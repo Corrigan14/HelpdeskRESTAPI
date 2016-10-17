@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "268950b350bd5f440cddc42a22d777b6",
-    "content-hash": "c026ed3a93b59d74fe0d01b07196fa55",
+    "hash": "4fbd66e38d3b0cc5bbbe8dd24b6a97d6",
+    "content-hash": "51fc6d32349c1beeac02141b08d96b40",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -875,6 +875,53 @@
                 "sql"
             ],
             "time": "2014-01-12 16:20:24"
+        },
+        {
+            "name": "lexik/framework-accelerator-bundle",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lexik/LexikFrameworkAcceleratorBundle.git",
+                "reference": "747c7cf79d21ba55078587243897e0a9ce9c384e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lexik/LexikFrameworkAcceleratorBundle/zipball/747c7cf79d21ba55078587243897e0a9ce9c384e",
+                "reference": "747c7cf79d21ba55078587243897e0a9ce9c384e",
+                "shasum": ""
+            },
+            "require": {
+                "symfony/framework-bundle": "~2.3|~3.0"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "Lexik\\Bundle\\FrameworkAcceleratorBundle\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Cedric Girard",
+                    "email": "c.girard@lexik.fr"
+                },
+                {
+                    "name": "Flohw",
+                    "email": "f.parreno@lexik.fr"
+                }
+            ],
+            "description": "A Symfony Bundle to accelerate your application",
+            "homepage": "https://github.com/lexik/LexikFrameworkAcceleratorBundle",
+            "keywords": [
+                "accelerator",
+                "bundle",
+                "cache",
+                "symfony"
+            ],
+            "time": "2016-04-28 07:09:28"
         },
         {
             "name": "lexik/jwt-authentication-bundle",
@@ -2484,7 +2531,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "lexik/framework-accelerator-bundle": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

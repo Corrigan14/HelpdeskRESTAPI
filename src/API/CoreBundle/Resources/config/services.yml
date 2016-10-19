@@ -1,4 +1,7 @@
 services:
-#    api_core.example:
-#        class: API\CoreBundle\Example
-#        arguments: ["@service_id", "plain_value", %parameter%]
+    api_base.model:
+        class: API\CoreBundle\Model\BaseModel
+        arguments: ["@doctrine.dbal.default_connection"]
+    api_user.model:
+        class: API\CoreBundle\Model\UserModel
+        arguments: ["@doctrine.dbal.default_connection"]

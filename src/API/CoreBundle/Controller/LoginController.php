@@ -19,8 +19,8 @@ class LoginController extends Controller
      *  statusCodes={
      *      200="Returned when successful",
      *      403="Returned when the user provided invalid credentials",
-     *      404={"Returned when the user is not found"},
-     *      405={"Incorrect method used"}
+     *      404="Returned when the user is not found",
+     *      405="Incorrect method used"
      *
      *  },
      *  parameters={

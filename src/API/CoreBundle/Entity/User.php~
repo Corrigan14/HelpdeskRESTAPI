@@ -248,28 +248,4 @@ class User implements UserInterface , \Serializable
     {
         return $this->address;
     }
-
-    /**
-     * Set detailData
-     *
-     * @param \API\CoreBundle\Entity\UserData $detailData
-     *
-     * @return User
-     */
-    public function setDetailData(\API\CoreBundle\Entity\UserData $detailData = null)
-    {
-        $this->detailData = $detailData;
-
-        return $this;
-    }
-
-    /**
-     * Get detailData
-     *
-     * @return \API\CoreBundle\Entity\UserData
-     */
-    public function getDetailData()
-    {
-        return $this->detailData;
-    }
 }

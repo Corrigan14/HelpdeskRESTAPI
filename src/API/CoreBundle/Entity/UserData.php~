@@ -315,28 +315,4 @@ class UserData
     {
         return $this->signature;
     }
-
-    /**
-     * Set user
-     *
-     * @param \API\CoreBundle\Entity\User $user
-     *
-     * @return UserData
-     */
-    public function setUser(\API\CoreBundle\Entity\User $user = null)
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
-    /**
-     * Get user
-     *
-     * @return \API\CoreBundle\Entity\User
-     */
-    public function getUser()
-    {
-        return $this->user;
-    }
 }

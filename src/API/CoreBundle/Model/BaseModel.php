@@ -14,6 +14,7 @@ class BaseModel
     /** @var Connection */
     protected $dbConnection;
 
+    /** @var \Doctrine\DBAL\Query\QueryBuilder  */
     protected $queryBuilder;
 
     /**

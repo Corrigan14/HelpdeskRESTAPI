@@ -3,7 +3,12 @@ token_authentication:
     defaults: { _controller: APICoreBundle:Login:tokenAuthentication }
     methods: [POST]
 
+users_basic_list:
+    path:     /users-basic
+    defaults: { _controller: APICoreBundle:User\Users:listWithBasicInfo }
+    methods: [GET]
+
 users_list:
     path:     /users
-    defaults: { _controller: APICoreBundle:User\Users:listWithBasicInfo }
+    defaults: { _controller: APICoreBundle:User\Users:listWithAllInfo }
     methods: [GET]

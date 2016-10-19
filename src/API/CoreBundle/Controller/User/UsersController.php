@@ -34,4 +34,25 @@ class UsersController extends Controller
         return $this->json(['users' => $users]);
     }
 
+    /**
+     * @ApiDoc(
+     *  description="Returns a list of Users with address Info (user Entity, UserAddress Entity)",
+     *  statusCodes={
+     *      200="Returned when successful",
+     *  })
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function listWithAllInfoAction()
+    {
+//        surname', 'title_before', 'title_after', 'function', 'mobile', 'tel', 'fax', 'signature'
+
+        $userModel = $this->get('api_user.model');
+        $values = ['email','username','is_active', 'street', 'city', 'zip', 'country', 'name', 'surname', 'titleBefore', 'titleAfter', 'function', 'mobile', 'tel', 'fax', 'signature'];
+
+        $users = $userModel->getAllUsersWithAllInfo($values);
+
+        return $this->json(['users' => $users]);
+    }
+
 }

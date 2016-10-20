@@ -45,8 +45,6 @@ class UsersController extends Controller
      */
     public function listWithAllInfoAction()
     {
-//        surname', 'title_before', 'title_after', 'function', 'mobile', 'tel', 'fax', 'signature'
-
         $userModel = $this->get('api_user.model');
         $values = ['email','username','is_active', 'street', 'city', 'zip', 'country', 'name', 'surname', 'titleBefore', 'titleAfter', 'function', 'mobile', 'tel', 'fax', 'signature'];
 

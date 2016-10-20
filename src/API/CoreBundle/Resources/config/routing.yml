@@ -12,3 +12,8 @@ users_list:
     path:     /users
     defaults: { _controller: APICoreBundle:User\Users:listWithAllInfo }
     methods: [GET]
+
+user_new:
+    path:     /user/new
+    defaults: { _controller: APICoreBundle:User\Users:postUser }
+    methods: [PUT]

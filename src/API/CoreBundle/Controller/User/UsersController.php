@@ -21,44 +21,38 @@ use Symfony\Component\Security\Core\Tests\Encoder\PasswordEncoder;
  */
 class UsersController extends Controller
 {
-
     /**
      * @ApiDoc(
-     *  description="Returns a list of Users with basic Info (user Entity)",
+     *  description="Returns a list of Users with detail Info (user Entity, UserData Entity)",
      *  statusCodes={
      *      200="Returned when successful",
      *  })
      *
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
-    public function listWithBasicInfoAction()
+    public function listUsersAction()
     {
-        $baseModel = $this->get('api_base.model');
-        $tableName = 'user';
-        $values = ['email', 'username', 'is_active'];
+        $userModel = $this->get('api_user.model');
+        $values = ['email', 'username', 'is_active', 'street', 'city', 'zip', 'country', 'name', 'surname', 'titleBefore', 'titleAfter', 'function', 'mobile', 'tel', 'fax', 'signature'];
 
-        $users = $baseModel->fetchResults($tableName, $values);
+        $users = $userModel->getCustomUsers($values);
 
         return $this->json(['users' => $users]);
     }
 
     /**
      * @ApiDoc(
-     *  description="Returns a list of Users with address Info (user Entity, UserAddress Entity)",
+     *  description="Returns User with detail Info(user Entity, UserData Entity)",
      *  statusCodes={
      *      200="Returned when successful",
      *  })
      *
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     * @param int $id
+     * @return JsonResponse
      */
-    public function listWithAllInfoAction()
+    public function getUserAction(int $id)
     {
-        $userModel = $this->get('api_user.model');
-        $values = ['email', 'username', 'is_active', 'street', 'city', 'zip', 'country', 'name', 'surname', 'titleBefore', 'titleAfter', 'function', 'mobile', 'tel', 'fax', 'signature'];
 
-        $users = $userModel->getAllUsersWithAllInfo($values);
-
-        return $this->json(['users' => $users]);
     }
 
     /**
@@ -72,7 +66,7 @@ class UsersController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function postUserAction(Request $request)
+    public function createUserAction(Request $request)
     {
         $user = new User();
 
@@ -98,6 +92,51 @@ class UsersController extends Controller
             $errors = $this->getErrorsFromForm($form);
             return new JsonResponse($errors,409);
         }
+    }
+
+    /**
+     * @ApiDoc(
+     *  description="Update All User Entity data",
+     *  statusCodes={
+     *      200="Returned when successful",
+     *  })
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function updateUserAction($id)
+    {
+
+    }
+
+    /**
+     * @ApiDoc(
+     *  description="Update Selected User Entity data",
+     *  statusCodes={
+     *      200="Returned when successful",
+     *  })
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function updatePartialUserAction($id)
+    {
+
+    }
+
+    /**
+     * @ApiDoc(
+     *  description="Delete User Entity",
+     *  statusCodes={
+     *      200="Returned when successful",
+     *  })
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function deleteUserAction($id)
+    {
+
     }
 
     /**

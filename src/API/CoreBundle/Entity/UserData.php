@@ -38,14 +38,14 @@ class UserData
     /**
      * @var string
      *
-     * @ORM\Column(name="titleBefore", type="string", length=45, nullable=true)
+     * @ORM\Column(name="title_before", type="string", length=45, nullable=true)
      */
     private $titleBefore;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="titleAfter", type="string", length=45, nullable=true)
+     * @ORM\Column(name="title_after", type="string", length=45, nullable=true)
      */
     private $titleAfter;
 
@@ -83,6 +83,34 @@ class UserData
      * @ORM\Column(name="signature", type="text", nullable=true)
      */
     private $signature;
+
+    /**
+     * @var string
+     *
+     *@ORM\Column(name="street", type="string", length=255, nullable=true)
+     */
+    private $street;
+
+    /**
+     * @var string
+     *
+     *@ORM\Column(name="city", type="string", length=255, nullable=true)
+     */
+    private $city;
+
+    /**
+     * @var string
+     *
+     *@ORM\Column(name="zip", type="string", length=255, nullable=true)
+     */
+    private $zip;
+
+    /**
+     * @var string
+     *
+     *@ORM\Column(name="country", type="string", length=255, nullable=true)
+     */
+    private $country;
 
     /**
      * @ORM\OneToOne(targetEntity="User", inversedBy="detailData")
@@ -319,11 +347,11 @@ class UserData
     /**
      * Set user
      *
-     * @param \API\CoreBundle\Entity\User $user
+     * @param User $user
      *
      * @return UserData
      */
-    public function setUser(\API\CoreBundle\Entity\User $user = null)
+    public function setUser(User $user = null)
     {
         $this->user = $user;
 
@@ -333,10 +361,106 @@ class UserData
     /**
      * Get user
      *
-     * @return \API\CoreBundle\Entity\User
+     * @return User
      */
     public function getUser()
     {
         return $this->user;
+    }
+
+    /**
+     * Set street
+     *
+     * @param string $street
+     *
+     * @return UserData
+     */
+    public function setStreet($street)
+    {
+        $this->street = $street;
+
+        return $this;
+    }
+
+    /**
+     * Get street
+     *
+     * @return string
+     */
+    public function getStreet()
+    {
+        return $this->street;
+    }
+
+    /**
+     * Set city
+     *
+     * @param string $city
+     *
+     * @return UserData
+     */
+    public function setCity($city)
+    {
+        $this->city = $city;
+
+        return $this;
+    }
+
+    /**
+     * Get city
+     *
+     * @return string
+     */
+    public function getCity()
+    {
+        return $this->city;
+    }
+
+    /**
+     * Set zip
+     *
+     * @param string $zip
+     *
+     * @return UserData
+     */
+    public function setZip($zip)
+    {
+        $this->zip = $zip;
+
+        return $this;
+    }
+
+    /**
+     * Get zip
+     *
+     * @return string
+     */
+    public function getZip()
+    {
+        return $this->zip;
+    }
+
+    /**
+     * Set country
+     *
+     * @param string $country
+     *
+     * @return UserData
+     */
+    public function setCountry($country)
+    {
+        $this->country = $country;
+
+        return $this;
+    }
+
+    /**
+     * Get country
+     *
+     * @return string
+     */
+    public function getCountry()
+    {
+        return $this->country;
     }
 }

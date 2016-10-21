@@ -59,13 +59,6 @@ class User implements UserInterface , \Serializable
     /**
      * @var string
      *
-     * @ORM\OneToOne(targetEntity="UserAddress", mappedBy="user")
-     */
-    private $address;
-
-    /**
-     * @var string
-     *
      * @ORM\OneToOne(targetEntity="UserData", mappedBy="user")
      */
     private $detailData;
@@ -241,37 +234,13 @@ class User implements UserInterface , \Serializable
     }
 
     /**
-     * Set address
-     *
-     * @param UserAddress $address
-     *
-     * @return User
-     */
-    public function setAddress(UserAddress $address = null)
-    {
-        $this->address = $address;
-
-        return $this;
-    }
-
-    /**
-     * Get address
-     *
-     * @return UserAddress
-     */
-    public function getAddress()
-    {
-        return $this->address;
-    }
-
-    /**
      * Set detailData
      *
-     * @param \API\CoreBundle\Entity\UserData $detailData
+     * @param UserData $detailData
      *
      * @return User
      */
-    public function setDetailData(\API\CoreBundle\Entity\UserData $detailData = null)
+    public function setDetailData(UserData $detailData = null)
     {
         $this->detailData = $detailData;
 

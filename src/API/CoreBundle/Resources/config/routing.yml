@@ -3,17 +3,32 @@ token_authentication:
     defaults: { _controller: APICoreBundle:Login:tokenAuthentication }
     methods: [POST]
 
-users_basic_list:
-    path:     /users-basic
-    defaults: { _controller: APICoreBundle:User\Users:listWithBasicInfo }
-    methods: [GET]
-
 users_list:
     path:     /users
-    defaults: { _controller: APICoreBundle:User\Users:listWithAllInfo }
+    defaults: { _controller: APICoreBundle:User\Users:listUsers }
     methods: [GET]
 
-user_new:
-    path:     /user/new
-    defaults: { _controller: APICoreBundle:User\Users:postUser }
+user:
+    path:     /users/{id}
+    defaults: { _controller: APICoreBundle:User\Users:getUser }
+    methods: [GET]
+
+user_create:
+    path:     /users
+    defaults: { _controller: APICoreBundle:User\Users:createUser }
+    methods: [POST]
+
+user_update:
+    path:     /users/{id}
+    defaults: { _controller: APICoreBundle:User\Users:updateUser }
     methods: [PUT]
+
+user_partial_update:
+    path:     /users/{id}
+    defaults: { _controller: APICoreBundle:User\Users:updatePartialUser }
+    methods: [PATCH]
+
+user_delete:
+    path:     /users/{id}
+    defaults: { _controller: APICoreBundle:User\Users:deleteUser }
+    methods: [DELETE]

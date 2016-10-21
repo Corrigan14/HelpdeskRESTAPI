@@ -85,6 +85,34 @@ class UserData
     private $signature;
 
     /**
+     * @var string
+     *
+     *@ORM\Column(name="street", type="string", length=255, nullable=true)
+     */
+    private $street;
+
+    /**
+     * @var string
+     *
+     *@ORM\Column(name="city", type="string", length=255, nullable=true)
+     */
+    private $city;
+
+    /**
+     * @var string
+     *
+     *@ORM\Column(name="zip", type="string", length=255, nullable=true)
+     */
+    private $zip;
+
+    /**
+     * @var string
+     *
+     *@ORM\Column(name="country", type="string", length=255, nullable=true)
+     */
+    private $country;
+
+    /**
      * @ORM\OneToOne(targetEntity="User", inversedBy="detailData")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      */
@@ -314,5 +342,29 @@ class UserData
     public function getSignature()
     {
         return $this->signature;
+    }
+
+    /**
+     * Set user
+     *
+     * @param \API\CoreBundle\Entity\User $user
+     *
+     * @return UserData
+     */
+    public function setUser(\API\CoreBundle\Entity\User $user = null)
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * Get user
+     *
+     * @return \API\CoreBundle\Entity\User
+     */
+    public function getUser()
+    {
+        return $this->user;
     }
 }

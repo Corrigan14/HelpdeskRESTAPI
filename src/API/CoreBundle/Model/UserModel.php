@@ -24,7 +24,7 @@ class UserModel extends BaseModel
      * @param array $values
      * @return array
      */
-    public function getAllUsersWithAllInfo(array $values)
+    public function getCustomUsers(array $values)
     {
         $query = $this->queryBuilder
             ->select($values)

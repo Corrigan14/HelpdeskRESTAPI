@@ -4,6 +4,7 @@ namespace API\CoreBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Collection;
@@ -11,34 +12,36 @@ use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Valid;
 
+/**
+ * Class UserType
+ *
+ * @package API\CoreBundle\Form
+ */
 class UserType extends AbstractType
 {
     /**
-     * {@inheritdoc}
+     * @param FormBuilderInterface $builder
+     * @param array                $options
+     *
+     * @throws \Symfony\Component\Validator\Exception\ConstraintDefinitionException
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder , array $options)
     {
         $builder->add('username')
-            ->add('password')
-            ->add('email');
+                ->add('password')
+                ->add('email');
     }
 
     /**
-     * {@inheritdoc}
+     * @param OptionsResolver $resolver
+     *
+     * @throws \Symfony\Component\OptionsResolver\Exception\AccessException
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-//        $collectionConstraint = new Collection([
-//            'email' => [
-//                new NotBlank(['message' => 'Email should not be blank.']),
-//                new Email(['message' => 'Invalid email address.'])
-//            ]
-//        ]);
-
         $resolver->setDefaults([
-//            'constraints' => $collectionConstraint,
-            'data_class' => 'API\CoreBundle\Entity\User',
-            'csrf_protection' => false,
+            'data_class'      => 'API\CoreBundle\Entity\User' ,
+            'csrf_protection' => false ,
         ]);
     }
 }

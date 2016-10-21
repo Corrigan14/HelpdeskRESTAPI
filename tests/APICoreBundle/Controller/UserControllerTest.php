@@ -41,7 +41,7 @@ class UserControllerTest extends WebTestCase
          */
         $keys = array_keys($response['data'][0]);
 
-        $this->assertEquals(UserModel::DEFAULT_FIELDS , $keys);
+        $this->assertEquals(array_merge(UserModel::DEFAULT_FIELDS,['_links']) , $keys);
 
         $crawler = $client->request('GET' , '/users?fields=name');
         $this->assertEquals(200 , $client->getResponse()->getStatusCode());
@@ -52,7 +52,7 @@ class UserControllerTest extends WebTestCase
          */
         $keys = array_keys($response['data'][0]);
 
-        $this->assertEquals(['name'] , $keys);
+        $this->assertEquals(['name','id','_links'] , $keys);
     }
 
     public function testUserSuccess()

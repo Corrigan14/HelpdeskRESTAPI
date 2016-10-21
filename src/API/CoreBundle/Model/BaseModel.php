@@ -6,6 +6,7 @@ use Doctrine\DBAL\Connection;
 
 /**
  * Class BaseModel
+ *
  * @package API\CoreBundle\Model
  */
 class BaseModel
@@ -13,11 +14,12 @@ class BaseModel
     /** @var Connection */
     protected $dbConnection;
 
-    /** @var \Doctrine\DBAL\Query\QueryBuilder  */
+    /** @var \Doctrine\DBAL\Query\QueryBuilder */
     protected $queryBuilder;
 
     /**
      * BaseModel constructor.
+     *
      * @param Connection $dbConnection
      */
     public function __construct(Connection $dbConnection)
@@ -33,7 +35,7 @@ class BaseModel
      * @return array
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function fetchResult(string $tableName, array $values = []): array
+    public function fetchResult(string $tableName , array $values = []): array
     {
         return $this->dbConnection->query($this->queryBuilder->select($values)->from($tableName)->getSQL())->fetch();
     }
@@ -45,7 +47,7 @@ class BaseModel
      * @return array
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function fetchResults(string $tableName, array $values = []): array
+    public function fetchResults(string $tableName , array $values = []): array
     {
         return $this->dbConnection->query($this->queryBuilder->select($values)->from($tableName)->getSQL())->fetchAll();
     }

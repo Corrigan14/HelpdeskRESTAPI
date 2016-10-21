@@ -90,7 +90,7 @@ class UserModel extends BaseModel implements ModelInterface
          * Pagination calculating offset
          */
         if (1 < $page) {
-            $query->setFirstResult(self::LIMIT * $page - self::LIMIT + 1);
+            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
         }
 
 
@@ -108,10 +108,18 @@ class UserModel extends BaseModel implements ModelInterface
      */
     public function getCustomUser(int $id , array $fields = [])
     {
-        $query = $this->getUserQuery($fields)->where('u.id = :id')->setParameter('id' , $id);
+        $query = $this->getUserQuery($fields)->where('u.id = :user');
         $query->setMaxResults(1);
 
-        return $this->dbConnection->query($query->getSQL())->fetch();
+
+        return [
+            'data'   => $this->dbConnection->executeQuery($query->getSQL() , ['user' => $id])->fetch() ,
+            '_links' => [
+                'put'    => $this->router->generate('user_update' , ['id' => $id]) ,
+                'patch'  => $this->router->generate('user_partial_update' , ['id' => $id]) ,
+                'delete' => $this->router->generate('user_delete' , ['id' => $id]) ,
+            ] ,
+        ];
     }
 
     /**
@@ -153,7 +161,9 @@ class UserModel extends BaseModel implements ModelInterface
     private function getUserQuery(array $fields = [])
     {
         $values = [];
-
+        if (0 === count($fields)) {
+            $fields = self::DEFAULT_FIELDS;
+        }
         /**
          * We are checking if fields exists in related entities, this way we avoid attacks and typing errors
          */

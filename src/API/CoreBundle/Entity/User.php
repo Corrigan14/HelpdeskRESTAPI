@@ -4,7 +4,7 @@ namespace API\CoreBundle\Entity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity as UniqueEntity;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
@@ -37,6 +37,10 @@ class User implements UserInterface , \Serializable
      * @ORM\Column(type="string", length=64)
      *
      * @Assert\NotBlank()
+     * @Assert\Length(
+     *     min=8,
+     *     minMessage="Your password must have at least {{ limit }} characters."
+     * )
      */
     private $password;
 
@@ -45,8 +49,7 @@ class User implements UserInterface , \Serializable
      *
      * @Assert\NotBlank()
      * @Assert\Email(
-     *     message = "The email '{{ value }}' is not a valid email.",
-     *     checkMX = true
+     *     message = "The email '{{ value }}' is not a valid email."
      * )
      */
     private $email;
@@ -57,7 +60,7 @@ class User implements UserInterface , \Serializable
     private $isActive;
 
     /**
-     * @var string
+     * @var UserData
      *
      * @ORM\OneToOne(targetEntity="UserData", mappedBy="user")
      */

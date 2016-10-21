@@ -3,13 +3,12 @@
 namespace API\CoreBundle\Controller;
 
 use API\CoreBundle\Entity\User;
-use API\CoreBundle\Form\UserType;
+use API\CoreBundle\Model\BaseModel;
+use API\CoreBundle\Services\ErrorHelper;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
-use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Tests\Encoder\PasswordEncoder;
 
 /**
  * Class UsersController
@@ -72,9 +71,7 @@ class UserController extends Controller
         $userModel = $this->get('api_user.model');
         $fields = $request->get('fields') ? explode(',' , $request->get('fields')) : [];
 
-        return $this->json([
-            'data' => $userModel->getCustomUser($id , $fields) ,
-        ]);
+        return $this->json($userModel->getCustomUser($id , $fields));
     }
 
     /**
@@ -88,34 +85,50 @@ class UserController extends Controller
      * @param Request $request
      *
      * @return JsonResponse
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \LogicException
      */
     public function createUserAction(Request $request)
     {
+        $requestData = $request->request->all();
         $user = new User();
+        $user->setRoles(['ROLE_USER']);
+        $user->setIsActive(true);
 
-        $form = $this->createForm(UserType::class , $user);
-        $form->submit($request->request->all());
 
-        if ($form->isValid()) {
-            $plainPassword = $form->get('password')->getData();
-            /** @var PasswordEncoder $encoder */
-            $encoder = $this->get('security.password_encoder');
-            $encoded = $encoder->encodePassword($user , $plainPassword);
+        /**
+         * For security reasons
+         */
+        unset($requestData['roles'] , $requestData['isActive']);
 
-            $user->setPassword($encoded);
-            $user->setIsActive(true);
-            $user->setRoles(['ROLE_USER']);
+        $errors = $this->get('entity_processor')->processEntity($user , $requestData);
+        if (false === $errors) {
+            if ($requestData['password']) {
+                $user->setPassword($this->get('security.password_encoder')->encodePassword($user , $requestData['password']));
+            }
 
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($user);
-            $em->flush();
+            $this->getDoctrine()->getManager()->persist($user);
+            $this->getDoctrine()->getManager()->flush();
 
-            return new JsonResponse($user->getId() , 201);
-        } else {
-            $errors = $this->getErrorsFromForm($form);
-
-            return new JsonResponse($errors , 409);
+            return $this->json($this->get('api_user.model')->getCustomUser($user->getId()) , 201);
         }
+
+        return $this->json(['errors' => $errors] , 409);
+
+//
+//        BaseModel::fillEntity(User::class , $user , $request->request->all());
+//        $validator = $this->get('validator');
+//        $errors = $validator->validate($user);
+//
+//        if (count($errors) > 0) {
+//            return $this->json(['errors' => ErrorHelper::getErrorsFromValidation($errors)] , 409);
+//        }
+//        $this->getDoctrine()->getManager()->persist($user);
+//        $this->getDoctrine()->getManager()->flush();
+//
+//        return $this->json($this->get('api_user.model')->getCustomUser($user->getId()) , 201);
     }
 
     /**
@@ -165,45 +178,4 @@ class UserController extends Controller
     {
 
     }
-
-    /**
-     * @param Form $form
-     *
-     * @return array
-     */
-    private function getErrorsFromForm(Form $form)
-    {
-        $errors = [];
-        foreach ($form->getErrors() as $error) {
-            $errors[] = $error->getMessage();
-        }
-        foreach ($form->all() as $childForm) {
-            if ($childForm instanceof Form) {
-                if ($childErrors = $this->getErrorsFromForm($childForm)) {
-                    $errors[$childForm->getName()] = $childErrors;
-                }
-            }
-        }
-
-        return $errors;
-    }
-
-//    public function postUserAction(Request $request)
-//    {
-//        $body = $request->getContent();
-//        $data = json_decode($body, true);
-//
-//        $user = new User();
-//        $form = $this->createForm(UserType::class,$user);
-//        $form->submit($data);
-//
-//        if($form->isValid()){
-//            $em = $this->getDoctrine()->getManager();
-//            $em->persist($user);
-//            $em->flush();
-//        }
-//
-//        return new Response('It worked. Believe me - I\'m an API', 201);
-//    }
-
 }

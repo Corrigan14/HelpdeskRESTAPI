@@ -5,3 +5,6 @@ services:
     api_user.model:
         class: API\CoreBundle\Model\UserModel
         arguments: ["@doctrine.dbal.default_connection", "@router"]
+    entity_processor:
+        class: API\CoreBundle\Services\ProcessEntity
+        arguments: ["@doctrine.orm.default_entity_manager", "@validator"]

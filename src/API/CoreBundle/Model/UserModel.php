@@ -29,7 +29,6 @@ class UserModel extends BaseModel
         $query = $this->queryBuilder
             ->select($values)
             ->from('user','u')
-            ->leftJoin('u','user_address','a','u.id = a.user_id')
             ->leftJoin('u','user_data','d','u.id = d.user_id');
 
         return $this->dbConnection->query($query->getSQL())->fetchAll();

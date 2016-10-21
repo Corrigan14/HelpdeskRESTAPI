@@ -1,6 +1,6 @@
 <?php
 
-namespace API\CoreBundle\Controller\User;
+namespace API\CoreBundle\Controller;
 
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Form\UserType;
@@ -19,11 +19,11 @@ use Symfony\Component\Security\Core\Tests\Encoder\PasswordEncoder;
  * Class UsersController
  * @package API\CoreBundle\Controller
  */
-class UsersController extends Controller
+class UserController extends Controller
 {
     /**
      * @ApiDoc(
-     *  description="Returns a list of Users with detail Info (user Entity, UserData Entity)",
+     *  description="Returns a list of Users with selected detail Info (user Entity, UserData Entity)",
      *  statusCodes={
      *      200="Returned when successful",
      *  })
@@ -33,7 +33,7 @@ class UsersController extends Controller
     public function listUsersAction()
     {
         $userModel = $this->get('api_user.model');
-        $values = ['email', 'username', 'is_active', 'street', 'city', 'zip', 'country', 'name', 'surname', 'titleBefore', 'titleAfter', 'function', 'mobile', 'tel', 'fax', 'signature'];
+        $values = ['email', 'username', 'is_active', 'street', 'city', 'zip', 'country', 'name', 'surname', 'title_before', 'title_after', 'function', 'mobile', 'tel', 'fax', 'signature'];
 
         $users = $userModel->getCustomUsers($values);
 
@@ -42,7 +42,7 @@ class UsersController extends Controller
 
     /**
      * @ApiDoc(
-     *  description="Returns User with detail Info(user Entity, UserData Entity)",
+     *  description="Returns User with selected detail Info(user Entity, UserData Entity)",
      *  statusCodes={
      *      200="Returned when successful",
      *  })

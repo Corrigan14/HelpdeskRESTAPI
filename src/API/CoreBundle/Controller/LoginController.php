@@ -24,9 +24,9 @@ class LoginController extends Controller
      *
      *  },
      *  parameters={
-     *      {"name"="username", "dataType"="string", "required"=true, "format"="json", "description"="username for
+     *      {"name"="username", "dataType"="string", "required"=true, "format"="POST", "description"="username for
      *      login purposes"},
-     *      {"name"="password", "dataType"="string", "required"=true, "format"="json", "description"="password for
+     *      {"name"="password", "dataType"="string", "required"=true, "format"="POST", "description"="password for
      *      login purposes"}
      *  }
      * )

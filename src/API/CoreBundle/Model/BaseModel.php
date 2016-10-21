@@ -3,7 +3,6 @@
 namespace API\CoreBundle\Model;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Driver\Statement;
 
 /**
  * Class BaseModel
@@ -29,8 +28,10 @@ class BaseModel
 
     /**
      * @param string $tableName
-     * @param array $values
+     * @param array  $values
+     *
      * @return array
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function fetchResult(string $tableName, array $values = []): array
     {
@@ -39,8 +40,10 @@ class BaseModel
 
     /**
      * @param string $tableName
-     * @param array $values
+     * @param array  $values
+     *
      * @return array
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function fetchResults(string $tableName, array $values = []): array
     {

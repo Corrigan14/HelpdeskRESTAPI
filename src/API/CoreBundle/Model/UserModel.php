@@ -36,7 +36,13 @@ class UserModel extends BaseModel implements ModelInterface
         $this->router = $router;
     }
 
-
+    /**
+     * Return Users Response  which includes Data and Links and Pagination
+     *
+     * @param array $fields
+     * @param int $page
+     * @return array
+     */
     public function getUsersResponse(array $fields , int $page)
     {
         if (0 === count($fields)) {

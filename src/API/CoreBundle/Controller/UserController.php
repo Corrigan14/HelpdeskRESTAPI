@@ -19,21 +19,31 @@ class UserController extends Controller
 {
     /**
      * @ApiDoc(
-     *  description="Returns a list of Users with selected detail Info (user Entity, UserData Entity), you can pass in
-     *  a fields option to get custom data", statusCodes={
+     *  description="Returns a list of Users with selected detail Info (user Entity, UserData Entity), you can pass in a fields option to get custom data",
+     *  statusCodes={
      *      200="Returned when successful",
-     *  },
-     *  parameters={
-     *      {"name"="fields", "dataType"="string", "required"=false, "format"="GET",
-     *       "description"="custom fields to get only selected data"},
-     *      {"name"="page", "dataType"="string", "required"=false, "format"="GET",
-     *       "description"="Pagination, limit is set to 10 records"}
      *  },
      *  headers={
      *     {
      *       "name"="X-AUTHORIZE-KEY",
      *       "required"=true,
      *       "description"="JWT Token"
+     *     }
+     *  },
+     *  parameters={
+     *     {
+     *       "name"="fields",
+     *       "dataType"="string",
+     *       "required"=false,
+     *       "format" = "GET",
+     *       "description"="Custom fields to get only selected data"
+     *     },
+     *     {
+     *       "name"="page",
+     *       "dataType"="string",
+     *       "required"=false,
+     *       "format" = "GET",
+     *       "description"="Pagination, limit is set to 10 records"
      *     }
      *  }
      * )
@@ -55,6 +65,21 @@ class UserController extends Controller
     /**
      * @ApiDoc(
      *  description="Returns User with selected detail Info(user Entity, UserData Entity)",
+     *  headers={
+     *     {
+     *       "name"="X-AUTHORIZE-KEY",
+     *       "required"=true,
+     *       "description"="JWT Token"
+     *     }
+     *  },
+     *  requirements={
+     *     {
+     *       "name"="id",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="the id of processed object"
+     *     }
+     *  },
      *  statusCodes={
      *      200="Returned when successful",
      *  })

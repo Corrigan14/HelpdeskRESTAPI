@@ -2,6 +2,8 @@
 
 namespace API\CoreBundle\Controller;
 
+use API\CoreBundle\Entity\User;
+use API\CoreBundle\Services\StatusCodesHelper;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,18 +19,21 @@ class LoginController extends Controller
      * @ApiDoc(
      *  description="Returns a JWT Token for authentication",
      *  statusCodes={
-     *      200="Returned when successful",
-     *      403="Returned when the user provided invalid credentials",
-     *      404="Returned when the user is not found",
-     *      405="Incorrect method used"
-     *
+     *      200="The request has succeeded",
+     *      403="Incorrect credentials",
+     *      404="User not found"
+     *  },
+     *  headers={
+     *     {
+     *       "name"="X-AUTHORIZE-KEY",
+     *       "required"=true,
+     *       "description"="JWT Token"
+     *     }
      *  },
      *  parameters={
-     *      {"name"="username", "dataType"="string", "required"=true, "format"="POST", "description"="username for
-     *      login purposes"},
-     *      {"name"="password", "dataType"="string", "required"=true, "format"="POST", "description"="password for
-     *      login purposes"}
-     *  }
+     *      {"name"="username", "dataType"="string", "required"=true, "format"="POST", "description"="username for login purposes"},
+     *      {"name"="password", "dataType"="string", "required"=true, "format"="POST", "description"="password for login purposes"}
+     *  },
      * )
      * @param Request $request
      *
@@ -43,16 +48,17 @@ class LoginController extends Controller
         $username = $request->request->get('username');
         $password = $request->request->get('password');
 
+        /** @var User $user */
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')
                      ->findOneBy(['username' => $username]);
 
         if (!$user) {
-            return $this->json(['error' => 'User not found'] , 404);
+            return $this->json(StatusCodesHelper::USER_NOT_FOUND_MESSAGE , StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
 
         // password check
         if (!$this->get('security.password_encoder')->isPasswordValid($user , $password)) {
-            return $this->json(['error' => 'Incorrect credentials'] , 403);
+            return $this->json(StatusCodesHelper::INCORRECT_CREDENTIALS_MESSAGE , StatusCodesHelper::INCORRECT_CREDENTIALS_CODE);
         }
 
         // Use LexikJWTAuthenticationBundle to create JWT token that hold only information about user name
@@ -60,6 +66,6 @@ class LoginController extends Controller
                       ->encode(['username' => $user->getUsername()]);
 
         // Return genereted tocken
-        return $this->json(['token' => $token]);
+        return $this->json(['token' => $token], StatusCodesHelper::SUCCESSFUL_CODE);
     }
 }

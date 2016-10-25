@@ -17,9 +17,35 @@ use Symfony\Component\HttpFoundation\Request;
 class UserController extends Controller
 {
     /**
+     *
+     * ### Response ###
+     *
+     *     {
+     *       "data": [
+     *                   {
+     *                         "id": "1",
+     *                         "email": "admin@admin.sk",
+     *                         "username": "admin",
+     *                         "_links": {
+     *                             "self": "/users/1"
+     *                         }
+     *                 }
+     *          ],
+     *       "_links": {
+     *             "self": "/users?page=1&fields=id,email,username",
+     *             "first": "/users?page=1&fields=id,email,username",
+     *             "prev": false,
+     *             "next": "/users?page=2&fields=id,email,username",
+     *             "last": "/users?page=3&fields=id,email,username"
+     *       },
+     *       "total": 22,
+     *       "page": 1,
+     *       "numberOfPages": 3
+     *     }
+     *
      * @ApiDoc(
-     *  description="Returns a list of Users with selected detail Info (user Entity, UserData Entity), you can pass in a fields option to get custom data",
-     *  statusCodes={
+     *  description="Returns a list of Users with selected detail Info (user Entity, UserData Entity), you can pass in
+     *  a fields option to get custom data", statusCodes={
      *      200="The request has succeeded",
      *  },
      *  headers={
@@ -32,7 +58,7 @@ class UserController extends Controller
      *  filters={
      *     {
      *       "name"="fields",
-     *       "description"="Custom fields to get only selected data"
+     *       "description"="Custom fields to get only selected data, see options in list of parameters"
      *     },
      *     {
      *       "name"="page",
@@ -52,7 +78,7 @@ class UserController extends Controller
         $fields = $request->get('fields') ? explode(',' , $request->get('fields')) : [];
         $page = $request->get('page') ?: 1;
 
-        return $this->json($userModel->getUsersResponse($fields , $page), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($userModel->getUsersResponse($fields , $page) , StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -82,7 +108,8 @@ class UserController extends Controller
      *       "parameters"="username|email|password...",
      *       "description"="Custom fields to get only selected data"
      *     },
-     *  }
+     *  },
+     *  output="API\CoreBundle\Entity\User"
      *  )
      *
      * @param int     $id
@@ -97,7 +124,7 @@ class UserController extends Controller
         $userModel = $this->get('api_user.model');
         $fields = $request->get('fields') ? explode(',' , $request->get('fields')) : [];
 
-        return $this->json($userModel->getCustomUserById($id , $fields), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($userModel->getCustomUserById($id , $fields) , StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -154,7 +181,7 @@ class UserController extends Controller
             return $this->json($this->get('api_user.model')->getCustomUser($user) , StatusCodesHelper::CREATED_CODE);
         }
 
-        return $this->json(['message'=>StatusCodesHelper::INVALID_PARAMETERS_MESSAGE,'errors'=> $errors], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $this->json(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE , 'errors' => $errors] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 
     /**

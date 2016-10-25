@@ -4,7 +4,7 @@ services:
         arguments: ["@doctrine.dbal.default_connection"]
     api_user.model:
         class: API\CoreBundle\Model\UserModel
-        arguments: ["@doctrine.dbal.default_connection", "@router"]
+        arguments: ["@doctrine.dbal.default_connection", "@router","@jms_serializer"]
     entity_processor:
         class: API\CoreBundle\Services\ProcessEntity
         arguments: ["@doctrine.orm.default_entity_manager", "@validator"]

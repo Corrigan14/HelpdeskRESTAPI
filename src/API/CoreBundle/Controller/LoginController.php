@@ -16,6 +16,13 @@ use Symfony\Component\HttpFoundation\Request;
 class LoginController extends Controller
 {
     /**
+     *
+     * ### Response ###
+     *
+     *     {
+     *       "token": "generated JWT Token"
+     *     }
+     *
      * @ApiDoc(
      *  description="Returns a JWT Token for authentication",
      *  statusCodes={
@@ -23,17 +30,13 @@ class LoginController extends Controller
      *      403="Incorrect credentials",
      *      404="User not found"
      *  },
-     *  headers={
-     *     {
-     *       "name"="X-AUTHORIZE-KEY",
-     *       "required"=true,
-     *       "description"="JWT Token"
-     *     }
-     *  },
      *  parameters={
-     *      {"name"="username", "dataType"="string", "required"=true, "format"="POST", "description"="username for login purposes"},
-     *      {"name"="password", "dataType"="string", "required"=true, "format"="POST", "description"="password for login purposes"}
+     *      {"name"="username", "dataType"="string", "required"=true, "format"="POST", "description"="username for
+     *      login purposes"},
+     *      {"name"="password", "dataType"="string", "required"=true, "format"="POST", "description"="password for
+     *      login purposes"}
      *  },
+     *
      * )
      * @param Request $request
      *
@@ -66,6 +69,6 @@ class LoginController extends Controller
                       ->encode(['username' => $user->getUsername()]);
 
         // Return genereted tocken
-        return $this->json(['token' => $token], StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json(['token' => $token] , StatusCodesHelper::SUCCESSFUL_CODE);
     }
 }

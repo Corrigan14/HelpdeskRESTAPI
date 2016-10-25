@@ -5,13 +5,16 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-
+use JMS\Serializer\Annotation\ExclusionPolicy;
+use JMS\Serializer\Annotation\Expose;
+use JMS\Serializer\Annotation\ReadOnly;
 
 /**
  * @ORM\Entity
  * @ORM\Table(name="user")
  * @UniqueEntity("email")
  * @UniqueEntity("username")
+ * @ExclusionPolicy("all")
  */
 class User implements UserInterface , \Serializable
 {
@@ -24,13 +27,18 @@ class User implements UserInterface , \Serializable
 
     /**
      * @ORM\Column(type="string", unique=true)
-     *
-     * @Assert\NotBlank()
+     * @Assert\NotBlank(message="Username is required")
+     * @Assert\Type("string")
+     * @Expose
+     * @var string
      */
     private $username;
 
     /**
      * @ORM\Column(type="string")
+     * @Expose
+     * @ReadOnly
+     * @var string
      */
     private $roles;
     /**
@@ -41,6 +49,9 @@ class User implements UserInterface , \Serializable
      *     min=8,
      *     minMessage="Your password must have at least {{ limit }} characters."
      * )
+     * @Assert\Type("string")
+     *
+     * @var string
      */
     private $password;
 
@@ -51,11 +62,16 @@ class User implements UserInterface , \Serializable
      * @Assert\Email(
      *     message = "The email '{{ value }}' is not a valid email."
      * )
+     * @Assert\Type("string")
+     * @Expose
+     * @var string
      */
     private $email;
 
     /**
      * @ORM\Column(name="is_active", type="boolean")
+     *
+     * @var bool
      */
     private $isActive;
 
@@ -63,6 +79,7 @@ class User implements UserInterface , \Serializable
      * @var UserData
      *
      * @ORM\OneToOne(targetEntity="UserData", mappedBy="user")
+     * @Expose
      */
     private $detailData;
 

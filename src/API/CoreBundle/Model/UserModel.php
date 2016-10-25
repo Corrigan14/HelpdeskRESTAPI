@@ -6,6 +6,7 @@ use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
 use API\CoreBundle\Services\HateoasHelper;
 use Doctrine\DBAL\Connection;
+use JMS\Serializer\Serializer;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
 /**
@@ -21,26 +22,33 @@ class UserModel extends BaseModel implements ModelInterface
     const DEFAULT_FIELDS = ['id' , 'email' , 'username'];
     const LIMIT = 10;
 
+    /** @var Router */
     private $router;
+
+    /** @var Serializer */
+    private $serializer;
 
     /**
      * UserModel constructor.
      *
      * @param Connection $dbConnection
      * @param Router     $router
+     * @param Serializer $serializer
      */
-    public function __construct(Connection $dbConnection , Router $router)
+    public function __construct(Connection $dbConnection , Router $router , Serializer $serializer)
     {
         parent::__construct($dbConnection);
 
         $this->router = $router;
+        $this->serializer = $serializer;
     }
 
     /**
      * Return Users Response  which includes Data and Links and Pagination
      *
      * @param array $fields
-     * @param int $page
+     * @param int   $page
+     *
      * @return array
      */
     public function getUsersResponse(array $fields , int $page)
@@ -112,7 +120,7 @@ class UserModel extends BaseModel implements ModelInterface
      * @return array
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function getCustomUser(int $id , array $fields = [])
+    public function getCustomUserById(int $id , array $fields = [])
     {
         $query = $this->getUserQuery($fields)->where('u.id = :user');
         $query->setMaxResults(1);
@@ -120,11 +128,25 @@ class UserModel extends BaseModel implements ModelInterface
 
         return [
             'data'   => $this->dbConnection->executeQuery($query->getSQL() , ['user' => $id])->fetch() ,
-            '_links' => [
-                'put'    => $this->router->generate('user_update' , ['id' => $id]) ,
-                'patch'  => $this->router->generate('user_partial_update' , ['id' => $id]) ,
-                'delete' => $this->router->generate('user_delete' , ['id' => $id]) ,
-            ] ,
+            '_links' => $this->getUserLinks($id) ,
+        ];
+    }
+
+    /**
+     * Return all info about user (User, UserAddress, UserData Entity)
+     *
+     * @param User  $user
+     * @param array $fields
+     *
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function getCustomUser(User $user , array $fields = [])
+    {
+
+        return [
+            'data'   => $this->serializer->serialize($user,'json') ,
+            '_links' => $this->getUserLinks($user->getId()) ,
         ];
     }
 
@@ -156,6 +178,20 @@ class UserModel extends BaseModel implements ModelInterface
     {
         return [
             'ud' => 'user_data' ,
+        ];
+    }
+
+    /**
+     * @param int $id
+     *
+     * @return array
+     */
+    private function getUserLinks(int $id)
+    {
+        return [
+            'put'    => $this->router->generate('user_update' , ['id' => $id]) ,
+            'patch'  => $this->router->generate('user_partial_update' , ['id' => $id]) ,
+            'delete' => $this->router->generate('user_delete' , ['id' => $id]) ,
         ];
     }
 

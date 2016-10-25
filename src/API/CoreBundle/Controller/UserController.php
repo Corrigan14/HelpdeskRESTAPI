@@ -3,8 +3,6 @@
 namespace API\CoreBundle\Controller;
 
 use API\CoreBundle\Entity\User;
-use API\CoreBundle\Model\BaseModel;
-use API\CoreBundle\Services\ErrorHelper;
 use API\CoreBundle\Services\StatusCodesHelper;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -81,6 +79,7 @@ class UserController extends Controller
      *  filters={
      *     {
      *       "name"="fields",
+     *       "parameters"="username|email|password...",
      *       "description"="Custom fields to get only selected data"
      *     },
      *  }
@@ -98,11 +97,13 @@ class UserController extends Controller
         $userModel = $this->get('api_user.model');
         $fields = $request->get('fields') ? explode(',' , $request->get('fields')) : [];
 
-        return $this->json($userModel->getCustomUser($id , $fields), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($userModel->getCustomUserById($id , $fields), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
+     *
      * @ApiDoc(
+     *  resource = true,
      *  description="Create new User, UserData Entity",
      *  statusCodes={
      *      201="The entity was successfully created",
@@ -115,25 +116,8 @@ class UserController extends Controller
      *       "description"="JWT Token"
      *     }
      *  },
-     *  output="API\CoreBundle\Entity\User",
-     *  parameters={
-     *     {"name"="username", "dataType"="string", "required"=true, "format" = "POST","description"="User name"},
-     *     {"name"="email", "dataType"="string", "required"=true, "format" = "POST","description"="Email"},
-     *     {"name"="password", "dataType"="string", "required"=true, "format" = "POST", "description"="At least 8 characters long password"},
-     *     {"name"="name", "dataType"="string", "required"=false, "format" = "POST", "description"="Name"},
-     *     {"name"="surname", "dataType"="string", "required"=false, "format" = "POST", "description"="Surname"},
-     *     {"name"="title_before", "dataType"="string", "required"=false, "format" = "POST", "description"="Title Before name"},
-     *     {"name"="title_after", "dataType"="string", "required"=false, "format" = "POST", "description"="Title After name"},
-     *     {"name"="function", "dataType"="string", "required"=false, "format" = "POST", "description"="Function - possition of user"},
-     *     {"name"="mobile", "dataType"="string", "required"=false, "format" = "POST", "description"="Mobile number"},
-     *     {"name"="tel", "dataType"="string", "required"=false, "format" = "POST", "description"="Telephone number"},
-     *     {"name"="fax", "dataType"="string", "required"=false, "format" = "POST", "description"="Fax number"},
-     *     {"name"="signature", "dataType"="text", "required"=false, "format" = "POST", "description"="Signature format"},
-     *     {"name"="street", "dataType"="string", "required"=false, "format" = "POST", "description"="Street (part of address)"},
-     *     {"name"="city", "dataType"="string", "required"=false, "format" = "POST", "description"="City (part of address)"},
-     *     {"name"="zip", "dataType"="string", "required"=false, "format" = "POST", "description"="Zip Code (part of address)"},
-     *     {"name"="country", "dataType"="string", "required"=false, "format" = "POST", "description"="Country (part of address)"},
-     *  },
+     *  input={"class"="API\CoreBundle\Entity\User"},
+     *  output={"class"="API\CoreBundle\Entity\User"},
      *  )
      *
      * @param Request $request
@@ -167,7 +151,7 @@ class UserController extends Controller
             $this->getDoctrine()->getManager()->persist($user);
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->json($this->get('api_user.model')->getCustomUser($user->getId()) , StatusCodesHelper::CREATED_CODE);
+            return $this->json($this->get('api_user.model')->getCustomUser($user) , StatusCodesHelper::CREATED_CODE);
         }
 
         return $this->json(['message'=>StatusCodesHelper::INVALID_PARAMETERS_MESSAGE,'errors'=> $errors], StatusCodesHelper::INVALID_PARAMETERS_CODE);

@@ -45,7 +45,8 @@ class UserController extends Controller
      *
      * @ApiDoc(
      *  description="Returns a list of Users with selected detail Info (user Entity, UserData Entity), you can pass in
-     *  a fields option to get custom data", statusCodes={
+     *  a fields option to get custom data",
+     *  statusCodes={
      *      200="The request has succeeded",
      *  },
      *  headers={

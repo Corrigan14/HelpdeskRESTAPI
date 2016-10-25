@@ -50,9 +50,9 @@ class UserController extends Controller
      *  },
      *  headers={
      *     {
-     *       "name"="X-AUTHORIZE-KEY",
+     *       "name"="Authorization",
      *       "required"=true,
-     *       "description"="JWT Token"
+     *       "description"="Bearer {JWT Token}"
      *     }
      *  },
      *  filters={
@@ -89,9 +89,9 @@ class UserController extends Controller
      *  },
      *  headers={
      *     {
-     *       "name"="X-AUTHORIZE-KEY",
+     *       "name"="Authorization",
      *       "required"=true,
-     *       "description"="JWT Token"
+     *       "description"="Bearer {JWT Token}"
      *     }
      *  },
      *  requirements={
@@ -138,9 +138,9 @@ class UserController extends Controller
      *  },
      *  headers={
      *     {
-     *       "name"="X-AUTHORIZE-KEY",
+     *       "name"="Authorization",
      *       "required"=true,
-     *       "description"="JWT Token"
+     *       "description"="Bearer {JWT Token}"
      *     }
      *  },
      *  input={"class"="API\CoreBundle\Entity\User"},
@@ -187,6 +187,13 @@ class UserController extends Controller
     /**
      * @ApiDoc(
      *  description="Update All User Entity data",
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
      *  statusCodes={
      *      200="The request has succeeded",
      *  })
@@ -203,6 +210,13 @@ class UserController extends Controller
     /**
      * @ApiDoc(
      *  description="Update Selected User Entity data",
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
      *  statusCodes={
      *      200="The request has succeeded",
      *  })
@@ -219,6 +233,13 @@ class UserController extends Controller
     /**
      * @ApiDoc(
      *  description="Delete User Entity",
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
      *  statusCodes={
      *      204="The entity was successfully deleted",
      *  })

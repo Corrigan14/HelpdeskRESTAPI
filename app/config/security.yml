@@ -15,16 +15,16 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         api:
-            pattern: ^/api/(?!token)
+            pattern: ^/api/v[0-9]/(?!token)
             guard:
                 authenticators:
                     - api.jwt_token_authenticator
+            stateless: true
         main:
             anonymous: ~
     access_control:
-        - { path: /api/token-authentication, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api, roles: ROLE_USER }
-
+        - { path: ^/api/v[0-9]/token-authentication, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/v[0-9], roles: ROLE_USER }
         - { path: ^/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/(css|js), roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/(_wdt|_profiler), roles: IS_AUTHENTICATED_ANONYMOUSLY }

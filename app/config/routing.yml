@@ -3,5 +3,5 @@ NelmioApiDocBundle:
     prefix:   /v1/doc
 api_core:
     resource: "@APICoreBundle/Resources/config/routing.yml"
-    prefix:   /
+    prefix:   /api/v1
 

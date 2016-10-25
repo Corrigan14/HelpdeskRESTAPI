@@ -76,6 +76,13 @@ class User implements UserInterface , \Serializable
     private $isActive;
 
     /**
+     * @ORM\Column(name="acl", type="text")
+     *
+     * @var bool
+     */
+    private $acl;
+
+    /**
      * @var UserData
      *
      * @ORM\OneToOne(targetEntity="UserData", mappedBy="user")
@@ -86,6 +93,7 @@ class User implements UserInterface , \Serializable
     public function __construct()
     {
         $this->isActive = true;
+        $this->acl = serialize([]);
     }
 
     /**
@@ -208,6 +216,22 @@ class User implements UserInterface , \Serializable
     public function getIsActive()
     {
         return $this->isActive;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAcl(): array
+    {
+        return unserialize($this->acl);
+    }
+
+    /**
+     * @param array $acl
+     */
+    public function setAcl(array $acl)
+    {
+        $this->acl = serialize($acl);
     }
 
     /**

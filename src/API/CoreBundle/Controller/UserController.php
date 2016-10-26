@@ -143,16 +143,30 @@ class UserController extends Controller
 
     /**
      *  ### Response ###
-     *      {
-     *          "data":     {
-     *                          "username": "admin"
-     *                          "roles": "ROLE_USER",
-     *                          "email": "admin@admin.sk",
+     *      ▿{
+     *          "data": ▿   {
+     *                          "id": "12",
+     *                          "username": "anitram547",
+     *                          "roles": "a:1:{i:0;s:9:\"ROLE_USER\";}",
+     *                          "email": "anitram@anitram.com",
+     *                          "name": "Martina",
+     *                          "surname": "Koronci Babinska",
+     *                          "title_before": null,
+     *                          "title_after": null,
+     *                          "function": "developer",
+     *                          "mobile": "00421 0987 544",
+     *                          "tel": null,
+     *                          "fax": null,
+     *                          "signature": "Martina Koronci Babinska, WEB-SOLUTIONS",
+     *                          "street": "Nova 487",
+     *                          "city": "Bratislava",
+     *                          "zip": "025874",
+     *                          "country": "SR"
      *                      },
-     *          "_links":   {
-     *                          "put": "/api/v1/users/2",
-     *                          "patch": "/api/v1/users/2",
-     *                          "delete": "/api/v1/users/2"
+     *          "_links": ▿{
+     *                      "put": "/api/v1/users/13",
+     *                      "patch": "/api/v1/users/13",
+     *                      "delete": "/api/v1/users/13"
      *                      }
      *      }
      *
@@ -205,9 +219,9 @@ class UserController extends Controller
             $this->getDoctrine()->getManager()->flush();
 
             /**
-             * Fill UserData Entity if some parameters were sent
+             * Fill UserData Entity if some its parameters were sent
              */
-            if(count($requestData['detail_data'])>0){
+            if(isset($requestData['detail_data']) && count($requestData['detail_data'])>0){
                 $userData = new UserData();
                 $userData->setUser($user);
                 $errorsUserData = $this->get('entity_processor')->processEntity($userData, $requestData['detail_data']);
@@ -216,10 +230,10 @@ class UserController extends Controller
                     $this->getDoctrine()->getManager()->persist($userData);
                     $this->getDoctrine()->getManager()->flush();
 
-                    return $this->json($this->get('api_user.model')->getCustomUser($user) , StatusCodesHelper::CREATED_CODE);
+                    return $this->json($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::CREATED_CODE);
                 }
             }else{
-                return $this->json($this->get('api_user.model')->getCustomUser($user) , StatusCodesHelper::CREATED_CODE);
+                return $this->json($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::CREATED_CODE);
             }
         }
 

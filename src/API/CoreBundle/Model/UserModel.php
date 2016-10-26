@@ -134,15 +134,21 @@ class UserModel extends BaseModel implements ModelInterface
     /**
      * Return all info about user
      *
-     * @param User  $user
-     *
+     * @param User $user
      * @return array
-     * @throws \Doctrine\DBAL\DBALException
      */
-    public function getCustomUser(User $user)
+    public function getCustomUserData(User $user)
     {
+        $query = $this->queryBuilder
+            ->select('u.id, u.username, u.email, u.roles, u.email, d.name, d.surname, d.title_before, d.title_after, d.function, d.mobile, d.tel, d.fax, d.signature, d.street, d.city, d.zip, d.country')
+            ->from($this->getTableName() , 'u')
+            ->leftJoin('u' , $this->getRelatedTableNames()['ud'] , 'd' , 'u.id = d.user_id')
+            ->where('u.id = :user');
+
+        $query->setMaxResults(1);
+
         return [
-            'data'   => $this->serializer->serialize($user,'json') ,
+            'data'   => $this->dbConnection->executeQuery($query->getSQL() , ['user' => $user->getId()])->fetch() ,
             '_links' => $this->getUserLinks($user->getId()) ,
         ];
     }

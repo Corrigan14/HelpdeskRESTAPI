@@ -52,7 +52,7 @@ class ProcessEntity
 
 
     /**
-     * Fills entity with data if method exists, pay attention on securit e.g. Roles, Passwords, Emails
+     * Fills entity with data if method exists, pay attention on security e.g. Roles, Passwords, Emails
      *
      * @param \stdClass $class
      * @param           $entity

@@ -3,6 +3,7 @@
 namespace API\CoreBundle\Controller;
 
 use API\CoreBundle\Entity\User;
+use API\CoreBundle\Entity\UserData;
 use API\CoreBundle\Services\StatusCodesHelper;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -189,7 +190,6 @@ class UserController extends Controller
         $user->setRoles(['ROLE_USER']);
         $user->setIsActive(true);
 
-
         /**
          * For security reasons
          */
@@ -204,7 +204,23 @@ class UserController extends Controller
             $this->getDoctrine()->getManager()->persist($user);
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->json($this->get('api_user.model')->getCustomUser($user) , StatusCodesHelper::CREATED_CODE);
+            /**
+             * Fill UserData Entity if some parameters were sent
+             */
+            if(count($requestData['detail_data'])>0){
+                $userData = new UserData();
+                $userData->setUser($user);
+                $errorsUserData = $this->get('entity_processor')->processEntity($userData, $requestData['detail_data']);
+
+                if(false === $errorsUserData){
+                    $this->getDoctrine()->getManager()->persist($userData);
+                    $this->getDoctrine()->getManager()->flush();
+
+                    return $this->json($this->get('api_user.model')->getCustomUser($user) , StatusCodesHelper::CREATED_CODE);
+                }
+            }else{
+                return $this->json($this->get('api_user.model')->getCustomUser($user) , StatusCodesHelper::CREATED_CODE);
+            }
         }
 
         return $this->json(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE , 'errors' => $errors] , StatusCodesHelper::INVALID_PARAMETERS_CODE);

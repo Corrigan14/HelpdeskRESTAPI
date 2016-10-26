@@ -25,18 +25,15 @@ class LoginController extends Controller
      *
      * @ApiDoc(
      *  description="Returns a JWT Token for authentication",
+     *  parameters={
+     *      {"name"="username", "dataType"="string", "required"=true, "format"="POST", "description"="username for login purposes"},
+     *      {"name"="password", "dataType"="string", "required"=true, "format"="POST", "description"="password for login purposes"}
+     *  },
      *  statusCodes={
      *      200="The request has succeeded",
      *      403="Incorrect credentials",
      *      404="User not found"
-     *  },
-     *  parameters={
-     *      {"name"="username", "dataType"="string", "required"=true, "format"="POST", "description"="username for
-     *      login purposes"},
-     *      {"name"="password", "dataType"="string", "required"=true, "format"="POST", "description"="password for
-     *      login purposes"}
-     *  },
-     *
+     *  }
      * )
      * @param Request $request
      *

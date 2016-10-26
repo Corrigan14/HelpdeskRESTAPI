@@ -4,14 +4,17 @@ namespace API\CoreBundle\Entity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity as UniqueEntity;
-
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use JMS\Serializer\Annotation\ExclusionPolicy;
+use JMS\Serializer\Annotation\Expose;
+use JMS\Serializer\Annotation\ReadOnly;
 
 /**
  * @ORM\Entity
  * @ORM\Table(name="user")
  * @UniqueEntity("email")
  * @UniqueEntity("username")
+ * @ExclusionPolicy("all")
  */
 class User implements UserInterface , \Serializable
 {
@@ -24,19 +27,31 @@ class User implements UserInterface , \Serializable
 
     /**
      * @ORM\Column(type="string", unique=true)
-     *
-     * @Assert\NotBlank()
+     * @Assert\NotBlank(message="Username is required")
+     * @Assert\Type("string")
+     * @Expose
+     * @var string
      */
     private $username;
 
     /**
      * @ORM\Column(type="string")
+     * @Expose
+     * @ReadOnly
+     * @var string
      */
     private $roles;
     /**
      * @ORM\Column(type="string", length=64)
      *
      * @Assert\NotBlank()
+     * @Assert\Length(
+     *     min=8,
+     *     minMessage="Your password must have at least {{ limit }} characters."
+     * )
+     * @Assert\Type("string")
+     *
+     * @var string
      */
     private $password;
 
@@ -45,27 +60,40 @@ class User implements UserInterface , \Serializable
      *
      * @Assert\NotBlank()
      * @Assert\Email(
-     *     message = "The email '{{ value }}' is not a valid email.",
-     *     checkMX = true
+     *     message = "The email '{{ value }}' is not a valid email."
      * )
+     * @Assert\Type("string")
+     * @Expose
+     * @var string
      */
     private $email;
 
     /**
      * @ORM\Column(name="is_active", type="boolean")
+     *
+     * @var bool
      */
     private $isActive;
 
     /**
-     * @var string
+     * @ORM\Column(name="acl", type="text")
+     *
+     * @var bool
+     */
+    private $acl;
+
+    /**
+     * @var UserData
      *
      * @ORM\OneToOne(targetEntity="UserData", mappedBy="user")
+     * @Expose
      */
     private $detailData;
 
     public function __construct()
     {
         $this->isActive = true;
+        $this->acl = serialize([]);
     }
 
     /**
@@ -188,6 +216,22 @@ class User implements UserInterface , \Serializable
     public function getIsActive()
     {
         return $this->isActive;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAcl(): array
+    {
+        return unserialize($this->acl);
+    }
+
+    /**
+     * @param array $acl
+     */
+    public function setAcl(array $acl)
+    {
+        $this->acl = serialize($acl);
     }
 
     /**

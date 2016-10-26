@@ -112,7 +112,7 @@ class UserModel extends BaseModel implements ModelInterface
     }
 
     /**
-     * Return all info about user (User, UserAddress, UserData Entity)
+     * Return all info from field list about user
      *
      * @param int   $id
      * @param array $fields
@@ -125,7 +125,6 @@ class UserModel extends BaseModel implements ModelInterface
         $query = $this->getUserQuery($fields)->where('u.id = :user');
         $query->setMaxResults(1);
 
-
         return [
             'data'   => $this->dbConnection->executeQuery($query->getSQL() , ['user' => $id])->fetch() ,
             '_links' => $this->getUserLinks($id) ,
@@ -133,17 +132,15 @@ class UserModel extends BaseModel implements ModelInterface
     }
 
     /**
-     * Return all info about user (User, UserAddress, UserData Entity)
+     * Return all info about user
      *
      * @param User  $user
-     * @param array $fields
      *
      * @return array
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function getCustomUser(User $user , array $fields = [])
+    public function getCustomUser(User $user)
     {
-
         return [
             'data'   => $this->serializer->serialize($user,'json') ,
             '_links' => $this->getUserLinks($user->getId()) ,

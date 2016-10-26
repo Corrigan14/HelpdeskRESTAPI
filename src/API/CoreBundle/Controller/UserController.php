@@ -17,9 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 class UserController extends Controller
 {
     /**
-     *
      * ### Response ###
-     *
      *     {
      *       "data": [
      *                   {
@@ -46,16 +44,6 @@ class UserController extends Controller
      * @ApiDoc(
      *  description="Returns a list of Users with selected detail Info (user Entity, UserData Entity), you can pass in
      *  a fields option to get custom data",
-     *  statusCodes={
-     *      200="The request has succeeded",
-     *  },
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
      *  filters={
      *     {
      *       "name"="fields",
@@ -65,7 +53,17 @@ class UserController extends Controller
      *       "name"="page",
      *       "description"="Pagination, limit is set to 10 records"
      *     }
-     *  }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200="The request has succeeded",
+     *  },
      * )
      *
      * @param Request $request
@@ -83,18 +81,22 @@ class UserController extends Controller
     }
 
     /**
+     *  ### Response ###
+     *      {
+     *          "data":     {
+     *                          "id": "2",
+     *                          "email": "admin@admin.sk",
+     *                          "username": "admin"
+     *                      },
+     *          "_links":   {
+     *                          "put": "/api/v1/users/2",
+     *                          "patch": "/api/v1/users/2",
+     *                          "delete": "/api/v1/users/2"
+     *                      }
+     *      }
+     *
      * @ApiDoc(
      *  description="Returns User with selected detail Info(user Entity, UserData Entity)",
-     *  statusCodes={
-     *      200="The request has succeeded",
-     *  },
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
      *  requirements={
      *     {
      *       "name"="id",
@@ -110,7 +112,17 @@ class UserController extends Controller
      *       "description"="Custom fields to get only selected data"
      *     },
      *  },
-     *  output="API\CoreBundle\Entity\User"
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  output="API\CoreBundle\Entity\User",
+     *  statusCodes={
+     *      200="The request has succeeded",
+     *  },
      *  )
      *
      * @param int     $id
@@ -129,14 +141,24 @@ class UserController extends Controller
     }
 
     /**
+     *  ### Response ###
+     *      {
+     *          "data":     {
+     *                          "username": "admin"
+     *                          "roles": "ROLE_USER",
+     *                          "email": "admin@admin.sk",
+     *                      },
+     *          "_links":   {
+     *                          "put": "/api/v1/users/2",
+     *                          "patch": "/api/v1/users/2",
+     *                          "delete": "/api/v1/users/2"
+     *                      }
+     *      }
      *
      * @ApiDoc(
      *  resource = true,
      *  description="Create new User, UserData Entity",
-     *  statusCodes={
-     *      201="The entity was successfully created",
-     *      409="Invalid parameters",
-     *  },
+     *  input={"class"="API\CoreBundle\Entity\User"},
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -144,8 +166,11 @@ class UserController extends Controller
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  input={"class"="API\CoreBundle\Entity\User"},
      *  output={"class"="API\CoreBundle\Entity\User"},
+     *  statusCodes={
+     *      201="The entity was successfully created",
+     *      409="Invalid parameters",
+     *  }
      *  )
      *
      * @param Request $request

@@ -22,6 +22,7 @@ class StatusCodesHelper
     const INVALID_TOKEN_MESSAGE = 'Token not valid';
     const INVALID_TOKEN_CODE = 400;
     const UNAUTHORIZED_MESSAGE = 'You are not authorized';
+    const ACCOUNT_DISABLED_MESSAGE = 'User account is disabled';
     const UNAUTHORIZED_CODE = 401;
     const INCORRECT_CREDENTIALS_MESSAGE = 'Incorrect credentials';
     const INCORRECT_CREDENTIALS_CODE = 403;

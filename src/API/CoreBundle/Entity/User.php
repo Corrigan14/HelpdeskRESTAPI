@@ -1,6 +1,7 @@
 <?php
 namespace API\CoreBundle\Entity;
 
+use Symfony\Component\Security\Core\User\AdvancedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -16,7 +17,7 @@ use JMS\Serializer\Annotation\ReadOnly;
  * @UniqueEntity("username")
  * @ExclusionPolicy("all")
  */
-class User implements UserInterface , \Serializable
+class User implements AdvancedUserInterface , \Serializable
 {
     /**
      * @ORM\Id
@@ -74,6 +75,12 @@ class User implements UserInterface , \Serializable
      * @var bool
      */
     private $isActive;
+    /**
+     * @ORM\Column(name="deleted", type="boolean")
+     *
+     * @var bool
+     */
+    private $deleted = false;
 
     /**
      * @ORM\Column(name="acl", type="text")
@@ -93,7 +100,7 @@ class User implements UserInterface , \Serializable
     public function __construct()
     {
         $this->isActive = true;
-        $this->acl = serialize([]);
+        $this->acl = json_encode([]);
     }
 
     /**
@@ -133,7 +140,7 @@ class User implements UserInterface , \Serializable
      */
     public function getRoles()
     {
-        return unserialize($this->roles);
+        return json_decode($this->roles);
     }
 
     /**
@@ -143,7 +150,7 @@ class User implements UserInterface , \Serializable
      */
     public function setRoles(array $roles)
     {
-        $this->roles = serialize($roles);
+        $this->roles = json_encode($roles);
 
         return $this;
     }
@@ -219,11 +226,27 @@ class User implements UserInterface , \Serializable
     }
 
     /**
+     * @return boolean
+     */
+    public function getDeleted(): bool
+    {
+        return $this->deleted;
+    }
+
+    /**
+     * @param boolean $deleted
+     */
+    public function setDeleted(bool $deleted)
+    {
+        $this->deleted = $deleted;
+    }
+
+    /**
      * @return array
      */
     public function getAcl(): array
     {
-        return unserialize($this->acl);
+        return json_decode($this->acl);
     }
 
     /**
@@ -231,7 +254,31 @@ class User implements UserInterface , \Serializable
      */
     public function setAcl(array $acl)
     {
-        $this->acl = serialize($acl);
+        $this->acl = json_encode($acl);
+    }
+
+    /**
+     * Set detailData
+     *
+     * @param UserData $detailData
+     *
+     * @return User
+     */
+    public function setDetailData(UserData $detailData = null)
+    {
+        $this->detailData = $detailData;
+
+        return $this;
+    }
+
+    /**
+     * Get detailData
+     *
+     * @return \API\CoreBundle\Entity\UserData
+     */
+    public function getDetailData()
+    {
+        return $this->detailData;
     }
 
     /**
@@ -278,26 +325,64 @@ class User implements UserInterface , \Serializable
     }
 
     /**
-     * Set detailData
+     * Checks whether the user's account has expired.
      *
-     * @param UserData $detailData
+     * Internally, if this method returns false, the authentication system
+     * will throw an AccountExpiredException and prevent login.
      *
-     * @return User
+     * @return bool true if the user's account is non expired, false otherwise
+     *
+     * @see AccountExpiredException
      */
-    public function setDetailData(UserData $detailData = null)
+    public function isAccountNonExpired()
     {
-        $this->detailData = $detailData;
-
-        return $this;
+        return true;
     }
 
     /**
-     * Get detailData
+     * Checks whether the user is locked.
      *
-     * @return \API\CoreBundle\Entity\UserData
+     * Internally, if this method returns false, the authentication system
+     * will throw a LockedException and prevent login.
+     *
+     * @return bool true if the user is not locked, false otherwise
+     *
+     * @see LockedException
      */
-    public function getDetailData()
+    public function isAccountNonLocked()
     {
-        return $this->detailData;
+        return true;
+    }
+
+    /**
+     * Checks whether the user's credentials (password) has expired.
+     *
+     * Internally, if this method returns false, the authentication system
+     * will throw a CredentialsExpiredException and prevent login.
+     *
+     * @return bool true if the user's credentials are non expired, false otherwise
+     *
+     * @see CredentialsExpiredException
+     */
+    public function isCredentialsNonExpired()
+    {
+        return true;
+    }
+
+    /**
+     * Checks whether the user is enabled.
+     *
+     * Internally, if this method returns false, the authentication system
+     * will throw a DisabledException and prevent login.
+     *
+     * @return bool true if the user is enabled, false otherwise
+     *
+     * @see DisabledException
+     */
+    public function isEnabled()
+    {
+        return false;
+
+        return $this->isActive && !$this->deleted;
     }
 }

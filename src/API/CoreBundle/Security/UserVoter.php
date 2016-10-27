@@ -10,6 +10,7 @@ namespace API\CoreBundle\Security;
 
 
 use API\CoreBundle\Entity\User;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 
@@ -24,13 +25,19 @@ class UserVoter
     private $decisionManager;
     /** @var TokenInterface */
     private $token;
-
+    /** @var  User */
     private $user;
 
-    public function __construct(AccessDecisionManagerInterface $decisionManager , TokenInterface $token)
+    /**
+     * UserVoter constructor.
+     *
+     * @param AccessDecisionManagerInterface $decisionManager
+     * @param TokenStorage                   $tokenStorage
+     */
+    public function __construct(AccessDecisionManagerInterface $decisionManager , TokenStorage $tokenStorage)
     {
         $this->decisionManager = $decisionManager;
-        $this->token = $token;
+        $this->token = $tokenStorage->getToken();
     }
 
 
@@ -38,13 +45,20 @@ class UserVoter
      * Perform a single access check operation on a given attribute, subject and token.
      * It is safe to assume that $attribute and $subject already passed the "supports()" method check.
      *
-     * @param string $action
+     * @param string    $action
+     *
+     * @param bool|User $targetUser
      *
      * @return bool
+     * @throws \InvalidArgumentException
      */
-    protected function isGranted($action)
+    public function isGranted($action , $targetUser = false)
     {
         $this->user = $this->token->getUser();
+
+        if (false !== $targetUser && !$this->user instanceof User) {
+            throw new \InvalidArgumentException('Target User must be an Instance of User Entity');
+        }
 
         if (!$this->user instanceof User) {
             // the user must be logged in; if not, deny access
@@ -55,11 +69,11 @@ class UserVoter
             case VoteOptions::CREATE_USER:
                 return $this->canCreate();
             case VoteOptions::SHOW_USER:
-                return $this->canRead();
+                return $this->canRead($targetUser);
             case VoteOptions::UPDATE_USER:
-                return $this->canUpdate();
+                return $this->canUpdate($targetUser);
             case VoteOptions::DELETE_USER:
-                return $this->canDelete();
+                return $this->canDelete($targetUser);
             case VoteOptions::LIST_USERS:
                 return $this->canList();
             default:
@@ -69,46 +83,103 @@ class UserVoter
 
     /**
      * @return bool
+     * @throws \InvalidArgumentException
      */
     private function canCreate(): bool
     {
-        return false;
+        if ($this->decisionManager->decide($this->token , ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        return $this->hasAclRights(VoteOptions::CREATE_USER);
     }
 
     /**
+     * @param User $user
+     *
      * @return bool
+     * @throws \InvalidArgumentException*
      */
-    private function canRead(): bool
+    private function canRead(User $user): bool
     {
+        if ($this->decisionManager->decide($this->token , ['ROLE_ADMIN'])) {
+            return true;
+        }
+        if ($user->getId() === $this->user->getId()) {
+            return true;
+        }
 
-        return false;
+        return $this->hasAclRights(VoteOptions::SHOW_USER);
     }
 
     /**
+     * @param User $user
+     *
      * @return bool
+     * @throws \InvalidArgumentException
      */
-    private function canUpdate(): bool
+    private function canUpdate(User $user): bool
     {
+        if ($this->decisionManager->decide($this->token , ['ROLE_ADMIN'])) {
+            return true;
+        }
+        if ($user->getId() === $this->user->getId()) {
+            return true;
+        }
 
-        return false;
+        return $this->hasAclRights(VoteOptions::UPDATE_USER);
     }
 
     /**
+     * @param User $user
+     *
      * @return bool
+     * @throws \InvalidArgumentException
      */
-    private function canDelete(): bool
+    private function canDelete(User $user): bool
     {
+        if ($this->decisionManager->decide($this->token , ['ROLE_ADMIN'])) {
+            return true;
+        }
+        if ($user->getId() === $this->user->getId()) {
+            return true;
+        }
 
-        return false;
+        return $this->hasAclRights(VoteOptions::DELETE_USER);
     }
 
     /**
      *
      * @return bool
+     * @throws \InvalidArgumentException
      */
     private function canList(): bool
     {
         if ($this->decisionManager->decide($this->token , ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+
+        return $this->hasAclRights(VoteOptions::LIST_USERS);
+    }
+
+    /**
+     * Every User has a custom array of access rights
+     *
+     * @param $action
+     *
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    private function hasAclRights($action)
+    {
+        if (!in_array($action , VoteOptions::getConstants() , true)) {
+            throw new \InvalidArgumentException('Action ins not valid, please list your action in the options list');
+        }
+
+        $acl = $this->user->getAcl();
+
+        if (in_array($action , $acl , true)) {
             return true;
         }
 

@@ -11,3 +11,7 @@ services:
         class: API\CoreBundle\Services\ProcessEntity
         arguments: ["@doctrine.orm.default_entity_manager", "@validator"]
         lazy: true
+    user_voter:
+        class: API\CoreBundle\Security\UserVoter
+        arguments: ["@security.access.decision_manager","@security.token_storage"]
+        lazy: true

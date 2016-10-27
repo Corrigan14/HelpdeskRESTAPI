@@ -26,8 +26,10 @@ class LoginController extends Controller
      * @ApiDoc(
      *  description="Returns a JWT Token for authentication",
      *  parameters={
-     *      {"name"="username", "dataType"="string", "required"=true, "format"="POST", "description"="username for login purposes"},
-     *      {"name"="password", "dataType"="string", "required"=true, "format"="POST", "description"="password for login purposes"}
+     *      {"name"="username", "dataType"="string", "required"=true, "format"="POST", "description"="username for
+     *      login purposes"},
+     *      {"name"="password", "dataType"="string", "required"=true, "format"="POST", "description"="password for
+     *      login purposes"}
      *  },
      *  statusCodes={
      *      200="The request has succeeded",
@@ -59,6 +61,11 @@ class LoginController extends Controller
         // password check
         if (!$this->get('security.password_encoder')->isPasswordValid($user , $password)) {
             return $this->json(StatusCodesHelper::INCORRECT_CREDENTIALS_MESSAGE , StatusCodesHelper::INCORRECT_CREDENTIALS_CODE);
+        }
+
+        //check if account was not deleted or is not active
+        if (!$user->isEnabled()) {
+            return $this->json(StatusCodesHelper::ACCOUNT_DISABLED_MESSAGE , StatusCodesHelper::UNAUTHORIZED_CODE);
         }
 
         // Use LexikJWTAuthenticationBundle to create JWT token that hold only information about user name

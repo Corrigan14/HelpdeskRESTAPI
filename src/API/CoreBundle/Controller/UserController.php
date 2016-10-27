@@ -4,6 +4,7 @@ namespace API\CoreBundle\Controller;
 
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
+use API\CoreBundle\Security\VoteOptions;
 use API\CoreBundle\Services\StatusCodesHelper;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -70,10 +71,15 @@ class UserController extends Controller
      * @param Request $request
      *
      * @return JsonResponse
+     * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
      */
     public function listUsersAction(Request $request)
     {
+        if (!$this->get('user_voter')->isGranted(VoteOptions::LIST_USERS)) {
+            return $this->unauthorizedResponse();
+        }
+
         $userModel = $this->get('api_user.model');
         $fields = $request->get('fields') ? explode(',' , $request->get('fields')) : [];
         $page = $request->get('page') ?: 1;
@@ -131,10 +137,15 @@ class UserController extends Controller
      * @param Request $request
      *
      * @return JsonResponse
+     * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
      */
     public function getUserAction(int $id , Request $request)
     {
+        if (!$this->get('user_voter')->isGranted(VoteOptions::SHOW_USER)) {
+            return $this->unauthorizedResponse();
+        }
+
         $userModel = $this->get('api_user.model');
         $fields = $request->get('fields') ? explode(',' , $request->get('fields')) : [];
 
@@ -191,6 +202,7 @@ class UserController extends Controller
      * @param Request $request
      *
      * @return JsonResponse
+     * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
@@ -198,6 +210,10 @@ class UserController extends Controller
      */
     public function createUserAction(Request $request)
     {
+        if (!$this->get('user_voter')->isGranted(VoteOptions::CREATE_USER)) {
+            return $this->unauthorizedResponse();
+        }
+
         $requestData = $request->request->all();
 
         $user = new User();
@@ -221,18 +237,18 @@ class UserController extends Controller
             /**
              * Fill UserData Entity if some its parameters were sent
              */
-            if(isset($requestData['detail_data']) && count($requestData['detail_data'])>0){
+            if (isset($requestData['detail_data']) && count($requestData['detail_data']) > 0) {
                 $userData = new UserData();
                 $userData->setUser($user);
-                $errorsUserData = $this->get('entity_processor')->processEntity($userData, $requestData['detail_data']);
+                $errorsUserData = $this->get('entity_processor')->processEntity($userData , $requestData['detail_data']);
 
-                if(false === $errorsUserData){
+                if (false === $errorsUserData) {
                     $this->getDoctrine()->getManager()->persist($userData);
                     $this->getDoctrine()->getManager()->flush();
 
                     return $this->json($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::CREATED_CODE);
                 }
-            }else{
+            } else {
                 return $this->json($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::CREATED_CODE);
             }
         }
@@ -257,10 +273,13 @@ class UserController extends Controller
      * @param int $id
      *
      * @return JsonResponse
+     * @throws \InvalidArgumentException
      */
     public function updateUserAction($id)
     {
-
+        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER)) {
+            return $this->unauthorizedResponse();
+        }
     }
 
     /**
@@ -280,10 +299,13 @@ class UserController extends Controller
      * @param int $id
      *
      * @return JsonResponse
+     * @throws \InvalidArgumentException
      */
     public function updatePartialUserAction($id)
     {
-
+        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER)) {
+            return $this->unauthorizedResponse();
+        }
     }
 
     /**
@@ -303,9 +325,19 @@ class UserController extends Controller
      * @param int $id
      *
      * @return JsonResponse
+     * @throws \InvalidArgumentException
      */
     public function deleteUserAction($id)
     {
+        if (!$this->get('user_voter')->isGranted(VoteOptions::DELETE_USER)) {
+            return $this->unauthorizedResponse();
+        }
+    }
 
+    private function unauthorizedResponse()
+    {
+        return $this->json([
+            'message' => StatusCodesHelper::UNAUTHORIZED_MESSAGE ,
+        ] , StatusCodesHelper::UNAUTHORIZED_CODE);
     }
 }

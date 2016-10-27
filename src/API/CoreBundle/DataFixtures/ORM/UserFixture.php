@@ -51,8 +51,18 @@ class UserFixture implements FixtureInterface , ContainerAwareInterface , Ordere
         $user = new User();
         $user->setEmail('admin@admin.sk')
              ->setUsername('admin')
-             ->setRoles(['ROLE_USER']);
+             ->setRoles(['ROLE_ADMIN']);
         $plainPassword = 'admin';
+        $encoder = $this->container->get('security.password_encoder');
+        $encoded = $encoder->encodePassword($user , $plainPassword);
+        $user->setPassword($encoded);
+        $manager->persist($user);
+
+        $user = new User();
+        $user->setEmail('user@user.sk')
+             ->setUsername('user')
+             ->setRoles(['ROLE_USER']);
+        $plainPassword = 'user';
         $encoder = $this->container->get('security.password_encoder');
         $encoded = $encoder->encodePassword($user , $plainPassword);
         $user->setPassword($encoded);

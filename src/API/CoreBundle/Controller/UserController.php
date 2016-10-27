@@ -112,13 +112,6 @@ class UserController extends Controller
      *       "description"="The id of processed object"
      *     }
      *  },
-     *  filters={
-     *     {
-     *       "name"="fields",
-     *       "parameters"="username|email|password...",
-     *       "description"="Custom fields to get only selected data"
-     *     },
-     *  },
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -132,24 +125,26 @@ class UserController extends Controller
      *  },
      *  )
      *
-     * @param int     $id
-     *
-     * @param Request $request
+     * @param int $id
      *
      * @return JsonResponse
+     * @throws \LogicException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function getUserAction(int $id , Request $request)
+    public function getUserAction(int $id)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::SHOW_USER , $id)) {
             return $this->unauthorizedResponse();
         }
+        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
+        if (null === $user) {
+            return $this->json([
+                'message' => StatusCodesHelper::USER_NOT_FOUND_CODE ,
+            ] , StatusCodesHelper::USER_NOT_FOUND_MESSAGE);
+        }
 
-        $userModel = $this->get('api_user.model');
-        $fields = $request->get('fields') ? explode(',' , $request->get('fields')) : [];
-
-        return $this->json($userModel->getCustomUserById($id , $fields) , StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -220,45 +215,13 @@ class UserController extends Controller
         $user->setRoles(['ROLE_USER']);
         $user->setIsActive(true);
 
-        /**
-         * For security reasons
-         */
-        unset($requestData['roles'] , $requestData['isActive']);
-
-        $errors = $this->get('entity_processor')->processEntity($user , $requestData);
-        if (false === $errors) {
-            if ($requestData['password']) {
-                $user->setPassword($this->get('security.password_encoder')->encodePassword($user , $requestData['password']));
-            }
-
-            $this->getDoctrine()->getManager()->persist($user);
-            $this->getDoctrine()->getManager()->flush();
-
-            /**
-             * Fill UserData Entity if some its parameters were sent
-             */
-            if (isset($requestData['detail_data']) && count($requestData['detail_data']) > 0) {
-                $userData = new UserData();
-                $user->setDetailData($userData);
-                $errorsUserData = $this->get('entity_processor')->processEntity($userData , $requestData['detail_data']);
-
-                if (false === $errorsUserData) {
-                    $this->getDoctrine()->getManager()->persist($userData);
-                    $this->getDoctrine()->getManager()->flush();
-
-                    return $this->json($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::CREATED_CODE);
-                }
-            } else {
-                return $this->json($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::CREATED_CODE);
-            }
-        }
-
-        return $this->json(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE , 'errors' => $errors] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $this->updateUser($user , $requestData);
     }
 
     /**
      * @ApiDoc(
      *  description="Update the Entire User",
+     *  input={"class"="API\CoreBundle\Entity\User"},
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -266,25 +229,37 @@ class UserController extends Controller
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
+     *  output={"class"="API\CoreBundle\Entity\User"},
      *  statusCodes={
      *      200="The request has succeeded",
      *  })
      *
-     * @param int $id
+     * @param int     $id
+     *
+     * @param Request $request
      *
      * @return JsonResponse
      * @throws \InvalidArgumentException
+     * @throws \LogicException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
-    public function updateUserAction($id)
+    public function updateUserAction($id , Request $request)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER , $id)) {
             return $this->unauthorizedResponse();
         }
+
+        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
+        $requestData = $request->request->all();
+
+        return $this->updateUser($user , $requestData);
     }
 
     /**
      * @ApiDoc(
      *  description="Partially update the User",
+     *  input={"class"="API\CoreBundle\Entity\User"},
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -292,20 +267,32 @@ class UserController extends Controller
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
+     *  output={"class"="API\CoreBundle\Entity\User"},
      *  statusCodes={
      *      200="The request has succeeded",
      *  })
      *
-     * @param int $id
+     * @param int     $id
+     *
+     * @param Request $request
      *
      * @return JsonResponse
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function updatePartialUserAction($id)
+    public function updatePartialUserAction($id , Request $request)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER , $id)) {
             return $this->unauthorizedResponse();
         }
+
+        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
+
+        $requestData = $request->request->all();
+
+        return $this->updateUser($user , $requestData);
     }
 
     /**
@@ -347,6 +334,57 @@ class UserController extends Controller
         return $this->json([
             'message' => StatusCodesHelper::DELETED_MESSAGE ,
         ] , StatusCodesHelper::DELETED_CODE);
+    }
+
+    /**
+     * @param User|null $user
+     *
+     * @param array     $requestData
+     *
+     * @return JsonResponse
+     * @throws \LogicException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @internal param $id
+     */
+    private function updateUser($user , array $requestData)
+    {
+        if (null === $user || !$user instanceof User) {
+            return $this->json([
+                'message' => StatusCodesHelper::USER_NOT_FOUND_CODE ,
+            ] , StatusCodesHelper::USER_NOT_FOUND_MESSAGE);
+        }
+
+
+        $errors = $this->get('entity_processor')->processEntity($user , $requestData);
+        if (false === $errors) {
+            if (isset($requestData['password'])) {
+                $user->setPassword($this->get('security.password_encoder')->encodePassword($user , $requestData['password']));
+            }
+
+            $this->getDoctrine()->getManager()->persist($user);
+            $this->getDoctrine()->getManager()->flush();
+
+            /**
+             * Fill UserData Entity if some its parameters were sent
+             */
+            if (isset($requestData['detail_data']) && count($requestData['detail_data']) > 0) {
+                $userData = new UserData();
+                $user->setDetailData($userData);
+                $errorsUserData = $this->get('entity_processor')->processEntity($userData , $requestData['detail_data']);
+
+                if (false === $errorsUserData) {
+                    $this->getDoctrine()->getManager()->persist($userData);
+                    $this->getDoctrine()->getManager()->flush();
+
+                    return $this->json($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::CREATED_CODE);
+                }
+            } else {
+                return $this->json($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::CREATED_CODE);
+            }
+        }
+
+        return $this->json(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE , 'errors' => $errors] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 
     /**

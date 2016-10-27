@@ -142,7 +142,7 @@ class UserController extends Controller
      */
     public function getUserAction(int $id , Request $request)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::SHOW_USER)) {
+        if (!$this->get('user_voter')->isGranted(VoteOptions::SHOW_USER , $id)) {
             return $this->unauthorizedResponse();
         }
 
@@ -277,7 +277,7 @@ class UserController extends Controller
      */
     public function updateUserAction($id)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER)) {
+        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER , $id)) {
             return $this->unauthorizedResponse();
         }
     }
@@ -303,7 +303,7 @@ class UserController extends Controller
      */
     public function updatePartialUserAction($id)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER)) {
+        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER , $id)) {
             return $this->unauthorizedResponse();
         }
     }
@@ -331,7 +331,7 @@ class UserController extends Controller
      */
     public function deleteUserAction($id)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::DELETE_USER)) {
+        if (!$this->get('user_voter')->isGranted(VoteOptions::DELETE_USER , $id)) {
             return $this->unauthorizedResponse();
         }
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);

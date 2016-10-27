@@ -5,6 +5,8 @@ namespace API\CoreBundle\Tests\Controller;
 use API\CoreBundle\Model\UserModel;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use API\CoreBundle\Tests\Traits\LoginTrait;
+
 
 /**
  * Class UserControllerTest
@@ -13,12 +15,15 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
  */
 class UserControllerTest extends WebTestCase
 {
+
+    use LoginTrait;
+
     /**
      * Test all error responses for controller
      */
     public function testUserError()
     {
-
+        //$this->assertEquals(false,$this->loginUser('a','a'));
     }
 
     /**
@@ -72,4 +77,10 @@ class UserControllerTest extends WebTestCase
         $this->assertTrue(array_key_exists('data' , $response));
         $this->assertTrue(array_key_exists('_links' , $response));
     }
+
+
+    public function testTrait(){
+
+    }
+
 }

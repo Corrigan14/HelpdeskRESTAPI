@@ -51,12 +51,12 @@ class LoginControllerTest extends WebTestCase
 
         $crawler = $client->request('POST' , '/token-authentication' , ['username' => 'admin' , 'password' => 'admin']);
         /**
-         * Expect User not found as incorrect username
+         * Expect User found
          */
         $this->assertEquals(200 , $client->getResponse()->getStatusCode());
         $content = json_decode($client->getResponse()->getContent() , true);
         /**
-         * Chceck for Token in response
+         * Check for Token in response
          */
         $this->assertTrue(array_key_exists('token' , $content));
     }

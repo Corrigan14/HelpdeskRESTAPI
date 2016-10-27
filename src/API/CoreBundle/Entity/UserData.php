@@ -3,7 +3,7 @@
 namespace API\CoreBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation\Exclude;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * UserData
@@ -19,7 +19,7 @@ class UserData
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @Exclude
+     * @Serializer\Exclude()
      */
     private $id;
 
@@ -115,9 +115,8 @@ class UserData
     private $country;
 
     /**
-     * @ORM\OneToOne(targetEntity="User", inversedBy="detailData")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
-     * @Exclude
+     * @ORM\OneToOne(targetEntity="User", mappedBy="detailData")
+     * @Serializer\Exclude()
      */
     private $user;
 

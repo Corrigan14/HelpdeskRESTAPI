@@ -239,7 +239,7 @@ class UserController extends Controller
              */
             if (isset($requestData['detail_data']) && count($requestData['detail_data']) > 0) {
                 $userData = new UserData();
-                $userData->setUser($user);
+                $user->setDetailData($userData);
                 $errorsUserData = $this->get('entity_processor')->processEntity($userData , $requestData['detail_data']);
 
                 if (false === $errorsUserData) {

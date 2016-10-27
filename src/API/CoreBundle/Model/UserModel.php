@@ -206,7 +206,6 @@ class UserModel extends BaseModel implements ModelInterface
          * We are checking if fields exists in related entities, this way we avoid attacks and typing errors
          */
         foreach ($fields as $field) {
-            //make sure password is never returned
             if ('password' === $field) {
                 continue;
             }

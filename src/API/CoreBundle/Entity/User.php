@@ -6,14 +6,13 @@ use Symfony\Component\Security\Core\User\AdvancedUserInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use JMS\Serializer\Annotation\Exclude;
-use JMS\Serializer\Annotation\ReadOnly;
 
 /**
  * @ORM\Entity
  * @ORM\Table(name="user")
  * @UniqueEntity("email")
  * @UniqueEntity("username")
+ * @Serializer\ExclusionPolicy("none")
  */
 class User implements AdvancedUserInterface , \Serializable
 {
@@ -34,19 +33,19 @@ class User implements AdvancedUserInterface , \Serializable
 
     /**
      * @ORM\Column(type="string")
-     * @ReadOnly
      * @var string
      */
     private $roles;
     /**
      * @ORM\Column(type="string", length=64)
-     * @Exclude
+     * @Serializer\Exclude()
      * @Assert\NotBlank()
      * @Assert\Length(
      *     min=8,
      *     minMessage="Your password must have at least {{ limit }} characters."
      * )
      * @Assert\Type("string")
+     * @Serializer\Exclude()
      * @var string
      */
     private $password;
@@ -85,8 +84,9 @@ class User implements AdvancedUserInterface , \Serializable
 
     /**
      * @var UserData
-     *
-     * @ORM\OneToOne(targetEntity="UserData", mappedBy="user")
+     * @ORM\OneToOne(targetEntity="UserData", inversedBy="user")
+     * @ORM\JoinColumn(name="detail_data_id", referencedColumnName="id", onDelete="CASCADE")
+     * @Serializer\MaxDepth(0)
      */
     private $detailData;
 

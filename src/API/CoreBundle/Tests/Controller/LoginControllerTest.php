@@ -15,41 +15,41 @@ class LoginControllerTest extends WebTestCase
     {
         $client = static::createClient();
 
-        $crawler = $client->request('POST' , '/token-authentication');
+        $crawler = $client->request('POST' , '/api/v1/token-authentication');
         /**
          * Expect User not found as missing credentials
          */
         $this->assertEquals(404 , $client->getResponse()->getStatusCode());
-        $this->assertContains('error' , $client->getResponse()->getContent());
+        $this->assertContains('User not found' , $client->getResponse()->getContent());
 
-        $crawler = $client->request('GET' , '/token-authentication');
+        $crawler = $client->request('GET' , '/api/v1/token-authentication');
         /**
          * Expect Method not allowed
          */
         $this->assertEquals(405 , $client->getResponse()->getStatusCode());
 
 
-        $crawler = $client->request('POST' , '/token-authentication' , ['username' => 'admin2' , 'password' => 'admin']);
+        $crawler = $client->request('POST' , '/api/v1/token-authentication' , ['username' => 'admin2' , 'password' => 'admin']);
         /**
          * Expect User not found as incorrect username
          */
         $this->assertEquals(404 , $client->getResponse()->getStatusCode());
-        $this->assertContains('error' , $client->getResponse()->getContent());
+        $this->assertContains('User not found' , $client->getResponse()->getContent());
 
 
-        $crawler = $client->request('POST' , '/token-authentication' , ['username' => 'admin' , 'password' => 'admin2']);
+        $crawler = $client->request('POST' , '/api/v1/token-authentication' , ['username' => 'admin' , 'password' => 'admin2']);
         /**
          * Expect Access Denied as incorrect password
          */
         $this->assertEquals(403 , $client->getResponse()->getStatusCode());
-        $this->assertContains('error' , $client->getResponse()->getContent());
+        $this->assertContains('Incorrect credentials' , $client->getResponse()->getContent());
     }
 
     public function testLoginSuccess()
     {
         $client = static::createClient();
 
-        $crawler = $client->request('POST' , '/token-authentication' , ['username' => 'admin' , 'password' => 'admin']);
+        $crawler = $client->request('POST' , '/api/v1/token-authentication' , ['username' => 'admin' , 'password' => 'admin']);
         /**
          * Expect User found
          */

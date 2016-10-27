@@ -112,13 +112,6 @@ class UserController extends Controller
      *       "description"="The id of processed object"
      *     }
      *  },
-     *  filters={
-     *     {
-     *       "name"="fields",
-     *       "parameters"="username|email|password...",
-     *       "description"="Custom fields to get only selected data"
-     *     },
-     *  },
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -132,24 +125,21 @@ class UserController extends Controller
      *  },
      *  )
      *
-     * @param int     $id
-     *
-     * @param Request $request
+     * @param int $id
      *
      * @return JsonResponse
+     * @throws \LogicException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function getUserAction(int $id , Request $request)
+    public function getUserAction(int $id)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::SHOW_USER , $id)) {
             return $this->unauthorizedResponse();
         }
+        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
 
-        $userModel = $this->get('api_user.model');
-        $fields = $request->get('fields') ? explode(',' , $request->get('fields')) : [];
-
-        return $this->json($userModel->getCustomUserById($id , $fields) , StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

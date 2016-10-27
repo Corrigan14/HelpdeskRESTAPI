@@ -319,12 +319,14 @@ class UserController extends Controller
      *     }
      *  },
      *  statusCodes={
-     *      204="The entity was successfully deleted",
+     *      204="The User was successfully deleted",
+     *      404="The User was not found",
      *  })
      *
      * @param int $id
      *
      * @return JsonResponse
+     * @throws \LogicException
      * @throws \InvalidArgumentException
      */
     public function deleteUserAction($id)
@@ -332,8 +334,24 @@ class UserController extends Controller
         if (!$this->get('user_voter')->isGranted(VoteOptions::DELETE_USER)) {
             return $this->unauthorizedResponse();
         }
+        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
+        if (null === $user) {
+            return $this->json([
+                'message' => StatusCodesHelper::USER_NOT_FOUND_CODE ,
+            ] , StatusCodesHelper::USER_NOT_FOUND_MESSAGE);
+        }
+
+        $this->getDoctrine()->getManager()->remove($user);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->json([
+            'message' => StatusCodesHelper::DELETED_MESSAGE ,
+        ] , StatusCodesHelper::DELETED_CODE);
     }
 
+    /**
+     * @return JsonResponse
+     */
     private function unauthorizedResponse()
     {
         return $this->json([

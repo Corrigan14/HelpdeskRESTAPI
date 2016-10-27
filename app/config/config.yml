@@ -80,3 +80,5 @@ lexik_jwt_authentication:
 
 jms_serializer:
     enable_short_alias: false
+    metadata:
+        auto_detection: true

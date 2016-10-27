@@ -135,20 +135,13 @@ class UserModel extends BaseModel implements ModelInterface
      * Return all info about user
      *
      * @param User $user
+     *
      * @return array
      */
     public function getCustomUserData(User $user)
     {
-        $query = $this->queryBuilder
-            ->select('u.id, u.username, u.email, u.roles, u.email, d.name, d.surname, d.title_before, d.title_after, d.function, d.mobile, d.tel, d.fax, d.signature, d.street, d.city, d.zip, d.country')
-            ->from($this->getTableName() , 'u')
-            ->leftJoin('u' , $this->getRelatedTableNames()['ud'] , 'd' , 'u.id = d.user_id')
-            ->where('u.id = :user');
-
-        $query->setMaxResults(1);
-
         return [
-            'data'   => $this->dbConnection->executeQuery($query->getSQL() , ['user' => $user->getId()])->fetch() ,
+            'data'   => $this->serializer->serialize($user , 'json') ,
             '_links' => $this->getUserLinks($user->getId()) ,
         ];
     }
@@ -213,6 +206,10 @@ class UserModel extends BaseModel implements ModelInterface
          * We are checking if fields exists in related entities, this way we avoid attacks and typing errors
          */
         foreach ($fields as $field) {
+            //make sure password is never returned
+            if ('password' === $field) {
+                continue;
+            }
             if (property_exists(User::class , $field)) {
                 $values[] = 'u.' . $field;
             } elseif (property_exists(UserData::class , $field)) {

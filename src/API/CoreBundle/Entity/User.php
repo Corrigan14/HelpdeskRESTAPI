@@ -1,13 +1,12 @@
 <?php
 namespace API\CoreBundle\Entity;
 
+use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Security\Core\User\AdvancedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use JMS\Serializer\Annotation\ExclusionPolicy;
-use JMS\Serializer\Annotation\Expose;
+use JMS\Serializer\Annotation\Exclude;
 use JMS\Serializer\Annotation\ReadOnly;
 
 /**
@@ -15,7 +14,6 @@ use JMS\Serializer\Annotation\ReadOnly;
  * @ORM\Table(name="user")
  * @UniqueEntity("email")
  * @UniqueEntity("username")
- * @ExclusionPolicy("all")
  */
 class User implements AdvancedUserInterface , \Serializable
 {
@@ -30,28 +28,25 @@ class User implements AdvancedUserInterface , \Serializable
      * @ORM\Column(type="string", unique=true)
      * @Assert\NotBlank(message="Username is required")
      * @Assert\Type("string")
-     * @Expose
      * @var string
      */
     private $username;
 
     /**
      * @ORM\Column(type="string")
-     * @Expose
      * @ReadOnly
      * @var string
      */
     private $roles;
     /**
      * @ORM\Column(type="string", length=64)
-     *
+     * @Exclude
      * @Assert\NotBlank()
      * @Assert\Length(
      *     min=8,
      *     minMessage="Your password must have at least {{ limit }} characters."
      * )
      * @Assert\Type("string")
-     *
      * @var string
      */
     private $password;
@@ -64,7 +59,6 @@ class User implements AdvancedUserInterface , \Serializable
      *     message = "The email '{{ value }}' is not a valid email."
      * )
      * @Assert\Type("string")
-     * @Expose
      * @var string
      */
     private $email;
@@ -93,7 +87,6 @@ class User implements AdvancedUserInterface , \Serializable
      * @var UserData
      *
      * @ORM\OneToOne(targetEntity="UserData", mappedBy="user")
-     * @Expose
      */
     private $detailData;
 
@@ -381,7 +374,6 @@ class User implements AdvancedUserInterface , \Serializable
      */
     public function isEnabled()
     {
-        return false;
 
         return $this->isActive && !$this->deleted;
     }

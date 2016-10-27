@@ -45,18 +45,18 @@ class UserVoter
      * Perform a single access check operation on a given attribute, subject and token.
      * It is safe to assume that $attribute and $subject already passed the "supports()" method check.
      *
-     * @param string    $action
+     * @param string   $action
      *
-     * @param bool|User $targetUser
+     * @param bool|int $targetUserId
      *
      * @return bool
      * @throws \InvalidArgumentException
      */
-    public function isGranted($action , $targetUser = false)
+    public function isGranted($action , $targetUserId = false)
     {
         $this->user = $this->token->getUser();
 
-        if (false !== $targetUser && !$this->user instanceof User) {
+        if (false !== $targetUserId && !$this->user instanceof User) {
             throw new \InvalidArgumentException('Target User must be an Instance of User Entity');
         }
 
@@ -69,11 +69,11 @@ class UserVoter
             case VoteOptions::CREATE_USER:
                 return $this->canCreate();
             case VoteOptions::SHOW_USER:
-                return $this->canRead($targetUser);
+                return $this->canRead($targetUserId);
             case VoteOptions::UPDATE_USER:
-                return $this->canUpdate($targetUser);
+                return $this->canUpdate($targetUserId);
             case VoteOptions::DELETE_USER:
-                return $this->canDelete($targetUser);
+                return $this->canDelete($targetUserId);
             case VoteOptions::LIST_USERS:
                 return $this->canList();
             default:
@@ -95,17 +95,17 @@ class UserVoter
     }
 
     /**
-     * @param User $user
+     * @param int $user
      *
      * @return bool
      * @throws \InvalidArgumentException*
      */
-    private function canRead(User $user): bool
+    private function canRead(int $user): bool
     {
         if ($this->decisionManager->decide($this->token , ['ROLE_ADMIN'])) {
             return true;
         }
-        if ($user->getId() === $this->user->getId()) {
+        if ($user === $this->user->getId()) {
             return true;
         }
 
@@ -113,17 +113,17 @@ class UserVoter
     }
 
     /**
-     * @param User $user
+     * @param int $user
      *
      * @return bool
      * @throws \InvalidArgumentException
      */
-    private function canUpdate(User $user): bool
+    private function canUpdate(int $user): bool
     {
         if ($this->decisionManager->decide($this->token , ['ROLE_ADMIN'])) {
             return true;
         }
-        if ($user->getId() === $this->user->getId()) {
+        if ($user === $this->user->getId()) {
             return true;
         }
 
@@ -131,17 +131,17 @@ class UserVoter
     }
 
     /**
-     * @param User $user
+     * @param int $user
      *
      * @return bool
      * @throws \InvalidArgumentException
      */
-    private function canDelete(User $user): bool
+    private function canDelete(int $user): bool
     {
         if ($this->decisionManager->decide($this->token , ['ROLE_ADMIN'])) {
             return true;
         }
-        if ($user->getId() === $this->user->getId()) {
+        if ($user === $this->user->getId()) {
             return true;
         }
 

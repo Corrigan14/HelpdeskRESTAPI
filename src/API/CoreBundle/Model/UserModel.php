@@ -222,6 +222,6 @@ class UserModel extends BaseModel implements ModelInterface
         return $this->queryBuilder
             ->select($values)
             ->from($this->getTableName() , 'u')
-            ->leftJoin('u' , $this->getRelatedTableNames()['ud'] , 'd' , 'u.id = d.user_id');
+            ->leftJoin('u' , $this->getRelatedTableNames()['ud'] , 'd' , 'u.detail_data_id = d.id');
     }
 }

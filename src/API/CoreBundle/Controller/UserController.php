@@ -258,7 +258,7 @@ class UserController extends Controller
 
     /**
      * @ApiDoc(
-     *  description="Update All User Entity data",
+     *  description="Update the Entire User",
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -284,7 +284,7 @@ class UserController extends Controller
 
     /**
      * @ApiDoc(
-     *  description="Update Selected User Entity data",
+     *  description="Partially update the User",
      *  headers={
      *     {
      *       "name"="Authorization",

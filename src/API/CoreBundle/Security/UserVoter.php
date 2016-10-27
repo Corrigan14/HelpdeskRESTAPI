@@ -56,8 +56,8 @@ class UserVoter
     {
         $this->user = $this->token->getUser();
 
-        if (false !== $targetUserId && !$this->user instanceof User) {
-            throw new \InvalidArgumentException('Target User must be an Instance of User Entity');
+        if (!$this->user instanceof User) {
+            throw new \InvalidArgumentException('User must be an Instance of User Entity');
         }
 
         if (!$this->user instanceof User) {

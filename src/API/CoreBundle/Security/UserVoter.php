@@ -57,10 +57,6 @@ class UserVoter
         $this->user = $this->token->getUser();
 
         if (!$this->user instanceof User) {
-            throw new \InvalidArgumentException('User must be an Instance of User Entity');
-        }
-
-        if (!$this->user instanceof User) {
             // the user must be logged in; if not, deny access
             return false;
         }

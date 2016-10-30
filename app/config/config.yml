@@ -82,3 +82,11 @@ jms_serializer:
     enable_short_alias: false
     metadata:
         auto_detection: true
+
+nelmio_cors:
+    paths:
+        '^/':
+            allow_origin: ['*']
+            allow_headers: ['Authorization','HTTP_AUTHORIZATION']
+            allow_methods: ['POST', 'PUT', 'GET', 'DELETE','OPTIONS']
+            max_age: 3600

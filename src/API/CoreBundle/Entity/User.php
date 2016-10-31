@@ -1,6 +1,7 @@
 <?php
 namespace API\CoreBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Security\Core\User\AdvancedUserInterface;
 use Doctrine\ORM\Mapping as ORM;
@@ -89,6 +90,13 @@ class User implements AdvancedUserInterface , \Serializable
      * @Serializer\MaxDepth(0)
      */
     private $detailData;
+
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="Tag", mappedBy="user")
+     */
+    private $tags;
 
     public function __construct()
     {
@@ -376,5 +384,40 @@ class User implements AdvancedUserInterface , \Serializable
     {
 
         return $this->isActive && !$this->deleted;
+    }
+
+    /**
+     * Add tag
+     *
+     * @param Tag $tag
+     *
+     * @return User
+     */
+    public function addTag(Tag $tag)
+    {
+        $this->tags[] = $tag;
+        $tag->setUser($this);
+
+        return $this;
+    }
+
+    /**
+     * Remove tag
+     *
+     * @param Tag $tag
+     */
+    public function removeTag(Tag $tag)
+    {
+        $this->tags->removeElement($tag);
+    }
+
+    /**
+     * Get tags
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getTags()
+    {
+        return $this->tags;
     }
 }

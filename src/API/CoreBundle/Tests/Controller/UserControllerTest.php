@@ -18,6 +18,9 @@ class UserControllerTest extends WebTestCase
 
     use LoginTrait;
 
+    private $adminToken;
+    private $userToken;
+
 
     public function __construct()
     {
@@ -111,6 +114,106 @@ class UserControllerTest extends WebTestCase
         $this->assertTrue(array_key_exists('data' , $response));
         $this->assertTrue(array_key_exists('_links' , $response));
     }
+
+
+
+    public function testUserCRUD()
+    {
+        $client = static::createClient();
+        /**
+         * @var EntityManager $manager
+         */
+        $manager = static::$kernel->getContainer()->get('doctrine')->getManager();
+
+        // if test user exists, remove
+        $user = $manager->getRepository('APICoreBundle:User')->findOneBy(['username'=>'testuser']);
+        if(null!== $user){
+            $manager->remove($user);
+            $manager->flush();
+        }
+        $user = $manager->getRepository('APICoreBundle:User')->findOneBy(['username'=>'testuser']);
+
+        $this->assertEquals(null , $user);
+
+        // create test user, without authorization header
+        $crawler = $client->request('POST' , '/api/v1/users',[
+            'username'=>'testuser','password'=>'password','email'=>'testuser@testuser.com']);
+        $this->assertEquals(401 , $client->getResponse()->getStatusCode());
+
+        // try to create test user with ROLE_USER
+        $crawler = $client->request('POST' , '/api/v1/users',[
+            'username'=>'testuser','password'=>'password','email'=>'testuser@testuser.com'
+        ],[],['Authorization'=>'Bearer '.$this->userToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->userToken]);
+        $this->assertEquals(401 , $client->getResponse()->getStatusCode());
+
+
+        //create user as admin, invalid email
+        $crawler = $client->request('POST' , '/api/v1/users',[
+            'username'=>'testuser','password'=>'password','email'=>'testuser.testuser.com'
+        ],[],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
+        $this->assertEquals(409 , $client->getResponse()->getStatusCode());
+
+        //create user as admin, invalid password
+        $crawler = $client->request('POST' , '/api/v1/users',[
+            'username'=>'testuser','password'=>'short','email'=>'testuser.testuser.com'
+        ],[],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
+        $this->assertEquals(409 , $client->getResponse()->getStatusCode());
+
+        //create user as admin, no password
+        $crawler = $client->request('POST' , '/api/v1/users',[
+            'username'=>'testuser','email'=>'testuser.testuser.com'
+        ],[],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
+        $this->assertEquals(409 , $client->getResponse()->getStatusCode());
+
+        //create user as admin, blank username
+        $crawler = $client->request('POST' , '/api/v1/users',[
+            'username'=>'','email'=>'testuser.testuser.com','password'=>'password'
+        ],[],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
+        $this->assertEquals(409 , $client->getResponse()->getStatusCode());
+
+
+        //create user as admin, no username
+        $crawler = $client->request('POST' , '/api/v1/users',[
+            'email'=>'testuser.testuser.com','password'=>'password'
+        ],[],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
+        $this->assertEquals(409 , $client->getResponse()->getStatusCode());
+
+
+        //create user as admin, with non-existent parameter
+        $crawler = $client->request('POST' , '/api/v1/users',[
+            'email'=>'testuser.testuser.com','username'=>'testuser','password'=>'password', 'bulls'=>'hit'
+        ],[],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
+        $this->assertEquals(409 , $client->getResponse()->getStatusCode());
+
+
+
+//        detail_data
+
+                //create user as admin
+        $crawler = $client->request('POST' , '/api/v1/users',[
+            'username'=>'testuser','password'=>'password','email'=>'testuser@testuser.com',
+            'detail_data'=>['name'=>'name']
+        ],[],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
+        $this->assertEquals(201 , $client->getResponse()->getStatusCode());
+
+
+        //create user as admin
+        $crawler = $client->request('POST' , '/api/v1/users',[
+            'username'=>'testuser','password'=>'password','email'=>'testuser@testuser.com'
+        ],[],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
+        $this->assertEquals(201 , $client->getResponse()->getStatusCode());
+
+//
+//        $crawler = $client->request('GET' , '/api/v1/users/' . $user->getId(),[],[],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
+//
+//        $this->assertEquals(200 , $client->getResponse()->getStatusCode());
+//
+//        $response = json_decode($client->getResponse()->getContent() , true);
+//
+//        $this->assertTrue(array_key_exists('data' , $response));
+//        $this->assertTrue(array_key_exists('_links' , $response));
+    }
+
 
 
     public function testTrait(){

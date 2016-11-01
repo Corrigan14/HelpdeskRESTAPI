@@ -6,6 +6,7 @@ use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
 use API\CoreBundle\Services\HateoasHelper;
 use Doctrine\DBAL\Connection;
+use Doctrine\ORM\Query;
 use JMS\Serializer\Serializer;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
@@ -25,22 +26,18 @@ class UserModel extends BaseModel implements ModelInterface
     /** @var Router */
     private $router;
 
-    /** @var Serializer */
-    private $serializer;
 
     /**
      * UserModel constructor.
      *
      * @param Connection $dbConnection
      * @param Router     $router
-     * @param Serializer $serializer
      */
-    public function __construct(Connection $dbConnection , Router $router , Serializer $serializer)
+    public function __construct(Connection $dbConnection , Router $router )
     {
         parent::__construct($dbConnection);
 
         $this->router = $router;
-        $this->serializer = $serializer;
     }
 
     /**
@@ -58,11 +55,6 @@ class UserModel extends BaseModel implements ModelInterface
         }
 
         $users = $this->getCustomUsers($fields , $page);
-        foreach ($users as $key => $value) {
-            $users[$key]['_links'] = [
-                'self' => $this->router->generate('user' , ['id' => $value['id']]) ,
-            ];
-        }
         $response = [
             'data' => $users ,
         ];
@@ -141,7 +133,7 @@ class UserModel extends BaseModel implements ModelInterface
     public function getCustomUserData(User $user)
     {
         return [
-            'data'   => $this->serializer->serialize($user , 'json') ,
+            'data'   => $user ,
             '_links' => $this->getUserLinks($user->getId()) ,
         ];
     }

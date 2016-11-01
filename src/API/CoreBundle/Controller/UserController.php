@@ -6,17 +6,17 @@ use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
 use API\CoreBundle\Security\VoteOptions;
 use API\CoreBundle\Services\StatusCodesHelper;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class UsersController
  *
  * @package API\CoreBundle\Controller
  */
-class UserController extends Controller
+class UserController extends ApiBaseController
 {
     /**
      * ### Response ###
@@ -83,7 +83,6 @@ class UserController extends Controller
         $userModel = $this->get('api_user.model');
         $fields = $request->get('fields') ? explode(',' , $request->get('fields')) : [];
         $page = $request->get('page') ?: 1;
-
         return $this->json($userModel->getUsersResponse($fields , $page) , StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
@@ -127,7 +126,7 @@ class UserController extends Controller
      *
      * @param int $id
      *
-     * @return JsonResponse
+     * @return Response
      * @throws \LogicException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
@@ -139,12 +138,12 @@ class UserController extends Controller
         }
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (null === $user) {
-            return $this->json([
+            return $this->createApiResponse([
                 'message' => StatusCodesHelper::USER_NOT_FOUND_CODE ,
             ] , StatusCodesHelper::USER_NOT_FOUND_MESSAGE);
         }
 
-        return $this->json($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -323,7 +322,7 @@ class UserController extends Controller
         }
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (null === $user) {
-            return $this->json([
+            return $this->createApiResponse([
                 'message' => StatusCodesHelper::USER_NOT_FOUND_CODE ,
             ] , StatusCodesHelper::USER_NOT_FOUND_MESSAGE);
         }
@@ -331,7 +330,7 @@ class UserController extends Controller
         $this->getDoctrine()->getManager()->remove($user);
         $this->getDoctrine()->getManager()->flush();
 
-        return $this->json([
+        return $this->createApiResponse([
             'message' => StatusCodesHelper::DELETED_MESSAGE ,
         ] , StatusCodesHelper::DELETED_CODE);
     }
@@ -350,7 +349,7 @@ class UserController extends Controller
     private function updateUser($user , array $requestData)
     {
         if (null === $user || !$user instanceof User) {
-            return $this->json([
+            return $this->createApiResponse([
                 'message' => StatusCodesHelper::USER_NOT_FOUND_CODE ,
             ] , StatusCodesHelper::USER_NOT_FOUND_MESSAGE);
         }
@@ -377,14 +376,14 @@ class UserController extends Controller
                     $this->getDoctrine()->getManager()->persist($userData);
                     $this->getDoctrine()->getManager()->flush();
 
-                    return $this->json($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::CREATED_CODE);
+                    return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::CREATED_CODE);
                 }
             } else {
-                return $this->json($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::CREATED_CODE);
+                return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::CREATED_CODE);
             }
         }
 
-        return $this->json(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE , 'errors' => $errors] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE , 'errors' => $errors] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 
     /**
@@ -392,7 +391,7 @@ class UserController extends Controller
      */
     private function unauthorizedResponse()
     {
-        return $this->json([
+        return $this->createApiResponse([
             'message' => StatusCodesHelper::UNAUTHORIZED_MESSAGE ,
         ] , StatusCodesHelper::UNAUTHORIZED_CODE);
     }

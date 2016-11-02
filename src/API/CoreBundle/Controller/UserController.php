@@ -290,7 +290,7 @@ class UserController extends Controller
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
 
-        $requestData = $request->request->all();
+        $requestData = $request->request->all();//var_dump($requestData);exit();
 
         return $this->updateUser($user , $requestData);
     }
@@ -369,6 +369,8 @@ class UserController extends Controller
              * Fill UserData Entity if some its parameters were sent
              */
             if (isset($requestData['detail_data']) && count($requestData['detail_data']) > 0) {
+                
+                //TODO co ak uz user data existuje v db?
                 $userData = new UserData();
                 $user->setDetailData($userData);
                 $errorsUserData = $this->get('entity_processor')->processEntity($userData , $requestData['detail_data']);

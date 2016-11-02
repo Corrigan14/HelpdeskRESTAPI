@@ -187,31 +187,34 @@ class UserControllerTest extends WebTestCase
 
 
 
-//        detail_data
 
-                //create user as admin
+        //TODO za kazdym sa vytvara novy detail data a neupdatuje sa povodny
+
+        //create user as admin, with detail data
         $crawler = $client->request('POST' , '/api/v1/users',[
             'username'=>'testuser','password'=>'password','email'=>'testuser@testuser.com',
-            'detail_data'=>['name'=>'name']
+            'detail_data'=>['name'=>'name','surname'=>'surname','tel'=>'1234']
         ],[],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
         $this->assertEquals(201 , $client->getResponse()->getStatusCode());
 
 
-        //create user as admin
-        $crawler = $client->request('POST' , '/api/v1/users',[
-            'username'=>'testuser','password'=>'password','email'=>'testuser@testuser.com'
-        ],[],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
+        $createdUser=json_decode($client->getResponse()->getContent() , true);
+        $createdUser=json_decode($createdUser['data'],true);
+        $this->assertTrue(array_key_exists('id' , $createdUser));
+
+
+        //patch
+        $crawler = $client->request('PATCH' , '/api/v1/users/'.$createdUser['id'],
+            [
+            'email'=>'changed@with.patch',
+                'detail_data'=>['name'=>'patch name','surname'=>'patch surname']
+        ],
+            [],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
         $this->assertEquals(201 , $client->getResponse()->getStatusCode());
 
-//
-//        $crawler = $client->request('GET' , '/api/v1/users/' . $user->getId(),[],[],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
-//
-//        $this->assertEquals(200 , $client->getResponse()->getStatusCode());
-//
-//        $response = json_decode($client->getResponse()->getContent() , true);
-//
-//        $this->assertTrue(array_key_exists('data' , $response));
-//        $this->assertTrue(array_key_exists('_links' , $response));
+        $createdUser=json_decode($client->getResponse()->getContent());
+
+        
     }
 
 

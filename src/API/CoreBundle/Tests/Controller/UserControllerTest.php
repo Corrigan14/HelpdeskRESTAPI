@@ -221,6 +221,13 @@ class UserControllerTest extends WebTestCase
         /**
          * put
          */
+        $crawler = $client->request('PUT' , '/api/v1/users/'.$createdUser['id'],
+            [
+                'email'=>'changed@with.put','username'=>'testuser',
+                'detail_data'=>['name'=>'patch name','surname'=>'patch surname']
+            ],
+            [],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
+        $this->assertEquals(201 , $client->getResponse()->getStatusCode());
 
 
         /**

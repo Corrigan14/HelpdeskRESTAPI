@@ -4,28 +4,34 @@ namespace API\CoreBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Tag
  *
  * @ORM\Table(name="tag")
  * @ORM\Entity(repositoryClass="API\CoreBundle\Repository\TagRepository")
+ * @UniqueEntity("title")
+ * @Serializer\ExclusionPolicy("all")
  */
-class Tag
+class Tag implements \Serializable
 {
     /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer")
+     * @Serializer\Exclude()
      */
     private $id;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="title", type="string", length=255)
+     * @ORM\Column(name="title", type="string", length=255, unique=true)
+     * @Assert\NotBlank(message="Title is required")
+     * @Assert\Type("string")
      */
     private $title;
 
@@ -33,6 +39,8 @@ class Tag
      * @var string
      *
      * @ORM\Column(name="color", type="string", length=45)
+     * @Assert\NotBlank(message="Color is required")
+     * @Assert\Type("string")
      */
     private $color;
 
@@ -41,6 +49,7 @@ class Tag
      *
      * @ORM\ManyToOne(targetEntity="User", inversedBy="tags")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
+     * @Serializer\Exclude()
      */
     private $user;
 
@@ -129,5 +138,38 @@ class Tag
     public function getUser()
     {
         return $this->user;
+    }
+
+    /**
+     * String representation of object
+     * @link http://php.net/manual/en/serializable.serialize.php
+     * @return string the string representation of the object or null
+     * @since 5.1.0
+     */
+    public function serialize()
+    {
+        return serialize([
+            $this->id ,
+            $this->title ,
+            $this->color ,
+        ]);
+    }
+
+    /**
+     * Constructs the object
+     * @link http://php.net/manual/en/serializable.unserialize.php
+     * @param string $serialized <p>
+     * The string representation of the object.
+     * </p>
+     * @return void
+     * @since 5.1.0
+     */
+    public function unserialize($serialized)
+    {
+        list (
+            $this->id ,
+            $this->title ,
+            $this->color ,
+            ) = unserialize($serialized);
     }
 }

@@ -26,9 +26,10 @@ class StatusCodesHelper
     const UNAUTHORIZED_CODE = 401;
     const INCORRECT_CREDENTIALS_MESSAGE = 'Incorrect credentials';
     const INCORRECT_CREDENTIALS_CODE = 403;
+    const USER_NOT_FOUND_MESSAGE = 'User not found';
+    const TAG_NOT_FOUND_MESSAGE = 'Tag not found';
     const RESOURCE_NOT_FOUND_MESSAGE = 'Resource not found';
     const RESOURCE_NOT_FOUND_CODE = 404;
-    const USER_NOT_FOUND_MESSAGE = 'User not found';
     const USER_NOT_FOUND_CODE = 404;
     const INVALID_PARAMETERS_MESSAGE = 'Invalid parameters';
     const INVALID_PARAMETERS_CODE = 409;

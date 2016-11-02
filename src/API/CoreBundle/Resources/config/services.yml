@@ -15,3 +15,7 @@ services:
         class: API\CoreBundle\Security\UserVoter
         arguments: ["@security.access.decision_manager","@security.token_storage"]
         lazy: true
+    api_tag.model:
+        class: API\CoreBundle\Model\TagModel
+        arguments: ["@doctrine.dbal.default_connection", "@router"]
+        lazy: true

@@ -226,6 +226,15 @@ class UserControllerTest extends WebTestCase
         /**
          * delete user
          */
+
+        $crawler = $client->request('DELETE' , '/api/v1/users/'.$createdUser['id'],
+            [], [],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->userToken]);
+        $this->assertEquals(401 , $client->getResponse()->getStatusCode());
+
+        $crawler = $client->request('DELETE' , '/api/v1/users/'.$createdUser['id'],
+            [], [],[]);
+        $this->assertEquals(401 , $client->getResponse()->getStatusCode());
+
         $crawler = $client->request('DELETE' , '/api/v1/users/'.$createdUser['id'],
             [], [],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
         $this->assertEquals(204 , $client->getResponse()->getStatusCode());

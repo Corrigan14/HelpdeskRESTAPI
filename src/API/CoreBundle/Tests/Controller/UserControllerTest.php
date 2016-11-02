@@ -190,7 +190,9 @@ class UserControllerTest extends WebTestCase
 
         //TODO za kazdym sa vytvara novy detail data a neupdatuje sa povodny
 
-        //create user as admin, with detail data
+        /**
+         * create user as admin, with detail data
+         */
         $crawler = $client->request('POST' , '/api/v1/users',[
             'username'=>'testuser','password'=>'password','email'=>'testuser@testuser.com',
             'detail_data'=>['name'=>'name','surname'=>'surname','tel'=>'1234']
@@ -203,7 +205,9 @@ class UserControllerTest extends WebTestCase
         $this->assertTrue(array_key_exists('id' , $createdUser));
 
 
-        //patch
+        /**
+         * patch
+         */
         $crawler = $client->request('PATCH' , '/api/v1/users/'.$createdUser['id'],
             [
             'email'=>'changed@with.patch',
@@ -212,9 +216,26 @@ class UserControllerTest extends WebTestCase
             [],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
         $this->assertEquals(201 , $client->getResponse()->getStatusCode());
 
-        $createdUser=json_decode($client->getResponse()->getContent());
 
-        
+
+        /**
+         * put
+         */
+
+
+        /**
+         * delete user
+         */
+        $crawler = $client->request('DELETE' , '/api/v1/users/'.$createdUser['id'],
+            [], [],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
+        $this->assertEquals(204 , $client->getResponse()->getStatusCode());
+
+        //was deleted
+        $crawler = $client->request('DELETE' , '/api/v1/users/'.$createdUser['id'],
+            [], [],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
+        $this->assertEquals(404 , $client->getResponse()->getStatusCode());
+
+
     }
 
 

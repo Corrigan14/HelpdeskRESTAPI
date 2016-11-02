@@ -324,8 +324,8 @@ class UserController extends Controller
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (null === $user) {
             return $this->json([
-                'message' => StatusCodesHelper::USER_NOT_FOUND_CODE ,
-            ] , StatusCodesHelper::USER_NOT_FOUND_MESSAGE);
+                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
+            ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
 
         $this->getDoctrine()->getManager()->remove($user);

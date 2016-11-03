@@ -430,12 +430,7 @@ class TagController extends ApiBaseController
      */
     private function processTag(Tag $tag, $requestData, $create = false)
     {
-        if($create)
-        {
-            $statusCode = StatusCodesHelper::CREATED_CODE;
-        }else{
-            $statusCode = StatusCodesHelper::SUCCESSFUL_CODE;
-        }
+        $statusCode = $this->getCreateUpdateStatusCode($create);
 
         $errors = $this->get('entity_processor')->processEntity($tag,$requestData);
 

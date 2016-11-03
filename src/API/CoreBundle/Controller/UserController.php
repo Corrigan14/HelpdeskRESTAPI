@@ -290,7 +290,7 @@ class UserController extends Controller
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
 
-        $requestData = $request->request->all();//var_dump($requestData);exit();
+        $requestData = $request->request->all();
 
         return $this->updateUser($user , $requestData);
     }

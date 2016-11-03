@@ -21,22 +21,25 @@ class UserController extends ApiBaseController
     /**
      * ### Response ###
      *     {
-     *       "data": [
-     *                   {
-     *                         "id": "1",
-     *                         "email": "admin@admin.sk",
-     *                         "username": "admin",
-     *                         "_links": {
-     *                             "self": "/users/1"
-     *                         }
-     *                 }
-     *          ],
-     *       "_links": {
-     *             "self": "/users?page=1&fields=id,email,username",
-     *             "first": "/users?page=1&fields=id,email,username",
-     *             "prev": false,
-     *             "next": "/users?page=2&fields=id,email,username",
-     *             "last": "/users?page=3&fields=id,email,username"
+     *       "data":
+     *       [
+     *          {
+     *            "id": "1",
+     *            "email": "admin@admin.sk",
+     *            "username": "admin",
+     *            "roles": "[\"ROLE_ADMIN\"]",
+     *            "is_active": true,
+     *            "deleted": false,
+     *            "acl": "[]"
+     *          }
+     *       ],
+     *       "_links":
+     *       {
+     *           "self": "/users?page=1&fields=id,email,username",
+     *           "first": "/users?page=1&fields=id,email,username",
+     *           "prev": false,
+     *           "next": "/users?page=2&fields=id,email,username",
+     *            "last": "/users?page=3&fields=id,email,username"
      *       },
      *       "total": 22,
      *       "page": 1,
@@ -64,7 +67,8 @@ class UserController extends ApiBaseController
      *     }
      *  },
      *  statusCodes={
-     *      200="The request has succeeded",
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request"
      *  },
      * )
      *
@@ -83,26 +87,33 @@ class UserController extends ApiBaseController
         $userModel = $this->get('api_user.model');
         $fields = $request->get('fields') ? explode(',' , $request->get('fields')) : [];
         $page = $request->get('page') ?: 1;
+
         return $this->json($userModel->getUsersResponse($fields , $page) , StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
      *  ### Response ###
      *      {
-     *          "data":     {
-     *                          "id": "2",
-     *                          "email": "admin@admin.sk",
-     *                          "username": "admin"
-     *                      },
-     *          "_links":   {
-     *                          "put": "/api/v1/users/2",
-     *                          "patch": "/api/v1/users/2",
-     *                          "delete": "/api/v1/users/2"
-     *                      }
+     *        "data":
+     *        {
+     *           "id": 46,
+     *           "username": "admin",
+     *           "email": "admin@admin.sk",
+     *           "roles": "[\"ROLE_ADMIN\"]",
+     *           "is_active": true,
+     *           "deleted": false,
+     *           "acl": "[]"
+     *        },
+     *        "_links":
+     *        {
+     *           "put": "/api/v1/users/46",
+     *           "patch": "/api/v1/users/46",
+     *           "delete": "/api/v1/users/46"
+     *        }
      *      }
      *
      * @ApiDoc(
-     *  description="Returns User with selected detail Info(user Entity, UserData Entity)",
+     *  description="Returns User (user Entity)",
      *  requirements={
      *     {
      *       "name"="id",
@@ -118,15 +129,17 @@ class UserController extends ApiBaseController
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  output="API\CoreBundle\Entity\User",
+     *  output={"class"="API\CoreBundle\Entity\User"},
      *  statusCodes={
-     *      200="The request has succeeded",
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      404 ="Not found user"
      *  },
      *  )
      *
      * @param int $id
      *
-     * @return Response
+     * @return JsonResponse
      * @throws \LogicException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
@@ -136,11 +149,12 @@ class UserController extends ApiBaseController
         if (!$this->get('user_voter')->isGranted(VoteOptions::SHOW_USER , $id)) {
             return $this->unauthorizedResponse();
         }
+
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (null === $user) {
             return $this->createApiResponse([
-                'message' => StatusCodesHelper::USER_NOT_FOUND_CODE ,
-            ] , StatusCodesHelper::USER_NOT_FOUND_MESSAGE);
+                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
+            ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
 
         return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user), StatusCodesHelper::SUCCESSFUL_CODE);
@@ -149,30 +163,38 @@ class UserController extends ApiBaseController
     /**
      *  ### Response ###
      *      ▿{
-     *          "data": ▿   {
-     *                          "id": "12",
-     *                          "username": "anitram547",
-     *                          "roles": "a:1:{i:0;s:9:\"ROLE_USER\";}",
-     *                          "email": "anitram@anitram.com",
-     *                          "name": "Martina",
-     *                          "surname": "Koronci Babinska",
-     *                          "title_before": null,
-     *                          "title_after": null,
-     *                          "function": "developer",
-     *                          "mobile": "00421 0987 544",
-     *                          "tel": null,
-     *                          "fax": null,
-     *                          "signature": "Martina Koronci Babinska, WEB-SOLUTIONS",
-     *                          "street": "Nova 487",
-     *                          "city": "Bratislava",
-     *                          "zip": "025874",
-     *                          "country": "SR"
-     *                      },
-     *          "_links": ▿{
-     *                      "put": "/api/v1/users/13",
-     *                      "patch": "/api/v1/users/13",
-     *                      "delete": "/api/v1/users/13"
-     *                      }
+     *         "data": ▿
+     *         {
+     *           "id": 12,
+     *           "username": "admin",
+     *           "email": "admin@admin.sk",
+     *           "roles": "[\"ROLE_ADMIN\"]",
+     *           "is_active": true,
+     *           "deleted": false,
+     *           "acl": "[]"
+     *           "detail_data":
+     *           {
+     *              "name": "Martina",
+     *              "surname": "Koronci Babinska",
+     *              "title_before": null,
+     *              "title_after": null,
+     *              "function": "developer",
+     *              "mobile": "00421 0987 544",
+     *              "tel": null,
+     *              "fax": null,
+     *              "signature": "Martina Koronci Babinska, WEB-SOLUTIONS",
+     *              "street": "Nova 487",
+     *              "city": "Bratislava",
+     *              "zip": "025874",
+     *              "country": "SR"
+     *           }
+     *         },
+     *         "_links": ▿
+     *         {
+     *            "put": "/api/v1/users/12",
+     *            "patch": "/api/v1/users/12",
+     *            "delete": "/api/v1/users/12"
+     *         }
      *      }
      *
      * @ApiDoc(
@@ -188,8 +210,9 @@ class UserController extends ApiBaseController
      *  },
      *  output={"class"="API\CoreBundle\Entity\User"},
      *  statusCodes={
-     *      201="The entity was successfully created",
-     *      409="Invalid parameters",
+     *      201 ="The entity was successfully created",
+     *      401 ="Unauthorized request",
+     *      409 ="Invalid parameters",
      *  }
      *  )
      *
@@ -214,13 +237,57 @@ class UserController extends ApiBaseController
         $user->setRoles(['ROLE_USER']);
         $user->setIsActive(true);
 
-        return $this->updateUser($user , $requestData);
+        return $this->updateUser($user , $requestData, true);
     }
 
     /**
+     *  ### Response ###
+     *      ▿{
+     *         "data": ▿
+     *         {
+     *           "id": 12,
+     *           "username": "admin",
+     *           "email": "admin@admin.sk",
+     *           "roles": "[\"ROLE_ADMIN\"]",
+     *           "is_active": true,
+     *           "deleted": false,
+     *           "acl": "[]"
+     *           "detail_data":
+     *           {
+     *              "name": "Martina",
+     *              "surname": "Koronci Babinska",
+     *              "title_before": null,
+     *              "title_after": null,
+     *              "function": "developer",
+     *              "mobile": "00421 0987 544",
+     *              "tel": null,
+     *              "fax": null,
+     *              "signature": "Martina Koronci Babinska, WEB-SOLUTIONS",
+     *              "street": "Nova 487",
+     *              "city": "Bratislava",
+     *              "zip": "025874",
+     *              "country": "SR"
+     *           }
+     *         },
+     *         "_links": ▿
+     *         {
+     *            "put": "/api/v1/users/12",
+     *            "patch": "/api/v1/users/12",
+     *            "delete": "/api/v1/users/12"
+     *         }
+     *      }
+     *
      * @ApiDoc(
-     *  description="Update the Entire User",
+     *  description="Update the entire User",
      *  input={"class"="API\CoreBundle\Entity\User"},
+     *  requirements={
+     *     {
+     *       "name"="id",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of processed object"
+     *     }
+     *  },
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -230,7 +297,10 @@ class UserController extends ApiBaseController
      *  },
      *  output={"class"="API\CoreBundle\Entity\User"},
      *  statusCodes={
-     *      200="The request has succeeded",
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      404 ="Not found user",
+     *      409 ="Invalid parameters",
      *  })
      *
      * @param int     $id
@@ -243,7 +313,7 @@ class UserController extends ApiBaseController
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
-    public function updateUserAction($id , Request $request)
+    public function updateUserAction(int $id , Request $request)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER , $id)) {
             return $this->unauthorizedResponse();
@@ -256,9 +326,53 @@ class UserController extends ApiBaseController
     }
 
     /**
+     *  ### Response ###
+     *      ▿{
+     *         "data": ▿
+     *         {
+     *           "id": 12,
+     *           "username": "admin",
+     *           "email": "admin@admin.sk",
+     *           "roles": "[\"ROLE_ADMIN\"]",
+     *           "is_active": true,
+     *           "deleted": false,
+     *           "acl": "[]"
+     *           "detail_data":
+     *           {
+     *              "name": "Martina",
+     *              "surname": "Koronci Babinska",
+     *              "title_before": null,
+     *              "title_after": null,
+     *              "function": "developer",
+     *              "mobile": "00421 0987 544",
+     *              "tel": null,
+     *              "fax": null,
+     *              "signature": "Martina Koronci Babinska, WEB-SOLUTIONS",
+     *              "street": "Nova 487",
+     *              "city": "Bratislava",
+     *              "zip": "025874",
+     *              "country": "SR"
+     *           }
+     *         },
+     *         "_links": ▿
+     *         {
+     *            "put": "/api/v1/users/12",
+     *            "patch": "/api/v1/users/12",
+     *            "delete": "/api/v1/users/12"
+     *         }
+     *      }
+     *
      * @ApiDoc(
      *  description="Partially update the User",
      *  input={"class"="API\CoreBundle\Entity\User"},
+     *  requirements={
+     *     {
+     *       "name"="id",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of processed object"
+     *     }
+     *  },
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -268,7 +382,10 @@ class UserController extends ApiBaseController
      *  },
      *  output={"class"="API\CoreBundle\Entity\User"},
      *  statusCodes={
-     *      200="The request has succeeded",
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      404 ="Not found user",
+     *      409 ="Invalid parameters",
      *  })
      *
      * @param int     $id
@@ -281,7 +398,7 @@ class UserController extends ApiBaseController
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function updatePartialUserAction($id , Request $request)
+    public function updatePartialUserAction(int $id , Request $request)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER , $id)) {
             return $this->unauthorizedResponse();
@@ -297,6 +414,14 @@ class UserController extends ApiBaseController
     /**
      * @ApiDoc(
      *  description="Delete User Entity",
+     *  requirements={
+     *     {
+     *       "name"="id",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of processed object"
+     *     }
+     *  },
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -305,8 +430,9 @@ class UserController extends ApiBaseController
      *     }
      *  },
      *  statusCodes={
-     *      204="The User was successfully deleted",
-     *      404="The User was not found",
+     *      204 ="The User Entity was successfully deleted",
+     *      401 ="Unauthorized request",
+     *      404 ="Not found user",
      *  })
      *
      * @param int $id
@@ -315,16 +441,17 @@ class UserController extends ApiBaseController
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function deleteUserAction($id)
+    public function deleteUserAction(int $id)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::DELETE_USER , $id)) {
             return $this->unauthorizedResponse();
         }
+
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (null === $user) {
             return $this->createApiResponse([
-                'message' => StatusCodesHelper::USER_NOT_FOUND_CODE ,
-            ] , StatusCodesHelper::USER_NOT_FOUND_MESSAGE);
+                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
+            ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
 
         $this->getDoctrine()->getManager()->remove($user);
@@ -338,22 +465,25 @@ class UserController extends ApiBaseController
     /**
      * @param User|null $user
      *
-     * @param array     $requestData
+     * @param array $requestData
      *
+     * @param bool $create
      * @return JsonResponse
-     * @throws \LogicException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @internal param $id
      */
-    private function updateUser($user , array $requestData)
+    private function updateUser($user , array $requestData, $create = false)
     {
-        if (null === $user || !$user instanceof User) {
-            return $this->createApiResponse([
-                'message' => StatusCodesHelper::USER_NOT_FOUND_CODE ,
-            ] , StatusCodesHelper::USER_NOT_FOUND_MESSAGE);
+        if($create){
+            $statusCode = StatusCodesHelper::CREATED_CODE;
+        }else{
+            $statusCode = StatusCodesHelper::SUCCESSFUL_CODE;
         }
 
+        if (null === $user || !$user instanceof User) {
+            return $this->createApiResponse([
+                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
+            ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
+        }
 
         $errors = $this->get('entity_processor')->processEntity($user , $requestData);
         if (false === $errors) {
@@ -376,23 +506,13 @@ class UserController extends ApiBaseController
                     $this->getDoctrine()->getManager()->persist($userData);
                     $this->getDoctrine()->getManager()->flush();
 
-                    return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::CREATED_CODE);
+                    return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user) , $statusCode);
                 }
             } else {
-                return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::CREATED_CODE);
+                return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user) , $statusCode);
             }
         }
 
         return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE , 'errors' => $errors] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
-    }
-
-    /**
-     * @return JsonResponse
-     */
-    private function unauthorizedResponse()
-    {
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::UNAUTHORIZED_MESSAGE ,
-        ] , StatusCodesHelper::UNAUTHORIZED_CODE);
     }
 }

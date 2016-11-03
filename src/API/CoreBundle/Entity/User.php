@@ -20,6 +20,8 @@ class User implements AdvancedUserInterface , \Serializable
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
+     * @Serializer\Exclude()
+     * @Serializer\ReadOnly()
      */
     private $id;
 
@@ -27,15 +29,11 @@ class User implements AdvancedUserInterface , \Serializable
      * @ORM\Column(type="string", unique=true)
      * @Assert\NotBlank(message="Username is required")
      * @Assert\Type("string")
+     *
      * @var string
      */
     private $username;
 
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    private $roles;
     /**
      * @ORM\Column(type="string", length=64)
      * @Serializer\Exclude()
@@ -45,48 +43,60 @@ class User implements AdvancedUserInterface , \Serializable
      *     minMessage="Your password must have at least {{ limit }} characters."
      * )
      * @Assert\Type("string")
-     * @Serializer\Exclude()
+     *
      * @var string
      */
     private $password;
 
     /**
      * @ORM\Column(type="string", length=60, unique=true)
-     *
      * @Assert\NotBlank()
      * @Assert\Email(
      *     message = "The email '{{ value }}' is not a valid email."
      * )
      * @Assert\Type("string")
+     *
      * @var string
      */
     private $email;
 
     /**
+     * @ORM\Column(type="string")
+     *
+     * @var string
+     */
+    private $roles;
+
+    /**
      * @ORM\Column(name="is_active", type="boolean")
+     * @Serializer\Exclude()
+     * @Serializer\ReadOnly()
      *
      * @var bool
      */
-    private $isActive;
+    private $isActive = true;
     /**
      * @ORM\Column(name="deleted", type="boolean")
+     * @Serializer\Exclude()
+     * @Serializer\ReadOnly()
      *
      * @var bool
      */
     private $deleted = false;
 
     /**
-     * @ORM\Column(name="acl", type="text")
-     * @Assert\Type("array")
+     * @ORM\Column(name="acl", type="text", nullable=true)
+     *
      * @var array
      */
     private $acl;
 
     /**
-     * @var UserData
      * @ORM\OneToOne(targetEntity="UserData", inversedBy="user")
      * @ORM\JoinColumn(name="detail_data_id", referencedColumnName="id", onDelete="CASCADE")
      * @Serializer\MaxDepth(0)
+     *
+     * @var UserData
      */
     private $detailData;
 

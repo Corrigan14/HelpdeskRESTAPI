@@ -84,8 +84,8 @@ class User implements AdvancedUserInterface , \Serializable
 
     /**
      * @var UserData
-     * @ORM\OneToOne(targetEntity="UserData", inversedBy="user")
-     * @ORM\JoinColumn(name="detail_data_id", referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\OneToOne(targetEntity="UserData", inversedBy="user", fetch="EAGER")
+     * @ORM\JoinColumn(name="detail_data_id", referencedColumnName="id", onDelete="SET NULL")
      * @Serializer\MaxDepth(0)
      */
     private $detailData;

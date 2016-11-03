@@ -140,8 +140,8 @@ class UserController extends Controller
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (null === $user) {
             return $this->json([
-                'message' => StatusCodesHelper::USER_NOT_FOUND_CODE ,
-            ] , StatusCodesHelper::USER_NOT_FOUND_MESSAGE);
+                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
+            ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
 
         return $this->json($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::SUCCESSFUL_CODE);
@@ -351,8 +351,8 @@ class UserController extends Controller
     {
         if (null === $user || !$user instanceof User) {
             return $this->json([
-                'message' => StatusCodesHelper::USER_NOT_FOUND_CODE ,
-            ] , StatusCodesHelper::USER_NOT_FOUND_MESSAGE);
+                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
+            ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
 
 
@@ -370,9 +370,13 @@ class UserController extends Controller
              */
             if (isset($requestData['detail_data']) && count($requestData['detail_data']) > 0) {
                 
-                //TODO co ak uz user data existuje v db?
-                $userData = new UserData();
-                $user->setDetailData($userData);
+
+                $userData = $user->getDetailData();
+                if(null === $userData){
+                    $userData = new UserData();
+                    $user->setDetailData($userData);
+                }
+
                 $errorsUserData = $this->get('entity_processor')->processEntity($userData , $requestData['detail_data']);
 
                 if (false === $errorsUserData) {

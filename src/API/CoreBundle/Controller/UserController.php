@@ -473,11 +473,7 @@ class UserController extends ApiBaseController
      */
     private function updateUser($user , array $requestData, $create = false)
     {
-        if($create){
-            $statusCode = StatusCodesHelper::CREATED_CODE;
-        }else{
-            $statusCode = StatusCodesHelper::SUCCESSFUL_CODE;
-        }
+        $statusCode = $this->getCreateUpdateStatusCode($create);
 
         if (null === $user || !$user instanceof User) {
             return $this->createApiResponse([

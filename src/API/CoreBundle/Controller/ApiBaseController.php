@@ -56,4 +56,19 @@ abstract class ApiBaseController extends Controller
         return $this->get('jms_serializer')
             ->serialize($data , $format);
     }
+
+    /**
+     * Return's 201 code if create = true, else 200
+     *
+     * @param bool $create
+     * @return int
+     */
+    protected function getCreateUpdateStatusCode($create)
+    {
+        if($create){
+            return StatusCodesHelper::CREATED_CODE;
+        }else{
+            return StatusCodesHelper::SUCCESSFUL_CODE;
+        }
+    }
 }

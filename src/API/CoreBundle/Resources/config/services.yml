@@ -5,7 +5,7 @@ services:
         lazy: true
     api_user.model:
         class: API\CoreBundle\Model\UserModel
-        arguments: ["@doctrine.dbal.default_connection", "@router","@jms_serializer"]
+        arguments: ["@doctrine.dbal.default_connection", "@router"]
         lazy: true
     entity_processor:
         class: API\CoreBundle\Services\ProcessEntity

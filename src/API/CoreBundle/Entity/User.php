@@ -77,8 +77,8 @@ class User implements AdvancedUserInterface , \Serializable
 
     /**
      * @ORM\Column(name="acl", type="text")
-     *
-     * @var bool
+     * @Assert\Type("array")
+     * @var array
      */
     private $acl;
 

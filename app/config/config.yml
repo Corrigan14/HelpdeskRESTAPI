@@ -82,7 +82,9 @@ jms_serializer:
     enable_short_alias: false
     metadata:
         auto_detection: true
-
+    visitors:
+        json:
+            options: [JSON_FORCE_OBJECT]
 nelmio_cors:
     paths:
         '^/':

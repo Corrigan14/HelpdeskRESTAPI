@@ -55,17 +55,17 @@ class LoginController extends Controller
                      ->findOneBy(['username' => $username]);
 
         if (!$user) {
-            return $this->json(StatusCodesHelper::USER_NOT_FOUND_MESSAGE , StatusCodesHelper::USER_NOT_FOUND_CODE);
+            return $this->json(['message'=>StatusCodesHelper::USER_NOT_FOUND_MESSAGE ], StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
 
         // password check
         if (!$this->get('security.password_encoder')->isPasswordValid($user , $password)) {
-            return $this->json(StatusCodesHelper::INCORRECT_CREDENTIALS_MESSAGE , StatusCodesHelper::INCORRECT_CREDENTIALS_CODE);
+            return $this->json(['message'=>StatusCodesHelper::INCORRECT_CREDENTIALS_MESSAGE ], StatusCodesHelper::INCORRECT_CREDENTIALS_CODE);
         }
 
         //check if account was not deleted or is not active
         if (!$user->isEnabled()) {
-            return $this->json(StatusCodesHelper::ACCOUNT_DISABLED_MESSAGE , StatusCodesHelper::UNAUTHORIZED_CODE);
+            return $this->json([ 'message'=>StatusCodesHelper::ACCOUNT_DISABLED_MESSAGE ] , StatusCodesHelper::UNAUTHORIZED_CODE);
         }
 
         // Use LexikJWTAuthenticationBundle to create JWT token that hold only information about user name

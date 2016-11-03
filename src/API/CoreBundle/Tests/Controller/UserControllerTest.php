@@ -234,10 +234,17 @@ class UserControllerTest extends WebTestCase
          * delete user
          */
 
+        /**
+         * try to delete user with ROLE_USER
+         */
         $crawler = $client->request('DELETE' , '/api/v1/users/'.$createdUser['id'],
             [], [],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->userToken]);
         $this->assertEquals(401 , $client->getResponse()->getStatusCode());
 
+
+        /**
+         * try to delete user without authentication
+         */
         $crawler = $client->request('DELETE' , '/api/v1/users/'.$createdUser['id'],
             [], [],[]);
         $this->assertEquals(401 , $client->getResponse()->getStatusCode());
@@ -246,7 +253,9 @@ class UserControllerTest extends WebTestCase
             [], [],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
         $this->assertEquals(204 , $client->getResponse()->getStatusCode());
 
-        //was deleted
+        /**
+         * check if user was deleted
+         */
         $crawler = $client->request('DELETE' , '/api/v1/users/'.$createdUser['id'],
             [], [],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
         $this->assertEquals(404 , $client->getResponse()->getStatusCode());

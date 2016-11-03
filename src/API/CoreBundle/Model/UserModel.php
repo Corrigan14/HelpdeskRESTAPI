@@ -20,12 +20,11 @@ class UserModel extends BaseModel implements ModelInterface
     /**
      * Default User fields in case no custom fields are defined
      */
-    const DEFAULT_FIELDS = ['id' , 'email' , 'username'];
+    const DEFAULT_FIELDS = ['id' , 'email' , 'username', 'roles', 'is_active', 'deleted', 'acl'];
     const LIMIT = 10;
 
     /** @var Router */
     private $router;
-
 
     /**
      * UserModel constructor.
@@ -55,6 +54,7 @@ class UserModel extends BaseModel implements ModelInterface
         }
 
         $users = $this->getCustomUsers($fields , $page);
+
         $response = [
             'data' => $users ,
         ];
@@ -99,7 +99,6 @@ class UserModel extends BaseModel implements ModelInterface
             $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
         }
 
-
         return $this->dbConnection->query($query->getSQL())->fetchAll();
     }
 
@@ -124,7 +123,7 @@ class UserModel extends BaseModel implements ModelInterface
     }
 
     /**
-     * Return all info about user
+     * Return all info about user Entity
      *
      * @param User $user
      *

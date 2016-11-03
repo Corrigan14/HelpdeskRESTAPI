@@ -48,7 +48,7 @@ Dokumentacne pravidla
         DOLEZITE: pre spravne zobrazenie jednotlivych parametrov v dokumentacii (type, required, format, description) je potrebne spravne definovanie parametrov v samotnej entite. Vyuzivame na to JMS SERIALIZER:
             1. (optional) k samotnej triede dodame politiku zobrazenia parametrov podla toho, ci chceme zobrazit vsetky alebo ziadne parametre: @ExclusionPolicy("all/none")
             2. (must - v zavislosti od zvolenej globalnej politiky) k premennym, ktore nechceme zobrazovat v dokumentacii (ich hodnoty sa nastavuju systemovo) dodame:  @Exclude
-            3.  (must - v zavislosti od zvolenej globalnej politiky) k premennym, ktore chceme zobrazovat v dokumentacii dodame: * @Expose
+            3. (must - v zavislosti od zvolenej globalnej politiky) k premennym, ktore chceme zobrazovat v dokumentacii dodame: * @Expose
             4. (must) pre definovanie Typ-u musime ku kazdej premennej doplnit @Assert\Type("type")
             5. (must) pre definovanie Format-u (pravidiel ako napr. ze ide o Email, ze pole nesmie byt prazdne..) musime tieto pravidla definovat jednotlivo pre premenne cez Asserts: * @Assert\NotBlank()
         PRIKLAD:

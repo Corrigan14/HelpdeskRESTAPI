@@ -2,10 +2,14 @@
 namespace API\CoreBundle\Entity;
 
 use JMS\Serializer\Annotation as Serializer;
+use JMS\Serializer\Annotation\ReadOnly;
+use JMS\Serializer\Annotation\Exclude;
+use JMS\Serializer\Annotation\ExclusionPolicy;
 use Symfony\Component\Security\Core\User\AdvancedUserInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 
 /**
  * @ORM\Entity
@@ -20,8 +24,7 @@ class User implements AdvancedUserInterface , \Serializable
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
-     * @Serializer\Exclude()
-     * @Serializer\ReadOnly()
+     * @ReadOnly()
      */
     private $id;
 
@@ -36,7 +39,7 @@ class User implements AdvancedUserInterface , \Serializable
 
     /**
      * @ORM\Column(type="string", length=64)
-     * @Serializer\Exclude()
+     * @Exclude()
      * @Assert\NotBlank()
      * @Assert\Length(
      *     min=8,
@@ -69,16 +72,14 @@ class User implements AdvancedUserInterface , \Serializable
 
     /**
      * @ORM\Column(name="is_active", type="boolean")
-     * @Serializer\Exclude()
-     * @Serializer\ReadOnly()
+     * @ReadOnly()
      *
      * @var bool
      */
     private $isActive = true;
     /**
      * @ORM\Column(name="deleted", type="boolean")
-     * @Serializer\Exclude()
-     * @Serializer\ReadOnly()
+     * @ReadOnly()
      *
      * @var bool
      */

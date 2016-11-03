@@ -102,9 +102,10 @@ class User implements AdvancedUserInterface , \Serializable
     private $detailData;
 
     /**
-     * @var ArrayCollection
-     *
      * @ORM\OneToMany(targetEntity="Tag", mappedBy="user")
+     * @Serializer\Exclude()
+     *
+     * @var ArrayCollection
      */
     private $tags;
 

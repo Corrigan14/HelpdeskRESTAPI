@@ -7,6 +7,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use JMS\Serializer\Annotation as Serializer;
+use JMS\Serializer\Annotation\ReadOnly;
+use JMS\Serializer\Annotation\Exclude;
 
 /**
  * Tag
@@ -14,7 +16,6 @@ use JMS\Serializer\Annotation as Serializer;
  * @ORM\Table(name="tag")
  * @ORM\Entity(repositoryClass="API\CoreBundle\Repository\TagRepository")
  * @UniqueEntity("title")
- * @Serializer\ExclusionPolicy("all")
  */
 class Tag implements \Serializable
 {
@@ -22,34 +23,34 @@ class Tag implements \Serializable
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
-     * @Serializer\Exclude()
+     * @ReadOnly()
      */
     private $id;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="title", type="string", length=255, unique=true)
      * @Assert\NotBlank(message="Title is required")
      * @Assert\Type("string")
+     *
+     * @var string
      */
     private $title;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="color", type="string", length=45)
      * @Assert\NotBlank(message="Color is required")
      * @Assert\Type("string")
+     *
+     * @var string
      */
     private $color;
 
     /**
-     * @var User
-     *
      * @ORM\ManyToOne(targetEntity="User", inversedBy="tags")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
-     * @Serializer\Exclude()
+     * @ReadOnly()
+     *
+     * @var User
      */
     private $user;
 

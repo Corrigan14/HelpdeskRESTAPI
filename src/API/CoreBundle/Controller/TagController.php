@@ -3,6 +3,7 @@
 namespace API\CoreBundle\Controller;
 
 use API\CoreBundle\Entity\Tag;
+use API\CoreBundle\Entity\User;
 use API\CoreBundle\Services\StatusCodesHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,18 +17,18 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 class TagController extends ApiBaseController
 {
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
      *        "data":
      *        {
-     *             "0":
-     *             {
-     *                   "id": "2",
-     *                   "user_id": "18",
-     *                   "title": "Work",
-     *                   "color": "4871BF"
-     *             }
-     *         }
+     *          "0":
+     *          {
+     *             "id": "2",
+     *             "user_id": "18",
+     *             "title": "Work",
+     *             "color": "4871BF"
+     *          }
+     *        }
      *      }
      *
      * @ApiDoc(
@@ -41,7 +42,7 @@ class TagController extends ApiBaseController
      *  },
      *  statusCodes={
      *      200 ="The request has succeeded",
-     *      401 ="User is not authorized",
+     *      401 ="Unauthorized request",
      *  }
      * )
      *
@@ -54,6 +55,7 @@ class TagController extends ApiBaseController
             return $this->unauthorizedResponse();
         }
 
+        /** @var User $user */
         $user = $this->get('user_voter')->getLoggedUser();
 
         if($user){
@@ -66,20 +68,20 @@ class TagController extends ApiBaseController
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
      *        "data":
      *        {
-     *               "id": "2",
-     *               "user_id": "18",
-     *               "title": "Work",
-     *               "color": "4871BF"
+     *           "id": "2",
+     *           "user_id": "18",
+     *           "title": "Work",
+     *           "color": "4871BF"
      *        },
      *        "_links":
      *        {
-     *              "put": "/api/v1/tags/2",
-     *              "patch": "/api/v1/tags/2",
-     *              "delete": "/api/v1/tags/2"
+     *           "put": "/api/v1/tags/2",
+     *           "patch": "/api/v1/tags/2",
+     *           "delete": "/api/v1/tags/2"
      *         }
      *      }
      *
@@ -102,9 +104,9 @@ class TagController extends ApiBaseController
      *  },
      *  output="API\CoreBundle\Entity\Tag",
      *  statusCodes={
-     *      200="The request has succeeded",
-     *      401 ="User is not authorized",
-     *      404="Tag not found",
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      404 ="Not found Tag",
      *  }
      * )
      *
@@ -118,6 +120,7 @@ class TagController extends ApiBaseController
             return $this->unauthorizedResponse();
         }
 
+        /** @var User $user */
         $user = $this->get('user_voter')->getLoggedUser();
 
         if($user){
@@ -140,16 +143,16 @@ class TagController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *               "id": "2",
-     *               "user_id": "18",
-     *               "title": "Work",
-     *               "color": "4871BF"
+     *           "id": "2",
+     *           "user_id": "18",
+     *           "title": "Work",
+     *           "color": "4871BF"
      *        },
      *        "_links":
      *        {
-     *              "put": "/api/v1/tags/2",
-     *              "patch": "/api/v1/tags/2",
-     *              "delete": "/api/v1/tags/2"
+     *           "put": "/api/v1/tags/2",
+     *           "patch": "/api/v1/tags/2",
+     *           "delete": "/api/v1/tags/2"
      *         }
      *      }
      *
@@ -167,7 +170,7 @@ class TagController extends ApiBaseController
      *  output={"class"="API\CoreBundle\Entity\Tag"},
      *  statusCodes={
      *      201 ="The entity was successfully created",
-     *      401 ="User is not authorized",
+     *      401 ="Unauthorized request",
      *      409 ="Invalid parameters",
      *  }
      * )
@@ -202,16 +205,16 @@ class TagController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *               "id": "2",
-     *               "user_id": "18",
-     *               "title": "Work",
-     *               "color": "4871BF"
+     *           "id": "2",
+     *           "user_id": "18",
+     *           "title": "Work",
+     *           "color": "4871BF"
      *        },
      *        "_links":
      *        {
-     *              "put": "/api/v1/tags/2",
-     *              "patch": "/api/v1/tags/2",
-     *              "delete": "/api/v1/tags/2"
+     *           "put": "/api/v1/tags/2",
+     *           "patch": "/api/v1/tags/2",
+     *           "delete": "/api/v1/tags/2"
      *         }
      *      }
      *
@@ -236,8 +239,8 @@ class TagController extends ApiBaseController
      *  output={"class"="API\CoreBundle\Entity\Tag"},
      *  statusCodes={
      *      200 ="The request has succeeded",
-     *      401 ="User is not authorized",
-     *      404="The tag was not found",
+     *      401 ="Unauthorized request",
+     *      404 ="Not found Tag",
      *      409 ="Invalid parameters",
      *  }
      * )
@@ -275,16 +278,16 @@ class TagController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *               "id": "2",
-     *               "user_id": "18",
-     *               "title": "Work",
-     *               "color": "4871BF"
+     *           "id": "2",
+     *           "user_id": "18",
+     *           "title": "Work",
+     *           "color": "4871BF"
      *        },
      *        "_links":
      *        {
-     *              "put": "/api/v1/tags/2",
-     *              "patch": "/api/v1/tags/2",
-     *              "delete": "/api/v1/tags/2"
+     *           "put": "/api/v1/tags/2",
+     *           "patch": "/api/v1/tags/2",
+     *           "delete": "/api/v1/tags/2"
      *         }
      *      }
      *
@@ -308,9 +311,9 @@ class TagController extends ApiBaseController
      *  },
      *  output={"class"="API\CoreBundle\Entity\Tag"},
      *  statusCodes={
-     *      201 ="The request has succeeded",
-     *      401 ="User is not authorized",
-     *      404="The tag was not found",
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      404 ="Not found Tag",
      *      409 ="Invalid parameters",
      *  }
      * )
@@ -362,8 +365,9 @@ class TagController extends ApiBaseController
      *     }
      *  },
      *  statusCodes={
-     *      204="The Tag was successfully deleted",
-     *      404="The tag was not found",
+     *      204 ="The Tag was successfully deleted",
+     *      401 ="Unauthorized request",
+     *      404 ="Not found Tag",
      *  })
      *
      * @param int $id
@@ -404,7 +408,7 @@ class TagController extends ApiBaseController
     /**
      * @param $tag
      * @param $requestData
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return JsonResponse
      */
     private function updateTag($tag, $requestData)
     {
@@ -422,7 +426,7 @@ class TagController extends ApiBaseController
      * @param Tag $tag
      * @param array $requestData
      * @param bool $create
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return JsonResponse
      */
     private function processTag(Tag $tag, $requestData, $create = false)
     {
@@ -445,15 +449,4 @@ class TagController extends ApiBaseController
 
         return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE , 'errors' => $errors] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
-
-    /**
-     * @return JsonResponse
-     */
-    private function unauthorizedResponse()
-    {
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::UNAUTHORIZED_MESSAGE ,
-        ] , StatusCodesHelper::UNAUTHORIZED_CODE);
-    }
-
 }

@@ -20,7 +20,7 @@ class UserModel extends BaseModel implements ModelInterface
     /**
      * Default User fields in case no custom fields are defined
      */
-    const DEFAULT_FIELDS = ['id' , 'email' , 'username', 'roles', 'is_active', 'deleted', 'acl'];
+    const DEFAULT_FIELDS = ['id' , 'email' , 'username', 'roles', 'is_active', 'acl'];
     const LIMIT = 10;
 
     /** @var Router */

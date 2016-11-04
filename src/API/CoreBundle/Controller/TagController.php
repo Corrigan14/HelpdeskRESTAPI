@@ -46,10 +46,10 @@ class TagController extends ApiBaseController implements ControllerInterface
      *  }
      * )
      *
+     * @param Request $request
      * @return JsonResponse
-     *
      */
-    public function listAction()
+    public function listAction(Request $request)
     {
         $tags = $this->get('api_tag.model')->getTags($this->getUser()->getId());
 

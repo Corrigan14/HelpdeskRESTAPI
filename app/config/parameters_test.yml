@@ -1,10 +1,10 @@
 # This file is auto-generated during the composer install
 parameters:
     database_host: 127.0.0.1
-    database_port: null
+    database_port: 3306
     database_name: taskmanagercore_test
     database_user: root
-    database_password: heslo
+    database_password: koronci22
     mailer_transport: smtp
     mailer_host: 127.0.0.1
     mailer_user: null
@@ -12,5 +12,5 @@ parameters:
     secret: ThisTokenIsNotSoSecretChangeIt
     jwt_private_key_path: '%kernel.root_dir%/../var/jwt/private.pem'
     jwt_public_key_path: '%kernel.root_dir%/../var/jwt/public.pem'
-    jwt_key_pass_phrase: heslo
+    jwt_key_pass_phrase: koronci22
     jwt_token_ttl: 3600

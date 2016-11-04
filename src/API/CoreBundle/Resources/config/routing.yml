@@ -5,30 +5,30 @@ token_authentication:
 
 users_list:
     path:     /users
-    defaults: { _controller: APICoreBundle:User:listUsers }
+    defaults: { _controller: APICoreBundle:User:list }
     methods: [GET]
 
 user:
     path:     /users/{id}
-    defaults: { _controller: APICoreBundle:User:getUser }
+    defaults: { _controller: APICoreBundle:User:get }
     methods: [GET]
 
 user_create:
     path:     /users
-    defaults: { _controller: APICoreBundle:User:createUser }
+    defaults: { _controller: APICoreBundle:User:create }
     methods: [POST]
 
 user_update:
     path:     /users/{id}
-    defaults: { _controller: APICoreBundle:User:updateUser }
+    defaults: { _controller: APICoreBundle:User:update }
     methods: [PUT]
 
 user_partial_update:
     path:     /users/{id}
-    defaults: { _controller: APICoreBundle:User:updatePartialUser }
+    defaults: { _controller: APICoreBundle:User:updatePartial }
     methods: [PATCH]
 
 user_delete:
     path:     /users/{id}
-    defaults: { _controller: APICoreBundle:User:deleteUser }
+    defaults: { _controller: APICoreBundle:User:delete }
     methods: [DELETE]

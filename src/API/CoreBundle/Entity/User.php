@@ -77,13 +77,6 @@ class User implements AdvancedUserInterface , \Serializable
      * @var bool
      */
     private $isActive = true;
-    /**
-     * @ORM\Column(name="deleted", type="boolean")
-     * @ReadOnly()
-     *
-     * @var bool
-     */
-    private $deleted = false;
 
     /**
      * @ORM\Column(name="acl", type="text", nullable=true)
@@ -227,22 +220,6 @@ class User implements AdvancedUserInterface , \Serializable
     public function getIsActive()
     {
         return $this->isActive;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function getDeleted(): bool
-    {
-        return $this->deleted;
-    }
-
-    /**
-     * @param boolean $deleted
-     */
-    public function setDeleted(bool $deleted)
-    {
-        $this->deleted = $deleted;
     }
 
     /**

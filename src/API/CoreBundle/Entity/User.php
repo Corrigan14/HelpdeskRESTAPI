@@ -363,6 +363,6 @@ class User implements AdvancedUserInterface , \Serializable
     public function isEnabled()
     {
 
-        return $this->isActive && !$this->deleted;
+        return $this->isActive;
     }
 }

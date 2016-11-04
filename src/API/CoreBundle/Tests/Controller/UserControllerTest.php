@@ -82,7 +82,10 @@ class UserControllerTest extends WebTestCase
          */
         $keys = array_keys($response['data'][0]);
 
-        $this->assertEquals(array_merge(UserModel::DEFAULT_FIELDS,['_links']) , $keys);
+
+        $this->assertEquals(UserModel::DEFAULT_FIELDS, $keys);
+
+        $this->assertTrue(array_key_exists('_links' , $response));
 
 
         $crawler = $client->request('GET' , '/api/v1/users?fields=name',[],[],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
@@ -93,8 +96,9 @@ class UserControllerTest extends WebTestCase
          * We expect at least one user and if we get a response based on custom fields e.g. only name
          */
         $keys = array_keys($response['data'][0]);
+        $this->assertTrue(array_key_exists('_links' , $response));
 
-        $this->assertEquals(['name','id','_links'] , $keys);
+        $this->assertEquals(['name','id'] , $keys);
     }
 
     public function testUserSuccess()
@@ -201,7 +205,7 @@ class UserControllerTest extends WebTestCase
 
 
         $createdUser=json_decode($client->getResponse()->getContent() , true);
-        $createdUser=json_decode($createdUser['data'],true);
+        $createdUser=$createdUser['data'];
         $this->assertTrue(array_key_exists('id' , $createdUser));
 
 
@@ -214,7 +218,7 @@ class UserControllerTest extends WebTestCase
                 'detail_data'=>['name'=>'patch name','surname'=>'patch surname']
         ],
             [],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
-        $this->assertEquals(201 , $client->getResponse()->getStatusCode());
+        $this->assertEquals(200 , $client->getResponse()->getStatusCode());
 
 
 
@@ -227,7 +231,7 @@ class UserControllerTest extends WebTestCase
                 'detail_data'=>['name'=>'patch name','surname'=>'patch surname']
             ],
             [],['Authorization'=>'Bearer '.$this->adminToken,'HTTP_AUTHORIZATION' => 'Bearer '.$this->adminToken]);
-        $this->assertEquals(201 , $client->getResponse()->getStatusCode());
+        $this->assertEquals(200 , $client->getResponse()->getStatusCode());
 
 
         /**

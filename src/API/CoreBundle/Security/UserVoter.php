@@ -79,33 +79,6 @@ class UserVoter
 
     /**
      * @return bool
-     */
-    public function isLogged()
-    {
-        $this->user = $this->token->getUser();
-
-        if (!$this->user instanceof User) {
-            // the user must be logged in; if not, deny access
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * @return bool|User
-     */
-    public function getLoggedUser()
-    {
-        if($this->user instanceof User){
-            return $this->user;
-        }
-
-        return false;
-    }
-
-    /**
-     * @return bool
      * @throws \InvalidArgumentException
      */
     private function canCreate(): bool

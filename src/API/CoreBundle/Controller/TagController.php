@@ -14,7 +14,7 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
  *
  * @package API\CoreBundle\Controller
  */
-class TagController extends ApiBaseController
+class TagController extends ApiBaseController implements ControllerInterface
 {
     /**
      *  ### Response ###
@@ -49,22 +49,11 @@ class TagController extends ApiBaseController
      * @return JsonResponse
      *
      */
-    public function listTagsAction()
+    public function listAction()
     {
-        if(!$this->get('user_voter')->isLogged()){
-            return $this->unauthorizedResponse();
-        }
+        $tags = $this->get('api_tag.model')->getTags($this->getUser()->getId());
 
-        /** @var User $user */
-        $user = $this->get('user_voter')->getLoggedUser();
-
-        if($user){
-            $tags = $this->get('api_tag.model')->getTags($user->getId());
-
-            return $this->createApiResponse($tags, StatusCodesHelper::SUCCESSFUL_CODE);
-        }
-
-        return $this->unauthorizedResponse();
+        return $this->createApiResponse($tags, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -114,28 +103,17 @@ class TagController extends ApiBaseController
      * @param int $id
      * @return JsonResponse
      */
-    public function getTagAction(int $id)
+    public function getAction(int $id)
     {
-        if(!$this->get('user_voter')->isLogged()){
-            return $this->unauthorizedResponse();
+        $tag = $this->get('api_tag.model')->getTagById($id, $this->getUser()->getId());
+
+        if (null === $tag || !$tag['data']) {
+            return $this->createApiResponse([
+                'message' => StatusCodesHelper::TAG_NOT_FOUND_MESSAGE,
+            ], StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
         }
 
-        /** @var User $user */
-        $user = $this->get('user_voter')->getLoggedUser();
-
-        if($user){
-            $tag = $this->get('api_tag.model')->getTagById($id, $user->getId());
-
-            if (null === $tag || !$tag['data']) {
-                return $this->createApiResponse([
-                    'message' => StatusCodesHelper::TAG_NOT_FOUND_MESSAGE ,
-                ] , StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
-            }
-
-            return $this->createApiResponse($tag, StatusCodesHelper::SUCCESSFUL_CODE);
-        }
-
-        return $this->unauthorizedResponse();
+        return $this->createApiResponse($tag, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -179,25 +157,14 @@ class TagController extends ApiBaseController
      * @param Request $request
      * @return JsonResponse
      */
-    public function createTagAction(Request $request)
+    public function createAction(Request $request)
     {
-        if(!$this->get('user_voter')->isLogged()){
-            return $this->unauthorizedResponse();
-        }
+        $requestData = $request->request->all();
 
-        $user = $this->get('user_voter')->getLoggedUser();
+        $tag = new Tag();
+        $tag->setUser($this->getUser());
 
-        if($user)
-        {
-            $requestData = $request->request->all();
-
-            $tag = new Tag();
-            $tag->setUser($user);
-
-            return $this->processTag($tag,$requestData, true);
-        }
-
-        return $this->unauthorizedResponse();
+        return $this->processTag($tag,$requestData, true);
     }
 
     /**
@@ -250,27 +217,16 @@ class TagController extends ApiBaseController
      * @param Request $request
      * @return JsonResponse
      */
-    public function updateTagAction(int $id, Request $request)
+    public function updateAction(int $id, Request $request)
     {
-        if(!$this->get('user_voter')->isLogged()){
-            return $this->unauthorizedResponse();
-        }
+        $requestData = $request->request->all();
 
-        $user = $this->get('user_voter')->getLoggedUser();
+        $tag = $this->getDoctrine()->getRepository('APICoreBundle:Tag')->findOneBy([
+            'id' => $id,
+            'user' => $this->getUser(),
+        ]);
 
-        if($user)
-        {
-            $requestData = $request->request->all();
-
-            $tag = $this->getDoctrine()->getRepository('APICoreBundle:Tag')->findOneBy([
-                'id' => $id,
-                'user' => $user,
-            ]);
-
-            return $this->updateTag($tag,$requestData);
-        }
-
-        return $this->unauthorizedResponse();
+        return $this->updateTag($tag,$requestData);
     }
 
     /**
@@ -323,27 +279,16 @@ class TagController extends ApiBaseController
      * @param Request $request
      * @return JsonResponse
      */
-    public function updatePartialTagAction(int $id, Request $request)
+    public function updatePartialAction(int $id, Request $request)
     {
-        if(!$this->get('user_voter')->isLogged()){
-            return $this->unauthorizedResponse();
-        }
+        $requestData = $request->request->all();
 
-        $user = $this->get('user_voter')->getLoggedUser();
+        $tag = $this->getDoctrine()->getRepository('APICoreBundle:Tag')->findOneBy([
+            'id' => $id,
+            'user' => $this->getUser(),
+        ]);
 
-        if($user)
-        {
-            $requestData = $request->request->all();
-
-            $tag = $this->getDoctrine()->getRepository('APICoreBundle:Tag')->findOneBy([
-                'id' => $id,
-                'user' => $user,
-            ]);
-
-            return $this->updateTag($tag,$requestData);
-        }
-
-        return $this->unauthorizedResponse();
+        return $this->updateTag($tag,$requestData);
     }
 
     /**
@@ -374,35 +319,25 @@ class TagController extends ApiBaseController
      *
      * @return JsonResponse
      */
-    public function deleteTagAction(int $id)
+    public function deleteAction(int $id)
     {
-        if(!$this->get('user_voter')->isLogged()){
-            return $this->unauthorizedResponse();
-        }
+        $tag = $this->getDoctrine()->getRepository('APICoreBundle:Tag')->findOneBy([
+            'id' => $id,
+            'user' => $this->getUser(),
+        ]);
 
-        $user = $this->get('user_voter')->getLoggedUser();
-
-        if($user) {
-            $tag = $this->getDoctrine()->getRepository('APICoreBundle:Tag')->findOneBy([
-                'id' => $id,
-                'user' => $user,
-            ]);
-
-            if (null === $tag || !$tag instanceof Tag) {
-                return $this->createApiResponse([
-                    'message' => StatusCodesHelper::TAG_NOT_FOUND_MESSAGE,
-                ], StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
-            }
-
-            $this->getDoctrine()->getManager()->remove($tag);
-            $this->getDoctrine()->getManager()->flush();
-
+        if (null === $tag || !$tag instanceof Tag) {
             return $this->createApiResponse([
-                'message' => StatusCodesHelper::DELETED_MESSAGE ,
-            ] , StatusCodesHelper::DELETED_CODE);
+                'message' => StatusCodesHelper::TAG_NOT_FOUND_MESSAGE,
+            ], StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
         }
 
-        return $this->unauthorizedResponse();
+        $this->getDoctrine()->getManager()->remove($tag);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->createApiResponse([
+            'message' => StatusCodesHelper::DELETED_MESSAGE ,
+        ] , StatusCodesHelper::DELETED_CODE);
     }
 
     /**

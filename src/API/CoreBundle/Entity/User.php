@@ -75,7 +75,7 @@ class User implements AdvancedUserInterface , \Serializable
      *
      * @var bool
      */
-    private $isActive = true;
+    private $is_active = true;
 
     /**
      * @ORM\Column(name="acl", type="text", nullable=true)
@@ -96,7 +96,7 @@ class User implements AdvancedUserInterface , \Serializable
 
     public function __construct()
     {
-        $this->isActive = true;
+        $this->is_active = true;
         $this->acl = json_encode([]);
     }
 
@@ -207,7 +207,7 @@ class User implements AdvancedUserInterface , \Serializable
      */
     public function setIsActive($isActive)
     {
-        $this->isActive = $isActive;
+        $this->is_active = $isActive;
 
         return $this;
     }
@@ -219,7 +219,7 @@ class User implements AdvancedUserInterface , \Serializable
      */
     public function getIsActive()
     {
-        return $this->isActive;
+        return $this->is_active;
     }
 
     /**
@@ -363,6 +363,6 @@ class User implements AdvancedUserInterface , \Serializable
     public function isEnabled()
     {
 
-        return $this->isActive;
+        return $this->is_active;
     }
 }

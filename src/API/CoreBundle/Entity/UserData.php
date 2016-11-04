@@ -42,14 +42,14 @@ class UserData
      *
      * @ORM\Column(name="title_before", type="string", length=45, nullable=true)
      */
-    private $titleBefore;
+    private $title_before;
 
     /**
      * @var string
      *
      * @ORM\Column(name="title_after", type="string", length=45, nullable=true)
      */
-    private $titleAfter;
+    private $title_after;
 
     /**
      * @var string
@@ -187,7 +187,7 @@ class UserData
      */
     public function setTitleBefore($titleBefore)
     {
-        $this->titleBefore = $titleBefore;
+        $this->title_before = $titleBefore;
 
         return $this;
     }
@@ -199,7 +199,7 @@ class UserData
      */
     public function getTitleBefore()
     {
-        return $this->titleBefore;
+        return $this->title_before;
     }
 
     /**
@@ -211,7 +211,7 @@ class UserData
      */
     public function setTitleAfter($titleAfter)
     {
-        $this->titleAfter = $titleAfter;
+        $this->title_after = $titleAfter;
 
         return $this;
     }
@@ -223,7 +223,7 @@ class UserData
      */
     public function getTitleAfter()
     {
-        return $this->titleAfter;
+        return $this->title_after;
     }
 
     /**

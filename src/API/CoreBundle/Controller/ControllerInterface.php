@@ -66,10 +66,10 @@ interface ControllerInterface
      *  }
      * )
      *
+     * @param Request $request
      * @return JsonResponse
-     *
      */
-    public function listAction();
+    public function listAction(Request $request);
 
     /**
      *  ### Response ###

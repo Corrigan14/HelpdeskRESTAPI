@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * @package API\CoreBundle\Controller
  */
-class UserController extends ApiBaseController
+class UserController extends ApiBaseController implements ControllerInterface
 {
     /**
      * ### Response ###
@@ -29,7 +29,6 @@ class UserController extends ApiBaseController
      *            "username": "admin",
      *            "roles": "[\"ROLE_ADMIN\"]",
      *            "is_active": true,
-     *            "deleted": false,
      *            "acl": "[]"
      *          }
      *       ],
@@ -78,7 +77,7 @@ class UserController extends ApiBaseController
      * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function listUsersAction(Request $request)
+    public function listAction(Request $request)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::LIST_USERS)) {
             return $this->unauthorizedResponse();
@@ -101,7 +100,6 @@ class UserController extends ApiBaseController
      *           "email": "admin@admin.sk",
      *           "roles": "[\"ROLE_ADMIN\"]",
      *           "is_active": true,
-     *           "deleted": false,
      *           "acl": "[]"
      *        },
      *        "_links":
@@ -144,7 +142,7 @@ class UserController extends ApiBaseController
      * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function getUserAction(int $id)
+    public function getAction(int $id)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::SHOW_USER , $id)) {
             return $this->unauthorizedResponse();
@@ -170,7 +168,6 @@ class UserController extends ApiBaseController
      *           "email": "admin@admin.sk",
      *           "roles": "[\"ROLE_ADMIN\"]",
      *           "is_active": true,
-     *           "deleted": false,
      *           "acl": "[]"
      *           "detail_data":
      *           {
@@ -225,7 +222,7 @@ class UserController extends ApiBaseController
      * @throws \Doctrine\DBAL\DBALException
      * @throws \LogicException
      */
-    public function createUserAction(Request $request)
+    public function createAction(Request $request)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::CREATE_USER)) {
             return $this->unauthorizedResponse();
@@ -250,7 +247,6 @@ class UserController extends ApiBaseController
      *           "email": "admin@admin.sk",
      *           "roles": "[\"ROLE_ADMIN\"]",
      *           "is_active": true,
-     *           "deleted": false,
      *           "acl": "[]"
      *           "detail_data":
      *           {
@@ -313,7 +309,7 @@ class UserController extends ApiBaseController
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
-    public function updateUserAction(int $id , Request $request)
+    public function updateAction(int $id , Request $request)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER , $id)) {
             return $this->unauthorizedResponse();
@@ -335,7 +331,6 @@ class UserController extends ApiBaseController
      *           "email": "admin@admin.sk",
      *           "roles": "[\"ROLE_ADMIN\"]",
      *           "is_active": true,
-     *           "deleted": false,
      *           "acl": "[]"
      *           "detail_data":
      *           {
@@ -398,7 +393,7 @@ class UserController extends ApiBaseController
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function updatePartialUserAction(int $id , Request $request)
+    public function updatePartialAction(int $id , Request $request)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER , $id)) {
             return $this->unauthorizedResponse();
@@ -441,7 +436,7 @@ class UserController extends ApiBaseController
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function deleteUserAction(int $id)
+    public function deleteAction(int $id)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::DELETE_USER , $id)) {
             return $this->unauthorizedResponse();
@@ -510,5 +505,15 @@ class UserController extends ApiBaseController
         }
 
         return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE , 'errors' => $errors] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
+    }
+
+    /**
+     * @return JsonResponse
+     */
+    protected function unauthorizedResponse()
+    {
+        return $this->createApiResponse([
+            'message' => StatusCodesHelper::UNAUTHORIZED_MESSAGE ,
+        ] , StatusCodesHelper::UNAUTHORIZED_CODE);
     }
 }

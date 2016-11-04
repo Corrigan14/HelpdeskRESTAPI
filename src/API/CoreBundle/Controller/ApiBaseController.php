@@ -23,16 +23,6 @@ use Symfony\Component\HttpFoundation\Response;
 abstract class ApiBaseController extends Controller
 {
     /**
-     * @return JsonResponse
-     */
-    protected function unauthorizedResponse()
-    {
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::UNAUTHORIZED_MESSAGE ,
-        ] , StatusCodesHelper::UNAUTHORIZED_CODE);
-    }
-
-    /**
      * @param $data
      * @param int $statusCode
      * @return JsonResponse

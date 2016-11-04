@@ -1,6 +1,7 @@
 <?php
 namespace API\CoreBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ReadOnly;
 use JMS\Serializer\Annotation\Exclude;
@@ -93,6 +94,14 @@ class User implements AdvancedUserInterface , \Serializable
      * @var UserData
      */
     private $detailData;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Tag", mappedBy="user")
+     * @Serializer\Exclude()
+     *
+     * @var ArrayCollection
+     */
+    private $tags;
 
     public function __construct()
     {
@@ -363,6 +372,41 @@ class User implements AdvancedUserInterface , \Serializable
     public function isEnabled()
     {
 
-        return $this->isActive && !$this->deleted;
+        return $this->isActive;
+    }
+
+    /**
+     * Add tag
+     *
+     * @param Tag $tag
+     *
+     * @return User
+     */
+    public function addTag(Tag $tag)
+    {
+        $this->tags[] = $tag;
+        $tag->setUser($this);
+
+        return $this;
+    }
+
+    /**
+     * Remove tag
+     *
+     * @param Tag $tag
+     */
+    public function removeTag(Tag $tag)
+    {
+        $this->tags->removeElement($tag);
+    }
+
+    /**
+     * Get tags
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getTags()
+    {
+        return $this->tags;
     }
 }

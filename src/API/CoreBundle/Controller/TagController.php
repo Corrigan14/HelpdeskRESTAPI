@@ -125,6 +125,15 @@ class TagController extends ApiBaseController implements ControllerInterface
      *           "user_id": "18",
      *           "title": "Work",
      *           "color": "4871BF"
+     *           "user":
+     *           {
+     *              "id": 19,
+     *              "username": "user",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "acl": "[]"
+     *          }
      *        },
      *        "_links":
      *        {
@@ -173,9 +182,17 @@ class TagController extends ApiBaseController implements ControllerInterface
      *        "data":
      *        {
      *           "id": "2",
-     *           "user_id": "18",
      *           "title": "Work",
-     *           "color": "4871BF"
+     *           "color": "4871BF",
+     *           "user":
+     *           {
+     *              "id": 19,
+     *              "username": "user",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "acl": "[]"
+     *          }
      *        },
      *        "_links":
      *        {
@@ -235,9 +252,17 @@ class TagController extends ApiBaseController implements ControllerInterface
      *        "data":
      *        {
      *           "id": "2",
-     *           "user_id": "18",
      *           "title": "Work",
-     *           "color": "4871BF"
+     *           "color": "4871BF",
+     *           "user":
+     *           {
+     *              "id": 19,
+     *              "username": "user",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "acl": "[]"
+     *          }
      *        },
      *        "_links":
      *        {

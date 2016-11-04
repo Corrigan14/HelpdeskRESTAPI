@@ -9,7 +9,6 @@ use API\CoreBundle\Services\StatusCodesHelper;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class UsersController
@@ -150,12 +149,14 @@ class UserController extends ApiBaseController implements ControllerInterface
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (null === $user) {
+
             return $this->createApiResponse([
+
                 'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
             ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
 
-        return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -234,7 +235,7 @@ class UserController extends ApiBaseController implements ControllerInterface
         $user->setRoles(['ROLE_USER']);
         $user->setIsActive(true);
 
-        return $this->updateUser($user , $requestData, true);
+        return $this->updateUser($user , $requestData , true);
     }
 
     /**
@@ -444,7 +445,9 @@ class UserController extends ApiBaseController implements ControllerInterface
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (null === $user) {
+
             return $this->createApiResponse([
+
                 'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
             ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
@@ -460,18 +463,21 @@ class UserController extends ApiBaseController implements ControllerInterface
     /**
      * @param User|null $user
      *
-     * @param array $requestData
+     * @param array     $requestData
      *
-     * @param bool $create
+     * @param bool      $create
+     *
      * @return JsonResponse
      * @internal param $id
      */
-    private function updateUser($user , array $requestData, $create = false)
+    private function updateUser($user , array $requestData , $create = false)
     {
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         if (null === $user || !$user instanceof User) {
+
             return $this->createApiResponse([
+
                 'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
             ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
@@ -489,8 +495,14 @@ class UserController extends ApiBaseController implements ControllerInterface
              * Fill UserData Entity if some its parameters were sent
              */
             if (isset($requestData['detail_data']) && count($requestData['detail_data']) > 0) {
-                $userData = new UserData();
-                $user->setDetailData($userData);
+
+
+                $userData = $user->getDetailData();
+                if (null === $userData) {
+                    $userData = new UserData();
+                    $user->setDetailData($userData);
+                }
+
                 $errorsUserData = $this->get('entity_processor')->processEntity($userData , $requestData['detail_data']);
 
                 if (false === $errorsUserData) {

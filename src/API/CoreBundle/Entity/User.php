@@ -4,7 +4,6 @@ namespace API\CoreBundle\Entity;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ReadOnly;
 use JMS\Serializer\Annotation\Exclude;
-use JMS\Serializer\Annotation\ExclusionPolicy;
 use Symfony\Component\Security\Core\User\AdvancedUserInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -86,8 +85,9 @@ class User implements AdvancedUserInterface , \Serializable
     private $acl;
 
     /**
-     * @ORM\OneToOne(targetEntity="UserData", inversedBy="user")
-     * @ORM\JoinColumn(name="detail_data_id", referencedColumnName="id", onDelete="CASCADE")
+     * @var UserData
+     * @ORM\OneToOne(targetEntity="UserData", inversedBy="user", fetch="EAGER")
+     * @ORM\JoinColumn(name="detail_data_id", referencedColumnName="id", onDelete="SET NULL")
      * @Serializer\MaxDepth(0)
      *
      * @var UserData

@@ -115,7 +115,7 @@ class UserData
     private $country;
 
     /**
-     * @ORM\OneToOne(targetEntity="User", mappedBy="detailData")
+     * @ORM\OneToOne(targetEntity="User", mappedBy="detailData", orphanRemoval=true)
      * @Serializer\Exclude()
      */
     private $user;

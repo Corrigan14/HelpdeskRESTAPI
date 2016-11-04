@@ -7,6 +7,10 @@ services:
         class: API\CoreBundle\Model\UserModel
         arguments: ["@doctrine.dbal.default_connection", "@router"]
         lazy: true
+    api_user.service:
+          class: API\CoreBundle\Services\userService
+          arguments: ["@doctrine.orm.entity_manager","@router"]
+          lazy: true
     entity_processor:
         class: API\CoreBundle\Services\ProcessEntity
         arguments: ["@doctrine.orm.default_entity_manager", "@validator"]

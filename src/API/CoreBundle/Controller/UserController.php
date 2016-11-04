@@ -82,11 +82,11 @@ class UserController extends ApiBaseController implements ControllerInterface
             return $this->unauthorizedResponse();
         }
 
-        $userModel = $this->get('api_user.model');
+//        $userModel = $this->get('api_user.model');
         $fields = $request->get('fields') ? explode(',' , $request->get('fields')) : [];
         $page = $request->get('page') ?: 1;
 
-        return $this->json($userModel->getUsersResponse($fields , $page) , StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($this->get('api_user.service')->getUsersResponse($fields , $page) , StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

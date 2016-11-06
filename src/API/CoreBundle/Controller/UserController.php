@@ -83,10 +83,10 @@ class UserController extends ApiBaseController implements ControllerInterface
         }
 
         $userModel = $this->get('api_user.model');
-        $fields = $request->get('fields') ? explode(',' , $request->get('fields')) : [];
+        $fields = $request->get('fields') ? explode(',', $request->get('fields')) : [];
         $page = $request->get('page') ?: 1;
 
-        return $this->json($userModel->getUsersResponse($fields , $page) , StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($userModel->getUsersResponse($fields, $page), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -143,7 +143,7 @@ class UserController extends ApiBaseController implements ControllerInterface
      */
     public function getAction(int $id)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::SHOW_USER , $id)) {
+        if (!$this->get('user_voter')->isGranted(VoteOptions::SHOW_USER, $id)) {
             return $this->unauthorizedResponse();
         }
 
@@ -152,11 +152,11 @@ class UserController extends ApiBaseController implements ControllerInterface
 
             return $this->createApiResponse([
 
-                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
-            ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
+                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE,
+            ], StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
 
-        return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -231,11 +231,16 @@ class UserController extends ApiBaseController implements ControllerInterface
 
         $requestData = $request->request->all();
 
+
+        $file=$request->files->get('image');
+        $fileEntity=$this->get('upload_helper')->uploadFile($file);
+
         $user = new User();
+        //$user->setImage($fileEntity);
         $user->setRoles(['ROLE_USER']);
         $user->setIsActive(true);
 
-        return $this->updateUser($user , $requestData , true);
+        return $this->updateUser($user, $requestData, true);
     }
 
     /**
@@ -300,7 +305,7 @@ class UserController extends ApiBaseController implements ControllerInterface
      *      409 ="Invalid parameters",
      *  })
      *
-     * @param int     $id
+     * @param int $id
      *
      * @param Request $request
      *
@@ -310,16 +315,16 @@ class UserController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
-    public function updateAction(int $id , Request $request)
+    public function updateAction(int $id, Request $request)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER , $id)) {
+        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER, $id)) {
             return $this->unauthorizedResponse();
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         $requestData = $request->request->all();
 
-        return $this->updateUser($user , $requestData);
+        return $this->updateUser($user, $requestData);
     }
 
     /**
@@ -384,7 +389,7 @@ class UserController extends ApiBaseController implements ControllerInterface
      *      409 ="Invalid parameters",
      *  })
      *
-     * @param int     $id
+     * @param int $id
      *
      * @param Request $request
      *
@@ -394,17 +399,23 @@ class UserController extends ApiBaseController implements ControllerInterface
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function updatePartialAction(int $id , Request $request)
+    public function updatePartialAction(int $id, Request $request)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER , $id)) {
+        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER, $id)) {
             return $this->unauthorizedResponse();
         }
+
+
+
+//        $file=$request->files->get('image');
+//        $fileEntity=$this->get('upload_helper')->uploadFile($file);
+
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
 
         $requestData = $request->request->all();
 
-        return $this->updateUser($user , $requestData);
+        return $this->updateUser($user, $requestData);
     }
 
     /**
@@ -439,7 +450,7 @@ class UserController extends ApiBaseController implements ControllerInterface
      */
     public function deleteAction(int $id)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::DELETE_USER , $id)) {
+        if (!$this->get('user_voter')->isGranted(VoteOptions::DELETE_USER, $id)) {
             return $this->unauthorizedResponse();
         }
 
@@ -448,29 +459,29 @@ class UserController extends ApiBaseController implements ControllerInterface
 
             return $this->createApiResponse([
 
-                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
-            ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
+                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE,
+            ], StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
 
         $this->getDoctrine()->getManager()->remove($user);
         $this->getDoctrine()->getManager()->flush();
 
         return $this->createApiResponse([
-            'message' => StatusCodesHelper::DELETED_MESSAGE ,
-        ] , StatusCodesHelper::DELETED_CODE);
+            'message' => StatusCodesHelper::DELETED_MESSAGE,
+        ], StatusCodesHelper::DELETED_CODE);
     }
 
     /**
      * @param User|null $user
      *
-     * @param array     $requestData
+     * @param array $requestData
      *
-     * @param bool      $create
+     * @param bool $create
      *
      * @return JsonResponse
      * @internal param $id
      */
-    private function updateUser($user , array $requestData , $create = false)
+    private function updateUser($user, array $requestData, $create = false)
     {
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
@@ -478,18 +489,25 @@ class UserController extends ApiBaseController implements ControllerInterface
 
             return $this->createApiResponse([
 
-                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
-            ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
+                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE,
+            ], StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
 
-        $errors = $this->get('entity_processor')->processEntity($user , $requestData);
+        $errors = $this->get('entity_processor')->processEntity($user, $requestData);
         if (false === $errors) {
             if (isset($requestData['password'])) {
-                $user->setPassword($this->get('security.password_encoder')->encodePassword($user , $requestData['password']));
+                $user->setPassword($this->get('security.password_encoder')->encodePassword($user, $requestData['password']));
             }
 
             $this->getDoctrine()->getManager()->persist($user);
             $this->getDoctrine()->getManager()->flush();
+            
+            
+            //var_dump($requestData);
+            //upload avatar
+            //$image = $this->get('upload_helper')->uploadFile($editForm->get('image')->getData());
+            //$user->setImage($image);
+            
 
             /**
              * Fill UserData Entity if some its parameters were sent
@@ -503,20 +521,20 @@ class UserController extends ApiBaseController implements ControllerInterface
                     $user->setDetailData($userData);
                 }
 
-                $errorsUserData = $this->get('entity_processor')->processEntity($userData , $requestData['detail_data']);
+                $errorsUserData = $this->get('entity_processor')->processEntity($userData, $requestData['detail_data']);
 
                 if (false === $errorsUserData) {
                     $this->getDoctrine()->getManager()->persist($userData);
                     $this->getDoctrine()->getManager()->flush();
 
-                    return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user) , $statusCode);
+                    return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user), $statusCode);
                 }
             } else {
-                return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user) , $statusCode);
+                return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user), $statusCode);
             }
         }
 
-        return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE , 'errors' => $errors] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE, 'errors' => $errors], StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 
     /**
@@ -525,7 +543,7 @@ class UserController extends ApiBaseController implements ControllerInterface
     protected function unauthorizedResponse()
     {
         return $this->createApiResponse([
-            'message' => StatusCodesHelper::UNAUTHORIZED_MESSAGE ,
-        ] , StatusCodesHelper::UNAUTHORIZED_CODE);
+            'message' => StatusCodesHelper::UNAUTHORIZED_MESSAGE,
+        ], StatusCodesHelper::UNAUTHORIZED_CODE);
     }
 }

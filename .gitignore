@@ -16,3 +16,5 @@
 /vendor/
 /web/bundles/
 /app/config/parameters_test.yml
+!/app/uploads/.gitkeep
+/app/uploads/

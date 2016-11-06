@@ -1,6 +1,7 @@
 <?php
 namespace API\CoreBundle\Entity;
 
+use API\CoreBundle\Services\Traits\FeaturedImageEntity;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ReadOnly;
 use JMS\Serializer\Annotation\Exclude;
@@ -19,6 +20,9 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  */
 class User implements AdvancedUserInterface , \Serializable
 {
+
+    use FeaturedImageEntity;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")

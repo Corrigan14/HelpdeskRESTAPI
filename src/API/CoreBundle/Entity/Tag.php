@@ -11,10 +11,8 @@ use JMS\Serializer\Annotation\ReadOnly;
 use JMS\Serializer\Annotation\Exclude;
 
 /**
- * Tag
- *
- * @ORM\Table(name="tag")
  * @ORM\Entity(repositoryClass="API\CoreBundle\Repository\TagRepository")
+ * @ORM\Table(name="tag")
  * @UniqueEntity("title")
  */
 class Tag implements \Serializable

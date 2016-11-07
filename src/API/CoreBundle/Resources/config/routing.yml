@@ -34,11 +34,11 @@ user_delete:
     methods: [DELETE]
 
 file_upload:
-    path:     /upload
+    path:     /cdn/upload
     defaults: { _controller: APICoreBundle:Cdn:upload }
     methods: [POST]
 
 file_load:
-    path:     /load/{slug}
+    path:     /cdn/load/{slug}
     defaults: { _controller: APICoreBundle:Cdn:load }
     methods: [GET]

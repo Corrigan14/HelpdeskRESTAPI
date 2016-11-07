@@ -12,8 +12,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Routing\Exception\MissingMandatoryParametersException;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
 /**
@@ -158,7 +156,6 @@ class CdnController extends ApiBaseController
      */
     public function loadAction($slug)
     {
-        $response = new JsonResponse();
         $fileEntity = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
             'slug' => $slug,
         ]);
@@ -198,11 +195,7 @@ class CdnController extends ApiBaseController
     /**
      * @param string $postName
      *
-     * @throws MissingMandatoryParametersException
-     *
      * @return UploadedFile
-     * @throws \Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException
-     * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
      */
     private function getUploadedFile($postName = 'upload')
     {

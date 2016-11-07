@@ -9,7 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Routing\Router;
  * Class TagModel
  * @package API\CoreBundle\Model
  */
-class TagModel extends BaseModel implements ModelInterface
+class TagModel
 {
     /** @var Router */
     private $router;

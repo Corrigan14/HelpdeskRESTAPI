@@ -6,11 +6,60 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class TagControllerTest extends WebTestCase
 {
-    public function testListtags()
-    {
-        $client = static::createClient();
+    const BASE_URL = '/api/v1/tags';
 
-        $crawler = $client->request('GET', '/tags');
+//    1. GET List
+    public function testListSuccess()
+    {
+
     }
 
+    public function testListErrors()
+    {
+
+    }
+
+//   2. GET Single
+    public function testGetSingleSuccess()
+    {
+
+    }
+
+    public function testGetSingleErrors()
+    {
+
+    }
+
+//    3 POST Single
+    public function testPostSingleSuccess()
+    {
+
+    }
+
+    public function testPostSingleErrors()
+    {
+
+    }
+
+//    4 UPDATE Single
+    public function testUpdateSingleSuccess()
+    {
+
+    }
+
+    public function testUpdateSingleErrors()
+    {
+
+    }
+
+//    5 DELETE Single
+    public function testDeleteSingleSuccess()
+    {
+
+    }
+
+    public function testDeleteSingleErrors()
+    {
+
+    }
 }

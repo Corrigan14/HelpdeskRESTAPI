@@ -4,6 +4,8 @@ namespace API\CoreBundle\Entity;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ReadOnly;
 use JMS\Serializer\Annotation\Exclude;
+use JMS\Serializer\Annotation\ExclusionPolicy;
+use JMS\Serializer\Annotation\MaxDepth;
 use Symfony\Component\Security\Core\User\AdvancedUserInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -15,7 +17,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * @ORM\Table(name="user")
  * @UniqueEntity("email")
  * @UniqueEntity("username")
- * @Serializer\ExclusionPolicy("none")
+ * @ExclusionPolicy("none")
  */
 class User implements AdvancedUserInterface , \Serializable
 {
@@ -86,9 +88,8 @@ class User implements AdvancedUserInterface , \Serializable
 
     /**
      * @var UserData
-     * @ORM\OneToOne(targetEntity="UserData", inversedBy="user", fetch="EAGER")
-     * @ORM\JoinColumn(name="detail_data_id", referencedColumnName="id", onDelete="SET NULL")
-     * @Serializer\MaxDepth(0)
+     * @ORM\OneToOne(targetEntity="UserData", mappedBy="user", orphanRemoval=true)
+     * @MaxDepth(1)
      *
      * @var UserData
      */

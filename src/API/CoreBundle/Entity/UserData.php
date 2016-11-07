@@ -4,12 +4,15 @@ namespace API\CoreBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use JMS\Serializer\Annotation\ReadOnly;
+use JMS\Serializer\Annotation\Exclude;
 
 /**
  * UserData
  *
  * @ORM\Table(name="user_data")
  * @ORM\Entity(repositoryClass="API\CoreBundle\Repository\UserDataRepository")
+ * @Serializer\ExclusionPolicy("none")
  */
 class UserData
 {
@@ -19,7 +22,7 @@ class UserData
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @Serializer\Exclude()
+     * @ReadOnly()
      */
     private $id;
 
@@ -115,8 +118,9 @@ class UserData
     private $country;
 
     /**
-     * @ORM\OneToOne(targetEntity="User", mappedBy="detailData", orphanRemoval=true)
-     * @Serializer\Exclude()
+     * @ORM\OneToOne(targetEntity="User", inversedBy="detailData", fetch="EAGER")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="SET NULL")
+     * @Exclude()
      */
     private $user;
 

@@ -39,7 +39,7 @@ class UserRepository extends EntityRepository
             $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
         }
 
-        return $this->getEntityManager()->getConnection()->query($query->getSQL())->fetchAll();
+        return $query->getArrayResult();
     }
 
     /**
@@ -88,6 +88,7 @@ class UserRepository extends EntityRepository
 
         return $this->createQueryBuilder('u')
             ->select($values)
+            ->leftJoin('u.detailData','d')
             ->getQuery();
     }
 }

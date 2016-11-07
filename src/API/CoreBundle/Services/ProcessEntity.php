@@ -62,6 +62,7 @@ class ProcessEntity
     {
         foreach ($data as $method => $value) {
             if (property_exists($class , $method)) {
+                $method = str_replace('_','',$method);
                 $m = 'set' . $method;
                 $entity->$m($value);
             }

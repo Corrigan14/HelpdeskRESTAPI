@@ -82,7 +82,6 @@ class UserController extends ApiBaseController implements ControllerInterface
             return $this->unauthorizedResponse();
         }
 
-//        $userModel = $this->get('api_user.model');
         $fields = $request->get('fields') ? explode(',' , $request->get('fields')) : [];
         $page = $request->get('page') ?: 1;
 
@@ -100,6 +99,22 @@ class UserController extends ApiBaseController implements ControllerInterface
      *           "roles": "[\"ROLE_ADMIN\"]",
      *           "is_active": true,
      *           "acl": "[]"
+     *           "detail_data":
+     *           {
+     *              "name": "Martina",
+     *              "surname": "Koronci Babinska",
+     *              "title_before": Mgr,
+     *              "title_after": PhD,
+     *              "function": "developer",
+     *              "mobile": "00421 0987 544",
+     *              "tel": 00421 0987 544,
+     *              "fax": 00421 0987 544,
+     *              "signature": "Martina Koronci Babinska, WEB-SOLUTIONS",
+     *              "street": "Nova 487",
+     *              "city": "Bratislava",
+     *              "zip": "025874",
+     *              "country": "SR"
+     *           }
      *        },
      *        "_links":
      *        {
@@ -149,14 +164,12 @@ class UserController extends ApiBaseController implements ControllerInterface
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (null === $user) {
-
             return $this->createApiResponse([
-
                 'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
             ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
 
-        return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user) , StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user) , StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -475,9 +488,7 @@ class UserController extends ApiBaseController implements ControllerInterface
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         if (null === $user || !$user instanceof User) {
-
             return $this->createApiResponse([
-
                 'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
             ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
@@ -496,10 +507,10 @@ class UserController extends ApiBaseController implements ControllerInterface
              */
             if (isset($requestData['detail_data']) && count($requestData['detail_data']) > 0) {
 
-
                 $userData = $user->getDetailData();
                 if (null === $userData) {
                     $userData = new UserData();
+                    $userData->setUser($user);
                     $user->setDetailData($userData);
                 }
 
@@ -509,10 +520,10 @@ class UserController extends ApiBaseController implements ControllerInterface
                     $this->getDoctrine()->getManager()->persist($userData);
                     $this->getDoctrine()->getManager()->flush();
 
-                    return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user) , $statusCode);
+                    return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user) , $statusCode);
                 }
             } else {
-                return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user) , $statusCode);
+                return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user) , $statusCode);
             }
         }
 

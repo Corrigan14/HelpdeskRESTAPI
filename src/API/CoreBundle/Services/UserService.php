@@ -2,6 +2,7 @@
 
 namespace API\CoreBundle\Services;
 
+use API\CoreBundle\Entity\User;
 use API\CoreBundle\Repository\UserRepository;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
@@ -10,7 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Routing\Router;
  * Class userService
  * @package API\CoreBundle\Services
  */
-class userService
+class UserService
 {
     /**
      * @var EntityManager
@@ -63,5 +64,34 @@ class userService
         );
 
         return array_merge($response , $pagination);
+    }
+
+    /**
+     * Return User Response which includes all data about User Entity and Links to update/partialUpdate/delete
+     *
+     * @param User $user
+     *
+     * @return array
+     */
+    public function getUserResponse(User $user)
+    {
+        return [
+            'data'   => $user ,
+            '_links' => $this->getUserLinks($user->getId()) ,
+        ];
+    }
+
+    /**
+     * @param int $id
+     *
+     * @return array
+     */
+    private function getUserLinks(int $id)
+    {
+        return [
+            'put'    => $this->router->generate('user_update' , ['id' => $id]) ,
+            'patch'  => $this->router->generate('user_partial_update' , ['id' => $id]) ,
+            'delete' => $this->router->generate('user_delete' , ['id' => $id]) ,
+        ];
     }
 }

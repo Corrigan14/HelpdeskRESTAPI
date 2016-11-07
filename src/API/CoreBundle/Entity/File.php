@@ -6,7 +6,7 @@ namespace API\CoreBundle\Entity;
 
 use API\CoreBundle\Services\CDN\FileEntityInterface;
 use Doctrine\ORM\Mapping as ORM;
-//use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -19,7 +19,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  */
 class File implements FileEntityInterface
 {
-//    use TimestampableEntity;
+    use TimestampableEntity;
     /**
      * @var integer
      *
@@ -39,8 +39,7 @@ class File implements FileEntityInterface
 
 
     /**
-     * Gedmo\Slug(fields={"name","createdAt"})
-     * @Gedmo\Slug(fields={"temp_name","name"})
+     * @Gedmo\Slug(fields={"name","createdAt"})
      * @ORM\Column(length=128, unique=true)
      */
     private $slug;
@@ -76,6 +75,13 @@ class File implements FileEntityInterface
      * @ORM\Column(name="upload_dir", type="string", length=255)
      */
     private $uploadDir;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="public", type="boolean",  options={"default"=false} )
+     */
+    private $public = false;
 
     /**
      * Set name
@@ -220,6 +226,22 @@ class File implements FileEntityInterface
     public function getUploadDir()
     {
         return $this->uploadDir;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isPublic()
+    {
+        return $this->public;
+    }
+
+    /**
+     * @param boolean $public
+     */
+    public function setPublic($public)
+    {
+        $this->public = $public;
     }
 
 

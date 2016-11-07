@@ -18,9 +18,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 class UploadHelper
 {
     /**
-     * @var Container
+     * @var String
      */
-    private $container;
 
     private $uploadDir;
 
@@ -32,11 +31,11 @@ class UploadHelper
 
 
     /**
-     * @param Container $container
+     * @param String $uploadDir
+     * @param EntityManager $em
      */
-    public function __construct($uploadDir, EntityManager $em)
+    public function __construct(String $uploadDir, EntityManager $em)
     {
-        //$this->container = $container;
         $this->uploadDir = $uploadDir;
         $this->em = $em;
     }
@@ -56,7 +55,6 @@ class UploadHelper
                 $slugs[] = $this->uploadFile($file);
             }
         }
-
 
         return $slugs;
     }
@@ -82,8 +80,7 @@ class UploadHelper
         $file->move($uploadDir['path']);
 
 
-        //return $fileEntity->getSlug();
-        return $fileEntity;
+        return $fileEntity->getSlug();
     }
     /**
      * Get a relatively unique folder name
@@ -101,7 +98,7 @@ class UploadHelper
         if ($onlyName) {
             return $unique;
         }
-        //$uploadDir = $this->container->getParameter('upload_dir');
+
         $uploadDir = $this->uploadDir;
         $uploadDir = $uploadDir.DIRECTORY_SEPARATOR.$unique;
 

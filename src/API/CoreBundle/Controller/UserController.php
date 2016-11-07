@@ -232,8 +232,8 @@ class UserController extends ApiBaseController implements ControllerInterface
         $requestData = $request->request->all();
 
 
-        $file=$request->files->get('image');
-        $fileEntity=$this->get('upload_helper')->uploadFile($file);
+//        $file=$request->files->get('image');
+//        $fileEntity=$this->get('upload_helper')->uploadFile($file);
 
         $user = new User();
         //$user->setImage($fileEntity);
@@ -404,12 +404,6 @@ class UserController extends ApiBaseController implements ControllerInterface
         if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER, $id)) {
             return $this->unauthorizedResponse();
         }
-
-
-
-//        $file=$request->files->get('image');
-//        $fileEntity=$this->get('upload_helper')->uploadFile($file);
-
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
 

@@ -32,3 +32,13 @@ user_delete:
     path:     /users/{id}
     defaults: { _controller: APICoreBundle:User:delete }
     methods: [DELETE]
+
+file_upload:
+    path:     /upload
+    defaults: { _controller: APICoreBundle:Cdn:upload }
+    methods: [POST]
+
+file_load:
+    path:     /load/{slug}
+    defaults: { _controller: APICoreBundle:Cdn:load }
+    methods: [GET]

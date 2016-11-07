@@ -15,8 +15,8 @@ abstract class ApiTestCase extends WebTestCase
 {
     use LoginTrait;
 
-    private $adminToken;
-    private $userToken;
+    protected $adminToken;
+    protected $userToken;
 
 
     public function __construct()

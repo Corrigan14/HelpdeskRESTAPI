@@ -9,7 +9,6 @@ use API\CoreBundle\Services\StatusCodesHelper;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class UsersController
@@ -83,11 +82,10 @@ class UserController extends ApiBaseController implements ControllerInterface
             return $this->unauthorizedResponse();
         }
 
-        $userModel = $this->get('api_user.model');
         $fields = $request->get('fields') ? explode(',' , $request->get('fields')) : [];
         $page = $request->get('page') ?: 1;
 
-        return $this->json($userModel->getUsersResponse($fields , $page) , StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($this->get('api_user.service')->getUsersResponse($fields , $page) , StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -101,6 +99,22 @@ class UserController extends ApiBaseController implements ControllerInterface
      *           "roles": "[\"ROLE_ADMIN\"]",
      *           "is_active": true,
      *           "acl": "[]"
+     *           "detail_data":
+     *           {
+     *              "name": "Martina",
+     *              "surname": "Koronci Babinska",
+     *              "title_before": Mgr,
+     *              "title_after": PhD,
+     *              "function": "developer",
+     *              "mobile": "00421 0987 544",
+     *              "tel": 00421 0987 544,
+     *              "fax": 00421 0987 544,
+     *              "signature": "Martina Koronci Babinska, WEB-SOLUTIONS",
+     *              "street": "Nova 487",
+     *              "city": "Bratislava",
+     *              "zip": "025874",
+     *              "country": "SR"
+     *           }
      *        },
      *        "_links":
      *        {
@@ -155,7 +169,7 @@ class UserController extends ApiBaseController implements ControllerInterface
             ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
 
-        return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user) , StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -234,7 +248,7 @@ class UserController extends ApiBaseController implements ControllerInterface
         $user->setRoles(['ROLE_USER']);
         $user->setIsActive(true);
 
-        return $this->updateUser($user , $requestData, true);
+        return $this->updateUser($user , $requestData , true);
     }
 
     /**
@@ -444,7 +458,9 @@ class UserController extends ApiBaseController implements ControllerInterface
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (null === $user) {
+
             return $this->createApiResponse([
+
                 'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
             ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
@@ -460,13 +476,14 @@ class UserController extends ApiBaseController implements ControllerInterface
     /**
      * @param User|null $user
      *
-     * @param array $requestData
+     * @param array     $requestData
      *
-     * @param bool $create
+     * @param bool      $create
+     *
      * @return JsonResponse
      * @internal param $id
      */
-    private function updateUser($user , array $requestData, $create = false)
+    private function updateUser($user , array $requestData , $create = false)
     {
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
@@ -489,18 +506,24 @@ class UserController extends ApiBaseController implements ControllerInterface
              * Fill UserData Entity if some its parameters were sent
              */
             if (isset($requestData['detail_data']) && count($requestData['detail_data']) > 0) {
-                $userData = new UserData();
-                $user->setDetailData($userData);
+
+                $userData = $user->getDetailData();
+                if (null === $userData) {
+                    $userData = new UserData();
+                    $userData->setUser($user);
+                    $user->setDetailData($userData);
+                }
+
                 $errorsUserData = $this->get('entity_processor')->processEntity($userData , $requestData['detail_data']);
 
                 if (false === $errorsUserData) {
                     $this->getDoctrine()->getManager()->persist($userData);
                     $this->getDoctrine()->getManager()->flush();
 
-                    return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user) , $statusCode);
+                    return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user) , $statusCode);
                 }
             } else {
-                return $this->createApiResponse($this->get('api_user.model')->getCustomUserData($user) , $statusCode);
+                return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user) , $statusCode);
             }
         }
 

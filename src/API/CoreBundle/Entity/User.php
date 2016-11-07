@@ -6,6 +6,7 @@ use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ReadOnly;
 use JMS\Serializer\Annotation\Exclude;
 use JMS\Serializer\Annotation\ExclusionPolicy;
+use JMS\Serializer\Annotation\MaxDepth;
 use Symfony\Component\Security\Core\User\AdvancedUserInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -13,11 +14,11 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="API\CoreBundle\Repository\UserRepository")
  * @ORM\Table(name="user")
  * @UniqueEntity("email")
  * @UniqueEntity("username")
- * @Serializer\ExclusionPolicy("none")
+ * @ExclusionPolicy("none")
  */
 class User implements AdvancedUserInterface , \Serializable
 {
@@ -77,7 +78,7 @@ class User implements AdvancedUserInterface , \Serializable
      *
      * @var bool
      */
-    private $isActive = true;
+    private $is_active = true;
 
     /**
      * @ORM\Column(name="acl", type="text", nullable=true)
@@ -87,9 +88,9 @@ class User implements AdvancedUserInterface , \Serializable
     private $acl;
 
     /**
-     * @ORM\OneToOne(targetEntity="UserData", inversedBy="user")
-     * @ORM\JoinColumn(name="detail_data_id", referencedColumnName="id", onDelete="CASCADE")
-     * @Serializer\MaxDepth(0)
+     * @var UserData
+     * @ORM\OneToOne(targetEntity="UserData", mappedBy="user", orphanRemoval=true)
+     * @MaxDepth(1)
      *
      * @var UserData
      */
@@ -105,7 +106,7 @@ class User implements AdvancedUserInterface , \Serializable
 
     public function __construct()
     {
-        $this->isActive = true;
+        $this->is_active = true;
         $this->acl = json_encode([]);
     }
 
@@ -216,7 +217,7 @@ class User implements AdvancedUserInterface , \Serializable
      */
     public function setIsActive($isActive)
     {
-        $this->isActive = $isActive;
+        $this->is_active = $isActive;
 
         return $this;
     }
@@ -228,7 +229,7 @@ class User implements AdvancedUserInterface , \Serializable
      */
     public function getIsActive()
     {
-        return $this->isActive;
+        return $this->is_active;
     }
 
     /**
@@ -372,7 +373,7 @@ class User implements AdvancedUserInterface , \Serializable
     public function isEnabled()
     {
 
-        return $this->isActive;
+        return $this->is_active;
     }
 
     /**

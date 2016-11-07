@@ -4,12 +4,15 @@ namespace API\CoreBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use JMS\Serializer\Annotation\ReadOnly;
+use JMS\Serializer\Annotation\Exclude;
 
 /**
  * UserData
  *
  * @ORM\Table(name="user_data")
  * @ORM\Entity(repositoryClass="API\CoreBundle\Repository\UserDataRepository")
+ * @Serializer\ExclusionPolicy("none")
  */
 class UserData
 {
@@ -19,7 +22,7 @@ class UserData
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @Serializer\Exclude()
+     * @ReadOnly()
      */
     private $id;
 
@@ -42,14 +45,14 @@ class UserData
      *
      * @ORM\Column(name="title_before", type="string", length=45, nullable=true)
      */
-    private $titleBefore;
+    private $title_before;
 
     /**
      * @var string
      *
      * @ORM\Column(name="title_after", type="string", length=45, nullable=true)
      */
-    private $titleAfter;
+    private $title_after;
 
     /**
      * @var string
@@ -115,8 +118,9 @@ class UserData
     private $country;
 
     /**
-     * @ORM\OneToOne(targetEntity="User", mappedBy="detailData")
-     * @Serializer\Exclude()
+     * @ORM\OneToOne(targetEntity="User", inversedBy="detailData", fetch="EAGER")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="SET NULL")
+     * @Exclude()
      */
     private $user;
 
@@ -187,7 +191,7 @@ class UserData
      */
     public function setTitleBefore($titleBefore)
     {
-        $this->titleBefore = $titleBefore;
+        $this->title_before = $titleBefore;
 
         return $this;
     }
@@ -199,7 +203,7 @@ class UserData
      */
     public function getTitleBefore()
     {
-        return $this->titleBefore;
+        return $this->title_before;
     }
 
     /**
@@ -211,7 +215,7 @@ class UserData
      */
     public function setTitleAfter($titleAfter)
     {
-        $this->titleAfter = $titleAfter;
+        $this->title_after = $titleAfter;
 
         return $this;
     }
@@ -223,7 +227,7 @@ class UserData
      */
     public function getTitleAfter()
     {
-        return $this->titleAfter;
+        return $this->title_after;
     }
 
     /**

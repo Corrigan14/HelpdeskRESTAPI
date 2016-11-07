@@ -12,7 +12,7 @@ use JMS\Serializer\Annotation\ReadOnly;
 use JMS\Serializer\Annotation\Exclude;
 
 /**
- * @ORM\Entity(repositoryClass="API\CoreBundle\Repository\TagRepository")
+ * @ORM\Entity(repositoryClass="API\TaskBundle\Repository\TagRepository")
  * @ORM\Table(name="tag")
  * @UniqueEntity("title")
  */

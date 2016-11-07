@@ -4,7 +4,7 @@ namespace API\TaskBundle\Controller;
 
 use API\CoreBundle\Controller\ApiBaseController;
 use API\CoreBundle\Controller\ControllerInterface;
-use API\CoreBundle\Entity\Tag;
+use API\TaskBundle\Entity\Tag;
 use API\CoreBundle\Services\StatusCodesHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,7 +13,7 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 /**
  * Class TagController
  *
- * @package API\CoreBundle\Controller
+ * @package API\TaskBundle\Controller
  */
 class TagController extends ApiBaseController  implements ControllerInterface
 {
@@ -52,7 +52,7 @@ class TagController extends ApiBaseController  implements ControllerInterface
      */
     public function listAction(Request $request)
     {
-        $tags = $this->get('api_tag.model')->getTags($this->getUser()->getId());
+        $tags = $this->get('api_tag.service')->getTagsResponse($this->getUser()->getId());
 
         return $this->createApiResponse($tags, StatusCodesHelper::SUCCESSFUL_CODE);
     }
@@ -63,9 +63,17 @@ class TagController extends ApiBaseController  implements ControllerInterface
      *        "data":
      *        {
      *           "id": "2",
-     *           "user_id": "18",
      *           "title": "Work",
      *           "color": "4871BF"
+     *           "user":
+     *           {
+     *              "id": 19,
+     *              "username": "user",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "acl": "[]"
+     *          }
      *        },
      *        "_links":
      *        {
@@ -92,7 +100,7 @@ class TagController extends ApiBaseController  implements ControllerInterface
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  output="API\CoreBundle\Entity\Tag",
+     *  output="API\TaskBundle\Entity\Tag",
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
@@ -106,13 +114,18 @@ class TagController extends ApiBaseController  implements ControllerInterface
      */
     public function getAction(int $id)
     {
-        $tag = $this->get('api_tag.model')->getTagById($id, $this->getUser()->getId());
+        $t = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
+            'id' => $id,
+            'user' => $this->getUser(),
+        ]);
 
-        if (null === $tag || !$tag['data']) {
+        if (null === $t) {
             return $this->createApiResponse([
                 'message' => StatusCodesHelper::TAG_NOT_FOUND_MESSAGE,
             ], StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
         }
+
+        $tag = $this->get('api_tag.service')->getTagResponse($t);
 
         return $this->createApiResponse($tag, StatusCodesHelper::SUCCESSFUL_CODE);
     }
@@ -147,7 +160,7 @@ class TagController extends ApiBaseController  implements ControllerInterface
      * @ApiDoc(
      *  resource = true,
      *  description="Create a new Tag Entity",
-     *  input={"class"="API\CoreBundle\Entity\Tag"},
+     *  input={"class"="API\TaskBundle\Entity\Tag"},
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -155,7 +168,7 @@ class TagController extends ApiBaseController  implements ControllerInterface
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  output={"class"="API\CoreBundle\Entity\Tag"},
+     *  output={"class"="API\TaskBundle\Entity\Tag"},
      *  statusCodes={
      *      201 ="The entity was successfully created",
      *      401 ="Unauthorized request",
@@ -213,7 +226,7 @@ class TagController extends ApiBaseController  implements ControllerInterface
      *       "description"="The id of processed object"
      *     }
      *  },
-     *  input={"class"="API\CoreBundle\Entity\Tag"},
+     *  input={"class"="API\TaskBundle\Entity\Tag"},
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -221,7 +234,7 @@ class TagController extends ApiBaseController  implements ControllerInterface
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  output={"class"="API\CoreBundle\Entity\Tag"},
+     *  output={"class"="API\TaskBundle\Entity\Tag"},
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
@@ -239,7 +252,7 @@ class TagController extends ApiBaseController  implements ControllerInterface
     {
         $requestData = $request->request->all();
 
-        $tag = $this->getDoctrine()->getRepository('APICoreBundle:Tag')->findOneBy([
+        $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
             'id' => $id,
             'user' => $this->getUser(),
         ]);
@@ -283,7 +296,7 @@ class TagController extends ApiBaseController  implements ControllerInterface
      *       "description"="The id of processed object"
      *     }
      *  },
-     *  input={"class"="API\CoreBundle\Entity\Tag"},
+     *  input={"class"="API\TaskBundle\Entity\Tag"},
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -291,7 +304,7 @@ class TagController extends ApiBaseController  implements ControllerInterface
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  output={"class"="API\CoreBundle\Entity\Tag"},
+     *  output={"class"="API\TaskBundle\Entity\Tag"},
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
@@ -309,7 +322,7 @@ class TagController extends ApiBaseController  implements ControllerInterface
     {
         $requestData = $request->request->all();
 
-        $tag = $this->getDoctrine()->getRepository('APICoreBundle:Tag')->findOneBy([
+        $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
             'id' => $id,
             'user' => $this->getUser(),
         ]);
@@ -347,7 +360,7 @@ class TagController extends ApiBaseController  implements ControllerInterface
      */
     public function deleteAction(int $id)
     {
-        $tag = $this->getDoctrine()->getRepository('APICoreBundle:Tag')->findOneBy([
+        $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
             'id' => $id,
             'user' => $this->getUser(),
         ]);
@@ -400,7 +413,7 @@ class TagController extends ApiBaseController  implements ControllerInterface
             $this->getDoctrine()->getManager()->persist($tag);
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->createApiResponse($this->get('api_tag.model')->getTagDataWithLinks($tag),$statusCode);
+            return $this->createApiResponse($this->get('api_tag.service')->getTagResponse($tag),$statusCode);
         }
 
         return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE , 'errors' => $errors] , StatusCodesHelper::INVALID_PARAMETERS_CODE);

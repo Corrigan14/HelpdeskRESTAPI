@@ -202,19 +202,19 @@ class User implements AdvancedUserInterface , \Serializable
     /**
      * Set isActive
      *
-     * @param boolean $isActive
+     * @param boolean $is_active
      *
      * @return User
      */
-    public function setIsActive($isActive)
+    public function setIsActive($is_active)
     {
-        $this->is_active = $isActive;
+        $this->is_active = $is_active;
 
         return $this;
     }
 
     /**
-     * Get isActive
+     * Get is_active
      *
      * @return boolean
      */

@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: user
- * Date: 11/7/16
- * Time: 11:34 AM
- */
 
 namespace API\CoreBundle\Tests\Controller;
 
@@ -31,7 +25,9 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
         $this->assertNotEquals(false, $this->userToken);
     }
 
-//    1. GET List
+    /**
+     * GET LIST - SUCCESS
+     */
     public function testListSuccess()
     {
         $crawler = $this->getClient(true)->request('GET', $this->getBaseUrl(), [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
@@ -42,6 +38,9 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
         $this->assertEquals(200, $this->getClient()->getResponse()->getStatusCode());
     }
 
+    /**
+     * GET LIST - ERRORS
+     */
     public function testListErrors()
     {
         $crawler = $this->getClient(true)->request('GET', $this->getBaseUrl());

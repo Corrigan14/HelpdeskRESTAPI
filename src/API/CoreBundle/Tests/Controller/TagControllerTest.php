@@ -2,21 +2,23 @@
 
 namespace API\CoreBundle\Tests\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-
-class TagControllerTest extends WebTestCase
+/**
+ * Class TagControllerTest
+ * @package API\CoreBundle\Tests\Controller
+ */
+class TagControllerTest extends ApiTestCase
 {
     const BASE_URL = '/api/v1/tags';
 
 //    1. GET List
     public function testListSuccess()
     {
-
+        parent::testListSuccess();
     }
 
     public function testListErrors()
     {
-
+        parent::testListErrors();
     }
 
 //   2. GET Single
@@ -61,5 +63,10 @@ class TagControllerTest extends WebTestCase
     public function testDeleteSingleErrors()
     {
 
+    }
+
+    public function getBaseUrl()
+    {
+        return self::BASE_URL;
     }
 }

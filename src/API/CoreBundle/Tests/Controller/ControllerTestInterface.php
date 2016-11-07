@@ -3,9 +3,6 @@ namespace API\CoreBundle\Tests\Controller;
 
 interface ControllerTestInterface
 {
-
-    const BASE_URL = '/api/v1/';
-
 //    1. GET List
     public function testListSuccess();
     public function testListErrors();
@@ -26,4 +23,6 @@ interface ControllerTestInterface
     public function testDeleteSingleSuccess();
     public function testDeleteSingleErrors();
 
+    public function getClient();
+    public function getBaseUrl();
 }

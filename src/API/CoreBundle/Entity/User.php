@@ -1,6 +1,7 @@
 <?php
 namespace API\CoreBundle\Entity;
 
+use API\TaskBundle\Entity\Tag;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ReadOnly;
@@ -97,7 +98,7 @@ class User implements AdvancedUserInterface , \Serializable
     private $detailData;
 
     /**
-     * @ORM\OneToMany(targetEntity="Tag", mappedBy="user")
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Tag", mappedBy="user")
      * @Serializer\Exclude()
      *
      * @var ArrayCollection

@@ -1,9 +1,9 @@
 <?php
 
-namespace API\CoreBundle\DataFixtures\ORM;
+namespace API\TaskBundle\DataFixtures\ORM;
 
-use API\CoreBundle\Entity\Tag;
 use API\CoreBundle\Entity\User;
+use API\TaskBundle\Entity\Tag;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -43,11 +43,13 @@ class TagFixture implements FixtureInterface , ContainerAwareInterface , Ordered
      */
     public function load(ObjectManager $manager)
     {
+        /** @var User $user */
         $user = $manager->getRepository('APICoreBundle:User')->findOneBy([
             'username' => 'admin',
         ]);
 
         if($user){
+            /** @var \API\TaskBundle\Entity\Tag $tag1 */
             $tag1 = new Tag();
             $tag1->setTitle('Free Time');
             $tag1->setColor('BF4848');

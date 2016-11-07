@@ -1,9 +1,10 @@
 <?php
 
-namespace API\CoreBundle\Controller;
+namespace API\TaskBundle\Controller;
 
+use API\CoreBundle\Controller\ApiBaseController;
+use API\CoreBundle\Controller\ControllerInterface;
 use API\CoreBundle\Entity\Tag;
-use API\CoreBundle\Entity\User;
 use API\CoreBundle\Services\StatusCodesHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,7 +15,7 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
  *
  * @package API\CoreBundle\Controller
  */
-class TagController extends ApiBaseController implements ControllerInterface
+class TagController extends ApiBaseController  implements ControllerInterface
 {
     /**
      *  ### Response ###

@@ -1,13 +1,14 @@
 <?php
 
-namespace API\CoreBundle\Services;
+namespace API\TaskBundle\Services;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
 /**
- * Class userService
- * @package API\CoreBundle\Services
+ * Class taskService
+ *
+ * @package API\TaskBundle\Services
  */
 class TagService
 {
@@ -21,7 +22,7 @@ class TagService
 
 
     /**
-     * UserService constructor.
+     * TagService constructor.
      *
      * @param EntityManager $em
      * @param Router $router

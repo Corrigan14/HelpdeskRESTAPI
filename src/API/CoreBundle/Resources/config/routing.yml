@@ -32,33 +32,3 @@ user_delete:
     path:     /users/{id}
     defaults: { _controller: APICoreBundle:User:delete }
     methods: [DELETE]
-
-tag_list:
-    path:     /tags
-    defaults: { _controller: APICoreBundle:Tag:list }
-    methods: [GET]
-
-tag:
-    path:     /tags/{id}
-    defaults: { _controller: APICoreBundle:Tag:get }
-    methods: [GET]
-
-tag_create:
-    path:     /tags
-    defaults: { _controller: APICoreBundle:Tag:create }
-    methods: [POST]
-
-tag_update:
-    path:     /tags/{id}
-    defaults: { _controller: APICoreBundle:Tag:update }
-    methods: [PUT]
-
-tag_partial_update:
-    path:     /tags/{id}
-    defaults: { _controller: APICoreBundle:Tag:updatePartial }
-    methods: [PATCH]
-
-tag_delete:
-    path:     /tags/{id}
-    defaults: { _controller: APICoreBundle:Tag:delete }
-    methods: [DELETE]

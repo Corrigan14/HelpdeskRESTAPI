@@ -1,7 +1,8 @@
 <?php
 
-namespace API\CoreBundle\Entity;
+namespace API\TaskBundle\Entity;
 
+use API\CoreBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -44,7 +45,7 @@ class Tag implements \Serializable
     private $color;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="tags")
+     * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="tags")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
      * @ReadOnly()
      *

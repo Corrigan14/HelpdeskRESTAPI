@@ -20,7 +20,7 @@ class ApiBaseVoter
     protected $token;
 
     /** @var  EntityManager */
-    private $em;
+    protected $em;
 
     /**
      * ApiBaseVoter constructor.

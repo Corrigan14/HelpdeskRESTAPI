@@ -44,8 +44,13 @@ class TagFixture implements FixtureInterface , ContainerAwareInterface , Ordered
     public function load(ObjectManager $manager)
     {
         /** @var User $user */
-        $user = $manager->getRepository('APICoreBundle:User')->findOneBy([
+        $admin = $manager->getRepository('APICoreBundle:User')->findOneBy([
             'username' => 'admin',
+        ]);
+
+        /** @var User $user */
+        $user = $manager->getRepository('APICoreBundle:User')->findOneBy([
+            'username' => 'user',
         ]);
 
         if($user){
@@ -53,17 +58,20 @@ class TagFixture implements FixtureInterface , ContainerAwareInterface , Ordered
             $tag1 = new Tag();
             $tag1->setTitle('Free Time');
             $tag1->setColor('BF4848');
-            $tag1->setUser($user);
+            $tag1->setPublic(true);
+            $tag1->setCreatedBy($admin);
 
             $tag2 = new Tag();
             $tag2->setTitle('Work');
             $tag2->setColor('4871BF');
-            $tag2->setUser($user);
+            $tag2->setPublic(true);
+            $tag2->setCreatedBy($admin);
 
             $tag3 = new Tag();
             $tag3->setTitle('Home');
             $tag3->setColor('DFD112');
-            $tag3->setUser($user);
+            $tag3->setPublic(false);
+            $tag3->setCreatedBy($user);
 
             $manager->persist($tag1);
             $manager->persist($tag2);

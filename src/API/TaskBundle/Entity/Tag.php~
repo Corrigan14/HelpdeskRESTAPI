@@ -12,7 +12,7 @@ use JMS\Serializer\Annotation\ReadOnly;
 use JMS\Serializer\Annotation\Exclude;
 
 /**
- * @ORM\Entity(repositoryClass="API\CoreBundle\Repository\TagRepository")
+ * @ORM\Entity(repositoryClass="API\TaskBundle\Repository\TagRepository")
  * @ORM\Table(name="tag")
  * @UniqueEntity("title")
  */
@@ -45,17 +45,29 @@ class Tag implements \Serializable
     private $color;
 
     /**
+     * @ORM\Column(name="public", type="boolean", options={"default" = 0})
+     *
+     * @var bool
+     */
+    private $public;
+
+    /**
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="tags")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
-     * @ReadOnly()
+     * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
+     * @Exclude()
      *
      * @var User
      */
-    private $user;
+    private $createdBy;
 
+
+
+    /**
+     * Tag constructor.
+     */
     public function __construct()
     {
-        $this->user = new ArrayCollection();
+
     }
 
     /**
@@ -117,30 +129,6 @@ class Tag implements \Serializable
     }
 
     /**
-     * Set user
-     *
-     * @param User $user
-     *
-     * @return Tag
-     */
-    public function setUser(User $user = null)
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
-    /**
-     * Get user
-     *
-     * @return User
-     */
-    public function getUser()
-    {
-        return $this->user;
-    }
-
-    /**
      * String representation of object
      * @link http://php.net/manual/en/serializable.serialize.php
      * @return string the string representation of the object or null
@@ -171,5 +159,53 @@ class Tag implements \Serializable
             $this->title ,
             $this->color ,
             ) = unserialize($serialized);
+    }
+
+    /**
+     * Set public
+     *
+     * @param boolean $public
+     *
+     * @return Tag
+     */
+    public function setPublic($public)
+    {
+        $this->public = $public;
+
+        return $this;
+    }
+
+    /**
+     * Get public
+     *
+     * @return boolean
+     */
+    public function getPublic()
+    {
+        return $this->public;
+    }
+
+    /**
+     * Set createdBy
+     *
+     * @param User $createdBy
+     *
+     * @return Tag
+     */
+    public function setCreatedBy(User $createdBy)
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    /**
+     * Get createdBy
+     *
+     * @return \API\CoreBundle\Entity\User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
     }
 }

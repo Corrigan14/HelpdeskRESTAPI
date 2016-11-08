@@ -7,6 +7,8 @@ tag:
     path:     /tags/{id}
     defaults: { _controller: APITaskBundle:Tag:get }
     methods: [GET]
+    requirements:
+        id: '\d+'
 
 tag_create:
     path:     /tags
@@ -17,13 +19,19 @@ tag_update:
     path:     /tags/{id}
     defaults: { _controller: APITaskBundle:Tag:update }
     methods: [PUT]
+    requirements:
+            id: '\d+'
 
 tag_partial_update:
     path:     /tags/{id}
     defaults: { _controller: APITaskBundle:Tag:updatePartial }
     methods: [PATCH]
+    requirements:
+            id: '\d+'
 
 tag_delete:
     path:     /tags/{id}
     defaults: { _controller: APITaskBundle:Tag:delete }
     methods: [DELETE]
+    requirements:
+            id: '\d+'

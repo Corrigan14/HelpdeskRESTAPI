@@ -35,7 +35,7 @@ class TagService
     }
 
     /**
-     * Return all User's Tags
+     * Return all User's Tags + public Tags
      *
      * @param int $id
      * @return array
@@ -43,7 +43,7 @@ class TagService
     public function getTagsResponse(int $id)
     {
         return[
-          'data' => $this->em->getRepository('APITaskBundle:Tag')->getTags($id),
+          'data' => $this->em->getRepository('APITaskBundle:Tag')->getAllTags($id),
         ];
     }
 

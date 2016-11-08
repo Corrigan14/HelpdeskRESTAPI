@@ -98,10 +98,10 @@ class User implements AdvancedUserInterface , \Serializable
     private $detailData;
 
     /**
-     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Tag", mappedBy="user")
-     * @Serializer\Exclude()
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Tag", mappedBy="createdBy")
+     * @Exclude()
      *
-     * @var ArrayCollection
+     * @var Tag
      */
     private $tags;
 
@@ -109,6 +109,7 @@ class User implements AdvancedUserInterface , \Serializable
     {
         $this->is_active = true;
         $this->acl = json_encode([]);
+        $this->tags = new ArrayCollection();
     }
 
     /**
@@ -387,7 +388,6 @@ class User implements AdvancedUserInterface , \Serializable
     public function addTag(Tag $tag)
     {
         $this->tags[] = $tag;
-        $tag->setUser($this);
 
         return $this;
     }

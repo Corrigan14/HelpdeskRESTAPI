@@ -26,6 +26,9 @@ class StatusCodesHelper
     const UNAUTHORIZED_CODE = 401;
     const INCORRECT_CREDENTIALS_MESSAGE = 'Incorrect credentials';
     const INCORRECT_CREDENTIALS_CODE = 403;
+    const ACCESS_DENIED_TO_CREATE_PUBLIC_TAG = 'Can not create PUBLIC tags!';
+    const ACCESS_DENIED_MESSAGE = 'Access denied!';
+    const ACCESS_DENIED_CODE = 403;
     const USER_NOT_FOUND_MESSAGE = 'User not found';
     const TAG_NOT_FOUND_MESSAGE = 'Tag not found';
     const RESOURCE_NOT_FOUND_MESSAGE = 'Resource not found';

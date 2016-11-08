@@ -6,6 +6,7 @@ use API\CoreBundle\Controller\ApiBaseController;
 use API\CoreBundle\Controller\ControllerInterface;
 use API\TaskBundle\Entity\Tag;
 use API\CoreBundle\Services\StatusCodesHelper;
+use API\TaskBundle\Security\VoteOptions;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -15,7 +16,7 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
  *
  * @package API\TaskBundle\Controller
  */
-class TagController extends ApiBaseController  implements ControllerInterface
+class TagController extends ApiBaseController implements ControllerInterface
 {
     /**
      *  ### Response ###
@@ -25,9 +26,9 @@ class TagController extends ApiBaseController  implements ControllerInterface
      *          "0":
      *          {
      *             "id": "2",
-     *             "user_id": "18",
      *             "title": "Work",
-     *             "color": "4871BF"
+     *             "color": "4871BF",
+     *             "public": true
      *          }
      *        }
      *      }
@@ -65,7 +66,8 @@ class TagController extends ApiBaseController  implements ControllerInterface
      *           "id": "2",
      *           "title": "Work",
      *           "color": "4871BF"
-     *           "user":
+     *           "public": true
+     *           "created_by":
      *           {
      *              "id": 19,
      *              "username": "user",
@@ -104,6 +106,7 @@ class TagController extends ApiBaseController  implements ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found Tag",
      *  }
      * )
@@ -116,13 +119,18 @@ class TagController extends ApiBaseController  implements ControllerInterface
     {
         $t = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
             'id' => $id,
-            'user' => $this->getUser(),
         ]);
 
         if (null === $t) {
             return $this->createApiResponse([
                 'message' => StatusCodesHelper::TAG_NOT_FOUND_MESSAGE,
             ], StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
+        }
+
+        if (!$this->get('tag_voter')->isGranted(VoteOptions::SHOW_TAG, $id)) {
+            return $this->createApiResponse([
+                'message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE,
+            ], StatusCodesHelper::ACCESS_DENIED_CODE);
         }
 
         $tag = $this->get('api_tag.service')->getTagResponse($t);
@@ -139,7 +147,8 @@ class TagController extends ApiBaseController  implements ControllerInterface
      *           "user_id": "18",
      *           "title": "Work",
      *           "color": "4871BF"
-     *           "user":
+     *           "public": true
+     *           "created_by":
      *           {
      *              "id": 19,
      *              "username": "user",
@@ -172,6 +181,7 @@ class TagController extends ApiBaseController  implements ControllerInterface
      *  statusCodes={
      *      201 ="The entity was successfully created",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied to create PUBLIC tag",
      *      409 ="Invalid parameters",
      *  }
      * )
@@ -185,9 +195,9 @@ class TagController extends ApiBaseController  implements ControllerInterface
         $requestData = $request->request->all();
 
         $tag = new Tag();
-        $tag->setUser($this->getUser());
+        $tag->setCreatedBy($this->getUser());
 
-        return $this->processTag($tag,$requestData, true);
+        return $this->processTag($tag, $requestData, true);
     }
 
     /**
@@ -198,7 +208,8 @@ class TagController extends ApiBaseController  implements ControllerInterface
      *           "id": "2",
      *           "title": "Work",
      *           "color": "4871BF",
-     *           "user":
+     *           "public": true
+     *           "created_by":
      *           {
      *              "id": 19,
      *              "username": "user",
@@ -238,6 +249,7 @@ class TagController extends ApiBaseController  implements ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied to create PUBLIC tag",
      *      404 ="Not found Tag",
      *      409 ="Invalid parameters",
      *  }
@@ -254,10 +266,10 @@ class TagController extends ApiBaseController  implements ControllerInterface
 
         $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
             'id' => $id,
-            'user' => $this->getUser(),
+            'createdBy' => $this->getUser(),
         ]);
 
-        return $this->updateTag($tag,$requestData);
+        return $this->updateTag($tag, $requestData);
     }
 
     /**
@@ -268,7 +280,8 @@ class TagController extends ApiBaseController  implements ControllerInterface
      *           "id": "2",
      *           "title": "Work",
      *           "color": "4871BF",
-     *           "user":
+     *           "public": true
+     *           "created_by":
      *           {
      *              "id": 19,
      *              "username": "user",
@@ -308,6 +321,7 @@ class TagController extends ApiBaseController  implements ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied to create PUBLIC tag",
      *      404 ="Not found Tag",
      *      409 ="Invalid parameters",
      *  }
@@ -324,10 +338,10 @@ class TagController extends ApiBaseController  implements ControllerInterface
 
         $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
             'id' => $id,
-            'user' => $this->getUser(),
+            'createdBy' => $this->getUser(),
         ]);
 
-        return $this->updateTag($tag,$requestData);
+        return $this->updateTag($tag, $requestData);
     }
 
     /**
@@ -362,7 +376,7 @@ class TagController extends ApiBaseController  implements ControllerInterface
     {
         $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
             'id' => $id,
-            'user' => $this->getUser(),
+            'createdBy' => $this->getUser(),
         ]);
 
         if (null === $tag || !$tag instanceof Tag) {
@@ -375,8 +389,8 @@ class TagController extends ApiBaseController  implements ControllerInterface
         $this->getDoctrine()->getManager()->flush();
 
         return $this->createApiResponse([
-            'message' => StatusCodesHelper::DELETED_MESSAGE ,
-        ] , StatusCodesHelper::DELETED_CODE);
+            'message' => StatusCodesHelper::DELETED_MESSAGE,
+        ], StatusCodesHelper::DELETED_CODE);
     }
 
     /**
@@ -386,14 +400,13 @@ class TagController extends ApiBaseController  implements ControllerInterface
      */
     private function updateTag($tag, $requestData)
     {
-        if(null === $tag || !$tag instanceof Tag)
-        {
+        if (null === $tag || !$tag instanceof Tag) {
             return $this->createApiResponse([
-                'message' => StatusCodesHelper::TAG_NOT_FOUND_MESSAGE ,
-            ] , StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
+                'message' => StatusCodesHelper::TAG_NOT_FOUND_MESSAGE,
+            ], StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
         }
 
-        return $this->processTag($tag,$requestData);
+        return $this->processTag($tag, $requestData);
     }
 
     /**
@@ -406,16 +419,23 @@ class TagController extends ApiBaseController  implements ControllerInterface
     {
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
-        $errors = $this->get('entity_processor')->processEntity($tag,$requestData);
+        if (isset($requestData['public']) && $requestData['public']) {
+            if (!$this->get('tag_voter')->isGranted(VoteOptions::CREATE_PUBLIC_TAG)) {
+                return $this->createApiResponse([
+                    'message' => StatusCodesHelper::ACCESS_DENIED_TO_CREATE_PUBLIC_TAG,
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            }
+        }
 
-        if (false === $errors)
-        {
+        $errors = $this->get('entity_processor')->processEntity($tag, $requestData);
+
+        if (false === $errors) {
             $this->getDoctrine()->getManager()->persist($tag);
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->createApiResponse($this->get('api_tag.service')->getTagResponse($tag),$statusCode);
+            return $this->createApiResponse($this->get('api_tag.service')->getTagResponse($tag), $statusCode);
         }
 
-        return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE , 'errors' => $errors] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE, 'errors' => $errors], StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

@@ -2,3 +2,6 @@ services:
     api_tag.service:
         class: API\TaskBundle\Services\TagService
         arguments: ["@doctrine.orm.entity_manager","@router"]
+    tag_voter:
+        class: API\TaskBundle\Security\TagVoter
+        arguments: ["@security.access.decision_manager","@security.token_storage", "@doctrine.orm.entity_manager"]

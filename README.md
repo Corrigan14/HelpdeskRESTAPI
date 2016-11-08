@@ -1,4 +1,4 @@
-.checkout
+.API Dokumentácia
 =========
 
 API Dokumentácia
@@ -139,3 +139,42 @@ Dokumentacne pravidla
         *      201="The entity was successfully created",
         *      409="Invalid parameters",
         *  },
+        
+.Tvorba novej Entity
+=========
+0. Testy
+
+1. Entita
+    - vytvorenie Entity
+    - Entita implementuje Serializer
+        use JMS\Serializer\Annotation as Serializer;
+    - vyuzivame
+        use JMS\Serializer\Annotation\ReadOnly;
+        use JMS\Serializer\Annotation\Exclude;
+    - kazdy parameter, ktory sa nema zobrazovat pri vypisovani entity musi mat nastaveny prefix @Exclude()
+    - kazdy parameter, ktory sa ma zobrazovat pri vypisovani entity, ale jeho hodnota sa nezadava (napr. ID) 
+      musi mat nastaveny prefix @ReadOnly()
+
+2. Fixtures
+      
+3. Controller
+    - vytvorenie Controllera
+    - kazdy Controller: extends ApiBaseController implements ControllerInterface
+    - upravime dokumentaciu pre jednotlive implementovane metody
+
+4. Routy (Resources/config/routing/entityName.yml)
+    - vytvorenie entityName.yml suboru
+    - kazdu skupinu rout musime zaregistrovat v routing.yml
+    - kazda entita bude mat zakladnu skupinu rout (pozri tag.yml)
+
+5. Service
+    - vytvorenie Service (Services)
+    - registracia Service (Resources/config/services.yml)
+    
+6. Repostory
+    - tento automaticky vygeneruje Doctrine pri vytvoreni entity. AK nie, je potrebne ho v entite zaregostrovat
+
+7. Security
+    - vytvorenie EntityNameOptions.php - obsahuje konstanty s akciami, pre ktore su potrebne pravidla vykonavania
+    - vytvorenie EntityNameVoter.php: extends ApiBaseVoter implements VoterInterface
+    

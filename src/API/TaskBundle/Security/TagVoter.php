@@ -4,6 +4,8 @@ namespace API\TaskBundle\Security;
 
 
 use API\CoreBundle\Entity\User;
+use API\CoreBundle\Security\ApiBaseVoter;
+use API\CoreBundle\Security\VoterInterface;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -14,31 +16,10 @@ use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface
  *
  * @package API\TaskBundle\Security
  */
-class TagVoter
+class TagVoter extends ApiBaseVoter implements VoterInterface
 {
-    /** @var AccessDecisionManagerInterface */
-    private $decisionManager;
-    /** @var TokenInterface */
-    private $token;
     /** @var  User */
     private $user;
-    /** @var  EntityManager */
-    private $em;
-
-    /**
-     * TagVoter constructor.
-     *
-     * @param AccessDecisionManagerInterface $decisionManager
-     * @param TokenStorage $tokenStorage
-     * @param EntityManager $em
-     */
-    public function __construct(AccessDecisionManagerInterface $decisionManager , TokenStorage $tokenStorage, EntityManager $em)
-    {
-        $this->decisionManager = $decisionManager;
-        $this->token = $tokenStorage->getToken();
-        $this->em = $em;
-    }
-
 
     /**
      * Perform a single access check operation on a given attribute, subject and token.

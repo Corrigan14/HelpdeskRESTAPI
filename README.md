@@ -177,4 +177,5 @@ Dokumentacne pravidla
 7. Security
     - vytvorenie EntityNameOptions.php - obsahuje konstanty s akciami, pre ktore su potrebne pravidla vykonavania
     - vytvorenie EntityNameVoter.php: extends ApiBaseVoter implements VoterInterface
+    - registracia EntityNameVoter (Resources/config/services.yml)
     

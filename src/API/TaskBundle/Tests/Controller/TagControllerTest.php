@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Tests\Controller;
 
 use API\CoreBundle\Tests\Controller\ApiTestCase;
+use API\TaskBundle\Entity\Tag;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class TagControllerTest extends ApiTestCase
@@ -95,5 +96,42 @@ class TagControllerTest extends ApiTestCase
     public function getBaseUrl()
     {
         return self::BASE_URL;
+    }
+
+    /**
+     * Return a signle entity from db for testing CRUD
+     *
+     * @return object
+     */
+    public function findOneEntity()
+    {
+        return $this->em->getRepository('APITaskBundle:Tag')->findOneBy([]);
+    }
+
+    /**
+     * Create and return a signle entity from db for testing CRUD
+     *
+     * @return object
+     */
+    public function createEntity()
+    {
+        $entity = $this->findOneEntity();
+        $user = $this->em->getRepository('APICoreBundle:User')->findOneBy([
+            'username' => 'user'
+        ]);
+        $admin = $this->em->getRepository('APICoreBundle:User')->findOneBy([
+            'username' => 'admin'
+        ]);
+
+        if(null === $entity)
+        {
+            $tag = new Tag();
+            $tag->setTitle('TestTag');
+            $tag->setColor('111111');
+            $tag->setPublic(true);
+            $tag->setCreatedBy($admin);
+
+            return $tag;
+        }
     }
 }

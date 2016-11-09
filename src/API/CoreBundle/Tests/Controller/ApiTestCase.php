@@ -33,16 +33,16 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
         self::bootKernel();
 
         $this->em = static::$kernel->getContainer()
-                                   ->get('doctrine')
-                                   ->getManager();
+            ->get('doctrine')
+            ->getManager();
 
-        $this->adminToken = $this->loginUserGetToken('admin' , 'admin' , static::createClient());
-        $this->userToken = $this->loginUserGetToken('testuser2' , 'testuser' , static::createClient());
+        $this->adminToken = $this->loginUserGetToken('admin', 'admin', static::createClient());
+        $this->userToken = $this->loginUserGetToken('testuser2', 'testuser', static::createClient());
         /**
          * token is generated?
          */
-        $this->assertNotEquals(false , $this->adminToken);
-        $this->assertNotEquals(false , $this->userToken);
+        $this->assertNotEquals(false, $this->adminToken);
+        $this->assertNotEquals(false, $this->userToken);
     }
 
     /**
@@ -66,6 +66,24 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
      */
     abstract public function createEntity();
 
+    /**
+     * Return Post data
+     *
+     * @return array
+     */
+    abstract public function returnPostTestData();
+
+    /**
+     * Should remove the entity which will be used in further Post request
+     */
+    abstract public function removeTestEntity();
+
+    /**
+     * Return Update data
+     *
+     * @return array
+     */
+    abstract public function returnUpdateTestData();
 
     /**
      * GET LIST - success
@@ -74,18 +92,18 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
      */
     public function testListSuccess()
     {
-        $this->getClient(true)->request('GET' , $this->getBaseUrl() , [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->getClient(true)->request('GET', $this->getBaseUrl(), [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         /**
          * Expect a list of data
          */
-        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE , $this->getClient()->getResponse()->getStatusCode());
-        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
 
         /**
          * We expect at least one user and compare the keys to default from UserModel
          */
         $keys = array_keys($response['data'][0]);
-        $this->assertTrue(array_key_exists('_links' , $response));
+        $this->assertTrue(array_key_exists('_links', $response));
 
         return $keys;
     }
@@ -95,12 +113,12 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
      */
     public function testListErrors()
     {
-        $this->getClient(true)->request('GET' , $this->getBaseUrl());
+        $this->getClient(true)->request('GET', $this->getBaseUrl());
         /**
          * unauthorized
          */
-        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE , $this->getClient()->getResponse()->getStatusCode());
-        $this->assertContains('Auth header required' , $this->getClient()->getResponse()->getContent());
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+        $this->assertContains('Auth header required', $this->getClient()->getResponse()->getContent());
     }
 
     /**
@@ -109,14 +127,14 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
     public function testGetSingleSuccess()
     {
         $entity = $this->findOneEntity();
-        $this->getClient(true)->request('GET' , $this->getBaseUrl() . '/' . $entity->getId() , [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $entity->getId(), [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
 
-        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE , $this->getClient()->getResponse()->getStatusCode());
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
 
-        $this->assertTrue(array_key_exists('data' , $response));
-        $this->assertTrue(array_key_exists('_links' , $response));
+        $this->assertTrue(array_key_exists('data', $response));
+        $this->assertTrue(array_key_exists('_links', $response));
     }
 
     /**
@@ -124,21 +142,76 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
      */
     public function testGetSingleErrors()
     {
-        $this->getClient(true)->request('GET' , $this->getBaseUrl() . '/73333448' , [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/73333448', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
 
-        $this->assertEquals(StatusCodesHelper::RESOURCE_NOT_FOUND_CODE , $this->getClient()->getResponse()->getStatusCode());
-
-
-        $this->getClient(true)->request('GET' , $this->getBaseUrl() . '/ebuf' , [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-
-        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE , $this->getClient()->getResponse()->getStatusCode());
+        $this->assertEquals(StatusCodesHelper::RESOURCE_NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
 
 
-        $this->getClient(true)->request('GET' , $this->getBaseUrl() . '/7448' , [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken . 1 , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken . 1]);
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/ebuf', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
 
-        $this->assertEquals(StatusCodesHelper::INVALID_JWT_TOKEN_CODE , $this->getClient()->getResponse()->getStatusCode());
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/7448', [], [], ['Authorization' => 'Bearer ' . $this->adminToken . 1, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken . 1]);
+
+        $this->assertEquals(StatusCodesHelper::INVALID_JWT_TOKEN_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
+    /**
+     * POST SINGLE - success
+     */
+    public function testPostSingleSuccess()
+    {
+        $data = $this->returnPostTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        // Create Entity as admin
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(201, $this->getClient()->getResponse()->getStatusCode());
+
+        $createdEntity = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $createdEntity = $createdEntity['data'];
+        $this->assertTrue(array_key_exists('id', $createdEntity));
+    }
+
+    /**
+     *  POST SINGLE - errors
+     */
+    public function testPostSingleErrors()
+    {
+        $data = $this->returnPostTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        // Create test entity, without authorization header
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), $data);
+        $this->assertEquals(401, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * UPDATE SINGLE - success
+     */
+    public function testUpdateSingleSuccess()
+    {
+        $entity = $this->findOneEntity();
+
+        $data = $this->returnUpdateTestData();
+
+        // Change Entity: POST method
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(),
+            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Change Entity: PATCH method
+        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(),
+            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
 
     /**
      * DELETE SINGLE - success
@@ -146,16 +219,16 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
     public function testDeleteSingleSuccess()
     {
         $entity = $this->findOneEntity();
-        $this->getClient(true)->request('DELETE' , $this->getBaseUrl() . '/' . $entity->getId() ,
-            [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::DELETED_CODE , $this->getClient()->getResponse()->getStatusCode());
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::DELETED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         /**
          * check if entity was deleted
          */
-        $this->getClient()->request('DELETE' , $this->getBaseUrl() . '/' . $entity->getId() ,
-            [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE , $this->getClient()->getResponse()->getStatusCode());
+        $this->getClient()->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
     /**

@@ -2,7 +2,6 @@
 
 namespace API\CoreBundle\Tests\Controller;
 
-use API\CoreBundle\DataFixtures\ORM\UserFixture;
 use API\CoreBundle\Repository\UserRepository;
 use API\CoreBundle\Services\StatusCodesHelper;
 
@@ -50,18 +49,53 @@ class UserControllerTest extends ApiTestCase
      */
     public function createEntity()
     {
-        $this->getClient(true)->request('POST' , $this->getBaseUrl() , [
-            'username'    => 'tuser' , 'password' => 'userTest22' , 'email' => 'tuser@user.sk' ,
-            'detail_data' => ['name' => 'name of user' , 'surname' => 'surname of user' , 'tel' => '1234 25879'] ,
-        ] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(201 , $this->getClient()->getResponse()->getStatusCode());
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), [
+            'username' => 'tuser', 'password' => 'userTest22', 'email' => 'tuser@user.sk',
+            'detail_data' => ['name' => 'name of user', 'surname' => 'surname of user', 'tel' => '1234 25879'],
+        ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(201, $this->getClient()->getResponse()->getStatusCode());
 
-        $createdUser = json_decode($this->getClient()->getResponse()->getContent() , true);
+        $createdUser = json_decode($this->getClient()->getResponse()->getContent(), true);
         $createdUser = $createdUser['data'];
-        $this->assertTrue(array_key_exists('id' , $createdUser));
+        $this->assertTrue(array_key_exists('id', $createdUser));
 
         return $createdUser;
     }
+
+    /**
+     * Return Post data
+     *
+     * @return array
+     */
+    public function returnPostTestData()
+    {
+        return [
+            'username' => 'testuser', 'password' => 'password', 'email' => 'testuser@testuser.com',
+            'detail_data' => ['name' => 'name', 'surname' => 'surname', 'tel' => '1234'],
+        ];
+    }
+
+    /**
+     * Should remove the entity which will be used in further Post request
+     */
+    public function removeTestEntity()
+    {
+        $this->removeTestUser();
+    }
+
+    /**
+     * Return Update data
+     *
+     * @return array
+     */
+    public function returnUpdateTestData()
+    {
+        return [
+            'email' => 'changed@with.put', 'username' => 'testuserchanged',
+            'detail_data' => ['name' => 'patch name', 'surname' => 'patch surname'],
+        ];
+    }
+
 
     /**
      * GET LIST - success
@@ -70,37 +104,18 @@ class UserControllerTest extends ApiTestCase
     {
         $keys = parent::testListSuccess();
 
-        $this->assertEquals(UserRepository::DEFAULT_FIELDS , $keys);
+        $this->assertEquals(UserRepository::DEFAULT_FIELDS, $keys);
 
-        $this->getClient()->request('GET' , '/api/v1/users?fields=name' , [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(200 , $this->getClient()->getResponse()->getStatusCode());
+        $this->getClient()->request('GET', '/api/v1/users?fields=name', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(200, $this->getClient()->getResponse()->getStatusCode());
 
-        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
 
         // We expect at least one user and if we get a response based on custom fields e.g. only name
         $keys = array_keys($response['data'][0]);
-        $this->assertTrue(array_key_exists('_links' , $response));
+        $this->assertTrue(array_key_exists('_links', $response));
 
-        $this->assertEquals(['name' , 'id'] , $keys);
-    }
-
-    /**
-     * POST SINGLE - success
-     */
-    public function testPostSingleSuccess()
-    {
-        $this->removeTestUser();
-
-        // Create user as admin, with detail data
-        $this->getClient(true)->request('POST' , $this->getBaseUrl() , [
-            'username'    => 'testuser' , 'password' => 'password' , 'email' => 'testuser@testuser.com' ,
-            'detail_data' => ['name' => 'name' , 'surname' => 'surname' , 'tel' => '1234'] ,
-        ] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(201 , $this->getClient()->getResponse()->getStatusCode());
-
-        $createdUser = json_decode($this->getClient()->getResponse()->getContent() , true);
-        $createdUser = $createdUser['data'];
-        $this->assertTrue(array_key_exists('id' , $createdUser));
+        $this->assertEquals(['name', 'id'], $keys);
     }
 
     /**
@@ -108,83 +123,52 @@ class UserControllerTest extends ApiTestCase
      */
     public function testPostSingleErrors()
     {
-        $this->removeTestUser();
+        parent::testPostSingleErrors();
 
-        // create test user, without authorization header
-        $this->getClient(true)->request('POST' , $this->getBaseUrl() , [
-            'username' => 'testuser' , 'password' => 'password' , 'email' => 'testuser@testuser.com']);
-        $this->assertEquals(401 , $this->getClient()->getResponse()->getStatusCode());
-
-        // try to create test user with ROLE_USER
-        $this->getClient()->request('POST' , $this->getBaseUrl() , [
-            'username' => 'testuser' , 'password' => 'password' , 'email' => 'testuser@testuser.com' ,
-        ] , [] , ['Authorization' => 'Bearer ' . $this->userToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
-        $this->assertEquals(401 , $this->getClient()->getResponse()->getStatusCode());
+        // Try to create test user with ROLE_USER
+        $this->getClient()->request('POST', $this->getBaseUrl(), [
+            'username' => 'testuser', 'password' => 'password', 'email' => 'testuser@testuser.com',
+        ], [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(401, $this->getClient()->getResponse()->getStatusCode());
 
 
-        //create user as admin, invalid email
-        $this->getClient()->request('POST' , $this->getBaseUrl() , [
-            'username' => 'testuser' , 'password' => 'password' , 'email' => 'testuser.testuser.com' ,
-        ] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(409 , $this->getClient()->getResponse()->getStatusCode());
+        // Create user as admin, invalid email
+        $this->getClient()->request('POST', $this->getBaseUrl(), [
+            'username' => 'testuser', 'password' => 'password', 'email' => 'testuser.testuser.com',
+        ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(409, $this->getClient()->getResponse()->getStatusCode());
 
-        //create user as admin, invalid password
-        $this->getClient()->request('POST' , $this->getBaseUrl() , [
-            'username' => 'testuser' , 'password' => 'short' , 'email' => 'testuser.testuser.com' ,
-        ] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(409 , $this->getClient()->getResponse()->getStatusCode());
+        // Create user as admin, invalid password
+        $this->getClient()->request('POST', $this->getBaseUrl(), [
+            'username' => 'testuser', 'password' => 'short', 'email' => 'testuser.testuser.com',
+        ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(409, $this->getClient()->getResponse()->getStatusCode());
 
-        //create user as admin, no password
-        $this->getClient()->request('POST' , $this->getBaseUrl() , [
-            'username' => 'testuser' , 'email' => 'testuser.testuser.com' ,
-        ] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(409 , $this->getClient()->getResponse()->getStatusCode());
+        // Create user as admin, no password
+        $this->getClient()->request('POST', $this->getBaseUrl(), [
+            'username' => 'testuser', 'email' => 'testuser.testuser.com',
+        ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(409, $this->getClient()->getResponse()->getStatusCode());
 
-        //create user as admin, blank username
-        $this->getClient()->request('POST' , $this->getBaseUrl() , [
-            'username' => '' , 'email' => 'testuser.testuser.com' , 'password' => 'password' ,
-        ] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(409 , $this->getClient()->getResponse()->getStatusCode());
-
-
-        //create user as admin, no username
-        $this->getClient()->request('POST' , $this->getBaseUrl() , [
-            'email' => 'testuser.testuser.com' , 'password' => 'password' ,
-        ] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(409 , $this->getClient()->getResponse()->getStatusCode());
+        // Create user as admin, blank username
+        $this->getClient()->request('POST', $this->getBaseUrl(), [
+            'username' => '', 'email' => 'testuser.testuser.com', 'password' => 'password',
+        ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(409, $this->getClient()->getResponse()->getStatusCode());
 
 
-        //create user as admin, with non-existent parameter
-        $this->getClient()->request('POST' , $this->getBaseUrl() , [
-            'email' => 'testuser.testuser.com' , 'username' => 'testuser' , 'password' => 'password' , 'bulls' => 'hit' ,
-        ] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(409 , $this->getClient()->getResponse()->getStatusCode());
-    }
+        // Create user as admin, no username
+        $this->getClient()->request('POST', $this->getBaseUrl(), [
+            'email' => 'testuser.testuser.com', 'password' => 'password',
+        ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(409, $this->getClient()->getResponse()->getStatusCode());
 
-    /**
-     * UPDATE SINGLE - success
-     */
-    public function testUpdateSingleSuccess()
-    {
-        $entity = $this->findOneEntity();
 
-        // Change User with username = user
-        $this->getClient(true)->request('PUT' , $this->getBaseUrl() . '/' . $entity->getId() ,
-            [
-                'email'       => 'changed@with.put' , 'username' => 'testuser' ,
-                'detail_data' => ['name' => 'patch name' , 'surname' => 'patch surname'] ,
-            ] ,
-            [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE , $this->getClient()->getResponse()->getStatusCode());
-
-        // Change User with username = user
-        $this->getClient()->request('PATCH' , $this->getBaseUrl() . '/' . $entity->getId() ,
-            [
-                'email'       => 'changed@with2.patch' ,
-                'detail_data' => ['name' => 'patch name' , 'surname' => 'patch surname'] ,
-            ] ,
-            [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE , $this->getClient()->getResponse()->getStatusCode());
+        // Create user as admin, with non-existent parameter
+        $this->getClient()->request('POST', $this->getBaseUrl(), [
+            'email' => 'testuser.testuser.com', 'username' => 'testuser', 'password' => 'password', 'bulls' => 'hit',
+        ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(409, $this->getClient()->getResponse()->getStatusCode());
     }
 
     /**
@@ -202,15 +186,15 @@ class UserControllerTest extends ApiTestCase
     {
         $entity = $this->findOneEntity();
         // Try to delete entity with ROLE_USER
-        $this->getClient(true)->request('DELETE' , $this->getBaseUrl() . '/' . $entity->getId() ,
-            [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
-        $this->assertEquals(401 , $this->getClient()->getResponse()->getStatusCode());
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(401, $this->getClient()->getResponse()->getStatusCode());
 
 
         // Try to delete user without authentication
-        $this->getClient()->request('DELETE' , $this->getBaseUrl() . '/' . $entity->getId() ,
-            [] , [] , []);
-        $this->assertEquals(401 , $this->getClient()->getResponse()->getStatusCode());
+        $this->getClient()->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
+            [], [], []);
+        $this->assertEquals(401, $this->getClient()->getResponse()->getStatusCode());
     }
 
     private function removeTestUser()
@@ -223,6 +207,6 @@ class UserControllerTest extends ApiTestCase
         }
         $user = $this->em->getRepository('APICoreBundle:User')->findOneBy(['username' => 'testuser']);
 
-        $this->assertEquals(null , $user);
+        $this->assertEquals(null, $user);
     }
 }

@@ -2,13 +2,13 @@
 
 namespace API\CoreBundle\Security;
 
-use Doctrine\ORM\EntityManager;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 
 /**
  * Class ApiBaseVoter
+ *
  * @package API\CoreBundle\Security
  */
 class ApiBaseVoter
@@ -19,19 +19,15 @@ class ApiBaseVoter
     /** @var TokenInterface */
     protected $token;
 
-    /** @var  EntityManager */
-    protected $em;
-
     /**
      * ApiBaseVoter constructor.
      *
      * @param AccessDecisionManagerInterface $decisionManager
      * @param TokenStorage                   $tokenStorage
      */
-    public function __construct(AccessDecisionManagerInterface $decisionManager , TokenStorage $tokenStorage, EntityManager $em)
+    public function __construct(AccessDecisionManagerInterface $decisionManager , TokenStorage $tokenStorage)
     {
         $this->decisionManager = $decisionManager;
         $this->token = $tokenStorage->getToken();
-        $this->em = $em;
     }
 }

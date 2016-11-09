@@ -9,5 +9,5 @@ services:
         lazy: true
     user_voter:
         class: API\CoreBundle\Security\UserVoter
-        arguments: ["@security.access.decision_manager","@security.token_storage","@doctrine.orm.default_entity_manager"]
+        arguments: ["@security.access.decision_manager","@security.token_storage"]
         lazy: true

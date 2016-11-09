@@ -3,9 +3,6 @@
 namespace API\CoreBundle\Security;
 
 use API\CoreBundle\Entity\User;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 
 /**
  * Class UserVoter

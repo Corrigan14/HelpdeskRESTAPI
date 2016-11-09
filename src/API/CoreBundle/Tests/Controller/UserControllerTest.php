@@ -24,7 +24,7 @@ class UserControllerTest extends ApiTestCase
 
         $this->assertEquals(UserRepository::DEFAULT_FIELDS , $keys);
 
-        $crawler = $this->getClient()->request('GET' , '/api/v1/users?fields=name' , [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->getClient()->request('GET' , '/api/v1/users?fields=name' , [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(200 , $this->getClient()->getResponse()->getStatusCode());
 
         $response = json_decode($this->getClient()->getResponse()->getContent() , true);
@@ -47,7 +47,7 @@ class UserControllerTest extends ApiTestCase
         /**
          * create user as admin, with detail data
          */
-        $crawler = $this->getClient(true)->request('POST' , $this->getBaseUrl() , [
+        $this->getClient(true)->request('POST' , $this->getBaseUrl() , [
             'username'    => 'testuser' , 'password' => 'password' , 'email' => 'testuser@testuser.com' ,
             'detail_data' => ['name' => 'name' , 'surname' => 'surname' , 'tel' => '1234'] ,
         ] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
@@ -67,51 +67,51 @@ class UserControllerTest extends ApiTestCase
         $this->removeTestUser();
 
         // create test user, without authorization header
-        $crawler = $this->getClient(true)->request('POST' , $this->getBaseUrl() , [
+        $this->getClient(true)->request('POST' , $this->getBaseUrl() , [
             'username' => 'testuser' , 'password' => 'password' , 'email' => 'testuser@testuser.com']);
         $this->assertEquals(401 , $this->getClient()->getResponse()->getStatusCode());
 
         // try to create test user with ROLE_USER
-        $crawler = $this->getClient()->request('POST' , $this->getBaseUrl() , [
+        $this->getClient()->request('POST' , $this->getBaseUrl() , [
             'username' => 'testuser' , 'password' => 'password' , 'email' => 'testuser@testuser.com' ,
         ] , [] , ['Authorization' => 'Bearer ' . $this->userToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(401 , $this->getClient()->getResponse()->getStatusCode());
 
 
         //create user as admin, invalid email
-        $crawler = $this->getClient()->request('POST' , $this->getBaseUrl() , [
+        $this->getClient()->request('POST' , $this->getBaseUrl() , [
             'username' => 'testuser' , 'password' => 'password' , 'email' => 'testuser.testuser.com' ,
         ] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(409 , $this->getClient()->getResponse()->getStatusCode());
 
         //create user as admin, invalid password
-        $crawler = $this->getClient()->request('POST' , $this->getBaseUrl() , [
+        $this->getClient()->request('POST' , $this->getBaseUrl() , [
             'username' => 'testuser' , 'password' => 'short' , 'email' => 'testuser.testuser.com' ,
         ] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(409 , $this->getClient()->getResponse()->getStatusCode());
 
         //create user as admin, no password
-        $crawler = $this->getClient()->request('POST' , $this->getBaseUrl() , [
+        $this->getClient()->request('POST' , $this->getBaseUrl() , [
             'username' => 'testuser' , 'email' => 'testuser.testuser.com' ,
         ] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(409 , $this->getClient()->getResponse()->getStatusCode());
 
         //create user as admin, blank username
-        $crawler = $this->getClient()->request('POST' , $this->getBaseUrl() , [
+        $this->getClient()->request('POST' , $this->getBaseUrl() , [
             'username' => '' , 'email' => 'testuser.testuser.com' , 'password' => 'password' ,
         ] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(409 , $this->getClient()->getResponse()->getStatusCode());
 
 
         //create user as admin, no username
-        $crawler = $this->getClient()->request('POST' , $this->getBaseUrl() , [
+        $this->getClient()->request('POST' , $this->getBaseUrl() , [
             'email' => 'testuser.testuser.com' , 'password' => 'password' ,
         ] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(409 , $this->getClient()->getResponse()->getStatusCode());
 
 
         //create user as admin, with non-existent parameter
-        $crawler = $this->getClient()->request('POST' , $this->getBaseUrl() , [
+        $this->getClient()->request('POST' , $this->getBaseUrl() , [
             'email' => 'testuser.testuser.com' , 'username' => 'testuser' , 'password' => 'password' , 'bulls' => 'hit' ,
         ] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(409 , $this->getClient()->getResponse()->getStatusCode());
@@ -157,7 +157,7 @@ class UserControllerTest extends ApiTestCase
         /**
          * try to delete entity with ROLE_USER
          */
-        $crawler = $this->getClient(true)->request('DELETE' , $this->getBaseUrl() . '/' . $entity->getId() ,
+        $this->getClient(true)->request('DELETE' , $this->getBaseUrl() . '/' . $entity->getId() ,
             [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(401 , $this->getClient()->getResponse()->getStatusCode());
 
@@ -165,7 +165,7 @@ class UserControllerTest extends ApiTestCase
         /**
          * try to delete user without authentication
          */
-        $crawler = $this->getClient()->request('DELETE' , $this->getBaseUrl() . '/' . $entity->getId() ,
+        $this->getClient()->request('DELETE' , $this->getBaseUrl() . '/' . $entity->getId() ,
             [] , [] , []);
         $this->assertEquals(401 , $this->getClient()->getResponse()->getStatusCode());
     }
@@ -181,7 +181,7 @@ class UserControllerTest extends ApiTestCase
     /**
      * Return a signle entity from db for testing CRUD
      *
-     * @return object
+     * @return mixed
      */
     public function findOneEntity()
     {
@@ -191,11 +191,12 @@ class UserControllerTest extends ApiTestCase
     /**
      * Create and return a signle entity from db for testing CRUD
      *
-     * @return object
+     * @return mixed
      */
     public function createEntity()
     {
         // TODO: Implement createEntity() method.
+        return false;
     }
 
     private function removeTestUser()

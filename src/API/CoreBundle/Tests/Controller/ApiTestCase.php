@@ -29,6 +29,7 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
      */
     public function __construct()
     {
+        parent::__construct();
         self::bootKernel();
 
         $this->em = static::$kernel->getContainer()
@@ -54,13 +55,14 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
     /**
      * Return a signle entity from db for testing CRUD
      *
-     * @return object
+     * @return mixed
      */
     abstract public function findOneEntity();
+
     /**
      * Create and return a signle entity from db for testing CRUD
      *
-     * @return object
+     * @return mixed
      */
     abstract public function createEntity();
 
@@ -72,7 +74,7 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
      */
     public function testListSuccess()
     {
-        $crawler = $this->getClient(true)->request('GET' , $this->getBaseUrl() , [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->getClient(true)->request('GET' , $this->getBaseUrl() , [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         /**
          * Expect a list of data
          */
@@ -93,7 +95,7 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
      */
     public function testListErrors()
     {
-        $crawler = $this->getClient(true)->request('GET' , $this->getBaseUrl());
+        $this->getClient(true)->request('GET' , $this->getBaseUrl());
         /**
          * unauthorized
          */

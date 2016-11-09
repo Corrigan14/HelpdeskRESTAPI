@@ -2,6 +2,7 @@
 
 namespace API\CoreBundle\Tests\Controller;
 
+use API\CoreBundle\DataFixtures\ORM\UserFixture;
 use API\CoreBundle\Services\StatusCodesHelper;
 use API\CoreBundle\Tests\Traits\LoginTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -37,7 +38,7 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
                                    ->getManager();
 
         $this->adminToken = $this->loginUserGetToken('admin' , 'admin' , static::createClient());
-        $this->userToken = $this->loginUserGetToken('user' , 'user' , static::createClient());
+        $this->userToken = $this->loginUserGetToken('testuser2' , 'testuser' , static::createClient());
         /**
          * token is generated?
          */

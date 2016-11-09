@@ -46,6 +46,206 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
     }
 
     /**
+     * GET LIST - success
+     *
+     * @return array
+     */
+    public function testListSuccess()
+    {
+        $this->getClient(true)->request('GET', $this->getBaseUrl(), [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+
+        // We expect at least one Entity, response has to include array with data and _links param
+        $keys = array_keys($response['data'][0]);
+        $this->assertTrue(array_key_exists('_links', $response));
+
+        return $keys;
+    }
+
+    /**
+     * GET LIST - errors
+     */
+    public function testListErrors()
+    {
+        $this->getClient(true)->request('GET', $this->getBaseUrl());
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+        $this->assertContains('Auth header required', $this->getClient()->getResponse()->getContent());
+    }
+
+    /**
+     * GET SINGLE - success
+     */
+    public function testGetSingleSuccess()
+    {
+        $entity = $this->findOneEntity();
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $entity->getId(), [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+
+        $this->assertTrue(array_key_exists('data', $response));
+        $this->assertTrue(array_key_exists('_links', $response));
+    }
+
+    /**
+     * GET SINGLE - errors
+     */
+    public function testGetSingleErrors()
+    {
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/73333448', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::RESOURCE_NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/ebuf', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/7448', [], [], ['Authorization' => 'Bearer ' . $this->adminToken . 1, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken . 1]);
+        $this->assertEquals(StatusCodesHelper::INVALID_JWT_TOKEN_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * POST SINGLE - success
+     */
+    public function testPostSingleSuccess()
+    {
+        $data = $this->returnPostTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        // Create Entity as admin
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        $createdEntity = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $createdEntity = $createdEntity['data'];
+        $this->assertTrue(array_key_exists('id', $createdEntity));
+    }
+
+    /**
+     *  POST SINGLE - errors
+     */
+    public function testPostSingleErrors()
+    {
+        $data = $this->returnPostTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        // Create test entity, without authorization header
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), $data);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * UPDATE SINGLE - success
+     */
+    public function testUpdateSingleSuccess()
+    {
+        $data = $this->returnUpdateTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        $entity = $this->findOneEntity();
+
+        // Change Entity: POST method
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(),
+            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Change Entity: PATCH method
+        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(),
+            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     *  UPDATE SINGLE - errors
+     */
+    public function testUpdateSingleErrors()
+    {
+        $data = $this->returnUpdateTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        $entity = $this->findOneEntity();
+
+        // Update test entity without authorization header: method PUT
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(), $data);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Update test entity without authorization header: method PATCH
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(), $data);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Update test entity with not existed ID: method PUT
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/1125874', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Update test entity with not existed ID: method PATCH
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/1125874', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * DELETE SINGLE - success
+     */
+    public function testDeleteSingleSuccess()
+    {
+        $entity = $this->findOneEntity();
+
+        // Delete Entity
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::DELETED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Check if entity was deleted
+        $this->getClient()->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * DELETE SINGLE - errors
+     */
+    public function testDeleteSingleErrors()
+    {
+        $entity = $this->findOneEntity();
+
+        // Try to delete Entity without authentication
+        $this->getClient()->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(), [], [], []);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to delete Entity with not existed ID
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/1125874', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * @param bool $new
+     *
+     * @return bool|\Symfony\Bundle\FrameworkBundle\Client
+     */
+    public function getClient($new = false)
+    {
+        if ($this->client && false === $new) {
+            return $this->client;
+        }
+
+        $this->client = static::createClient();
+
+        return $this->client;
+    }
+
+    /**
      * Get the url for requests
      *
      * @return string
@@ -74,11 +274,6 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
     abstract public function returnPostTestData();
 
     /**
-     * Should remove the entity which will be used in further Post request
-     */
-    abstract public function removeTestEntity();
-
-    /**
      * Return Update data
      *
      * @return array
@@ -86,164 +281,7 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
     abstract public function returnUpdateTestData();
 
     /**
-     * GET LIST - success
-     *
-     * @return array
+     * Should remove the entity which will be used in further Post or Update request
      */
-    public function testListSuccess()
-    {
-        $this->getClient(true)->request('GET', $this->getBaseUrl(), [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        /**
-         * Expect a list of data
-         */
-        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
-        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
-
-        /**
-         * We expect at least one user and compare the keys to default from UserModel
-         */
-        $keys = array_keys($response['data'][0]);
-        $this->assertTrue(array_key_exists('_links', $response));
-
-        return $keys;
-    }
-
-    /**
-     * GET LIST - errors
-     */
-    public function testListErrors()
-    {
-        $this->getClient(true)->request('GET', $this->getBaseUrl());
-        /**
-         * unauthorized
-         */
-        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
-        $this->assertContains('Auth header required', $this->getClient()->getResponse()->getContent());
-    }
-
-    /**
-     * GET SINGLE - success
-     */
-    public function testGetSingleSuccess()
-    {
-        $entity = $this->findOneEntity();
-        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $entity->getId(), [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-
-        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
-
-        $this->assertTrue(array_key_exists('data', $response));
-        $this->assertTrue(array_key_exists('_links', $response));
-    }
-
-    /**
-     * GET SINGLE - errors
-     */
-    public function testGetSingleErrors()
-    {
-        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/73333448', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-
-        $this->assertEquals(StatusCodesHelper::RESOURCE_NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-
-        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/ebuf', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-
-        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-
-        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/7448', [], [], ['Authorization' => 'Bearer ' . $this->adminToken . 1, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken . 1]);
-
-        $this->assertEquals(StatusCodesHelper::INVALID_JWT_TOKEN_CODE, $this->getClient()->getResponse()->getStatusCode());
-    }
-
-    /**
-     * POST SINGLE - success
-     */
-    public function testPostSingleSuccess()
-    {
-        $data = $this->returnPostTestData();
-
-        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
-        // entity corresponding to the post data
-        $this->removeTestEntity();
-
-        // Create Entity as admin
-        $this->getClient(true)->request('POST', $this->getBaseUrl(), $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(201, $this->getClient()->getResponse()->getStatusCode());
-
-        $createdEntity = json_decode($this->getClient()->getResponse()->getContent(), true);
-        $createdEntity = $createdEntity['data'];
-        $this->assertTrue(array_key_exists('id', $createdEntity));
-    }
-
-    /**
-     *  POST SINGLE - errors
-     */
-    public function testPostSingleErrors()
-    {
-        $data = $this->returnPostTestData();
-
-        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
-        // entity corresponding to the post data
-        $this->removeTestEntity();
-
-        // Create test entity, without authorization header
-        $this->getClient(true)->request('POST', $this->getBaseUrl(), $data);
-        $this->assertEquals(401, $this->getClient()->getResponse()->getStatusCode());
-    }
-
-    /**
-     * UPDATE SINGLE - success
-     */
-    public function testUpdateSingleSuccess()
-    {
-        $entity = $this->findOneEntity();
-
-        $data = $this->returnUpdateTestData();
-
-        // Change Entity: POST method
-        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(),
-            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        // Change Entity: PATCH method
-        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(),
-            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
-    }
-
-    /**
-     * DELETE SINGLE - success
-     */
-    public function testDeleteSingleSuccess()
-    {
-        $entity = $this->findOneEntity();
-        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
-            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::DELETED_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        /**
-         * check if entity was deleted
-         */
-        $this->getClient()->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
-            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
-    }
-
-    /**
-     * @param bool $new
-     *
-     * @return bool|\Symfony\Bundle\FrameworkBundle\Client
-     */
-    public function getClient($new = false)
-    {
-        if ($this->client && false === $new) {
-            return $this->client;
-        }
-
-        $this->client = static::createClient();
-
-        return $this->client;
-    }
+    abstract public function removeTestEntity();
 }

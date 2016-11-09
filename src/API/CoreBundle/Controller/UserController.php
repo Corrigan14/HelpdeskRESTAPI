@@ -460,7 +460,6 @@ class UserController extends ApiBaseController implements ControllerInterface
         if (null === $user) {
 
             return $this->createApiResponse([
-
                 'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
             ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
         }

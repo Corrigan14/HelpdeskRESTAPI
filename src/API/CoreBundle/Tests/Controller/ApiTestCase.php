@@ -2,7 +2,6 @@
 
 namespace API\CoreBundle\Tests\Controller;
 
-use API\CoreBundle\DataFixtures\ORM\UserFixture;
 use API\CoreBundle\Services\StatusCodesHelper;
 use API\CoreBundle\Tests\Traits\LoginTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;

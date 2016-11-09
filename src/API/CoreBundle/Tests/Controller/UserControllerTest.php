@@ -33,9 +33,11 @@ class UserControllerTest extends ApiTestCase
         $u = $this->em->getRepository('APICoreBundle:User')->findOneBy([
             'username' => 'tuser',
         ]);
+
         if (null !== $u) {
             return $u;
         }
+
         $userArray = $this->createEntity();
 
         return $this->em->getRepository('APICoreBundle:User')->find($userArray['id']);

@@ -53,14 +53,14 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
     abstract public function getBaseUrl();
 
     /**
-     * Return a signle entity from db for testing CRUD
+     * Return a single entity from db for testing CRUD
      *
      * @return mixed
      */
     abstract public function findOneEntity();
 
     /**
-     * Create and return a signle entity from db for testing CRUD
+     * Create and return a single entity from db for testing CRUD
      *
      * @return mixed
      */
@@ -68,7 +68,7 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
 
 
     /**
-     * GET LIST - SUCCESS
+     * GET LIST - success
      *
      * @return array
      */
@@ -91,7 +91,7 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
     }
 
     /**
-     * GET LIST - ERRORS
+     * GET LIST - errors
      */
     public function testListErrors()
     {

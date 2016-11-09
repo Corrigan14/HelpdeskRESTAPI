@@ -37,7 +37,7 @@ interface ControllerTestInterface
      */
     public function testPostSingleErrors();
 
-//    4 UPDATE Single
+//    4 UPDATE (PUT, PATCH) Single
     /**
      * UPDATE SINGLE - success
      */

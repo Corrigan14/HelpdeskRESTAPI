@@ -27,12 +27,10 @@ class UserControllerTest extends ApiTestCase
         $this->getClient()->request('GET', '/api/v1/users?fields=name', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
-
         // We expect at least one user and if we get a response based on custom fields e.g. only name
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
         $keys = array_keys($response['data'][0]);
         $this->assertTrue(array_key_exists('_links', $response));
-
         $this->assertEquals(['name', 'id'], $keys);
     }
 
@@ -49,37 +47,37 @@ class UserControllerTest extends ApiTestCase
         ], [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Create user as admin, invalid email
+        // Try to create user as admin, invalid email
         $this->getClient()->request('POST', $this->getBaseUrl(), [
             'username' => 'testuser', 'password' => 'password', 'email' => 'testuser.testuser.com',
         ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Create user as admin, invalid password
+        // Try to create user as admin, invalid password
         $this->getClient()->request('POST', $this->getBaseUrl(), [
             'username' => 'testuser', 'password' => 'short', 'email' => 'testuser.testuser.com',
         ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Create user as admin, no password
+        // Try to create user as admin, no password
         $this->getClient()->request('POST', $this->getBaseUrl(), [
             'username' => 'testuser', 'email' => 'testuser.testuser.com',
         ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Create user as admin, blank username
+        // Try to create user as admin, blank username
         $this->getClient()->request('POST', $this->getBaseUrl(), [
             'username' => '', 'email' => 'testuser.testuser.com', 'password' => 'password',
         ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Create user as admin, no username
+        // Try to create user as admin, no username
         $this->getClient()->request('POST', $this->getBaseUrl(), [
             'email' => 'testuser.testuser.com', 'password' => 'password',
         ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Create user as admin, with non-existent parameter
+        // Try to create user as admin, with non-existent parameter
         $this->getClient()->request('POST', $this->getBaseUrl(), [
             'email' => 'testuser.testuser.com', 'username' => 'testuser', 'password' => 'password', 'bulls' => 'hit',
         ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);

@@ -15,13 +15,16 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
 {
     use LoginTrait;
 
+    /** @var bool|string  */
     protected $adminToken;
+
+    /** @var bool|string  */
     protected $userToken;
 
+    /** @var bool  */
     protected $client = false;
-    /**
-     * @var \Doctrine\ORM\EntityManager
-     */
+
+    /** @var \Doctrine\ORM\EntityManager */
     protected $em;
 
     /**
@@ -38,9 +41,8 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
 
         $this->adminToken = $this->loginUserGetToken('admin', 'admin', static::createClient());
         $this->userToken = $this->loginUserGetToken('testuser2', 'testuser', static::createClient());
-        /**
-         * token is generated?
-         */
+
+        // Token is generated?
         $this->assertNotEquals(false, $this->adminToken);
         $this->assertNotEquals(false, $this->userToken);
     }
@@ -52,12 +54,12 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
      */
     public function testListSuccess()
     {
+        // Load list of data of Entity (as Admin)
         $this->getClient(true)->request('GET', $this->getBaseUrl(), [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
-        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
 
         // We expect at least one Entity, response has to include array with data and _links param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
         $keys = array_keys($response['data'][0]);
         $this->assertTrue(array_key_exists('_links', $response));
 
@@ -69,8 +71,10 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
      */
     public function testListErrors()
     {
+        // Try to load list of entities without authorization header
         $this->getClient(true)->request('GET', $this->getBaseUrl());
         $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
         $this->assertContains('Auth header required', $this->getClient()->getResponse()->getContent());
     }
 
@@ -80,12 +84,13 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
     public function testGetSingleSuccess()
     {
         $entity = $this->findOneEntity();
-        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $entity->getId(), [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
 
+        // Load one Entity with posted ID (as Admin)
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $entity->getId(), [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
+        // We expect Entity, response has to include array with data and _links param
         $response = json_decode($this->getClient()->getResponse()->getContent(), true);
-
         $this->assertTrue(array_key_exists('data', $response));
         $this->assertTrue(array_key_exists('_links', $response));
     }
@@ -95,13 +100,22 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
      */
     public function testGetSingleErrors()
     {
+        $entity = $this->findOneEntity();
+
+        // Try to load Entity without authorization header
+        $this->getClient(true)->request('GET',  $this->getBaseUrl() . '/' . $entity->getId());
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to load Entity with not existed ID (as Admin)
         $this->getClient(true)->request('GET', $this->getBaseUrl() . '/73333448', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::RESOURCE_NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
 
+        // Try to load Entity with bad ID (as Admin)
         $this->getClient(true)->request('GET', $this->getBaseUrl() . '/ebuf', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/7448', [], [], ['Authorization' => 'Bearer ' . $this->adminToken . 1, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken . 1]);
+        // Try to load Entity if we have invalid JWT token
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $entity->getId(), [], [], ['Authorization' => 'Bearer ' . $this->adminToken . 1, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken . 1]);
         $this->assertEquals(StatusCodesHelper::INVALID_JWT_TOKEN_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
@@ -116,13 +130,14 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
         // entity corresponding to the post data
         $this->removeTestEntity();
 
-        // Create Entity as admin
+        // Create Entity (as admin)
         $this->getClient(true)->request('POST', $this->getBaseUrl(), $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        $createdEntity = json_decode($this->getClient()->getResponse()->getContent(), true);
-        $createdEntity = $createdEntity['data'];
-        $this->assertTrue(array_key_exists('id', $createdEntity));
+        // We expect Entity, response has to include array with data and _links param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertTrue(array_key_exists('data', $response));
+        $this->assertTrue(array_key_exists('_links', $response));
     }
 
     /**
@@ -136,7 +151,7 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
         // entity corresponding to the post data
         $this->removeTestEntity();
 
-        // Create test entity, without authorization header
+        // Try to create test Entity, without authorization header
         $this->getClient(true)->request('POST', $this->getBaseUrl(), $data);
         $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
@@ -154,12 +169,12 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
 
         $entity = $this->findOneEntity();
 
-        // Change Entity: POST method
+        // Update Entity: POST method (as admin)
         $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(),
             $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Change Entity: PATCH method
+        // Update Entity: PATCH method (as admin)
         $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(),
             $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
@@ -178,19 +193,19 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
 
         $entity = $this->findOneEntity();
 
-        // Update test entity without authorization header: method PUT
+        // Update test Entity without authorization header: method PUT
         $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(), $data);
         $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Update test entity without authorization header: method PATCH
+        // Update test Entity without authorization header: method PATCH
         $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(), $data);
         $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Update test entity with not existed ID: method PUT
+        // Update test Entity with not existed ID: method PUT (as admin)
         $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/1125874', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Update test entity with not existed ID: method PATCH
+        // Update test Entity with not existed ID: method PATCH (as admin)
         $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/1125874', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
@@ -207,7 +222,7 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
             [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::DELETED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Check if entity was deleted
+        // Check if Entity was deleted
         $this->getClient()->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
             [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
@@ -220,11 +235,11 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
     {
         $entity = $this->findOneEntity();
 
-        // Try to delete Entity without authentication
+        // Try to delete Entity without authorization header
         $this->getClient()->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(), [], [], []);
         $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Try to delete Entity with not existed ID
+        // Try to delete Entity with not existed ID (as Admin)
         $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/1125874', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
     }

@@ -174,8 +174,9 @@ Dokumentacne pravidla
                             entity (findOneEntity, createEntity, removeTestEntity)
     - kazdu metodu v ControllerTest mozeme rozsirit o testy pre specificke funkcie 
       ako napr. testovanie vkladania nespravnych udajov (napr. email nie je validny) 
-      (zavolame najskor napr. parent::testListSuccess())  
-
+      (zavolame najskor napr. parent::testListSuccess())
+    - na testovanie vyuzivame osobitnu databazu, jej update a naplnenie fixtures:
+         
 6. Controller
     - upravime dokumentaciu pre jednotlive metody
     - doprogramujeme uz odtestovane metody tak, aby vsetky testy presli spravne (min CRUD): phpunit

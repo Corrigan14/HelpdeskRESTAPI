@@ -4,91 +4,15 @@ namespace API\TaskBundle\Tests\Controller;
 
 use API\CoreBundle\Tests\Controller\ApiTestCase;
 use API\TaskBundle\Entity\Tag;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
+/**
+ * Class TagControllerTest
+ *
+ * @package API\TaskBundle\Tests\Controller
+ */
 class TagControllerTest extends ApiTestCase
 {
     const BASE_URL = '/api/v1/tags';
-
-    /**
-     * GET LIST - success
-     */
-    public function testListSuccess()
-    {
-        parent::testListSuccess();
-    }
-
-    /**
-     * GET LIST - errors
-     */
-    public function testListErrors()
-    {
-        parent::testListErrors();
-    }
-
-    /**
-     * GET SINGLE - success
-     */
-    public function testGetSingleSuccess()
-    {
-        // TODO: Implement testGetSingleSuccess() method.
-    }
-
-    /**
-     * GET SINGLE - errors
-     */
-    public function testGetSingleErrors()
-    {
-        // TODO: Implement testGetSingleErrors() method.
-    }
-
-    /**
-     * POST SINGLE - success
-     */
-    public function testPostSingleSuccess()
-    {
-        // TODO: Implement testPostSingleSuccess() method.
-    }
-
-    /**
-     *  POST SINGLE - errors
-     */
-    public function testPostSingleErrors()
-    {
-        // TODO: Implement testPostSingleErrors() method.
-    }
-
-    /**
-     * UPDATE SINGLE - success
-     */
-    public function testUpdateSingleSuccess()
-    {
-        // TODO: Implement testUpdateSingleSuccess() method.
-    }
-
-    /**
-     *  UPDATE SINGLE - errors
-     */
-    public function testUpdateSingleErrors()
-    {
-        // TODO: Implement testUpdateSingleErrors() method.
-    }
-
-    /**
-     * DELETE SINGLE - success
-     */
-    public function testDeleteSingleSuccess()
-    {
-        // TODO: Implement testDeleteSingleSuccess() method.
-    }
-
-    /**
-     * DELETE SINGLE - errors
-     */
-    public function testDeleteSingleErrors()
-    {
-        // TODO: Implement testDeleteSingleErrors() method.
-    }
 
     /**
      * Return Base URL
@@ -99,7 +23,7 @@ class TagControllerTest extends ApiTestCase
     }
 
     /**
-     * Return a signle entity from db for testing CRUD
+     * Return a single entity from db for testing CRUD
      *
      * @return object
      */
@@ -109,7 +33,7 @@ class TagControllerTest extends ApiTestCase
     }
 
     /**
-     * Create and return a signle entity from db for testing CRUD
+     * Create and return a single entity from db for testing CRUD
      *
      * @return object
      */
@@ -133,5 +57,33 @@ class TagControllerTest extends ApiTestCase
 
             return $tag;
         }
+    }
+
+    /**
+     * Should remove the entity which will be used in further Post or Update request
+     */
+    public function removeTestEntity()
+    {
+        // TODO: Implement removeTestEntity() method.
+    }
+
+    /**
+     * Return Post data
+     *
+     * @return array
+     */
+    public function returnPostTestData()
+    {
+        // TODO: Implement returnPostTestData() method.
+    }
+
+    /**
+     * Return Update data
+     *
+     * @return array
+     */
+    public function returnUpdateTestData()
+    {
+        // TODO: Implement returnUpdateTestData() method.
     }
 }

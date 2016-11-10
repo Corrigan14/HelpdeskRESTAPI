@@ -282,6 +282,11 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
     abstract public function createEntity();
 
     /**
+     * Should remove the entity which will be used in further Post or Update request
+     */
+    abstract public function removeTestEntity();
+
+    /**
      * Return Post data
      *
      * @return array
@@ -294,9 +299,4 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
      * @return array
      */
     abstract public function returnUpdateTestData();
-
-    /**
-     * Should remove the entity which will be used in further Post or Update request
-     */
-    abstract public function removeTestEntity();
 }

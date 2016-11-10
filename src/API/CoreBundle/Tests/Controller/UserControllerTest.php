@@ -168,6 +168,7 @@ class UserControllerTest extends ApiTestCase
             $this->em->remove($user);
             $this->em->flush();
         }
+
         $user = $this->em->getRepository('APICoreBundle:User')->findOneBy(['username' => $username]);
 
         $this->assertEquals(null, $user);
@@ -214,11 +215,22 @@ class UserControllerTest extends ApiTestCase
         ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(201, $this->getClient()->getResponse()->getStatusCode());
 
+        // Check if Entity was created
         $createdUser = json_decode($this->getClient()->getResponse()->getContent(), true);
         $createdUser = $createdUser['data'];
         $this->assertTrue(array_key_exists('id', $createdUser));
 
         return $createdUser;
+    }
+
+
+    /**
+     * Should remove the entity which will be used in further Post or Update request
+     */
+    public function removeTestEntity()
+    {
+        $this->removeTestUser('testuser');
+        $this->removeTestUser('testuserchanged');
     }
 
     /**
@@ -245,14 +257,5 @@ class UserControllerTest extends ApiTestCase
             'email' => 'changed@with.put', 'username' => 'testuserchanged',
             'detail_data' => ['name' => 'patch name', 'surname' => 'patch surname'],
         ];
-    }
-
-    /**
-     * Should remove the entity which will be used in further Post or Update request
-     */
-    public function removeTestEntity()
-    {
-        $this->removeTestUser('testuser');
-        $this->removeTestUser('testuserchanged');
     }
 }

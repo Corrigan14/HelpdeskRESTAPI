@@ -142,8 +142,6 @@ Dokumentacne pravidla
         
 .Tvorba novej Entity
 =========
-0. Testy
-
 1. Entita
     - vytvorenie Entity
     - Entita implementuje Serializer
@@ -156,25 +154,40 @@ Dokumentacne pravidla
       musi mat nastaveny prefix @ReadOnly()
 
 2. Fixtures
-      
+
 3. Controller
-    - vytvorenie Controllera
+    - vytvorenie prazdneho Controllera
     - kazdy Controller: extends ApiBaseController implements ControllerInterface
-    - upravime dokumentaciu pre jednotlive implementovane metody
 
 4. Routy (Resources/config/routing/entityName.yml)
     - vytvorenie entityName.yml suboru
     - kazdu skupinu rout musime zaregistrovat v routing.yml
     - kazda entita bude mat zakladnu skupinu rout (pozri tag.yml)
+    
+5. Testy
+    - kazdy ControllerTest:  extends ApiTestCase, definuje: const BASE_URL (napr. '/api/v1/users')
+    - Api TestCase implementuje ControllerTestInterface, ktory urcuje mnimalne metody pre testovanie zakladnych requestov
+    - ApiTestCase automaticky testuje zakladne GET, POST, PUT, PATCH, DELETE actions (pozri ApiTestCase dokumentaciu), 
+      musime vsak pripravit:
+                            url (metoda: getBaseUrl)
+                            testovacie data (metody: returnUpdateTestData, returnPostTestData)
+                            entity (findOneEntity, createEntity, removeTestEntity)
+    - kazdu metodu v ControllerTest mozeme rozsirit o testy pre specificke funkcie 
+      ako napr. testovanie vkladania nespravnych udajov (napr. email nie je validny) 
+      (zavolame najskor napr. parent::testListSuccess())  
 
-5. Service
+6. Controller
+    - upravime dokumentaciu pre jednotlive metody
+    - doprogramujeme uz odtestovane metody tak, aby vsetky testy presli spravne (min CRUD): phpunit
+    
+6a. Service
     - vytvorenie Service (Services)
     - registracia Service (Resources/config/services.yml)
     
-6. Repostory
+6b. Repostory
     - tento automaticky vygeneruje Doctrine pri vytvoreni entity. AK nie, je potrebne ho v entite zaregostrovat
 
-7. Security
+6c. Security
     - vytvorenie EntityNameOptions.php - obsahuje konstanty s akciami, pre ktore su potrebne pravidla vykonavania
     - vytvorenie EntityNameVoter.php: extends ApiBaseVoter implements VoterInterface
     - registracia EntityNameVoter (Resources/config/services.yml)

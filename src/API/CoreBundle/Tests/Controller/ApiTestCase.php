@@ -193,19 +193,19 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
 
         $entity = $this->findOneEntity();
 
-        // Update test Entity without authorization header: method PUT
+        // Try to update test Entity without authorization header: method PUT
         $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(), $data);
         $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Update test Entity without authorization header: method PATCH
+        // Try to update test Entity without authorization header: method PATCH
         $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(), $data);
         $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Update test Entity with not existed ID: method PUT (as admin)
+        // Try to update test Entity with not existed ID: method PUT (as admin)
         $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/1125874', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Update test Entity with not existed ID: method PATCH (as admin)
+        // Try to update test Entity with not existed ID: method PATCH (as admin)
         $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/1125874', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
     }

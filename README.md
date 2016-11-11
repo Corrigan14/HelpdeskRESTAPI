@@ -165,6 +165,9 @@ Dokumentacne pravidla
     - kazda entita bude mat zakladnu skupinu rout (pozri tag.yml)
     
 5. Testy
+    - pre testy vyuzivame vlastnu testovaciu databazu s fixtures:
+                php bin/console doctrine:schema:update --force  --env=test
+                php bin/console doctrine:fixtures:load --env=test
     - kazdy ControllerTest:  extends ApiTestCase, definuje: const BASE_URL (napr. '/api/v1/users')
     - Api TestCase implementuje ControllerTestInterface, ktory urcuje mnimalne metody pre testovanie zakladnych requestov
     - ApiTestCase automaticky testuje zakladne GET, POST, PUT, PATCH, DELETE actions (pozri ApiTestCase dokumentaciu), 
@@ -173,11 +176,27 @@ Dokumentacne pravidla
                             testovacie data (metody: returnUpdateTestData, returnPostTestData)
                             entity (findOneEntity, createEntity, removeTestEntity)
     - kazdu metodu v ControllerTest mozeme rozsirit o testy pre specificke funkcie 
-      ako napr. testovanie vkladania nespravnych udajov (napr. email nie je validny) 
-      (zavolame najskor napr. parent::testListSuccess())  
-    - pre testy vyuzivame vlastnu testovaciu databazu s fixtures:
-                php bin/console doctrine:schema:update --force  --env=test
-                php bin/console doctrine:fixtures:load --env=test
+      ako napr. testovanie vkladania nespravnych udajov (napr. email nie je validny)
+      Zvycajne pojde o rozsirenie:
+          /**
+          *  POST SINGLE - errors
+          */
+          public function testPostSingleErrors()
+          {
+              parent::testPostSingleErrors();
+      
+              // Try to create Entity with invalid parameter ... (... is required) [code 409]
+          }
+      
+          /**
+           *  UPDATE SINGLE - errors
+           */
+          public function testUpdateSingleErrors()
+          {
+              parent::testUpdateSingleErrors();
+      
+              // Try to update Entity with not invalid parameter ... (... has to be uniqe) [code 409]
+          }
 
 6. Controller
     - upravime dokumentaciu pre jednotlive metody

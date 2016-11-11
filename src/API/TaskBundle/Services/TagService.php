@@ -2,7 +2,9 @@
 
 namespace API\TaskBundle\Services;
 
+use API\CoreBundle\Services\HateoasHelper;
 use API\TaskBundle\Entity\Tag;
+use API\TaskBundle\Repository\TagRepository;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
@@ -35,16 +37,30 @@ class TagService
     }
 
     /**
-     * Return all User's Tags + public Tags
+     * Return all User's Tags + public Tags which includes Data and Links and Pagination
      *
      * @param int $id
+     * @param int $page
      * @return array
      */
-    public function getTagsResponse(int $id)
+    public function getTagsResponse(int $id, int $page)
     {
-        return[
-          'data' => $this->em->getRepository('APITaskBundle:Tag')->getAllTags($id),
+        /** @var TagRepository $tagRepository */
+        $tagRepository = $this->em->getRepository('APITaskBundle:Tag');
+        $tags = $tagRepository->getAllTags($id, $page);
+
+        $response = [
+            'data' => $tags
         ];
+
+        $pagination = HateoasHelper::getPagination(
+            $this->router->generate('tag_list'),
+            $page,
+            $tagRepository->countTags($id),
+            TagRepository::LIMIT
+        );
+
+        return array_merge($response,$pagination);
     }
 
     /**
@@ -57,8 +73,8 @@ class TagService
     public function getTagResponse(Tag $tag)
     {
         return [
-            'data'   => $tag ,
-            '_links' => $this->getTagLinks($tag->getId()) ,
+            'data' => $tag,
+            '_links' => $this->getTagLinks($tag->getId()),
         ];
     }
 
@@ -70,9 +86,9 @@ class TagService
     private function getTagLinks(int $id)
     {
         return [
-            'put'    => $this->router->generate('tag_update' , ['id' => $id]) ,
-            'patch'  => $this->router->generate('tag_partial_update' , ['id' => $id]) ,
-            'delete' => $this->router->generate('tag_delete' , ['id' => $id]) ,
+            'put' => $this->router->generate('tag_update', ['id' => $id]),
+            'patch' => $this->router->generate('tag_partial_update', ['id' => $id]),
+            'delete' => $this->router->generate('tag_delete', ['id' => $id]),
         ];
     }
 

@@ -6,6 +6,7 @@ namespace API\TaskBundle\Security;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Security\ApiBaseVoter;
 use API\CoreBundle\Security\VoterInterface;
+use API\TaskBundle\Entity\Tag;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -27,12 +28,12 @@ class TagVoter extends ApiBaseVoter implements VoterInterface
      *
      * @param string   $action
      *
-     * @param bool|int $targetTagId
+     * @param bool|Tag $tag
      *
      * @return bool
      * @throws \InvalidArgumentException
      */
-    public function isGranted($action , $targetTagId = false)
+    public function isGranted($action , $tag = false)
     {
         $this->user = $this->token->getUser();
 
@@ -45,7 +46,7 @@ class TagVoter extends ApiBaseVoter implements VoterInterface
             case VoteOptions::CREATE_PUBLIC_TAG:
                 return $this->canCreatePublicTag();
             case VoteOptions::SHOW_TAG:
-                return $this->canReadTag($targetTagId);
+                return $this->canReadTag($tag);
             default:
                 return false;
         }
@@ -65,15 +66,13 @@ class TagVoter extends ApiBaseVoter implements VoterInterface
     }
 
     /**
-     * @param int $tagId
-     *
+     * @param Tag $tag
      * @return bool
-     * @throws \InvalidArgumentException*
+     * @internal param int $tagId
+     *
      */
-    private function canReadTag(int $tagId): bool
+    private function canReadTag(Tag $tag): bool
     {
-        $tag = $this->em->getRepository('APITaskBundle:Tag')->find($tagId);
-
         if ($tag->getPublic() || $this->user->getId() === $tag->getCreatedBy()->getId()) {
             return true;
         }

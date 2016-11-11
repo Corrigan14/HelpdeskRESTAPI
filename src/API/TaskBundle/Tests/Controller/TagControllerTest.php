@@ -12,7 +12,7 @@ use API\TaskBundle\Entity\Tag;
  */
 class TagControllerTest extends ApiTestCase
 {
-    const BASE_URL = '/api/v1/tags';
+    const BASE_URL = '/api/v1/tasks/tags';
 
     /**
      * Return Base URL
@@ -29,7 +29,18 @@ class TagControllerTest extends ApiTestCase
      */
     public function findOneEntity()
     {
-        return $this->em->getRepository('APITaskBundle:Tag')->findOneBy([]);
+        /** @var Tag $tag */
+        $tag = $this->em->getRepository('APITaskBundle:Tag')->findOneBy([
+            'title' => 'Test Public Tag'
+        ]);
+
+        if (null !== $tag) {
+            return $tag;
+        }
+
+        $tagArray = $this->createEntity();
+
+        return $this->em->getRepository('APITaskBundle:Tag')->find($tagArray['id']);
     }
 
     /**
@@ -39,24 +50,17 @@ class TagControllerTest extends ApiTestCase
      */
     public function createEntity()
     {
-        $entity = $this->findOneEntity();
-        $user = $this->em->getRepository('APICoreBundle:User')->findOneBy([
-            'username' => 'user'
-        ]);
-        $admin = $this->em->getRepository('APICoreBundle:User')->findOneBy([
-            'username' => 'admin'
-        ]);
+        $this->getClient(true)->request('POST', $this->getBaseUrl(),
+            ['title' => 'Test Public Tag', 'color' => '111111', 'public' => true],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(201, $this->getClient()->getResponse()->getStatusCode());
 
-        if(null === $entity)
-        {
-            $tag = new Tag();
-            $tag->setTitle('TestTag');
-            $tag->setColor('111111');
-            $tag->setPublic(true);
-            $tag->setCreatedBy($admin);
+        // Check if Entity was created
+        $createdTag = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $createdTag = $createdTag['data'];
+        $this->assertTrue(array_key_exists('id', $createdTag));
 
-            return $tag;
-        }
+        return $createdTag;
     }
 
     /**
@@ -64,7 +68,8 @@ class TagControllerTest extends ApiTestCase
      */
     public function removeTestEntity()
     {
-        // TODO: Implement removeTestEntity() method.
+        $this->removeTestTag('Test Public Tag in POST');
+        $this->removeTestTag('Test Public Tag in UPDATE');
     }
 
     /**
@@ -74,7 +79,9 @@ class TagControllerTest extends ApiTestCase
      */
     public function returnPostTestData()
     {
-        // TODO: Implement returnPostTestData() method.
+        return [
+            'title' => 'Test Public Tag in POST', 'color' => '000000', 'public' => true
+        ];
     }
 
     /**
@@ -84,6 +91,25 @@ class TagControllerTest extends ApiTestCase
      */
     public function returnUpdateTestData()
     {
-        // TODO: Implement returnUpdateTestData() method.
+        return [
+            'title' => 'Test Public Tag in UPDATE'
+        ];
+    }
+
+    /**
+     * @param $title
+     */
+    private function removeTestTag($title)
+    {
+        // If test Tag exists, remove
+        $tag = $this->em->getRepository('APITaskBundle:Tag')->findOneBy(['title' => $title]);
+        if (null !== $tag) {
+            $this->em->remove($tag);
+            $this->em->flush();
+        }
+
+        $tag = $this->em->getRepository('APITaskBundle:Tag')->findOneBy(['title' => $title]);
+
+        $this->assertEquals(null, $tag);
     }
 }

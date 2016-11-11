@@ -19,22 +19,39 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 class TagController extends ApiBaseController implements ControllerInterface
 {
     /**
-     *  ### Response ###
-     *      {
-     *        "data":
-     *        {
-     *          "0":
+     * ### Response ###
+     *     {
+     *       "data":
+     *       [
      *          {
-     *             "id": "2",
+     *            "id": "2",
      *             "title": "Work",
      *             "color": "4871BF",
      *             "public": true
      *          }
-     *        }
-     *      }
+     *       ],
+     *       "_links":
+     *       {
+     *           "self": "/tags?page=1",
+     *           "first": "/tags?page=1",
+     *           "prev": false,
+     *           "next": "/tags?page=2",
+     *           "last": "/tags?page=3"
+     *       },
+     *       "total": 22,
+     *       "page": 1,
+     *       "numberOfPages": 3
+     *     }
+     *
      *
      * @ApiDoc(
-     *  description="Returns a list of Logged User's Tags",
+     *  description="Returns a list of Logged User's Tags + public tags",
+     *  filters={
+     *     {
+     *       "name"="page",
+     *       "description"="Pagination, limit is set to 10 records"
+     *     }
+     *  },
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -53,9 +70,9 @@ class TagController extends ApiBaseController implements ControllerInterface
      */
     public function listAction(Request $request)
     {
-        $tags = $this->get('api_tag.service')->getTagsResponse($this->getUser()->getId());
+        $page = $request->get('page') ?: 1;
 
-        return $this->createApiResponse($tags, StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($this->get('api_tag.service')->getTagsResponse($this->getUser()->getId(), $page), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -79,9 +96,9 @@ class TagController extends ApiBaseController implements ControllerInterface
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/tags/2",
-     *           "patch": "/api/v1/tags/2",
-     *           "delete": "/api/v1/tags/2"
+     *           "put": "/api/v1/tasks/tags/2",
+     *           "patch": "/api/v1/tasks/tags/2",
+     *           "delete": "/api/v1/tasks/tags/2"
      *         }
      *      }
      *
@@ -117,17 +134,16 @@ class TagController extends ApiBaseController implements ControllerInterface
      */
     public function getAction(int $id)
     {
-        $t = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
-            'id' => $id,
-        ]);
+        /** @var Tag $t */
+        $t = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->find($id);
 
-        if (null === $t) {
+        if (null === $t || !$t instanceof Tag) {
             return $this->createApiResponse([
                 'message' => StatusCodesHelper::TAG_NOT_FOUND_MESSAGE,
             ], StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
         }
 
-        if (!$this->get('tag_voter')->isGranted(VoteOptions::SHOW_TAG, $id)) {
+        if (!$this->get('tag_voter')->isGranted(VoteOptions::SHOW_TAG, $t)) {
             return $this->createApiResponse([
                 'message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE,
             ], StatusCodesHelper::ACCESS_DENIED_CODE);
@@ -160,9 +176,9 @@ class TagController extends ApiBaseController implements ControllerInterface
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/tags/2",
-     *           "patch": "/api/v1/tags/2",
-     *           "delete": "/api/v1/tags/2"
+     *           "put": "/api/v1/tasks/tags/2",
+     *           "patch": "/api/v1/tasks/tags/2",
+     *           "delete": "/api/v1/tasks/tags/2"
      *         }
      *      }
      *
@@ -221,9 +237,9 @@ class TagController extends ApiBaseController implements ControllerInterface
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/tags/2",
-     *           "patch": "/api/v1/tags/2",
-     *           "delete": "/api/v1/tags/2"
+     *           "put": "/api/v1/tasks/tags/2",
+     *           "patch": "/api/v1/tasks/tags/2",
+     *           "delete": "/api/v1/tasks/tags/2"
      *         }
      *      }
      *
@@ -293,9 +309,9 @@ class TagController extends ApiBaseController implements ControllerInterface
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/tags/2",
-     *           "patch": "/api/v1/tags/2",
-     *           "delete": "/api/v1/tags/2"
+     *           "put": "/api/v1/tasks/tags/2",
+     *           "patch": "/api/v1/tasks/tags/2",
+     *           "delete": "/api/v1/tasks/tags/2"
      *         }
      *      }
      *

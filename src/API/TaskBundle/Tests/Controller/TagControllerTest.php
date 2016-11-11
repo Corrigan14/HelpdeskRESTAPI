@@ -15,6 +15,42 @@ class TagControllerTest extends ApiTestCase
     const BASE_URL = '/api/v1/tasks/tags';
 
     /**
+     * GET SINGLE - errors
+     */
+    public function testGetSingleErrors()
+    {
+        parent::testGetSingleErrors();
+
+        // Try to load Entity of another user: 403 ACCESS DENIED
+    }
+
+    /**
+     *  POST SINGLE - errors
+     */
+    public function testPostSingleErrors()
+    {
+        parent::testPostSingleErrors();
+
+        // Try to create PUBLIC Tag with ROLE_USER [code 403]
+
+        // Try to create Tag with invalid parameter TITLE (title has to be uniqe) [code 409]
+
+        // Try to create Tag with invalid parameter COLOR (color is required) [code 409]
+    }
+
+    /**
+     *  UPDATE SINGLE - errors
+     */
+    public function testUpdateSingleErrors()
+    {
+        parent::testUpdateSingleErrors();
+
+        // Try to update Tag to PUBLIC with ROLE_USER [code 403]
+
+        // Try to update Tag with not unique parameter TITLE (title has to be uniqe) [code 409]
+    }
+
+    /**
      * Return Base URL
      */
     public function getBaseUrl()

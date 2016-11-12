@@ -316,7 +316,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *     }
      *  },
      *  statusCodes={
-     *      204 ="The Entity was successfully deleted",
+     *      200 ="The is_active Status of Entity was successfully changed to inactive",
      *      401 ="Unauthorized request",
      *      404 ="Not found Entity",
      *  })

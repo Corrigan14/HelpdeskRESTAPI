@@ -46,8 +46,8 @@ class CompanyFixture implements FixtureInterface , ContainerAwareInterface , Ord
 
         $company = new Company();
         $company->setTitle('LanSystems')
-            ->setIco('11025878')
-            ->setDic('1258745899644')
+            ->setIco('110258782')
+            ->setDic('12587458996244')
             ->setStreet('Ina cesta 125')
             ->setZip('021478')
             ->setCity('Bratislava')

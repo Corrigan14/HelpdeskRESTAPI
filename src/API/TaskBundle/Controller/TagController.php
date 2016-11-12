@@ -32,11 +32,11 @@ class TagController extends ApiBaseController implements ControllerInterface
      *       ],
      *       "_links":
      *       {
-     *           "self": "/tags?page=1",
-     *           "first": "/tags?page=1",
+     *           "self": "/api/v1/tasks/tags?page=1",
+     *           "first": "/api/v1/tasks/tags?page=1",
      *           "prev": false,
-     *           "next": "/tags?page=2",
-     *           "last": "/tags?page=3"
+     *           "next": "/api/v1/tasks/tags?page=2",
+     *           "last": "/api/v1/tasks/tags?page=3"
      *       },
      *       "total": 22,
      *       "page": 1,

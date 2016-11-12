@@ -439,7 +439,7 @@ class UserController extends ApiBaseController implements ControllerInterface
      *     }
      *  },
      *  statusCodes={
-     *      204 ="The User Entity was successfully deleted",
+     *      200 ="is_active param of Entity was successfully changed to inactive: 0",
      *      401 ="Unauthorized request",
      *      404 ="Not found user",
      *  })
@@ -456,20 +456,21 @@ class UserController extends ApiBaseController implements ControllerInterface
             return $this->unauthorizedResponse();
         }
 
+        /** @var User $user */
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (null === $user) {
-
             return $this->createApiResponse([
                 'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
             ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
 
-        $this->getDoctrine()->getManager()->remove($user);
+        $user->setIsActive(false);
+        $this->getDoctrine()->getManager()->persist($user);
         $this->getDoctrine()->getManager()->flush();
 
         return $this->createApiResponse([
-            'message' => StatusCodesHelper::DELETED_MESSAGE ,
-        ] , StatusCodesHelper::DELETED_CODE);
+            'message' => StatusCodesHelper::UNACITVATE_MESSAGE ,
+        ] , StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

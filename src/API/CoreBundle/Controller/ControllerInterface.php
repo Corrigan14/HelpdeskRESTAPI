@@ -263,6 +263,8 @@ interface ControllerInterface
      *     }
      *  },
      *  statusCodes={
+     *      200 ="is_active param of Entity was successfully changed to inactive: 0",
+     *      ...OR...
      *      204 ="The Entity was successfully deleted",
      *      401 ="Unauthorized request",
      *      404 ="Not found Tag",

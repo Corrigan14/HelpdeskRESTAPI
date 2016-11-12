@@ -1,36 +1,36 @@
 users_list:
-    path:     /users
+    path:     users
     defaults: { _controller: APICoreBundle:User:list }
     methods: [GET]
 
 user:
-    path:     /users/{id}
+    path:     users/{id}
     defaults: { _controller: APICoreBundle:User:get }
     methods: [GET]
     requirements:
         id: '\d+'
 
 user_create:
-    path:     /users
+    path:     users
     defaults: { _controller: APICoreBundle:User:create }
     methods: [POST]
 
 user_update:
-    path:     /users/{id}
+    path:     users/{id}
     defaults: { _controller: APICoreBundle:User:update }
     methods: [PUT]
     requirements:
         id: '\d+'
 
 user_partial_update:
-    path:     /users/{id}
+    path:     users/{id}
     defaults: { _controller: APICoreBundle:User:updatePartial }
     methods: [PATCH]
     requirements:
         id: '\d+'
 
 user_delete:
-    path:     /users/{id}
+    path:     users/{id}
     defaults: { _controller: APICoreBundle:User:delete }
     methods: [DELETE]
     requirements:

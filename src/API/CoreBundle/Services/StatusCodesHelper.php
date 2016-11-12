@@ -16,6 +16,7 @@ class StatusCodesHelper
     const CREATED_MESSAGE = 'The entity was successfully created';
     const DELETED_CODE = 204;
     const DELETED_MESSAGE = 'The entity was successfully deleted';
+    const UNACITVATE_MESSAGE = 'The is_active param of entity was set to 0';
 
     const BAD_REQUEST_MESSAGE = 'Bad Request';
     const BAD_REQUEST_CODE = 400;

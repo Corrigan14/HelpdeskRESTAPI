@@ -9,4 +9,4 @@ api_user:
 
 api_company:
     resource: "@APICoreBundle/Resources/config/routing/company.yml"
-    prefix: /company
+    prefix: /companies

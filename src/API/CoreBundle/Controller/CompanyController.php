@@ -11,24 +11,32 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
  *
  * @package API\CoreBundle\Controller
  */
-class CompanyController extends ApiBaseController  implements ControllerInterface
+class CompanyController extends ApiBaseController implements ControllerInterface
 {
     /**
-     *  ### Response - option if we have pagination ###
+     *  ### Response ###
      *     {
      *       "data":
      *       [
      *          {
      *            "id": "1",
+     *            "title": "Web-Solutions"
+     *            "ico": "1102587"
+     *            "dic": "12587459644"
+     *            "ic_dph": "12587459644"
+     *            "street": "Cesta 125"
+     *            "city": "Bratislava"
+     *            "zip": "02587"
+     *            "country": "SR"
      *          }
      *       ],
      *       "_links":
      *       {
-     *           "self": "/entity?page=1",
-     *           "first": "/entity?page=1",
+     *           "self": "api/v1/companies?page=1",
+     *           "first": "api/v1/companies?page=1",
      *           "prev": false,
-     *           "next": "/entity?page=2",
-     *            "last": "/entity?page=3"
+     *           "next": "api/v1/companies?page=2",
+     *            "last": "api/v1/companies?page=3"
      *       },
      *       "total": 22,
      *       "page": 1,
@@ -71,12 +79,20 @@ class CompanyController extends ApiBaseController  implements ControllerInterfac
      *        "data":
      *        {
      *           "id": "2",
+     *           "title": "Web-Solutions"
+     *           "ico": "1102587"
+     *           "dic": "12587459644"
+     *           "ic_dph": "12587459644"
+     *           "street": "Cesta 125"
+     *           "city": "Bratislava"
+     *           "zip": "02587"
+     *           "country": "SR"
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/id",
-     *           "patch": "/api/v1/entityName/id",
-     *           "delete": "/api/v1/entityName/id"
+     *           "put": "/api/v1/companies/id",
+     *           "patch": "/api/v1/companies/id",
+     *           "delete": "/api/v1/companies/id"
      *         }
      *      }
      *
@@ -97,7 +113,7 @@ class CompanyController extends ApiBaseController  implements ControllerInterfac
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  output="API\CoreBundle\Entity\...entityName",
+     *  output="API\CoreBundle\Entity\Company",
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
@@ -119,19 +135,27 @@ class CompanyController extends ApiBaseController  implements ControllerInterfac
      *        "data":
      *        {
      *           "id": "2",
+     *           "title": "Web-Solutions"
+     *           "ico": "1102587"
+     *           "dic": "12587459644"
+     *           "ic_dph": "12587459644"
+     *           "street": "Cesta 125"
+     *           "city": "Bratislava"
+     *           "zip": "02587"
+     *           "country": "SR"
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *           "put": "/api/v1/companies/2",
+     *           "patch": "/api/v1/companies/2",
+     *           "delete": "/api/v1/companies/2"
      *         }
      *      }
      *
      * @ApiDoc(
      *  resource = true,
      *  description="Create a new Entity (POST)",
-     *  input={"class"="API\CoreBundle\Entity\...entityName"},
+     *  input={"class"="API\CoreBundle\Entity\Company"},
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -139,11 +163,10 @@ class CompanyController extends ApiBaseController  implements ControllerInterfac
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  output={"class"="API\CoreBundle\Entity\...entityName"},
+     *  output={"class"="API\CoreBundle\Entity\Company"},
      *  statusCodes={
      *      201 ="The entity was successfully created",
      *      401 ="Unauthorized request",
-     *      403 ="Access denied",
      *      409 ="Invalid parameters",
      *  }
      * )
@@ -162,12 +185,20 @@ class CompanyController extends ApiBaseController  implements ControllerInterfac
      *        "data":
      *        {
      *           "id": "2",
+     *           "title": "Web-Solutions"
+     *           "ico": "1102587"
+     *           "dic": "12587459644"
+     *           "ic_dph": "12587459644"
+     *           "street": "Cesta 125"
+     *           "city": "Bratislava"
+     *           "zip": "02587"
+     *           "country": "SR"
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *           "put": "/api/v1/companies/2",
+     *           "patch": "/api/v1/companies/2",
+     *           "delete": "/api/v1/companies/2"
      *         }
      *      }
      *
@@ -181,7 +212,7 @@ class CompanyController extends ApiBaseController  implements ControllerInterfac
      *       "description"="The id of processed object"
      *     }
      *  },
-     *  input={"class"="API\CoreBundle\Entity\...entityName"},
+     *  input={"class"="API\CoreBundle\Entity\Company"},
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -189,11 +220,10 @@ class CompanyController extends ApiBaseController  implements ControllerInterfac
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  output={"class"="API\CoreBundle\Entity\...entityName"},
+     *  output={"class"="API\CoreBundle\Entity\Company"},
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
-     *      403 ="Access denied",
      *      404 ="Not found Entity",
      *      409 ="Invalid parameters",
      *  }
@@ -214,12 +244,20 @@ class CompanyController extends ApiBaseController  implements ControllerInterfac
      *        "data":
      *        {
      *           "id": "2",
+     *           "title": "Web-Solutions"
+     *           "ico": "1102587"
+     *           "dic": "12587459644"
+     *           "ic_dph": "12587459644"
+     *           "street": "Cesta 125"
+     *           "city": "Bratislava"
+     *           "zip": "02587"
+     *           "country": "SR"
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *           "put": "/api/v1/companies/2",
+     *           "patch": "/api/v1/companies/2",
+     *           "delete": "/api/v1/companies/2"
      *         }
      *      }
      *
@@ -233,7 +271,7 @@ class CompanyController extends ApiBaseController  implements ControllerInterfac
      *       "description"="The id of processed object"
      *     }
      *  },
-     *  input={"class"="API\CoreBundle\Entity\...entityName"},
+     *  input={"class"="API\CoreBundle\Entity\Company"},
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -241,11 +279,10 @@ class CompanyController extends ApiBaseController  implements ControllerInterfac
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  output={"class"="API\CoreBundle\Entity\...entityName"},
+     *  output={"class"="API\CoreBundle\Entity\Company"},
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
-     *      403 ="Access denied",
      *      404 ="Not found Entity",
      *      409 ="Invalid parameters",
      *  }
@@ -281,7 +318,7 @@ class CompanyController extends ApiBaseController  implements ControllerInterfac
      *  statusCodes={
      *      204 ="The Entity was successfully deleted",
      *      401 ="Unauthorized request",
-     *      404 ="Not found Tag",
+     *      404 ="Not found Entity",
      *  })
      *
      * @param int $id

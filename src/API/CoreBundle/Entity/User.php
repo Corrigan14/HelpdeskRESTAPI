@@ -98,6 +98,7 @@ class User implements AdvancedUserInterface , \Serializable
     /**
      * @ORM\ManyToOne(targetEntity="Company", inversedBy="users")
      * @ORM\JoinColumn(name="company_id", referencedColumnName="id")
+     * @ReadOnly()
      */
     private $company;
 

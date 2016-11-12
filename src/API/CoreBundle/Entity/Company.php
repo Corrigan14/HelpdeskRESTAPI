@@ -108,6 +108,7 @@ class Company implements \Serializable
 
     /**
      * @ORM\OneToMany(targetEntity="User", mappedBy="company")
+     * @Exclude()
      */
     private $users;
 

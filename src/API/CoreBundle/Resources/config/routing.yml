@@ -3,7 +3,7 @@ token_authentication:
     defaults: { _controller: APICoreBundle:Login:tokenAuthentication }
     methods: [POST]
 
-api_task_task:
+api_user:
     resource: "@APICoreBundle/Resources/config/routing/user.yml"
     prefix: /users
 

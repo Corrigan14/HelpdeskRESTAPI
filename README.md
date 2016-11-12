@@ -158,11 +158,12 @@ Dokumentacne pravidla
 3. Controller
     - vytvorenie prazdneho Controllera
     - kazdy Controller: extends ApiBaseController implements ControllerInterface
+                        use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
 4. Routy (Resources/config/routing/entityName.yml)
     - vytvorenie entityName.yml suboru
     - kazdu skupinu rout musime zaregistrovat v routing.yml
-    - kazda entita bude mat zakladnu skupinu rout (pozri tag.yml)
+    - kazda entita bude mat zakladnu skupinu rout (pozri user.yml)
     
 5. Testy
     - pre testy vyuzivame vlastnu testovaciu databazu s fixtures:

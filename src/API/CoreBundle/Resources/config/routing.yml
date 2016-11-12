@@ -6,3 +6,7 @@ token_authentication:
 api_users:
     resource: "@APICoreBundle/Resources/config/routing/user.yml"
     prefix: /
+
+api_companies:
+    resource: "@APICoreBundle/Resources/config/routing/company.yml"
+    prefix: /

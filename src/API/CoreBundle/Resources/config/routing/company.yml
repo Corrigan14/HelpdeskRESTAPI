@@ -1,36 +1,36 @@
 company_list:
-    path:     /
+    path:     /companies
     defaults: { _controller: APICoreBundle:Company:list }
     methods: [GET]
 
 company:
-    path:     /{id}
+    path:     /companies/{id}
     defaults: { _controller: APICoreBundle:Company:get }
     methods: [GET]
     requirements:
         id: '\d+'
 
 company_create:
-    path:     /
+    path:     /companies
     defaults: { _controller: APICoreBundle:Company:create }
     methods: [POST]
 
 company_update:
-    path:     /{id}
+    path:     /companies/{id}
     defaults: { _controller: APICoreBundle:Company:update }
     methods: [PUT]
     requirements:
         id: '\d+'
 
 company_partial_update:
-    path:     /{id}
+    path:     /companies/{id}
     defaults: { _controller: APICoreBundle:Company:updatePartial }
     methods: [PATCH]
     requirements:
         id: '\d+'
 
 company_delete:
-    path:     /{id}
+    path:     /companies/{id}
     defaults: { _controller: APICoreBundle:Company:delete }
     methods: [DELETE]
     requirements:

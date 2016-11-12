@@ -3,40 +3,6 @@ token_authentication:
     defaults: { _controller: APICoreBundle:Login:tokenAuthentication }
     methods: [POST]
 
-users_list:
-    path:     /users
-    defaults: { _controller: APICoreBundle:User:list }
-    methods: [GET]
-
-user:
-    path:     /users/{id}
-    defaults: { _controller: APICoreBundle:User:get }
-    methods: [GET]
-    requirements:
-        id: '\d+'
-
-user_create:
-    path:     /users
-    defaults: { _controller: APICoreBundle:User:create }
-    methods: [POST]
-
-user_update:
-    path:     /users/{id}
-    defaults: { _controller: APICoreBundle:User:update }
-    methods: [PUT]
-    requirements:
-        id: '\d+'
-
-user_partial_update:
-    path:     /users/{id}
-    defaults: { _controller: APICoreBundle:User:updatePartial }
-    methods: [PATCH]
-    requirements:
-        id: '\d+'
-
-user_delete:
-    path:     /users/{id}
-    defaults: { _controller: APICoreBundle:User:delete }
-    methods: [DELETE]
-    requirements:
-        id: '\d+'
+api_task_task:
+    resource: "@APICoreBundle/Resources/config/routing/user.yml"
+    prefix: /users

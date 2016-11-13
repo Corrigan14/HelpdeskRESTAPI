@@ -24,7 +24,7 @@ class TagController extends ApiBaseController implements ControllerInterface
      *       "data":
      *       [
      *          {
-     *            "id": "2",
+     *             "id": "2",
      *             "title": "Work",
      *             "color": "4871BF",
      *             "public": true

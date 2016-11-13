@@ -13,7 +13,7 @@ use API\TaskBundle\Entity\Tag;
  */
 class TagControllerTest extends ApiTestCase
 {
-    const BASE_URL = '/api/v1/tasks/tags';
+    const BASE_URL = '/api/v1/task-bundle/tags';
 
     /**
      * GET SINGLE - errors

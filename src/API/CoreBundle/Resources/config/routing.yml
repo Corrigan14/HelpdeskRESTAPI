@@ -1,7 +1,2 @@
-token_authentication:
-    path:     /token-authentication
-    defaults: { _controller: APICoreBundle:Login:tokenAuthentication }
-    methods: [POST]
-
 api_users:
     resource: "@APICoreBundle/Resources/config/routing/user.yml"

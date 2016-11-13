@@ -5,7 +5,11 @@ api_task:
 NelmioApiDocBundle:
     resource: "@NelmioApiDocBundle/Resources/config/routing.yml"
     prefix:   /v1/doc
+token_authentication:
+    path:     /api/v1/token-authentication
+    defaults: { _controller: APICoreBundle:Login:tokenAuthentication }
+    methods: [POST]
 api_core:
     resource: "@APICoreBundle/Resources/config/routing.yml"
-    prefix:   /api/v1
+    prefix:   /api/v1/core-bundle
 

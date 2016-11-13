@@ -12,7 +12,7 @@ use API\CoreBundle\Services\StatusCodesHelper;
  */
 class UserControllerTest extends ApiTestCase
 {
-    const BASE_URL = '/api/v1/users';
+    const BASE_URL = '/api/v1/core-bundle/users';
 
     /**
      * GET LIST - success

@@ -24,7 +24,7 @@ class UserControllerTest extends ApiTestCase
         $this->assertEquals(UserRepository::DEFAULT_FIELDS, $keys);
 
         // Test List with custom data fields
-        $this->getClient()->request('GET', '/api/v1/users?fields=name', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->getClient()->request('GET', $this->getBaseUrl() . '?fields=name', [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // We expect at least one user and if we get a response based on custom fields e.g. only name

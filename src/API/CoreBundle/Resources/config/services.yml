@@ -3,6 +3,9 @@ services:
           class: API\CoreBundle\Services\UserService
           arguments: ["@doctrine.orm.entity_manager","@router"]
           lazy: true
+    api_company.service:
+          class: API\CoreBundle\Services\CompanyService
+          arguments: ["@doctrine.orm.entity_manager","@router"]
     entity_processor:
         class: API\CoreBundle\Services\ProcessEntity
         arguments: ["@doctrine.orm.default_entity_manager", "@validator"]
@@ -11,3 +14,6 @@ services:
         class: API\CoreBundle\Security\UserVoter
         arguments: ["@security.access.decision_manager","@security.token_storage"]
         lazy: true
+    company_voter:
+        class: API\CoreBundle\Security\CompanyVoter
+        arguments: ["@security.access.decision_manager","@security.token_storage"]

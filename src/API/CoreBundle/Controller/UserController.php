@@ -2,6 +2,7 @@
 
 namespace API\CoreBundle\Controller;
 
+use API\CoreBundle\Entity\Company;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
 use API\CoreBundle\Security\VoteOptions;
@@ -66,7 +67,8 @@ class UserController extends ApiBaseController implements ControllerInterface
      *  },
      *  statusCodes={
      *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request"
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied"
      *  },
      * )
      *
@@ -79,13 +81,13 @@ class UserController extends ApiBaseController implements ControllerInterface
     public function listAction(Request $request)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::LIST_USERS)) {
-            return $this->unauthorizedResponse();
+            return $this->accessDeniedResponse();
         }
 
-        $fields = $request->get('fields') ? explode(',' , $request->get('fields')) : [];
+        $fields = $request->get('fields') ? explode(',', $request->get('fields')) : [];
         $page = $request->get('page') ?: 1;
 
-        return $this->json($this->get('api_user.service')->getUsersResponse($fields , $page) , StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($this->get('api_user.service')->getUsersResponse($fields, $page), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -114,6 +116,18 @@ class UserController extends ApiBaseController implements ControllerInterface
      *              "city": "Bratislava",
      *              "zip": "025874",
      *              "country": "SR"
+     *           },
+     *          "company":
+     *           {
+     *              "id": 1,
+     *              "title": "Web-Solutions",
+     *              "ico": "1102587",
+     *              "dic": "12587459644",
+     *              "street": "Cesta 125",
+     *              "city": "Bratislava",
+     *              "zip": "021478",
+     *              "country": "Slovenska Republika",
+     *              "is_active": true
      *           }
      *        },
      *        "_links":
@@ -145,6 +159,7 @@ class UserController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found user"
      *  },
      *  )
@@ -158,18 +173,18 @@ class UserController extends ApiBaseController implements ControllerInterface
      */
     public function getAction(int $id)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::SHOW_USER , $id)) {
-            return $this->unauthorizedResponse();
+        if (!$this->get('user_voter')->isGranted(VoteOptions::SHOW_USER, $id)) {
+            return $this->accessDeniedResponse();
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (null === $user) {
             return $this->createApiResponse([
-                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
-            ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
+                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE,
+            ], StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
 
-        return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user) , StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -198,6 +213,18 @@ class UserController extends ApiBaseController implements ControllerInterface
      *              "city": "Bratislava",
      *              "zip": "025874",
      *              "country": "SR"
+     *           },
+     *          "company":
+     *           {
+     *              "id": 1,
+     *              "title": "Web-Solutions",
+     *              "ico": "1102587",
+     *              "dic": "12587459644",
+     *              "street": "Cesta 125",
+     *              "city": "Bratislava",
+     *              "zip": "021478",
+     *              "country": "Slovenska Republika",
+     *              "is_active": true
      *           }
      *         },
      *         "_links": ▿
@@ -223,11 +250,13 @@ class UserController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      201 ="The entity was successfully created",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      409 ="Invalid parameters",
      *  }
      *  )
      *
      * @param Request $request
+     * @param int|bool $companyId
      *
      * @return JsonResponse
      * @throws \InvalidArgumentException
@@ -236,10 +265,10 @@ class UserController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\DBAL\DBALException
      * @throws \LogicException
      */
-    public function createAction(Request $request)
+    public function createAction(Request $request, $companyId = false)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::CREATE_USER)) {
-            return $this->unauthorizedResponse();
+            return $this->accessDeniedResponse();
         }
 
         $requestData = $request->request->all();
@@ -248,7 +277,9 @@ class UserController extends ApiBaseController implements ControllerInterface
         $user->setRoles(['ROLE_USER']);
         $user->setIsActive(true);
 
-        return $this->updateUser($user , $requestData , true);
+        $this->setCompanyToUser($user, $companyId);
+
+        return $this->updateUser($user, $requestData, true);
     }
 
     /**
@@ -277,6 +308,18 @@ class UserController extends ApiBaseController implements ControllerInterface
      *              "city": "Bratislava",
      *              "zip": "025874",
      *              "country": "SR"
+     *           },
+     *          "company":
+     *           {
+     *              "id": 1,
+     *              "title": "Web-Solutions",
+     *              "ico": "1102587",
+     *              "dic": "12587459644",
+     *              "street": "Cesta 125",
+     *              "city": "Bratislava",
+     *              "zip": "021478",
+     *              "country": "Slovenska Republika",
+     *              "is_active": true
      *           }
      *         },
      *         "_links": ▿
@@ -309,12 +352,13 @@ class UserController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found user",
      *      409 ="Invalid parameters",
      *  })
      *
-     * @param int     $id
-     *
+     * @param int $id
+     * @param int|bool $companyId
      * @param Request $request
      *
      * @return JsonResponse
@@ -323,16 +367,20 @@ class UserController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
-    public function updateAction(int $id , Request $request)
+    public function updateAction(int $id, Request $request, $companyId = false)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER , $id)) {
-            return $this->unauthorizedResponse();
+        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER, $id)) {
+            return $this->accessDeniedResponse();
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         $requestData = $request->request->all();
 
-        return $this->updateUser($user , $requestData);
+        if (null !== $user && $user instanceof User) {
+            $this->setCompanyToUser($user, $companyId);
+        }
+
+        return $this->updateUser($user, $requestData);
     }
 
     /**
@@ -361,6 +409,18 @@ class UserController extends ApiBaseController implements ControllerInterface
      *              "city": "Bratislava",
      *              "zip": "025874",
      *              "country": "SR"
+     *           },
+     *          "company":
+     *           {
+     *              "id": 1,
+     *              "title": "Web-Solutions",
+     *              "ico": "1102587",
+     *              "dic": "12587459644",
+     *              "street": "Cesta 125",
+     *              "city": "Bratislava",
+     *              "zip": "021478",
+     *              "country": "Slovenska Republika",
+     *              "is_active": true
      *           }
      *         },
      *         "_links": ▿
@@ -393,12 +453,13 @@ class UserController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found user",
      *      409 ="Invalid parameters",
      *  })
      *
-     * @param int     $id
-     *
+     * @param int $id
+     * @param int|bool $companyId
      * @param Request $request
      *
      * @return JsonResponse
@@ -407,17 +468,21 @@ class UserController extends ApiBaseController implements ControllerInterface
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function updatePartialAction(int $id , Request $request)
+    public function updatePartialAction(int $id, Request $request, $companyId = false)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER , $id)) {
-            return $this->unauthorizedResponse();
+        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER, $id)) {
+            return $this->accessDeniedResponse();
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
 
         $requestData = $request->request->all();
 
-        return $this->updateUser($user , $requestData);
+        if (null !== $user && $user instanceof User) {
+            $this->setCompanyToUser($user, $companyId);
+        }
+
+        return $this->updateUser($user, $requestData);
     }
 
     /**
@@ -441,6 +506,7 @@ class UserController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="is_active param of Entity was successfully changed to inactive: 0",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found user",
      *  })
      *
@@ -452,16 +518,16 @@ class UserController extends ApiBaseController implements ControllerInterface
      */
     public function deleteAction(int $id)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::DELETE_USER , $id)) {
-            return $this->unauthorizedResponse();
+        if (!$this->get('user_voter')->isGranted(VoteOptions::DELETE_USER, $id)) {
+            return $this->accessDeniedResponse();
         }
 
         /** @var User $user */
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (null === $user) {
             return $this->createApiResponse([
-                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
-            ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
+                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE,
+            ], StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
 
         $user->setIsActive(false);
@@ -469,34 +535,34 @@ class UserController extends ApiBaseController implements ControllerInterface
         $this->getDoctrine()->getManager()->flush();
 
         return $this->createApiResponse([
-            'message' => StatusCodesHelper::UNACITVATE_MESSAGE ,
-        ] , StatusCodesHelper::SUCCESSFUL_CODE);
+            'message' => StatusCodesHelper::UNACITVATE_MESSAGE,
+        ], StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
      * @param User|null $user
      *
-     * @param array     $requestData
+     * @param array $requestData
      *
-     * @param bool      $create
+     * @param bool $create
      *
      * @return JsonResponse
      * @internal param $id
      */
-    private function updateUser($user , array $requestData , $create = false)
+    private function updateUser($user, array $requestData, $create = false)
     {
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         if (null === $user || !$user instanceof User) {
             return $this->createApiResponse([
-                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
-            ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
+                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE,
+            ], StatusCodesHelper::USER_NOT_FOUND_CODE);
         }
 
-        $errors = $this->get('entity_processor')->processEntity($user , $requestData);
+        $errors = $this->get('entity_processor')->processEntity($user, $requestData);
         if (false === $errors) {
             if (isset($requestData['password'])) {
-                $user->setPassword($this->get('security.password_encoder')->encodePassword($user , $requestData['password']));
+                $user->setPassword($this->get('security.password_encoder')->encodePassword($user, $requestData['password']));
             }
 
             $this->getDoctrine()->getManager()->persist($user);
@@ -514,29 +580,39 @@ class UserController extends ApiBaseController implements ControllerInterface
                     $user->setDetailData($userData);
                 }
 
-                $errorsUserData = $this->get('entity_processor')->processEntity($userData , $requestData['detail_data']);
+                $errorsUserData = $this->get('entity_processor')->processEntity($userData, $requestData['detail_data']);
 
                 if (false === $errorsUserData) {
                     $this->getDoctrine()->getManager()->persist($userData);
                     $this->getDoctrine()->getManager()->flush();
 
-                    return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user) , $statusCode);
+                    return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user), $statusCode);
                 }
             } else {
-                return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user) , $statusCode);
+                return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user), $statusCode);
             }
         }
 
-        return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE , 'errors' => $errors] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE, 'errors' => $errors], StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 
     /**
+     * @param User $user
+     * @param bool $companyId
      * @return JsonResponse
      */
-    protected function unauthorizedResponse()
+    private function setCompanyToUser(User $user, $companyId = false)
     {
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::UNAUTHORIZED_MESSAGE ,
-        ] , StatusCodesHelper::UNAUTHORIZED_CODE);
+        if ($companyId) {
+            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
+
+            if (null !== $company && $company instanceof Company) {
+                $user->setCompany($company);
+            } else {
+                return $this->createApiResponse([
+                    'message' => StatusCodesHelper::COMPANY_NOT_FOUND_MESSAGE,
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+        }
     }
 }

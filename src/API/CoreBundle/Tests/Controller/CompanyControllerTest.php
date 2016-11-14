@@ -9,7 +9,7 @@ namespace API\CoreBundle\Tests\Controller;
  */
 class CompanyControllerTest extends ApiTestCase
 {
-    const BASE_URL = '/api/v1/companies';
+    const BASE_URL = '/api/v1/core-bundle/companies';
 
     /**
      * Get the url for requests

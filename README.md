@@ -164,11 +164,13 @@ Dokumentacne pravidla
     - vytvorenie entityName.yml suboru
     - kazdu skupinu rout musime zaregistrovat v routing.yml
     - kazda entita bude mat zakladnu skupinu rout (pozri user.yml)
+    - pri importovanych cestach netreba pouzivat prefix pretoze tam da na konci kazdej cesty lomitko
     
 5. Testy
     - pre testy vyuzivame vlastnu testovaciu databazu s fixtures:
                 php bin/console doctrine:schema:update --force  --env=test
                 php bin/console doctrine:fixtures:load --env=test
+                php bin/console cache:clear --env=test
     - kazdy ControllerTest:  extends ApiTestCase, definuje: const BASE_URL (napr. '/api/v1/users')
     - Api TestCase implementuje ControllerTestInterface, ktory urcuje mnimalne metody pre testovanie zakladnych requestov
     - ApiTestCase automaticky testuje zakladne GET, POST, PUT, PATCH, DELETE actions (pozri ApiTestCase dokumentaciu), 

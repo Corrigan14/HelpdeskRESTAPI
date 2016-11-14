@@ -15,6 +15,13 @@ user_create:
     defaults: { _controller: APICoreBundle:User:create }
     methods: [POST]
 
+user_create_with_company:
+    path:     /users/company/{companyId}
+    defaults: { _controller: APICoreBundle:User:create }
+    methods: [POST]
+    requirements:
+        companyId: '\d+'
+
 user_update:
     path:     /users/{id}
     defaults: { _controller: APICoreBundle:User:update }
@@ -22,12 +29,26 @@ user_update:
     requirements:
         id: '\d+'
 
+user_update_with_company:
+    path:     /users/{id}/company/{companyId}
+    defaults: { _controller: APICoreBundle:User:update }
+    methods: [PUT]
+    requirements:
+        companyId: '\d+'
+
 user_partial_update:
     path:     /users/{id}
     defaults: { _controller: APICoreBundle:User:updatePartial }
     methods: [PATCH]
     requirements:
         id: '\d+'
+
+user_partial_update_with_company:
+    path:     /users/{id}/company/{companyId}
+    defaults: { _controller: APICoreBundle:User:updatePartial }
+    methods: [PATCH]
+    requirements:
+        companyId: '\d+'
 
 user_delete:
     path:     /users/{id}

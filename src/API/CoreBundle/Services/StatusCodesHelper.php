@@ -30,6 +30,7 @@ class StatusCodesHelper
     const RESOURCE_NOT_FOUND_MESSAGE = 'Resource not found';
     const RESOURCE_NOT_FOUND_CODE = 404;
     const USER_NOT_FOUND_MESSAGE = 'User not found';
+    const COMPANY_NOT_FOUND_MESSAGE = 'Company not found';
     const USER_NOT_FOUND_CODE = 404;
     const NOT_FOUND_MESSAGE = 'Not found';
     const NOT_FOUND_CODE = 404;

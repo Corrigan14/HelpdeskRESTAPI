@@ -205,13 +205,16 @@ Dokumentacne pravidla
     
 6a. Service
     - vytvorenie Service (Services)
+    - Ak sa jedna o beznu Entitu ako napr. Company ci Tag, Sevice moze: extends ApiBaseService(), ktory 
+      obsahuje metody na ziskanie Zoznamu entit (v metode listAction) a ziskanie jednej entity (v metode getAction)
     - registracia Service (Resources/config/services.yml)
     
-6b. Repostory
-    - tento automaticky vygeneruje Doctrine pri vytvoreni entity. AK nie, je potrebne ho v entite zaregostrovat
+6b. Repository
+    - tento automaticky vygeneruje Doctrine pri vytvoreni entity. AK nie, je potrebne ho v entite zaregistrovat
+    - ak vyuzivame ApiBaseService potrebujeme, aby nas repozitar implementoval metody RepositoryInteface()
 
 6c. Security
-    - vytvorenie EntityNameOptions.php - obsahuje konstanty s akciami, pre ktore su potrebne pravidla vykonavania
+    - doplnenie VoterOptions.php - obsahuje konstanty s akciami, pre ktore su potrebne pravidla vykonavania
     - vytvorenie EntityNameVoter.php: extends ApiBaseVoter implements VoterInterface
     - registracia EntityNameVoter (Resources/config/services.yml)
     

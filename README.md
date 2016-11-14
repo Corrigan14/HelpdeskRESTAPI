@@ -158,11 +158,12 @@ Dokumentacne pravidla
 3. Controller
     - vytvorenie prazdneho Controllera
     - kazdy Controller: extends ApiBaseController implements ControllerInterface
+                        use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
 4. Routy (Resources/config/routing/entityName.yml)
     - vytvorenie entityName.yml suboru
     - kazdu skupinu rout musime zaregistrovat v routing.yml
-    - kazda entita bude mat zakladnu skupinu rout (pozri tag.yml)
+    - kazda entita bude mat zakladnu skupinu rout (pozri user.yml)
     
 5. Testy
     - pre testy vyuzivame vlastnu testovaciu databazu s fixtures:
@@ -204,13 +205,16 @@ Dokumentacne pravidla
     
 6a. Service
     - vytvorenie Service (Services)
+    - Ak sa jedna o beznu Entitu ako napr. Company ci Tag, Sevice moze: extends ApiBaseService(), ktory 
+      obsahuje metody na ziskanie Zoznamu entit (v metode listAction) a ziskanie jednej entity (v metode getAction)
     - registracia Service (Resources/config/services.yml)
     
-6b. Repostory
-    - tento automaticky vygeneruje Doctrine pri vytvoreni entity. AK nie, je potrebne ho v entite zaregostrovat
+6b. Repository
+    - tento automaticky vygeneruje Doctrine pri vytvoreni entity. AK nie, je potrebne ho v entite zaregistrovat
+    - ak vyuzivame ApiBaseService potrebujeme, aby nas repozitar implementoval metody RepositoryInteface()
 
 6c. Security
-    - vytvorenie EntityNameOptions.php - obsahuje konstanty s akciami, pre ktore su potrebne pravidla vykonavania
+    - doplnenie VoterOptions.php - obsahuje konstanty s akciami, pre ktore su potrebne pravidla vykonavania
     - vytvorenie EntityNameVoter.php: extends ApiBaseVoter implements VoterInterface
     - registracia EntityNameVoter (Resources/config/services.yml)
     

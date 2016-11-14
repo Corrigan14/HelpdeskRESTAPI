@@ -312,6 +312,7 @@ class UserController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found user",
      *      409 ="Invalid parameters",
      *  })
@@ -396,6 +397,7 @@ class UserController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found user",
      *      409 ="Invalid parameters",
      *  })
@@ -444,6 +446,7 @@ class UserController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="is_active param of Entity was successfully changed to inactive: 0",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found user",
      *  })
      *

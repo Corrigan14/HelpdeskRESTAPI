@@ -45,7 +45,7 @@ class CompanyService
     {
         /** @var CompanyRepository $companyRepository */
         $companyRepository = $this->em->getRepository('APICoreBundle:Company');
-        $companies = $companyRepository->getAllCompanies($page);
+        $companies = $companyRepository->getAllEntities(false,$page);
 
         $response = [
             'data' => $companies,
@@ -54,7 +54,7 @@ class CompanyService
         $pagination = HateoasHelper::getPagination(
             $this->router->generate('company_list'),
             $page,
-            $companyRepository->countCompanies(),
+            $companyRepository->countEntities(false),
             CompanyRepository::LIMIT
         );
 

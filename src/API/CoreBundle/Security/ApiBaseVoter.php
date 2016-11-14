@@ -2,6 +2,7 @@
 
 namespace API\CoreBundle\Security;
 
+use API\CoreBundle\Entity\User;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
@@ -29,5 +30,29 @@ class ApiBaseVoter
     {
         $this->decisionManager = $decisionManager;
         $this->token = $tokenStorage->getToken();
+    }
+
+    /**
+     * Every User has a custom array of access rights
+     *
+     * @param string $action
+     * @param User $user
+     *
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function hasAclRights($action, User $user)
+    {
+        if (!in_array($action , VoteOptions::getConstants() , true)) {
+            throw new \InvalidArgumentException('Action ins not valid, please list your action in the options list');
+        }
+
+        $acl = $user->getAcl();
+
+        if (in_array($action , $acl , true)) {
+            return true;
+        }
+
+        return false;
     }
 }

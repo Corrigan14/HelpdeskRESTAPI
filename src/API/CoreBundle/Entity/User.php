@@ -5,6 +5,8 @@ use API\CoreBundle\Services\Traits\FeaturedImageEntity;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ReadOnly;
 use JMS\Serializer\Annotation\Exclude;
+use JMS\Serializer\Annotation\ExclusionPolicy;
+use JMS\Serializer\Annotation\MaxDepth;
 use Symfony\Component\Security\Core\User\AdvancedUserInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -12,11 +14,11 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="API\CoreBundle\Repository\UserRepository")
  * @ORM\Table(name="user")
  * @UniqueEntity("email")
  * @UniqueEntity("username")
- * @Serializer\ExclusionPolicy("none")
+ * @ExclusionPolicy("none")
  */
 class User implements AdvancedUserInterface , \Serializable
 {
@@ -79,7 +81,7 @@ class User implements AdvancedUserInterface , \Serializable
      *
      * @var bool
      */
-    private $isActive = true;
+    private $is_active = true;
 
     /**
      * @ORM\Column(name="acl", type="text", nullable=true)
@@ -90,9 +92,8 @@ class User implements AdvancedUserInterface , \Serializable
 
     /**
      * @var UserData
-     * @ORM\OneToOne(targetEntity="UserData", inversedBy="user", fetch="EAGER")
-     * @ORM\JoinColumn(name="detail_data_id", referencedColumnName="id", onDelete="SET NULL")
-     * @Serializer\MaxDepth(0)
+     * @ORM\OneToOne(targetEntity="UserData", mappedBy="user", orphanRemoval=true)
+     * @MaxDepth(1)
      *
      * @var UserData
      */
@@ -100,7 +101,7 @@ class User implements AdvancedUserInterface , \Serializable
 
     public function __construct()
     {
-        $this->isActive = true;
+        $this->is_active = true;
         $this->acl = json_encode([]);
     }
 
@@ -205,25 +206,25 @@ class User implements AdvancedUserInterface , \Serializable
     /**
      * Set isActive
      *
-     * @param boolean $isActive
+     * @param boolean $is_active
      *
      * @return User
      */
-    public function setIsActive($isActive)
+    public function setIsActive($is_active)
     {
-        $this->isActive = $isActive;
+        $this->is_active = $is_active;
 
         return $this;
     }
 
     /**
-     * Get isActive
+     * Get is_active
      *
      * @return boolean
      */
     public function getIsActive()
     {
-        return $this->isActive;
+        return $this->is_active;
     }
 
     /**
@@ -367,6 +368,6 @@ class User implements AdvancedUserInterface , \Serializable
     public function isEnabled()
     {
 
-        return $this->isActive;
+        return $this->is_active;
     }
 }

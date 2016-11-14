@@ -34,16 +34,6 @@ interface ControllerInterface
      *       "numberOfPages": 3
      *     }
      *
-     *  ### Response - if we don't have ###
-     *      {
-     *        "data":
-     *        {
-     *          "0":
-     *          {
-     *             "id": "2",
-     *          }
-     *        },
-     *      }
      *
      * @ApiDoc(
      *  description="Returns a list of Entities (GET)",
@@ -146,6 +136,7 @@ interface ControllerInterface
      *  statusCodes={
      *      201 ="The entity was successfully created",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      409 ="Invalid parameters",
      *  }
      * )
@@ -192,6 +183,7 @@ interface ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found Entity",
      *      409 ="Invalid parameters",
      *  }
@@ -240,6 +232,7 @@ interface ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found Entity",
      *      409 ="Invalid parameters",
      *  }
@@ -270,6 +263,8 @@ interface ControllerInterface
      *     }
      *  },
      *  statusCodes={
+     *      200 ="is_active param of Entity was successfully changed to inactive: 0",
+     *      ...OR...
      *      204 ="The Entity was successfully deleted",
      *      401 ="Unauthorized request",
      *      404 ="Not found Tag",

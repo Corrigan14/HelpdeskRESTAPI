@@ -171,7 +171,7 @@ class CdnController extends ApiBaseController
             return $this->createApiResponse(['message' => StatusCodesHelper::RESOURCE_NOT_FOUND_MESSAGE,], StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
         }
 
-        //TODO check user privileges
+        //TODO check user privileges - cache
 
         // Generate response
         $response = new Response();

@@ -1,4 +1,4 @@
-.checkout
+.API Dokumentácia
 =========
 
 API Dokumentácia
@@ -139,3 +139,80 @@ Dokumentacne pravidla
         *      201="The entity was successfully created",
         *      409="Invalid parameters",
         *  },
+        
+.Tvorba novej Entity
+=========
+1. Entita
+    - vytvorenie Entity
+    - Entita implementuje Serializer
+        use JMS\Serializer\Annotation as Serializer;
+    - vyuzivame
+        use JMS\Serializer\Annotation\ReadOnly;
+        use JMS\Serializer\Annotation\Exclude;
+    - kazdy parameter, ktory sa nema zobrazovat pri vypisovani entity musi mat nastaveny prefix @Exclude()
+    - kazdy parameter, ktory sa ma zobrazovat pri vypisovani entity, ale jeho hodnota sa nezadava (napr. ID) 
+      musi mat nastaveny prefix @ReadOnly()
+
+2. Fixtures
+
+3. Controller
+    - vytvorenie prazdneho Controllera
+    - kazdy Controller: extends ApiBaseController implements ControllerInterface
+                        use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+
+4. Routy (Resources/config/routing/entityName.yml)
+    - vytvorenie entityName.yml suboru
+    - kazdu skupinu rout musime zaregistrovat v routing.yml
+    - kazda entita bude mat zakladnu skupinu rout (pozri user.yml)
+    - pri importovanych cestach netreba pouzivat prefix pretoze tam da na konci kazdej cesty lomitko
+    
+5. Testy
+    - pre testy vyuzivame vlastnu testovaciu databazu s fixtures:
+                php bin/console doctrine:schema:update --force  --env=test
+                php bin/console doctrine:fixtures:load --env=test
+    - kazdy ControllerTest:  extends ApiTestCase, definuje: const BASE_URL (napr. '/api/v1/users')
+    - Api TestCase implementuje ControllerTestInterface, ktory urcuje mnimalne metody pre testovanie zakladnych requestov
+    - ApiTestCase automaticky testuje zakladne GET, POST, PUT, PATCH, DELETE actions (pozri ApiTestCase dokumentaciu), 
+      musime vsak pripravit:
+                            url (metoda: getBaseUrl)
+                            testovacie data (metody: returnUpdateTestData, returnPostTestData)
+                            entity (findOneEntity, createEntity, removeTestEntity)
+    - kazdu metodu v ControllerTest mozeme rozsirit o testy pre specificke funkcie 
+      ako napr. testovanie vkladania nespravnych udajov (napr. email nie je validny)
+      Zvycajne pojde o rozsirenie:
+          /**
+          *  POST SINGLE - errors
+          */
+          public function testPostSingleErrors()
+          {
+              parent::testPostSingleErrors();
+      
+              // Try to create Entity with invalid parameter ... (... is required) [code 409]
+          }
+      
+          /**
+           *  UPDATE SINGLE - errors
+           */
+          public function testUpdateSingleErrors()
+          {
+              parent::testUpdateSingleErrors();
+      
+              // Try to update Entity with not invalid parameter ... (... has to be uniqe) [code 409]
+          }
+
+6. Controller
+    - upravime dokumentaciu pre jednotlive metody
+    - doprogramujeme uz odtestovane metody tak, aby vsetky testy presli spravne (min CRUD): phpunit
+    
+6a. Service
+    - vytvorenie Service (Services)
+    - registracia Service (Resources/config/services.yml)
+    
+6b. Repostory
+    - tento automaticky vygeneruje Doctrine pri vytvoreni entity. AK nie, je potrebne ho v entite zaregostrovat
+
+6c. Security
+    - vytvorenie EntityNameOptions.php - obsahuje konstanty s akciami, pre ktore su potrebne pravidla vykonavania
+    - vytvorenie EntityNameVoter.php: extends ApiBaseVoter implements VoterInterface
+    - registracia EntityNameVoter (Resources/config/services.yml)
+    

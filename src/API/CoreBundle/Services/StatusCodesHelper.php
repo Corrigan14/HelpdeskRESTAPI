@@ -16,6 +16,7 @@ class StatusCodesHelper
     const CREATED_MESSAGE = 'The entity was successfully created';
     const DELETED_CODE = 204;
     const DELETED_MESSAGE = 'The entity was successfully deleted';
+    const UNACITVATE_MESSAGE = 'The is_active param of entity was set to 0';
 
     const BAD_REQUEST_MESSAGE = 'Bad Request';
     const BAD_REQUEST_CODE = 400;
@@ -30,8 +31,16 @@ class StatusCodesHelper
     const RESOURCE_NOT_FOUND_CODE = 404;
     const USER_NOT_FOUND_MESSAGE = 'User not found';
     const USER_NOT_FOUND_CODE = 404;
+    const NOT_FOUND_MESSAGE = 'Not found';
+    const NOT_FOUND_CODE = 404;
+    const ROUTE_REQUIREMENT_NOTMET_MESSAGE = 'No route found';
+    const ROUTE_REQUIREMENT_NOTMET_CODE = 405;
     const INVALID_PARAMETERS_MESSAGE = 'Invalid parameters';
     const INVALID_PARAMETERS_CODE = 409;
+
+
+    const INVALID_JWT_TOKEN_MESSAGE = 'Invalid JWT Token';
+    const INVALID_JWT_TOKEN_CODE = 500;
 
 
 }

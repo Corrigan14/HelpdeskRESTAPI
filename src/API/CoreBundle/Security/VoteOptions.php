@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: websolutions
- * Date: 10/25/16
- * Time: 1:43 PM
- */
 
 namespace API\CoreBundle\Security;
 

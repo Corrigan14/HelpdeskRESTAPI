@@ -1,45 +1,18 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: websolutions
- * Date: 10/25/16
- * Time: 1:06 PM
- */
 
 namespace API\CoreBundle\Security;
 
-
 use API\CoreBundle\Entity\User;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 
 /**
  * Class UserVoter
  *
  * @package API\CoreBundle\Security
  */
-class UserVoter
+class UserVoter extends ApiBaseVoter implements VoterInterface
 {
-    /** @var AccessDecisionManagerInterface */
-    private $decisionManager;
-    /** @var TokenInterface */
-    private $token;
     /** @var  User */
     private $user;
-
-    /**
-     * UserVoter constructor.
-     *
-     * @param AccessDecisionManagerInterface $decisionManager
-     * @param TokenStorage                   $tokenStorage
-     */
-    public function __construct(AccessDecisionManagerInterface $decisionManager , TokenStorage $tokenStorage)
-    {
-        $this->decisionManager = $decisionManager;
-        $this->token = $tokenStorage->getToken();
-    }
-
 
     /**
      * Perform a single access check operation on a given attribute, subject and token.

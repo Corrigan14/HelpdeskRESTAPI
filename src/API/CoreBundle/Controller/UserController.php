@@ -67,7 +67,8 @@ class UserController extends ApiBaseController implements ControllerInterface
      *  },
      *  statusCodes={
      *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request"
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied"
      *  },
      * )
      *
@@ -80,7 +81,7 @@ class UserController extends ApiBaseController implements ControllerInterface
     public function listAction(Request $request)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::LIST_USERS)) {
-            return $this->unauthorizedResponse();
+            return $this->accessDeniedResponse();
         }
 
         $fields = $request->get('fields') ? explode(',', $request->get('fields')) : [];
@@ -158,6 +159,7 @@ class UserController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found user"
      *  },
      *  )
@@ -172,7 +174,7 @@ class UserController extends ApiBaseController implements ControllerInterface
     public function getAction(int $id)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::SHOW_USER, $id)) {
-            return $this->unauthorizedResponse();
+            return $this->accessDeniedResponse();
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
@@ -248,6 +250,7 @@ class UserController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      201 ="The entity was successfully created",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      409 ="Invalid parameters",
      *  }
      *  )
@@ -265,7 +268,7 @@ class UserController extends ApiBaseController implements ControllerInterface
     public function createAction(Request $request, $companyId = false)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::CREATE_USER)) {
-            return $this->unauthorizedResponse();
+            return $this->accessDeniedResponse();
         }
 
         $requestData = $request->request->all();
@@ -349,6 +352,7 @@ class UserController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found user",
      *      409 ="Invalid parameters",
      *  })
@@ -366,7 +370,7 @@ class UserController extends ApiBaseController implements ControllerInterface
     public function updateAction(int $id, Request $request, $companyId = false)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER, $id)) {
-            return $this->unauthorizedResponse();
+            return $this->accessDeniedResponse();
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
@@ -449,6 +453,7 @@ class UserController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found user",
      *      409 ="Invalid parameters",
      *  })
@@ -466,7 +471,7 @@ class UserController extends ApiBaseController implements ControllerInterface
     public function updatePartialAction(int $id, Request $request, $companyId = false)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER, $id)) {
-            return $this->unauthorizedResponse();
+            return $this->accessDeniedResponse();
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
@@ -501,6 +506,7 @@ class UserController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="is_active param of Entity was successfully changed to inactive: 0",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found user",
      *  })
      *
@@ -513,7 +519,7 @@ class UserController extends ApiBaseController implements ControllerInterface
     public function deleteAction(int $id)
     {
         if (!$this->get('user_voter')->isGranted(VoteOptions::DELETE_USER, $id)) {
-            return $this->unauthorizedResponse();
+            return $this->accessDeniedResponse();
         }
 
         /** @var User $user */
@@ -588,16 +594,6 @@ class UserController extends ApiBaseController implements ControllerInterface
         }
 
         return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE, 'errors' => $errors], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-    }
-
-    /**
-     * @return JsonResponse
-     */
-    protected function unauthorizedResponse()
-    {
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::UNAUTHORIZED_MESSAGE,
-        ], StatusCodesHelper::UNAUTHORIZED_CODE);
     }
 
     /**

@@ -35,6 +35,34 @@ class UserControllerTest extends ApiTestCase
     }
 
     /**
+     * GET LIST - errors
+     */
+    public function testListErrors()
+    {
+        parent::testListErrors();
+
+        // Try to load list of entities user doesn't have permission with USER_ROLE
+        $this->getClient(true)->request('GET', $this->getBaseUrl(), [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * GET SINGLE - errors
+     */
+    public function testGetSingleErrors()
+    {
+        parent::testGetSingleErrors();
+
+        $entity = $this->findOneEntity();
+
+        // Try to load Entity if user doesn't have permission with USER_ROLE
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $entity->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
      * POST SINGLE - success
      *
      * Test the adding of company to User
@@ -73,11 +101,11 @@ class UserControllerTest extends ApiTestCase
     {
         parent::testPostSingleErrors();
 
-        // Try to create test user with ROLE_USER
+        // Try to create test user with ROLE_USER if user doesn't have permission
         $this->getClient()->request('POST', $this->getBaseUrl(), [
             'username' => 'testuser', 'password' => 'password', 'email' => 'testuser@testuser.com',
         ], [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
-        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to create user as admin, invalid email
         $this->getClient()->request('POST', $this->getBaseUrl(), [
@@ -137,17 +165,17 @@ class UserControllerTest extends ApiTestCase
 
         $entity = $this->findOneEntity();
 
-        // Try to update test user with ROLE_USER:method PUT
+        // Try to update test user with ROLE_USER if user doesn't have permission : method PUT
         $this->getClient()->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(), [
             'username' => 'testuser225', 'password' => 'password', 'email' => 'testuser@testuser.com',
         ], [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
-        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Try to update test user with ROLE_USER:method PATCH
+        // Try to update test user with ROLE_USER if user doesn't have permission : method PATCH
         $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(), [
             'username' => 'testuser225', 'password' => 'password', 'email' => 'testuser@testuser.com',
         ], [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
-        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Update user as admin, invalid email: method PUT
         $this->getClient()->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(), [
@@ -210,10 +238,10 @@ class UserControllerTest extends ApiTestCase
 
         $entity = $this->findOneEntity();
 
-        // Try to delete User Entity with logged ROLE_USER
+        // Try to delete User Entity with logged ROLE_USER if user doesn't have permission
         $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
             [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
-        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
 

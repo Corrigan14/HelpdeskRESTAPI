@@ -90,38 +90,6 @@ class CdnController extends ApiBaseController
     }
 
 
-
-    /**
-     * @Route("/delete/{slug}")
-     *
-     * @param string $slug
-     *
-     * @return JsonResponse
-     * @throws \LogicException
-     * @throws \Symfony\Component\Security\Core\Exception\AccessDeniedException
-     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
-     */
-    public function deleteAction($slug)
-    {
-
-        $this->denyAccessUnlessGranted('ROLE_SUPERADMIN', null, 'Unable to access this page!');
-
-        $fileEntity = $this->getDoctrine()->getRepository('AppBundle:File')->findOneBy([
-            'slug' => $slug,
-        ]);
-        $uploadDir = $this->container->getParameter('upload_dir');
-        $file = $uploadDir . DIRECTORY_SEPARATOR . $fileEntity->getUploadDir() . DIRECTORY_SEPARATOR . $fileEntity->getTempName();
-
-        if (!file_exists($file)) {
-            unlink($file);
-        }
-
-        $this->getDoctrine()->getManager()->remove($fileEntity);
-        $this->getDoctrine()->getManager()->flush();
-
-        return new JsonResponse(['message' => 'File removed!']);
-    }
-
     /**
      * @Route("/load/{slug}", name="cdn_load_file")
      *
@@ -172,20 +140,38 @@ class CdnController extends ApiBaseController
         }
 
         //TODO check user privileges - cache
-
         // Generate response
         $response = new Response();
 
+        if($fileEntity->isPublic()){
+            $response->setPublic();
+            $response->setSharedMaxAge(3600);
+        }else{
+            $response->setPrivate();
+        }
+
+
+//        $etag = md5(rand(0, 500));
+//        $response->setEtag($etag);
+//        $expires=time()+(60*60*24*365);
+//        $response->headers->set("Expires",gmdate("D, d M Y H:i:s", $expires)." GMT");
+
         // Set headers
-        $response->headers->set('Cache-Control', 'private');
         $response->headers->set('Content-type', mime_content_type($file));//$fileEntity->getType());
         $response->headers->set('Content-length', filesize($file) );//$fileEntity->getSize());
         $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set("Last-Modified",gmdate("D, d M Y H:i:s", filemtime($file))." GMT");
+
+//        $response->setTtl(25);
+//        $response->setClientTtl(25);
+//        $response->setMaxAge(15);
+//        $response->setSharedMaxAge(15);
 
         // Send headers before outputting anything
         $response->sendHeaders();
 
-        $response->setContent(readfile($file));
+//        $response->setContent('test '.time());
+        $response->setContent(file_get_contents($file));
 
         return $response;
     }

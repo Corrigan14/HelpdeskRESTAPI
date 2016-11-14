@@ -63,9 +63,10 @@ class UploadHelper
     /**
      * @param UploadedFile $file
      *
+     * @param bool $public
      * @return string
      */
-    public function uploadFile(UploadedFile $file)
+    public function uploadFile(UploadedFile $file, bool $public=false)
     {
         $fileEntity = new File();
         $uploadDir = $this->getUploadDir();
@@ -74,7 +75,7 @@ class UploadHelper
         $fileEntity->setSize($file->getClientSize());
         $fileEntity->setTempName($file->getFilename());
         $fileEntity->setType($file->getMimeType());
-        $fileEntity->setSlug(rand(0,123456));
+        $fileEntity->setPublic($public);
         $this->em->persist($fileEntity);
         $this->em->flush();
         $file->move($uploadDir['path']);

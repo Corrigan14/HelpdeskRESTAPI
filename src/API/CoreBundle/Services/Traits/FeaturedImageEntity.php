@@ -19,9 +19,15 @@ use Doctrine\ORM\Mapping as ORM;
  */
 trait FeaturedImageEntity
 {
+//    /**
+//     * @ORM\OneToOne(targetEntity="API\CoreBundle\Entity\File")
+//     * @ORM\JoinColumn(name="image", referencedColumnName="id", nullable=true, onDelete="SET NULL" )
+//     */
+//    private $image;
+
+
     /**
-     * @ORM\OneToOne(targetEntity="API\CoreBundle\Entity\File")
-     * @ORM\JoinColumn(name="image", referencedColumnName="id", nullable=true, onDelete="SET NULL" )
+     * @ORM\Column(name="image", length=128, nullable=true)
      */
     private $image;
 
@@ -31,14 +37,15 @@ trait FeaturedImageEntity
      */
     public function getImage()
     {
-        return unserialize($this->image);
+        //return unserialize($this->image);
+        return $this->image;
     }
 
 
     /**
-     * @param File $image
+     * @param String $image
      */
-    public function setImage(File $image)
+    public function setImage(String $image)
     {
         $this->image =$image;
     }

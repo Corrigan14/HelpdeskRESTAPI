@@ -247,12 +247,14 @@ class UserController extends ApiBaseController implements ControllerInterface
 
         $requestData = $request->request->all();
 
-
-//        $file=$request->files->get('image');
-//        $fileEntity=$this->get('upload_helper')->uploadFile($file);
-
         $user = new User();
-        //$user->setImage($fileEntity);
+        //avatar
+        $file=$request->files->get('image');
+        if(null != $file) {
+            $imageSlug = $this->get('upload_helper')->uploadFile($file, true);
+            $user->setImage($imageSlug);
+        }
+
         $user->setRoles(['ROLE_USER']);
         $user->setIsActive(true);
 

@@ -1,2 +1,4 @@
 api_users:
     resource: "@APICoreBundle/Resources/config/routing/user.yml"
+api_cdn:
+    resource: "@APICoreBundle/Resources/config/routing/cdn.yml"

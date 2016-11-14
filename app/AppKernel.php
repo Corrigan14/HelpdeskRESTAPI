@@ -24,6 +24,7 @@ class AppKernel extends Kernel
             new Nelmio\CorsBundle\NelmioCorsBundle(),
             new API\CoreBundle\APICoreBundle(),
             new Stof\DoctrineExtensionsBundle\StofDoctrineExtensionsBundle(),
+            new FOS\HttpCacheBundle\FOSHttpCacheBundle() ,
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {

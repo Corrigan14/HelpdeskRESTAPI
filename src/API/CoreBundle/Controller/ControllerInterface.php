@@ -53,6 +53,7 @@ interface ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied"
      *  }
      * )
      *
@@ -97,6 +98,7 @@ interface ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found Entity",
      *  }
      * )
@@ -267,6 +269,7 @@ interface ControllerInterface
      *      ...OR...
      *      204 ="The Entity was successfully deleted",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found Tag",
      *  })
      *

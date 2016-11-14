@@ -23,7 +23,7 @@ class CompanyVoter extends ApiBaseVoter implements VoterInterface
      *
      * @return bool
      */
-    public function isGranted($action, $options)
+    public function isGranted($action, $options = [])
     {
         $this->user = $this->token->getUser();
 
@@ -48,12 +48,15 @@ class CompanyVoter extends ApiBaseVoter implements VoterInterface
         }
     }
 
+    /**
+     * @return bool
+     */
     private function canList()
     {
         if ($this->decisionManager->decide($this->token , ['ROLE_ADMIN'])) {
             return true;
         }
 
-        return $this->hasACLRights(VoteOptions::LIST_COMPANIES, $this->user);
+        return $this->hasAclRights(VoteOptions::LIST_COMPANIES, $this->user);
     }
 }

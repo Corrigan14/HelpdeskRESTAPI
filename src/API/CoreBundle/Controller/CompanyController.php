@@ -2,6 +2,8 @@
 
 namespace API\CoreBundle\Controller;
 
+use API\CoreBundle\Security\VoteOptions;
+use API\CoreBundle\Services\StatusCodesHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -70,7 +72,12 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      */
     public function listAction(Request $request)
     {
-        // TODO: Implement listAction() method.
+        if(!$this->get('company_voter')->isGranted(VoteOptions::LIST_COMPANIES)){
+            return ;
+        }
+        $page = $request->get('page') ?: 1;
+
+        return $this->json($this->get('api_company.service')->getCompaniesResponse($this->getUser()->getId(), $page), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

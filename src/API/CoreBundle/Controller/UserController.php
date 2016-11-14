@@ -274,17 +274,7 @@ class UserController extends ApiBaseController implements ControllerInterface
         $user->setRoles(['ROLE_USER']);
         $user->setIsActive(true);
 
-        if ($companyId) {
-            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
-
-            if (null !== $company && $company instanceof Company) {
-                $user->setCompany($company);
-            }else {
-                return $this->createApiResponse([
-                    'message' => StatusCodesHelper::COMPANY_NOT_FOUND_MESSAGE,
-                ], StatusCodesHelper::NOT_FOUND_CODE);
-            }
-        }
+        $this->setCompanyToUser($user, $companyId);
 
         return $this->updateUser($user, $requestData, true);
     }
@@ -382,16 +372,8 @@ class UserController extends ApiBaseController implements ControllerInterface
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         $requestData = $request->request->all();
 
-        if ($companyId) {
-            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
-
-            if (null !== $company && $company instanceof Company) {
-                $user->setCompany($company);
-            }else {
-                return $this->createApiResponse([
-                    'message' => StatusCodesHelper::COMPANY_NOT_FOUND_MESSAGE,
-                ], StatusCodesHelper::NOT_FOUND_CODE);
-            }
+        if (null !== $user && $user instanceof User) {
+            $this->setCompanyToUser($user, $companyId);
         }
 
         return $this->updateUser($user, $requestData);
@@ -491,16 +473,8 @@ class UserController extends ApiBaseController implements ControllerInterface
 
         $requestData = $request->request->all();
 
-        if ($companyId) {
-            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
-
-            if (null !== $company && $company instanceof Company) {
-                $user->setCompany($company);
-            } else {
-                return $this->createApiResponse([
-                    'message' => StatusCodesHelper::COMPANY_NOT_FOUND_MESSAGE,
-                ], StatusCodesHelper::NOT_FOUND_CODE);
-            }
+        if (null !== $user && $user instanceof User) {
+            $this->setCompanyToUser($user, $companyId);
         }
 
         return $this->updateUser($user, $requestData);
@@ -624,5 +598,25 @@ class UserController extends ApiBaseController implements ControllerInterface
         return $this->createApiResponse([
             'message' => StatusCodesHelper::UNAUTHORIZED_MESSAGE,
         ], StatusCodesHelper::UNAUTHORIZED_CODE);
+    }
+
+    /**
+     * @param User $user
+     * @param bool $companyId
+     * @return JsonResponse
+     */
+    private function setCompanyToUser(User $user, $companyId = false)
+    {
+        if ($companyId) {
+            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
+
+            if (null !== $company && $company instanceof Company) {
+                $user->setCompany($company);
+            } else {
+                return $this->createApiResponse([
+                    'message' => StatusCodesHelper::COMPANY_NOT_FOUND_MESSAGE,
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+        }
     }
 }

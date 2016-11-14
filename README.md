@@ -164,6 +164,7 @@ Dokumentacne pravidla
     - vytvorenie entityName.yml suboru
     - kazdu skupinu rout musime zaregistrovat v routing.yml
     - kazda entita bude mat zakladnu skupinu rout (pozri user.yml)
+    - pri importovanych cestach netreba pouzivat prefix pretoze tam da na konci kazdej cesty lomitko
     
 5. Testy
     - pre testy vyuzivame vlastnu testovaciu databazu s fixtures:

@@ -15,7 +15,7 @@ class UserControllerTest extends ApiTestCase
     const BASE_URL = '/api/v1/core-bundle/users';
 
     /**
-     * GET LIST - success
+     * GET LIST - success ..
      */
     public function testListSuccess()
     {

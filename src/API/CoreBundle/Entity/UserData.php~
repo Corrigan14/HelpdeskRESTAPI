@@ -120,6 +120,7 @@ class UserData
     /**
      * @ORM\OneToOne(targetEntity="User", inversedBy="detailData", fetch="EAGER")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="SET NULL")
+     * @Exclude()
      */
     private $user;
 

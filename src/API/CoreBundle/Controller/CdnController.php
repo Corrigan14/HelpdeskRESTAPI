@@ -2,9 +2,9 @@
 
 namespace API\CoreBundle\Controller;
 
-use API\CoreBundle\Controller\ApiBaseController;
+use Igsem\APIBundle\Controller\ApiBaseController;
 use API\CoreBundle\Services\CDN\UploadedFile;
-use API\CoreBundle\Services\StatusCodesHelper;
+use Igsem\APIBundle\Services\StatusCodesHelper;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use API\CoreBundle\Entity\File;

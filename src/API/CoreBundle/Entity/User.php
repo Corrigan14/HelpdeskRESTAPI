@@ -99,6 +99,13 @@ class User implements AdvancedUserInterface , \Serializable
      */
     private $detailData;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Company", inversedBy="users")
+     * @ORM\JoinColumn(name="company_id", referencedColumnName="id")
+     * @ReadOnly()
+     */
+    private $company;
+
     public function __construct()
     {
         $this->is_active = true;
@@ -369,5 +376,29 @@ class User implements AdvancedUserInterface , \Serializable
     {
 
         return $this->is_active;
+    }
+
+    /**
+     * Set company
+     *
+     * @param Company $company
+     *
+     * @return User
+     */
+    public function setCompany(Company $company = null)
+    {
+        $this->company = $company;
+
+        return $this;
+    }
+
+    /**
+     * Get company
+     *
+     * @return Company
+     */
+    public function getCompany()
+    {
+        return $this->company;
     }
 }

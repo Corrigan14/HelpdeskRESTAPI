@@ -1,4 +1,7 @@
 services:
+    api_base.service:
+          class: API\CoreBundle\Services\ApiBaseService
+          arguments: ["@router"]
     api_user.service:
           class: API\CoreBundle\Services\UserService
           arguments: ["@doctrine.orm.entity_manager","@router"]
@@ -11,8 +14,10 @@ services:
         class: API\CoreBundle\Security\UserVoter
         arguments: ["@security.access.decision_manager","@security.token_storage"]
         lazy: true
-
     upload_helper:
         class: API\CoreBundle\Services\UploadHelper
         arguments: ["%upload_dir%","@doctrine.orm.entity_manager"]
+    company_voter:
+        class: API\CoreBundle\Security\CompanyVoter
+        arguments: ["@security.access.decision_manager","@security.token_storage"]
 

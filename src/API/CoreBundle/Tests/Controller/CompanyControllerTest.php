@@ -2,7 +2,8 @@
 
 namespace API\CoreBundle\Tests\Controller;
 
-use API\CoreBundle\Services\StatusCodesHelper;
+use Igsem\APIBundle\Services\StatusCodesHelper;
+use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 
 /**
  * Class CompanyControllerTest

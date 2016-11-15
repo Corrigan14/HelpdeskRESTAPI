@@ -3,13 +3,14 @@
 namespace API\CoreBundle\Controller;
 
 use API\CoreBundle\Entity\Company;
-use API\CoreBundle\Repository\CompanyRepository;
-use API\CoreBundle\Repository\RepositoryInterface;
 use API\CoreBundle\Security\VoteOptions;
-use API\CoreBundle\Services\StatusCodesHelper;
+use Igsem\APIBundle\Services\StatusCodesHelper;
+use Igsem\APIBundle\Controller\ApiBaseController;
+use Igsem\APIBundle\Controller\ControllerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class CompanyController
@@ -72,7 +73,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
-     * @return JsonResponse
+     * @return Response|JsonResponse
      */
     public function listAction(Request $request)
     {
@@ -135,7 +136,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param int $id
-     * @return JsonResponse
+     * @return Response|JsonResponse
      */
     public function getAction(int $id)
     {
@@ -145,9 +146,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
 
         $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
         if (null === $company || !$company instanceof Company) {
-            return $this->createApiResponse([
-                'message' => StatusCodesHelper::COMPANY_NOT_FOUND_MESSAGE,
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            return $this->notFoundResponse();
         }
 
         return $this->createApiResponse($this->get('api_base.service')->getEntityResponse($company, 'company'), StatusCodesHelper::SUCCESSFUL_CODE);
@@ -197,7 +196,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
-     * @return JsonResponse
+     * @return Response|JsonResponse
      */
     public function createAction(Request $request)
     {
@@ -265,7 +264,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @param Request $request
-     * @return JsonResponse
+     * @return Response|JsonResponse
      */
     public function updateAction(int $id, Request $request)
     {
@@ -333,7 +332,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @param Request $request
-     * @return JsonResponse
+     * @return Response|JsonResponse
      */
     public function updatePartialAction(int $id, Request $request)
     {
@@ -375,7 +374,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      *
-     * @return JsonResponse
+     * @return Response|JsonResponse
      */
     public function deleteAction(int $id)
     {
@@ -386,9 +385,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
         $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
 
         if (null === $company || !$company instanceof Company) {
-            return $this->createApiResponse([
-                'message' => StatusCodesHelper::COMPANY_NOT_FOUND_MESSAGE,
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            return $this->notFoundResponse();
         }
 
         $company->setIsActive(false);
@@ -405,16 +402,14 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      * @param array $requestData
      * @param bool $create
      *
-     * @return JsonResponse
+     * @return Response|JsonResponse
      */
     private function updateCompany($company, array $requestData, $create = false)
     {
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         if (null === $company || !$company instanceof Company) {
-            return $this->createApiResponse([
-                'message' => StatusCodesHelper::COMPANY_NOT_FOUND_MESSAGE,
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            return $this->notFoundResponse();
         }
 
         $errors = $this->get('entity_processor')->processEntity($company, $requestData);
@@ -427,6 +422,6 @@ class CompanyController extends ApiBaseController implements ControllerInterface
             return $this->createApiResponse($entityResponse, $statusCode);
         }
 
-        return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE, 'errors' => $errors], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $this->invalidParametersResponse();
     }
 }

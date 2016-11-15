@@ -1,4 +1,7 @@
 services:
+    api_base.service:
+          class: API\CoreBundle\Services\ApiBaseService
+          arguments: ["@doctrine.orm.entity_manager","@router"]
     api_user.service:
           class: API\CoreBundle\Services\UserService
           arguments: ["@doctrine.orm.entity_manager","@router"]

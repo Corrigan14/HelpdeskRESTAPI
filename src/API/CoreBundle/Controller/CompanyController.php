@@ -2,6 +2,7 @@
 
 namespace API\CoreBundle\Controller;
 
+use API\CoreBundle\Entity\Company;
 use API\CoreBundle\Security\VoteOptions;
 use API\CoreBundle\Services\StatusCodesHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -64,6 +65,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied"
      *  }
      * )
      *
@@ -72,12 +74,13 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      */
     public function listAction(Request $request)
     {
-        if(!$this->get('company_voter')->isGranted(VoteOptions::LIST_COMPANIES)){
-            return ;
+        if (!$this->get('company_voter')->isGranted(VoteOptions::LIST_COMPANIES)) {
+            return $this->accessDeniedResponse();
         }
+
         $page = $request->get('page') ?: 1;
 
-        return $this->json($this->get('api_company.service')->getCompaniesResponse($this->getUser()->getId(), $page), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($this->get('api_company.service')->getCompaniesResponse($page), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -124,6 +127,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found Entity",
      *  }
      * )
@@ -133,7 +137,18 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      */
     public function getAction(int $id)
     {
-        // TODO: Implement getAction() method.
+        if (!$this->get('company_voter')->isGranted(VoteOptions::SHOW_COMPANY, $id)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
+        if (null === $company || !$company instanceof Company) {
+            return $this->createApiResponse([
+                'message' => StatusCodesHelper::COMPANY_NOT_FOUND_MESSAGE,
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        return $this->createApiResponse($this->get('api_company.service')->getCompanyResponse($company), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

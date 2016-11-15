@@ -1,6 +1,7 @@
 <?php
 
 namespace API\CoreBundle\Tests\Controller;
+use API\CoreBundle\Services\StatusCodesHelper;
 
 /**
  * Class CompanyControllerTest
@@ -10,6 +11,34 @@ namespace API\CoreBundle\Tests\Controller;
 class CompanyControllerTest extends ApiTestCase
 {
     const BASE_URL = '/api/v1/core-bundle/companies';
+
+    /**
+     * GET LIST - errors
+     */
+    public function testListErrors()
+    {
+        parent::testListErrors();
+
+        // Try to load a list of companies with USER_ROLE without ACL permission to see companies
+        $this->getClient(true)->request('GET', $this->getBaseUrl(), [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * GET SINGLE - errors
+     */
+    public function testGetSingleErrors()
+    {
+        parent::testGetSingleErrors();
+
+        $company = $this->findOneEntity();
+
+        // Try to load a company with USER_ROLE without ACL permission to see this company
+        $this->getClient(true)->request('GET', $this->getBaseUrl().'/'.$company->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
 
     /**
      * Get the url for requests
@@ -29,7 +58,7 @@ class CompanyControllerTest extends ApiTestCase
     public function findOneEntity()
     {
         $company = $this->em->getRepository('APICoreBundle:Company')->findOneBy([
-            'title' => 'Test Company'
+            'title' => 'Web-Solutions'
         ]);
 
         if (null !== $company) {

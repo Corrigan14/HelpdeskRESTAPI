@@ -89,7 +89,7 @@ class UserControllerTest extends ApiTestCase
         // We expect Entity, response has to include array with data and _links and data include's company param
         $response = json_decode($this->getClient()->getResponse()->getContent(), true);
         $data = $response['data'];
-
+dump($data);
         $this->assertTrue(array_key_exists('data', $response));
         $this->assertTrue(array_key_exists('_links', $response));
         $this->assertTrue(array_key_exists('company', $data));

@@ -104,6 +104,12 @@ class User implements AdvancedUserInterface , \Serializable
      * @var Tag
      */
     private $tags;
+    /**
+     * @ORM\ManyToOne(targetEntity="Company", inversedBy="users")
+     * @ORM\JoinColumn(name="company_id", referencedColumnName="id")
+     * @ReadOnly()
+     */
+    private $company;
 
     public function __construct()
     {
@@ -410,5 +416,29 @@ class User implements AdvancedUserInterface , \Serializable
     public function getTags()
     {
         return $this->tags;
+    }
+
+    /**
+     * Set company
+     *
+     * @param Company $company
+     *
+     * @return User
+     */
+    public function setCompany(Company $company = null)
+    {
+        $this->company = $company;
+
+        return $this;
+    }
+
+    /**
+     * Get company
+     *
+     * @return Company
+     */
+    public function getCompany()
+    {
+        return $this->company;
     }
 }

@@ -64,6 +64,37 @@ class UserControllerTest extends ApiTestCase
     }
 
     /**
+     * POST SINGLE - success
+     *
+     * Test the adding of company to User
+     */
+    public function testPostSingleSuccess()
+    {
+        parent::testPostSingleSuccess();
+
+        $data = $this->returnPostTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        $company = $this->em->getRepository('APICoreBundle:Company')->findOneBy([
+            'title' => 'Web-Solutions'
+        ]);
+
+        // Create Entity and add Company to this User(as admin)
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/company/' . $company->getId(), $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect Entity, response has to include array with data and _links and data include's company param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $data = $response['data'];
+        $this->assertTrue(array_key_exists('data', $response));
+        $this->assertTrue(array_key_exists('_links', $response));
+        $this->assertTrue(array_key_exists('company', $data));
+    }
+
+    /**
      *  POST SINGLE - errors
      */
     public function testPostSingleErrors()
@@ -111,6 +142,18 @@ class UserControllerTest extends ApiTestCase
             'email' => 'testuser.testuser.com', 'username' => 'testuser', 'password' => 'password', 'bulls' => 'hit',
         ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * UPDATE SINGLE - success
+     */
+    public function testUpdateSingleSuccess()
+    {
+        parent::testUpdateSingleSuccess();
+
+        $this->testPutUserWithCompany();
+        $this->testPatchUserWithCompany();
+
     }
 
     /**
@@ -201,22 +244,6 @@ class UserControllerTest extends ApiTestCase
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
-    /**
-     * @param string $username
-     */
-    private function removeTestUser($username)
-    {
-        // If test user exists, remove
-        $user = $this->em->getRepository('APICoreBundle:User')->findOneBy(['username' => $username]);
-        if (null !== $user) {
-            $this->em->remove($user);
-            $this->em->flush();
-        }
-
-        $user = $this->em->getRepository('APICoreBundle:User')->findOneBy(['username' => $username]);
-
-        $this->assertEquals(null, $user);
-    }
 
     /**
      * Return Base URL
@@ -301,5 +328,77 @@ class UserControllerTest extends ApiTestCase
             'email' => 'changed@with.put', 'username' => 'testuserchanged',
             'detail_data' => ['name' => 'patch name', 'surname' => 'patch surname'],
         ];
+    }
+
+    public function testPutUserWithCompany()
+    {
+        $data = $this->returnUpdateTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        $entity = $this->findOneEntity();
+
+        $company = $this->em->getRepository('APICoreBundle:Company')->findOneBy([
+            'title' => 'LanSystems'
+        ]);
+        // Update Company of User: PUT method (as admin)
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/company/' . $company->getId(),
+            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect Entity, response has to include array with data and _links and data include's company param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $data = $response['data'];
+
+        $this->assertTrue(array_key_exists('data', $response));
+        $this->assertTrue(array_key_exists('_links', $response));
+        $this->assertTrue(array_key_exists('company', $data));
+    }
+
+    public function testPatchUserWithCompany()
+    {
+        $data = $this->returnUpdateTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        $entity = $this->findOneEntity();
+
+        $company = $this->em->getRepository('APICoreBundle:Company')->findOneBy([
+            'title' => 'LanSystems'
+        ]);
+        // Update Company of User: PATCH method (as admin)
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/company/' . $company->getId(),
+            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect Entity, response has to include array with data and _links and data include's company param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $data = $response['data'];
+
+        $this->assertTrue(array_key_exists('data', $response));
+        $this->assertTrue(array_key_exists('_links', $response));
+        $this->assertTrue(array_key_exists('company', $data));
+    }
+
+
+    /**
+     * @param string $username
+     */
+    private function removeTestUser($username)
+    {
+        // If test user exists, remove
+        $user = $this->em->getRepository('APICoreBundle:User')->findOneBy(['username' => $username]);
+        if (null !== $user) {
+            $this->em->remove($user);
+            $this->em->flush();
+        }
+
+        $user = $this->em->getRepository('APICoreBundle:User')->findOneBy(['username' => $username]);
+
+        $this->assertEquals(null, $user);
     }
 }

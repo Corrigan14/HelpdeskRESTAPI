@@ -14,3 +14,6 @@ services:
         class: API\CoreBundle\Security\UserVoter
         arguments: ["@security.access.decision_manager","@security.token_storage"]
         lazy: true
+    company_voter:
+        class: API\CoreBundle\Security\CompanyVoter
+        arguments: ["@security.access.decision_manager","@security.token_storage"]

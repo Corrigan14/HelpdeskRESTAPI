@@ -44,12 +44,6 @@ class TagControllerTest extends ApiTestCase
             [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Try to create Tag with invalid parameter TITLE (title has to be unique) [code 409]
-        $this->getClient(true)->request('POST', $this->getBaseUrl(),
-            ['title' => 'Work', 'color' => '777777'],
-            [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
-        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
-
         // Try to create Tag with invalid parameter COLOR (color is required) [code 409]
         $this->getClient(true)->request('POST', $this->getBaseUrl(),
             ['title' => 'Unique name o f tag'],
@@ -70,11 +64,6 @@ class TagControllerTest extends ApiTestCase
         $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $privateUsersTag->getId(), ['public' => true],
             [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        // Try to update Tag with not unique parameter TITLE (title has to be uniqe) [code 409]
-        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $privateUsersTag->getId(), ['title' => 'Work'],
-            [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
-        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
     /**

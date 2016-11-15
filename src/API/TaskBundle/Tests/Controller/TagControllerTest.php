@@ -44,7 +44,7 @@ class TagControllerTest extends ApiTestCase
             [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Try to create Tag with invalid parameter TITLE (title has to be uniqe) [code 409]
+        // Try to create Tag with invalid parameter TITLE (title has to be unique) [code 409]
         $this->getClient(true)->request('POST', $this->getBaseUrl(),
             ['title' => 'Work', 'color' => '777777'],
             [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);

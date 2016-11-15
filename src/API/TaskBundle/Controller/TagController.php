@@ -73,7 +73,10 @@ class TagController extends ApiBaseController implements ControllerInterface
     {
         $page = $request->get('page') ?: 1;
 
-        return $this->json($this->get('api_tag.service')->getTagsResponse($this->getUser()->getId(), $page), StatusCodesHelper::SUCCESSFUL_CODE);
+        $tagRepository = $this->getDoctrine()->getRepository('APITaskBundle:Tag');
+        $loggedUserId = $this->getUser()->getId();
+
+        return $this->json($this->get('api_base.service')->getEntitiesResponse($tagRepository, $page, 'tag_list', ['userId' => $loggedUserId]), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -138,7 +141,7 @@ class TagController extends ApiBaseController implements ControllerInterface
         /** @var Tag $t */
         $t = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->find($id);
 
-        if (null === $t || !$t instanceof Tag) {
+        if (!$t instanceof Tag) {
             return $this->notFoundResponse();
         }
 
@@ -146,7 +149,7 @@ class TagController extends ApiBaseController implements ControllerInterface
             return $this->accessDeniedResponse();
         }
 
-        $tag = $this->get('api_tag.service')->getTagResponse($t);
+        $tag = $this->get('api_base.service')->getEntityResponse($t, 'tag');
 
         return $this->createApiResponse($tag, StatusCodesHelper::SUCCESSFUL_CODE);
     }
@@ -271,16 +274,23 @@ class TagController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @param Request $request
-     * @return JsonResponse
+     * @return Response|JsonResponse
      */
     public function updateAction(int $id, Request $request)
     {
-        $requestData = $request->request->all();
-
         $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
             'id' => $id,
-            'createdBy' => $this->getUser(),
         ]);
+
+        if (!$tag instanceof Tag) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('tag_voter')->isGranted(VoteOptions::UPDATE_TAG, $tag)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
 
         return $this->updateTag($tag, $requestData);
     }
@@ -343,16 +353,23 @@ class TagController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @param Request $request
-     * @return JsonResponse
+     * @return Response|JsonResponse
      */
     public function updatePartialAction(int $id, Request $request)
     {
-        $requestData = $request->request->all();
-
         $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
             'id' => $id,
-            'createdBy' => $this->getUser(),
         ]);
+
+        if (!$tag instanceof Tag) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('tag_voter')->isGranted(VoteOptions::UPDATE_TAG, $tag)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
 
         return $this->updateTag($tag, $requestData);
     }
@@ -389,11 +406,14 @@ class TagController extends ApiBaseController implements ControllerInterface
     {
         $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
             'id' => $id,
-            'createdBy' => $this->getUser(),
         ]);
 
-        if (null === $tag || !$tag instanceof Tag) {
+        if (!$tag instanceof Tag) {
             return $this->notFoundResponse();
+        }
+
+        if (!$this->get('tag_voter')->isGranted(VoteOptions::DELETE_TAG, $tag)) {
+            return $this->accessDeniedResponse();
         }
 
         $this->getDoctrine()->getManager()->remove($tag);
@@ -411,7 +431,7 @@ class TagController extends ApiBaseController implements ControllerInterface
      */
     private function updateTag($tag, $requestData)
     {
-        if (null === $tag || !$tag instanceof Tag) {
+        if (!$tag instanceof Tag) {
             return $this->notFoundResponse();
         }
 
@@ -431,7 +451,11 @@ class TagController extends ApiBaseController implements ControllerInterface
         if (isset($requestData['public']) && $requestData['public']) {
             if (!$this->get('tag_voter')->isGranted(VoteOptions::CREATE_PUBLIC_TAG)) {
                 return $this->accessDeniedResponse();
+            } else {
+                $tag->setPublic(true);
             }
+        } else {
+            $tag->setPublic(false);
         }
 
         $errors = $this->get('entity_processor')->processEntity($tag, $requestData);
@@ -440,7 +464,7 @@ class TagController extends ApiBaseController implements ControllerInterface
             $this->getDoctrine()->getManager()->persist($tag);
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->createApiResponse($this->get('api_tag.service')->getTagResponse($tag), $statusCode);
+            return $this->createApiResponse($this->get('api_base.service')->getEntityResponse($tag, 'tag'), $statusCode);
         }
 
         return $this->invalidParametersResponse();

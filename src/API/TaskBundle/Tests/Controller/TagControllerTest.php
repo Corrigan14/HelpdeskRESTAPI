@@ -2,9 +2,10 @@
 
 namespace API\TaskBundle\Tests\Controller;
 
-use API\CoreBundle\Services\StatusCodesHelper;
-use API\CoreBundle\Tests\Controller\ApiTestCase;
+
 use API\TaskBundle\Entity\Tag;
+use Igsem\APIBundle\Services\StatusCodesHelper;
+use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 
 /**
  * Class TagControllerTest
@@ -22,12 +23,10 @@ class TagControllerTest extends ApiTestCase
     {
         parent::testGetSingleErrors();
 
-        // Try to load private Tag Entity of another user: 403 ACCESS DENIED
-
-        // We has to create/find Tag with that conditions
+        // We has to create/find private Tag
         $privateUsersTag = $this->getPrivateUsersEntityTag();
 
-        // Test
+        // Try to load private Tag Entity of another user: 403 ACCESS DENIED
         $this->getClient(true)->request('GET', $this->getBaseUrl() . '/'.$privateUsersTag->getId(), [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
     }

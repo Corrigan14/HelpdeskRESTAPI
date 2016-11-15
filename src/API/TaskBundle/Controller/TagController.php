@@ -2,14 +2,15 @@
 
 namespace API\TaskBundle\Controller;
 
-use API\CoreBundle\Controller\ApiBaseController;
-use API\CoreBundle\Controller\ControllerInterface;
+use Igsem\APIBundle\Services\StatusCodesHelper;
+use Igsem\APIBundle\Controller\ApiBaseController;
+use Igsem\APIBundle\Controller\ControllerInterface;
 use API\TaskBundle\Entity\Tag;
-use API\CoreBundle\Services\StatusCodesHelper;
 use API\TaskBundle\Security\VoteOptions;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class TagController
@@ -32,11 +33,11 @@ class TagController extends ApiBaseController implements ControllerInterface
      *       ],
      *       "_links":
      *       {
-     *           "self": "/api/v1/tasks/tags?page=1",
-     *           "first": "/api/v1/tasks/tags?page=1",
+     *           "self": "/api/v1/task-bundle/tags?page=1",
+     *           "first": "/api/v1/task-bundle/tags?page=1",
      *           "prev": false,
-     *           "next": "/api/v1/tasks/tags?page=2",
-     *           "last": "/api/v1/tasks/tags?page=3"
+     *           "next": "/api/v1/task-bundle/tags?page=2",
+     *           "last": "/api/v1/task-bundle/tags?page=3"
      *       },
      *       "total": 22,
      *       "page": 1,
@@ -96,9 +97,9 @@ class TagController extends ApiBaseController implements ControllerInterface
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/tasks/tags/2",
-     *           "patch": "/api/v1/tasks/tags/2",
-     *           "delete": "/api/v1/tasks/tags/2"
+     *           "put": "/api/v1/task-bundle/tags/2",
+     *           "patch": "/api/v1/task-bundle/tags/2",
+     *           "delete": "/api/v1/task-bundle/tags/2"
      *         }
      *      }
      *
@@ -130,7 +131,7 @@ class TagController extends ApiBaseController implements ControllerInterface
      *
      *
      * @param int $id
-     * @return JsonResponse
+     * @return Response|JsonResponse
      */
     public function getAction(int $id)
     {
@@ -138,15 +139,11 @@ class TagController extends ApiBaseController implements ControllerInterface
         $t = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->find($id);
 
         if (null === $t || !$t instanceof Tag) {
-            return $this->createApiResponse([
-                'message' => StatusCodesHelper::TAG_NOT_FOUND_MESSAGE,
-            ], StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
+            return $this->notFoundResponse();
         }
 
         if (!$this->get('tag_voter')->isGranted(VoteOptions::SHOW_TAG, $t)) {
-            return $this->createApiResponse([
-                'message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE,
-            ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            return $this->accessDeniedResponse();
         }
 
         $tag = $this->get('api_tag.service')->getTagResponse($t);
@@ -176,9 +173,9 @@ class TagController extends ApiBaseController implements ControllerInterface
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/tasks/tags/2",
-     *           "patch": "/api/v1/tasks/tags/2",
-     *           "delete": "/api/v1/tasks/tags/2"
+     *           "put": "/api/v1/task-bundle/tags/2",
+     *           "patch": "/api/v1/task-bundle/tags/2",
+     *           "delete": "/api/v1/task-bundle/tags/2"
      *         }
      *      }
      *
@@ -204,7 +201,7 @@ class TagController extends ApiBaseController implements ControllerInterface
      *
      *
      * @param Request $request
-     * @return JsonResponse
+     * @return Response|JsonResponse
      */
     public function createAction(Request $request)
     {
@@ -237,9 +234,9 @@ class TagController extends ApiBaseController implements ControllerInterface
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/tasks/tags/2",
-     *           "patch": "/api/v1/tasks/tags/2",
-     *           "delete": "/api/v1/tasks/tags/2"
+     *           "put": "/api/v1/task-bundle/tags/2",
+     *           "patch": "/api/v1/task-bundle/tags/2",
+     *           "delete": "/api/v1/task-bundle/tags/2"
      *         }
      *      }
      *
@@ -309,9 +306,9 @@ class TagController extends ApiBaseController implements ControllerInterface
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/tasks/tags/2",
-     *           "patch": "/api/v1/tasks/tags/2",
-     *           "delete": "/api/v1/tasks/tags/2"
+     *           "put": "/api/v1/task-bundle/tags/2",
+     *           "patch": "/api/v1/task-bundle/tags/2",
+     *           "delete": "/api/v1/task-bundle/tags/2"
      *         }
      *      }
      *
@@ -386,7 +383,7 @@ class TagController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      *
-     * @return JsonResponse
+     * @return Response|JsonResponse
      */
     public function deleteAction(int $id)
     {
@@ -396,9 +393,7 @@ class TagController extends ApiBaseController implements ControllerInterface
         ]);
 
         if (null === $tag || !$tag instanceof Tag) {
-            return $this->createApiResponse([
-                'message' => StatusCodesHelper::TAG_NOT_FOUND_MESSAGE,
-            ], StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
+            return $this->notFoundResponse();
         }
 
         $this->getDoctrine()->getManager()->remove($tag);
@@ -412,14 +407,12 @@ class TagController extends ApiBaseController implements ControllerInterface
     /**
      * @param $tag
      * @param $requestData
-     * @return JsonResponse
+     * @return Response|JsonResponse
      */
     private function updateTag($tag, $requestData)
     {
         if (null === $tag || !$tag instanceof Tag) {
-            return $this->createApiResponse([
-                'message' => StatusCodesHelper::TAG_NOT_FOUND_MESSAGE,
-            ], StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
+            return $this->notFoundResponse();
         }
 
         return $this->processTag($tag, $requestData);
@@ -429,7 +422,7 @@ class TagController extends ApiBaseController implements ControllerInterface
      * @param Tag $tag
      * @param array $requestData
      * @param bool $create
-     * @return JsonResponse
+     * @return Response|JsonResponse
      */
     private function processTag(Tag $tag, $requestData, $create = false)
     {
@@ -437,9 +430,7 @@ class TagController extends ApiBaseController implements ControllerInterface
 
         if (isset($requestData['public']) && $requestData['public']) {
             if (!$this->get('tag_voter')->isGranted(VoteOptions::CREATE_PUBLIC_TAG)) {
-                return $this->createApiResponse([
-                    'message' => StatusCodesHelper::ACCESS_DENIED_TO_CREATE_PUBLIC_TAG,
-                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+                return $this->accessDeniedResponse();
             }
         }
 
@@ -452,6 +443,6 @@ class TagController extends ApiBaseController implements ControllerInterface
             return $this->createApiResponse($this->get('api_tag.service')->getTagResponse($tag), $statusCode);
         }
 
-        return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE, 'errors' => $errors], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $this->invalidParametersResponse();
     }
 }

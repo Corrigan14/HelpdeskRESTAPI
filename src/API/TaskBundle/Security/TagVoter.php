@@ -61,7 +61,7 @@ class TagVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
-        return $this->hasAclRights(VoteOptions::CREATE_PUBLIC_TAG, $this->user);
+        return $this->hasAclRights(VoteOptions::CREATE_PUBLIC_TAG, $this->user, VoteOptions::getConstants());
     }
 
     /**

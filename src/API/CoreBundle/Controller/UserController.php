@@ -5,7 +5,9 @@ namespace API\CoreBundle\Controller;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
 use API\CoreBundle\Security\VoteOptions;
-use API\CoreBundle\Services\StatusCodesHelper;
+use Igsem\APIBundle\Services\StatusCodesHelper;
+use Igsem\APIBundle\Controller\ApiBaseController;
+use Igsem\APIBundle\Controller\ControllerInterface;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * @package API\CoreBundle\Controller
  */
-class UserController extends ApiBaseController implements ControllerInterface
+class UserController extends ApiBaseController  implements ControllerInterface
 {
     /**
      * ### Response ###

@@ -32,7 +32,8 @@
     "lexik/jwt-authentication-bundle": "^2.0",
     "lexik/framework-accelerator-bundle": "dev-master",
     "jms/serializer-bundle": "^1.1",
-    "nelmio/cors-bundle": "^1.4"
+    "nelmio/cors-bundle": "^1.4",
+    "igsem/api-bundle": "1.*"
   },
   "require-dev": {
     "sensio/generator-bundle": "^3.0",
@@ -62,7 +63,7 @@
     "symfony-var-dir": "var",
     "symfony-web-dir": "web",
     "symfony-tests-dir": "tests",
-    "symfony-assets-install": "relative",
+    "symfony-assets-install": "absolute",
     "incenteev-parameters": [
       {
         "file": "app/config/parameters.yml"

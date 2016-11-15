@@ -3,7 +3,7 @@
 namespace API\CoreBundle\Controller;
 
 use API\CoreBundle\Entity\User;
-use API\CoreBundle\Services\StatusCodesHelper;
+use Igsem\APIBundle\Services\StatusCodesHelper;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;

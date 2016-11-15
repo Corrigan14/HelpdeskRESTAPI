@@ -101,3 +101,41 @@ stof_doctrine_extensions:
             tree: true
             timestampable: true
             sluggable: true
+
+
+fos_http_cache:
+    proxy_client:
+        symfony:
+            servers: 127.0.0.1
+            base_url: localhost
+    cache_manager:
+        enabled: true
+        generate_url_type: auto
+
+    invalidation:
+        enabled: true
+        rules:
+            -
+                match:
+                    attributes:
+                        _route: "user_partial_update"
+                routes:
+#                    users_list: ~    # e.g., /villains
+                    user: ~   # e.g., /villain/{id}
+
+    cache_control:
+            defaults:
+                overwrite: false
+            rules:
+
+                # match everything to set defaults
+                -
+                    match:
+                        path: ^/api/v1/core-bundle/users
+                    headers:
+                        vary: Authorization
+                        cache_control:
+                            public: true
+                            max_age: 60
+                            s_maxage: 120
+                        etag: true

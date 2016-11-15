@@ -170,7 +170,6 @@ Dokumentacne pravidla
     - pre testy vyuzivame vlastnu testovaciu databazu s fixtures:
                 php bin/console doctrine:schema:update --force  --env=test
                 php bin/console doctrine:fixtures:load --env=test
-                php bin/console cache:clear --env=test
     - kazdy ControllerTest:  extends ApiTestCase, definuje: const BASE_URL (napr. '/api/v1/users')
     - Api TestCase implementuje ControllerTestInterface, ktory urcuje mnimalne metody pre testovanie zakladnych requestov
     - ApiTestCase automaticky testuje zakladne GET, POST, PUT, PATCH, DELETE actions (pozri ApiTestCase dokumentaciu), 
@@ -205,18 +204,20 @@ Dokumentacne pravidla
     - upravime dokumentaciu pre jednotlive metody
     - doprogramujeme uz odtestovane metody tak, aby vsetky testy presli spravne (min CRUD): phpunit
     
-6a. Service
-    - vytvorenie Service (Services)
-    - Ak sa jedna o beznu Entitu ako napr. Company ci Tag, Sevice moze: extends ApiBaseService(), ktory 
-      obsahuje metody na ziskanie Zoznamu entit (v metode listAction) a ziskanie jednej entity (v metode getAction)
+7. Service - vytvorenie Service (Services) 
+    - Ak sa jedna o beznu Entitu ako napr. Company ci Tag, Sevice moze: extends ApiBaseService(),
+     alebo mozeme priamo vyuzivat metody ApiBaseServicu:
+            - metody na ziskanie Zoznamu entit 
+              (v metode listAction: getEntitiesResponse($entityRepository napr. $this->getDoctrine()->getRepository('ApiCoreBundle:Company'), $page, $routeName napr. 'company_list', $options = [])) 
+            - metody na ziskanie jednej entity (v metode getAction: getEntityResponse($entity, $entityName napr. 'company')) 
     - registracia Service (Resources/config/services.yml)
     
-6b. Repository
-    - tento automaticky vygeneruje Doctrine pri vytvoreni entity. AK nie, je potrebne ho v entite zaregistrovat
+8. Repository 
+    - tento automaticky vygeneruje Doctrine pri vytvoreni entity. AK nie, je potrebne ho v entite zaregistrovat 
     - ak vyuzivame ApiBaseService potrebujeme, aby nas repozitar implementoval metody RepositoryInteface()
-
-6c. Security
-    - doplnenie VoterOptions.php - obsahuje konstanty s akciami, pre ktore su potrebne pravidla vykonavania
-    - vytvorenie EntityNameVoter.php: extends ApiBaseVoter implements VoterInterface
+    
+9. Security 
+    - doplnenie VoterOptions.php - obsahuje konstanty s akciami, pre ktore su potrebne pravidla vykonavania 
+    - vytvorenie EntityNameVoter.php: extends ApiBaseVoter implements VoterInterface 
     - registracia EntityNameVoter (Resources/config/services.yml)
     

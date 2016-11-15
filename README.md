@@ -204,15 +204,20 @@ Dokumentacne pravidla
     - upravime dokumentaciu pre jednotlive metody
     - doprogramujeme uz odtestovane metody tak, aby vsetky testy presli spravne (min CRUD): phpunit
     
-6a. Service
-    - vytvorenie Service (Services)
+7. Service - vytvorenie Service (Services) 
+    - Ak sa jedna o beznu Entitu ako napr. Company ci Tag, Sevice moze: extends ApiBaseService(),
+     alebo mozeme priamo vyuzivat metody ApiBaseServicu:
+            - metody na ziskanie Zoznamu entit 
+              (v metode listAction: getEntitiesResponse($entityRepository napr. $this->getDoctrine()->getRepository('ApiCoreBundle:Company'), $page, $routeName napr. 'company_list', $options = [])) 
+            - metody na ziskanie jednej entity (v metode getAction: getEntityResponse($entity, $entityName napr. 'company')) 
     - registracia Service (Resources/config/services.yml)
     
-6b. Repostory
-    - tento automaticky vygeneruje Doctrine pri vytvoreni entity. AK nie, je potrebne ho v entite zaregostrovat
-
-6c. Security
-    - vytvorenie EntityNameOptions.php - obsahuje konstanty s akciami, pre ktore su potrebne pravidla vykonavania
-    - vytvorenie EntityNameVoter.php: extends ApiBaseVoter implements VoterInterface
+8. Repository 
+    - tento automaticky vygeneruje Doctrine pri vytvoreni entity. AK nie, je potrebne ho v entite zaregistrovat 
+    - ak vyuzivame ApiBaseService potrebujeme, aby nas repozitar implementoval metody RepositoryInteface()
+    
+9. Security 
+    - doplnenie VoterOptions.php - obsahuje konstanty s akciami, pre ktore su potrebne pravidla vykonavania 
+    - vytvorenie EntityNameVoter.php: extends ApiBaseVoter implements VoterInterface 
     - registracia EntityNameVoter (Resources/config/services.yml)
     

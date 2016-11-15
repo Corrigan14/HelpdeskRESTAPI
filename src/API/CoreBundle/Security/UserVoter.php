@@ -60,7 +60,7 @@ class UserVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
-        return $this->hasAclRights(VoteOptions::CREATE_USER);
+        return $this->hasAclRights(VoteOptions::CREATE_USER, $this->user);
     }
 
     /**
@@ -78,7 +78,7 @@ class UserVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
-        return $this->hasAclRights(VoteOptions::SHOW_USER);
+        return $this->hasAclRights(VoteOptions::SHOW_USER, $this->user);
     }
 
     /**
@@ -96,7 +96,7 @@ class UserVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
-        return $this->hasAclRights(VoteOptions::UPDATE_USER);
+        return $this->hasAclRights(VoteOptions::UPDATE_USER, $this->user);
     }
 
     /**
@@ -114,7 +114,7 @@ class UserVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
-        return $this->hasAclRights(VoteOptions::DELETE_USER);
+        return $this->hasAclRights(VoteOptions::DELETE_USER, $this->user);
     }
 
     /**
@@ -128,30 +128,6 @@ class UserVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
-
-        return $this->hasAclRights(VoteOptions::LIST_USERS);
-    }
-
-    /**
-     * Every User has a custom array of access rights
-     *
-     * @param $action
-     *
-     * @return bool
-     * @throws \InvalidArgumentException
-     */
-    private function hasAclRights($action)
-    {
-        if (!in_array($action , VoteOptions::getConstants() , true)) {
-            throw new \InvalidArgumentException('Action ins not valid, please list your action in the options list');
-        }
-
-        $acl = $this->user->getAcl();
-
-        if (in_array($action , $acl , true)) {
-            return true;
-        }
-
-        return false;
+        return $this->hasAclRights(VoteOptions::LIST_USERS, $this->user);
     }
 }

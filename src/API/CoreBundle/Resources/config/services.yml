@@ -1,14 +1,11 @@
 services:
     api_base.service:
           class: API\CoreBundle\Services\ApiBaseService
-          arguments: ["@doctrine.orm.entity_manager","@router"]
+          arguments: ["@router"]
     api_user.service:
           class: API\CoreBundle\Services\UserService
           arguments: ["@doctrine.orm.entity_manager","@router"]
           lazy: true
-    api_company.service:
-          class: API\CoreBundle\Services\CompanyService
-          arguments: ["@doctrine.orm.entity_manager","@router"]
     entity_processor:
         class: API\CoreBundle\Services\ProcessEntity
         arguments: ["@doctrine.orm.default_entity_manager", "@validator"]

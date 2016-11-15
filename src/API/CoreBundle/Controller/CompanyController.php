@@ -3,6 +3,8 @@
 namespace API\CoreBundle\Controller;
 
 use API\CoreBundle\Entity\Company;
+use API\CoreBundle\Repository\CompanyRepository;
+use API\CoreBundle\Repository\RepositoryInterface;
 use API\CoreBundle\Security\VoteOptions;
 use API\CoreBundle\Services\StatusCodesHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -80,7 +82,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
 
         $page = $request->get('page') ?: 1;
 
-        return $this->json($this->get('api_company.service')->getCompaniesResponse($page), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($this->get('api_base.service')->getEntitiesResponse($this->getDoctrine()->getRepository('APICoreBundle:Company'), $page, 'company_list'), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -148,7 +150,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
             ], StatusCodesHelper::NOT_FOUND_CODE);
         }
 
-        return $this->createApiResponse($this->get('api_company.service')->getCompanyResponse($company), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->createApiResponse($this->get('api_base.service')->getEntityResponse($company,'company'), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

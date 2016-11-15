@@ -17,12 +17,13 @@ class CompanyRepository extends EntityRepository implements RepositoryInterface
     /**
      * Return all entities with specific conditions based on actual Entity
      *
-     * @param mixed $options
      * @param int $page
+     *
+     * @param array $options
      *
      * @return mixed
      */
-    public function getAllEntities($options, $page)
+    public function getAllEntities(int $page, array $options = [])
     {
         $query = $this->createQueryBuilder('c')
             ->getQuery();
@@ -46,7 +47,7 @@ class CompanyRepository extends EntityRepository implements RepositoryInterface
      *
      * @return int
      */
-    public function countEntities($options)
+    public function countEntities(array $options = [])
     {
         $query = $this->createQueryBuilder('c')
             ->select('COUNT(c.id)')

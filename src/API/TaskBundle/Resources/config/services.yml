@@ -2,3 +2,6 @@ services:
     tag_voter:
         class: API\TaskBundle\Security\TagVoter
         arguments: ["@security.access.decision_manager","@security.token_storage", "@doctrine.orm.entity_manager"]
+    status_voter:
+        class: API\TaskBundle\Security\StatusVoter
+        arguments: ["@security.access.decision_manager","@security.token_storage", "@doctrine.orm.entity_manager"]

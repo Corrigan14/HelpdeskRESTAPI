@@ -2,8 +2,11 @@
 
 namespace API\TaskBundle\Controller;
 
+use API\TaskBundle\Entity\Status;
+use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
+use Igsem\APIBundle\Services\StatusCodesHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -14,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * @package API\TaskBundle\Controller
  */
-class StatusController extends ApiBaseController  implements ControllerInterface
+class StatusController extends ApiBaseController implements ControllerInterface
 {
     /**
      *  ### Response ###
@@ -68,7 +71,15 @@ class StatusController extends ApiBaseController  implements ControllerInterface
      */
     public function listAction(Request $request)
     {
-        // TODO: Implement listAction() method.
+        if (!$this->get('status_voter')->isGranted(VoteOptions::LIST_STATUSES)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $page = $request->get('page') ?: 1;
+
+        $statusRepository = $this->getDoctrine()->getRepository('APITaskBundle:Status');
+
+        return $this->json($this->get('api_base.service')->getEntitiesResponse($statusRepository, $page, 'status_list'), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -77,7 +88,8 @@ class StatusController extends ApiBaseController  implements ControllerInterface
      *        "data":
      *        {
      *           "id": "2",
-     *           "title": "New"
+     *           "title": "New",
+     *           "is_active": true
      *        },
      *        "_links":
      *        {
@@ -118,7 +130,19 @@ class StatusController extends ApiBaseController  implements ControllerInterface
      */
     public function getAction(int $id)
     {
-        // TODO: Implement getAction() method.
+        $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($id);
+
+        if (!$status instanceof Status) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('status_voter')->isGranted(VoteOptions::SHOW_STATUS, $status)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $statusArray = $this->get('api_base.service')->getEntityResponse($status, 'status');
+
+        return $this->createApiResponse($statusArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -127,7 +151,8 @@ class StatusController extends ApiBaseController  implements ControllerInterface
      *        "data":
      *        {
      *           "id": "2",
-     *           "title": "New"
+     *           "title": "New",
+     *           "is_active": true
      *        },
      *        "_links":
      *        {
@@ -162,7 +187,15 @@ class StatusController extends ApiBaseController  implements ControllerInterface
      */
     public function createAction(Request $request)
     {
-        // TODO: Implement createAction() method.
+        if (!$this->get('status_voter')->isGranted(VoteOptions::CREATE_STATUS)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
+
+        $status = new Status();
+
+        return $this->updateStatus($status, $requestData, true);
     }
 
     /**
@@ -171,7 +204,8 @@ class StatusController extends ApiBaseController  implements ControllerInterface
      *        "data":
      *        {
      *           "id": "2",
-     *           "title": "New"
+     *           "title": "New",
+     *           "is_active": true
      *        },
      *        "_links":
      *        {
@@ -215,7 +249,19 @@ class StatusController extends ApiBaseController  implements ControllerInterface
      */
     public function updateAction(int $id, Request $request)
     {
-        // TODO: Implement updateAction() method.
+        $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($id);
+
+        if (!$status instanceof Status) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('status_voter')->isGranted(VoteOptions::UPDATE_STATUS, $status)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
+
+        return $this->updateStatus($status, $requestData);
     }
 
     /**
@@ -224,7 +270,8 @@ class StatusController extends ApiBaseController  implements ControllerInterface
      *        "data":
      *        {
      *           "id": "2",
-     *           "title": "New"
+     *           "title": "New",
+     *           "is_active": true
      *        },
      *        "_links":
      *        {
@@ -303,5 +350,28 @@ class StatusController extends ApiBaseController  implements ControllerInterface
     public function deleteAction(int $id)
     {
         // TODO: Implement deleteAction() method.
+    }
+
+    /**
+     * @param Status $status
+     * @param array $requestData
+     * @param bool $create
+     *
+     * @return Response|JsonResponse
+     */
+    private function updateStatus(Status $status, $requestData, $create = false)
+    {
+        $statusCode = $this->getCreateUpdateStatusCode($create);
+
+        $errors = $this->get('entity_processor')->processEntity($status, $requestData);
+
+        if (false === $errors) {
+            $this->getDoctrine()->getManager()->persist($status);
+            $this->getDoctrine()->getManager()->flush();
+
+            return $this->createApiResponse($this->get('api_base.service')->getEntityResponse($status, 'status'), $statusCode);
+        }
+
+        return $this->invalidParametersResponse();
     }
 }

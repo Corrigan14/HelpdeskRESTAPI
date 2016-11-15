@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Tests\Controller;
 
 use API\TaskBundle\Entity\Status;
+use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 
 /**
@@ -13,6 +14,84 @@ use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 class StatusControllerTest extends ApiTestCase
 {
     const BASE_URL = '/api/v1/task-bundle/status';
+
+    /**
+     * GET LIST - errors
+     */
+    public function testListErrors()
+    {
+        parent::testListErrors();
+
+        // Try to load list of entities with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('GET', $this->getBaseUrl(), [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * GET SINGLE - errors
+     */
+    public function testGetSingleErrors()
+    {
+        parent::testGetSingleErrors();
+
+        $entity = $this->findOneEntity();
+
+        // Try to load entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $entity->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     *  POST SINGLE - errors
+     */
+    public function testPostSingleErrors()
+    {
+        parent::testPostSingleErrors();
+
+        $data = $this->returnPostTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        // Try to create entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), $data, [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to create entity with invalid parameter Title (title has to be unique)
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), ['title' => 'New'], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     *  UPDATE SINGLE - errors
+     */
+    public function testUpdateSingleErrors()
+    {
+        parent::testUpdateSingleErrors();
+
+        $data = $this->returnUpdateTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        $entity = $this->findOneEntity();
+
+        // Try to update entity with ROLE_USER which hasn't permission to this action: method PUT
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(), $data, [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to create entity with invalid parameter Title (title has to be unique): method PUT
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(), ['title' => 'New'], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
 
     /**
      * Get the url for requests
@@ -32,7 +111,7 @@ class StatusControllerTest extends ApiTestCase
     public function findOneEntity()
     {
         $status = $this->em->getRepository('APITaskBundle:Status')->findOneBy([
-            'title' => 'New',
+            'title' => 'Created Status',
         ]);
 
         if ($status instanceof Status) {

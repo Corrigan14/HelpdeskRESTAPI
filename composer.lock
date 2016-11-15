@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "38dc186009f7cd1a5b1208a34fc561f6",
+    "hash": "656b7791b51bf7ddd22158853c27aabf",
     "content-hash": "cfcdfead1a40fbbdc1f4abf26b279c5b",
     "packages": [
         {
@@ -2505,16 +2505,16 @@
         },
         {
             "name": "symfony/monolog-bundle",
-            "version": "3.0.0",
+            "version": "3.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/monolog-bundle.git",
-                "reference": "0122716b7af8b0a8e67e8b2bd186ea0d35f41d84"
+                "reference": "5f2d2d62530cd66be361216107869a3b061045db"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/monolog-bundle/zipball/0122716b7af8b0a8e67e8b2bd186ea0d35f41d84",
-                "reference": "0122716b7af8b0a8e67e8b2bd186ea0d35f41d84",
+                "url": "https://api.github.com/repos/symfony/monolog-bundle/zipball/5f2d2d62530cd66be361216107869a3b061045db",
+                "reference": "5f2d2d62530cd66be361216107869a3b061045db",
                 "shasum": ""
             },
             "require": {
@@ -2561,7 +2561,7 @@
                 "log",
                 "logging"
             ],
-            "time": "2016-11-06 18:58:20"
+            "time": "2016-11-15 15:54:07"
         },
         {
             "name": "symfony/polyfill-apcu",

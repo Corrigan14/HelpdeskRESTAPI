@@ -11,13 +11,14 @@ use Igsem\APIBundle\Controller\ControllerInterface;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class UsersController
  *
  * @package API\CoreBundle\Controller
  */
-class UserController extends ApiBaseController  implements ControllerInterface
+class UserController extends ApiBaseController implements ControllerInterface
 {
     /**
      * ### Response ###
@@ -35,11 +36,11 @@ class UserController extends ApiBaseController  implements ControllerInterface
      *       ],
      *       "_links":
      *       {
-     *           "self": "/users?page=1&fields=id,email,username",
-     *           "first": "/users?page=1&fields=id,email,username",
+     *           "self": "/api/v1/core-bundle/users?page=1&fields=id,email,username",
+     *           "first": "/api/v1/core-bundle/users?page=1&fields=id,email,username",
      *           "prev": false,
-     *           "next": "/users?page=2&fields=id,email,username",
-     *            "last": "/users?page=3&fields=id,email,username"
+     *           "next": "/api/v1/core-bundle/users?page=2&fields=id,email,username",
+     *            "last": "/api/v1/core-bundle/users?page=3&fields=id,email,username"
      *       },
      *       "total": 22,
      *       "page": 1,
@@ -75,7 +76,7 @@ class UserController extends ApiBaseController  implements ControllerInterface
      *
      * @param Request $request
      *
-     * @return JsonResponse
+     * @return Response|JsonResponse
      * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
      */
@@ -85,10 +86,10 @@ class UserController extends ApiBaseController  implements ControllerInterface
             return $this->accessDeniedResponse();
         }
 
-        $fields = $request->get('fields') ? explode(',' , $request->get('fields')) : [];
+        $fields = $request->get('fields') ? explode(',', $request->get('fields')) : [];
         $page = $request->get('page') ?: 1;
 
-        return $this->json($this->get('api_user.service')->getUsersResponse($fields , $page) , StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($this->get('api_user.service')->getUsersResponse($fields, $page), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -121,9 +122,9 @@ class UserController extends ApiBaseController  implements ControllerInterface
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/users/46",
-     *           "patch": "/api/v1/users/46",
-     *           "delete": "/api/v1/users/46"
+     *           "put": "/api/v1/core-bundle/users/46",
+     *           "patch": "/api/v1/core-bundle/users/46",
+     *           "delete": "/api/v1/core-bundle/users/46"
      *        }
      *      }
      *
@@ -155,25 +156,23 @@ class UserController extends ApiBaseController  implements ControllerInterface
      *
      * @param int $id
      *
-     * @return JsonResponse
+     * @return Response|JsonResponse
      * @throws \LogicException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
      */
     public function getAction(int $id)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::SHOW_USER , $id)) {
+        if (!$this->get('user_voter')->isGranted(VoteOptions::SHOW_USER, $id)) {
             return $this->accessDeniedResponse();
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (null === $user) {
-            return $this->createApiResponse([
-                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
-            ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
+            return $this->notFoundResponse();
         }
 
-        return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user) , StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -206,9 +205,9 @@ class UserController extends ApiBaseController  implements ControllerInterface
      *         },
      *         "_links": ▿
      *         {
-     *            "put": "/api/v1/users/12",
-     *            "patch": "/api/v1/users/12",
-     *            "delete": "/api/v1/users/12"
+     *            "put": "/api/v1/core-bundle/users/12",
+     *            "patch": "/api/v1/core-bundle/users/12",
+     *            "delete": "/api/v1/core-bundle/users/12"
      *         }
      *      }
      *
@@ -234,7 +233,7 @@ class UserController extends ApiBaseController  implements ControllerInterface
      *
      * @param Request $request
      *
-     * @return JsonResponse
+     * @return Response|JsonResponse
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
@@ -253,7 +252,7 @@ class UserController extends ApiBaseController  implements ControllerInterface
         $user->setRoles(['ROLE_USER']);
         $user->setIsActive(true);
 
-        return $this->updateUser($user , $requestData , true);
+        return $this->updateUser($user, $requestData, true);
     }
 
     /**
@@ -286,9 +285,9 @@ class UserController extends ApiBaseController  implements ControllerInterface
      *         },
      *         "_links": ▿
      *         {
-     *            "put": "/api/v1/users/12",
-     *            "patch": "/api/v1/users/12",
-     *            "delete": "/api/v1/users/12"
+     *            "put": "/api/v1/core-bundle/users/12",
+     *            "patch": "/api/v1/core-bundle/users/12",
+     *            "delete": "/api/v1/core-bundle/users/12"
      *         }
      *      }
      *
@@ -319,26 +318,26 @@ class UserController extends ApiBaseController  implements ControllerInterface
      *      409 ="Invalid parameters",
      *  })
      *
-     * @param int     $id
+     * @param int $id
      *
      * @param Request $request
      *
-     * @return JsonResponse
+     * @return Response|JsonResponse
      * @throws \InvalidArgumentException
      * @throws \LogicException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
-    public function updateAction(int $id , Request $request)
+    public function updateAction(int $id, Request $request)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER , $id)) {
+        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER, $id)) {
             return $this->accessDeniedResponse();
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         $requestData = $request->request->all();
 
-        return $this->updateUser($user , $requestData);
+        return $this->updateUser($user, $requestData);
     }
 
     /**
@@ -371,9 +370,9 @@ class UserController extends ApiBaseController  implements ControllerInterface
      *         },
      *         "_links": ▿
      *         {
-     *            "put": "/api/v1/users/12",
-     *            "patch": "/api/v1/users/12",
-     *            "delete": "/api/v1/users/12"
+     *            "put": "/api/v1/core-bundle/users/12",
+     *            "patch": "/api/v1/core-bundle/users/12",
+     *            "delete": "/api/v1/core-bundle/users/12"
      *         }
      *      }
      *
@@ -404,19 +403,19 @@ class UserController extends ApiBaseController  implements ControllerInterface
      *      409 ="Invalid parameters",
      *  })
      *
-     * @param int     $id
+     * @param int $id
      *
      * @param Request $request
      *
-     * @return JsonResponse
+     * @return Response|JsonResponse
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function updatePartialAction(int $id , Request $request)
+    public function updatePartialAction(int $id, Request $request)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER , $id)) {
+        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER, $id)) {
             return $this->accessDeniedResponse();
         }
 
@@ -424,7 +423,7 @@ class UserController extends ApiBaseController  implements ControllerInterface
 
         $requestData = $request->request->all();
 
-        return $this->updateUser($user , $requestData);
+        return $this->updateUser($user, $requestData);
     }
 
     /**
@@ -454,22 +453,20 @@ class UserController extends ApiBaseController  implements ControllerInterface
      *
      * @param int $id
      *
-     * @return JsonResponse
+     * @return Response|JsonResponse
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
     public function deleteAction(int $id)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::DELETE_USER , $id)) {
+        if (!$this->get('user_voter')->isGranted(VoteOptions::DELETE_USER, $id)) {
             return $this->accessDeniedResponse();
         }
 
         /** @var User $user */
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (null === $user) {
-            return $this->createApiResponse([
-                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
-            ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
+            return $this->notFoundResponse();
         }
 
         $user->setIsActive(false);
@@ -477,34 +474,32 @@ class UserController extends ApiBaseController  implements ControllerInterface
         $this->getDoctrine()->getManager()->flush();
 
         return $this->createApiResponse([
-            'message' => StatusCodesHelper::UNACITVATE_MESSAGE ,
-        ] , StatusCodesHelper::SUCCESSFUL_CODE);
+            'message' => StatusCodesHelper::UNACITVATE_MESSAGE,
+        ], StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
      * @param User|null $user
      *
-     * @param array     $requestData
+     * @param array $requestData
      *
-     * @param bool      $create
+     * @param bool $create
      *
-     * @return JsonResponse
+     * @return Response|JsonResponse
      * @internal param $id
      */
-    private function updateUser($user , array $requestData , $create = false)
+    private function updateUser($user, array $requestData, $create = false)
     {
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         if (null === $user || !$user instanceof User) {
-            return $this->createApiResponse([
-                'message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE ,
-            ] , StatusCodesHelper::USER_NOT_FOUND_CODE);
+            return $this->notFoundResponse();
         }
 
-        $errors = $this->get('entity_processor')->processEntity($user , $requestData);
+        $errors = $this->get('entity_processor')->processEntity($user, $requestData);
         if (false === $errors) {
             if (isset($requestData['password'])) {
-                $user->setPassword($this->get('security.password_encoder')->encodePassword($user , $requestData['password']));
+                $user->setPassword($this->get('security.password_encoder')->encodePassword($user, $requestData['password']));
             }
 
             $this->getDoctrine()->getManager()->persist($user);
@@ -522,19 +517,19 @@ class UserController extends ApiBaseController  implements ControllerInterface
                     $user->setDetailData($userData);
                 }
 
-                $errorsUserData = $this->get('entity_processor')->processEntity($userData , $requestData['detail_data']);
+                $errorsUserData = $this->get('entity_processor')->processEntity($userData, $requestData['detail_data']);
 
                 if (false === $errorsUserData) {
                     $this->getDoctrine()->getManager()->persist($userData);
                     $this->getDoctrine()->getManager()->flush();
 
-                    return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user) , $statusCode);
+                    return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user), $statusCode);
                 }
             } else {
-                return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user) , $statusCode);
+                return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user), $statusCode);
             }
         }
 
-        return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE , 'errors' => $errors] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $this->invalidParametersResponse();
     }
 }

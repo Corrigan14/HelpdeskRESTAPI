@@ -24,9 +24,9 @@ class ApiBaseVoter
      * ApiBaseVoter constructor.
      *
      * @param AccessDecisionManagerInterface $decisionManager
-     * @param TokenStorage                   $tokenStorage
+     * @param TokenStorage $tokenStorage
      */
-    public function __construct(AccessDecisionManagerInterface $decisionManager , TokenStorage $tokenStorage)
+    public function __construct(AccessDecisionManagerInterface $decisionManager, TokenStorage $tokenStorage)
     {
         $this->decisionManager = $decisionManager;
         $this->token = $tokenStorage->getToken();
@@ -38,18 +38,22 @@ class ApiBaseVoter
      * @param string $action
      * @param User $user
      *
+     * @param array|bool $voteConsts
      * @return bool
-     * @throws \InvalidArgumentException
      */
-    public function hasAclRights($action, User $user)
+    public function hasAclRights($action, User $user, $voteConsts = false)
     {
-        if (!in_array($action , VoteOptions::getConstants() , true)) {
+        if (!$voteConsts) {
+            $voteConsts = VoteOptions::getConstants();
+        }
+
+        if (!in_array($action, $voteConsts, true)) {
             throw new \InvalidArgumentException('Action ins not valid, please list your action in the options list');
         }
 
         $acl = $user->getAcl();
 
-        if (in_array($action , $acl , true)) {
+        if (in_array($action, $acl, true)) {
             return true;
         }
 

@@ -37,11 +37,11 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *       ],
      *       "_links":
      *       {
-     *           "self": "api/v1/companies?page=1",
-     *           "first": "api/v1/companies?page=1",
+     *           "self": "api/v1/core-bundle/companies?page=1",
+     *           "first": "api/v1/core-bundle/companies?page=1",
      *           "prev": false,
-     *           "next": "api/v1/companies?page=2",
-     *            "last": "api/v1/companies?page=3"
+     *           "next": "api/v1/core-bundle/companies?page=2",
+     *            "last": "api/v1/core-bundle/companies?page=3"
      *       },
      *       "total": 22,
      *       "page": 1,
@@ -102,9 +102,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/companies/id",
-     *           "patch": "/api/v1/companies/id",
-     *           "delete": "/api/v1/companies/id"
+     *           "put": "/api/v1/core-bundle/companies/id",
+     *           "patch": "/api/v1/core-bundle/companies/id",
+     *           "delete": "/api/v1/core-bundle/companies/id"
      *         }
      *      }
      *
@@ -150,7 +150,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
             ], StatusCodesHelper::NOT_FOUND_CODE);
         }
 
-        return $this->createApiResponse($this->get('api_base.service')->getEntityResponse($company,'company'), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->createApiResponse($this->get('api_base.service')->getEntityResponse($company, 'company'), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -170,9 +170,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/companies/2",
-     *           "patch": "/api/v1/companies/2",
-     *           "delete": "/api/v1/companies/2"
+     *           "put": "/api/v1/core-bundle/companies/2",
+     *           "patch": "/api/v1/core-bundle/companies/2",
+     *           "delete": "/api/v1/core-bundle/companies/2"
      *         }
      *      }
      *
@@ -191,6 +191,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      201 ="The entity was successfully created",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      409 ="Invalid parameters",
      *  }
      * )
@@ -200,7 +201,15 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      */
     public function createAction(Request $request)
     {
-        // TODO: Implement createAction() method.
+        if (!$this->get('company_voter')->isGranted(VoteOptions::CREATE_COMPANY)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
+
+        $company = new Company();
+
+        return $this->updateCompany($company, $requestData, true);
     }
 
     /**
@@ -220,9 +229,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/companies/2",
-     *           "patch": "/api/v1/companies/2",
-     *           "delete": "/api/v1/companies/2"
+     *           "put": "/api/v1/core-bundle/companies/2",
+     *           "patch": "/api/v1/core-bundle/companies/2",
+     *           "delete": "/api/v1/core-bundle/companies/2"
      *         }
      *      }
      *
@@ -248,6 +257,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found Entity",
      *      409 ="Invalid parameters",
      *  }
@@ -259,7 +269,15 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      */
     public function updateAction(int $id, Request $request)
     {
-        // TODO: Implement updateAction() method.
+        if (!$this->get('company_voter')->isGranted(VoteOptions::UPDATE_COMPANY, $id)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
+
+        $requestData = $request->request->all();
+
+        return $this->updateCompany($company, $requestData);
     }
 
     /**
@@ -279,9 +297,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/companies/2",
-     *           "patch": "/api/v1/companies/2",
-     *           "delete": "/api/v1/companies/2"
+     *           "put": "/api/v1/core-bundle/companies/2",
+     *           "patch": "/api/v1/core-bundle/companies/2",
+     *           "delete": "/api/v1/core-bundle/companies/2"
      *         }
      *      }
      *
@@ -307,6 +325,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found Entity",
      *      409 ="Invalid parameters",
      *  }
@@ -318,7 +337,15 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      */
     public function updatePartialAction(int $id, Request $request)
     {
-        // TODO: Implement updatePartialAction() method.
+        if (!$this->get('company_voter')->isGranted(VoteOptions::UPDATE_COMPANY, $id)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
+
+        $requestData = $request->request->all();
+
+        return $this->updateCompany($company, $requestData);
     }
 
     /**
@@ -342,6 +369,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="The is_active Status of Entity was successfully changed to inactive",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found Entity",
      *  })
      *
@@ -351,6 +379,54 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      */
     public function deleteAction(int $id)
     {
-        // TODO: Implement deleteAction() method.
+        if (!$this->get('company_voter')->isGranted(VoteOptions::DELETE_COMPANY, $id)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
+
+        if (null === $company || !$company instanceof Company) {
+            return $this->createApiResponse([
+                'message' => StatusCodesHelper::COMPANY_NOT_FOUND_MESSAGE,
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $company->setIsActive(false);
+        $this->getDoctrine()->getManager()->persist($company);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->createApiResponse([
+            'message' => StatusCodesHelper::UNACITVATE_MESSAGE,
+        ], StatusCodesHelper::SUCCESSFUL_CODE);
+    }
+
+    /**
+     * @param mixed $company
+     * @param array $requestData
+     * @param bool $create
+     *
+     * @return JsonResponse
+     */
+    private function updateCompany($company, array $requestData, $create = false)
+    {
+        $statusCode = $this->getCreateUpdateStatusCode($create);
+
+        if (null === $company || !$company instanceof Company) {
+            return $this->createApiResponse([
+                'message' => StatusCodesHelper::COMPANY_NOT_FOUND_MESSAGE,
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $errors = $this->get('entity_processor')->processEntity($company, $requestData);
+
+        if (false === $errors) {
+            $this->getDoctrine()->getManager()->persist($company);
+            $this->getDoctrine()->getManager()->flush();
+
+            $entityResponse = $this->get('api_base.service')->getEntityResponse($company, 'company');
+            return $this->createApiResponse($entityResponse, $statusCode);
+        }
+
+        return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE, 'errors' => $errors], StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

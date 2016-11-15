@@ -70,10 +70,48 @@ class CompanyVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
-        if($this->user->getCompany()->getId() === $companyId){
+        if ($this->user->getCompany()->getId() === $companyId) {
             return true;
         }
 
         return $this->hasAclRights(VoteOptions::SHOW_COMPANY, $this->user);
+    }
+
+    /**
+     * @return bool
+     */
+    private function canCreate():bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        return $this->hasAclRights(VoteOptions::CREATE_COMPANY, $this->user);
+    }
+
+    /**
+     * @param int $companyId
+     * @return bool
+     */
+    private function canUpdate(int $companyId):bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        return $this->hasAclRights(VoteOptions::UPDATE_COMPANY, $this->user);
+    }
+
+    /**
+     * @param int $companyId
+     * @return bool
+     */
+    private function canDelete(int $companyId):bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        return $this->hasAclRights(VoteOptions::DELETE_COMPANY, $this->user);
     }
 }

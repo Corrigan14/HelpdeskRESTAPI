@@ -48,6 +48,14 @@ class UserFixture implements FixtureInterface , ContainerAwareInterface , Ordere
      */
     public function load(ObjectManager $manager)
     {
+        $companyWS = $manager->getRepository('APICoreBundle:Company')->findOneBy([
+           'title' => 'Web-Solutions'
+        ]);
+
+        $companyLS = $manager->getRepository('APICoreBundle:Company')->findOneBy([
+           'title' => 'LanSystems'
+        ]);
+
         $user = new User();
         $user->setEmail('admin@admin.sk')
              ->setUsername('admin')
@@ -56,6 +64,7 @@ class UserFixture implements FixtureInterface , ContainerAwareInterface , Ordere
         $encoder = $this->container->get('security.password_encoder');
         $encoded = $encoder->encodePassword($user , $plainPassword);
         $user->setPassword($encoded);
+        $user->setCompany($companyWS);
         $manager->persist($user);
 
         $user = new User();
@@ -66,7 +75,9 @@ class UserFixture implements FixtureInterface , ContainerAwareInterface , Ordere
         $encoder = $this->container->get('security.password_encoder');
         $encoded = $encoder->encodePassword($user , $plainPassword);
         $user->setPassword($encoded);
+        $user->setCompany($companyLS);
         $manager->persist($user);
+
         $user = new User();
         $user->setEmail('testuser2@user.sk')
              ->setUsername('testuser2')
@@ -75,6 +86,7 @@ class UserFixture implements FixtureInterface , ContainerAwareInterface , Ordere
         $encoder = $this->container->get('security.password_encoder');
         $encoded = $encoder->encodePassword($user , $plainPassword);
         $user->setPassword($encoded);
+        $user->setCompany($companyLS);
         $manager->persist($user);
 
         $manager->flush();
@@ -88,6 +100,6 @@ class UserFixture implements FixtureInterface , ContainerAwareInterface , Ordere
      */
     public function getOrder()
     {
-        return 1;
+        return 2;
     }
 }

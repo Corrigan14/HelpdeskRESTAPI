@@ -2,7 +2,7 @@
 
 namespace API\CoreBundle\Services;
 
-use Doctrine\ORM\EntityManager;
+use API\CoreBundle\Repository\RepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
 /**
@@ -13,39 +13,34 @@ use Symfony\Bundle\FrameworkBundle\Routing\Router;
 class ApiBaseService
 {
     const PAGINATION_LIMIT = 10;
-    /**
-     * @var EntityManager
-     */
-    protected $em;
+
 
     /** @var Router */
     protected $router;
 
     /**
-     * UserService constructor.
+     * ApiBaseService constructor.
      *
-     * @param EntityManager $em
      * @param Router $router
      */
-    public function __construct(EntityManager $em, Router $router)
+    public function __construct(Router $router)
     {
-        $this->em = $em;
         $this->router = $router;
     }
 
     /**
      * Return all Entities which includes Data and Links
      *
-     * @param array $options
+     * @param RepositoryInterface $entityRepository
      * @param int $page
-     * @param string $entityRepository
      * @param string $routeName
+     * @param array $options
+     *
      * @return array
      */
-    public function getEntitiesResponse($options, int $page, string $entityRepository, string $routeName)
+    public function getEntitiesResponse(RepositoryInterface $entityRepository, int $page, string $routeName, array $options = [])
     {
-        $entityRepository = $this->em->getRepository($entityRepository);
-        $entities = $entityRepository->getAllEntities($options, $page);
+        $entities = $entityRepository->getAllEntities($page, $options);
 
         $response = [
             'data' => $entities
@@ -64,7 +59,7 @@ class ApiBaseService
     /**
      * Return Entity Response which includes all data about Entity and Links to update/partialUpdate/delete
      *
-     * @param $entity
+     * @param object $entity
      * @param string $entityName
      *
      * @return array

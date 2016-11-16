@@ -12,20 +12,19 @@ interface RepositoryInterface
     /**
      * Return's all entities with specific conditions based on actual Entity
      *
-     * @param mixed $options
      * @param int $page
-     *
+     * @param array $options
      * @return mixed
      */
-    public function getAllEntities($options, $page);
+    public function getAllEntities(int $page, array $options = []);
 
 
     /**
      * Return count of all Entities
      *
-     * @param mixed $options
+     * @param array $options
      *
      * @return int
      */
-    public function countEntities($options);
+    public function countEntities(array $options = []);
 }

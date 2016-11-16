@@ -164,6 +164,7 @@ Dokumentacne pravidla
     - vytvorenie entityName.yml suboru
     - kazdu skupinu rout musime zaregistrovat v routing.yml
     - kazda entita bude mat zakladnu skupinu rout (pozri user.yml)
+    - pri importovanych cestach netreba pouzivat prefix pretoze tam da na konci kazdej cesty lomitko
     
 5. Testy
     - pre testy vyuzivame vlastnu testovaciu databazu s fixtures:
@@ -203,18 +204,20 @@ Dokumentacne pravidla
     - upravime dokumentaciu pre jednotlive metody
     - doprogramujeme uz odtestovane metody tak, aby vsetky testy presli spravne (min CRUD): phpunit
     
-6a. Service
-    - vytvorenie Service (Services)
-    - Ak sa jedna o beznu Entitu ako napr. Company ci Tag, Sevice moze: extends ApiBaseService(), ktory 
-      obsahuje metody na ziskanie Zoznamu entit (v metode listAction) a ziskanie jednej entity (v metode getAction)
+7. Service - vytvorenie Service (Services) 
+    - Ak sa jedna o beznu Entitu ako napr. Company ci Tag, Sevice moze: extends ApiBaseService(),
+     alebo mozeme priamo vyuzivat metody ApiBaseServicu:
+            - metody na ziskanie Zoznamu entit 
+              (v metode listAction: getEntitiesResponse($entityRepository napr. $this->getDoctrine()->getRepository('ApiCoreBundle:Company'), $page, $routeName napr. 'company_list', $options = [])) 
+            - metody na ziskanie jednej entity (v metode getAction: getEntityResponse($entity, $entityName napr. 'company')) 
     - registracia Service (Resources/config/services.yml)
     
-6b. Repository
-    - tento automaticky vygeneruje Doctrine pri vytvoreni entity. AK nie, je potrebne ho v entite zaregistrovat
+8. Repository 
+    - tento automaticky vygeneruje Doctrine pri vytvoreni entity. AK nie, je potrebne ho v entite zaregistrovat 
     - ak vyuzivame ApiBaseService potrebujeme, aby nas repozitar implementoval metody RepositoryInteface()
-
-6c. Security
-    - doplnenie VoterOptions.php - obsahuje konstanty s akciami, pre ktore su potrebne pravidla vykonavania
-    - vytvorenie EntityNameVoter.php: extends ApiBaseVoter implements VoterInterface
+    
+9. Security 
+    - doplnenie VoterOptions.php - obsahuje konstanty s akciami, pre ktore su potrebne pravidla vykonavania 
+    - vytvorenie EntityNameVoter.php: extends ApiBaseVoter implements VoterInterface 
     - registracia EntityNameVoter (Resources/config/services.yml)
     

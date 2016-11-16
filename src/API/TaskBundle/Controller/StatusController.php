@@ -315,7 +315,19 @@ class StatusController extends ApiBaseController implements ControllerInterface
      */
     public function updatePartialAction(int $id, Request $request)
     {
-        // TODO: Implement updatePartialAction() method.
+        $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($id);
+
+        if (!$status instanceof Status) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('status_voter')->isGranted(VoteOptions::UPDATE_STATUS, $status)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
+
+        return $this->updateStatus($status, $requestData);
     }
 
     /**
@@ -349,7 +361,23 @@ class StatusController extends ApiBaseController implements ControllerInterface
      */
     public function deleteAction(int $id)
     {
-        // TODO: Implement deleteAction() method.
+        $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($id);
+
+        if (!$status instanceof Status) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('status_voter')->isGranted(VoteOptions::DELETE_STATUS, $status)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $status->setIsActive(false);
+        $this->getDoctrine()->getManager()->persist($status);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->createApiResponse([
+            'message' => StatusCodesHelper::UNACITVATE_MESSAGE,
+        ], StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

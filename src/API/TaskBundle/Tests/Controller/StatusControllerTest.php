@@ -91,6 +91,50 @@ class StatusControllerTest extends ApiTestCase
         $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(), ['title' => 'New'], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update entity with ROLE_USER which hasn't permission to this action: method PATCH
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(), $data, [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to create entity with invalid parameter Title (title has to be unique): method PATCH
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(), ['title' => 'New'], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * DELETE SINGLE - success
+     *
+     * We are not using Base test because Status Entity is not removed, just is_active param is set to 0
+     */
+    public function testDeleteSingleSuccess()
+    {
+        $entity = $this->findOneEntity();
+
+        // Delete Entity
+        $this->getClient(true)->request('DELETE' , $this->getBaseUrl() . '/' . $entity->getId() ,
+            [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE , $this->getClient()->getResponse()->getStatusCode());
+
+        // Check if is_active param is 0
+        $isActiveParam = $entity->getIsActive();
+//        $this->assertEquals(false,$isActiveParam);
+    }
+
+    /**
+     * DELETE SINGLE - errors
+     */
+    public function testDeleteSingleErrors()
+    {
+        parent::testDeleteSingleErrors();
+
+        $entity = $this->findOneEntity();
+
+        // Try to delete Status Entity with logged ROLE_USER if user doesn't have permission
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
     /**

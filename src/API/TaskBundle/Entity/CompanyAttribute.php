@@ -122,13 +122,13 @@ class CompanyAttribute implements \Serializable
     /**
      * Set options
      *
-     * @param string $options
+     * @param array $options
      *
      * @return CompanyAttribute
      */
     public function setOptions($options)
     {
-        $this->options = $options;
+        $this->options = serialize($options);
 
         return $this;
     }
@@ -136,11 +136,11 @@ class CompanyAttribute implements \Serializable
     /**
      * Get options
      *
-     * @return string
+     * @return array
      */
     public function getOptions()
     {
-        return $this->options;
+        return $this->unserialize($this->options);
     }
 
     /**

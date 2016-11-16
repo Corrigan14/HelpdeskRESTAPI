@@ -37,7 +37,7 @@ class CompanyAttributeFixture implements FixtureInterface, ContainerAwareInterfa
             'select2' => 'select2',
             'select3' => 'select3',
         ];
-        $ca->setOptions(serialize($options));
+        $ca->setOptions($options);
         $manager->persist($ca);
 
         $ca = new CompanyAttribute();

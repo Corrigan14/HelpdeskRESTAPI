@@ -2,8 +2,12 @@
 
 namespace API\TaskBundle\Controller;
 
+use API\TaskBundle\Entity\CompanyAttribute;
+use API\TaskBundle\Security\VoteOptions;
+use API\TaskBundle\Services\VariableHelper;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
+use Igsem\APIBundle\Services\StatusCodesHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -70,7 +74,15 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      */
     public function listAction(Request $request)
     {
-        // TODO: Implement listAction() method.
+        if (!$this->get('company_attribute_voter')->isGranted(VoteOptions::LIST_COMPANY_ATTRIBUTES)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $page = $request->get('page') ?: 1;
+
+        $companyAttributeRepository = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute');
+
+        return $this->json($this->get('api_base.service')->getEntitiesResponse($companyAttributeRepository, $page, 'company_attribute_list'), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -123,7 +135,19 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      */
     public function getAction(int $id)
     {
-        // TODO: Implement getAction() method.
+        $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($id);
+
+        if (!$companyAttribute instanceof CompanyAttribute) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('company_attribute_voter')->isGranted(VoteOptions::SHOW_COMPANY_ATTRIBUTE)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $companyAttributeArray = $this->get('api_base.service')->getEntityResponse($companyAttribute, 'company_attribute');
+
+        return $this->createApiResponse($companyAttributeArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -170,7 +194,15 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      */
     public function createAction(Request $request)
     {
-        // TODO: Implement createAction() method.
+        if (!$this->get('company_attribute_voter')->isGranted(VoteOptions::CREATE_COMPANY_ATTRIBUTE)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $companyAttribute = new CompanyAttribute();
+
+        $requestData = $request->request->all();
+
+        return $this->updateCompanyAttribute($companyAttribute, $requestData, true);
     }
 
     /**
@@ -226,7 +258,19 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      */
     public function updateAction(int $id, Request $request)
     {
-        // TODO: Implement updateAction() method.
+        $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($id);
+
+        if (!$companyAttribute instanceof CompanyAttribute) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('company_attribute_voter')->isGranted(VoteOptions::UPDATE_COMPANY_ATTRIBUTE)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
+
+        return $this->updateCompanyAttribute($companyAttribute, $requestData);
     }
 
     /**
@@ -282,7 +326,19 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      */
     public function updatePartialAction(int $id, Request $request)
     {
-        // TODO: Implement updatePartialAction() method.
+        $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($id);
+
+        if (!$companyAttribute instanceof CompanyAttribute) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('company_attribute_voter')->isGranted(VoteOptions::UPDATE_COMPANY_ATTRIBUTE)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
+
+        return $this->updateCompanyAttribute($companyAttribute, $requestData);
     }
 
     /**
@@ -307,7 +363,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *      200 ="is_active param of Entity was successfully changed to inactive: 0",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
-     *      404 ="Not found Tag",
+     *      404 ="Not found Entity",
      *  })
      *
      * @param int $id
@@ -316,6 +372,58 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      */
     public function deleteAction(int $id)
     {
-        // TODO: Implement deleteAction() method.
+        $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($id);
+
+        if (!$companyAttribute instanceof CompanyAttribute) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('company_attribute_voter')->isGranted(VoteOptions::DELETE_COMPANY_ATTRIBUTE)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $companyAttribute->setIsActive(false);
+        $this->getDoctrine()->getManager()->persist($companyAttribute);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->createApiResponse([
+            'message' => StatusCodesHelper::UNACITVATE_MESSAGE,
+        ], StatusCodesHelper::SUCCESSFUL_CODE);
+    }
+
+
+    /**
+     * @param $companyAttribute
+     * @param $requestData
+     * @param bool $create
+     * @return Response
+     */
+    private function updateCompanyAttribute($companyAttribute, $requestData, $create = false)
+    {
+        $statusCode = $this->getCreateUpdateStatusCode($create);
+
+        // Check if type is instance of Variables in VariableHelper
+        if (isset($requestData['type'])) {
+            $type = $requestData['type'];
+            $typeOptions = VariableHelper::getConstants();
+            if (!in_array($type, $typeOptions, true)) {
+                return $this->createApiResponse([
+                    'message' => 'Not allowed Type of company attribute!',
+                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            }
+
+        }
+
+        $errors = $this->get('entity_processor')->processEntity($companyAttribute, $requestData);
+
+        if (false === $errors) {
+            $this->getDoctrine()->getManager()->persist($companyAttribute);
+            $this->getDoctrine()->getManager()->flush();
+
+            $companyAttributeArray = $this->get('api_base.service')->getEntityResponse($companyAttribute, 'company_attribute');
+            return $this->createApiResponse($companyAttributeArray, $statusCode);
+        }
+
+        return $this->invalidParametersResponse();
     }
 }

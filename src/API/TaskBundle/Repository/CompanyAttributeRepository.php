@@ -49,7 +49,7 @@ class CompanyAttributeRepository extends EntityRepository implements RepositoryI
         $query = $this->createQueryBuilder('ca')
             ->select('COUNT(ca.id)')
             ->getQuery()
-            ->getSingleResult();
+            ->getSingleScalarResult();
 
         return $query;
     }

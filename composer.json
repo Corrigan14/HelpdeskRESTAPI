@@ -33,7 +33,7 @@
     "lexik/framework-accelerator-bundle": "dev-master",
     "jms/serializer-bundle": "^1.1",
     "nelmio/cors-bundle": "^1.4",
-    "igsem/api-bundle": "1.*"
+    "igsem/api-bundle": "^1.0"
   },
   "require-dev": {
     "sensio/generator-bundle": "^3.0",

@@ -26,6 +26,7 @@ class AppKernel extends Kernel
             new API\CoreBundle\APICoreBundle(),
             new Stof\DoctrineExtensionsBundle\StofDoctrineExtensionsBundle(),
             new FOS\HttpCacheBundle\FOSHttpCacheBundle() ,
+            new API\TaskBundle\APITaskBundle(),
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {

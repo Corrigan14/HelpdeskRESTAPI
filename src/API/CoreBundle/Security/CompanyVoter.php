@@ -2,6 +2,7 @@
 
 namespace API\CoreBundle\Security;
 
+use API\CoreBundle\Entity\Company;
 use API\CoreBundle\Entity\User;
 
 /**
@@ -38,9 +39,9 @@ class CompanyVoter extends ApiBaseVoter implements VoterInterface
             case VoteOptions::SHOW_COMPANY:
                 return $this->canRead($options);
             case VoteOptions::UPDATE_COMPANY:
-                return $this->canUpdate($options);
+                return $this->canUpdate();
             case VoteOptions::DELETE_COMPANY:
-                return $this->canDelete($options);
+                return $this->canDelete();
             case VoteOptions::LIST_COMPANIES:
                 return $this->canList();
             default:
@@ -61,16 +62,16 @@ class CompanyVoter extends ApiBaseVoter implements VoterInterface
     }
 
     /**
-     * @param int $companyId
+     * @param Company $company
      * @return bool
      */
-    private function canRead(int $companyId):bool
+    private function canRead($company):bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
         }
 
-        if ($this->user->getCompany()->getId() === $companyId) {
+        if ($this->user->getCompany() === $company) {
             return true;
         }
 
@@ -90,10 +91,9 @@ class CompanyVoter extends ApiBaseVoter implements VoterInterface
     }
 
     /**
-     * @param int $companyId
      * @return bool
      */
-    private function canUpdate(int $companyId):bool
+    private function canUpdate():bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
@@ -103,10 +103,9 @@ class CompanyVoter extends ApiBaseVoter implements VoterInterface
     }
 
     /**
-     * @param int $companyId
      * @return bool
      */
-    private function canDelete(int $companyId):bool
+    private function canDelete():bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;

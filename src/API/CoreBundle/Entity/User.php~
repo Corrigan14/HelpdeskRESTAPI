@@ -1,6 +1,8 @@
 <?php
 namespace API\CoreBundle\Entity;
 
+
+use API\CoreBundle\Services\Traits\FeaturedImageEntity;
 use API\TaskBundle\Entity\Tag;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
@@ -23,6 +25,9 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  */
 class User implements AdvancedUserInterface , \Serializable
 {
+
+    use FeaturedImageEntity;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -382,5 +387,63 @@ class User implements AdvancedUserInterface , \Serializable
     {
 
         return $this->is_active;
+    }
+
+    /**
+     * Add tag
+     *
+     * @param Tag $tag
+     *
+     * @return User
+     */
+    public function addTag(Tag $tag)
+    {
+        $this->tags[] = $tag;
+
+        return $this;
+    }
+
+    /**
+     * Remove tag
+     *
+     * @param Tag $tag
+     */
+    public function removeTag(Tag $tag)
+    {
+        $this->tags->removeElement($tag);
+    }
+
+    /**
+     * Get tags
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getTags()
+    {
+        return $this->tags;
+    }
+
+    /**
+     * Set company
+     *
+     * @param Company $company
+     *
+     * @return User
+     */
+    public function setCompany(Company $company = null)
+    {
+        $this->company = $company;
+
+        return $this;
+    }
+
+    /**
+     * Get company
+     *
+     * @return Company
+     */
+    public function getCompany()
+    {
+        return $this->company;
     }
 }

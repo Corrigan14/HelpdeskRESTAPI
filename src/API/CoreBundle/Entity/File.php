@@ -20,6 +20,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 class File implements FileEntityInterface
 {
     use TimestampableEntity;
+
     /**
      * @var integer
      *
@@ -82,6 +83,17 @@ class File implements FileEntityInterface
      * @ORM\Column(name="public", type="boolean",  options={"default"=false} )
      */
     private $public = false;
+
+
+    /**
+     * Get id
+     *
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
 
     /**
      * Set name
@@ -245,4 +257,13 @@ class File implements FileEntityInterface
     }
 
 
+    /**
+     * Get public
+     *
+     * @return boolean
+     */
+    public function getPublic()
+    {
+        return $this->public;
+    }
 }

@@ -19,14 +19,31 @@
             <directory>vendor/igsem</directory>
         </testsuite>
     </testsuites>
-
     <filter>
+        <blacklist>
+            <directory>cache</directory>
+            <directory>data</directory>
+            <directory>lib/vendor</directory>
+            <directory>log</directory>
+            <!-- exclude plugins -->
+            <directory>plugins</directory>
+            <directory>web</directory>
+            <directory>Entity</directory>
+            <directory>Repository</directory>
+            <directory>DataFixtures</directory>
+            <directory>src/*/Bundle/*Bundle/Entity</directory>
+            <directory>src/*/Bundle/*Bundle/Repository</directory>
+            <directory>src/*/Bundle/*Bundle/DataFixtures</directory>
+        </blacklist>
         <whitelist>
             <directory>src</directory>
             <exclude>
                 <directory>src/*Bundle/Resources</directory>
                 <directory>src/*/*Bundle/Resources</directory>
                 <directory>src/*/Bundle/*Bundle/Resources</directory>
+                <directory>src/*/Bundle/*Bundle/Entity</directory>
+                <directory>src/*/Bundle/*Bundle/Repository</directory>
+                <directory>src/*/Bundle/*Bundle/DataFixtures</directory>
             </exclude>
         </whitelist>
     </filter>

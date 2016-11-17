@@ -93,3 +93,12 @@ nelmio_cors:
             allow_headers: ['Authorization','HTTP_AUTHORIZATION']
             allow_methods: ['POST', 'PUT', 'GET', 'DELETE','OPTIONS']
             max_age: 3600
+
+stof_doctrine_extensions:
+    default_locale: en
+    translation_fallback: true
+    orm:
+        default:
+            tree: true
+            timestampable: true
+            sluggable: true

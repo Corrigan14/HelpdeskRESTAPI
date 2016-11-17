@@ -23,7 +23,7 @@ class AppKernel extends Kernel
             new JMS\SerializerBundle\JMSSerializerBundle(),
             new Nelmio\CorsBundle\NelmioCorsBundle(),
             new \Igsem\APIBundle\IgsemAPIBundle(),
-            new API\CoreBundle\APICoreBundle(),
+            new \API\CoreBundle\APICoreBundle(),
             new Stof\DoctrineExtensionsBundle\StofDoctrineExtensionsBundle(),
             new API\TaskBundle\APITaskBundle(),
         ];

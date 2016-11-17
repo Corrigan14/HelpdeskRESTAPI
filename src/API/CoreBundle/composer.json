@@ -1,0 +1,31 @@
+{
+  "name": "igsem/api-core-bundle",
+  "description": "API Core for User management, login, security. Implements JWT and Guard Authenticator. User Crud, Company Crud a Simple CDN for file upload",
+  "type": "symfony-bundle",
+  "homepage": "https://github.com/JuliusKoronci/IgsemAPICoreBundle",
+  "require": {
+    "php": ">=7.0.7",
+    "symfony/framework-bundle": "~2.3|~3.0",
+    "jms/serializer-bundle": "^1.1",
+    "nelmio/api-doc-bundle": "^2.13",
+    "igsem/api-bundle": "^1.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^5.6"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Julius Koronci",
+      "email": "jk@web-solutions.sk"
+    }
+  ],
+  "autoload": {
+    "psr-0": {
+      "Igsem\\APICoreBundle": ""
+    }
+  },
+  "target-dir": "Igsem/API/CoreBundle",
+  "prefer-stable": true,
+  "minimum-stability": "stable"
+}

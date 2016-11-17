@@ -6,7 +6,6 @@ use API\CoreBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ReadOnly;
 use JMS\Serializer\Annotation\Exclude;
@@ -14,7 +13,6 @@ use JMS\Serializer\Annotation\Exclude;
 /**
  * @ORM\Entity(repositoryClass="API\TaskBundle\Repository\TagRepository")
  * @ORM\Table(name="tag")
- * @UniqueEntity("title")
  */
 class Tag implements \Serializable
 {

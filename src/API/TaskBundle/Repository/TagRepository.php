@@ -2,24 +2,27 @@
 
 namespace API\TaskBundle\Repository;
 
+use API\CoreBundle\Repository\RepositoryInterface;
 use Doctrine\ORM\EntityRepository;
 
 /**
  * TagRepository
  */
-class TagRepository extends EntityRepository
+class TagRepository extends EntityRepository implements RepositoryInterface
 {
     const LIMIT = 10;
 
     /**
-     * Return all User's Tags + public Tags
+     * Return's all entities with specific conditions based on actual Entity
      *
-     * @param int $userId
      * @param int $page
-     * @return array
+     * @param array $options
+     * @return mixed
      */
-    public function getAllTags(int $userId, int $page)
+    public function getAllEntities(int $page, array $options = [])
     {
+        $userId = $options['userId'];
+
         $query = $this->createQueryBuilder('t')
             ->where('t.createdBy = :userId')
             ->orWhere('t.public = :public')
@@ -28,14 +31,34 @@ class TagRepository extends EntityRepository
 
         $query->setMaxResults(self::LIMIT);
 
-        /**
-         * Pagination calculating offset
-         */
+        // Pagination calculating offset
         if (1 < $page) {
             $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
         }
 
         return $query->getArrayResult();
+    }
+
+    /**
+     * Return count of all Entities
+     *
+     * @param array $options
+     *
+     * @return int
+     */
+    public function countEntities(array $options = [])
+    {
+        $userId = $options['userId'];
+
+        $query = $this->createQueryBuilder('t')
+            ->select('COUNT(t.id)')
+            ->where('t.createdBy = :userId')
+            ->orWhere('t.public = :public')
+            ->setParameters(['userId' => $userId, 'public' => true])
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $query;
     }
 
     /**
@@ -51,24 +74,5 @@ class TagRepository extends EntityRepository
             ->setParameter('userId', $userId);
 
         return $query->getQuery()->getArrayResult();
-    }
-
-    /**
-     * Return count of all User's tags + public tags
-     *
-     * @param int $userId
-     * @return int
-     */
-    public function countTags(int $userId): int
-    {
-        $query = $this->createQueryBuilder('t')
-            ->select('COUNT(t.id)')
-            ->where('t.createdBy = :userId')
-            ->orWhere('t.public = :public')
-            ->setParameters(['userId' => $userId, 'public' => true])
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        return $query;
     }
 }

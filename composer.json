@@ -69,7 +69,8 @@
         "file": "app/config/parameters.yml"
       },
       {
-        "file": "app/config/parameters_test.yml"
+        "file": "app/config/parameters_test.yml",
+        "dist-file": "app/config//parameters.yml.dist"
       }
     ]
   }

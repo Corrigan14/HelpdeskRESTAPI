@@ -1,0 +1,37 @@
+tag_list:
+    path:     /tags
+    defaults: { _controller: APITaskBundle:Tag:list }
+    methods: [GET]
+
+tag:
+    path:     /tags/{id}
+    defaults: { _controller: APITaskBundle:Tag:get }
+    methods: [GET]
+    requirements:
+        id: '\d+'
+
+tag_create:
+    path:     /tags
+    defaults: { _controller: APITaskBundle:Tag:create }
+    methods: [POST]
+
+tag_update:
+    path:     /tags/{id}
+    defaults: { _controller: APITaskBundle:Tag:update }
+    methods: [PUT]
+    requirements:
+            id: '\d+'
+
+tag_partial_update:
+    path:     /tags/{id}
+    defaults: { _controller: APITaskBundle:Tag:updatePartial }
+    methods: [PATCH]
+    requirements:
+            id: '\d+'
+
+tag_delete:
+    path:     /tags/{id}
+    defaults: { _controller: APITaskBundle:Tag:delete }
+    methods: [DELETE]
+    requirements:
+            id: '\d+'

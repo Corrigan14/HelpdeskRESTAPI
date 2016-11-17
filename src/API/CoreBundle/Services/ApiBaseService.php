@@ -49,7 +49,7 @@ class ApiBaseService
         $pagination = HateoasHelper::getPagination(
             $this->router->generate($routeName),
             $page,
-            $entityRepository->countEntities(),
+            $entityRepository->countEntities($options),
             self::PAGINATION_LIMIT
         );
 

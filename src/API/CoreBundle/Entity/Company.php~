@@ -108,6 +108,7 @@ class Company implements \Serializable
 
     /**
      * @ORM\OneToMany(targetEntity="User", mappedBy="company")
+     * @Exclude()
      */
     private $users;
 
@@ -369,5 +370,39 @@ class Company implements \Serializable
     public function unserialize($serialized)
     {
         // TODO: Implement unserialize() method.
+    }
+
+    /**
+     * Add user
+     *
+     * @param User $user
+     *
+     * @return Company
+     */
+    public function addUser(User $user)
+    {
+        $this->users[] = $user;
+
+        return $this;
+    }
+
+    /**
+     * Remove user
+     *
+     * @param User $user
+     */
+    public function removeUser(User $user)
+    {
+        $this->users->removeElement($user);
+    }
+
+    /**
+     * Get users
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getUsers()
+    {
+        return $this->users;
     }
 }

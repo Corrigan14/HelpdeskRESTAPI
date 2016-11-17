@@ -1,6 +1,10 @@
 <?php
 namespace API\CoreBundle\Entity;
 
+
+use API\CoreBundle\Services\Traits\FeaturedImageEntity;
+use API\TaskBundle\Entity\Tag;
+use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ReadOnly;
 use JMS\Serializer\Annotation\Exclude;
@@ -21,6 +25,9 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  */
 class User implements AdvancedUserInterface , \Serializable
 {
+
+    use FeaturedImageEntity;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -96,6 +103,13 @@ class User implements AdvancedUserInterface , \Serializable
     private $detailData;
 
     /**
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Tag", mappedBy="createdBy")
+     * @Exclude()
+     *
+     * @var Tag
+     */
+    private $tags;
+    /**
      * @ORM\ManyToOne(targetEntity="Company", inversedBy="users")
      * @ORM\JoinColumn(name="company_id", referencedColumnName="id")
      * @ReadOnly()
@@ -106,6 +120,7 @@ class User implements AdvancedUserInterface , \Serializable
     {
         $this->is_active = true;
         $this->acl = json_encode([]);
+        $this->tags = new ArrayCollection();
     }
 
     /**
@@ -372,6 +387,40 @@ class User implements AdvancedUserInterface , \Serializable
     {
 
         return $this->is_active;
+    }
+
+    /**
+     * Add tag
+     *
+     * @param Tag $tag
+     *
+     * @return User
+     */
+    public function addTag(Tag $tag)
+    {
+        $this->tags[] = $tag;
+
+        return $this;
+    }
+
+    /**
+     * Remove tag
+     *
+     * @param Tag $tag
+     */
+    public function removeTag(Tag $tag)
+    {
+        $this->tags->removeElement($tag);
+    }
+
+    /**
+     * Get tags
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getTags()
+    {
+        return $this->tags;
     }
 
     /**

@@ -22,10 +22,10 @@
   ],
   "autoload": {
     "psr-0": {
-      "Igsem\\APICoreBundle": ""
+      "API\\CoreBundle": ""
     }
   },
-  "target-dir": "Igsem/API/CoreBundle",
+  "target-dir": "API/CoreBundle",
   "prefer-stable": true,
   "minimum-stability": "stable"
 }

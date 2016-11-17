@@ -140,13 +140,14 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      */
     public function getAction(int $id)
     {
-        if (!$this->get('company_voter')->isGranted(VoteOptions::SHOW_COMPANY, $id)) {
-            return $this->accessDeniedResponse();
+        $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
+
+        if (!$company instanceof Company) {
+            return $this->notFoundResponse();
         }
 
-        $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
-        if (null === $company || !$company instanceof Company) {
-            return $this->notFoundResponse();
+        if (!$this->get('company_voter')->isGranted(VoteOptions::SHOW_COMPANY, $company)) {
+            return $this->accessDeniedResponse();
         }
 
         return $this->createApiResponse($this->get('api_base.service')->getEntityResponse($company, 'company'), StatusCodesHelper::SUCCESSFUL_CODE);
@@ -268,11 +269,15 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      */
     public function updateAction(int $id, Request $request)
     {
-        if (!$this->get('company_voter')->isGranted(VoteOptions::UPDATE_COMPANY, $id)) {
-            return $this->accessDeniedResponse();
+        $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
+
+        if (!$company instanceof Company) {
+            return $this->notFoundResponse();
         }
 
-        $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
+        if (!$this->get('company_voter')->isGranted(VoteOptions::UPDATE_COMPANY, $company)) {
+            return $this->accessDeniedResponse();
+        }
 
         $requestData = $request->request->all();
 
@@ -336,11 +341,15 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      */
     public function updatePartialAction(int $id, Request $request)
     {
-        if (!$this->get('company_voter')->isGranted(VoteOptions::UPDATE_COMPANY, $id)) {
-            return $this->accessDeniedResponse();
+        $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
+
+        if (!$company instanceof Company) {
+            return $this->notFoundResponse();
         }
 
-        $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
+        if (!$this->get('company_voter')->isGranted(VoteOptions::UPDATE_COMPANY, $company)) {
+            return $this->accessDeniedResponse();
+        }
 
         $requestData = $request->request->all();
 
@@ -378,14 +387,14 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      */
     public function deleteAction(int $id)
     {
-        if (!$this->get('company_voter')->isGranted(VoteOptions::DELETE_COMPANY, $id)) {
-            return $this->accessDeniedResponse();
-        }
-
         $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
 
-        if (null === $company || !$company instanceof Company) {
+        if (!$company instanceof Company) {
             return $this->notFoundResponse();
+        }
+
+        if (!$this->get('company_voter')->isGranted(VoteOptions::DELETE_COMPANY, $id)) {
+            return $this->accessDeniedResponse();
         }
 
         $company->setIsActive(false);

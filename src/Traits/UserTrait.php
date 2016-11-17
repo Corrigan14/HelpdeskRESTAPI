@@ -27,7 +27,6 @@ trait UserTrait
      * Add tag
      *
      * @param Tag $tag
-     *
      * @return User
      */
     public function addTag(Tag $tag)

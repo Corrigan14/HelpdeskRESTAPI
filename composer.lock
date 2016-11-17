@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "4c063664170c763c49120692876e7ad7",
-    "content-hash": "1ea091ae4d1ff3872ffcf7d96b955d97",
+    "hash": "0269070b3fe95d26f62618cd7ad6066e",
+    "content-hash": "cbf64d7f5767116ca89491c53eac98c4",
     "packages": [
         {
             "name": "behat/transliterator",
@@ -940,17 +940,17 @@
         },
         {
             "name": "igsem/api-core-bundle",
-            "version": "0.0.9",
-            "target-dir": "Igsem/API/CoreBundle",
+            "version": "1.0.1",
+            "target-dir": "API/CoreBundle",
             "source": {
                 "type": "git",
-                "url": "https://github.com/JuliusKoronci/IgsemAPICoreBundle.git",
-                "reference": "be07297c8f13447e333a5ff6cc0c28e03356d558"
+                "url": "https://github.com/JuliusKoronci/APICoreBundle.git",
+                "reference": "bcdf62f1728b7e1118fb42ce369c5a8b350a789d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/JuliusKoronci/IgsemAPICoreBundle/zipball/be07297c8f13447e333a5ff6cc0c28e03356d558",
-                "reference": "be07297c8f13447e333a5ff6cc0c28e03356d558",
+                "url": "https://api.github.com/repos/JuliusKoronci/APICoreBundle/zipball/bcdf62f1728b7e1118fb42ce369c5a8b350a789d",
+                "reference": "bcdf62f1728b7e1118fb42ce369c5a8b350a789d",
                 "shasum": ""
             },
             "require": {
@@ -966,7 +966,7 @@
             "type": "symfony-bundle",
             "autoload": {
                 "psr-0": {
-                    "Igsem\\APICoreBundle": ""
+                    "API\\CoreBundle": ""
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -981,7 +981,7 @@
             ],
             "description": "API Core for User management, login, security. Implements JWT and Guard Authenticator. User Crud, Company Crud a Simple CDN for file upload",
             "homepage": "https://github.com/JuliusKoronci/IgsemAPICoreBundle",
-            "time": "2016-11-17 17:32:13"
+            "time": "2016-11-17 20:11:05"
         },
         {
             "name": "incenteev/composer-parameter-handler",
@@ -2902,16 +2902,16 @@
         },
         {
             "name": "twig/twig",
-            "version": "v1.27.0",
+            "version": "v1.28.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "3c6c0033fd3b5679c6e1cb60f4f9766c2b424d97"
+                "reference": "60ae30368f7ac50a95de032f16c1e882b0f69813"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/3c6c0033fd3b5679c6e1cb60f4f9766c2b424d97",
-                "reference": "3c6c0033fd3b5679c6e1cb60f4f9766c2b424d97",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/60ae30368f7ac50a95de032f16c1e882b0f69813",
+                "reference": "60ae30368f7ac50a95de032f16c1e882b0f69813",
                 "shasum": ""
             },
             "require": {
@@ -2924,7 +2924,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.27-dev"
+                    "dev-master": "1.28-dev"
                 }
             },
             "autoload": {
@@ -2959,7 +2959,7 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2016-10-25 19:17:17"
+            "time": "2016-11-17 17:46:53"
         }
     ],
     "packages-dev": [

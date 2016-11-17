@@ -16,6 +16,7 @@
         <testsuite name="Project Test Suite">
             <directory>src</directory>
             <directory>tests</directory>
+            <directory>vendor/igsem</directory>
         </testsuite>
     </testsuites>
 

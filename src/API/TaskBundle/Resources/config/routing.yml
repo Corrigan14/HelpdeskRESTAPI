@@ -1,6 +1,6 @@
 api_task_task:
     resource: "@APITaskBundle/Resources/config/routing/task.yml"
-    prefix: /task
+    prefix: /
 api_task_tag:
     resource: "@APITaskBundle/Resources/config/routing/tag.yml"
     prefix: /

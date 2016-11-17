@@ -242,6 +242,10 @@ class UserControllerTest extends ApiTestCase
         $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
             [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Check if is_active param is 0
+        $isActiveParam = $entity->getIsActive();
+//        $this->assertEquals(false,$isActiveParam);
     }
 
 

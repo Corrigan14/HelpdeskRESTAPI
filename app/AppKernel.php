@@ -20,7 +20,12 @@ class AppKernel extends Kernel
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
             new Nelmio\ApiDocBundle\NelmioApiDocBundle(),
             new Lexik\Bundle\JWTAuthenticationBundle\LexikJWTAuthenticationBundle(),
-            new API\CoreBundle\APICoreBundle(),
+            new JMS\SerializerBundle\JMSSerializerBundle(),
+            new Nelmio\CorsBundle\NelmioCorsBundle(),
+            new \Igsem\APIBundle\IgsemAPIBundle(),
+            new \API\CoreBundle\APICoreBundle(),
+            new Stof\DoctrineExtensionsBundle\StofDoctrineExtensionsBundle(),
+            new API\TaskBundle\APITaskBundle(),
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {

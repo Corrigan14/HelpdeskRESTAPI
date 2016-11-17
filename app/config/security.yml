@@ -1,7 +1,6 @@
 # To get started with security, check out the documentation:
 # http://symfony.com/doc/current/book/security.html
 security:
-
     # http://symfony.com/doc/current/book/security.html#where-do-users-come-from-user-providers
     providers:
         db_provider:
@@ -15,16 +14,22 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         api:
-            pattern: ^/api/(?!token)
+            pattern: ^/api/v[0-9]/(?!token)
             guard:
                 authenticators:
                     - api.jwt_token_authenticator
+            stateless: true
         main:
             anonymous: ~
+    role_hierarchy:
+        ROLE_SUPERADMIN: ROLE_ADMIN
+        ROLE_ADMIN: ROLE_MANAGER
+        ROLE_MANAGER: ROLE_USER
+        ROLE_USER: ROLE_CUSTOMER
+        ROLE_CUSTOMER: IS_AUTHENTICATED_ANONYMOUSLY
     access_control:
-        - { path: /api/token-authentication, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api, roles: ROLE_USER }
-
+        - { path: ^/api/v[0-9]/token-authentication, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/v[0-9], roles: ROLE_USER }
         - { path: ^/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/(css|js), roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/(_wdt|_profiler), roles: IS_AUTHENTICATED_ANONYMOUSLY }

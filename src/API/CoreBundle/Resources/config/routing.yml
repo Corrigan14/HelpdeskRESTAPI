@@ -1,4 +1,0 @@
-token_authentication:
-    path:     /token-authentication
-    defaults: { _controller: APICoreBundle:Login:tokenAuthentication }
-    methods: [POST]

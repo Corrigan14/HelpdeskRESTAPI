@@ -777,17 +777,17 @@
         },
         {
             "name": "igsem/api-bundle",
-            "version": "1.0.1",
+            "version": "1.0.2",
             "target-dir": "Igsem/APIBundle",
             "source": {
                 "type": "git",
                 "url": "https://github.com/JuliusKoronci/IgsemAPIBundle.git",
-                "reference": "3d6f586afdb51c2a18404d17ccb794bb2e022ed7"
+                "reference": "2989ee2f29d377284fddf5b3c8ee7ff406d7111f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/JuliusKoronci/IgsemAPIBundle/zipball/3d6f586afdb51c2a18404d17ccb794bb2e022ed7",
-                "reference": "3d6f586afdb51c2a18404d17ccb794bb2e022ed7",
+                "url": "https://api.github.com/repos/JuliusKoronci/IgsemAPIBundle/zipball/2989ee2f29d377284fddf5b3c8ee7ff406d7111f",
+                "reference": "2989ee2f29d377284fddf5b3c8ee7ff406d7111f",
                 "shasum": ""
             },
             "require": {
@@ -817,7 +817,7 @@
             ],
             "description": "A simple bundle to help Symfony API development. Provides a BaseController, BaseTest and a StatusCode helper",
             "homepage": "https://github.com/JuliusKoronci/IgsemAPIBundle",
-            "time": "2016-11-15 09:20:35"
+            "time": "2016-11-17 14:54:11"
         },
         {
             "name": "incenteev/composer-parameter-handler",

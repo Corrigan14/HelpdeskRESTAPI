@@ -5,11 +5,8 @@ namespace API\CoreBundle\Controller;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use API\CoreBundle\Services\CDN\UploadedFile;
 use Igsem\APIBundle\Services\StatusCodesHelper;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use API\CoreBundle\Entity\File;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -22,19 +19,14 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 class CdnController extends ApiBaseController
 {
     /**
-     * Allow CORS for all requests
-     */
-    public function __construct()
-    {
-        header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Headers: *');
-        header('Access-Control-Allow-Credentials: true');
-    }
-
-    /**
      * @Route("/upload")
      * @param Request $request
-     * @return JsonResponse
+     *
+     * @return Response
+     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
+     * @throws \LogicException
+     * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
+     * @throws \InvalidArgumentException
      * @ApiDoc(
      *  resource = true,
      *  description="Create a new Entity (POST)",
@@ -65,28 +57,28 @@ class CdnController extends ApiBaseController
     public function uploadAction(Request $request)
     {
 
-            $file = $this->getUploadedFile('file');
+        $file = $this->getUploadedFile('file');
 
-            if(false === $file){
-                return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE,], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-            }
+        if (false === $file) {
+            return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE ,] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        }
 
-            $target = $this->getFolderDir();
-            $file->setUploadDir($target['dir']);
-            $fileEntity = new File();
-            $file->save($fileEntity);
-            $file->move($target['path']);
+        $target = $this->getFolderDir();
+        $file->setUploadDir($target['dir']);
+        $fileEntity = new File();
+        $file->save($fileEntity);
+        $file->move($target['path']);
 
-            if($request->get('public')){
-                $fileEntity->setPublic(true);
-            }
+        if ($request->get('public')) {
+            $fileEntity->setPublic(true);
+        }
 
-            $this->getDoctrine()->getManager()->persist($fileEntity);
-            $this->getDoctrine()->getManager()->flush();
-            $slug = $fileEntity->getSlug();
+        $this->getDoctrine()->getManager()->persist($fileEntity);
+        $this->getDoctrine()->getManager()->flush();
+        $slug = $fileEntity->getSlug();
 
 
-        return $this->createApiResponse(['slug'=>$slug,'message' => StatusCodesHelper::CREATED_MESSAGE,], StatusCodesHelper::CREATED_CODE);
+        return $this->createApiResponse(['slug' => $slug , 'message' => StatusCodesHelper::CREATED_MESSAGE ,] , StatusCodesHelper::CREATED_CODE);
     }
 
 
@@ -95,7 +87,11 @@ class CdnController extends ApiBaseController
      *
      * @param string $slug
      *
-     * @return string|JsonResponse
+     * @return Response
+     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
      *
      * @ApiDoc(
      *  description="Returns File",
@@ -125,28 +121,28 @@ class CdnController extends ApiBaseController
     public function loadAction($slug)
     {
         $fileEntity = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
-            'slug' => $slug,
+            'slug' => $slug ,
         ]);
 
         if (null === $fileEntity) {
-            return $this->createApiResponse(['message' => StatusCodesHelper::RESOURCE_NOT_FOUND_MESSAGE,], StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
+            return $this->createApiResponse(['message' => StatusCodesHelper::RESOURCE_NOT_FOUND_MESSAGE ,] , StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
         }
         $uploadDir = $this->container->getParameter('upload_dir');
 
-        $file = $uploadDir . DIRECTORY_SEPARATOR . $fileEntity->getUploadDir() . DIRECTORY_SEPARATOR .$fileEntity->getTempName();
+        $file = $uploadDir . DIRECTORY_SEPARATOR . $fileEntity->getUploadDir() . DIRECTORY_SEPARATOR . $fileEntity->getTempName();
 
         if (!file_exists($file)) {
-            return $this->createApiResponse(['message' => StatusCodesHelper::RESOURCE_NOT_FOUND_MESSAGE,], StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
+            return $this->createApiResponse(['message' => StatusCodesHelper::RESOURCE_NOT_FOUND_MESSAGE ,] , StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
         }
 
         //TODO check user privileges - cache
         // Generate response
         $response = new Response();
 
-        if($fileEntity->isPublic()){
+        if ($fileEntity->isPublic()) {
             $response->setPublic();
             $response->setSharedMaxAge(3600);
-        }else{
+        } else {
             $response->setPrivate();
         }
 
@@ -157,10 +153,10 @@ class CdnController extends ApiBaseController
 //        $response->headers->set("Expires",gmdate("D, d M Y H:i:s", $expires)." GMT");
 
         // Set headers
-        $response->headers->set('Content-type', mime_content_type($file));//$fileEntity->getType());
-        $response->headers->set('Content-length', filesize($file) );//$fileEntity->getSize());
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set("Last-Modified",gmdate("D, d M Y H:i:s", filemtime($file))." GMT");
+        $response->headers->set('Content-type' , mime_content_type($file));//$fileEntity->getType());
+        $response->headers->set('Content-length' , filesize($file));//$fileEntity->getSize());
+        $response->headers->set('Access-Control-Allow-Origin' , '*');
+        $response->headers->set('Last-Modified' , gmdate('D, d M Y H:i:s' , filemtime($file)) . ' GMT');
 
 //        $response->setTtl(25);
 //        $response->setClientTtl(25);
@@ -177,18 +173,18 @@ class CdnController extends ApiBaseController
     }
 
 
-
     /**
      * @param string $postName
      *
-     * @return UploadedFile
+     * @return UploadedFile|bool
+     * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
      */
     private function getUploadedFile($postName = 'upload')
     {
         if (!empty($_FILES[$postName])) {
             $postFile = $_FILES[$postName];
 
-            return new UploadedFile($postFile['tmp_name'], $postFile['name'], $postFile['type'], $postFile['size'], $postFile['error']);
+            return new UploadedFile($postFile['tmp_name'] , $postFile['name'] , $postFile['type'] , $postFile['size'] , $postFile['error']);
         }
 
         return false;
@@ -214,12 +210,12 @@ class CdnController extends ApiBaseController
         $uploadDir = $uploadDir . DIRECTORY_SEPARATOR . $unique;
 
         if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
+            mkdir($uploadDir , 0777 , true);
         }
 
         return [
-            'path' => $uploadDir,
-            'dir' => $unique,
+            'path' => $uploadDir ,
+            'dir'  => $unique ,
         ];
     }
 }

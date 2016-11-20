@@ -144,8 +144,6 @@ Dokumentacne pravidla
 =========
 1. Entita
     - vytvorenie Entity
-    - Entita implementuje Serializer
-        use JMS\Serializer\Annotation as Serializer;
     - vyuzivame
         use JMS\Serializer\Annotation\ReadOnly;
         use JMS\Serializer\Annotation\Exclude;
@@ -153,7 +151,13 @@ Dokumentacne pravidla
     - kazdy parameter, ktory sa ma zobrazovat pri vypisovani entity, ale jeho hodnota sa nezadava (napr. ID) 
       musi mat nastaveny prefix @ReadOnly()
 
-2. Fixtures
+2. Fixtures implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
+    - use:
+        use Doctrine\Common\DataFixtures\FixtureInterface;
+        use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
+        use Doctrine\Common\Persistence\ObjectManager;
+        use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+        use Symfony\Component\DependencyInjection\ContainerInterface;
 
 3. Controller
     - vytvorenie prazdneho Controllera

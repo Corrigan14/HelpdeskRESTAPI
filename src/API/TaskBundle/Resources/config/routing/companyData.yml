@@ -1,5 +1,5 @@
 company_data_list:
-    path:     /company-data
+    path:     /company-data/company/{companyId}/company-attribute/{companyAttributeId}
     defaults: { _controller: APITaskBundle:CompanyData:list }
     methods: [GET]
 
@@ -16,14 +16,14 @@ company_data_create:
     methods: [POST]
 
 company_data_update:
-    path:     /company-data/{id}/company/{companyId}/company-attribute/{companyAttributeId}
+    path:     /company-data/{id}
     defaults: { _controller: APITaskBundle:CompanyData:update }
     methods: [PUT]
     requirements:
             id: '\d+'
 
 company_data_partial_update:
-    path:     /company-data/{id}/company/{companyId}/company-attribute/{companyAttributeId}
+    path:     /company-data/{id}
     defaults: { _controller: APITaskBundle:CompanyData:updatePartial }
     methods: [PATCH]
     requirements:

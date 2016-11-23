@@ -4,20 +4,20 @@ namespace API\TaskBundle\Controller;
 
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class CompanyDataController
  *
  * @package API\TaskBundle\Controller
  */
-class CompanyDataController extends ApiBaseController  implements ControllerInterface
+class CompanyDataController extends ApiBaseController implements ControllerInterface
 {
     /**
-     *  ### Response - option if we have pagination ###
+     *  ### Response ###
      *     {
      *       "data":
      *       [
@@ -27,11 +27,11 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      *       ],
      *       "_links":
      *       {
-     *           "self": "/entity?page=1",
-     *           "first": "/entity?page=1",
+     *           "self": "/task-bundle/company-data?page=1",
+     *           "first": "/task-bundle/company-data?page=1",
      *           "prev": false,
-     *           "next": "/entity?page=2",
-     *            "last": "/entity?page=3"
+     *           "next": "/task-bundle/company-data?page=2",
+     *            "last": "/task-bundle/company-data?page=3"
      *       },
      *       "total": 22,
      *       "page": 1,
@@ -40,7 +40,21 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      *
      *
      * @ApiDoc(
-     *  description="Returns a list of Entities (GET)",
+     *  description="Returns a list of Entities, this list can be based on Company or on Company Attribute (GET)",
+     *  requirements={
+     *     {
+     *       "name"="companyId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of company which data could be listed"
+     *     },
+     *     {
+     *       "name"="companyAttributeId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of company attribute which data could be listed"
+     *     }
+     *  },
      *  filters={
      *     {
      *       "name"="page",
@@ -62,9 +76,11 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      * )
      *
      * @param Request $request
-     * @return JsonResponse
+     * @param bool $companyId
+     * @param bool $companyAttributeId
+     * @return JsonResponse|Response
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request, $companyId = false, $companyAttributeId = false)
     {
         // TODO: Implement listAction() method.
     }
@@ -78,9 +94,9 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/id",
-     *           "patch": "/api/v1/entityName/id",
-     *           "delete": "/api/v1/entityName/id"
+     *           "put": "/api/v1//task-bundle/company-data/id",
+     *           "patch": "/api/v1//task-bundle/company-data/id",
+     *           "delete": "/api/v1//task-bundle/company-data/id"
      *         }
      *      }
      *
@@ -101,7 +117,7 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  output="API\CoreBundle\Entity\...entityName",
+     *  output="API\TaskBundle\Entity\CompanyData",
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
@@ -111,7 +127,7 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      * )
      *
      * @param int $id
-     * @return JsonResponse
+     * @return JsonResponse|Response
      */
     public function getAction(int $id)
     {
@@ -127,16 +143,30 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *           "put": "/api/v1/task-bundle/company-data/2",
+     *           "patch": "/api/v1/task-bundle/company-data/2",
+     *           "delete": "/api/v1/task-bundle/company-data/2"
      *         }
      *      }
      *
      * @ApiDoc(
      *  resource = true,
      *  description="Create a new Entity (POST)",
-     *  input={"class"="API\CoreBundle\Entity\...entityName"},
+     *  requirements={
+     *     {
+     *       "name"="companyId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of company to add additional data"
+     *     },
+     *     {
+     *       "name"="companyAttributeId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of company attribute"
+     *     }
+     *  },
+     *  input={"class"="API\TaskBundle\Entity\CompanyData"},
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -144,7 +174,7 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  output={"class"="API\CoreBundle\Entity\...entityName"},
+     *  output={"class"="API\TaskBundle\Entity\CompanyData"},
      *  statusCodes={
      *      201 ="The entity was successfully created",
      *      401 ="Unauthorized request",
@@ -154,9 +184,11 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      * )
      *
      * @param Request $request
-     * @return JsonResponse
+     * @param $companyId
+     * @param $companyAttributeId
+     * @return JsonResponse|Response
      */
-    public function createAction(Request $request)
+    public function createAction(Request $request, $companyId = false, $companyAttributeId = false)
     {
         // TODO: Implement createAction() method.
     }
@@ -170,9 +202,9 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *           "put": "/api/v1/task-bundle/company-data/2",
+     *           "patch": "/api/v1/task-bundle/company-data/2",
+     *           "delete": "/api/v1/task-bundle/company-data/2"
      *         }
      *      }
      *
@@ -186,7 +218,7 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      *       "description"="The id of processed object"
      *     }
      *  },
-     *  input={"class"="API\CoreBundle\Entity\...entityName"},
+     *  input={"class"="API\TaskBundle\Entity\CompanyData"},
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -194,7 +226,7 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  output={"class"="API\CoreBundle\Entity\...entityName"},
+     *  output={"class"="API\TaskBundle\Entity\CompanyData"},
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
@@ -206,7 +238,7 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      *
      * @param int $id
      * @param Request $request
-     * @return JsonResponse
+     * @return JsonResponse|Response
      */
     public function updateAction(int $id, Request $request)
     {
@@ -222,9 +254,9 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *           "put": "/api/v1/task-bundle/company-data/2",
+     *           "patch": "/api/v1/task-bundle/company-data/2",
+     *           "delete": "/api/v1/task-bundle/company-data/2"
      *         }
      *      }
      *
@@ -238,7 +270,7 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      *       "description"="The id of processed object"
      *     }
      *  },
-     *  input={"class"="API\CoreBundle\Entity\...entityName"},
+     *  input={"class"="API\TaskBundle\Entity\CompanyData"},
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -246,7 +278,7 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  output={"class"="API\CoreBundle\Entity\...entityName"},
+     *  output={"class"="API\TaskBundle\Entity\CompanyData"},
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
@@ -258,7 +290,7 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      *
      * @param int $id
      * @param Request $request
-     * @return JsonResponse
+     * @return JsonResponse|Response
      */
     public function updatePartialAction(int $id, Request $request)
     {
@@ -284,8 +316,6 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      *     }
      *  },
      *  statusCodes={
-     *      200 ="is_active param of Entity was successfully changed to inactive: 0",
-     *      ...OR...
      *      204 ="The Entity was successfully deleted",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
@@ -294,7 +324,7 @@ class CompanyDataController extends ApiBaseController  implements ControllerInte
      *
      * @param int $id
      *
-     * @return JsonResponse
+     * @return JsonResponse|Response
      */
     public function deleteAction(int $id)
     {

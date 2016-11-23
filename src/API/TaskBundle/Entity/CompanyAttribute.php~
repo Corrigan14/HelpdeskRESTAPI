@@ -185,13 +185,13 @@ class CompanyAttribute
     }
 
     /**
-     * Add companyDatum
+     * Add companyData
      *
      * @param CompanyData $companyDatum
      *
      * @return CompanyAttribute
      */
-    public function addCompanyData(CompanyData $companyDatum)
+    public function addCompanyDatum(CompanyData $companyDatum)
     {
         $this->companyData[] = $companyDatum;
 
@@ -199,11 +199,11 @@ class CompanyAttribute
     }
 
     /**
-     * Remove companyDatum
+     * Remove companyData
      *
      * @param CompanyData $companyDatum
      */
-    public function removeCompanyData(CompanyData $companyDatum)
+    public function removeCompanyDatum(CompanyData $companyDatum)
     {
         $this->companyData->removeElement($companyDatum);
     }

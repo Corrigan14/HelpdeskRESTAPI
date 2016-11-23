@@ -218,7 +218,8 @@ Dokumentacne pravidla
     
 8. Repository 
     - tento automaticky vygeneruje Doctrine pri vytvoreni entity. AK nie, je potrebne ho v entite zaregistrovat 
-    - ak vyuzivame ApiBaseService potrebujeme, aby nas repozitar implementoval metody RepositoryInteface()
+    - ak vyuzivame ApiBaseService potrebujeme, aby nas repozitar 
+            extends EntityRepository implements RepositoryInterface
     
 9. Security 
     - doplnenie VoterOptions.php - obsahuje konstanty s akciami, pre ktore su potrebne pravidla vykonavania 

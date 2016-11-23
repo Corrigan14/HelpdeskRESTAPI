@@ -1,5 +1,5 @@
 company_data_list:
-    path:     /company-data/company/{companyId}/company-attribute/{companyAttributeId}
+    path:     /company-data
     defaults: { _controller: APITaskBundle:CompanyData:list }
     methods: [GET]
 

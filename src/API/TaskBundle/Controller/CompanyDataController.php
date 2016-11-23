@@ -2,8 +2,10 @@
 
 namespace API\TaskBundle\Controller;
 
+use API\CoreBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
+use Igsem\APIBundle\Services\StatusCodesHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -27,11 +29,11 @@ class CompanyDataController extends ApiBaseController implements ControllerInter
      *       ],
      *       "_links":
      *       {
-     *           "self": "/task-bundle/company-data?page=1",
-     *           "first": "/task-bundle/company-data?page=1",
+     *           "self": "/task-bundle/company-data?page=1&company=12&company-attribute=1",
+     *           "first": "/task-bundle/company-data?page=1&company=12&company-attribute=1",
      *           "prev": false,
-     *           "next": "/task-bundle/company-data?page=2",
-     *            "last": "/task-bundle/company-data?page=3"
+     *           "next": "/task-bundle/company-data?page=2&company=12&company-attribute=1",
+     *            "last": "/task-bundle/company-data?page=3&company=12&company-attribute=1"
      *       },
      *       "total": 22,
      *       "page": 1,
@@ -41,24 +43,18 @@ class CompanyDataController extends ApiBaseController implements ControllerInter
      *
      * @ApiDoc(
      *  description="Returns a list of Entities, this list can be based on Company or on Company Attribute (GET)",
-     *  requirements={
-     *     {
-     *       "name"="companyId",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of company which data could be listed"
-     *     },
-     *     {
-     *       "name"="companyAttributeId",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of company attribute which data could be listed"
-     *     }
-     *  },
      *  filters={
      *     {
      *       "name"="page",
      *       "description"="Pagination, limit is set to 10 records"
+     *     },
+     *     {
+     *       "name"="company",
+     *       "description"="Company ID"
+     *     },
+     *     {
+     *       "name"="company-attribute",
+     *       "description"="Company Attribute ID"
      *     }
      *  },
      *  headers={
@@ -76,13 +72,25 @@ class CompanyDataController extends ApiBaseController implements ControllerInter
      * )
      *
      * @param Request $request
-     * @param bool $companyId
-     * @param bool $companyAttributeId
      * @return JsonResponse|Response
      */
-    public function listAction(Request $request, $companyId = false, $companyAttributeId = false)
+    public function listAction(Request $request)
     {
-        // TODO: Implement listAction() method.
+        // The access to this action is based on same action for Company Entity
+        if (!$this->get('company_voter')->isGranted(VoteOptions::LIST_COMPANIES)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $page = $request->get('page') ?: 1;
+
+        $companyDataRepository = $this->getDoctrine()->getRepository('APITaskBundle:CompanyData');
+
+        $options = [
+            'companyId' => $request->get('company'),
+            'companyAttributeId' => $request->get('company-attribute'),
+        ];
+
+        return $this->json($this->get('api_base.service')->getEntitiesResponse($companyDataRepository, $page, 'company_data_list', $options), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

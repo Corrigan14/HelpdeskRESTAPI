@@ -1,4 +1,4 @@
-scompany_extend_create:
-    path:     /company-extend
+company_extension_create:
+    path:     /company-extension
     defaults: { _controller: APITaskBundle:Company:create }
     methods: [POST]

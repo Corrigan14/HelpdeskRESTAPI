@@ -11,5 +11,5 @@ api_task_company_attribute:
     resource: "@APITaskBundle/Resources/config/routing/companyAttribute.yml"
     prefix: /
 api_task_company_data:
-    resource: "@APITaskBundle/Resources/config/routing/companyExtend.yml"
+    resource: "@APITaskBundle/Resources/config/routing/companyExtension.yml"
     prefix: /

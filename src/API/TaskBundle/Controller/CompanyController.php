@@ -8,7 +8,6 @@ use API\TaskBundle\Entity\CompanyAttribute;
 use API\TaskBundle\Entity\CompanyData;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -46,8 +45,8 @@ class CompanyController extends ApiBaseController
      *
      * @ApiDoc(
      *  description="Create a new Company Entity with extra Company Data.
-     *  This can be added by attributes: company_data[company_attribute_id] = value",
-     *  Attributes must be defined in the CompanyAttribute
+     *  This can be added by attributes: company_data[company_attribute_id] = value,
+     *  attributes must be defined in the CompanyAttribute Entity.",
      *  input={"class"="API\CoreBundle\Entity\Company"},
      *  headers={
      *     {
@@ -67,6 +66,8 @@ class CompanyController extends ApiBaseController
      *
      * @param Request $request
      * @return JsonResponse|Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function createAction(Request $request)
     {
@@ -75,8 +76,6 @@ class CompanyController extends ApiBaseController
         }
 
         $requestData = $request->request->all();
-
-        dump($requestData);
 
         $company = new Company();
 
@@ -89,6 +88,8 @@ class CompanyController extends ApiBaseController
      * @param bool $create
      *
      * @return Response|JsonResponse
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     private function updateCompany($company, array $requestData, $create = false)
     {
@@ -108,6 +109,7 @@ class CompanyController extends ApiBaseController
              * Fill CompanyData Entity if some its parameters were sent
              */
             if (isset($requestData['company_data']) && count($requestData['company_data']) > 0) {
+                /** @var array $companyData */
                 $companyData = $requestData['company_data'];
                 foreach ($companyData as $key => $value) {
                     $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($key);
@@ -133,7 +135,9 @@ class CompanyController extends ApiBaseController
                 }
             }
 
-            $entityResponse = $this->get('api_base.service')->getEntityResponse($company, 'company');
+            $fullCompanyEntity = $this->getDoctrine()->getRepository('APICoreBundle:Company')->getFullCompanyEntity($company);
+            dump($fullCompanyEntity);
+            $entityResponse = $this->get('api_base.service')->getEntityResponse($fullCompanyEntity, 'company');
             return $this->createApiResponse($entityResponse, $statusCode);
         }
 

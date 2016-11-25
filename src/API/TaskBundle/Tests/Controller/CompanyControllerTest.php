@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Tests\Controller;
 
+use API\TaskBundle\Entity\CompanyAttribute;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 
@@ -49,15 +50,21 @@ class CompanyControllerTest extends ApiTestCase
      */
     public function testPostSingleSuccess()
     {
-        $this->getClient(true)->request('POST',$this->getBaseUrl(),
-            ['title'=>'Extended company', 'company_data'=>['1'=>'value 1', '2'=>'value 2']],[],
-            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::CREATED_CODE,$this->getClient()->getResponse()->getStatusCode());
+        $companyAttribute = $this->em->getRepository('APITaskBundle:CompanyAttribute')->findOneBy([
+            'title' => 'input company additional attribute'
+        ]);
 
-        // Response should contain some company_data
-        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
-        $responseCompanyData = $response['company_data'];
-        $this->assertEquals(!null,$responseCompanyData);
+        if ($companyAttribute instanceof CompanyAttribute) {
+            $this->getClient(true)->request('POST', $this->getBaseUrl(),
+                ['title' => 'Extended company', 'company_data' => [$companyAttribute->getId() => 'value 1']], [],
+                ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+            $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+            // Response should contain some company_data
+            $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+            $responseCompanyData = $response['company_data'];
+            $this->assertEquals(!null, $responseCompanyData);
+        }
 
     }
 

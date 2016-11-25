@@ -46,7 +46,7 @@ class CompanyController extends ApiBaseController
      * @ApiDoc(
      *  description="Create a new Company Entity with extra Company Data.
      *  This can be added by attributes: company_data[company_attribute_id] = value,
-     *  attributes must be defined in the CompanyAttribute Entity.",
+     *  attributes must be defined in the CompanyAttribute Entity",
      *  input={"class"="API\CoreBundle\Entity\Company"},
      *  headers={
      *     {
@@ -135,8 +135,8 @@ class CompanyController extends ApiBaseController
                 }
             }
 
-            $fullCompanyEntity = $this->getDoctrine()->getRepository('APICoreBundle:Company')->getFullCompanyEntity($company);
-            dump($fullCompanyEntity);
+            $fullCompanyEntity = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($company->getId());
+            dump($fullCompanyEntity->getCompanyData());
             $entityResponse = $this->get('api_base.service')->getEntityResponse($fullCompanyEntity, 'company');
             return $this->createApiResponse($entityResponse, $statusCode);
         }

@@ -19,7 +19,6 @@ trait CompanyTrait
      * @var CompanyData
      *
      * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\CompanyData", mappedBy="company")
-     * @Exclude()
      */
     private $companyData;
 
@@ -49,8 +48,6 @@ trait CompanyTrait
 
     /**
      * Get companyData
-     *
-     * @return Collection
      */
     public function getCompanyData()
     {

@@ -1,7 +1,7 @@
 <?php
 
 namespace Traits;
-use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\ORM\QueryBuilder;
 
 /**
  * Class CompanyRepositoryTrait - extends CompanyRepository
@@ -19,12 +19,9 @@ trait CompanyRepositoryTrait
         $queryBuilder = $this->createQueryBuilder('c');
         $query = $queryBuilder->select()
             ->where('c.id = :companyId')
-            ->leftJoin('c.companyData','company_data','cd')
             ->setParameter('companyId', $company)
-            ->getQuery()
-            ->getSingleResult();
+            ->getQuery();
 
-        dump($query);
-        return $query;
+        return $query->getSingleResult();
     }
 }

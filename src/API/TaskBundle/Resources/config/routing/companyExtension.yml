@@ -1,0 +1,25 @@
+company_extension:
+    path:     /company-extension/{id}
+    defaults: { _controller: APITaskBundle:Company:get }
+    methods: [GET]
+    requirements:
+        id: '\d+'
+
+company_extension_create:
+    path:     /company-extension
+    defaults: { _controller: APITaskBundle:Company:create }
+    methods: [POST]
+
+company_extension_update:
+    path:     /company-extension/{id}
+    defaults: { _controller: APITaskBundle:Company:update }
+    methods: [PUT]
+    requirements:
+        id: '\d+'
+
+company_extension_partial_update:
+    path:     /company-extension/{id}
+    defaults: { _controller: APITaskBundle:Company:updatePartially }
+    methods: [PATCH]
+    requirements:
+        id: '\d+'

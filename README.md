@@ -144,8 +144,6 @@ Dokumentacne pravidla
 =========
 1. Entita
     - vytvorenie Entity
-    - Entita implementuje Serializer
-        use JMS\Serializer\Annotation as Serializer;
     - vyuzivame
         use JMS\Serializer\Annotation\ReadOnly;
         use JMS\Serializer\Annotation\Exclude;
@@ -153,7 +151,13 @@ Dokumentacne pravidla
     - kazdy parameter, ktory sa ma zobrazovat pri vypisovani entity, ale jeho hodnota sa nezadava (napr. ID) 
       musi mat nastaveny prefix @ReadOnly()
 
-2. Fixtures
+2. Fixtures implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
+    - use:
+        use Doctrine\Common\DataFixtures\FixtureInterface;
+        use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
+        use Doctrine\Common\Persistence\ObjectManager;
+        use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+        use Symfony\Component\DependencyInjection\ContainerInterface;
 
 3. Controller
     - vytvorenie prazdneho Controllera
@@ -214,7 +218,8 @@ Dokumentacne pravidla
     
 8. Repository 
     - tento automaticky vygeneruje Doctrine pri vytvoreni entity. AK nie, je potrebne ho v entite zaregistrovat 
-    - ak vyuzivame ApiBaseService potrebujeme, aby nas repozitar implementoval metody RepositoryInteface()
+    - ak vyuzivame ApiBaseService potrebujeme, aby nas repozitar 
+            extends EntityRepository implements RepositoryInterface
     
 9. Security 
     - doplnenie VoterOptions.php - obsahuje konstanty s akciami, pre ktore su potrebne pravidla vykonavania 

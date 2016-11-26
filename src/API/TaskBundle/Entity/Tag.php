@@ -6,15 +6,13 @@ use API\CoreBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ReadOnly;
-use JMS\Serializer\Annotation\Exclude;
 
 /**
  * @ORM\Entity(repositoryClass="API\TaskBundle\Repository\TagRepository")
  * @ORM\Table(name="tag")
  */
-class Tag implements \Serializable
+class Tag
 {
     /**
      * @ORM\Id
@@ -122,39 +120,6 @@ class Tag implements \Serializable
     public function getColor()
     {
         return $this->color;
-    }
-
-    /**
-     * String representation of object
-     * @link http://php.net/manual/en/serializable.serialize.php
-     * @return string the string representation of the object or null
-     * @since 5.1.0
-     */
-    public function serialize()
-    {
-        return serialize([
-            $this->id ,
-            $this->title ,
-            $this->color ,
-        ]);
-    }
-
-    /**
-     * Constructs the object
-     * @link http://php.net/manual/en/serializable.unserialize.php
-     * @param string $serialized <p>
-     * The string representation of the object.
-     * </p>
-     * @return void
-     * @since 5.1.0
-     */
-    public function unserialize($serialized)
-    {
-        list (
-            $this->id ,
-            $this->title ,
-            $this->color ,
-            ) = unserialize($serialized);
     }
 
     /**

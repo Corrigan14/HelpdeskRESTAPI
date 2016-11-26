@@ -37,13 +37,18 @@ class CompanyControllerTest extends ApiTestCase
      */
     public function testGetSingleSuccess()
     {
-    }
+        /** @var Company $company */
+        $company = $this->findOneEntity();
 
-    /**
-     * GET SINGLE - errors
-     */
-    public function testGetSingleErrors()
-    {
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $company->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect Entity, response has to include array with data and _links and company_data param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertTrue(array_key_exists('data', $response));
+        $this->assertTrue(array_key_exists('_links', $response));
+        $this->assertTrue(array_key_exists('company_data', $response));
     }
 
     /**
@@ -57,7 +62,7 @@ class CompanyControllerTest extends ApiTestCase
 
         if ($companyAttribute instanceof CompanyAttribute) {
             $this->getClient(true)->request('POST', $this->getBaseUrl(),
-                ['title' => 'Extended company', 'company_data' => [$companyAttribute->getId() => 'value 1']], [],
+                ['title' => 'Extended company NEW', 'company_data' => [$companyAttribute->getId() => 'value 1']], [],
                 ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
             $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
@@ -95,17 +100,41 @@ class CompanyControllerTest extends ApiTestCase
     }
 
     /**
-     * UPDATE SINGLE - success
-     */
-    public function testUpdateSingleSuccess()
-    {
-    }
-
-    /**
      *  UPDATE SINGLE - errors
      */
     public function testUpdateSingleErrors()
     {
+        parent::testUpdateSingleErrors();
+
+        $data = $this->returnUpdateTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        $entity = $this->findOneEntity();
+
+        // Try to update entity with ROLE_USER which hasn't permission to this action: method PUT
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(), $data, [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update entity with ROLE_USER which hasn't permission to this action: method PATCH
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(), $data, [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update entity with invalid parameter company_data[attribute id] (attribute has to exists)
+        $this->getClient(true)->request('PUT', $this->getBaseUrl(). '/' . $entity->getId(),
+            ['company_data' => [2258 => 'value 1']], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update entity with invalid parameter company_data[attribute id] (attribute has to exists)
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl(). '/' . $entity->getId(),
+            ['company_data' => [2258 => 'value 1']], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
     /**
@@ -139,7 +168,17 @@ class CompanyControllerTest extends ApiTestCase
      */
     public function findOneEntity()
     {
-        // TODO: Implement findOneEntity() method.
+        $company = $this->em->getRepository('APICoreBundle:Company')->findOneBy([
+            'title' => 'Extended company CREATE',
+        ]);
+
+        if ($company instanceof Company) {
+            return $company;
+        }
+
+        $companyArray = $this->createEntity();
+
+        return $this->em->getRepository('APICoreBundle:Company')->find($companyArray['id']);
     }
 
     /**
@@ -149,7 +188,27 @@ class CompanyControllerTest extends ApiTestCase
      */
     public function createEntity()
     {
-        // TODO: Implement createEntity() method.
+        $companyAttribute = $this->em->getRepository('APITaskBundle:CompanyAttribute')->findOneBy([
+            'title' => 'input company additional attribute'
+        ]);
+
+        if ($companyAttribute instanceof CompanyAttribute) {
+            $this->getClient(true)->request('POST', $this->getBaseUrl(),
+                $this->returnPostTestData(), [],
+                ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+            $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+            // Check if Entity was created
+            $createdCompany = json_decode($this->getClient()->getResponse()->getContent(), true);
+            $createdCompany = $createdCompany['data'];
+            $this->assertTrue(array_key_exists('id', $createdCompany));
+
+            return $createdCompany;
+        } else {
+            return $this->em->getRepository('APICoreBundle:Company')->findOneBy([
+                'title' => 'Web-solutions'
+            ]);
+        }
     }
 
     /**
@@ -209,7 +268,7 @@ class CompanyControllerTest extends ApiTestCase
             'title' => $title,
         ]);
 
-        if ($company instanceof Company) {
+        if ($company) {
             $this->em->remove($company);
             $this->em->flush();
         }

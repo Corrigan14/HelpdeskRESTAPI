@@ -45,7 +45,7 @@ class CompanyService
           ')
         ->setParameter('companyId',$companyId);
 
-        return $query->getSingleResult();
+        return $query->getOneOrNullResult();
     }
 
     /**

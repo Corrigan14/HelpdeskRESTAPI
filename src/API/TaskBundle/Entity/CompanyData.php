@@ -39,7 +39,7 @@ class CompanyData
      * @var Company
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\Company", inversedBy="companyData")
-     * @ORM\JoinColumn(name="company_id", referencedColumnName="id", nullable=false)
+     * @ORM\JoinColumn(name="company_id", referencedColumnName="id", nullable=false, onDelete="CASCADE")
      * @Exclude()
      */
     private $company;

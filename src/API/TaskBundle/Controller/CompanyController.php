@@ -98,10 +98,29 @@ class CompanyController extends ApiBaseController
      *
      * @param int $id
      * @return JsonResponse|Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function getAction(int $id)
     {
+        $company = $this->get('company_service')->getFullCompany($id);
 
+        if (!$this->get('company_voter')->isGranted(VoteOptions::SHOW_COMPANY, $company)) {
+            return $this->accessDeniedResponse();
+        }
+
+        if (!$company instanceof Company) {
+            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
+        }
+
+        if (!$company instanceof Company) {
+            return $this->notFoundResponse();
+        }
+
+        $entityResponse = $this->get('company_service')->getEntityResponse($company, 'company_extension');
+
+
+        return $this->createApiResponse($entityResponse, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -276,10 +295,24 @@ class CompanyController extends ApiBaseController
      * @param Request $request
      * @param int $id
      * @return JsonResponse|Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function updateAction(Request $request, int $id)
     {
+        $company = $this->get('company_service')->getFullCompany($id);
 
+        if (!$this->get('company_voter')->isGranted(VoteOptions::UPDATE_COMPANY, $company)) {
+            return $this->accessDeniedResponse();
+        }
+
+        if (!$company instanceof Company) {
+            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
+        }
+
+        $requestData = $request->request->all();
+
+        return $this->updateCompany($company, $requestData);
     }
 
     /**
@@ -365,10 +398,24 @@ class CompanyController extends ApiBaseController
      * @param Request $request
      * @param int $id
      * @return JsonResponse|Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function updatePartiallyAction(Request $request, int $id)
     {
+        $company = $this->get('company_service')->getFullCompany($id);
 
+        if (!$this->get('company_voter')->isGranted(VoteOptions::UPDATE_COMPANY, $company)) {
+            return $this->accessDeniedResponse();
+        }
+
+        if (!$company instanceof Company) {
+            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
+        }
+
+        $requestData = $request->request->all();
+
+        return $this->updateCompany($company, $requestData);
     }
 
     /**
@@ -403,12 +450,21 @@ class CompanyController extends ApiBaseController
                 foreach ($companyData as $key => $value) {
                     $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($key);
                     if ($companyAttribute instanceof CompanyAttribute) {
-                        $cd = new CompanyData();
-                        $cd->setCompany($company);
-                        $cd->setCompanyAttribute($companyAttribute);
+                        $cd = $this->getDoctrine()->getRepository('APITaskBundle:CompanyData')->findOneBy([
+                            'companyAttribute' => $companyAttribute,
+                            'company' => $company,
+                        ]);
+
+                        if (!$cd instanceof CompanyData) {
+                            $cd = new CompanyData();
+                            $cd->setCompany($company);
+                            $cd->setCompanyAttribute($companyAttribute);
+                        }
 
                         $cdErrors = $this->get('entity_processor')->processEntity($cd, ['value' => $value]);
                         if (false === $cdErrors) {
+                            $company->addCompanyDatum($cd);
+                            $this->getDoctrine()->getManager()->persist($company);
                             $this->getDoctrine()->getManager()->persist($cd);
                             $this->getDoctrine()->getManager()->flush();
                         } else {
@@ -425,6 +481,7 @@ class CompanyController extends ApiBaseController
             }
 
             $fullCompanyEntity = $this->get('company_service')->getFullCompany($company->getId());
+//            $fullCompanyEntity = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($company->getId());
             $entityResponse = $this->get('company_service')->getEntityResponse($fullCompanyEntity, 'company_extension');
             return $this->createApiResponse($entityResponse, $statusCode);
         }

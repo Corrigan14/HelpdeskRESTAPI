@@ -35,6 +35,117 @@ class CompanyController extends ApiBaseController
      *           "zip": "02587"
      *           "country": "SR"
      *        },
+     *       "company_data": {
+     *           "0":
+     *           {
+     *             "id": 44,
+     *             "value": "data val",
+     *             "company_attribute":
+     *             {
+     *               "id": 1,
+     *               "title": "input company additional attribute",
+     *               "type": "input",
+     *               "is_active": true
+     *             }
+     *           },
+     *           "1":
+     *           {
+     *             "id": 45,
+     *             "value": "data valluesgyda gfg",
+     *             "company_attribute":
+     *             {
+     *               "id": 2,
+     *               "title": "select company additional attribute",
+     *               "type": "simple_select",
+     *               "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *               "is_active": true
+     *             }
+     *           }
+     *        },
+     *        "_links":
+     *        {
+     *           "put": "/api/v1/task-bundle/company-extend/2",
+     *           "patch": "/api/v1/task-bundle/company-extend/2",
+     *           "delete": "/api/v1/task-bundle/company-extend/2"
+     *         }
+     *      }
+     *
+     * @ApiDoc(
+     *  description="Returns full Company Entity including extra Company Data",
+     *  requirements={
+     *     {
+     *       "name"="id",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of processed object"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  output={"class"="API\CoreBundle\Entity\Company"},
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity"
+     *  }
+     * )
+     *
+     * @param int $id
+     * @return JsonResponse|Response
+     */
+    public function getAction(int $id)
+    {
+
+    }
+
+    /**
+     * ### Response ###
+     *      {
+     *        "data":
+     *        {
+     *           "id": "2",
+     *           "title": "Web-Solutions"
+     *           "ico": "1102587"
+     *           "dic": "12587459644"
+     *           "ic_dph": "12587459644"
+     *           "street": "Cesta 125"
+     *           "city": "Bratislava"
+     *           "zip": "02587"
+     *           "country": "SR"
+     *        },
+     *       "company_data": {
+     *           "0":
+     *           {
+     *             "id": 44,
+     *             "value": "data val",
+     *             "company_attribute":
+     *             {
+     *               "id": 1,
+     *               "title": "input company additional attribute",
+     *               "type": "input",
+     *               "is_active": true
+     *             }
+     *           },
+     *           "1":
+     *           {
+     *             "id": 45,
+     *             "value": "data valluesgyda gfg",
+     *             "company_attribute":
+     *             {
+     *               "id": 2,
+     *               "title": "select company additional attribute",
+     *               "type": "simple_select",
+     *               "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *               "is_active": true
+     *             }
+     *           }
+     *        },
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/company-extend/2",
@@ -80,6 +191,184 @@ class CompanyController extends ApiBaseController
         $company = new Company();
 
         return $this->updateCompany($company, $requestData, true);
+    }
+
+    /**
+     * ### Response ###
+     *      {
+     *        "data":
+     *        {
+     *           "id": "2",
+     *           "title": "Web-Solutions"
+     *           "ico": "1102587"
+     *           "dic": "12587459644"
+     *           "ic_dph": "12587459644"
+     *           "street": "Cesta 125"
+     *           "city": "Bratislava"
+     *           "zip": "02587"
+     *           "country": "SR"
+     *        },
+     *       "company_data": {
+     *           "0":
+     *           {
+     *             "id": 44,
+     *             "value": "data val",
+     *             "company_attribute":
+     *             {
+     *               "id": 1,
+     *               "title": "input company additional attribute",
+     *               "type": "input",
+     *               "is_active": true
+     *             }
+     *           },
+     *           "1":
+     *           {
+     *             "id": 45,
+     *             "value": "data valluesgyda gfg",
+     *             "company_attribute":
+     *             {
+     *               "id": 2,
+     *               "title": "select company additional attribute",
+     *               "type": "simple_select",
+     *               "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *               "is_active": true
+     *             }
+     *           }
+     *        },
+     *        "_links":
+     *        {
+     *           "put": "/api/v1/task-bundle/company-extend/2",
+     *           "patch": "/api/v1/task-bundle/company-extend/2",
+     *           "delete": "/api/v1/task-bundle/company-extend/2"
+     *         }
+     *      }
+     *
+     * @ApiDoc(
+     *  description="Update a Company Entity with extra Company Data.
+     *  This can be edited by attributes: company_data[company_attribute_id] = value,
+     *  attributes must be defined in the CompanyAttribute Entity",
+     *  requirements={
+     *     {
+     *       "name"="id",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of processed object"
+     *     }
+     *  },
+     *  input={"class"="API\CoreBundle\Entity\Company"},
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  output={"class"="API\CoreBundle\Entity\Company"},
+     *  statusCodes={
+     *      200 ="The entity was successfully updated",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity",
+     *      409 ="Invalid parameters",
+     *  }
+     * )
+     *
+     * @param Request $request
+     * @param int $id
+     * @return JsonResponse|Response
+     */
+    public function updateAction(Request $request, int $id)
+    {
+
+    }
+
+    /**
+     * ### Response ###
+     *      {
+     *        "data":
+     *        {
+     *           "id": "2",
+     *           "title": "Web-Solutions"
+     *           "ico": "1102587"
+     *           "dic": "12587459644"
+     *           "ic_dph": "12587459644"
+     *           "street": "Cesta 125"
+     *           "city": "Bratislava"
+     *           "zip": "02587"
+     *           "country": "SR"
+     *        },
+     *       "company_data": {
+     *           "0":
+     *           {
+     *             "id": 44,
+     *             "value": "data val",
+     *             "company_attribute":
+     *             {
+     *               "id": 1,
+     *               "title": "input company additional attribute",
+     *               "type": "input",
+     *               "is_active": true
+     *             }
+     *           },
+     *           "1":
+     *           {
+     *             "id": 45,
+     *             "value": "data valluesgyda gfg",
+     *             "company_attribute":
+     *             {
+     *               "id": 2,
+     *               "title": "select company additional attribute",
+     *               "type": "simple_select",
+     *               "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *               "is_active": true
+     *             }
+     *           }
+     *        },
+     *        "_links":
+     *        {
+     *           "put": "/api/v1/task-bundle/company-extend/2",
+     *           "patch": "/api/v1/task-bundle/company-extend/2",
+     *           "delete": "/api/v1/task-bundle/company-extend/2"
+     *         }
+     *      }
+     *
+     * @ApiDoc(
+     *  description="Update partially a Company Entity with extra Company Data.
+     *  This can be edited by attributes: company_data[company_attribute_id] = value,
+     *  attributes must be defined in the CompanyAttribute Entity",
+     *  requirements={
+     *     {
+     *       "name"="id",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of processed object"
+     *     }
+     *  },
+     *  input={"class"="API\CoreBundle\Entity\Company"},
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  output={"class"="API\CoreBundle\Entity\Company"},
+     *  statusCodes={
+     *      200 ="The entity was successfully updated",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity",
+     *      409 ="Invalid parameters",
+     *  }
+     * )
+     *
+     * @param Request $request
+     * @param int $id
+     * @return JsonResponse|Response
+     */
+    public function updatePartiallyAction(Request $request, int $id)
+    {
+
     }
 
     /**
@@ -135,9 +424,8 @@ class CompanyController extends ApiBaseController
                 }
             }
 
-            $fullCompanyEntity = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($company->getId());
-            dump($fullCompanyEntity->getCompanyData());
-            $entityResponse = $this->get('api_base.service')->getEntityResponse($fullCompanyEntity, 'company');
+            $fullCompanyEntity = $this->get('company_service')->getFullCompany($company->getId());
+            $entityResponse = $this->get('company_service')->getEntityResponse($fullCompanyEntity, 'company_extension');
             return $this->createApiResponse($entityResponse, $statusCode);
         }
 

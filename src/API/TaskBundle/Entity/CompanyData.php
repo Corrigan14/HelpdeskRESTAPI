@@ -6,6 +6,7 @@ use API\CoreBundle\Entity\Company;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation\ReadOnly;
+use JMS\Serializer\Annotation\Exclude;
 
 /**
  * CompanyData
@@ -39,6 +40,7 @@ class CompanyData
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\Company", inversedBy="companyData")
      * @ORM\JoinColumn(name="company_id", referencedColumnName="id", nullable=false)
+     * @Exclude()
      */
     private $company;
 

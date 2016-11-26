@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Tests\Controller;
 
+use API\CoreBundle\Entity\Company;
 use API\TaskBundle\Entity\CompanyAttribute;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Tests\Controller\ApiTestCase;
@@ -63,7 +64,7 @@ class CompanyControllerTest extends ApiTestCase
             // Response should contain some company_data
             $response = json_decode($this->getClient()->getResponse()->getContent(), true);
             $responseCompanyData = $response['company_data'];
-            $this->assertEquals(!null, $responseCompanyData);
+            $this->assertCount(1, $responseCompanyData);
         }
 
     }
@@ -73,6 +74,24 @@ class CompanyControllerTest extends ApiTestCase
      */
     public function testPostSingleErrors()
     {
+        parent::testPostSingleErrors();
+
+        $data = $this->returnPostTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        // Try to create entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), $data, [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to create entity with invalid parameter company_data[attribute id] (attribute has to exists)
+        $this->getClient(true)->request('POST', $this->getBaseUrl(),
+            ['title' => 'Extended company', 'company_data' => [2258 => 'value 1']], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
     /**
@@ -138,7 +157,8 @@ class CompanyControllerTest extends ApiTestCase
      */
     public function removeTestEntity()
     {
-        // TODO: Implement removeTestEntity() method.
+        $this->removeCompanyEntity('Extended company CREATE');
+        $this->removeCompanyEntity('Extended company UPDATE');
     }
 
     /**
@@ -148,7 +168,16 @@ class CompanyControllerTest extends ApiTestCase
      */
     public function returnPostTestData()
     {
-        // TODO: Implement returnPostTestData() method.
+        $companyAttribute = $this->em->getRepository('APITaskBundle:CompanyAttribute')->findOneBy([
+            'title' => 'input company additional attribute'
+        ]);
+
+        return [
+            'title' => 'Extended company CREATE',
+            'company_data' => [
+                $companyAttribute->getId() => 'value 22'
+            ]
+        ];
     }
 
     /**
@@ -158,6 +187,37 @@ class CompanyControllerTest extends ApiTestCase
      */
     public function returnUpdateTestData()
     {
-        // TODO: Implement returnUpdateTestData() method.
+        $companyAttribute = $this->em->getRepository('APITaskBundle:CompanyAttribute')->findOneBy([
+            'title' => 'input company additional attribute'
+        ]);
+
+        return [
+            'title' => 'Extended company UPDATE',
+            'company_data' => [
+                $companyAttribute->getId() => 'value 33'
+            ]
+        ];
+    }
+
+    /**
+     * @param string $title
+     */
+    private function removeCompanyEntity(string $title)
+    {
+        // If test Company exists, remove
+        $company = $this->em->getRepository('APICoreBundle:Company')->findOneBy([
+            'title' => $title,
+        ]);
+
+        if ($company instanceof Company) {
+            $this->em->remove($company);
+            $this->em->flush();
+        }
+
+        $company = $this->em->getRepository('APICoreBundle:Company')->findOneBy([
+            'title' => $title,
+        ]);
+
+        $this->assertEquals(null, $company);
     }
 }

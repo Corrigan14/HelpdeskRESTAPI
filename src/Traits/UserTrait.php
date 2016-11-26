@@ -3,7 +3,9 @@
 namespace Traits;
 
 use API\CoreBundle\Entity\User;
+use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Tag;
+use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
@@ -17,10 +19,16 @@ trait UserTrait
      * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Tag", mappedBy="createdBy")
      * @Serializer\Exclude()
      *
-     * @var Tag
+     * @var ArrayCollection
      */
     private $tags;
 
+    /**
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Project", mappedBy="createdBy")
+     *
+     * @var ArrayCollection
+     */
+    private $projects;
 
     /**
      * Add tag
@@ -51,6 +59,39 @@ trait UserTrait
     public function getTags()
     {
         return $this->tags;
+    }
+
+    /**
+     * Add project
+     *
+     * @param Project $project
+     * @return User
+     */
+    public function addProject(Project $project)
+    {
+        $this->projects[] = $project;
+
+        return $this;
+    }
+
+    /**
+     * Remove project
+     *
+     * @param Project $project
+     */
+    public function removeProject(Project $project)
+    {
+        $this->projects->removeElement($project);
+    }
+
+    /**
+     * Get projects
+     *
+     * @return ArrayCollection
+     */
+    public function getProjects()
+    {
+        return $this->projects;
     }
 
 }

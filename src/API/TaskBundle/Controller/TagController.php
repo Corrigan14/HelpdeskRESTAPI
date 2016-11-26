@@ -68,6 +68,7 @@ class TagController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return JsonResponse
+     * @throws \LogicException
      */
     public function listAction(Request $request)
     {
@@ -135,6 +136,7 @@ class TagController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function getAction(int $id)
     {
@@ -205,6 +207,7 @@ class TagController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function createAction(Request $request)
     {
@@ -275,6 +278,7 @@ class TagController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function updateAction(int $id, Request $request)
     {
@@ -354,12 +358,11 @@ class TagController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function updatePartialAction(int $id, Request $request)
     {
-        $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
-            'id' => $id,
-        ]);
+        $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->find($id);
 
         if (!$tag instanceof Tag) {
             return $this->notFoundResponse();
@@ -401,12 +404,11 @@ class TagController extends ApiBaseController implements ControllerInterface
      * @param int $id
      *
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function deleteAction(int $id)
     {
-        $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
-            'id' => $id,
-        ]);
+        $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->find($id);
 
         if (!$tag instanceof Tag) {
             return $this->notFoundResponse();
@@ -428,6 +430,8 @@ class TagController extends ApiBaseController implements ControllerInterface
      * @param $tag
      * @param $requestData
      * @return Response|JsonResponse
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     private function updateTag($tag, $requestData)
     {
@@ -443,6 +447,8 @@ class TagController extends ApiBaseController implements ControllerInterface
      * @param array $requestData
      * @param bool $create
      * @return Response|JsonResponse
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     private function processTag(Tag $tag, $requestData, $create = false)
     {

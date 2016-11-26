@@ -68,6 +68,8 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function listAction(Request $request)
     {
@@ -127,6 +129,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function getAction(int $id)
     {
@@ -184,6 +187,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \InvalidArgumentException
      */
     public function createAction(Request $request)
     {
@@ -246,6 +250,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function updateAction(int $id, Request $request)
     {
@@ -312,6 +317,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function updatePartialAction(int $id, Request $request)
     {
@@ -358,6 +364,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @param int $id
      *
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function deleteAction(int $id)
     {
@@ -386,6 +393,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @param bool $create
      *
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     private function updateStatus(Status $status, $requestData, $create = false)
     {

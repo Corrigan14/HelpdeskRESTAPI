@@ -22,6 +22,7 @@ class CompanyService
     /**
      * ApiBaseService constructor.
      * @param EntityManager $em
+     * @param Router $router
      */
     public function __construct(EntityManager $em, Router $router)
     {

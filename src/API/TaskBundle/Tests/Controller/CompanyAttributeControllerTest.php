@@ -125,10 +125,6 @@ class CompanyAttributeControllerTest extends ApiTestCase
         $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
             [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        // Check if is_active param is 0
-        $isActiveParam = $entity->getIsActive();
-//        $this->assertEquals(false,$isActiveParam);
     }
 
     /**
@@ -171,7 +167,7 @@ class CompanyAttributeControllerTest extends ApiTestCase
         $this->getClient(true)->request('POST', $this->getBaseUrl(),
             ['title' => 'CREATED company additional attribute', 'type' => VariableHelper::TEXT_AREA], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(201, $this->getClient()->getResponse()->getStatusCode());
+        $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Check if Entity was created
         $response = json_decode($this->getClient()->getResponse()->getContent(), true);

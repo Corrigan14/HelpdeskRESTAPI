@@ -49,7 +49,7 @@ class CompanyDataRepository extends EntityRepository implements RepositoryInterf
         } else {
             $query = $this->createQueryBuilder('cd')
                 ->getQuery();
-        };
+        }
 
         $query->setMaxResults(self::LIMIT);
 
@@ -70,6 +70,8 @@ class CompanyDataRepository extends EntityRepository implements RepositoryInterf
      * @param array $options
      *
      * @return int
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function countEntities(array $options = [])
     {
@@ -99,7 +101,7 @@ class CompanyDataRepository extends EntityRepository implements RepositoryInterf
             $query = $this->createQueryBuilder('cd')
                 ->select('COUNT(cd.id)')
                 ->getQuery();
-        };
+        }
 
         return $query->getSingleScalarResult();
     }

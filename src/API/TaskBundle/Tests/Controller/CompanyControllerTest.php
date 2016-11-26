@@ -23,6 +23,7 @@ class CompanyControllerTest extends ApiTestCase
      */
     public function testListSuccess()
     {
+        return [];
     }
 
     /**
@@ -30,6 +31,7 @@ class CompanyControllerTest extends ApiTestCase
      */
     public function testListErrors()
     {
+        return [];
     }
 
     /**
@@ -125,13 +127,13 @@ class CompanyControllerTest extends ApiTestCase
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to update entity with invalid parameter company_data[attribute id] (attribute has to exists)
-        $this->getClient(true)->request('PUT', $this->getBaseUrl(). '/' . $entity->getId(),
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(),
             ['company_data' => [2258 => 'value 1']], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to update entity with invalid parameter company_data[attribute id] (attribute has to exists)
-        $this->getClient(true)->request('PATCH', $this->getBaseUrl(). '/' . $entity->getId(),
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(),
             ['company_data' => [2258 => 'value 1']], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
@@ -142,6 +144,7 @@ class CompanyControllerTest extends ApiTestCase
      */
     public function testDeleteSingleSuccess()
     {
+        return [];
     }
 
     /**
@@ -149,6 +152,7 @@ class CompanyControllerTest extends ApiTestCase
      */
     public function testDeleteSingleErrors()
     {
+        return [];
     }
 
     /**

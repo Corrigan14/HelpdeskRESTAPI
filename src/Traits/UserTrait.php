@@ -7,10 +7,9 @@ use API\TaskBundle\Entity\Tag;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
- * Created by PhpStorm.
- * User: websolutions
- * Date: 11/17/16
- * Time: 9:03 PM
+ * Class UserTrait
+ *
+ * @package Traits
  */
 trait UserTrait
 {
@@ -48,8 +47,6 @@ trait UserTrait
 
     /**
      * Get tags
-     *
-     * @return \Doctrine\Common\Collections\Collection
      */
     public function getTags()
     {

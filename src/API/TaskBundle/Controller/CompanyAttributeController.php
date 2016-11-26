@@ -71,6 +71,8 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function listAction(Request $request)
     {
@@ -132,6 +134,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *
      * @param int $id
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function getAction(int $id)
     {
@@ -191,6 +194,8 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function createAction(Request $request)
     {
@@ -255,6 +260,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function updateAction(int $id, Request $request)
     {
@@ -323,6 +329,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function updatePartialAction(int $id, Request $request)
     {
@@ -369,6 +376,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      * @param int $id
      *
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function deleteAction(int $id)
     {
@@ -397,6 +405,8 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      * @param $requestData
      * @param bool $create
      * @return Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     private function updateCompanyAttribute($companyAttribute, $requestData, $create = false)
     {

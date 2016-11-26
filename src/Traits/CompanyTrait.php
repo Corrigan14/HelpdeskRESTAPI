@@ -8,10 +8,9 @@ use Doctrine\Common\Collections\Collection;
 use JMS\Serializer\Annotation\Exclude;
 
 /**
- * Created by PhpStorm.
- * User: websolutions
- * Date: 11/17/16
- * Time: 9:03 PM
+ * Class CompanyTrait
+ *
+ * @package Traits
  */
 trait CompanyTrait
 {

@@ -29,6 +29,13 @@ class VoteOptions
     const DELETE_COMPANY_ATTRIBUTE = 'delete_company_attribute';
     const LIST_COMPANY_ATTRIBUTES = 'list_company_attributes';
 
+    // PROJECT CRUD
+    const CREATE_PROJECT = 'create_project';
+    const SHOW_PROJECT = 'read_project';
+    const UPDATE_PROJECT = 'update_project';
+    const DELETE_PROJECT = 'delete_project';
+    const LIST_PROJECTS = 'list_projects';
+
     /**
      * @return array
      */

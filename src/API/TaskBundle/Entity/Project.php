@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Entity;
 
 use API\CoreBundle\Entity\User;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -60,6 +61,21 @@ class Project
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
      */
     private $createdBy;
+
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\UserHasProject", mappedBy="project")
+     */
+    private $userHasProjects;
+
+    /**
+     * Project constructor.
+     */
+    public function __construct()
+    {
+        $this->userHasProjects = new ArrayCollection();
+    }
 
     /**
      * Get id
@@ -165,5 +181,39 @@ class Project
     public function getCreatedBy()
     {
         return $this->createdBy;
+    }
+
+    /**
+     * Add userHasProject
+     *
+     * @param UserHasProject $userHasProject
+     *
+     * @return Project
+     */
+    public function addUserHasProject(UserHasProject $userHasProject)
+    {
+        $this->userHasProjects[] = $userHasProject;
+
+        return $this;
+    }
+
+    /**
+     * Remove userHasProject
+     *
+     * @param UserHasProject $userHasProject
+     */
+    public function removeUserHasProject(UserHasProject $userHasProject)
+    {
+        $this->userHasProjects->removeElement($userHasProject);
+    }
+
+    /**
+     * Get userHasProjects
+     *
+     * @return ArrayCollection
+     */
+    public function getUserHasProjects()
+    {
+        return $this->userHasProjects;
     }
 }

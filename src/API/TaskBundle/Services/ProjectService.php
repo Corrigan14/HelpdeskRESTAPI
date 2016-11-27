@@ -5,6 +5,7 @@ namespace API\TaskBundle\Services;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Repository\UserRepository;
 use API\CoreBundle\Services\HateoasHelper;
+use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Repository\ProjectRepository;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
@@ -47,7 +48,7 @@ class ProjectService
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function getProjectsResponse(int $page, array $options)
+    public function getProjectsResponse(int $page, array $options):array
     {
         /** @var ProjectRepository $projectRepository */
         $projectRepository = $this->em->getRepository('APITaskBundle:Project');
@@ -70,16 +71,14 @@ class ProjectService
 
     /**
      * Return Project Response which includes all data about Project Entity and Links to update/partialUpdate/delete
-     *
-     * @param User $user
-     *
+     * @param Project $project
      * @return array
      */
-    public function getProjectResponse(User $user)
+    public function getProjectResponse(Project $project):array
     {
         return [
-            'data' => $user,
-            '_links' => $this->getProjectLinks($user->getId()),
+            'data' => $project,
+            '_links' => $this->getProjectLinks($project->getId()),
         ];
     }
 
@@ -88,12 +87,12 @@ class ProjectService
      *
      * @return array
      */
-    private function getProjectLinks(int $id)
+    private function getProjectLinks(int $id):array
     {
         return [
-            'put' => $this->router->generate('user_update', ['id' => $id]),
-            'patch' => $this->router->generate('user_partial_update', ['id' => $id]),
-            'delete' => $this->router->generate('user_delete', ['id' => $id]),
+            'put' => $this->router->generate('projects_update', ['id' => $id]),
+            'patch' => $this->router->generate('projects_partial_update', ['id' => $id]),
+            'delete' => $this->router->generate('projects_delete', ['id' => $id]),
         ];
     }
 }

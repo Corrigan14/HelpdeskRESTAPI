@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Controller;
 
+use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
@@ -112,8 +113,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *            "id": "2",
      *            "title": "Project 1",
      *            "description": "Description of Project 1",
-     *            "created_at": "20.11.2016",
-     *            "updated_at": "22.11.2016",
+     *            "is_active": true,
      *            "created_by":
      *           {
      *              "id": 19,
@@ -121,14 +121,28 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *              "email": "user@user.sk",
      *              "roles": "[\"ROLE_USER\"]",
      *              "is_active": true,
-     *              "acl": "[]"
+     *              "acl": "[]",
+     *              "company":
+     *              {
+     *                 "id": 86,
+     *                 "title": "LanSystems",
+     *                 "ico": "110258782",
+     *                 "dic": "12587458996244",
+     *                 "street": "Ina cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true
+     *               }
      *          }
+     *          "created_at": "2016-11-26T21:49:04+0100",
+     *          "updated_at": "2016-11-26T21:49:04+0100"
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/project/id",
-     *           "patch": "/api/v1/project/id",
-     *           "delete": "/api/v1/project/id"
+     *           "put": "/api/v1/projects/id",
+     *           "patch": "/api/v1/projects/id",
+     *           "delete": "/api/v1/projects/id"
      *         }
      *      }
      *
@@ -160,22 +174,34 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function getAction(int $id)
     {
-        // TODO: Implement getAction() method.
+        $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($id);
+
+        if (!$project instanceof Project) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('project_voter')->isGranted(VoteOptions::SHOW_PROJECT, $project)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $projectArray = $this->get('project_service')->getProjectResponse($project);
+
+        return $this->createApiResponse($projectArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
      *        "data":
      *        {
      *            "id": "2",
      *            "title": "Project 1",
      *            "description": "Description of Project 1",
-     *            "created_at": "20.11.2016",
-     *            "updated_at": "22.11.2016",
+     *            "is_active": true,
      *            "created_by":
      *           {
      *              "id": 19,
@@ -183,14 +209,28 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *              "email": "user@user.sk",
      *              "roles": "[\"ROLE_USER\"]",
      *              "is_active": true,
-     *              "acl": "[]"
+     *              "acl": "[]",
+     *              "company":
+     *              {
+     *                 "id": 86,
+     *                 "title": "LanSystems",
+     *                 "ico": "110258782",
+     *                 "dic": "12587458996244",
+     *                 "street": "Ina cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true
+     *               }
      *          }
+     *          "created_at": "2016-11-26T21:49:04+0100",
+     *          "updated_at": "2016-11-26T21:49:04+0100"
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/project/id",
-     *           "patch": "/api/v1/project/id",
-     *           "delete": "/api/v1/project/id"
+     *           "put": "/api/v1/projects/id",
+     *           "patch": "/api/v1/projects/id",
+     *           "delete": "/api/v1/projects/id"
      *         }
      *      }
      *
@@ -223,15 +263,14 @@ class ProjectController extends ApiBaseController implements ControllerInterface
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
      *        "data":
      *        {
      *            "id": "2",
      *            "title": "Project 1",
      *            "description": "Description of Project 1",
-     *            "created_at": "20.11.2016",
-     *            "updated_at": "22.11.2016",
+     *            "is_active": true,
      *            "created_by":
      *           {
      *              "id": 19,
@@ -239,14 +278,28 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *              "email": "user@user.sk",
      *              "roles": "[\"ROLE_USER\"]",
      *              "is_active": true,
-     *              "acl": "[]"
+     *              "acl": "[]",
+     *              "company":
+     *              {
+     *                 "id": 86,
+     *                 "title": "LanSystems",
+     *                 "ico": "110258782",
+     *                 "dic": "12587458996244",
+     *                 "street": "Ina cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true
+     *               }
      *          }
+     *          "created_at": "2016-11-26T21:49:04+0100",
+     *          "updated_at": "2016-11-26T21:49:04+0100"
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/project/id",
-     *           "patch": "/api/v1/project/id",
-     *           "delete": "/api/v1/project/id"
+     *           "put": "/api/v1/projects/id",
+     *           "patch": "/api/v1/projects/id",
+     *           "delete": "/api/v1/projects/id"
      *         }
      *      }
      *
@@ -288,15 +341,14 @@ class ProjectController extends ApiBaseController implements ControllerInterface
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
      *        "data":
      *        {
      *            "id": "2",
      *            "title": "Project 1",
      *            "description": "Description of Project 1",
-     *            "created_at": "20.11.2016",
-     *            "updated_at": "22.11.2016",
+     *            "is_active": true,
      *            "created_by":
      *           {
      *              "id": 19,
@@ -304,14 +356,28 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *              "email": "user@user.sk",
      *              "roles": "[\"ROLE_USER\"]",
      *              "is_active": true,
-     *              "acl": "[]"
+     *              "acl": "[]",
+     *              "company":
+     *              {
+     *                 "id": 86,
+     *                 "title": "LanSystems",
+     *                 "ico": "110258782",
+     *                 "dic": "12587458996244",
+     *                 "street": "Ina cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true
+     *               }
      *          }
+     *          "created_at": "2016-11-26T21:49:04+0100",
+     *          "updated_at": "2016-11-26T21:49:04+0100"
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/project/id",
-     *           "patch": "/api/v1/project/id",
-     *           "delete": "/api/v1/project/id"
+     *           "put": "/api/v1/projects/id",
+     *           "patch": "/api/v1/projects/id",
+     *           "delete": "/api/v1/projects/id"
      *         }
      *      }
      *
@@ -393,8 +459,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *            "id": "2",
      *            "title": "Project 1",
      *            "description": "Description of Project 1",
-     *            "created_at": "20.11.2016",
-     *            "updated_at": "22.11.2016"
+     *            "is_active": true,
      *            "created_by":
      *           {
      *              "id": 19,
@@ -402,14 +467,28 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *              "email": "user@user.sk",
      *              "roles": "[\"ROLE_USER\"]",
      *              "is_active": true,
-     *              "acl": "[]"
+     *              "acl": "[]",
+     *              "company":
+     *              {
+     *                 "id": 86,
+     *                 "title": "LanSystems",
+     *                 "ico": "110258782",
+     *                 "dic": "12587458996244",
+     *                 "street": "Ina cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true
+     *               }
      *          }
+     *          "created_at": "2016-11-26T21:49:04+0100",
+     *          "updated_at": "2016-11-26T21:49:04+0100"
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/project/id",
-     *           "patch": "/api/v1/project/id",
-     *           "delete": "/api/v1/project/id"
+     *           "put": "/api/v1/projects/id",
+     *           "patch": "/api/v1/projects/id",
+     *           "delete": "/api/v1/projects/id"
      *         }
      *      }
      *

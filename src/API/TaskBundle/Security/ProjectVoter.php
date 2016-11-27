@@ -5,6 +5,7 @@ namespace API\TaskBundle\Security;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Security\ApiBaseVoter;
 use API\CoreBundle\Security\VoterInterface;
+use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\UserHasProject;
 
 /**
@@ -23,11 +24,11 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
      *
      * @param string $action
      *
-     * @param mixed $status
+     * @param Project|bool $project
      *
      * @return bool
      */
-    public function isGranted($action, $status = false)
+    public function isGranted($action, $project = false)
     {
         $this->user = $this->token->getUser();
 
@@ -40,7 +41,7 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
             case VoteOptions::LIST_PROJECTS:
                 return $this->canList();
             case VoteOptions::SHOW_PROJECT:
-                return $this->canRead();
+                return $this->canRead($project);
             case VoteOptions::CREATE_PROJECT:
                 return $this->canCreate();
             case VoteOptions::UPDATE_PROJECT;
@@ -82,15 +83,21 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
     }
 
     /**
+     * @param Project $project
      * @return bool
+     * @throws \InvalidArgumentException
      */
-    private function canRead():bool
+    private function canRead(Project $project):bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
         }
 
-        return $this->hasAclRights(VoteOptions::SHOW_STATUS, $this->user, VoteOptions::getConstants());
+        if ($project->getCreatedBy() === $this->user) {
+            return true;
+        }
+
+        return $this->hasAclProjectRights(VoteOptions::SHOW_PROJECT, $project);
     }
 
     /**
@@ -134,10 +141,11 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
      *
      * @param string $action
      *
+     * @param Project $project
      * @return bool
      * @throws \InvalidArgumentException
      */
-    public function hasAclProjectRights($action)
+    public function hasAclProjectRights($action, Project $project)
     {
         if (!in_array($action, VoteOptions::getConstants(), true)) {
             throw new \InvalidArgumentException('Action ins not valid, please list your action in the options list');
@@ -148,9 +156,11 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
         if (count($userHasProjects) > 0) {
             /** @var UserHasProject $uhp */
             foreach ($userHasProjects as $uhp) {
-                $acl = $uhp->getAcl();
-                if (in_array($action, $acl, true)) {
-                    return true;
+                if ($uhp->getProject() === $project) {
+                    $acl = $uhp->getAcl();
+                    if (in_array($action, $acl, true)) {
+                        return true;
+                    }
                 }
             }
         }

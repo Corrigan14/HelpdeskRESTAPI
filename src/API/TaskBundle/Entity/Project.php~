@@ -57,7 +57,7 @@ class Project
     /**
      * @var User
      *
-     * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="project")
+     * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="projects")
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
      */
     private $createdBy;

@@ -65,14 +65,10 @@ class UserHasProject
      * Set acl
      *
      * @param array $acl
-     *
-     * @return UserHasProject
      */
-    public function setAcl($acl)
+    public function setAcl(array $acl)
     {
-        $this->acl = $acl;
-
-        return $this;
+        $this->acl = json_encode($acl);
     }
 
     /**
@@ -80,9 +76,9 @@ class UserHasProject
      *
      * @return array
      */
-    public function getAcl()
+    public function getAcl():array
     {
-        return $this->acl;
+        return json_decode($this->acl);
     }
 
     /**

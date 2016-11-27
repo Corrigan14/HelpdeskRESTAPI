@@ -33,7 +33,7 @@ trait UserTrait
     private $projects;
 
     /**
-     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\UserHasProject", mappedBy="project")
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\UserHasProject", mappedBy="user")
      * @Exclude()
      *
      * @var ArrayCollection

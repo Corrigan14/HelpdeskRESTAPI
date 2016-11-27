@@ -2,8 +2,10 @@
 
 namespace API\TaskBundle\Controller;
 
+use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
+use Igsem\APIBundle\Services\StatusCodesHelper;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,8 +27,18 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *            "id": "1",
      *            "title": "Project 1",
      *            "description": "Description of Project 1",
-     *            "created_at": "20.11.2016",
-     *            "updated_at": "22.11.2016"
+     *            "createdAt":
+     *            {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *            "updatedAt":
+     *            {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            }
      *          }
      *       ],
      *       "_links":
@@ -44,7 +56,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      *
      * @ApiDoc(
-     *  description="Returns a list of logged User's Projects: created and based on ACL (user_has_project)",
+     *  description="Returns a list of logged User's Projects: created and based on ACL (user_has_project: every project where user has some ACL)",
      *  filters={
      *     {
      *       "name"="page",
@@ -70,11 +82,26 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
-     * @return JsonResponse
+     * @return JsonResponse|Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function listAction(Request $request)
     {
-        // TODO: Implement listAction() method.
+        if (!$this->get('project_voter')->isGranted(VoteOptions::LIST_PROJECTS)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $page = $request->get('page') ?: 1;
+        $isActive = $request->get('isActive') ?: 'all';
+
+        $options = [
+            'isAdmin' => $this->get('project_voter')->isAdmin(),
+            'loggedUser' => $this->getUser(),
+            'isActive' => strtolower($isActive),
+        ];
+
+        return $this->json($this->get('project_service')->getProjectsResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -386,7 +413,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *         }
      *      }
      *
-     *  @ApiDoc(
+     * @ApiDoc(
      *  description="Restore Project Entity",
      *  requirements={
      *     {

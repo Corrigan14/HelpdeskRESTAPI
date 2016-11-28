@@ -53,7 +53,12 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
         }
     }
 
-    public function isAdmin()
+    /**
+     * Check if logged user has Admin ROLE
+     *
+     * @return bool
+     */
+    public function isAdmin():bool
     {
         return $this->decisionManager->decide($this->token, ['ROLE_ADMIN']);
     }
@@ -63,7 +68,7 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
      *
      * @return bool
      */
-    private function canList()
+    private function canList():bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
@@ -101,6 +106,8 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
     }
 
     /**
+     * Admin can create project or it depends on Users ACL
+     *
      * @return bool
      */
     private function canCreate():bool
@@ -109,7 +116,7 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
-        return $this->hasAclRights(VoteOptions::CREATE_STATUS, $this->user, VoteOptions::getConstants());
+        return $this->hasAclRights(VoteOptions::CREATE_PROJECT, $this->user, VoteOptions::getConstants());
     }
 
     /**

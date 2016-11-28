@@ -3,11 +3,37 @@
 namespace API\TaskBundle\Tests\Controller;
 
 use API\TaskBundle\Entity\Project;
+use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 
 class ProjectControllerTest extends ApiTestCase
 {
     const BASE_URL = '/api/v1/task-bundle/projects';
+
+    /**
+     * POST SINGLE - success
+     */
+    public function testPostSingleErrors()
+    {
+        parent::testPostSingleErrors();
+
+        $data = $this->returnPostTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        // Try to create entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), $data, [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to create entity with invalid parameter Title (title is required)
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), ['description' => 'Description'], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+    }
 
     /**
      * Get the url for requests
@@ -54,7 +80,8 @@ class ProjectControllerTest extends ApiTestCase
      */
     public function removeTestEntity()
     {
-        // TODO: Implement removeTestEntity() method.
+        $this->removeProject('project CREATE');
+        $this->removeProject('project UPDATE');
     }
 
     /**
@@ -81,5 +108,27 @@ class ProjectControllerTest extends ApiTestCase
             'title' => 'project UPDATE',
             'description' => 'short description',
         ];
+    }
+
+    /**
+     * @param $title
+     */
+    private function removeProject($title)
+    {
+        $project = $this->em->getRepository('APITaskBundle:Project')->findOneBy([
+            'title' => $title
+        ]);
+
+        if ($project instanceof Project) {
+            $this->em->remove($project);
+            $this->em->flush();
+        }
+
+        // Check if entity was removed
+        $project = $this->em->getRepository('APITaskBundle:Project')->findOneBy([
+            'title' => $title
+        ]);
+
+        $this->assertEquals(null, $project);
     }
 }

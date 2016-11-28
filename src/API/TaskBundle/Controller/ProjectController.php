@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Controller;
 
+use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
@@ -256,10 +257,22 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function createAction(Request $request)
     {
-        // TODO: Implement createAction() method.
+        if (!$this->get('project_voter')->isGranted(VoteOptions::CREATE_PROJECT)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
+
+        $project = new Project();
+        $project->setCreatedBy($this->getUser());
+        $project->setIsActive(true);
+
+        return $this->updateProject($project, $requestData, true);
     }
 
     /**
@@ -524,5 +537,192 @@ class ProjectController extends ApiBaseController implements ControllerInterface
     public function restoreAction(int $id)
     {
 
+    }
+
+    /**
+     *  ### Response ###
+     *      {
+     *        "data":
+     *        {
+     *            "id": "2",
+     *
+     *        }
+     *      }
+     *
+     * @ApiDoc(
+     *  resource = true,
+     *  description="Add users ACL to project",
+     *  requirements={
+     *     {
+     *       "name"="projectId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of project"
+     *     },
+     *     {
+     *       "name"="userId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of user"
+     *     },
+     *  },
+     *  input={"class"="API\TaskBundle\Entity\UserHasProject"},
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  output={"class"="API\TaskBundle\Entity\UserHasProject"},
+     *  statusCodes={
+     *      201 ="The entity was successfully created",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      409 ="Invalid parameters",
+     *  }
+     * )
+     *
+     *
+     * @param int $projectId
+     * @param int $userId
+     * @return JsonResponse|Response
+     */
+    public function addUserToProjectAction(int $projectId, int $userId)
+    {
+
+    }
+
+    /**
+     *  ### Response ###
+     *      {
+     *        "data":
+     *        {
+     *            "id": "2",
+     *
+     *        }
+     *      }
+     *
+     * @ApiDoc(
+     *  resource = true,
+     *  description="Remove users ACL from project",
+     *  requirements={
+     *     {
+     *       "name"="projectId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of project"
+     *     },
+     *     {
+     *       "name"="userId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of user"
+     *     },
+     *  },
+     *  input={"class"="API\TaskBundle\Entity\UserHasProject"},
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  output={"class"="API\TaskBundle\Entity\UserHasProject"},
+     *  statusCodes={
+     *      201 ="The entity was successfully created",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      409 ="Invalid parameters",
+     *  }
+     * )
+     *
+     *
+     * @param int $projectId
+     * @param int $userId
+     * @return JsonResponse|Response
+     */
+    public function updateUserProjectAclAction(int $projectId, int $userId)
+    {
+
+    }
+
+    /**
+     *  ### Response ###
+     *      {
+     *        "data":
+     *        {
+     *            "id": "2",
+     *
+     *        }
+     *      }
+     *
+     * @ApiDoc(
+     *  resource = true,
+     *  description="Remove users ACL from project",
+     *  requirements={
+     *     {
+     *       "name"="projectId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of project"
+     *     },
+     *     {
+     *       "name"="userId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of user"
+     *     },
+     *  },
+     *  input={"class"="API\TaskBundle\Entity\UserHasProject"},
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  output={"class"="API\TaskBundle\Entity\UserHasProject"},
+     *  statusCodes={
+     *      201 ="The entity was successfully created",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      409 ="Invalid parameters",
+     *  }
+     * )
+     *
+     *
+     * @param int $projectId
+     * @param int $userId
+     * @return JsonResponse|Response
+     */
+    public function removeUserFromProjectAction(int $projectId, int $userId)
+    {
+
+    }
+
+    /**
+     * @param Project $project
+     * @param array $requestData
+     * @param bool $create
+     * @throws \LogicException
+     *
+     * @return Response|JsonResponse
+     */
+    private function updateProject(Project $project, $requestData, $create = false)
+    {
+        $statusCode = $this->getCreateUpdateStatusCode($create);
+
+        $errors = $this->get('entity_processor')->processEntity($project, $requestData);
+
+        if (false === $errors) {
+            $this->getDoctrine()->getManager()->persist($project);
+            $this->getDoctrine()->getManager()->flush();
+
+            $response = $this->get('project_service')->getProjectResponse($project);
+            return $this->createApiResponse($response, $statusCode);
+        }
+
+        return $this->invalidParametersResponse();
     }
 }

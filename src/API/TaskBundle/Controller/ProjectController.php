@@ -484,10 +484,27 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function deleteAction(int $id)
     {
-        // TODO: Implement deleteAction() method.
+        $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($id);
+
+        if (!$project instanceof Project) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('project_voter')->isGranted(VoteOptions::DELETE_PROJECT, $project)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $project->setIsActive(false);
+        $this->getDoctrine()->getManager()->persist($project);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->createApiResponse([
+            'message' => StatusCodesHelper::UNACITVATE_MESSAGE,
+        ], StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -559,10 +576,26 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @param int $id
      *
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function restoreAction(int $id)
     {
+        $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($id);
 
+        if (!$project instanceof Project) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('project_voter')->isGranted(VoteOptions::DELETE_PROJECT, $project)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $project->setIsActive(true);
+        $this->getDoctrine()->getManager()->persist($project);
+        $this->getDoctrine()->getManager()->flush();
+
+        $response = $this->get('project_service')->getProjectResponse($project);
+        return $this->createApiResponse($response, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

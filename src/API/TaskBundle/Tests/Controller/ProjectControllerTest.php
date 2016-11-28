@@ -63,27 +63,81 @@ class ProjectControllerTest extends ApiTestCase
         $this->removeTestEntity();
 
         $adminEntity = $this->findOneAdminEntity();
-        $entity = $this->findOneEntity();
 
         // Try to update entity with ROLE_USER which hasn't permission to this action: method PUT
         $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $adminEntity->getId(), $data, [],
             ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Try to create entity with invalid parameter Title (title is required): method PUT
-        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(), ['description' => 'New'], [],
-            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
-
         // Try to update entity with ROLE_USER which hasn't permission to this action: method PATCH
         $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $adminEntity->getId(), $data, [],
             ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
 
-        // Try to create entity with invalid parameter Title (title has to be unique): method PATCH
-        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(), ['description' => 'New'], [],
+    /**
+     * DELETE SINGLE - success
+     */
+    public function testDeleteSingleSuccess()
+    {
+        $entity = $this->findOneEntity();
+
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(), [], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * DELETE SINGLE - error
+     */
+    public function testDeleteSingleErrors()
+    {
+        parent::testDeleteSingleErrors();
+
+        $entity = $this->findOneAdminEntity();
+
+        // Try to delete entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * RESTORE SINGLE - success
+     */
+    public function testRestoreSingleSuccess()
+    {
+        $entity = $this->findOneInActiveEntity();
+
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/restore', [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Check if isActive param is set to 0
+        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
+        $this->assertEquals(true , $response['data']['is_active']);
+    }
+
+    /**
+     * RESTORE SINGLE - error
+     */
+    public function testRestoreSingleErrors()
+    {
+        $entity = $this->findOneAdminEntity();
+
+        // Try to restore entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/restore', [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to restore  Entity without authorization header
+        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/restore', [], [], []);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to restore  Entity with not existed ID (as Admin)
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/1125874' . '/restore', [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
     /**
@@ -125,6 +179,22 @@ class ProjectControllerTest extends ApiTestCase
     {
         $project = $this->em->getRepository('APITaskBundle:Project')->findOneBy([
             'title' => 'Project of admin 2'
+        ]);
+
+        if ($project instanceof Project) {
+            return $project;
+        }
+    }
+
+    /**
+     * Return a single ADMIN project entity with inactive status from db
+     *
+     * @return mixed
+     */
+    public function findOneInActiveEntity()
+    {
+        $project = $this->em->getRepository('APITaskBundle:Project')->findOneBy([
+            'title' => 'Project of admin 3 - inactive'
         ]);
 
         if ($project instanceof Project) {

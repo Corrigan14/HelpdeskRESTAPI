@@ -130,17 +130,25 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
+        if ($project->getCreatedBy() === $this->user) {
+            return true;
+        }
+
         return $this->hasAclProjectRights(VoteOptions::UPDATE_PROJECT, $project);
     }
 
     /**
-     * @param $project
+     * @param Project $project
      * @return bool
      * @throws \InvalidArgumentException
      */
     private function canDelete($project):bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        if ($project->getCreatedBy() === $this->user) {
             return true;
         }
 

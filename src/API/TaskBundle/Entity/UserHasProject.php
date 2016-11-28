@@ -39,6 +39,7 @@ class UserHasProject
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="userHasProjects")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=false)
+     * @ReadOnly()
      */
     private $user;
 
@@ -47,6 +48,7 @@ class UserHasProject
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Project", inversedBy="userHasProjects")
      * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=false)
+     * @ReadOnly()
      */
     private $project;
 

@@ -31,10 +31,21 @@ class VoteOptions
 
     // PROJECT CRUD
     const CREATE_PROJECT = 'create_project';
-    const SHOW_PROJECT = 'read_project';
+    const LIST_PROJECTS = 'list_projects';
+
+    // USER HAS PROJECT ACL OPTIONS
+    const ADD_USER_TO_PROJECT = 'add_user_to_project';
+    const VIEW_PROJECT = 'read_project';
     const UPDATE_PROJECT = 'update_project';
     const DELETE_PROJECT = 'delete_project';
-    const LIST_PROJECTS = 'list_projects';
+
+    const CREATE_TASK_IN_PROJECT = 'create_task_in_project';
+    const UPDATE_ALL_TASKS_IN_PROJECT = 'update_all_tasks_in_project';
+    const UPDATE_COMPANY_TASKS_IN_PROJECT = 'update_company_tasks_in_project';
+    const UPDATE_USER_TASKS_IN_PROJECT = 'update_user_tasks_in_project';
+    const VIEW_ALL_TASKS_IN_PROJECT = 'view_all_tasks_in_project';
+    const VIEW_COMPANY_TASKS_IN_PROJECT = 'view_company_tasks_in_project';
+    const VIEW_USER_TASKS_IN_PROJECT = 'view_user_tasks_in_project';
 
     /**
      * @return array

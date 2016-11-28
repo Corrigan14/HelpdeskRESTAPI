@@ -40,7 +40,7 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
         switch ($action) {
             case VoteOptions::LIST_PROJECTS:
                 return $this->canList();
-            case VoteOptions::SHOW_PROJECT:
+            case VoteOptions::VIEW_PROJECT:
                 return $this->canRead($project);
             case VoteOptions::CREATE_PROJECT:
                 return $this->canCreate();
@@ -48,6 +48,8 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
                 return $this->canUpdate($project);
             case VoteOptions::DELETE_PROJECT;
                 return $this->canDelete($project);
+            case VoteOptions::ADD_USER_TO_PROJECT;
+                return $this->canAddUserToProject($project);
             default:
                 return false;
         }
@@ -102,7 +104,7 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
-        return $this->hasAclProjectRights(VoteOptions::SHOW_PROJECT, $project);
+        return $this->hasAclProjectRights(VoteOptions::VIEW_PROJECT, $project);
     }
 
     /**
@@ -153,6 +155,24 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
         }
 
         return $this->hasAclProjectRights(VoteOptions::DELETE_PROJECT, $project);
+    }
+
+    /**
+     * @param Project $project
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    private function canAddUserToProject($project):bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        if ($project->getCreatedBy() === $this->user) {
+            return true;
+        }
+
+        return $this->hasAclProjectRights(VoteOptions::ADD_USER_TO_PROJECT, $project);
     }
 
     /**

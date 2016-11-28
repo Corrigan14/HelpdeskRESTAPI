@@ -4,6 +4,7 @@ namespace API\TaskBundle\Controller;
 
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Project;
+use API\TaskBundle\Entity\UserHasProject;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
@@ -185,7 +186,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
-        if (!$this->get('project_voter')->isGranted(VoteOptions::SHOW_PROJECT, $project)) {
+        if (!$this->get('project_voter')->isGranted(VoteOptions::VIEW_PROJECT, $project)) {
             return $this->accessDeniedResponse();
         }
 
@@ -604,7 +605,6 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *        "data":
      *        {
      *            "id": "2",
-     *
      *        }
      *      }
      *
@@ -638,6 +638,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *      201 ="The entity was successfully created",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
+     *      404 ="Not found user or project",
      *      409 ="Invalid parameters",
      *  }
      * )
@@ -645,11 +646,39 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      * @param int $projectId
      * @param int $userId
+     * @param Request $request
      * @return JsonResponse|Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
-    public function addUserToProjectAction(int $projectId, int $userId)
+    public function addUserToProjectAction(int $projectId, int $userId, Request $request)
     {
+        $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
 
+        if (!$project instanceof Project) {
+            return $this->createApiResponse([
+                'message' => 'Project with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($userId);
+
+        if (!$user instanceof User) {
+            return $this->createApiResponse([
+                'message' => 'User with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        if (!$this->get('project_voter')->isGranted(VoteOptions::ADD_USER_TO_PROJECT, $project)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
+        $userHasProject = new UserHasProject();
+        $userHasProject->setProject($project);
+        $userHasProject->setUser($user);
+
+        return $this->updateUserHasProject($requestData, $userHasProject, true);
     }
 
     /**
@@ -692,6 +721,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *      201 ="The entity was successfully created",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
+     *      404 ="Not found user or project",
      *      409 ="Invalid parameters",
      *  }
      * )
@@ -746,6 +776,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *      201 ="The entity was successfully created",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
+     *      404 ="Not found user or project",
      *      409 ="Invalid parameters",
      *  }
      * )
@@ -783,5 +814,17 @@ class ProjectController extends ApiBaseController implements ControllerInterface
         }
 
         return $this->invalidParametersResponse();
+    }
+
+    /**
+     * @param array $requestData
+     * @param UserHasProject $userHasProject
+     * @param bool $create
+     */
+    private function updateUserHasProject(array $requestData, UserHasProject $userHasProject, $create = false)
+    {
+        $statusCode = $this->getCreateUpdateStatusCode($create);
+
+        $errors = $this->get('entity_processor')->processEntity($userHasProject, $requestData);
     }
 }

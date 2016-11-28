@@ -347,10 +347,23 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function updateAction(int $id, Request $request)
     {
-        // TODO: Implement updateAction() method.
+        $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($id);
+
+        if (!$project instanceof Project) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('project_voter')->isGranted(VoteOptions::UPDATE_PROJECT, $project)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
+
+        return $this->updateProject($project, $requestData);
     }
 
     /**
@@ -425,10 +438,23 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function updatePartialAction(int $id, Request $request)
     {
-        // TODO: Implement updatePartialAction() method.
+        $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($id);
+
+        if (!$project instanceof Project) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('project_voter')->isGranted(VoteOptions::UPDATE_PROJECT, $project)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
+
+        return $this->updateProject($project, $requestData);
     }
 
     /**

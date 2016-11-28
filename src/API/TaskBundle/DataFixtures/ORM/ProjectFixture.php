@@ -59,6 +59,16 @@ class ProjectFixture implements FixtureInterface, ContainerAwareInterface, Order
             $manager->persist($project);
             $manager->flush();
         }
+
+        if ($userAdmin instanceof User) {
+            $project = new Project();
+            $project->setTitle('Project of admin 2');
+            $project->setCreatedBy($userAdmin);
+            $project->setDescription('Description of second project of admin.');
+
+            $manager->persist($project);
+            $manager->flush();
+        }
     }
 
     /**

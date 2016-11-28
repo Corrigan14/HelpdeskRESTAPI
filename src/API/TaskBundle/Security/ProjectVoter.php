@@ -45,9 +45,9 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
             case VoteOptions::CREATE_PROJECT:
                 return $this->canCreate();
             case VoteOptions::UPDATE_PROJECT;
-                return $this->canUpdate();
+                return $this->canUpdate($project);
             case VoteOptions::DELETE_PROJECT;
-                return $this->canDelete();
+                return $this->canDelete($project);
             default:
                 return false;
         }
@@ -92,7 +92,7 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    private function canRead(Project $project):bool
+    private function canRead($project):bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
@@ -120,27 +120,31 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
     }
 
     /**
+     * @param Project $project
      * @return bool
+     * @throws \InvalidArgumentException
      */
-    private function canUpdate():bool
+    private function canUpdate($project):bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
         }
 
-        return $this->hasAclRights(VoteOptions::UPDATE_STATUS, $this->user, VoteOptions::getConstants());
+        return $this->hasAclProjectRights(VoteOptions::UPDATE_PROJECT, $project);
     }
 
     /**
+     * @param $project
      * @return bool
+     * @throws \InvalidArgumentException
      */
-    private function canDelete():bool
+    private function canDelete($project):bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
         }
 
-        return $this->hasAclRights(VoteOptions::DELETE_STATUS, $this->user, VoteOptions::getConstants());
+        return $this->hasAclProjectRights(VoteOptions::DELETE_PROJECT, $project);
     }
 
     /**

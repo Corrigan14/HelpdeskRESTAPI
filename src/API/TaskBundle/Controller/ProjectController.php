@@ -605,7 +605,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *        "data":
      *        {
      *           "id": 28,
-     *           "acl": "[\"test22258\"]",
+     *           "acl": "[\"create_task_in_project\"]",
      *           "user":
      *           {
      *             "id": 57,
@@ -719,13 +719,38 @@ class ProjectController extends ApiBaseController implements ControllerInterface
 
     /**
      *  ### Response ###
-     *      {
+     *     {
      *        "data":
      *        {
-     *            "id": "2",
-     *
+     *           "id": 28,
+     *           "acl": "[\"create_task_in_project\"]",
+     *           "user":
+     *           {
+     *             "id": 57,
+     *             "username": "testuser2",
+     *             "email": "testuser2@user.sk",
+     *             "roles": "[\"ROLE_USER\"]",
+     *             "is_active": true,
+     *             "acl": "[]",
+     *             "company": ⊕{...}
+     *           },
+     *          "project":
+     *          {
+     *            "id": 54,
+     *            "title": "Project of admin",
+     *            "description": "Description of project of admin.",
+     *            "is_active": true,
+     *            "created_by":  ⊕{...}
+     *            "created_at": "2016-11-29T17:00:00+0100",
+     *            "updated_at": "2016-11-29T17:00:00+0100"
+     *          }
+     *        },
+     *        "_links":
+     *        {
+     *          "put": "/api/v1/task-bundle/project/54/user/57",
+     *          "delete": "/api/v1/task-bundle/project/54/user/57"
      *        }
-     *      }
+     *     }
      *
      * @ApiDoc(
      *  resource = true,
@@ -773,15 +798,6 @@ class ProjectController extends ApiBaseController implements ControllerInterface
     }
 
     /**
-     *  ### Response ###
-     *      {
-     *        "data":
-     *        {
-     *            "id": "2",
-     *
-     *        }
-     *      }
-     *
      * @ApiDoc(
      *  resource = true,
      *  description="Remove users ACL from project",
@@ -870,6 +886,15 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             if (!is_array($acl)) {
                 $acl = explode(',', $acl);
                 $requestData['acl'] = $acl;
+            }
+
+            // Check if all ACL are from allowed options
+            foreach ($acl as $key => $value) {
+                if (!in_array($value, VoteOptions::getConstants(), true)) {
+                    return $this->createApiResponse([
+                        'message' => $value . ' ACL is not allowed!',
+                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                }
             }
         }
 

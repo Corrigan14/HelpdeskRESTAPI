@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Tests\Controller;
 
 use API\TaskBundle\Entity\Project;
+use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 
@@ -114,8 +115,8 @@ class ProjectControllerTest extends ApiTestCase
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Check if isActive param is set to 0
-        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
-        $this->assertEquals(true , $response['data']['is_active']);
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertEquals(true, $response['data']['is_active']);
     }
 
     /**
@@ -136,6 +137,65 @@ class ProjectControllerTest extends ApiTestCase
 
         // Try to restore  Entity with not existed ID (as Admin)
         $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/1125874' . '/restore', [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * test for CREATE UserHasProject Entity - success
+     */
+    public function addUserToProjectSuccess()
+    {
+        $adminProject = $this->findOneAdminEntity();
+        $user = $this->em->getRepository('APICoreBundle:User')->findOneBy([
+            'username' => 'user'
+        ]);
+        $acl = [];
+        $acl[] = VoteOptions::CREATE_TASK_IN_PROJECT;
+        $acl[] = VoteOptions::VIEW_ALL_TASKS_IN_PROJECT;
+
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminProject->getId() . '/user/' . $user->getId(),
+            [$acl], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * test for CREATE UserHasProject Entity - error
+     */
+    public function addUserToProjectError()
+    {
+        $adminProject = $this->findOneAdminEntity();
+        $user = $this->em->getRepository('APICoreBundle:User')->findOneBy([
+            'username' => 'user'
+        ]);
+        $acl = [];
+        $acl[] = VoteOptions::CREATE_TASK_IN_PROJECT;
+        $acl[] = VoteOptions::VIEW_ALL_TASKS_IN_PROJECT;
+
+        $errorAcl = [];
+        $errorAcl[] = 'test';
+
+        // Try to create Entity without authorization header
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminProject->getId() . '/user/' . $user->getId(),
+            [$acl], [], []);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to create Entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminProject->getId() . '/user/' . $user->getId(),
+            [$acl], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to create Entity with invalid project Id - project doesn't exist
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . 2357841 . '/user/' . $user->getId(),
+            [$acl], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to create Entity with invalid ACL data - acl has to be allowed in VoteOptions
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminProject->getId() . '/user/' . $user->getId(),
+            [$errorAcl], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
     }

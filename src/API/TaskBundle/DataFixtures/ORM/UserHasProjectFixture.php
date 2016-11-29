@@ -50,7 +50,7 @@ class UserHasProjectFixture implements FixtureInterface, ContainerAwareInterface
         if ($userUser instanceof User && $adminsProject instanceof Project) {
             $acl = [];
             $acl[] = VoteOptions::UPDATE_PROJECT;
-            $acl[] = VoteOptions::SHOW_PROJECT;
+            $acl[] = VoteOptions::VIEW_PROJECT;
 
             $userHasProject = new UserHasProject();
             $userHasProject->setUser($userUser);

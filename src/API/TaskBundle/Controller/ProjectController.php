@@ -601,12 +601,38 @@ class ProjectController extends ApiBaseController implements ControllerInterface
 
     /**
      *  ### Response ###
-     *      {
+     *     {
      *        "data":
      *        {
-     *            "id": "2",
+     *           "id": 28,
+     *           "acl": "[\"test22258\"]",
+     *           "user":
+     *           {
+     *             "id": 57,
+     *             "username": "testuser2",
+     *             "email": "testuser2@user.sk",
+     *             "roles": "[\"ROLE_USER\"]",
+     *             "is_active": true,
+     *             "acl": "[]",
+     *             "company": ⊕{...}
+     *           },
+     *          "project":
+     *          {
+     *            "id": 54,
+     *            "title": "Project of admin",
+     *            "description": "Description of project of admin.",
+     *            "is_active": true,
+     *            "created_by":  ⊕{...}
+     *            "created_at": "2016-11-29T17:00:00+0100",
+     *            "updated_at": "2016-11-29T17:00:00+0100"
+     *          }
+     *        },
+     *        "_links":
+     *        {
+     *          "put": "/api/v1/task-bundle/project/54/user/57",
+     *          "delete": "/api/v1/task-bundle/project/54/user/57"
      *        }
-     *      }
+     *     }
      *
      * @ApiDoc(
      *  resource = true,
@@ -674,9 +700,19 @@ class ProjectController extends ApiBaseController implements ControllerInterface
         }
 
         $requestData = $request->request->all();
-        $userHasProject = new UserHasProject();
-        $userHasProject->setProject($project);
-        $userHasProject->setUser($user);
+
+        $existedUserHasProjectEntity = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+            'project' => $project,
+            'user' => $user,
+        ]);
+
+        if ($existedUserHasProjectEntity instanceof UserHasProject) {
+            $userHasProject = $existedUserHasProjectEntity;
+        } else {
+            $userHasProject = new UserHasProject();
+            $userHasProject->setProject($project);
+            $userHasProject->setUser($user);
+        }
 
         return $this->updateUserHasProject($requestData, $userHasProject, true);
     }
@@ -820,11 +856,34 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @param array $requestData
      * @param UserHasProject $userHasProject
      * @param bool $create
+     * @throws \LogicException
+     *
+     * @return Response|JsonResponse
      */
     private function updateUserHasProject(array $requestData, UserHasProject $userHasProject, $create = false)
     {
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
+        if (array_key_exists('acl', $requestData)) {
+            $acl = $requestData['acl'];
+
+            if (!is_array($acl)) {
+                $acl = explode(',', $acl);
+                $requestData['acl'] = $acl;
+            }
+        }
+
         $errors = $this->get('entity_processor')->processEntity($userHasProject, $requestData);
+
+        if (false === $errors) {
+
+            $this->getDoctrine()->getManager()->persist($userHasProject);
+            $this->getDoctrine()->getManager()->flush();
+
+            $response = $this->get('project_service')->getUserHasProjectResponse($userHasProject, $userHasProject->getProject()->getId(), $userHasProject->getUser()->getId());
+            return $this->createApiResponse($response, $statusCode);
+        }
+
+        return $this->invalidParametersResponse();
     }
 }

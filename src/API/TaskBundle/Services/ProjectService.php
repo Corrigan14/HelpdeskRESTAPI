@@ -6,6 +6,7 @@ use API\CoreBundle\Entity\User;
 use API\CoreBundle\Repository\UserRepository;
 use API\CoreBundle\Services\HateoasHelper;
 use API\TaskBundle\Entity\Project;
+use API\TaskBundle\Entity\UserHasProject;
 use API\TaskBundle\Repository\ProjectRepository;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
@@ -79,6 +80,34 @@ class ProjectService
         return [
             'data' => $project,
             '_links' => $this->getProjectLinks($project->getId()),
+        ];
+    }
+
+    /**
+     * Return UserHasProject Response which includes all data about UHP Entity and Links to update/partialUpdate/delete
+     * @param UserHasProject $userHasProject
+     * @param int $projectId
+     * @param int $userId
+     * @return array
+     */
+    public function getUserHasProjectResponse(UserHasProject $userHasProject, int $projectId, int $userId):array
+    {
+        return [
+            'data' => $userHasProject,
+            '_links' => $this->getUserHasProjectLinks($projectId, $userId),
+        ];
+    }
+
+    /**
+     * @param int $projectId
+     * @param int $userId
+     * @return array
+     */
+    private function getUserHasProjectLinks(int $projectId, int $userId):array
+    {
+        return [
+            'put' => $this->router->generate('project_update_user_acl', ['projectId' => $projectId, 'userId' => $userId]),
+            'delete' => $this->router->generate('project_remove_from_user', ['projectId' => $projectId, 'userId' => $userId]),
         ];
     }
 

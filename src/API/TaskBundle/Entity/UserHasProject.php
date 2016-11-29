@@ -30,7 +30,6 @@ class UserHasProject
      * @var array
      *
      * @ORM\Column(name="acl", type="text", nullable=true)
-     * @Assert\Type("array")
      */
     private $acl;
 

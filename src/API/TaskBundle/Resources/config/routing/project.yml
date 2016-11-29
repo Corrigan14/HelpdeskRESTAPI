@@ -44,7 +44,7 @@ projects_restore:
             id: '\d+'
 
 project_add_to_user:
-    path:     /project/{projectId}/{user}/{userId}
+    path:     /project/{projectId}/user/{userId}
     defaults: { _controller: APITaskBundle:Project:addUserToProject }
     methods: [POST]
     requirements:
@@ -52,7 +52,7 @@ project_add_to_user:
             userId: '\d+'
 
 project_update_user_acl:
-    path:     /project/{projectId}/{user}/{userId}
+    path:     /project/{projectId}/user/{userId}
     defaults: { _controller: APITaskBundle:Project:updateUserProjectAcl }
     methods: [PUT]
     requirements:
@@ -60,7 +60,7 @@ project_update_user_acl:
             userId: '\d+'
 
 project_remove_from_user:
-    path:     /project/{projectId}/{user}/{userId}
+    path:     /project/{projectId}/user/{userId}
     defaults: { _controller: APITaskBundle:Project:removeUserFromProject }
     methods: [DELETE]
     requirements:

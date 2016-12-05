@@ -52,6 +52,8 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
                 return $this->canAddUserToProject($project);
             case VoteOptions::REMOVE_USER_FROM_PROJECT;
                 return $this->canRemoveUserFromProject($project);
+            case VoteOptions::EDIT_USER_ACL_IN_PROJECT;
+                return $this->canEditUserAclInProject($project);
             default:
                 return false;
         }
@@ -193,6 +195,24 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
         }
 
         return $this->hasAclProjectRights(VoteOptions::REMOVE_USER_FROM_PROJECT, $project);
+    }
+
+    /**
+     * @param Project $project
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    private function canEditUserAclInProject($project):bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        if ($project->getCreatedBy() === $this->user) {
+            return true;
+        }
+
+        return $this->hasAclProjectRights(VoteOptions::EDIT_USER_ACL_IN_PROJECT, $project);
     }
 
     /**

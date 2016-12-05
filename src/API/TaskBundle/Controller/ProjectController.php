@@ -792,11 +792,49 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      * @param int $projectId
      * @param int $userId
+     * @param Request $request
      * @return JsonResponse|Response
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
      */
-    public function updateUserProjectAclAction(int $projectId, int $userId)
+    public function updateUserProjectAclAction(int $projectId, int $userId, Request $request)
     {
+        $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
 
+        if (!$project instanceof Project) {
+            return $this->createApiResponse([
+                'message' => 'Project with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($userId);
+
+        if (!$user instanceof User) {
+            return $this->createApiResponse([
+                'message' => 'User with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        if (!$this->get('project_voter')->isGranted(VoteOptions::EDIT_USER_ACL_IN_PROJECT, $project)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $existedUserHasProjectEntity = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+            'project' => $project,
+            'user' => $user,
+        ]);
+
+        if (!$existedUserHasProjectEntity instanceof UserHasProject) {
+            return $this->createApiResponse([
+                'message' => 'Users ACL in requested project was not found!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $requestData = $request->request->all();
+
+        return $this->updateUserHasProject($requestData, $existedUserHasProjectEntity);
     }
 
     /**

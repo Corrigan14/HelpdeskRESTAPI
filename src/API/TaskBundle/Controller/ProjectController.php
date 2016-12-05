@@ -674,6 +674,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @param int $userId
      * @param Request $request
      * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -799,7 +801,6 @@ class ProjectController extends ApiBaseController implements ControllerInterface
 
     /**
      * @ApiDoc(
-     *  resource = true,
      *  description="Remove users ACL from project",
      *  requirements={
      *     {
@@ -815,7 +816,6 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *       "description"="The id of user"
      *     },
      *  },
-     *  input={"class"="API\TaskBundle\Entity\UserHasProject"},
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -823,13 +823,11 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  output={"class"="API\TaskBundle\Entity\UserHasProject"},
      *  statusCodes={
-     *      201 ="The entity was successfully created",
+     *      204 ="The entity was successfully deleted",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
-     *      404 ="Not found user or project",
-     *      409 ="Invalid parameters",
+     *      404 ="Not found user or project"
      *  }
      * )
      *
@@ -837,9 +835,48 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @param int $projectId
      * @param int $userId
      * @return JsonResponse|Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function removeUserFromProjectAction(int $projectId, int $userId)
     {
+        $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
+
+        if (!$project instanceof Project) {
+            return $this->createApiResponse([
+                'message' => 'Project with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($userId);
+
+        if (!$user instanceof User) {
+            return $this->createApiResponse([
+                'message' => 'User with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        if (!$this->get('project_voter')->isGranted(VoteOptions::REMOVE_USER_FROM_PROJECT, $project)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+            'project' => $project,
+            'user' => $user
+        ]);
+
+        if ($userHasProject instanceof UserHasProject) {
+            $this->getDoctrine()->getManager()->remove($userHasProject);
+            $this->getDoctrine()->getManager()->flush();
+
+            return $this->createApiResponse([
+                'message' => StatusCodesHelper::DELETED_MESSAGE,
+            ], StatusCodesHelper::DELETED_CODE);
+        }
+
+        return $this->createApiResponse([
+            'message' => 'The requested User did not have permission to requested Project!',
+        ], StatusCodesHelper::NOT_FOUND_CODE);
 
     }
 
@@ -850,6 +887,9 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @throws \LogicException
      *
      * @return Response|JsonResponse
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function updateProject(Project $project, $requestData, $create = false)
     {
@@ -875,6 +915,9 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @throws \LogicException
      *
      * @return Response|JsonResponse
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function updateUserHasProject(array $requestData, UserHasProject $userHasProject, $create = false)
     {

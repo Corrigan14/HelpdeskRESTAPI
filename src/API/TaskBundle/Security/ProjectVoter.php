@@ -50,6 +50,8 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
                 return $this->canDelete($project);
             case VoteOptions::ADD_USER_TO_PROJECT;
                 return $this->canAddUserToProject($project);
+            case VoteOptions::REMOVE_USER_FROM_PROJECT;
+                return $this->canRemoveUserFromProject($project);
             default:
                 return false;
         }
@@ -176,6 +178,24 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
     }
 
     /**
+     * @param Project $project
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    private function canRemoveUserFromProject($project):bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        if ($project->getCreatedBy() === $this->user) {
+            return true;
+        }
+
+        return $this->hasAclProjectRights(VoteOptions::REMOVE_USER_FROM_PROJECT, $project);
+    }
+
+    /**
      * Every User has a custom array of access rights to every project
      *
      * @param string $action
@@ -187,7 +207,7 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
     public function hasAclProjectRights($action, Project $project)
     {
         if (!in_array($action, VoteOptions::getConstants(), true)) {
-            throw new \InvalidArgumentException('Action ins not valid, please list your action in the options list');
+            throw new \InvalidArgumentException('Action is not valid, please list your action in the options list');
         }
 
         $userHasProjects = $this->user->getUserHasProjects();

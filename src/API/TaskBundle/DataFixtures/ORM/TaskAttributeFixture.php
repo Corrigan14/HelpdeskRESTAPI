@@ -1,7 +1,7 @@
 <?php
 namespace API\TaskBundle\DataFixtures\ORM;
 
-use API\TaskBundle\Entity\CompanyAttribute;
+use API\TaskBundle\Entity\TaskAttribute;
 use API\TaskBundle\Services\VariableHelper;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
@@ -10,11 +10,11 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class CompanyAttributeFixture
+ * Class TaskAttributeFixture
  *
  * @package API\TaskBundle\DataFixtures\ORM
  */
-class CompanyAttributeFixture implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
+class TaskAttributeFixture implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
 {
 
     /**
@@ -24,26 +24,26 @@ class CompanyAttributeFixture implements FixtureInterface, ContainerAwareInterfa
      */
     public function load(ObjectManager $manager)
     {
-        $ca = new CompanyAttribute();
-        $ca->setTitle('input company additional attribute');
-        $ca->setType(VariableHelper::INPUT);
-        $manager->persist($ca);
+        $ta = new TaskAttribute();
+        $ta->setTitle('input task additional attribute');
+        $ta->setType(VariableHelper::INPUT);
+        $manager->persist($ta);
 
-        $ca = new CompanyAttribute();
-        $ca->setTitle('select company additional attribute');
-        $ca->setType(VariableHelper::SIMPLE_SELECT);
+        $ta = new TaskAttribute();
+        $ta->setTitle('select task additional attribute');
+        $ta->setType(VariableHelper::SIMPLE_SELECT);
         $options = [
             'select1' => 'select1',
             'select2' => 'select2',
             'select3' => 'select3',
         ];
-        $ca->setOptions($options);
-        $manager->persist($ca);
+        $ta->setOptions($options);
+        $manager->persist($ta);
 
-        $ca = new CompanyAttribute();
-        $ca->setTitle('integer number company additional attribute');
-        $ca->setType(VariableHelper::INTEGER_NUMBER);
-        $manager->persist($ca);
+        $ta = new TaskAttribute();
+        $ta->setTitle('integer number task additional attribute');
+        $ta->setType(VariableHelper::INTEGER_NUMBER);
+        $manager->persist($ta);
 
         $manager->flush();
     }
@@ -55,7 +55,7 @@ class CompanyAttributeFixture implements FixtureInterface, ContainerAwareInterfa
      */
     public function getOrder()
     {
-        return 4;
+        return 8;
     }
 
     public function setContainer(ContainerInterface $container = null)

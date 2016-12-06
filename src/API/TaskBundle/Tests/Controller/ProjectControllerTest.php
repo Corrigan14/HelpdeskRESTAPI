@@ -142,86 +142,86 @@ class ProjectControllerTest extends ApiTestCase
         $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
-    /**
-     * test for CREATE UserHasProject Entity - success
-     */
-    public function testAddUserToProjectSuccess()
-    {
-        $adminProject = $this->findOneAdminEntity();
-        $user = $this->em->getRepository('APICoreBundle:User')->findOneBy([
-            'username' => 'user'
-        ]);
-        $acl = [];
-        $acl[] = VoteOptions::CREATE_TASK_IN_PROJECT;
-        $acl[] = VoteOptions::VIEW_ALL_TASKS_IN_PROJECT;
-
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminProject->getId() . '/user/' . $user->getId(),
-            [$acl], [],
-            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
-    }
-
-    /**
-     * test for CREATE UserHasProject Entity - error
-     */
-    public function testAddUserToProjectError()
-    {
-        $adminProject = $this->findOneAdminEntity();
-        $user = $this->em->getRepository('APICoreBundle:User')->findOneBy([
-            'username' => 'user'
-        ]);
-        $acl = [];
-        $acl[] = VoteOptions::CREATE_TASK_IN_PROJECT;
-        $acl[] = VoteOptions::VIEW_ALL_TASKS_IN_PROJECT;
-
-        $errorAcl = [];
-        $errorAcl[] = 'test';
-
-        // Try to create Entity without authorization header
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminProject->getId() . '/user/' . $user->getId(),
-            [$acl], [], []);
-        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        // Try to create Entity with ROLE_USER which hasn't permission to this action
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminProject->getId() . '/user/' . $user->getId(),
-            [$acl], [],
-            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
-        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        // Try to create Entity with invalid project Id - project doesn't exist
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . 2357841 . '/user/' . $user->getId(),
-            [$acl], [],
-            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        // Try to create Entity with invalid ACL data - acl has to be allowed in VoteOptions
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminProject->getId() . '/user/' . $user->getId(),
-            [$errorAcl], [],
-            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
-    }
-
-    /**
-     * test for DELETE UserHasProject Entity - success
-     */
-    public function testRemoveUserFromProjectSuccess()
-    {
-        $userHasProjectEntity = $this->findUserHasProjectEntity();
-        $user = $userHasProjectEntity->getUser();
-        $project = $userHasProjectEntity->getProject();
-
-        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/project/' . $project->getId() . '/user/' . $user->getId(),
-            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::DELETED_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        // Check if UserHasProject Entity was removed
-        $userHasProjectEntityAfter = $this->em->getRepository('APITaskBundle:UserHasProject')->findOneBy([
-            'user' => $user,
-            'project' => $project,
-        ]);
-
-        $this->assertEquals(null, $userHasProjectEntityAfter);
-    }
+//    /**
+//     * test for CREATE UserHasProject Entity - success
+//     */
+//    public function testAddUserToProjectSuccess()
+//    {
+//        $adminProject = $this->findOneAdminEntity();
+//        $user = $this->em->getRepository('APICoreBundle:User')->findOneBy([
+//            'username' => 'user'
+//        ]);
+//        $acl = [];
+//        $acl[] = VoteOptions::CREATE_TASK_IN_PROJECT;
+//        $acl[] = VoteOptions::VIEW_ALL_TASKS_IN_PROJECT;
+//
+//        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminProject->getId() . '/user/' . $user->getId(),
+//            [$acl], [],
+//            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+//        $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
+//    }
+//
+//    /**
+//     * test for CREATE UserHasProject Entity - error
+//     */
+//    public function testAddUserToProjectError()
+//    {
+//        $adminProject = $this->findOneAdminEntity();
+//        $user = $this->em->getRepository('APICoreBundle:User')->findOneBy([
+//            'username' => 'user'
+//        ]);
+//        $acl = [];
+//        $acl[] = VoteOptions::CREATE_TASK_IN_PROJECT;
+//        $acl[] = VoteOptions::VIEW_ALL_TASKS_IN_PROJECT;
+//
+//        $errorAcl = [];
+//        $errorAcl[] = 'test';
+//
+//        // Try to create Entity without authorization header
+//        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminProject->getId() . '/user/' . $user->getId(),
+//            [$acl], [], []);
+//        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+//
+//        // Try to create Entity with ROLE_USER which hasn't permission to this action
+//        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminProject->getId() . '/user/' . $user->getId(),
+//            [$acl], [],
+//            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+//        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+//
+//        // Try to create Entity with invalid project Id - project doesn't exist
+//        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . 2357841 . '/user/' . $user->getId(),
+//            [$acl], [],
+//            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+//        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+//
+//        // Try to create Entity with invalid ACL data - acl has to be allowed in VoteOptions
+//        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminProject->getId() . '/user/' . $user->getId(),
+//            [$errorAcl], [],
+//            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+//        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+//    }
+//
+//    /**
+//     * test for DELETE UserHasProject Entity - success
+//     */
+//    public function testRemoveUserFromProjectSuccess()
+//    {
+//        $userHasProjectEntity = $this->findUserHasProjectEntity();
+//        $user = $userHasProjectEntity->getUser();
+//        $project = $userHasProjectEntity->getProject();
+//
+//        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/project/' . $project->getId() . '/user/' . $user->getId(),
+//            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+//        $this->assertEquals(StatusCodesHelper::DELETED_CODE, $this->getClient()->getResponse()->getStatusCode());
+//
+//        // Check if UserHasProject Entity was removed
+//        $userHasProjectEntityAfter = $this->em->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+//            'user' => $user,
+//            'project' => $project,
+//        ]);
+//
+//        $this->assertEquals(null, $userHasProjectEntityAfter);
+//    }
 
     /**
      * Get the url for requests

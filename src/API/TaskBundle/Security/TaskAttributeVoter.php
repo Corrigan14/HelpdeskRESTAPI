@@ -5,6 +5,7 @@ namespace API\TaskBundle\Security;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Security\ApiBaseVoter;
 use API\CoreBundle\Security\VoterInterface;
+use API\TaskBundle\Entity\TaskAttribute;
 
 /**
  * Class TaskAttributeVoter
@@ -38,6 +39,8 @@ class TaskAttributeVoter extends ApiBaseVoter implements VoterInterface
         switch ($action) {
             case VoteOptions::LIST_TASK_ATTRIBUTES:
                 return $this->canList();
+            case VoteOptions::SHOW_COMPANY_ATTRIBUTE:
+                return $this->canRead();
             default:
                 return false;
         }
@@ -49,7 +52,21 @@ class TaskAttributeVoter extends ApiBaseVoter implements VoterInterface
      *
      * @return bool
      */
-    private function canList()
+    private function canList():bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        return $this->hasAclRights(VoteOptions::LIST_TASK_ATTRIBUTES, $this->user, VoteOptions::getConstants());
+    }
+
+    /**
+     * User can see the task attribute
+     *
+     * @return bool
+     */
+    private function canRead():bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;

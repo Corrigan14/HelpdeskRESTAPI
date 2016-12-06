@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Controller;
 
+use API\TaskBundle\Entity\TaskAttribute;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
@@ -139,10 +140,24 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *
      * @param int $id
      * @return JsonResponse|Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function getAction(int $id)
     {
-        // TODO: Implement getAction() method.
+        $ta = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($id);
+
+        if (!$ta instanceof TaskAttribute) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('task_attribute_voter')->isGranted(VoteOptions::SHOW_TASK_ATTRIBUTE)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $caArray = $this->get('task_attribute_service')->getTaskAttributeResponse($ta);
+
+        return $this->createApiResponse($caArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

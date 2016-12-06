@@ -49,6 +49,13 @@ class VoteOptions
     const VIEW_COMPANY_TASKS_IN_PROJECT = 'view_company_tasks_in_project';
     const VIEW_USER_TASKS_IN_PROJECT = 'view_user_tasks_in_project';
 
+    // TASK ATTRIBUTE CRUD
+    const CREATE_TASK_ATTRIBUTE = 'create_task_attribute';
+    const SHOW_TASK_ATTRIBUTE = 'read_task_attribute';
+    const UPDATE_TASK_ATTRIBUTE = 'update_task_attribute';
+    const DELETE_TASK_ATTRIBUTE = 'delete_task_attribute';
+    const LIST_TASK_ATTRIBUTES = 'list_task_attributes';
+
     /**
      * @return array
      */

@@ -2,8 +2,10 @@
 
 namespace API\TaskBundle\Controller;
 
+use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
+use Igsem\APIBundle\Services\StatusCodesHelper;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -71,10 +73,23 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *
      * @param Request $request
      * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function listAction(Request $request)
     {
-        // TODO: Implement listAction() method.
+        if (!$this->get('task_attribute_voter')->isGranted(VoteOptions::LIST_TASK_ATTRIBUTES)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $page = $request->get('page') ?: 1;
+        $isActive = $request->get('isActive') ?: 'all';
+
+        $options['isActive'] = $isActive;
+
+        return $this->json($this->get('task_attribute_service')->getTaskAttributesResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

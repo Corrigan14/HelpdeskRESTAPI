@@ -19,3 +19,9 @@ services:
     project_service:
           class: API\TaskBundle\Services\ProjectService
           arguments: ["@doctrine.orm.entity_manager", "@router"]
+    task_attribute_voter:
+          class: API\TaskBundle\Security\TaskAttributeVoter
+          arguments: ["@security.access.decision_manager","@security.token_storage", "@doctrine.orm.entity_manager"]
+    task_attribute_service:
+          class: API\TaskBundle\Services\TaskAttributeService
+          arguments: ["@doctrine.orm.entity_manager", "@router"]

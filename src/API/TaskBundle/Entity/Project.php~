@@ -9,6 +9,7 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ReadOnly;
+use JMS\Serializer\Annotation\Exclude;
 
 /**
  * Project
@@ -59,6 +60,7 @@ class Project
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="projects")
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
+     * @ReadOnly()
      */
     private $createdBy;
 
@@ -66,6 +68,7 @@ class Project
      * @var ArrayCollection
      *
      * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\UserHasProject", mappedBy="project")
+     * @Exclude()
      */
     private $userHasProjects;
 

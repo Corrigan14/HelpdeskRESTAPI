@@ -3,7 +3,6 @@
 namespace API\TaskBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ReadOnly;
@@ -64,7 +63,7 @@ class TaskAttribute
 
 
     /**
-     * @var
+     * @var ArrayCollection
      *
      * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskData", mappedBy="taskAttribute")
      * @Serializer\Exclude()
@@ -184,38 +183,5 @@ class TaskAttribute
     {
         return $this->is_active;
     }
-
-    /**
-     * Add taskDatum
-     *
-     * @param TaskData $taskDatum
-     *
-     * @return TaskAttribute
-     */
-    public function addTaskDatum(TaskData $taskDatum)
-    {
-        $this->taskData[] = $taskDatum;
-
-        return $this;
-    }
-
-    /**
-     * Remove taskDatum
-     *
-     * @param TaskData $taskDatum
-     */
-    public function removeTaskDatum(TaskData $taskDatum)
-    {
-        $this->taskData->removeElement($taskDatum);
-    }
-
-    /**
-     * Get taskData
-     *
-     * @return Collection
-     */
-    public function getTaskData()
-    {
-        return $this->taskData;
-    }
 }
+

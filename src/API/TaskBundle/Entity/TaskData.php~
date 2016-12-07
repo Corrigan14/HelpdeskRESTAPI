@@ -74,5 +74,28 @@ class TaskData
     {
         return $this->value;
     }
-}
 
+    /**
+     * Set taskAttribute
+     *
+     * @param TaskAttribute $taskAttribute
+     *
+     * @return TaskData
+     */
+    public function setTaskAttribute(TaskAttribute $taskAttribute)
+    {
+        $this->taskAttribute = $taskAttribute;
+
+        return $this;
+    }
+
+    /**
+     * Get taskAttribute
+     *
+     * @return TaskAttribute
+     */
+    public function getTaskAttribute()
+    {
+        return $this->taskAttribute;
+    }
+}

@@ -3,21 +3,17 @@
 namespace API\TaskBundle\Entity;
 
 use API\CoreBundle\Entity\User;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
-use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation as Serializer;
-use JMS\Serializer\Annotation\ReadOnly;
-use JMS\Serializer\Annotation\Exclude;
 
 /**
- * Project
+ * Task
  *
- * @ORM\Table(name="project")
- * @ORM\Entity(repositoryClass="API\TaskBundle\Repository\ProjectRepository")
+ * @ORM\Table(name="task")
+ * @ORM\Entity(repositoryClass="API\TaskBundle\Repository\TaskRepository")
  */
-class Project
+class Task
 {
     use TimestampableEntity;
 
@@ -27,7 +23,7 @@ class Project
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ReadOnly()
+     * @Serializer\ReadOnly()
      */
     private $id;
 
@@ -35,8 +31,6 @@ class Project
      * @var string
      *
      * @ORM\Column(name="title", type="string", length=255)
-     * @Assert\NotBlank(message="Title of status is required")
-     * @Assert\Type("string")
      */
     private $title;
 
@@ -48,46 +42,43 @@ class Project
     private $description;
 
     /**
-     * @ORM\Column(name="is_active", type="boolean", options={"default":1})
-     * @ReadOnly()
+     * @var \DateTime
      *
-     * @var bool
+     * @ORM\Column(name="deadline", type="datetime", nullable=true)
      */
-    private $is_active = true;
+    private $deadline;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="important", type="boolean", options={"default":0})
+     */
+    private $important;
 
     /**
      * @var User
      *
-     * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="projects")
+     * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="createdTasks")
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
-     * @ReadOnly()
      */
     private $createdBy;
 
     /**
-     * @var ArrayCollection
+     * @var User
      *
-     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\UserHasProject", mappedBy="project")
-     * @Exclude()
+     * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="requestedTasks")
+     * @ORM\JoinColumn(name="requested_by", referencedColumnName="id", nullable=false)
      */
-    private $userHasProjects;
+    private $requestedBy;
 
     /**
-     * @var ArrayCollection
+     * @var Project
      *
-     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Task", mappedBy="project")
-     * @Exclude()
+     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Project", inversedBy="task")
+     * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=true)
      */
-    private $tasks;
+    private $project;
 
-    /**
-     * Project constructor.
-     */
-    public function __construct()
-    {
-        $this->userHasProjects = new ArrayCollection();
-        $this->tasks = new ArrayCollection();
-    }
 
     /**
      * Get id
@@ -104,7 +95,7 @@ class Project
      *
      * @param string $title
      *
-     * @return Project
+     * @return Task
      */
     public function setTitle($title)
     {
@@ -128,7 +119,7 @@ class Project
      *
      * @param string $description
      *
-     * @return Project
+     * @return Task
      */
     public function setDescription($description)
     {
@@ -148,27 +139,51 @@ class Project
     }
 
     /**
-     * Set isActive
+     * Set deadline
      *
-     * @param boolean $isActive
+     * @param \DateTime $deadline
      *
-     * @return Project
+     * @return Task
      */
-    public function setIsActive($isActive)
+    public function setDeadline($deadline)
     {
-        $this->is_active = $isActive;
+        $this->deadline = $deadline;
 
         return $this;
     }
 
     /**
-     * Get isActive
+     * Get deadline
      *
-     * @return boolean
+     * @return \DateTime
      */
-    public function getIsActive()
+    public function getDeadline()
     {
-        return $this->is_active;
+        return $this->deadline;
+    }
+
+    /**
+     * Set important
+     *
+     * @param boolean $important
+     *
+     * @return Task
+     */
+    public function setImportant($important)
+    {
+        $this->important = $important;
+
+        return $this;
+    }
+
+    /**
+     * Get important
+     *
+     * @return bool
+     */
+    public function getImportant()
+    {
+        return $this->important;
     }
 
     /**
@@ -176,7 +191,7 @@ class Project
      *
      * @param User $createdBy
      *
-     * @return Project
+     * @return Task
      */
     public function setCreatedBy(User $createdBy)
     {
@@ -196,36 +211,50 @@ class Project
     }
 
     /**
-     * Add userHasProject
+     * Set requestedBy
      *
-     * @param UserHasProject $userHasProject
+     * @param User $requestedBy
      *
-     * @return Project
+     * @return Task
      */
-    public function addUserHasProject(UserHasProject $userHasProject)
+    public function setRequestedBy(User $requestedBy)
     {
-        $this->userHasProjects[] = $userHasProject;
+        $this->requestedBy = $requestedBy;
 
         return $this;
     }
 
     /**
-     * Remove userHasProject
+     * Get requestedBy
      *
-     * @param UserHasProject $userHasProject
+     * @return User
      */
-    public function removeUserHasProject(UserHasProject $userHasProject)
+    public function getRequestedBy()
     {
-        $this->userHasProjects->removeElement($userHasProject);
+        return $this->requestedBy;
     }
 
     /**
-     * Get userHasProjects
+     * Set project
      *
-     * @return ArrayCollection
+     * @param Project $project
+     *
+     * @return Task
      */
-    public function getUserHasProjects()
+    public function setProject(Project $project = null)
     {
-        return $this->userHasProjects;
+        $this->project = $project;
+
+        return $this;
+    }
+
+    /**
+     * Get project
+     *
+     * @return Project
+     */
+    public function getProject()
+    {
+        return $this->project;
     }
 }

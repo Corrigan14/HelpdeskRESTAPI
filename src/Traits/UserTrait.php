@@ -5,8 +5,11 @@ namespace Traits;
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Tag;
+use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\UserHasProject;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\Exclude;
 
 /**
@@ -39,6 +42,22 @@ trait UserTrait
      * @var ArrayCollection
      */
     private $userHasProjects;
+
+    /**
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Task", mappedBy="createdBy")
+     * @Exclude()
+     *
+     * @var ArrayCollection
+     */
+    private $createdTasks;
+
+    /**
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Task", mappedBy="requested_by")
+     * @Exclude()
+     *
+     * @var ArrayCollection
+     */
+    private $requestedTasks;
 
     /**
      * Add tag
@@ -97,7 +116,7 @@ trait UserTrait
     /**
      * Get projects
      *
-     * @return ArrayCollection
+     * @return Collection
      */
     public function getProjects()
     {
@@ -131,11 +150,79 @@ trait UserTrait
     /**
      * Get userHasProjects
      *
-     * @return ArrayCollection
+     * @return Collection
      */
     public function getUserHasProjects()
     {
         return $this->userHasProjects;
+    }
+
+    /**
+     * Add createdTask
+     *
+     * @param Task $createdTask
+     *
+     * @return User
+     */
+    public function addCreatedTask(Task $createdTask)
+    {
+        $this->createdTasks[] = $createdTask;
+
+        return $this;
+    }
+
+    /**
+     * Remove createdTask
+     *
+     * @param Task $createdTask
+     */
+    public function removeCreatedTask(Task $createdTask)
+    {
+        $this->createdTasks->removeElement($createdTask);
+    }
+
+    /**
+     * Get createdTasks
+     *
+     * @return Collection
+     */
+    public function getCreatedTasks()
+    {
+        return $this->createdTasks;
+    }
+
+    /**
+     * Add requestedTask
+     *
+     * @param Task $requestedTask
+     *
+     * @return User
+     */
+    public function addRequestedTask(Task $requestedTask)
+    {
+        $this->requestedTasks[] = $requestedTask;
+
+        return $this;
+    }
+
+    /**
+     * Remove requestedTask
+     *
+     * @param Task $requestedTask
+     */
+    public function removeRequestedTask(Task $requestedTask)
+    {
+        $this->requestedTasks->removeElement($requestedTask);
+    }
+
+    /**
+     * Get requestedTask
+     *
+     * @return Collection
+     */
+    public function getRequestedTask()
+    {
+        return $this->requestedTasks;
     }
 
 }

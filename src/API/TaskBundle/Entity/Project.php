@@ -4,6 +4,7 @@ namespace API\TaskBundle\Entity;
 
 use API\CoreBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -73,11 +74,20 @@ class Project
     private $userHasProjects;
 
     /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Task", mappedBy="project")
+     * @Exclude()
+     */
+    private $tasks;
+
+    /**
      * Project constructor.
      */
     public function __construct()
     {
         $this->userHasProjects = new ArrayCollection();
+        $this->tasks = new ArrayCollection();
     }
 
     /**
@@ -218,5 +228,39 @@ class Project
     public function getUserHasProjects()
     {
         return $this->userHasProjects;
+    }
+
+    /**
+     * Add task
+     *
+     * @param Task $task
+     *
+     * @return Project
+     */
+    public function addTask(Task $task)
+    {
+        $this->tasks[] = $task;
+
+        return $this;
+    }
+
+    /**
+     * Remove task
+     *
+     * @param Task $task
+     */
+    public function removeTask(Task $task)
+    {
+        $this->tasks->removeElement($task);
+    }
+
+    /**
+     * Get tasks
+     *
+     * @return Collection
+     */
+    public function getTasks()
+    {
+        return $this->tasks;
     }
 }

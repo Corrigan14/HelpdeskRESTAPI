@@ -39,8 +39,10 @@ class TaskAttributeVoter extends ApiBaseVoter implements VoterInterface
         switch ($action) {
             case VoteOptions::LIST_TASK_ATTRIBUTES:
                 return $this->canList();
-            case VoteOptions::SHOW_COMPANY_ATTRIBUTE:
+            case VoteOptions::SHOW_TASK_ATTRIBUTE:
                 return $this->canRead();
+            case VoteOptions::CREATE_TASK_ATTRIBUTE:
+                return $this->canCreate();
             default:
                 return false;
         }
@@ -73,5 +75,19 @@ class TaskAttributeVoter extends ApiBaseVoter implements VoterInterface
         }
 
         return $this->hasAclRights(VoteOptions::LIST_TASK_ATTRIBUTES, $this->user, VoteOptions::getConstants());
+    }
+
+    /**
+     * User can create the task attribute
+     *
+     * @return bool
+     */
+    private function canCreate():bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        return $this->hasAclRights(VoteOptions::CREATE_TASK_ATTRIBUTE, $this->user, VoteOptions::getConstants());
     }
 }

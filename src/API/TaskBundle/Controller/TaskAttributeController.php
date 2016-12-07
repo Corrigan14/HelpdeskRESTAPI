@@ -4,6 +4,7 @@ namespace API\TaskBundle\Controller;
 
 use API\TaskBundle\Entity\TaskAttribute;
 use API\TaskBundle\Security\VoteOptions;
+use API\TaskBundle\Services\VariableHelper;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
 use Igsem\APIBundle\Services\StatusCodesHelper;
@@ -74,6 +75,9 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *
      * @param Request $request
      * @return JsonResponse|Response
+     * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
+     * @throws \Symfony\Component\Routing\Exception\MissingMandatoryParametersException
+     * @throws \Symfony\Component\Routing\Exception\InvalidParameterException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
@@ -201,10 +205,25 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *
      * @param Request $request
      * @return JsonResponse|Response
+     * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
+     * @throws \Symfony\Component\Routing\Exception\MissingMandatoryParametersException
+     * @throws \Symfony\Component\Routing\Exception\InvalidParameterException
+     * @throws \LogicException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \InvalidArgumentException
      */
     public function createAction(Request $request)
     {
-        // TODO: Implement createAction() method.
+        if (!$this->get('task_attribute_voter')->isGranted(VoteOptions::CREATE_TASK_ATTRIBUTE)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
+        $taskAttribute = new TaskAttribute();
+        $taskAttribute->setIsActive(true);
+
+        return $this->updateEntity($requestData, $taskAttribute, true);
     }
 
     /**
@@ -405,5 +424,48 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
     public function restoreAction(int $id, Request $request)
     {
         // TODO: Implement updatePartialAction() method.
+    }
+
+    /**
+     * @param array $requestData
+     * @param TaskAttribute $taskAttribute
+     * @param bool $create
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     *
+     * @return JsonResponse|Response
+     * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
+     * @throws \Symfony\Component\Routing\Exception\MissingMandatoryParametersException
+     * @throws \Symfony\Component\Routing\Exception\InvalidParameterException
+     */
+    private function updateEntity(array $requestData, TaskAttribute $taskAttribute, $create = false)
+    {
+        $statusCode = $this->getCreateUpdateStatusCode($create);
+
+        // Check if selected Type is allowed
+        if (array_key_exists('type', $requestData)) {
+            $type = $requestData['type'];
+            $allowedTypes = VariableHelper::getConstants();
+
+            if (!in_array($type, $allowedTypes, true)) {
+                return $this->createApiResponse([
+                    'message' => $type . ' Type is not allowed!',
+                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            }
+        }
+
+        $errors = $this->get('entity_processor')->processEntity($taskAttribute, $requestData);
+
+        if (false === $errors) {
+            $this->getDoctrine()->getManager()->persist($taskAttribute);
+            $this->getDoctrine()->getManager()->flush();
+
+            $taskAttributeResponse = $this->get('task_attribute_service')->getTaskAttributeResponse($taskAttribute);
+            return $this->createApiResponse($taskAttributeResponse, $statusCode);
+        }
+
+        return $this->invalidParametersResponse();
     }
 }

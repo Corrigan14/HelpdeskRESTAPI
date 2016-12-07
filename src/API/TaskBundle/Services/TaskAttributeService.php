@@ -75,6 +75,9 @@ class TaskAttributeService
      *
      * @param TaskAttribute $taskAttribute
      * @return array
+     * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
+     * @throws \Symfony\Component\Routing\Exception\MissingMandatoryParametersException
+     * @throws \Symfony\Component\Routing\Exception\InvalidParameterException
      */
     public function getTaskAttributeResponse(TaskAttribute $taskAttribute):array
     {

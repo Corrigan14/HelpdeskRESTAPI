@@ -37,7 +37,31 @@ class TaskAttributeControllerTest extends ApiTestCase
         $this->getClient(true)->request('GET', $this->getBaseUrl().'/'.$entity->getId(), [], [],
             ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
 
+    /**
+     *  POST SINGLE - errors
+     */
+    public function testPostSingleErrors()
+    {
+        parent::testPostSingleErrors();
+
+        $data = $this->returnPostTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        // Try to create Task Attribute Entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('POST' , $this->getBaseUrl() , $data,[],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE , $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to create Task Attribute Entity with invalid parameter Type (Type has to be chosen from allowed options)
+        $this->getClient(true)->request('POST' , $this->getBaseUrl() ,
+            ['title'=>'test title','type'=>'some not allowed Type'],[],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE , $this->getClient()->getResponse()->getStatusCode());
     }
 
     /**
@@ -58,7 +82,7 @@ class TaskAttributeControllerTest extends ApiTestCase
     public function findOneEntity()
     {
         $ta = $this->em->getRepository('APITaskBundle:TaskAttribute')->findOneBy([
-            'title' => 'task attribute'
+            'title' => 'task attribute NEW'
         ]);
 
         if ($ta instanceof TaskAttribute) {
@@ -76,7 +100,7 @@ class TaskAttributeControllerTest extends ApiTestCase
     public function createEntity()
     {
         $ta = new TaskAttribute();
-        $ta->setTitle('task attribute');
+        $ta->setTitle('task attribute NEW');
         $ta->setType(VariableHelper::INPUT);
         $this->em->persist($ta);
         $this->em->flush();

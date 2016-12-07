@@ -57,11 +57,18 @@ class Tag
     private $createdBy;
 
     /**
+     * @var ArrayCollection
+     *
+     * @ORM\ManyToMany(targetEntity="API\TaskBundle\Entity\Task", mappedBy="tags")
+     */
+    private $tasks;
+
+    /**
      * Tag constructor.
      */
     public function __construct()
     {
-
+        $this->tasks = new ArrayCollection();
     }
 
     /**

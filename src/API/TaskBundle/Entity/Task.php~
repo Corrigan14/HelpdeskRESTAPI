@@ -75,7 +75,7 @@ class Task
     /**
      * @var Project
      *
-     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Project", inversedBy="task")
+     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Project", inversedBy="tasks")
      * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=true)
      */
     private $project;
@@ -96,12 +96,21 @@ class Task
     private $followers;
 
     /**
+     * @var ArrayCollection
+     *
+     * @ORM\ManyToMany(targetEntity="API\TaskBundle\Entity\Tag", inversedBy="tasks")
+     * @ORM\JoinTable(name="task_has_tag")
+     */
+    private $tags;
+
+    /**
      * Task constructor.
      */
     public function __construct()
     {
         $this->taskData = new ArrayCollection();
         $this->followers = new ArrayCollection();
+        $this->tags = new ArrayCollection();
     }
 
     /**
@@ -285,11 +294,11 @@ class Task
     /**
      * Add taskDatum
      *
-     * @param \API\TaskBundle\Entity\TaskData $taskDatum
+     * @param TaskData $taskDatum
      *
      * @return Task
      */
-    public function addTaskDatum(\API\TaskBundle\Entity\TaskData $taskDatum)
+    public function addTaskDatum(TaskData $taskDatum)
     {
         $this->taskData[] = $taskDatum;
 
@@ -299,9 +308,9 @@ class Task
     /**
      * Remove taskDatum
      *
-     * @param \API\TaskBundle\Entity\TaskData $taskDatum
+     * @param TaskData $taskDatum
      */
-    public function removeTaskDatum(\API\TaskBundle\Entity\TaskData $taskDatum)
+    public function removeTaskDatum(TaskData $taskDatum)
     {
         $this->taskData->removeElement($taskDatum);
     }
@@ -309,7 +318,7 @@ class Task
     /**
      * Get taskData
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return ArrayCollection
      */
     public function getTaskData()
     {

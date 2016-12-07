@@ -43,10 +43,15 @@ class TaskDataFixture implements FixtureInterface, ContainerAwareInterface, Orde
             'title' => 'select task additional attribute'
         ]);
 
+        $usersTask = $manager->getRepository('APITaskBundle:Task')->findOneBy([
+            'title' => 'Task 1 - user is creator, user is requested'
+        ]);
+
         if ($taskAttributeInput instanceof TaskAttribute) {
             $td = new TaskData();
             $td->setTaskAttribute($taskAttributeInput);
             $td->setValue('some input');
+            $td->setTask($usersTask);
             $manager->persist($td);
         }
 
@@ -54,6 +59,7 @@ class TaskDataFixture implements FixtureInterface, ContainerAwareInterface, Orde
             $td = new TaskData();
             $td->setTaskAttribute($taskAttributeSelect);
             $td->setValue('select1');
+            $td->setTask($usersTask);
             $manager->persist($td);
         }
 
@@ -67,6 +73,6 @@ class TaskDataFixture implements FixtureInterface, ContainerAwareInterface, Orde
      */
     public function getOrder()
     {
-        return 9;
+        return 10;
     }
 }

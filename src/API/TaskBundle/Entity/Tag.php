@@ -170,10 +170,44 @@ class Tag
     /**
      * Get createdBy
      *
-     * @return \API\CoreBundle\Entity\User
+     * @return User
      */
     public function getCreatedBy()
     {
         return $this->createdBy;
+    }
+
+    /**
+     * Add task
+     *
+     * @param Task $task
+     *
+     * @return Tag
+     */
+    public function addTask(Task $task)
+    {
+        $this->tasks[] = $task;
+
+        return $this;
+    }
+
+    /**
+     * Remove task
+     *
+     * @param Task $task
+     */
+    public function removeTask(Task $task)
+    {
+        $this->tasks->removeElement($task);
+    }
+
+    /**
+     * Get tasks
+     *
+     * @return ArrayCollection
+     */
+    public function getTasks()
+    {
+        return $this->tasks;
     }
 }

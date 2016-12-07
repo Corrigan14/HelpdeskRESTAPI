@@ -42,6 +42,14 @@ class TaskData
     private $taskAttribute;
 
     /**
+     * @var Task
+     *
+     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Task", inversedBy="taskData")
+     * @ORM\JoinColumn(name="task_id", referencedColumnName="id", nullable=true)
+     */
+    private $task;
+
+    /**
      * Get id
      *
      * @return int
@@ -97,5 +105,29 @@ class TaskData
     public function getTaskAttribute()
     {
         return $this->taskAttribute;
+    }
+
+    /**
+     * Set task
+     *
+     * @param \API\TaskBundle\Entity\Task $task
+     *
+     * @return TaskData
+     */
+    public function setTask(\API\TaskBundle\Entity\Task $task = null)
+    {
+        $this->task = $task;
+
+        return $this;
+    }
+
+    /**
+     * Get task
+     *
+     * @return \API\TaskBundle\Entity\Task
+     */
+    public function getTask()
+    {
+        return $this->task;
     }
 }

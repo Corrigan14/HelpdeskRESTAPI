@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Entity;
 
 use API\CoreBundle\Entity\User;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use JMS\Serializer\Annotation as Serializer;
@@ -74,11 +75,43 @@ class Task
     /**
      * @var Project
      *
-     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Project", inversedBy="task")
+     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Project", inversedBy="tasks")
      * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=true)
      */
     private $project;
 
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskData", mappedBy="task")
+     */
+    private $taskData;
+
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\ManyToMany(targetEntity="API\CoreBundle\Entity\User", inversedBy="followedTasks")
+     * @ORM\JoinTable(name="task_has_follower")
+     */
+    private $followers;
+
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\ManyToMany(targetEntity="API\TaskBundle\Entity\Tag", inversedBy="tasks")
+     * @ORM\JoinTable(name="task_has_tag")
+     */
+    private $tags;
+
+    /**
+     * Task constructor.
+     */
+    public function __construct()
+    {
+        $this->taskData = new ArrayCollection();
+        $this->followers = new ArrayCollection();
+        $this->tags = new ArrayCollection();
+    }
 
     /**
      * Get id
@@ -256,5 +289,73 @@ class Task
     public function getProject()
     {
         return $this->project;
+    }
+
+    /**
+     * Add taskDatum
+     *
+     * @param TaskData $taskDatum
+     *
+     * @return Task
+     */
+    public function addTaskDatum(TaskData $taskDatum)
+    {
+        $this->taskData[] = $taskDatum;
+
+        return $this;
+    }
+
+    /**
+     * Remove taskDatum
+     *
+     * @param TaskData $taskDatum
+     */
+    public function removeTaskDatum(TaskData $taskDatum)
+    {
+        $this->taskData->removeElement($taskDatum);
+    }
+
+    /**
+     * Get taskData
+     *
+     * @return ArrayCollection
+     */
+    public function getTaskData()
+    {
+        return $this->taskData;
+    }
+
+    /**
+     * Add follower
+     *
+     * @param User $follower
+     *
+     * @return Task
+     */
+    public function addFollower(User $follower)
+    {
+        $this->followers[] = $follower;
+
+        return $this;
+    }
+
+    /**
+     * Remove follower
+     *
+     * @param User $follower
+     */
+    public function removeFollower(User $follower)
+    {
+        $this->followers->removeElement($follower);
+    }
+
+    /**
+     * Get followers
+     *
+     * @return ArrayCollection
+     */
+    public function getFollowers()
+    {
+        return $this->followers;
     }
 }

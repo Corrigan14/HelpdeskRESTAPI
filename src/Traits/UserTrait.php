@@ -52,12 +52,19 @@ trait UserTrait
     private $createdTasks;
 
     /**
-     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Task", mappedBy="requested_by")
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Task", mappedBy="requestedBy")
      * @Exclude()
      *
      * @var ArrayCollection
      */
     private $requestedTasks;
+
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\ManyToMany(targetEntity="API\TaskBundle\Entity\Task", mappedBy="followers")
+     */
+    private $followedTasks;
 
     /**
      * Add tag
@@ -223,6 +230,39 @@ trait UserTrait
     public function getRequestedTask()
     {
         return $this->requestedTasks;
+    }
+
+    /**
+     * Add followed task
+     *
+     * @param Task $followedTask
+     * @return User
+     */
+    public function addFollowedTask(Task $followedTask)
+    {
+        $this->followedTasks[] = $followedTask;
+
+        return $this;
+    }
+
+    /**
+     * Remove followed task
+     *
+     * @param Task $followedTask
+     */
+    public function removeFollowedTask(Task $followedTask)
+    {
+        $this->followedTasks->removeElement($followedTask);
+    }
+
+    /**
+     * Get followed tasks
+     *
+     * @return ArrayCollection
+     */
+    public function getFollowedTasks()
+    {
+        return $this->followedTasks;
     }
 
 }

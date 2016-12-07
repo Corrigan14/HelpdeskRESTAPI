@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Entity;
 
 use API\CoreBundle\Entity\User;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use JMS\Serializer\Annotation as Serializer;
@@ -79,6 +80,29 @@ class Task
      */
     private $project;
 
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskData", mappedBy="task")
+     */
+    private $taskData;
+
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\ManyToMany(targetEntity="API\CoreBundle\Entity\User", inversedBy="followedTasks")
+     * @ORM\JoinTable(name="task_has_follower")
+     */
+    private $followers;
+
+    /**
+     * Task constructor.
+     */
+    public function __construct()
+    {
+        $this->taskData = new ArrayCollection();
+        $this->followers = new ArrayCollection();
+    }
 
     /**
      * Get id
@@ -232,5 +256,97 @@ class Task
     public function getRequestedBy()
     {
         return $this->requestedBy;
+    }
+
+    /**
+     * Set project
+     *
+     * @param Project $project
+     *
+     * @return Task
+     */
+    public function setProject(Project $project = null)
+    {
+        $this->project = $project;
+
+        return $this;
+    }
+
+    /**
+     * Get project
+     *
+     * @return Project
+     */
+    public function getProject()
+    {
+        return $this->project;
+    }
+
+    /**
+     * Add taskDatum
+     *
+     * @param \API\TaskBundle\Entity\TaskData $taskDatum
+     *
+     * @return Task
+     */
+    public function addTaskDatum(\API\TaskBundle\Entity\TaskData $taskDatum)
+    {
+        $this->taskData[] = $taskDatum;
+
+        return $this;
+    }
+
+    /**
+     * Remove taskDatum
+     *
+     * @param \API\TaskBundle\Entity\TaskData $taskDatum
+     */
+    public function removeTaskDatum(\API\TaskBundle\Entity\TaskData $taskDatum)
+    {
+        $this->taskData->removeElement($taskDatum);
+    }
+
+    /**
+     * Get taskData
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getTaskData()
+    {
+        return $this->taskData;
+    }
+
+    /**
+     * Add follower
+     *
+     * @param User $follower
+     *
+     * @return Task
+     */
+    public function addFollower(User $follower)
+    {
+        $this->followers[] = $follower;
+
+        return $this;
+    }
+
+    /**
+     * Remove follower
+     *
+     * @param User $follower
+     */
+    public function removeFollower(User $follower)
+    {
+        $this->followers->removeElement($follower);
+    }
+
+    /**
+     * Get followers
+     *
+     * @return ArrayCollection
+     */
+    public function getFollowers()
+    {
+        return $this->followers;
     }
 }

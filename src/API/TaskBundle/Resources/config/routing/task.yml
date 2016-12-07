@@ -1,0 +1,69 @@
+tasks_list:
+    path:     /tasks
+    defaults: { _controller: APITaskBundle:Task:list }
+    methods: [GET]
+
+task:
+    path:     /tasks/{id}
+    defaults: { _controller: APITaskBundle:Task:get }
+    methods: [GET]
+    requirements:
+        id: '\d+'
+
+tasks_create:
+    path:     /tasks/project/{projectId}/user/{requestedUserId}
+    defaults: { _controller: APITaskBundle:Task:create }
+    methods: [POST]
+
+tasks_update:
+    path:     /tasks/{id}/project/{projectId}/user/{requestedUserId}
+    defaults: { _controller: APITaskBundle:Task:update }
+    methods: [PUT]
+    requirements:
+            id: '\d+'
+
+tasks_partial_update:
+    path:     /tasks/{id}/project/{projectId}/user/{requestedUserId}
+    defaults: { _controller: APITaskBundle:Task:updatePartial }
+    methods: [PATCH]
+    requirements:
+            id: '\d+'
+
+tasks_delete:
+    path:     /tasks/{id}
+    defaults: { _controller: APITaskBundle:Task:delete }
+    methods: [DELETE]
+    requirements:
+            id: '\d+'
+
+tasks_add_follower_to_task:
+    path:     /tasks/{taskId}/user/{userId}
+    defaults: { _controller: APITaskBundle:Task:addFollowerToTask}
+    methods: [POST]
+    requirements:
+            taskId: '\d+'
+            userId: '\d+'
+
+tasks_remove_follower_from_task:
+    path:     /tasks/{taskId}/user/{userId}
+    defaults: { _controller: APITaskBundle:Task:removeFollowerFromTask}
+    methods: [PATCH]
+    requirements:
+            taskId: '\d+'
+            userId: '\d+'
+
+tasks_add_tag_to_task:
+    path:     /tasks/{taskId}/tag/{tagId}
+    defaults: { _controller: APITaskBundle:Task:addTagToTask}
+    methods: [POST]
+    requirements:
+            taskId: '\d+'
+            tagId: '\d+'
+
+tasks_remove_tag_from_task:
+    path:     /tasks/{taskId}/tag/{tagId}
+    defaults: { _controller: APITaskBundle:Task:removeTagFromTask}
+    methods: [PATCH]
+    requirements:
+            taskId: '\d+'
+            tagId: '\d+'

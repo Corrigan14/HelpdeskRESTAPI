@@ -61,6 +61,7 @@ class Task
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="createdTasks")
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
+     * @Serializer\ReadOnly()
      */
     private $createdBy;
 
@@ -69,6 +70,7 @@ class Task
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="requestedTasks")
      * @ORM\JoinColumn(name="requested_by", referencedColumnName="id", nullable=false)
+     * @Serializer\ReadOnly()
      */
     private $requestedBy;
 
@@ -77,6 +79,7 @@ class Task
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Project", inversedBy="tasks")
      * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=true)
+     * @Serializer\ReadOnly()
      */
     private $project;
 
@@ -84,6 +87,7 @@ class Task
      * @var ArrayCollection
      *
      * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskData", mappedBy="task")
+     * @Serializer\ReadOnly()
      */
     private $taskData;
 
@@ -92,6 +96,7 @@ class Task
      *
      * @ORM\ManyToMany(targetEntity="API\CoreBundle\Entity\User", inversedBy="followedTasks")
      * @ORM\JoinTable(name="task_has_follower")
+     * @Serializer\ReadOnly()
      */
     private $followers;
 
@@ -100,6 +105,7 @@ class Task
      *
      * @ORM\ManyToMany(targetEntity="API\TaskBundle\Entity\Tag", inversedBy="tasks")
      * @ORM\JoinTable(name="task_has_tag")
+     * @Serializer\ReadOnly()
      */
     private $tags;
 

@@ -38,6 +38,7 @@ class TaskData
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\TaskAttribute", inversedBy="taskData")
      * @ORM\JoinColumn(name="task_attribute_id", referencedColumnName="id", nullable=false)
+     * @Serializer\Exclude()
      */
     private $taskAttribute;
 
@@ -46,6 +47,7 @@ class TaskData
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Task", inversedBy="taskData")
      * @ORM\JoinColumn(name="task_id", referencedColumnName="id", nullable=true)
+     * @Serializer\Exclude()
      */
     private $task;
 

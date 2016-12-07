@@ -34,7 +34,7 @@ class TaskAttributeControllerTest extends ApiTestCase
         $entity = $this->findOneEntity();
 
         // Try to load list of entity with ROLE_USER which hasn't permission to this action
-        $this->getClient(true)->request('GET', $this->getBaseUrl().'/'.$entity->getId(), [], [],
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $entity->getId(), [], [],
             ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
@@ -53,15 +53,117 @@ class TaskAttributeControllerTest extends ApiTestCase
         $this->removeTestEntity();
 
         // Try to create Task Attribute Entity with ROLE_USER which hasn't permission to this action
-        $this->getClient(true)->request('POST' , $this->getBaseUrl() , $data,[],
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), $data, [],
             ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
-        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE , $this->getClient()->getResponse()->getStatusCode());
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to create Task Attribute Entity with invalid parameter Type (Type has to be chosen from allowed options)
-        $this->getClient(true)->request('POST' , $this->getBaseUrl() ,
-            ['title'=>'test title','type'=>'some not allowed Type'],[],
+        $this->getClient(true)->request('POST', $this->getBaseUrl(),
+            ['title' => 'test title', 'type' => 'some not allowed Type'], [],
             ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
-        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE , $this->getClient()->getResponse()->getStatusCode());
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     *  UPDATE SINGLE - errors
+     */
+    public function testUpdateSingleErrors()
+    {
+        parent::testUpdateSingleErrors();
+
+        $data = $this->returnUpdateTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        $entity = $this->findOneEntity();
+
+        // Try to update test Entity with ROLE_USER which hasn't permission to this action: method PUT
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(), $data, [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update test Entity with ROLE_USER which hasn't permission to this action: method PATCH
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(), $data, [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update the Task Attribute Entity with invalid parameter Type (Type has to be chosen from allowed options)
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(),
+            ['type' => 'some not allowed Type'], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update the Task Attribute Entity with invalid parameter Type (Type has to be chosen from allowed options)
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(),
+            ['type' => 'some not allowed Type'], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * DELETE SINGLE - success
+     */
+    public function testDeleteSingleSuccess()
+    {
+        $entity = $this->findOneEntity();
+
+        // Delete Entity
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * DELETE SINGLE - errors
+     */
+    public function testDeleteSingleErrors()
+    {
+        parent::testDeleteSingleErrors();
+
+        $entity = $this->findOneEntity();
+
+        // Try to delete Entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * RESTORE SINGLE - success
+     */
+    public function testRestoreSingleSuccess()
+    {
+        $entity = $this->findOneEntity();
+
+        // Restore Entity
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/restore',
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * RESTORE SINGLE - errors
+     */
+    public function testRestoreSingleErrors()
+    {
+        $entity = $this->findOneEntity();
+
+        // Try to restore Entity without authorization header
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/restore',
+            [], [], []);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        //  Try to restore Entity with not existed ID (as Admin)
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . '125789954' . '/restore',
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to restore Entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/restore',
+            [], [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
     /**

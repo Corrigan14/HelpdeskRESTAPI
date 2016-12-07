@@ -276,10 +276,29 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      * @param int $id
      * @param Request $request
      * @return JsonResponse|Response
+     * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
+     * @throws \Symfony\Component\Routing\Exception\MissingMandatoryParametersException
+     * @throws \Symfony\Component\Routing\Exception\InvalidParameterException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function updateAction(int $id, Request $request)
     {
-        // TODO: Implement updateAction() method.
+        $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($id);
+
+        if (!$taskAttribute instanceof TaskAttribute) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('task_attribute_voter')->isGranted(VoteOptions::UPDATE_TASK_ATTRIBUTE)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
+
+        return $this->updateEntity($requestData, $taskAttribute);
     }
 
     /**
@@ -332,10 +351,29 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      * @param int $id
      * @param Request $request
      * @return JsonResponse|Response
+     * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
+     * @throws \Symfony\Component\Routing\Exception\MissingMandatoryParametersException
+     * @throws \Symfony\Component\Routing\Exception\InvalidParameterException
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
      */
     public function updatePartialAction(int $id, Request $request)
     {
-        // TODO: Implement updatePartialAction() method.
+        $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($id);
+
+        if (!$taskAttribute instanceof TaskAttribute) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('task_attribute_voter')->isGranted(VoteOptions::UPDATE_TASK_ATTRIBUTE)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
+
+        return $this->updateEntity($requestData, $taskAttribute);
     }
 
     /**
@@ -366,10 +404,27 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      * @param int $id
      *
      * @return JsonResponse|Response
+     * @throws \LogicException
      */
     public function deleteAction(int $id)
     {
-        // TODO: Implement deleteAction() method.
+        $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($id);
+
+        if (!$taskAttribute instanceof TaskAttribute) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('task_attribute_voter')->isGranted(VoteOptions::DELETE_TASK_ATTRIBUTE)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $taskAttribute->setIsActive(false);
+        $this->getDoctrine()->getManager()->persist($taskAttribute);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->createApiResponse([
+            'message' => StatusCodesHelper::UNACITVATE_MESSAGE,
+        ], StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -418,12 +473,27 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      * )
      *
      * @param int $id
-     * @param Request $request
      * @return JsonResponse|Response
+     * @throws \LogicException
      */
-    public function restoreAction(int $id, Request $request)
+    public function restoreAction(int $id)
     {
-        // TODO: Implement updatePartialAction() method.
+        $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($id);
+
+        if (!$taskAttribute instanceof TaskAttribute) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('task_attribute_voter')->isGranted(VoteOptions::DELETE_TASK_ATTRIBUTE)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $taskAttribute->setIsActive(true);
+        $this->getDoctrine()->getManager()->persist($taskAttribute);
+        $this->getDoctrine()->getManager()->flush();
+
+        $taskAttributeResponse = $this->get('task_attribute_service')->getTaskAttributeResponse($taskAttribute);
+        return $this->createApiResponse($taskAttributeResponse, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

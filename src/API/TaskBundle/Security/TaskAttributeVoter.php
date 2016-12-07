@@ -43,6 +43,10 @@ class TaskAttributeVoter extends ApiBaseVoter implements VoterInterface
                 return $this->canRead();
             case VoteOptions::CREATE_TASK_ATTRIBUTE:
                 return $this->canCreate();
+            case VoteOptions::UPDATE_TASK_ATTRIBUTE:
+                return $this->canUpdate();
+            case VoteOptions::DELETE_TASK_ATTRIBUTE:
+                return $this->canDelete();
             default:
                 return false;
         }
@@ -89,5 +93,33 @@ class TaskAttributeVoter extends ApiBaseVoter implements VoterInterface
         }
 
         return $this->hasAclRights(VoteOptions::CREATE_TASK_ATTRIBUTE, $this->user, VoteOptions::getConstants());
+    }
+
+    /**
+     * User can update the task attribute
+     *
+     * @return bool
+     */
+    private function canUpdate():bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        return $this->hasAclRights(VoteOptions::UPDATE_TASK_ATTRIBUTE, $this->user, VoteOptions::getConstants());
+    }
+
+    /**
+     * User can delete the task attribute
+     *
+     * @return bool
+     */
+    private function canDelete():bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        return $this->hasAclRights(VoteOptions::DELETE_TASK_ATTRIBUTE, $this->user, VoteOptions::getConstants());
     }
 }

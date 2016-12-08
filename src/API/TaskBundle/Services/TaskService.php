@@ -2,7 +2,12 @@
 
 namespace API\TaskBundle\Services;
 
+use API\CoreBundle\Entity\Company;
+use API\CoreBundle\Entity\User;
+use API\TaskBundle\Entity\Project;
+use API\TaskBundle\Entity\UserHasProject;
 use API\TaskBundle\Repository\TaskRepository;
+use API\TaskBundle\Security\VoteOptions;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
@@ -40,6 +45,8 @@ class TaskService
      * @param array $options
      *
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getTasksResponse(int $page, array $options):array
     {
@@ -99,9 +106,12 @@ class TaskService
      * @param int $page
      * @param array $options
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     private function getRequiredTasks(int $page, array $options)
     {
+        /** @var User $loggedUser */
         $loggedUser = $options['loggedUser'];
         $isAdmin = $options['isAdmin'];
 
@@ -122,8 +132,56 @@ class TaskService
         }
 
         // Return's tasks based on loggedUser ACL
+        // User Can see: - all tasks which created and which are requested by him - task which are not in projects
+        //               - tasks from projects: VIEW_ALL_TASKS_IN_PROJECT, VIEW_COMPANY_TASKS_IN_PROJECT, VIEW_USER_TASKS_IN_PROJECT
 
+        // Divide user's projects based on his ACL
+        // 1. User can see all tasks in projects which he created
+        $usersProjects = $loggedUser->getProjects();
+        $dividedProjects = [];
+        if (count($usersProjects) > 0) {
+            /** @var Project $up */
+            foreach ($usersProjects as $up) {
+                $dividedProjects['VIEW_ALL_TASKS_IN_PROJECT'][] = $up->getId();
+            }
+        }
 
-        return [];
+        // 2.
+        $userHasProjects = $loggedUser->getUserHasProjects();
+        if (count($userHasProjects) > 0) {
+            /** @var UserHasProject $uhp */
+            foreach ($userHasProjects as $uhp) {
+                $acl = $uhp->getAcl();
+                if (null === $acl) {
+                    continue;
+                }
+                if (in_array(VoteOptions::VIEW_ALL_TASKS_IN_PROJECT, $acl, true)) {
+                    $dividedProjects['VIEW_ALL_TASKS_IN_PROJECT'][] = $uhp->getProject()->getId();
+                    continue;
+                }
+                if (in_array(VoteOptions::VIEW_COMPANY_TASKS_IN_PROJECT, $acl, true)) {
+                    $dividedProjects['VIEW_COMPANY_TASKS_IN_PROJECT'][] = $uhp->getProject()->getId();
+                    continue;
+                }
+                if (in_array(VoteOptions::VIEW_USER_TASKS_IN_PROJECT, $acl, true)) {
+                    $dividedProjects['VIEW_USER_TASKS_IN_PROJECT'][] = $uhp->getProject()->getId();
+                    continue;
+                }
+            }
+        }
+
+        $usersCompany = $loggedUser->getCompany();
+        $companyId = false;
+        if ($usersCompany instanceof Company) {
+            $companyId = $usersCompany->getId();
+        }
+
+        $usersTasks = $this->em->getRepository('APITaskBundle:Task')->getAllUsersTasks($page, $loggedUser->getId(), $companyId, $dividedProjects, $optionsNeeded);
+        $usersTasksCount = $this->em->getRepository('APITaskBundle:Task')->countAllUsersTasks($loggedUser->getId(), $companyId, $dividedProjects, $optionsNeeded);
+
+        return [
+            'tasks' => $usersTasks,
+            'count' => $usersTasksCount
+        ];
     }
 }

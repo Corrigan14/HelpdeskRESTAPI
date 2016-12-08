@@ -107,6 +107,12 @@ class TaskVoter implements VoterInterface
             return $this->hasAclProjectRights($actions, $options['project']);
         }
 
+        //If user created some projects, return TRUE
+        $usersProjects = $this->user->getProjects();
+        if (count($usersProjects) > 0) {
+            return true;
+        }
+
         // If user can create or list tasks or can view some task in som projects, return TRUE
         // The list of tasks is based on user's ACL - service manage this
         $canCreate = $this->hasAclRights(VoteOptions::CREATE_TASK, $this->user);

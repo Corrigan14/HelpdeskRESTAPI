@@ -16,7 +16,7 @@ class TaskRepository extends EntityRepository
      *
      * @param int $page
      * @param array $options
-     * @return mixed
+     * @return array|null
      */
     public function getAllAdminTasks(int $page, array $options)
     {
@@ -50,7 +50,7 @@ class TaskRepository extends EntityRepository
 
     /**
      * @param array $options
-     * @return mixed
+     * @return int|null
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
@@ -76,5 +76,31 @@ class TaskRepository extends EntityRepository
         }
 
         return $query->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * @param int $page
+     * @param int $userId
+     * @param int $companyId
+     * @param $dividedProjects
+     * @param array $optionsNeeded
+     * @return array|null
+     */
+    public function getAllUsersTasks(int $page, int $userId, int $companyId, $dividedProjects, array $optionsNeeded)
+    {
+        return [];
+    }
+
+
+    /**
+     * @param int $userId
+     * @param int $companyId
+     * @param $dividedProjects
+     * @param array $optionsNeeded
+     * @return int
+     */
+    public function countAllUsersTasks(int $userId, int $companyId, $dividedProjects, array $optionsNeeded)
+    {
+        return 12;
     }
 }

@@ -56,6 +56,10 @@ class VoteOptions
     const DELETE_TASK_ATTRIBUTE = 'delete_task_attribute';
     const LIST_TASK_ATTRIBUTES = 'list_task_attributes';
 
+    // TASK CRUD
+    const LIST_TASKS = 'list_tasks';
+    const CREATE_TASK = 'create_task';
+
     /**
      * @return array
      */

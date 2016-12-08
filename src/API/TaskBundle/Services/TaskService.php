@@ -132,11 +132,12 @@ class TaskService
         }
 
         // Return's tasks based on loggedUser ACL
-        // User Can see: - all tasks which created and which are requested by him - task which are not in projects
-        //               - tasks from projects: VIEW_ALL_TASKS_IN_PROJECT, VIEW_COMPANY_TASKS_IN_PROJECT, VIEW_USER_TASKS_IN_PROJECT
+        // User Can view: - all tasks which created and which are requested by him - also tasks which are not in projects (VIEW_USER_TASKS_IN_PROJECT)
+        //               - tasks from projects: VIEW_ALL_TASKS_IN_PROJECT, VIEW_COMPANY_TASKS_IN_PROJECT,
 
         // Divide user's projects based on his ACL
-        // 1. User can see all tasks in projects which he created
+
+        // 1. User can view all tasks in projects which he created
         $usersProjects = $loggedUser->getProjects();
         $dividedProjects = [];
         if (count($usersProjects) > 0) {
@@ -146,7 +147,7 @@ class TaskService
             }
         }
 
-        // 2.
+        // 2. User can view projects tasks based on userHasProject ACL
         $userHasProjects = $loggedUser->getUserHasProjects();
         if (count($userHasProjects) > 0) {
             /** @var UserHasProject $uhp */
@@ -161,10 +162,6 @@ class TaskService
                 }
                 if (in_array(VoteOptions::VIEW_COMPANY_TASKS_IN_PROJECT, $acl, true)) {
                     $dividedProjects['VIEW_COMPANY_TASKS_IN_PROJECT'][] = $uhp->getProject()->getId();
-                    continue;
-                }
-                if (in_array(VoteOptions::VIEW_USER_TASKS_IN_PROJECT, $acl, true)) {
-                    $dividedProjects['VIEW_USER_TASKS_IN_PROJECT'][] = $uhp->getProject()->getId();
                     continue;
                 }
             }

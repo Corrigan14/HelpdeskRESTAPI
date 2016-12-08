@@ -83,12 +83,73 @@ class TaskRepository extends EntityRepository
      * @param int $userId
      * @param int $companyId
      * @param $dividedProjects
-     * @param array $optionsNeeded
+     * @param array $options
      * @return array|null
      */
-    public function getAllUsersTasks(int $page, int $userId, int $companyId, $dividedProjects, array $optionsNeeded)
+    public function getAllUsersTasks(int $page, int $userId, int $companyId, $dividedProjects, array $options)
     {
-        return [];
+        if (array_key_exists('VIEW_ALL_TASKS_IN_PROJECT', $dividedProjects)) {
+            /** @var array $allTasksInProject */
+            $allTasksInProject = $dividedProjects['VIEW_ALL_TASKS_IN_PROJECT'];
+        } else {
+            $allTasksInProject = [];
+        }
+
+        if (array_key_exists('VIEW_COMPANY_TASKS_IN_PROJECT', $dividedProjects)) {
+            /** @var array $companyTasksInProject */
+            $companyTasksInProject = $dividedProjects['VIEW_COMPANY_TASKS_IN_PROJECT'];
+        } else {
+            $companyTasksInProject = [];
+        }
+
+        $query = $this->createQueryBuilder('t')
+            ->where('t.createdBy = :userId')
+            ->orWhere('t.requestedBy = :userId');
+        $paramArray['userId'] = $userId;
+
+        $paramNum = 0;
+        if (count($allTasksInProject) > 0) {
+            foreach ($allTasksInProject as $project) {
+                $query->orWhere('t.project = :project' . $paramNum);
+                $paramArray['project' . $paramNum] = $project;
+
+                $paramNum++;
+            }
+        }
+
+        if (count($companyTasksInProject) > 0) {
+            foreach ($companyTasksInProject as $project) {
+                $query->orWhere('t.project = :project' . $paramNum)
+                    ->leftJoin('t.createdBy', 'u')
+                    ->andWhere('u.company = :companyId');
+                $paramArray['project' . $paramNum] = $project;
+
+                $paramNum++;
+            }
+            $paramArray['companyId'] = $companyId;
+        }
+
+        foreach ($options as $key => $value) {
+            if (false !== $value) {
+                $query->andWhere($key . '= :parameter' . $paramNum);
+                $paramArray['parameter' . $paramNum] = $value;
+
+                $paramNum++;
+            }
+        }
+
+        if (!empty($paramArray)) {
+            $query->setParameters($paramArray);
+        }
+
+        $query->setMaxResults(self::LIMIT);
+
+        // Pagination calculating offset
+        if (1 < $page) {
+            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
+        }
+
+        return $query->getQuery()->getArrayResult();
     }
 
 

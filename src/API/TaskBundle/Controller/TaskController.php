@@ -95,6 +95,9 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return JsonResponse|Response
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
     public function listAction(Request $request)

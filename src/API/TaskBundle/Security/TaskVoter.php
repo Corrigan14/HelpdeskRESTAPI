@@ -100,7 +100,7 @@ class TaskVoter implements VoterInterface
         $actions[] = VoteOptions::VIEW_USER_TASKS_IN_PROJECT;
         $actions[] = VoteOptions::CREATE_TASK_IN_PROJECT;
 
-        // If user requests to see tasks in some project
+        // If user requests to view tasks in some project
         // Option to see Tasks in some project depends on users project ACL:
         // VIEW_ALL_TASKS_IN_PROJECT, VIEW_COMPANY_TASKS_IN_PROJECT, VIEW_USER_TASKS_IN_PROJECT, CREATE_TASK_IN_PROJECT
         if (false !== $options['project']) {
@@ -177,7 +177,7 @@ class TaskVoter implements VoterInterface
                 /** @var UserHasProject $uhp */
                 foreach ($userHasProjects as $uhp) {
                     $acl = $uhp->getAcl();
-                    if (in_array($action, $acl, true)) {
+                    if (null !== $acl && in_array($action, $acl, true)) {
                         return true;
                     }
                 }
@@ -203,7 +203,7 @@ class TaskVoter implements VoterInterface
 
         $acl = $user->getAcl();
 
-        if (in_array($action, $acl, true)) {
+        if (null !== $acl && in_array($action, $acl, true)) {
             return true;
         }
 

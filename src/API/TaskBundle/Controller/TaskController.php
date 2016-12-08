@@ -26,8 +26,23 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *       "data":
      *       [
      *          {
-     *            "id": "1",
-     *          }
+     *            "id": 7,
+     *            "title": "Task 1 - user is creator, user is requested",
+     *            "description": "Description of Task 1",
+     *            "deadline": null,
+     *            "important": false,
+     *            "createdAt": ⊕{...}
+     *            "updatedAt": ⊕{...}
+     *          },
+     *         {
+     *            "id": 8,
+     *            "title": "Task 2 - user is creator, admin is requested",
+     *            "description": "Description of Task 2",
+     *            "deadline": null,
+     *            "important": false,
+     *            "createdAt": ⊕{...}
+     *            "updatedAt": ⊕{...}
+     *         },
      *       ],
      *       "_links":
      *       {
@@ -133,6 +148,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
             'project' => $projectParam,
             'creator' => $creatorParam,
             'requested' => $requestedUserParam,
+            'loggedUser' => $this->getUser(),
+            'isAdmin' => $this->get('task_voter')->isAdmin()
         ];
 
         // Check if logged user has access to show requested data

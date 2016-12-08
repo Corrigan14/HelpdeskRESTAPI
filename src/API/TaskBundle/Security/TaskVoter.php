@@ -74,6 +74,14 @@ class TaskVoter implements VoterInterface
     }
 
     /**
+     * @return bool
+     */
+    public function isAdmin():bool
+    {
+        return $this->decisionManager->decide($this->token, ['ROLE_ADMIN']);
+    }
+
+    /**
      * User can see a list of tasks
      *
      * @param array $options

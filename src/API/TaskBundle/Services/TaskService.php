@@ -21,9 +21,8 @@ class TaskService
     /** @var Router */
     private $router;
 
-
     /**
-     * ProjectService constructor.
+     * TaskService constructor.
      *
      * @param EntityManager $em
      * @param Router $router
@@ -44,8 +43,9 @@ class TaskService
      */
     public function getTasksResponse(int $page, array $options):array
     {
-        $tasks = $this->em->getRepository('APITaskBundle:Task')->getAllEntities($page, $options);
-        $count = count($tasks);
+        $data = $this->getRequiredTasks($page, $options);
+        $tasks = $data['tasks'];
+        $count = $data['count'];
 
         $response = [
             'data' => $tasks,
@@ -91,5 +91,39 @@ class TaskService
             'page' => $page,
             'numberOfPages' => $totalNumberOfPages,
         ];
+    }
+
+    /**
+     * Return Tasks based on User's ACL
+     *
+     * @param int $page
+     * @param array $options
+     * @return array
+     */
+    private function getRequiredTasks(int $page, array $options)
+    {
+        $loggedUser = $options['loggedUser'];
+        $isAdmin = $options['isAdmin'];
+
+        $optionsNeeded = [
+            't.createdBy' => $options['creator'],
+            't.requestedBy' => $options['requested'],
+            't.project' => $options['project']
+        ];
+
+        // Return's all Tasks - logged user is ADMIN
+        if ($isAdmin) {
+            $tasks = $this->em->getRepository('APITaskBundle:Task')->getAllAdminTasks($page, $optionsNeeded);
+            $count = $this->em->getRepository('APITaskBundle:Task')->countAllAdminTasks($optionsNeeded);
+            return [
+                'tasks' => $tasks,
+                'count' => $count
+            ];
+        }
+
+        // Return's tasks based on loggedUser ACL
+
+
+        return [];
     }
 }

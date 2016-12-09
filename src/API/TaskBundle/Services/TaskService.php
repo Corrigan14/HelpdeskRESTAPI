@@ -5,6 +5,7 @@ namespace API\TaskBundle\Services;
 use API\CoreBundle\Entity\Company;
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Project;
+use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\UserHasProject;
 use API\TaskBundle\Repository\TaskRepository;
 use API\TaskBundle\Security\VoteOptions;
@@ -61,6 +62,32 @@ class TaskService
         $pagination = $this->getPagination($page, $count, $options);
 
         return array_merge($response, $pagination);
+    }
+
+    /**
+     * @param Task $task
+     * @return array
+     */
+    public function getTaskResponse(Task $task)
+    {
+        return [
+            'data' => $task,
+            '_links' => $this->getTaskLinks($task->getId()),
+        ];
+    }
+
+    /**
+     * @param int $id
+     *
+     * @return array
+     */
+    private function getTaskLinks(int $id)
+    {
+        return [
+            'put' => $this->router->generate('tasks_update', ['id' => $id, 'projectId'=>'all','requestedUserId'=>'all']),
+            'patch' => $this->router->generate('tasks_partial_update', ['id' => $id, 'projectId'=>'all','requestedUserId'=>'all']),
+            'delete' => $this->router->generate('tasks_delete', ['id' => $id]),
+        ];
     }
 
     /**

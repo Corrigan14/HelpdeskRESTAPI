@@ -170,18 +170,40 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "2",
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/task/2",
-     *           "patch": "/api/v1/task-bundle/task/2",
-     *           "delete": "/api/v1/task-bundle/task/2"
-     *         }
-     *      }
+     *          "id": 1,
+     *          "title": "Task 1 - user is creator, user is requested",
+     *          "description": "Description of Task 1",
+     *          "important": false,
+     *          "created_by":⊕{...},
+     *          "requested_by": ⊕{...},
+     *          "project": ⊕{...},
+     *          "task_data":
+     *          {
+     *             "0":
+     *             {
+     *               "id": 1,
+     *               "value": "some input"
+     *             },
+     *            "1":
+     *            {
+     *              "id": 2,
+     *              "value": "select1"
+     *            }
+     *          }
+     *          "followers": ⊕{...}
+     *          "tags": ⊕{...}
+     *          "created_at": "2016-12-09T07:39:52+0100",
+     *          "updated_at": "2016-12-09T07:39:52+0100"
+     *      },
+     *       "_links":
+     *       {
+     *         "put": "/api/v1/task-bundle/tasks/1/project/all/user/all",
+     *         "patch": "/api/v1/task-bundle/tasks/1/project/all/user/all",
+     *         "delete": "/api/v1/task-bundle/tasks/1"
+     *       }
      *
      * @ApiDoc(
-     *  description="Returns full Task Entity including extended Task Data",
+     *  description="Returns full Task Entity including extended about Task Data",
      *  requirements={
      *     {
      *       "name"="id",
@@ -221,7 +243,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
             return $this->accessDeniedResponse();
         }
 
-        $response = $this->get('api_base.service')->getEntityResponse($task, 'tasks');
+        $response = $this->get('task_service')->getTaskResponse($task);
 
         return $this->createApiResponse($response, StatusCodesHelper::SUCCESSFUL_CODE);
     }
@@ -231,7 +253,30 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "2",
+     *          "id": 1,
+     *          "title": "Task 1 - user is creator, user is requested",
+     *          "description": "Description of Task 1",
+     *          "important": false,
+     *          "created_by":⊕{...},
+     *          "requested_by": ⊕{...},
+     *          "project": ⊕{...},
+     *          "task_data":
+     *          {
+     *             "0":
+     *             {
+     *               "id": 1,
+     *               "value": "some input"
+     *             },
+     *            "1":
+     *            {
+     *              "id": 2,
+     *              "value": "select1"
+     *            }
+     *          }
+     *          "followers": ⊕{...}
+     *          "tags": ⊕{...}
+     *          "created_at": "2016-12-09T07:39:52+0100",
+     *          "updated_at": "2016-12-09T07:39:52+0100"
      *        },
      *        "_links":
      *        {
@@ -279,11 +324,11 @@ class TaskController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
-     * @param int|bool $projectId
-     * @param int|bool $requestedUserId
+     * @param int|string $projectId
+     * @param int|string $requestedUserId
      * @return JsonResponse|Response
      */
-    public function createAction(Request $request, $projectId = false, $requestedUserId = false)
+    public function createAction(Request $request, $projectId = 'all', $requestedUserId = 'all')
     {
 
     }
@@ -293,7 +338,30 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "2",
+     *          "id": 1,
+     *          "title": "Task 1 - user is creator, user is requested",
+     *          "description": "Description of Task 1",
+     *          "important": false,
+     *          "created_by":⊕{...},
+     *          "requested_by": ⊕{...},
+     *          "project": ⊕{...},
+     *          "task_data":
+     *          {
+     *             "0":
+     *             {
+     *               "id": 1,
+     *               "value": "some input"
+     *             },
+     *            "1":
+     *            {
+     *              "id": 2,
+     *              "value": "select1"
+     *            }
+     *          }
+     *          "followers": ⊕{...}
+     *          "tags": ⊕{...}
+     *          "created_at": "2016-12-09T07:39:52+0100",
+     *          "updated_at": "2016-12-09T07:39:52+0100"
      *        },
      *        "_links":
      *        {
@@ -362,7 +430,30 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "2",
+     *          "id": 1,
+     *          "title": "Task 1 - user is creator, user is requested",
+     *          "description": "Description of Task 1",
+     *          "important": false,
+     *          "created_by":⊕{...},
+     *          "requested_by": ⊕{...},
+     *          "project": ⊕{...},
+     *          "task_data":
+     *          {
+     *             "0":
+     *             {
+     *               "id": 1,
+     *               "value": "some input"
+     *             },
+     *            "1":
+     *            {
+     *              "id": 2,
+     *              "value": "select1"
+     *            }
+     *          }
+     *          "followers": ⊕{...}
+     *          "tags": ⊕{...}
+     *          "created_at": "2016-12-09T07:39:52+0100",
+     *          "updated_at": "2016-12-09T07:39:52+0100"
      *        },
      *        "_links":
      *        {

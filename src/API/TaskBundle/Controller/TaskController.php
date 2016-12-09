@@ -4,6 +4,7 @@ namespace API\TaskBundle\Controller;
 
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Project;
+use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
@@ -89,7 +90,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
-     *      404 ="Not found entity",
+     *      404 ="Not found entity"
      *  }
      * )
      *
@@ -210,7 +211,19 @@ class TaskController extends ApiBaseController implements ControllerInterface
      */
     public function getAction(int $id)
     {
-        // TODO: Implement getAction() method.
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
+
+        if (!$task instanceof Task) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_TASK, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $response = $this->get('api_base.service')->getEntityResponse($task, 'tasks');
+
+        return $this->createApiResponse($response, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

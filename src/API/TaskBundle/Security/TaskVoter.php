@@ -2,10 +2,12 @@
 
 namespace API\TaskBundle\Security;
 
+use API\CoreBundle\Entity\Company;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Security\ApiBaseVoter;
 use API\CoreBundle\Security\VoterInterface;
 use API\TaskBundle\Entity\Project;
+use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\UserHasProject;
 use Doctrine\ORM\EntityManager;
 use Prophecy\Argument\Token\TokenInterface;
@@ -67,6 +69,8 @@ class TaskVoter implements VoterInterface
         switch ($action) {
             case VoteOptions::LIST_TASKS:
                 return $this->canList($options);
+            case VoteOptions::SHOW_TASK:
+                return $this->canRead($options);
             default:
                 return false;
         }
@@ -123,6 +127,66 @@ class TaskVoter implements VoterInterface
     }
 
     /**
+     * User can see a task
+     *
+     * @param  $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    private function canRead(Task $task):bool
+    {
+
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        // User can see a task if he created it or task is requested by him
+        if ($task->getCreatedBy()->getId() === $this->user->getId() || $task->getRequestedBy()->getId() === $this->user->getId()) {
+            return true;
+        }
+
+        $taskProject = $task->getProject();
+        if ($taskProject instanceof Project) {
+            $userHasProject = $this->em->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+                'user' => $this->user,
+                'project' => $taskProject
+            ]);
+            if ($userHasProject instanceof UserHasProject) {
+                $acl = $userHasProject->getAcl();
+                if (null !== $acl) {
+                    // User can see a task if this task is from project where user has access: VIEW_ALL_TASKS_IN_PROJECT
+                    if (in_array(VoteOptions::VIEW_ALL_TASKS_IN_PROJECT, $acl)) {
+                        return true;
+                    } elseif (in_array(VoteOptions::VIEW_COMPANY_TASKS_IN_PROJECT, $acl)) {
+                        // User can see a task if this task is from project where user has access: VIEW_COMPANY_TASKS_IN_PROJECT
+                        // and user is from same company like creator of task
+                        $usersCompany = $this->user->getCompany();
+                        if ($usersCompany instanceof Company) {
+                            $companyU = $usersCompany;
+                        } else {
+                            $companyU = false;
+                        }
+                        $taskCreatorCompany = $task->getCreatedBy()->getCompany();
+                        if ($taskCreatorCompany instanceof Company) {
+                            $companyT = $taskCreatorCompany;
+                        } else {
+                            $companyT = false;
+                        }
+                        if ($companyU && $companyT && $companyU->getId() === $companyT->getId()) {
+                            return true;
+                        }
+                        return false;
+                    }
+                }
+                return false;
+            }
+            return false;
+        }
+        return false;
+    }
+
+
+    /**
      * User can have a custom array of access rights to selected project
      *
      * @param array $actions
@@ -132,7 +196,7 @@ class TaskVoter implements VoterInterface
      * @internal param string $action
      *
      */
-    public function hasAclProjectRights(array $actions, int $projectId):bool
+    private function hasAclProjectRights(array $actions, int $projectId):bool
     {
         $userHasProject = $this->em->getRepository('APITaskBundle:UserHasProject')->findOneBy([
             'project' => $projectId,
@@ -164,7 +228,7 @@ class TaskVoter implements VoterInterface
      * @internal param string $action
      *
      */
-    public function hasAclProjectsRights(array $actions):bool
+    private function hasAclProjectsRights(array $actions):bool
     {
         $userHasProjects = $this->user->getUserHasProjects();
 
@@ -195,7 +259,7 @@ class TaskVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    public function hasAclRights($action, User $user):bool
+    private function hasAclRights($action, User $user):bool
     {
         if (!in_array($action, VoteOptions::getConstants(), true)) {
             throw new \InvalidArgumentException('Action ins not valid, please list your action in the options list');

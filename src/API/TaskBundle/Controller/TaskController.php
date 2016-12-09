@@ -5,6 +5,8 @@ namespace API\TaskBundle\Controller;
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Task;
+use API\TaskBundle\Entity\TaskAttribute;
+use API\TaskBundle\Entity\TaskData;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
@@ -319,6 +321,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *      201 ="The entity was successfully created",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
+     *      404 ="Not found entity",
      *      409 ="Invalid parameters",
      *  }
      * )
@@ -330,7 +333,51 @@ class TaskController extends ApiBaseController implements ControllerInterface
      */
     public function createAction(Request $request, $projectId = 'all', $requestedUserId = 'all')
     {
+        // Check if project and requested user exists
+        if ('all' !== $projectId && '{projectId}' !== $projectId) {
+            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
 
+            if (!$project instanceof Project) {
+                return $this->createApiResponse([
+                    'message' => 'Project with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+        } else {
+            $project = null;
+        }
+
+        if ('all' !== $requestedUserId && '{requestedUserId}' !== $requestedUserId) {
+            $requestedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requestedUserId);
+
+            if (!$requestedUser instanceof User) {
+                return $this->createApiResponse([
+                    'message' => 'Requested user with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+        } else {
+            $requestedUser = null;
+        }
+
+        // Check if user can create task in selected project
+        if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK, $project)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
+
+        $task = new Task();
+        $task->setCreatedBy($this->getUser());
+        $task->setImportant(false);
+        if ($project instanceof Project) {
+            $task->setProject($project);
+        }
+        if ($requestedUser instanceof User) {
+            $task->setRequestedBy($requestedUser);
+        } else {
+            $task->setRequestedBy($this->getUser());
+        }
+
+        return $this->updateTaskEntity($task, $requestData, true);
     }
 
     /**
@@ -770,5 +817,68 @@ class TaskController extends ApiBaseController implements ControllerInterface
     public function removeTagFromTaskAction(Request $request, int $taskId, int $tagId)
     {
 
+    }
+
+    /**
+     * @param Task $task
+     * @param array $requestData
+     * @param bool $create
+     *
+     * @return JsonResponse|Response
+     */
+    private function updateTaskEntity(Task $task, array $requestData, $create = false)
+    {
+        $statusCode = $this->getCreateUpdateStatusCode($create);
+
+        $errors = $this->get('entity_processor')->processEntity($task, $requestData);
+
+        if (false === $errors) {
+            $this->getDoctrine()->getManager()->persist($task);
+            $this->getDoctrine()->getManager()->flush();
+
+            /**
+             * Fill TaskData Entity if some its parameters were sent
+             */
+            if (isset($requestData['task_data']) && count($requestData['task_data']) > 0) {
+                /** @var array $taskData */
+                $taskData = $requestData['task_data'];
+                foreach ($taskData as $key => $value) {
+                    $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($key);
+                    if ($taskAttribute instanceof TaskAttribute) {
+                        $cd = $this->getDoctrine()->getRepository('APITaskBundle:TaskData')->findOneBy([
+                            'taskAttribute' => $taskAttribute,
+                            'task' => $task,
+                        ]);
+
+                        if (!$cd instanceof TaskData) {
+                            $cd = new TaskData();
+                            $cd->setTask($task);
+                            $cd->setTaskAttribute($taskAttribute);
+                        }
+
+                        $cdErrors = $this->get('entity_processor')->processEntity($cd, ['value' => $value]);
+                        if (false === $cdErrors) {
+                            $task->addTaskDatum($cd);
+                            $this->getDoctrine()->getManager()->persist($task);
+                            $this->getDoctrine()->getManager()->persist($cd);
+                            $this->getDoctrine()->getManager()->flush();
+                        } else {
+                            $this->createApiResponse([
+                                'message' => 'The value of task_data with key: ' . $key . ' is invalid',
+                            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        }
+                    } else {
+                        return $this->createApiResponse([
+                            'message' => 'The key: ' . $key . ' of Task Attribute is not valid (Task Attribute with this ID doesn\'t exist)',
+                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    }
+                }
+            }
+
+            $response = $this->get('task_service')->getTaskResponse($task);
+            return $this->createApiResponse($response, $statusCode);
+        }
+
+        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

@@ -112,6 +112,80 @@ class TaskControllerTest extends ApiTestCase
     }
 
     /**
+     * POST SINGLE - success
+     */
+    public function testPostSingleSuccess()
+    {
+        $data = $this->returnPostTestData();
+
+        $adminsProject = $this->em->getRepository('APITaskBundle:Project')->findOneBy([
+            'title' => 'Project of admin 2',
+        ]);
+
+        $adminUser = $this->em->getRepository('APICoreBundle:User')->findOneBy([
+            'username' => 'user'
+        ]);
+
+        // Create Base Entity without setting of Project or Requested user
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/all/user/all', $data, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect Entity, response has to include array with data and _links param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertTrue(array_key_exists('data', $response));
+        $this->assertTrue(array_key_exists('_links', $response));
+
+        // Create Base Entity without setting of Project or Requested user
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminsProject->getId() . '/user/' . $adminUser->getId(),
+            $data, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect Entity, response has to include array with data and _links param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertTrue(array_key_exists('data', $response));
+        $this->assertTrue(array_key_exists('_links', $response));
+    }
+
+    /**
+     *  POST SINGLE - errors
+     */
+    public function testPostSingleErrors()
+    {
+        $data = $this->returnPostTestData();
+
+        $adminProject = $this->em->getRepository('APITaskBundle:Project')->findOneBy([
+            'title' => 'Project of admin'
+        ]);
+
+        // Try to create test Entity, without authorization header
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/all/user/all', $data);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to create Entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/all/user/all', $data, [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to create Task in not existed Project, Requested to not existed user
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/125478/user/abds', $data, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to create Task with ROLE_USER in not allowed Project
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminProject->getId() . '/user/all',
+            $data, [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to create Task with invalid parameter title (title is required)
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/all/user/all', ['description'=>'desc'], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
      * Get the url for requests
      *
      * @return string
@@ -183,14 +257,15 @@ class TaskControllerTest extends ApiTestCase
      */
     public function returnPostTestData()
     {
-        $userUser = $this->em->getRepository('APICoreBundle:User')->findOneBy([
-            'username' => 'user'
+        $taskAttr = $this->em->getRepository('APITaskBundle:TaskAttribute')->findOneBy([
+            'title' => 'input task additional attribute',
         ]);
-
         return [
             'title' => 'Task TEST POST - user is creator',
             'description' => 'desc',
-            'createdBy' => $userUser
+            'task_data' => [
+                $taskAttr->getId() => 'some test value'
+            ]
         ];
     }
 
@@ -201,14 +276,9 @@ class TaskControllerTest extends ApiTestCase
      */
     public function returnUpdateTestData()
     {
-        $userUser = $this->em->getRepository('APICoreBundle:User')->findOneBy([
-            'username' => 'user'
-        ]);
-
         return [
             'title' => 'Task TEST PUT PATCH - user is creator',
-            'description' => 'desc',
-            'createdBy' => $userUser
+            'description' => 'desc'
         ];
     }
 }

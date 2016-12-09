@@ -71,6 +71,8 @@ class TaskVoter implements VoterInterface
                 return $this->canList($options);
             case VoteOptions::SHOW_TASK:
                 return $this->canRead($options);
+            case VoteOptions::CREATE_TASK:
+                return $this->canCreate($options);
             default:
                 return false;
         }
@@ -185,6 +187,33 @@ class TaskVoter implements VoterInterface
         return false;
     }
 
+    /**
+     * User can create a task
+     *
+     * @param  Project|null $project
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    private function canCreate($project):bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        // User can create task without project if he has CREATE_TASK access in its ACL
+        if (null === $project) {
+            return $this->hasAclRights(VoteOptions::CREATE_TASK, $this->user);
+        }
+
+        // User can create task in it's own project
+        if ($project->getCreatedBy()->getId() === $this->user->getId()) {
+            return true;
+        }
+
+        // User can create task if he has CREATE_TASK_IN_PROJECT access in projects ACL
+        $actions [] = VoteOptions::CREATE_TASK_IN_PROJECT;
+        return $this->hasAclProjectRights($actions, $project->getId());
+    }
 
     /**
      * User can have a custom array of access rights to selected project

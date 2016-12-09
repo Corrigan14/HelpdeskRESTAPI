@@ -132,7 +132,7 @@ class TaskService
         }
 
         // Return's tasks based on loggedUser ACL
-        // User Can view: - all tasks which created and which are requested by him - also tasks which are not in projects (VIEW_USER_TASKS_IN_PROJECT)
+        // User Can view: - all tasks which created and which are requested by him - also tasks which are not in projects
         //               - tasks from projects: VIEW_ALL_TASKS_IN_PROJECT, VIEW_COMPANY_TASKS_IN_PROJECT,
 
         // Divide user's projects based on his ACL

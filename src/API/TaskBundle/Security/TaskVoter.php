@@ -60,7 +60,7 @@ class TaskVoter implements VoterInterface
         $this->user = $this->token->getUser();
 
         if (!$this->user instanceof User) {
-            // the user must be logged in; if not, deny access
+            // the user must be logged in if not, deny access
             return false;
         }
 

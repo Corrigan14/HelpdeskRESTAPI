@@ -801,7 +801,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
         }
 
         $listOfTaskFollowers = $task->getFollowers();
-        return $this->createApiResponse($listOfTaskFollowers,StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->createApiResponse($listOfTaskFollowers, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -859,14 +859,50 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *  }
      * )
      *
-     * @param Request $request
      * @param int $taskId
      * @param int $userId
      * @return JsonResponse|Response
+     * @throws \LogicException
      */
-    public function removeFollowerFromTaskAction(Request $request, int $taskId, int $userId)
+    public function removeFollowerFromTaskAction(int $taskId, int $userId)
     {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($userId);
+
+        if (!$user instanceof User) {
+            return $this->createApiResponse([
+                'message' => 'User with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $options = [
+            'task' => $task,
+            'follower' => $user
+        ];
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::REMOVE_TASK_FOLLOWER, $options)) {
+            return $this->accessDeniedResponse();
+        }
+
+        if (!$this->canAddTaskFollower($user, $task)) {
+            $task->removeFollower($user);
+            $user->removeFollowedTask($task);
+            $this->getDoctrine()->getManager()->persist($task);
+            $this->getDoctrine()->getManager()->persist($user);
+            $this->getDoctrine()->getManager()->flush();
+
+            $listOfTaskFollowers = $task->getFollowers();
+            return $this->createApiResponse($listOfTaskFollowers, StatusCodesHelper::SUCCESSFUL_CODE);
+        }
+
+        return $this->notFoundResponse();
     }
 
     /**

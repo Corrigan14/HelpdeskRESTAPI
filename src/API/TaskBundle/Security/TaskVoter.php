@@ -79,6 +79,8 @@ class TaskVoter implements VoterInterface
                 return $this->canDelete($options);
             case VoteOptions::ADD_TASK_FOLLOWER:
                 return $this->canAddTaskFollower($options);
+            case VoteOptions::REMOVE_TASK_FOLLOWER:
+                return $this->canRemoveTaskFollower($options);
             default:
                 return false;
         }
@@ -344,6 +346,19 @@ class TaskVoter implements VoterInterface
         }
 
         return false;
+    }
+
+    /**
+     * @param array $options
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function canRemoveTaskFollower(array $options):bool
+    {
+        $task = $options['task'];
+
+        // If logged user can update task, he can add or remove follower to this task
+        return $this->canUpdate($task);
     }
 
     /**

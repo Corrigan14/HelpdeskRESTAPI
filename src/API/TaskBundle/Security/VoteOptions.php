@@ -65,6 +65,7 @@ class VoteOptions
 
     // OTHER WITH TASK
     const ADD_TASK_FOLLOWER = 'add_task_follower';
+    const REMOVE_TASK_FOLLOWER = 'remove_task_follower';
 
     /**
      * @return array

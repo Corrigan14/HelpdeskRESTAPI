@@ -381,6 +381,38 @@ class TaskControllerTest extends ApiTestCase
     }
 
     /**
+     * REMOVE FOLLOWER FROM TASK - success
+     */
+    public function testRemoveFollowerFromTaskSuccess()
+    {
+        /** @var Task $task */
+        $task = $this->findOneAdminEntity();
+        $followers = $task->getFollowers();
+        $followers->toArray();
+        if (count($followers) > 0) {
+            $follower = $followers[0];
+            $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $task->getId() . '/user/' . $follower->getId(),
+                [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+            $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+        }
+    }
+
+    /**
+     * REMOVE FOLLOWER FROM TASK - errors
+     */
+    public function testRemoveFollowerFromTaskErrors()
+    {
+        /** @var Task $task */
+        $task = $this->findOneAdminEntity();
+        $followers = $task->getFollowers();
+        $followers->toArray();
+        if (count($followers) > 0) {
+            $follower = $followers[0];
+
+        }
+    }
+
+    /**
      * Get the url for requests
      *
      * @return string

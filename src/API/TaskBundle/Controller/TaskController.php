@@ -232,6 +232,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @return JsonResponse|Response
+     * @throws \LogicException
      */
     public function getAction(int $id)
     {
@@ -330,9 +331,15 @@ class TaskController extends ApiBaseController implements ControllerInterface
      * @param int|string $projectId
      * @param int|string $requestedUserId
      * @return JsonResponse|Response
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
      */
     public function createAction(Request $request, $projectId = 'all', $requestedUserId = 'all')
     {
+        $task = new Task();
+
         // Check if project and requested user exists
         if ('all' !== $projectId && '{projectId}' !== $projectId) {
             $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
@@ -342,6 +349,9 @@ class TaskController extends ApiBaseController implements ControllerInterface
                     'message' => 'Project with requested Id does not exist!',
                 ], StatusCodesHelper::NOT_FOUND_CODE);
             }
+
+            $task->setProject($project);
+
         } else {
             $project = null;
         }
@@ -354,8 +364,12 @@ class TaskController extends ApiBaseController implements ControllerInterface
                     'message' => 'Requested user with requested Id does not exist!',
                 ], StatusCodesHelper::NOT_FOUND_CODE);
             }
+
+            $task->setRequestedBy($requestedUser);
+
         } else {
             $requestedUser = null;
+            $task->setRequestedBy($this->getUser());
         }
 
         // Check if user can create task in selected project
@@ -365,17 +379,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
 
         $requestData = $request->request->all();
 
-        $task = new Task();
         $task->setCreatedBy($this->getUser());
         $task->setImportant(false);
-        if ($project instanceof Project) {
-            $task->setProject($project);
-        }
-        if ($requestedUser instanceof User) {
-            $task->setRequestedBy($requestedUser);
-        } else {
-            $task->setRequestedBy($this->getUser());
-        }
 
         return $this->updateTaskEntity($task, $requestData, true);
     }
@@ -463,13 +468,55 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @param Request $request
-     * @param bool|int $projectId
-     * @param bool|int $requestedUserId
+     * @param bool|string $projectId
+     * @param bool|string $requestedUserId
      * @return JsonResponse|Response
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
      */
-    public function updateAction(int $id, Request $request, $projectId = false, $requestedUserId = false)
+    public function updateAction(int $id, Request $request, $projectId = 'all', $requestedUserId = 'all')
     {
-        // TODO: Implement updateAction() method.
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
+
+        if (!$task instanceof Task) {
+            return $this->notFoundResponse();
+        }
+
+        // Check if project and requested user exists
+        if ('all' !== $projectId && '{projectId}' !== $projectId) {
+            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
+
+            if (!$project instanceof Project) {
+                return $this->createApiResponse([
+                    'message' => 'Project with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+
+            $task->setProject($project);
+        }
+
+        if ('all' !== $requestedUserId && '{requestedUserId}' !== $requestedUserId) {
+            $requestedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requestedUserId);
+
+            if (!$requestedUser instanceof User) {
+                return $this->createApiResponse([
+                    'message' => 'Requested user with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+
+            $task->setRequestedBy($requestedUser);
+        }
+
+        // Check if user can update selected task
+        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
+
+        return $this->updateTaskEntity($task, $requestData);
     }
 
     /**
@@ -555,13 +602,55 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @param Request $request
-     * @param bool|int $projectId
-     * @param bool|int $requestedUserId
+     * @param bool|string $projectId
+     * @param bool|string $requestedUserId
      * @return JsonResponse|Response
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
      */
-    public function updatePartialAction(int $id, Request $request, $projectId = false, $requestedUserId = false)
+    public function updatePartialAction(int $id, Request $request, $projectId = 'all', $requestedUserId = 'all')
     {
-        // TODO: Implement updateAction() method.
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
+
+        if (!$task instanceof Task) {
+            return $this->notFoundResponse();
+        }
+
+        // Check if project and requested user exists
+        if ('all' !== $projectId && '{projectId}' !== $projectId) {
+            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
+
+            if (!$project instanceof Project) {
+                return $this->createApiResponse([
+                    'message' => 'Project with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+
+            $task->setProject($project);
+        }
+
+        if ('all' !== $requestedUserId && '{requestedUserId}' !== $requestedUserId) {
+            $requestedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requestedUserId);
+
+            if (!$requestedUser instanceof User) {
+                return $this->createApiResponse([
+                    'message' => 'Requested user with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+
+            $task->setRequestedBy($requestedUser);
+        }
+
+        // Check if user can update selected task
+        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
+
+        return $this->updateTaskEntity($task, $requestData);
     }
 
 
@@ -825,6 +914,10 @@ class TaskController extends ApiBaseController implements ControllerInterface
      * @param bool $create
      *
      * @return JsonResponse|Response
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
     private function updateTaskEntity(Task $task, array $requestData, $create = false)
     {
@@ -837,7 +930,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
             $this->getDoctrine()->getManager()->flush();
 
             /**
-             * Fill TaskData Entity if some its parameters were sent
+             * Fill TaskData Entity if some of its parameters were sent
              */
             if (isset($requestData['task_data']) && count($requestData['task_data']) > 0) {
                 /** @var array $taskData */

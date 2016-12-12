@@ -63,6 +63,9 @@ class VoteOptions
     const UPDATE_TASK = 'update_task';
     const DELETE_TASK = 'delete_task';
 
+    // OTHER WITH TASK
+    const ADD_TASK_FOLLOWER = 'add_task_follower';
+
     /**
      * @return array
      */

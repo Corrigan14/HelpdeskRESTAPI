@@ -707,20 +707,30 @@ class TaskController extends ApiBaseController implements ControllerInterface
     /**
      * ### Response ###
      *      {
-     *        "data":
-     *        {
-     *           "id": "2",
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/task/2",
-     *           "patch": "/api/v1/task-bundle/task/2",
-     *           "delete": "/api/v1/task-bundle/task/2"
+     *         "0":
+     *         {
+     *            "id": 85,
+     *            "username": "admin",
+     *            "email": "admin@admin.sk",
+     *            "roles": "[\"ROLE_ADMIN\"]",
+     *            "is_active": true,
+     *            "acl": "[]",
+     *            "company": ⊕{...}
+     *         },
+     *         "1":
+     *         {
+     *            "id": 87,
+     *            "username": "testuser2",
+     *            "email": "testuser2@user.sk",
+     *            "roles": "[\"ROLE_USER\"]",
+     *            "is_active": true,
+     *            "acl": "[]",
+     *            "company": ⊕{...}
      *         }
      *      }
      *
      * @ApiDoc(
-     *  description="Add a new follower to the Task. Returns array of tasks followers",
+     *  description="Add a new follower to the Task. Returns a list of tasks followers",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -749,28 +759,73 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *  }
      * )
      *
-     * @param Request $request
      * @param int $taskId
      * @param int $userId
      * @return JsonResponse|Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
-    public function addFollowerToTaskAction(Request $request, int $taskId, int $userId)
+    public function addFollowerToTaskAction(int $taskId, int $userId)
     {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($userId);
+
+        if (!$user instanceof User) {
+            return $this->createApiResponse([
+                'message' => 'User with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $options = [
+            'task' => $task,
+            'follower' => $user
+        ];
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_TASK_FOLLOWER, $options)) {
+            return $this->accessDeniedResponse();
+        }
+
+        if ($this->canAddTaskFollower($user, $task)) {
+            $task->addFollower($user);
+            $user->addFollowedTask($task);
+            $this->getDoctrine()->getManager()->persist($task);
+            $this->getDoctrine()->getManager()->persist($user);
+            $this->getDoctrine()->getManager()->flush();
+        }
+
+        $listOfTaskFollowers = $task->getFollowers();
+        return $this->createApiResponse($listOfTaskFollowers,StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
      * ### Response ###
-     *      {
-     *        "data":
-     *        {
-     *           "id": "2",
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/task/2",
-     *           "patch": "/api/v1/task-bundle/task/2",
-     *           "delete": "/api/v1/task-bundle/task/2"
+     *       {
+     *         "0":
+     *         {
+     *            "id": 85,
+     *            "username": "admin",
+     *            "email": "admin@admin.sk",
+     *            "roles": "[\"ROLE_ADMIN\"]",
+     *            "is_active": true,
+     *            "acl": "[]",
+     *            "company": ⊕{...}
+     *         },
+     *         "1":
+     *         {
+     *            "id": 87,
+     *            "username": "testuser2",
+     *            "email": "testuser2@user.sk",
+     *            "roles": "[\"ROLE_USER\"]",
+     *            "is_active": true,
+     *            "acl": "[]",
+     *            "company": ⊕{...}
      *         }
      *      }
      *
@@ -989,5 +1044,21 @@ class TaskController extends ApiBaseController implements ControllerInterface
         }
 
         return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+    }
+
+    /**
+     * @param User $user
+     * @param Task $task
+     * @return bool
+     * @throws \LogicException
+     */
+    private function canAddTaskFollower(User $user, Task $task):bool
+    {
+        $taskHasFollower = $task->getFollowers();
+
+        if (in_array($user, $taskHasFollower->toArray(), true)) {
+            return false;
+        }
+        return true;
     }
 }

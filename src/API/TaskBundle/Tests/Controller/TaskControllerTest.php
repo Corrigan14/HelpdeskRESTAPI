@@ -337,6 +337,50 @@ class TaskControllerTest extends ApiTestCase
     }
 
     /**
+     * ADD FOLLOWER TO TASK - success
+     */
+    public function testAddFollowerToTaskSuccess()
+    {
+        $task = $this->findOneAdminEntity();
+        $userUser = $this->em->getRepository('APICoreBundle:User')->findOneBy([
+            'username' => 'testuser2'
+        ]);
+
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/user/' . $userUser->getId(),
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // At least one follower could be returned
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertNotNull(count($response));
+    }
+
+    /**
+     * ADD FOLLOWER TO TASK - errors
+     */
+    public function testAddFollowerToTaskErrors()
+    {
+        $task = $this->findOneAdminEntity();
+        $userUser = $this->em->getRepository('APICoreBundle:User')->findOneBy([
+            'username' => 'testuser2'
+        ]);
+
+        // Try to add Follower without authorization header
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/user/' . $userUser->getId());
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to add Follower to not existed Task
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/1245680' . '/user/' . $userUser->getId(),
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to delete Entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/user/' . $userUser->getId(),
+            [], [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
      * Get the url for requests
      *
      * @return string

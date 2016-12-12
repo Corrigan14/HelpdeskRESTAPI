@@ -682,10 +682,26 @@ class TaskController extends ApiBaseController implements ControllerInterface
      * @param int $id
      *
      * @return JsonResponse|Response
+     * @throws \LogicException
      */
     public function deleteAction(int $id)
     {
-        // TODO: Implement deleteAction() method.
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
+
+        if (!$task instanceof Task) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::DELETE_TASK, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $this->getDoctrine()->getManager()->remove($task);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->createApiResponse([
+            'message' => StatusCodesHelper::DELETED_MESSAGE,
+        ], StatusCodesHelper::DELETED_CODE);
     }
 
     /**

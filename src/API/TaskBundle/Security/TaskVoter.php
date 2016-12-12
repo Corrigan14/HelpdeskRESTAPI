@@ -75,6 +75,8 @@ class TaskVoter implements VoterInterface
                 return $this->canCreate($options);
             case VoteOptions::UPDATE_TASK:
                 return $this->canUpdate($options);
+            case VoteOptions::DELETE_TASK:
+                return $this->canDelete($options);
             default:
                 return false;
         }
@@ -209,7 +211,7 @@ class TaskVoter implements VoterInterface
     }
 
     /**
-     * User can update a task
+     * User can update the task entity
      *
      * @param  Task|null $task
      * @return bool
@@ -252,6 +254,62 @@ class TaskVoter implements VoterInterface
             }
 
             // User can update task if he has UPDATE_USER_TASKS_IN_PROJECT access in projects ACL and
+            // The task is requested by him ar is assigned to him
+            $actions [] = VoteOptions::UPDATE_USER_TASKS_IN_PROJECT;
+            $hasAcl = $this->hasAclProjectRights($actions, $project->getId());
+
+            if ($hasAcl && ($this->user->getId() === $task->getRequestedBy()->getId())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * User can delete the task entity
+     *
+     * @param  Task|null $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    private function canDelete($task):bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        // User can delete task if he created it
+        if ($task->getCreatedBy()->getId() === $this->user->getId()) {
+            return true;
+        }
+
+        $project = $task->getProject();
+
+        if ($project instanceof Project) {
+            // User can delete all tasks in it's own project
+            if ($project->getCreatedBy()->getId() === $this->user->getId()) {
+                return true;
+            }
+
+            // User can delete task if he has UPDATE_ALL_TASKS_IN_PROJECT access in projects ACL
+            $actions [] = VoteOptions::UPDATE_ALL_TASKS_IN_PROJECT;
+            if ($this->hasAclProjectRights($actions, $project->getId())) {
+                return true;
+            }
+
+            // User can delete task if he has UPDATE_COMPANY_TASKS_IN_PROJECT access in projects ACL and
+            // His company is the same like company of creator of the task
+            $actions [] = VoteOptions::UPDATE_COMPANY_TASKS_IN_PROJECT;
+            $hasAcl = $this->hasAclProjectRights($actions, $project->getId());
+            $usersCompany = $this->user->getCompany();
+            $tasksCompany = $task->getCreatedBy()->getCompany();
+
+            if ($hasAcl && ($usersCompany instanceof Company && $tasksCompany instanceof Company && ($usersCompany->getId() === $tasksCompany->getId()))) {
+                return true;
+            }
+
+            // User can delete task if he has UPDATE_USER_TASKS_IN_PROJECT access in projects ACL and
             // The task is requested by him ar is assigned to him
             $actions [] = VoteOptions::UPDATE_USER_TASKS_IN_PROJECT;
             $hasAcl = $this->hasAclProjectRights($actions, $project->getId());

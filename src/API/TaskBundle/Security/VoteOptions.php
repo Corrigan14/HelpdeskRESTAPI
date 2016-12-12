@@ -61,6 +61,7 @@ class VoteOptions
     const SHOW_TASK = 'read_task';
     const CREATE_TASK = 'create_task';
     const UPDATE_TASK = 'update_task';
+    const DELETE_TASK = 'delete_task';
 
     /**
      * @return array

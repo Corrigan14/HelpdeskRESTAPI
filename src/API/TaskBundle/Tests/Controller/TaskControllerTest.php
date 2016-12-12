@@ -259,7 +259,7 @@ class TaskControllerTest extends ApiTestCase
         $data = $this->returnUpdateTestData();
         $data2 = $this->returnWrongTestData();
 
-        $entity = $this->createAdminsEntity();
+        $entity = $this->findOneAdminEntity();
 
         // Try to update test Entity without authorization header: method PUT
         $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/project/all/user/all', $data);
@@ -322,6 +322,21 @@ class TaskControllerTest extends ApiTestCase
     }
 
     /**
+     * DELETE SINGLE - errors
+     */
+    public function testDeleteSingleErrors()
+    {
+        parent::testDeleteSingleErrors();
+
+        $entity = $this->findOneAdminEntity();
+
+        // Try to delete Entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
+            [], [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
      * Get the url for requests
      *
      * @return string
@@ -347,6 +362,24 @@ class TaskControllerTest extends ApiTestCase
         }
 
         return $this->createEntity();
+    }
+
+    /**
+     * Return a single entity from db for testing CRUD
+     *
+     * @return mixed
+     */
+    public function findOneAdminEntity()
+    {
+        $task = $this->em->getRepository('APITaskBundle:Task')->findOneBy([
+            'title' => 'Task TEST - admin is creator, admin is requested 2'
+        ]);
+
+        if ($task instanceof Task) {
+            return $task;
+        }
+
+        return $this->createAdminsEntity();
     }
 
     /**

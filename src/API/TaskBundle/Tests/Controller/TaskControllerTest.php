@@ -6,6 +6,7 @@ use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
+use API\TaskBundle\Security\StatusOptions;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 
@@ -590,6 +591,104 @@ class TaskControllerTest extends ApiTestCase
             [], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::BAD_REQUEST_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * ASSIGN USER TO TASK - success
+     */
+    public function testUpdateAssignUserToTaskSuccess()
+    {
+        // Create or find User assigned to task
+        /** @var Task $task */
+        $task = $this->findOneAdminEntity();
+
+        /** @var User $user */
+        $user = $task->getCreatedBy();
+
+        /** @var TaskHasAssignedUser $task */
+        $taskHasAssignedUser = $this->em->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy([
+            'task' => $task,
+            'user' => $user,
+        ]);
+
+        if ($taskHasAssignedUser instanceof TaskHasAssignedUser) {
+            $task = $taskHasAssignedUser->getTask();
+            $user = $taskHasAssignedUser->getUser();
+        } else {
+            $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/assign-user/' . $user->getId(),
+                [], [],
+                ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+            $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
+        }
+
+        $status = $this->em->getRepository('APITaskBundle:Status')->findOneBy([
+            'title' => StatusOptions::IN_PROGRESS]);
+
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $task->getId() . '/assign-user/' . $user->getId() . '/status/' . $status->getId(),
+            ['time_spent' => 100], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * ASSIGN USER TO TASK - errors
+     */
+    public function testUpdateAssignUserToTaskErrors()
+    {
+        // Create or find User assigned to task
+        /** @var Task $task */
+        $task = $this->findOneAdminEntity();
+
+        /** @var User $user */
+        $user = $task->getCreatedBy();
+
+        /** @var TaskHasAssignedUser $task */
+        $taskHasAssignedUser = $this->em->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy([
+            'task' => $task,
+            'user' => $user,
+        ]);
+
+        if ($taskHasAssignedUser instanceof TaskHasAssignedUser) {
+            $task = $taskHasAssignedUser->getTask();
+            $user = $taskHasAssignedUser->getUser();
+        } else {
+            $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/assign-user/' . $user->getId(),
+                [], [],
+                ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+            $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
+        }
+
+        $status = $this->em->getRepository('APITaskBundle:Status')->findOneBy([
+            'title' => StatusOptions::IN_PROGRESS]);
+
+        // Try to update Entity without authorization header
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $task->getId() . '/assign-user/' . $user->getId() . '/status/' . $status->getId(),
+            ['time_spent' => 100], [], []);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update Entity with not existed Status
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $task->getId() . '/assign-user/' . $user->getId() . '/status/125874',
+            ['time_spent' => 100], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update Entity with not existed Task
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/125789' . '/assign-user/' . $user->getId() . '/status/' . $status->getId(),
+            ['time_spent' => 100], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update Entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $task->getId() . '/assign-user/' . $user->getId() . '/status/' . $status->getId(),
+            ['time_spent' => 100], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update Entity with wrong data: status date could be Datetime Type
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $task->getId() . '/assign-user/' . $user->getId() . '/status/' . $status->getId(),
+            ['time_spent' => 100, 'status_date' => '12.5.1254'], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
     /**

@@ -9,6 +9,7 @@ use API\CoreBundle\Security\VoterInterface;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
+use API\TaskBundle\Entity\TaskHasAssignedUser;
 use API\TaskBundle\Entity\UserHasProject;
 use Doctrine\ORM\EntityManager;
 use Prophecy\Argument\Token\TokenInterface;
@@ -88,6 +89,8 @@ class TaskVoter implements VoterInterface
                 return $this->canRemoveTagFromTask($options);
             case VoteOptions::ASSIGN_USER_TO_TASK:
                 return $this->canAssignUserToTask($options);
+            case VoteOptions::UPDATE_ASSIGN_USER_TO_TASK:
+                return $this->casUpdateAssignUserToTask($options);
             default:
                 return false;
         }
@@ -454,6 +457,20 @@ class TaskVoter implements VoterInterface
         }
 
         return ($canUpdate && $canUser) ? true : false;
+    }
+
+    /**
+     * @param TaskHasAssignedUser $taskHasAssignedUser
+     * @return bool
+     */
+    private function casUpdateAssignUserToTask(TaskHasAssignedUser $taskHasAssignedUser):bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        // Only admin or user assigned to task can update this entity
+        return ($taskHasAssignedUser->getUser()->getId() === $this->user->getId()) ? true : false;
     }
 
     /**

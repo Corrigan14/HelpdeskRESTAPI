@@ -1250,7 +1250,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *      }
      *
      * @ApiDoc(
-     *  description="Update taskHasAssignedUser Entity. Returns array of users assigned to task",
+     *  description="Update taskHasAssignedUser Entity. Just status, time spent and status date could be updated!
+     *  Returns array of users assigned to task",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -1295,6 +1296,62 @@ class TaskController extends ApiBaseController implements ControllerInterface
      */
     public function updateAssignUserToTaskAction(Request $request, int $taskId, int $userId, int $statusId)
     {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($userId);
+
+        if (!$user instanceof User) {
+            return $this->createApiResponse([
+                'message' => 'User with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $taskHasAssignedEntity = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy([
+            'user' => $user,
+            'task' => $task
+        ]);
+
+        if (!$taskHasAssignedEntity instanceof TaskHasAssignedUser) {
+            return $this->createApiResponse([
+                'message' => 'Requested user is not assigned to the requested task!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_ASSIGN_USER_TO_TASK, $taskHasAssignedEntity)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($statusId);
+
+        if (!$status instanceof Status) {
+            return $this->createApiResponse([
+                'message' => 'Status with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $taskHasAssignedEntity->setStatus($status);
+        $status->addTaskHasAssignedUser($taskHasAssignedEntity);
+
+        $requestData = $request->request->all();
+
+        $errors = $this->get('entity_processor')->processEntity($taskHasAssignedEntity, $requestData);
+
+        if (false === $errors) {
+            $this->getDoctrine()->getManager()->persist($taskHasAssignedEntity);
+            $this->getDoctrine()->getManager()->persist($status);
+            $this->getDoctrine()->getManager()->flush();
+
+            $assignedUsersArray = $this->getArrayOfUsersAssignedToTask($task);
+            return $this->createApiResponse($assignedUsersArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        }
+
+        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
 
     }
 

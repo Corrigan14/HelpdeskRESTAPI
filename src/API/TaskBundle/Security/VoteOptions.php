@@ -48,6 +48,9 @@ class VoteOptions
     const VIEW_ALL_TASKS_IN_PROJECT = 'view_all_tasks_in_project';
     const VIEW_COMPANY_TASKS_IN_PROJECT = 'view_company_tasks_in_project';
     const VIEW_USER_TASKS_IN_PROJECT = 'view_user_tasks_in_project';
+    const SOLVE_ALL_TASKS_IN_PROJECT = 'solve_all_tasks_in_project';
+    const SOLVE_COMPANY_TASKS_IN_PROJECT = 'solve_company_tasks_in_project';
+    const SOLVE_USER_TASKS_IN_PROJECT = 'solve_user_tasks_in_project';
 
     // TASK ATTRIBUTE CRUD
     const CREATE_TASK_ATTRIBUTE = 'create_task_attribute';
@@ -62,10 +65,14 @@ class VoteOptions
     const CREATE_TASK = 'create_task';
     const UPDATE_TASK = 'update_task';
     const DELETE_TASK = 'delete_task';
+    const SOLVE_TASK = 'solve_task';
 
     // OTHER WITH TASK
     const ADD_TASK_FOLLOWER = 'add_task_follower';
     const REMOVE_TASK_FOLLOWER = 'remove_task_follower';
+    const ADD_TAG_TO_TASK = 'add_tag_to_task';
+    const REMOVE_TAG_FROM_TASK = 'remove_tag_from_task';
+    const ASSIGN_USER_TO_TASK = 'assign_user_to_task';
 
     /**
      * @return array

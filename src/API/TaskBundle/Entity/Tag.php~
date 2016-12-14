@@ -5,6 +5,7 @@ namespace API\TaskBundle\Entity;
 use API\CoreBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation\ReadOnly;
 
@@ -60,6 +61,7 @@ class Tag
      * @var ArrayCollection
      *
      * @ORM\ManyToMany(targetEntity="API\TaskBundle\Entity\Task", mappedBy="tags")
+     * @Serializer\Exclude()
      */
     private $tasks;
 
@@ -170,10 +172,44 @@ class Tag
     /**
      * Get createdBy
      *
-     * @return \API\CoreBundle\Entity\User
+     * @return User
      */
     public function getCreatedBy()
     {
         return $this->createdBy;
+    }
+
+    /**
+     * Add task
+     *
+     * @param Task $task
+     *
+     * @return Tag
+     */
+    public function addTask(Task $task)
+    {
+        $this->tasks[] = $task;
+
+        return $this;
+    }
+
+    /**
+     * Remove task
+     *
+     * @param Task $task
+     */
+    public function removeTask(Task $task)
+    {
+        $this->tasks->removeElement($task);
+    }
+
+    /**
+     * Get tasks
+     *
+     * @return ArrayCollection
+     */
+    public function getTasks()
+    {
+        return $this->tasks;
     }
 }

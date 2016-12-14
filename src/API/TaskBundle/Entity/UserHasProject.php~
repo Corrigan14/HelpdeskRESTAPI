@@ -75,9 +75,9 @@ class UserHasProject
     /**
      * Get acl
      *
-     * @return array
+     * @return array|null
      */
-    public function getAcl():array
+    public function getAcl()
     {
         return json_decode($this->acl);
     }

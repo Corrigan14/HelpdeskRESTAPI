@@ -2,7 +2,10 @@
 
 namespace API\TaskBundle\Tests\Controller;
 
+use API\CoreBundle\Entity\User;
+use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
+use API\TaskBundle\Entity\TaskHasAssignedUser;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 
@@ -387,14 +390,17 @@ class TaskControllerTest extends ApiTestCase
     {
         /** @var Task $task */
         $task = $this->findOneAdminEntity();
-        $followers = $task->getFollowers();
-        $followers->toArray();
-        if (count($followers) > 0) {
-            $follower = $followers[0];
-            $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $task->getId() . '/user/' . $follower->getId(),
-                [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-            $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
-        }
+
+        // Add follower to task
+        $userUser = $this->em->getRepository('APICoreBundle:User')->findOneBy([
+            'username' => 'testuser2'
+        ]);
+        $this->addFollowerToTask($task, $userUser);
+
+        // Remove follower
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $task->getId() . '/user/' . $userUser->getId(),
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
     /**
@@ -404,12 +410,186 @@ class TaskControllerTest extends ApiTestCase
     {
         /** @var Task $task */
         $task = $this->findOneAdminEntity();
-        $followers = $task->getFollowers();
-        $followers->toArray();
-        if (count($followers) > 0) {
-            $follower = $followers[0];
 
-        }
+        // Add follower to task
+        $userUser = $this->em->getRepository('APICoreBundle:User')->findOneBy([
+            'username' => 'testuser2'
+        ]);
+        $this->addFollowerToTask($task, $userUser);
+
+        // Try to remove Follower without authorization header
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $task->getId() . '/user/' . $userUser->getId());
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to remove Follower from not existed Task
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/125874' . '/user/' . $userUser->getId(),
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to remove Follower with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $task->getId() . '/user/' . $userUser->getId(),
+            [], [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * ADD TAG TO TASK - success
+     */
+    public function testAddTagToTaskSuccess()
+    {
+        /** @var Task $task */
+        $task = $this->findOneAdminEntity();
+
+        /** @var Tag $tag */
+        $tag = $this->em->getRepository('APITaskBundle:Tag')->findOneBy([
+            'title' => 'Another Admin Public Tag'
+        ]);
+
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/tag/' . $tag->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * ADD TAG TO TASK - errors
+     */
+    public function testAddTagToTaskErrors()
+    {
+        /** @var Task $task */
+        $task = $this->findOneAdminEntity();
+
+        /** @var Tag $tag */
+        $tag = $this->em->getRepository('APITaskBundle:Tag')->findOneBy([
+            'title' => 'Another Admin Public Tag'
+        ]);
+
+        // Try to add Tag without authorization header
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/tag/' . $tag->getId());
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to add Tag to not existed Task
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/125874' . '/tag/' . $tag->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to add Tag with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/tag/' . $tag->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+
+    /**
+     * REMOVE TAG FROM TASK - success
+     */
+    public function testRemoveTagFromTaskSuccess()
+    {
+        /** @var Task $task */
+        $task = $this->findOneAdminEntity();
+
+        /** @var Tag $tag */
+        $tag = $this->em->getRepository('APITaskBundle:Tag')->findOneBy([
+            'title' => 'Another Admin Public Tag'
+        ]);
+        $this->addTagToTask($task, $tag);
+
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $task->getId() . '/tag/' . $tag->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * REMOVE TAG FROM TASK - errors
+     */
+    public function testRemoveTagFromTaskErrors()
+    {
+        /** @var Task $task */
+        $task = $this->findOneAdminEntity();
+
+        /** @var Tag $tag */
+        $tag = $this->em->getRepository('APITaskBundle:Tag')->findOneBy([
+            'title' => 'Another Admin Public Tag'
+        ]);
+        $this->addTagToTask($task, $tag);
+
+        // Try to remove Tag without authorization header
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $task->getId() . '/tag/' . $tag->getId());
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to remove Tag to not existed Task
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/125874' . '/tag/' . $tag->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to add Tag with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $task->getId() . '/tag/' . $tag->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * ASSIGN USER TO TASK - success
+     */
+    public function testCreateAssignUserToTaskSuccess()
+    {
+        /** @var Task $task */
+        $task = $this->findOneAdminEntity();
+
+        /** @var User $user */
+        $user = $task->getCreatedBy();
+
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/assign-user/' . $user->getId(),
+            [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * ASSIGN USER TO TASK - errors
+     */
+    public function testCreateAssignUserToTaskErrors()
+    {
+        /** @var Task $task */
+        $task = $this->findOneAdminEntity();
+
+        /** @var User $user */
+        $user = $task->getCreatedBy();
+
+        // Remove assigned admin user
+        $this->removeTaskHasAssignedUser($task, $user);
+
+        // Try to create Entity without authorization header
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/assign-user/' . $user->getId());
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to assign not Existed User to not Existed Task
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/1254' . $task->getId() . '/assign-user/2598' . $user->getId(),
+            [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to assign User to task with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/assign-user/' . $user->getId(),
+            [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to assign User to task with wrong data: status date could be Datetime Type
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/assign-user/' . $user->getId(),
+            ['status_date' => '12.5.2016'], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to assign User to task two times
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/assign-user/' . $user->getId(),
+            [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/assign-user/' . $user->getId(),
+            [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::BAD_REQUEST_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
     /**
@@ -578,6 +758,69 @@ class TaskControllerTest extends ApiTestCase
 
         if ($task instanceof Task) {
             $this->em->remove($task);
+            $this->em->flush();
+        }
+    }
+
+    /**
+     * @param Task $task
+     * @param User $follower
+     * @return bool
+     */
+    private function addFollowerToTask(Task $task, User $follower)
+    {
+        $followers = $task->getFollowers();
+        $followers->toArray();
+
+        foreach ($followers as $foll) {
+            if ($foll === $follower) {
+                return true;
+            }
+        }
+        $task->addFollower($follower);
+        $this->em->persist($task);
+        $this->em->flush();
+
+        return true;
+    }
+
+    /**
+     * @param Task $task
+     * @param Tag $tag
+     * @return bool
+     */
+    private function addTagToTask(Task $task, Tag $tag):bool
+    {
+        $tags = $task->getTags();
+
+        if (in_array($tag, $tags->toArray())) {
+            return true;
+        }
+
+        $task->addTag($tag);
+        $this->em->persist($task);
+        $this->em->flush();
+
+        return true;
+    }
+
+    /**
+     * @param Task $task
+     * @param User $user
+     */
+    private function removeTaskHasAssignedUser(Task $task, User $user)
+    {
+        $taskHasAssignedUser = $this->em->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy([
+            'user' => $user,
+            'task' => $task
+        ]);
+
+        if ($taskHasAssignedUser instanceof TaskHasAssignedUser) {
+            $task->removeTaskHasAssignedUser($taskHasAssignedUser);
+            $user->removeTaskHasAssignedUser($taskHasAssignedUser);
+            $this->em->remove($taskHasAssignedUser);
+            $this->em->persist($task);
+            $this->em->persist($user);
             $this->em->flush();
         }
     }

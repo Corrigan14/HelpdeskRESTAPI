@@ -6,6 +6,7 @@ use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
+use API\TaskBundle\Entity\TaskHasAssignedUser;
 use API\TaskBundle\Entity\UserHasProject;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -65,6 +66,14 @@ trait UserTrait
      * @ORM\ManyToMany(targetEntity="API\TaskBundle\Entity\Task", mappedBy="followers")
      */
     private $followedTasks;
+
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskHasAssignedUser", mappedBy="user")
+     * @Serializer\Exclude()
+     */
+    private $taskHasAssignedUsers;
 
     /**
      * Add tag
@@ -263,6 +272,40 @@ trait UserTrait
     public function getFollowedTasks()
     {
         return $this->followedTasks;
+    }
+
+    /**
+     * Add taskHasAssignedUser
+     *
+     * @param TaskHasAssignedUser $taskHasAssignedUser
+     *
+     * @return User
+     */
+    public function addTaskHasAssignedUser(TaskHasAssignedUser $taskHasAssignedUser)
+    {
+        $this->taskHasAssignedUsers[] = $taskHasAssignedUser;
+
+        return $this;
+    }
+
+    /**
+     * Remove taskHasAssignedUser
+     *
+     * @param TaskHasAssignedUser $taskHasAssignedUser
+     */
+    public function removeTaskHasAssignedUser(TaskHasAssignedUser $taskHasAssignedUser)
+    {
+        $this->taskHasAssignedUsers->removeElement($taskHasAssignedUser);
+    }
+
+    /**
+     * Get taskHasAssignedUsers
+     *
+     * @return Collection
+     */
+    public function getTaskHasAssignedUsers()
+    {
+        return $this->taskHasAssignedUsers;
     }
 
 }

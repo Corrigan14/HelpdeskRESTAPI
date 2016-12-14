@@ -4,9 +4,13 @@ namespace API\TaskBundle\Controller;
 
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Project;
+use API\TaskBundle\Entity\Status;
+use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskAttribute;
 use API\TaskBundle\Entity\TaskData;
+use API\TaskBundle\Entity\TaskHasAssignedUser;
+use API\TaskBundle\Security\StatusOptions;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
@@ -756,6 +760,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *      201 ="The entity was successfully created",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
+     *      404 ="Not found entity",
      *  }
      * )
      *
@@ -856,6 +861,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *      200 ="The follower was successfully removed",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
+     *      404 ="Not found entity",
      *  }
      * )
      *
@@ -908,15 +914,21 @@ class TaskController extends ApiBaseController implements ControllerInterface
     /**
      * ### Response ###
      *      {
-     *        "data":
-     *        {
-     *           "id": "2",
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/task/2",
-     *           "patch": "/api/v1/task-bundle/task/2",
-     *           "delete": "/api/v1/task-bundle/task/2"
+     *         "0":
+     *         {
+     *            "id": 19,
+     *            "title": "Home",
+     *            "color": "DFD112",
+     *            "public": false,
+     *            "created_by": ⊕{...}
+     *         },
+     *         "1":
+     *         {
+     *            "id": 20,
+     *            "title": "Work",
+     *            "color": "DFD115",
+     *            "public": true,
+     *            "created_by": ⊕{...}
      *         }
      *      }
      *
@@ -930,7 +942,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *       "description"="The id of task"
      *     },
      *     {
-     *       "name"="userId",
+     *       "name"="tagId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
      *       "description"="The id of tag"
@@ -947,31 +959,71 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *      201 ="The entity was successfully created",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
+     *      404 ="Not found Entity",
      *  }
      * )
      *
-     * @param Request $request
      * @param int $taskId
      * @param int $tagId
      * @return JsonResponse|Response
      */
-    public function addTagToTaskAction(Request $request, int $taskId, int $tagId)
+    public function addTagToTaskAction(int $taskId, int $tagId)
     {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->find($tagId);
+
+        if (!$tag instanceof Tag) {
+            return $this->createApiResponse([
+                'message' => 'Tag with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $options = [
+            'task' => $task,
+            'tag' => $tag
+        ];
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_TAG_TO_TASK, $options)) {
+            return $this->accessDeniedResponse();
+        }
+
+        if ($this->canAddTagToTask($task, $tag)) {
+            $task->addTag($tag);
+            $tag->addTask($task);
+            $this->getDoctrine()->getManager()->persist($task);
+            $this->getDoctrine()->getManager()->persist($tag);
+            $this->getDoctrine()->getManager()->flush();
+        }
+
+        $arrayOfTags = $task->getTags();
+        return $this->createApiResponse($arrayOfTags, StatusCodesHelper::CREATED_CODE);
     }
 
     /**
      * ### Response ###
      *      {
-     *        "data":
-     *        {
-     *           "id": "2",
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/task/2",
-     *           "patch": "/api/v1/task-bundle/task/2",
-     *           "delete": "/api/v1/task-bundle/task/2"
+     *         "0":
+     *         {
+     *            "id": 19,
+     *            "title": "Home",
+     *            "color": "DFD112",
+     *            "public": false,
+     *            "created_by": ⊕{...}
+     *         },
+     *         "1":
+     *         {
+     *            "id": 20,
+     *            "title": "Work",
+     *            "color": "DFD115",
+     *            "public": true,
+     *            "created_by": ⊕{...}
      *         }
      *      }
      *
@@ -979,7 +1031,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *  description="Remove the Tag from the Task. Returns array of tasks tags",
      *  requirements={
      *     {
-     *       "name"="taskId",
+     *       "name"="tagId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
      *       "description"="The id of task"
@@ -1002,15 +1054,314 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *      200 ="The tag was successfully removed from task",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
+     *      404 ="Not found Entity",
+     *  }
+     * )
+     *
+     * @param int $taskId
+     * @param int $tagId
+     * @return JsonResponse|Response
+     */
+    public function removeTagFromTaskAction(int $taskId, int $tagId)
+    {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->find($tagId);
+
+        if (!$tag instanceof Tag) {
+            return $this->createApiResponse([
+                'message' => 'Tag with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $options = [
+            'task' => $task,
+            'tag' => $tag
+        ];
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::REMOVE_TAG_FROM_TASK, $options)) {
+            return $this->accessDeniedResponse();
+        }
+
+        if (!$this->canAddTagToTask($task, $tag)) {
+            $task->removeTag($tag);
+            $tag->removeTask($task);
+            $this->getDoctrine()->getManager()->persist($task);
+            $this->getDoctrine()->getManager()->persist($tag);
+            $this->getDoctrine()->getManager()->flush();
+
+            $arrayOfTags = $task->getTags();
+            return $this->createApiResponse($arrayOfTags, StatusCodesHelper::SUCCESSFUL_CODE);
+        }
+
+        return $this->createApiResponse([
+            'message' => 'Task does not contains requested tag!',
+        ], StatusCodesHelper::NOT_FOUND_CODE);
+    }
+
+    /**
+     * ### Response ###
+     *      {
+     *         "0":
+     *         {
+     *           "id": 17,
+     *           "username": "user",
+     *           "email": "user@user.sk",
+     *           "roles": "[\"ROLE_USER\"]",
+     *           "is_active": true,
+     *           "acl": "[]",
+     *           "company": ⊕{...},
+     *           "followed_tasks": {}
+     *         },
+     *         "1":
+     *         {
+     *           "id": 18,
+     *           "username": "testuser2",
+     *           "email": "testuser2@user.sk",
+     *           "roles": "[\"ROLE_USER\"]",
+     *           "is_active": true,
+     *           "acl": "[]",
+     *           "company": ⊕{...},
+     *           "followed_tasks": {}
+     *         }
+     *      }
+     *
+     * @ApiDoc(
+     *  description="Assign task to the user - create taskHasAssignedUser Entity. Status of this task is set to StatusOption: NEW.
+     *  Returns array of users assigned to task",
+     *  requirements={
+     *     {
+     *       "name"="taskId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of task"
+     *     },
+     *     {
+     *       "name"="userId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of tag"
+     *     }
+     *  },
+     *  input={"class"="API\TaskBundle\Entity\TaskHasAssignedUser"},
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      201 ="The task was successfully assigned to the user",
+     *      400 ="Bad Request",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity",
+     *      409 ="Invalid parameters",
      *  }
      * )
      *
      * @param Request $request
      * @param int $taskId
-     * @param int $tagId
+     * @param int $userId
      * @return JsonResponse|Response
      */
-    public function removeTagFromTaskAction(Request $request, int $taskId, int $tagId)
+    public function createAssignUserToTaskAction(Request $request, int $taskId, int $userId)
+    {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($userId);
+
+        if (!$user instanceof User) {
+            return $this->createApiResponse([
+                'message' => 'User with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $options = [
+            'task' => $task,
+            'user' => $user
+        ];
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::ASSIGN_USER_TO_TASK, $options)) {
+            return $this->accessDeniedResponse();
+        }
+
+        if ($this->canAssignUserToTask($task, $user)) {
+            $newStatus = $this->getDoctrine()->getRepository('APITaskBundle:Status')->findOneBy([
+                'title' => StatusOptions::NEW,
+            ]);
+            if ($newStatus instanceof Status) {
+                $taskHasAssignedUser = new TaskHasAssignedUser();
+                $taskHasAssignedUser->setTask($task);
+                $taskHasAssignedUser->setStatus($newStatus);
+                $taskHasAssignedUser->setUser($user);
+
+                $requestData = $request->request->all();
+                return $this->updateTaskHasAssignUserEntity($taskHasAssignedUser, $requestData, true);
+            }
+            return $this->createApiResponse([
+                'message' => 'New Status Entity does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        return $this->createApiResponse([
+            'message' => 'User is already assigned to this task!',
+        ], StatusCodesHelper::BAD_REQUEST_CODE);
+    }
+
+    /**
+     * ### Response ###
+     *      {
+     *         "0":
+     *         {
+     *           "id": 17,
+     *           "username": "user",
+     *           "email": "user@user.sk",
+     *           "roles": "[\"ROLE_USER\"]",
+     *           "is_active": true,
+     *           "acl": "[]",
+     *           "company": ⊕{...},
+     *           "followed_tasks": {}
+     *         },
+     *         "1":
+     *         {
+     *           "id": 18,
+     *           "username": "testuser2",
+     *           "email": "testuser2@user.sk",
+     *           "roles": "[\"ROLE_USER\"]",
+     *           "is_active": true,
+     *           "acl": "[]",
+     *           "company": ⊕{...},
+     *           "followed_tasks": {}
+     *         }
+     *      }
+     *
+     * @ApiDoc(
+     *  description="Update taskHasAssignedUser Entity. Returns array of users assigned to task",
+     *  requirements={
+     *     {
+     *       "name"="taskId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of task"
+     *     },
+     *     {
+     *       "name"="userId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of tag"
+     *     },
+     *     {
+     *       "name"="statusId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of tag"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="The task was successfully updated",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity",
+     *      409 ="Invalid parameters",
+     *  }
+     * )
+     *
+     * @param Request $request
+     * @param int $taskId
+     * @param int $userId
+     * @param int $statusId
+     * @return JsonResponse|Response
+     */
+    public function updateAssignUserToTaskAction(Request $request, int $taskId, int $userId, int $statusId)
+    {
+
+    }
+
+    /**
+     * ### Response ###
+     *      {
+     *         "0":
+     *         {
+     *           "id": 17,
+     *           "username": "user",
+     *           "email": "user@user.sk",
+     *           "roles": "[\"ROLE_USER\"]",
+     *           "is_active": true,
+     *           "acl": "[]",
+     *           "company": ⊕{...},
+     *           "followed_tasks": {}
+     *         },
+     *         "1":
+     *         {
+     *           "id": 18,
+     *           "username": "testuser2",
+     *           "email": "testuser2@user.sk",
+     *           "roles": "[\"ROLE_USER\"]",
+     *           "is_active": true,
+     *           "acl": "[]",
+     *           "company": ⊕{...},
+     *           "followed_tasks": {}
+     *         }
+     *      }
+     *
+     * @ApiDoc(
+     *  description="Delete taskHasAssignedUser Entity. Returns array of users assigned to task",
+     *  requirements={
+     *     {
+     *       "name"="taskId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of task"
+     *     },
+     *     {
+     *       "name"="userId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of tag"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      204 ="The Entity was successfully removed",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity"
+     *  }
+     * )
+     *
+     * @param Request $request
+     * @param int $taskId
+     * @param int $userId
+     * @return JsonResponse|Response
+     */
+    public function removeAssignUserFromTaskAction(Request $request, int $taskId, int $userId)
     {
 
     }
@@ -1083,6 +1434,35 @@ class TaskController extends ApiBaseController implements ControllerInterface
     }
 
     /**
+     * @param TaskHasAssignedUser $taskHasAssignedUser
+     * @param array $requestData
+     * @param bool $create
+     * @return Response
+     */
+    private function updateTaskHasAssignUserEntity(TaskHasAssignedUser $taskHasAssignedUser, array $requestData, $create = false)
+    {
+        $statusCode = $this->getCreateUpdateStatusCode($create);
+
+        $errors = $this->get('entity_processor')->processEntity($taskHasAssignedUser, $requestData);
+
+        if (false === $errors) {
+            $task = $taskHasAssignedUser->getTask();
+            $task->addTaskHasAssignedUser($taskHasAssignedUser);
+            $user = $taskHasAssignedUser->getUser();
+            $user->addTaskHasAssignedUser($taskHasAssignedUser);
+            $this->getDoctrine()->getManager()->persist($taskHasAssignedUser);
+            $this->getDoctrine()->getManager()->persist($task);
+            $this->getDoctrine()->getManager()->persist($user);
+            $this->getDoctrine()->getManager()->flush();
+
+            $assignedUsersArray = $this->getArrayOfUsersAssignedToTask($task);
+            return $this->createApiResponse($assignedUsersArray, $statusCode);
+        }
+
+        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+    }
+
+    /**
      * @param User $user
      * @param Task $task
      * @return bool
@@ -1096,5 +1476,53 @@ class TaskController extends ApiBaseController implements ControllerInterface
             return false;
         }
         return true;
+    }
+
+    /**
+     * @param Task $task
+     * @param Tag $tag
+     * @return bool
+     */
+    private function canAddTagToTask(Task $task, Tag $tag):bool
+    {
+        $taskHasTags = $task->getTags();
+
+        if (in_array($tag, $taskHasTags->toArray(), true)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @param Task $task
+     * @param User $user
+     * @return bool
+     */
+    private function canAssignUserToTask(Task $task, User $user):bool
+    {
+        $assignedUsersArray = $this->getArrayOfUsersAssignedToTask($task);
+
+        if (in_array($user, $assignedUsersArray, true)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param Task $task
+     * @return array
+     */
+    private function getArrayOfUsersAssignedToTask(Task $task):array
+    {
+        $assignedUsers = $task->getTaskHasAssignedUsers();
+        $assignedUsersArray = [];
+
+        /** @var TaskHasAssignedUser $au */
+        foreach ($assignedUsers as $au) {
+            $assignedUsersArray[] = $au->getUser();
+        }
+
+        return $assignedUsersArray;
     }
 }

@@ -7,6 +7,7 @@ use API\CoreBundle\Entity\User;
 use API\CoreBundle\Security\ApiBaseVoter;
 use API\CoreBundle\Security\VoterInterface;
 use API\TaskBundle\Entity\Project;
+use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\UserHasProject;
 use Doctrine\ORM\EntityManager;
@@ -81,6 +82,12 @@ class TaskVoter implements VoterInterface
                 return $this->canAddTaskFollower($options);
             case VoteOptions::REMOVE_TASK_FOLLOWER:
                 return $this->canRemoveTaskFollower($options);
+            case VoteOptions::ADD_TAG_TO_TASK:
+                return $this->canAddTagToTask($options);
+            case VoteOptions::REMOVE_TAG_FROM_TASK:
+                return $this->canRemoveTagFromTask($options);
+            case VoteOptions::ASSIGN_USER_TO_TASK:
+                return $this->canAssignUserToTask($options);
             default:
                 return false;
         }
@@ -359,6 +366,94 @@ class TaskVoter implements VoterInterface
 
         // If logged user can update task, he can add or remove follower to this task
         return $this->canUpdate($task);
+    }
+
+    /**
+     * @param array $options
+     * @return bool
+     */
+    public function canAddTagToTask(array $options):bool
+    {
+        /** @var Task $task */
+        $task = $options['task'];
+        /** @var Tag $tag */
+        $tag = $options['tag'];
+
+        // User Can add Tag to the Task if he can UPDATE_TASK
+        $canUpdate = $this->canUpdate($task);
+
+        // User can add tag if it's public or it's his tag (he created it)
+        $canTag = ($tag->getCreatedBy()->getId() === $this->user->getId() || $tag->getPublic()) ? true : false;
+
+        return ($canUpdate && $canTag) ? true : false;
+    }
+
+    /**
+     * @param array $options
+     * @return bool
+     */
+    public function canRemoveTagFromTask(array $options):bool
+    {
+        // User can remove tag from task if he can add it
+        return $this->canAddTagToTask($options);
+    }
+
+    /**
+     * @param array $options
+     * @return bool
+     */
+    public function canAssignUserToTask(array $options):bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        /** @var Task $task */
+        $task = $options['task'];
+        /** @var User $user */
+        $user = $options['user'];
+
+        $canUser = false;
+
+        // User Can assign User to the Task if he can UPDATE_TASK
+        $canUpdate = $this->canUpdate($task);
+
+        // User can be assigned to the task, if he created or requested this task and if he has SOLVE_TASK access in it's ACL
+        if ($this->hasAclRights(VoteOptions::SOLVE_TASK, $user) && ($task->getCreatedBy()->getId() === $user->getId() || $task->getRequestedBy()->getId() === $user->getId())) {
+            $canUser = true;
+            return ($canUpdate && $canUser) ? true : false;
+        }
+
+        $project = $task->getProject();
+
+        if ($project instanceof Project) {
+            // User can solve all tasks in it's own project if he has SOLVE_TASK access in it's ACL
+            if ($this->hasAclRights(VoteOptions::SOLVE_TASK, $user) && ($project->getCreatedBy()->getId() === $user->getId())) {
+                $canUser = true;
+                return ($canUpdate && $canUser) ? true : false;
+            }
+
+            // User can solve task if he has SOLVE_ALL_TASKS_IN_PROJECT access in projects ACL
+            $actions [] = VoteOptions::SOLVE_ALL_TASKS_IN_PROJECT;
+            if ($this->hasAclProjectRights($actions, $project->getId())) {
+                $canUser = true;
+                return ($canUpdate && $canUser) ? true : false;
+            }
+
+            // User can solve task if he has SOLVE_COMPANY_TASKS_IN_PROJECT access in projects ACL and
+            // His company is the same like company of creator of the task
+            $actions [] = VoteOptions::SOLVE_COMPANY_TASKS_IN_PROJECT;
+            $hasAcl = $this->hasAclProjectRights($actions, $project->getId());
+            $usersCompany = $user->getCompany();
+            $tasksCompany = $task->getCreatedBy()->getCompany();
+
+            if ($hasAcl && ($usersCompany instanceof Company && $tasksCompany instanceof Company && ($usersCompany->getId() === $tasksCompany->getId()))) {
+                $canUser = true;
+                return ($canUpdate && $canUser) ? true : false;
+            }
+        }
+
+        return ($canUpdate && $canUser) ? true : false;
     }
 
     /**

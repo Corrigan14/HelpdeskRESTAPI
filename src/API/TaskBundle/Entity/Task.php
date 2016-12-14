@@ -113,6 +113,14 @@ class Task
     private $tags;
 
     /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskHasAssignedUser", mappedBy="task")
+     * @Serializer\Exclude()
+     */
+    private $taskHasAssignedUsers;
+
+    /**
      * Task constructor.
      */
     public function __construct()
@@ -120,6 +128,7 @@ class Task
         $this->taskData = new ArrayCollection();
         $this->followers = new ArrayCollection();
         $this->tags = new ArrayCollection();
+        $this->taskHasAssignedUsers = new ArrayCollection();
     }
 
     /**
@@ -400,5 +409,39 @@ class Task
     public function getTags()
     {
         return $this->tags;
+    }
+
+    /**
+     * Add taskHasAssignedUser
+     *
+     * @param TaskHasAssignedUser $taskHasAssignedUser
+     *
+     * @return Task
+     */
+    public function addTaskHasAssignedUser(TaskHasAssignedUser $taskHasAssignedUser)
+    {
+        $this->taskHasAssignedUsers[] = $taskHasAssignedUser;
+
+        return $this;
+    }
+
+    /**
+     * Remove taskHasAssignedUser
+     *
+     * @param TaskHasAssignedUser $taskHasAssignedUser
+     */
+    public function removeTaskHasAssignedUser(TaskHasAssignedUser $taskHasAssignedUser)
+    {
+        $this->taskHasAssignedUsers->removeElement($taskHasAssignedUser);
+    }
+
+    /**
+     * Get taskHasAssignedUsers
+     *
+     * @return ArrayCollection
+     */
+    public function getTaskHasAssignedUsers()
+    {
+        return $this->taskHasAssignedUsers;
     }
 }

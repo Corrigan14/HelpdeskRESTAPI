@@ -67,3 +67,28 @@ tasks_remove_tag_from_task:
     requirements:
             taskId: '\d+'
             tagId: '\d+'
+
+tasks_assign_user_to_task:
+    path:     /tasks/{taskId}/assign-user/{userId}
+    defaults: { _controller: APITaskBundle:Task:createAssignUserToTask}
+    methods: [POST]
+    requirements:
+            taskId: '\d+'
+            userId: '\d+'
+
+tasks_update_assign_user_to_task:
+    path:     /tasks/{taskId}/assign-user/{userId}/status/{statusId}
+    defaults: { _controller: APITaskBundle:Task:updateAssignUserToTask}
+    methods: [PATCH]
+    requirements:
+            taskId: '\d+'
+            userId: '\d+'
+            statusId: '\d+'
+
+tasks_remove_assign_user_from_task:
+    path:     /tasks/{taskId}/assign-user/{userId}
+    defaults: { _controller: APITaskBundle:Task:removeAssignUserFromTask}
+    methods: [DELETE]
+    requirements:
+            taskId: '\d+'
+            userId: '\d+'

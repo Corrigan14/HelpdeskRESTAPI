@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Task
@@ -32,6 +33,8 @@ class Task
      * @var string
      *
      * @ORM\Column(name="title", type="string", length=255)
+     * @Assert\NotBlank(message="Title of task is required")
+     * @Assert\Type("string")
      */
     private $title;
 
@@ -61,6 +64,7 @@ class Task
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="createdTasks")
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
+     * @Serializer\ReadOnly()
      */
     private $createdBy;
 
@@ -69,6 +73,7 @@ class Task
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="requestedTasks")
      * @ORM\JoinColumn(name="requested_by", referencedColumnName="id", nullable=false)
+     * @Serializer\ReadOnly()
      */
     private $requestedBy;
 
@@ -77,6 +82,7 @@ class Task
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Project", inversedBy="tasks")
      * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=true)
+     * @Serializer\ReadOnly()
      */
     private $project;
 
@@ -84,6 +90,7 @@ class Task
      * @var ArrayCollection
      *
      * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskData", mappedBy="task")
+     * @Serializer\ReadOnly()
      */
     private $taskData;
 
@@ -92,6 +99,7 @@ class Task
      *
      * @ORM\ManyToMany(targetEntity="API\CoreBundle\Entity\User", inversedBy="followedTasks")
      * @ORM\JoinTable(name="task_has_follower")
+     * @Serializer\ReadOnly()
      */
     private $followers;
 
@@ -100,8 +108,17 @@ class Task
      *
      * @ORM\ManyToMany(targetEntity="API\TaskBundle\Entity\Tag", inversedBy="tasks")
      * @ORM\JoinTable(name="task_has_tag")
+     * @Serializer\ReadOnly()
      */
     private $tags;
+
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskHasAssignedUser", mappedBy="taskHasAssignedUsers")
+     * @Serializer\Exclude()
+     */
+    private $taskHasAssignedUsers;
 
     /**
      * Task constructor.
@@ -357,5 +374,39 @@ class Task
     public function getFollowers()
     {
         return $this->followers;
+    }
+
+    /**
+     * Add tag
+     *
+     * @param Tag $tag
+     *
+     * @return Task
+     */
+    public function addTag(Tag $tag)
+    {
+        $this->tags[] = $tag;
+
+        return $this;
+    }
+
+    /**
+     * Remove tag
+     *
+     * @param Tag $tag
+     */
+    public function removeTag(Tag $tag)
+    {
+        $this->tags->removeElement($tag);
+    }
+
+    /**
+     * Get tags
+     *
+     * @return ArrayCollection
+     */
+    public function getTags()
+    {
+        return $this->tags;
     }
 }

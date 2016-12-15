@@ -21,7 +21,9 @@ class TaskRepository extends EntityRepository
     public function getAllAdminTasks(int $page, array $options)
     {
         $query = $this->createQueryBuilder('t')
-            ->where('t.id is not NULL');
+            ->leftJoin('t.taskData', 'td')
+            ->where('t.id is not NULL')
+            ->groupBy('t.id');
 
         $paramArray = [];
         $paramNum = 0;

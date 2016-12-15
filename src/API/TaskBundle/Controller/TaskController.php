@@ -101,6 +101,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
+     *
      * @return JsonResponse|Response
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\NonUniqueResultException
@@ -120,8 +121,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
 
             if (!$project instanceof Project) {
                 return $this->createApiResponse([
-                    'message' => 'Project with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
+                    'message' => 'Project with requested Id does not exist!' ,
+                ] , StatusCodesHelper::NOT_FOUND_CODE);
             }
             $projectParam = $projectId;
         } else {
@@ -133,8 +134,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
 
             if (!$creator instanceof User) {
                 return $this->createApiResponse([
-                    'message' => 'Creator with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
+                    'message' => 'Creator with requested Id does not exist!' ,
+                ] , StatusCodesHelper::NOT_FOUND_CODE);
             }
             $creatorParam = $creatorId;
         } else {
@@ -146,8 +147,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
 
             if (!$requestedUser instanceof User) {
                 return $this->createApiResponse([
-                    'message' => 'Requested user with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
+                    'message' => 'Requested user with requested Id does not exist!' ,
+                ] , StatusCodesHelper::NOT_FOUND_CODE);
             }
             $requestedUserParam = $requestedUserId;
         } else {
@@ -155,20 +156,21 @@ class TaskController extends ApiBaseController implements ControllerInterface
         }
 
         $options = [
-            'project' => $projectParam,
-            'creator' => $creatorParam,
-            'requested' => $requestedUserParam,
-            'loggedUser' => $this->getUser(),
-            'isAdmin' => $this->get('task_voter')->isAdmin()
+            'project'    => $projectParam ,
+            'creator'    => $creatorParam ,
+            'requested'  => $requestedUserParam ,
+            'loggedUser' => $this->getUser() ,
+            'isAdmin'    => $this->get('task_voter')->isAdmin(),
         ];
 
         // Check if logged user has access to show requested data
-        if (!$this->get('task_voter')->isGranted(VoteOptions::LIST_TASKS, $options)) {
+        if (!$this->get('task_voter')->isGranted(VoteOptions::LIST_TASKS , $options)) {
             return $this->accessDeniedResponse();
         }
 
-        $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);
-        return $this->json($tasksArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $tasksArray = $this->get('task_service')->getTasksResponse($page , $options);
+
+        return $this->json($tasksArray , StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -235,6 +237,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param int $id
+     *
      * @return JsonResponse|Response
      * @throws \LogicException
      */
@@ -246,13 +249,13 @@ class TaskController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
-        if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_TASK, $task)) {
+        if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_TASK , $task)) {
             return $this->accessDeniedResponse();
         }
 
         $response = $this->get('task_service')->getTaskResponse($task);
 
-        return $this->createApiResponse($response, StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->createApiResponse($response , StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -331,16 +334,17 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *  }
      * )
      *
-     * @param Request $request
+     * @param Request    $request
      * @param int|string $projectId
      * @param int|string $requestedUserId
+     *
      * @return JsonResponse|Response
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function createAction(Request $request, $projectId = 'all', $requestedUserId = 'all')
+    public function createAction(Request $request , $projectId = 'all' , $requestedUserId = 'all')
     {
         $task = new Task();
 
@@ -350,8 +354,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
 
             if (!$project instanceof Project) {
                 return $this->createApiResponse([
-                    'message' => 'Project with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
+                    'message' => 'Project with requested Id does not exist!' ,
+                ] , StatusCodesHelper::NOT_FOUND_CODE);
             }
 
             $task->setProject($project);
@@ -365,8 +369,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
 
             if (!$requestedUser instanceof User) {
                 return $this->createApiResponse([
-                    'message' => 'Requested user with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
+                    'message' => 'Requested user with requested Id does not exist!' ,
+                ] , StatusCodesHelper::NOT_FOUND_CODE);
             }
 
             $task->setRequestedBy($requestedUser);
@@ -377,7 +381,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
         }
 
         // Check if user can create task in selected project
-        if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK, $project)) {
+        if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK , $project)) {
             return $this->accessDeniedResponse();
         }
 
@@ -386,7 +390,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $task->setCreatedBy($this->getUser());
         $task->setImportant(false);
 
-        return $this->updateTaskEntity($task, $requestData, true);
+        return $this->updateTaskEntity($task , $requestData , true);
     }
 
     /**
@@ -470,17 +474,18 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *  }
      * )
      *
-     * @param int $id
-     * @param Request $request
+     * @param int         $id
+     * @param Request     $request
      * @param bool|string $projectId
      * @param bool|string $requestedUserId
+     *
      * @return JsonResponse|Response
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function updateAction(int $id, Request $request, $projectId = 'all', $requestedUserId = 'all')
+    public function updateAction(int $id , Request $request , $projectId = 'all' , $requestedUserId = 'all')
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
 
@@ -494,8 +499,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
 
             if (!$project instanceof Project) {
                 return $this->createApiResponse([
-                    'message' => 'Project with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
+                    'message' => 'Project with requested Id does not exist!' ,
+                ] , StatusCodesHelper::NOT_FOUND_CODE);
             }
 
             $task->setProject($project);
@@ -506,21 +511,21 @@ class TaskController extends ApiBaseController implements ControllerInterface
 
             if (!$requestedUser instanceof User) {
                 return $this->createApiResponse([
-                    'message' => 'Requested user with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
+                    'message' => 'Requested user with requested Id does not exist!' ,
+                ] , StatusCodesHelper::NOT_FOUND_CODE);
             }
 
             $task->setRequestedBy($requestedUser);
         }
 
         // Check if user can update selected task
-        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK , $task)) {
             return $this->accessDeniedResponse();
         }
 
         $requestData = $request->request->all();
 
-        return $this->updateTaskEntity($task, $requestData);
+        return $this->updateTaskEntity($task , $requestData);
     }
 
     /**
@@ -604,17 +609,18 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *  }
      * )
      *
-     * @param int $id
-     * @param Request $request
+     * @param int         $id
+     * @param Request     $request
      * @param bool|string $projectId
      * @param bool|string $requestedUserId
+     *
      * @return JsonResponse|Response
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function updatePartialAction(int $id, Request $request, $projectId = 'all', $requestedUserId = 'all')
+    public function updatePartialAction(int $id , Request $request , $projectId = 'all' , $requestedUserId = 'all')
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
 
@@ -628,8 +634,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
 
             if (!$project instanceof Project) {
                 return $this->createApiResponse([
-                    'message' => 'Project with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
+                    'message' => 'Project with requested Id does not exist!' ,
+                ] , StatusCodesHelper::NOT_FOUND_CODE);
             }
 
             $task->setProject($project);
@@ -640,21 +646,21 @@ class TaskController extends ApiBaseController implements ControllerInterface
 
             if (!$requestedUser instanceof User) {
                 return $this->createApiResponse([
-                    'message' => 'Requested user with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
+                    'message' => 'Requested user with requested Id does not exist!' ,
+                ] , StatusCodesHelper::NOT_FOUND_CODE);
             }
 
             $task->setRequestedBy($requestedUser);
         }
 
         // Check if user can update selected task
-        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK , $task)) {
             return $this->accessDeniedResponse();
         }
 
         $requestData = $request->request->all();
 
-        return $this->updateTaskEntity($task, $requestData);
+        return $this->updateTaskEntity($task , $requestData);
     }
 
 
@@ -696,7 +702,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
-        if (!$this->get('task_voter')->isGranted(VoteOptions::DELETE_TASK, $task)) {
+        if (!$this->get('task_voter')->isGranted(VoteOptions::DELETE_TASK , $task)) {
             return $this->accessDeniedResponse();
         }
 
@@ -704,8 +710,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $this->getDoctrine()->getManager()->flush();
 
         return $this->createApiResponse([
-            'message' => StatusCodesHelper::DELETED_MESSAGE,
-        ], StatusCodesHelper::DELETED_CODE);
+            'message' => StatusCodesHelper::DELETED_MESSAGE ,
+        ] , StatusCodesHelper::DELETED_CODE);
     }
 
     /**
@@ -766,38 +772,39 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *
      * @param int $taskId
      * @param int $userId
+     *
      * @return JsonResponse|Response
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function addFollowerToTaskAction(int $taskId, int $userId)
+    public function addFollowerToTaskAction(int $taskId , int $userId)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
             return $this->createApiResponse([
-                'message' => 'Task with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+                'message' => 'Task with requested Id does not exist!' ,
+            ] , StatusCodesHelper::NOT_FOUND_CODE);
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($userId);
 
         if (!$user instanceof User) {
             return $this->createApiResponse([
-                'message' => 'User with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+                'message' => 'User with requested Id does not exist!' ,
+            ] , StatusCodesHelper::NOT_FOUND_CODE);
         }
 
         $options = [
-            'task' => $task,
-            'follower' => $user
+            'task'     => $task ,
+            'follower' => $user,
         ];
 
-        if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_TASK_FOLLOWER, $options)) {
+        if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_TASK_FOLLOWER , $options)) {
             return $this->accessDeniedResponse();
         }
 
-        if ($this->canAddTaskFollower($user, $task)) {
+        if ($this->canAddTaskFollower($user , $task)) {
             $task->addFollower($user);
             $user->addFollowedTask($task);
             $this->getDoctrine()->getManager()->persist($task);
@@ -806,7 +813,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
         }
 
         $listOfTaskFollowers = $task->getFollowers();
-        return $this->createApiResponse($listOfTaskFollowers, StatusCodesHelper::SUCCESSFUL_CODE);
+
+        return $this->createApiResponse($listOfTaskFollowers , StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -867,37 +875,38 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *
      * @param int $taskId
      * @param int $userId
+     *
      * @return JsonResponse|Response
      * @throws \LogicException
      */
-    public function removeFollowerFromTaskAction(int $taskId, int $userId)
+    public function removeFollowerFromTaskAction(int $taskId , int $userId)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
             return $this->createApiResponse([
-                'message' => 'Task with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+                'message' => 'Task with requested Id does not exist!' ,
+            ] , StatusCodesHelper::NOT_FOUND_CODE);
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($userId);
 
         if (!$user instanceof User) {
             return $this->createApiResponse([
-                'message' => 'User with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+                'message' => 'User with requested Id does not exist!' ,
+            ] , StatusCodesHelper::NOT_FOUND_CODE);
         }
 
         $options = [
-            'task' => $task,
-            'follower' => $user
+            'task'     => $task ,
+            'follower' => $user,
         ];
 
-        if (!$this->get('task_voter')->isGranted(VoteOptions::REMOVE_TASK_FOLLOWER, $options)) {
+        if (!$this->get('task_voter')->isGranted(VoteOptions::REMOVE_TASK_FOLLOWER , $options)) {
             return $this->accessDeniedResponse();
         }
 
-        if (!$this->canAddTaskFollower($user, $task)) {
+        if (!$this->canAddTaskFollower($user , $task)) {
             $task->removeFollower($user);
             $user->removeFollowedTask($task);
             $this->getDoctrine()->getManager()->persist($task);
@@ -905,7 +914,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
             $this->getDoctrine()->getManager()->flush();
 
             $listOfTaskFollowers = $task->getFollowers();
-            return $this->createApiResponse($listOfTaskFollowers, StatusCodesHelper::SUCCESSFUL_CODE);
+
+            return $this->createApiResponse($listOfTaskFollowers , StatusCodesHelper::SUCCESSFUL_CODE);
         }
 
         return $this->notFoundResponse();
@@ -965,36 +975,37 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *
      * @param int $taskId
      * @param int $tagId
+     *
      * @return JsonResponse|Response
      */
-    public function addTagToTaskAction(int $taskId, int $tagId)
+    public function addTagToTaskAction(int $taskId , int $tagId)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
             return $this->createApiResponse([
-                'message' => 'Task with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+                'message' => 'Task with requested Id does not exist!' ,
+            ] , StatusCodesHelper::NOT_FOUND_CODE);
         }
 
         $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->find($tagId);
 
         if (!$tag instanceof Tag) {
             return $this->createApiResponse([
-                'message' => 'Tag with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+                'message' => 'Tag with requested Id does not exist!' ,
+            ] , StatusCodesHelper::NOT_FOUND_CODE);
         }
 
         $options = [
-            'task' => $task,
-            'tag' => $tag
+            'task' => $task ,
+            'tag'  => $tag,
         ];
 
-        if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_TAG_TO_TASK, $options)) {
+        if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_TAG_TO_TASK , $options)) {
             return $this->accessDeniedResponse();
         }
 
-        if ($this->canAddTagToTask($task, $tag)) {
+        if ($this->canAddTagToTask($task , $tag)) {
             $task->addTag($tag);
             $tag->addTask($task);
             $this->getDoctrine()->getManager()->persist($task);
@@ -1003,7 +1014,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
         }
 
         $arrayOfTags = $task->getTags();
-        return $this->createApiResponse($arrayOfTags, StatusCodesHelper::CREATED_CODE);
+
+        return $this->createApiResponse($arrayOfTags , StatusCodesHelper::CREATED_CODE);
     }
 
     /**
@@ -1060,36 +1072,37 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *
      * @param int $taskId
      * @param int $tagId
+     *
      * @return JsonResponse|Response
      */
-    public function removeTagFromTaskAction(int $taskId, int $tagId)
+    public function removeTagFromTaskAction(int $taskId , int $tagId)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
             return $this->createApiResponse([
-                'message' => 'Task with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+                'message' => 'Task with requested Id does not exist!' ,
+            ] , StatusCodesHelper::NOT_FOUND_CODE);
         }
 
         $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->find($tagId);
 
         if (!$tag instanceof Tag) {
             return $this->createApiResponse([
-                'message' => 'Tag with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+                'message' => 'Tag with requested Id does not exist!' ,
+            ] , StatusCodesHelper::NOT_FOUND_CODE);
         }
 
         $options = [
-            'task' => $task,
-            'tag' => $tag
+            'task' => $task ,
+            'tag'  => $tag,
         ];
 
-        if (!$this->get('task_voter')->isGranted(VoteOptions::REMOVE_TAG_FROM_TASK, $options)) {
+        if (!$this->get('task_voter')->isGranted(VoteOptions::REMOVE_TAG_FROM_TASK , $options)) {
             return $this->accessDeniedResponse();
         }
 
-        if (!$this->canAddTagToTask($task, $tag)) {
+        if (!$this->canAddTagToTask($task , $tag)) {
             $task->removeTag($tag);
             $tag->removeTask($task);
             $this->getDoctrine()->getManager()->persist($task);
@@ -1097,12 +1110,13 @@ class TaskController extends ApiBaseController implements ControllerInterface
             $this->getDoctrine()->getManager()->flush();
 
             $arrayOfTags = $task->getTags();
-            return $this->createApiResponse($arrayOfTags, StatusCodesHelper::SUCCESSFUL_CODE);
+
+            return $this->createApiResponse($arrayOfTags , StatusCodesHelper::SUCCESSFUL_CODE);
         }
 
         return $this->createApiResponse([
-            'message' => 'Task does not contains requested tag!',
-        ], StatusCodesHelper::NOT_FOUND_CODE);
+            'message' => 'Task does not contains requested tag!' ,
+        ] , StatusCodesHelper::NOT_FOUND_CODE);
     }
 
     /**
@@ -1133,9 +1147,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *      }
      *
      * @ApiDoc(
-     *  description="Assign task to the user - create taskHasAssignedUser Entity. Status of this task is set to StatusOption: NEW.
-     *  Returns array of users assigned to task",
-     *  requirements={
+     *  description="Assign task to the user - create taskHasAssignedUser Entity. Status of this task is set to
+     *  StatusOption: NEW. Returns array of users assigned to task", requirements={
      *     {
      *       "name"="taskId",
      *       "dataType"="integer",
@@ -1168,40 +1181,41 @@ class TaskController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
-     * @param int $taskId
-     * @param int $userId
+     * @param int     $taskId
+     * @param int     $userId
+     *
      * @return JsonResponse|Response
      */
-    public function createAssignUserToTaskAction(Request $request, int $taskId, int $userId)
+    public function createAssignUserToTaskAction(Request $request , int $taskId , int $userId)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
             return $this->createApiResponse([
-                'message' => 'Task with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+                'message' => 'Task with requested Id does not exist!' ,
+            ] , StatusCodesHelper::NOT_FOUND_CODE);
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($userId);
 
         if (!$user instanceof User) {
             return $this->createApiResponse([
-                'message' => 'User with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+                'message' => 'User with requested Id does not exist!' ,
+            ] , StatusCodesHelper::NOT_FOUND_CODE);
         }
 
         $options = [
-            'task' => $task,
-            'user' => $user
+            'task' => $task ,
+            'user' => $user,
         ];
 
-        if (!$this->get('task_voter')->isGranted(VoteOptions::ASSIGN_USER_TO_TASK, $options)) {
+        if (!$this->get('task_voter')->isGranted(VoteOptions::ASSIGN_USER_TO_TASK , $options)) {
             return $this->accessDeniedResponse();
         }
 
-        if ($this->canAssignUserToTask($task, $user)) {
+        if ($this->canAssignUserToTask($task , $user)) {
             $newStatus = $this->getDoctrine()->getRepository('APITaskBundle:Status')->findOneBy([
-                'title' => StatusOptions::NEW,
+                'title' => StatusOptions::NEW ,
             ]);
             if ($newStatus instanceof Status) {
                 $taskHasAssignedUser = new TaskHasAssignedUser();
@@ -1210,16 +1224,18 @@ class TaskController extends ApiBaseController implements ControllerInterface
                 $taskHasAssignedUser->setUser($user);
 
                 $requestData = $request->request->all();
-                return $this->updateTaskHasAssignUserEntity($taskHasAssignedUser, $requestData, true);
+
+                return $this->updateTaskHasAssignUserEntity($taskHasAssignedUser , $requestData , true);
             }
+
             return $this->createApiResponse([
-                'message' => 'New Status Entity does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+                'message' => 'New Status Entity does not exist!' ,
+            ] , StatusCodesHelper::NOT_FOUND_CODE);
         }
 
         return $this->createApiResponse([
-            'message' => 'User is already assigned to this task!',
-        ], StatusCodesHelper::BAD_REQUEST_CODE);
+            'message' => 'User is already assigned to this task!' ,
+        ] , StatusCodesHelper::BAD_REQUEST_CODE);
     }
 
     /**
@@ -1289,41 +1305,42 @@ class TaskController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
-     * @param int $taskId
-     * @param int $userId
-     * @param int $statusId
+     * @param int     $taskId
+     * @param int     $userId
+     * @param int     $statusId
+     *
      * @return JsonResponse|Response
      */
-    public function updateAssignUserToTaskAction(Request $request, int $taskId, int $userId, int $statusId)
+    public function updateAssignUserToTaskAction(Request $request , int $taskId , int $userId , int $statusId)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
             return $this->createApiResponse([
-                'message' => 'Task with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+                'message' => 'Task with requested Id does not exist!' ,
+            ] , StatusCodesHelper::NOT_FOUND_CODE);
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($userId);
 
         if (!$user instanceof User) {
             return $this->createApiResponse([
-                'message' => 'User with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+                'message' => 'User with requested Id does not exist!' ,
+            ] , StatusCodesHelper::NOT_FOUND_CODE);
         }
 
         $taskHasAssignedEntity = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy([
-            'user' => $user,
-            'task' => $task
+            'user' => $user ,
+            'task' => $task,
         ]);
 
         if (!$taskHasAssignedEntity instanceof TaskHasAssignedUser) {
             return $this->createApiResponse([
-                'message' => 'Requested user is not assigned to the requested task!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+                'message' => 'Requested user is not assigned to the requested task!' ,
+            ] , StatusCodesHelper::NOT_FOUND_CODE);
         }
 
-        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_ASSIGN_USER_TO_TASK, $taskHasAssignedEntity)) {
+        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_ASSIGN_USER_TO_TASK , $taskHasAssignedEntity)) {
             return $this->accessDeniedResponse();
         }
 
@@ -1331,8 +1348,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
 
         if (!$status instanceof Status) {
             return $this->createApiResponse([
-                'message' => 'Status with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+                'message' => 'Status with requested Id does not exist!' ,
+            ] , StatusCodesHelper::NOT_FOUND_CODE);
         }
 
         $taskHasAssignedEntity->setStatus($status);
@@ -1340,7 +1357,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
 
         $requestData = $request->request->all();
 
-        $errors = $this->get('entity_processor')->processEntity($taskHasAssignedEntity, $requestData);
+        $errors = $this->get('entity_processor')->processEntity($taskHasAssignedEntity , $requestData);
 
         if (false === $errors) {
             $this->getDoctrine()->getManager()->persist($taskHasAssignedEntity);
@@ -1348,10 +1365,11 @@ class TaskController extends ApiBaseController implements ControllerInterface
             $this->getDoctrine()->getManager()->flush();
 
             $assignedUsersArray = $this->getArrayOfUsersAssignedToTask($task);
-            return $this->createApiResponse($assignedUsersArray, StatusCodesHelper::SUCCESSFUL_CODE);
+
+            return $this->createApiResponse($assignedUsersArray , StatusCodesHelper::SUCCESSFUL_CODE);
         }
 
-        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $this->createApiResponse($errors , StatusCodesHelper::INVALID_PARAMETERS_CODE);
 
     }
 
@@ -1414,19 +1432,20 @@ class TaskController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
-     * @param int $taskId
-     * @param int $userId
+     * @param int     $taskId
+     * @param int     $userId
+     *
      * @return JsonResponse|Response
      */
-    public function removeAssignUserFromTaskAction(Request $request, int $taskId, int $userId)
+    public function removeAssignUserFromTaskAction(Request $request , int $taskId , int $userId)
     {
 
     }
 
     /**
-     * @param Task $task
+     * @param Task  $task
      * @param array $requestData
-     * @param bool $create
+     * @param bool  $create
      *
      * @return JsonResponse|Response
      * @throws \InvalidArgumentException
@@ -1434,11 +1453,11 @@ class TaskController extends ApiBaseController implements ControllerInterface
      * @throws \LogicException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
-    private function updateTaskEntity(Task $task, array $requestData, $create = false)
+    private function updateTaskEntity(Task $task , array $requestData , $create = false)
     {
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
-        $errors = $this->get('entity_processor')->processEntity($task, $requestData);
+        $errors = $this->get('entity_processor')->processEntity($task , $requestData);
 
         if (false === $errors) {
             $this->getDoctrine()->getManager()->persist($task);
@@ -1454,8 +1473,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
                     $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($key);
                     if ($taskAttribute instanceof TaskAttribute) {
                         $cd = $this->getDoctrine()->getRepository('APITaskBundle:TaskData')->findOneBy([
-                            'taskAttribute' => $taskAttribute,
-                            'task' => $task,
+                            'taskAttribute' => $taskAttribute ,
+                            'task'          => $task ,
                         ]);
 
                         if (!$cd instanceof TaskData) {
@@ -1464,7 +1483,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
                             $cd->setTaskAttribute($taskAttribute);
                         }
 
-                        $cdErrors = $this->get('entity_processor')->processEntity($cd, ['value' => $value]);
+                        $cdErrors = $this->get('entity_processor')->processEntity($cd , ['value' => $value]);
                         if (false === $cdErrors) {
                             $task->addTaskDatum($cd);
                             $this->getDoctrine()->getManager()->persist($task);
@@ -1472,35 +1491,37 @@ class TaskController extends ApiBaseController implements ControllerInterface
                             $this->getDoctrine()->getManager()->flush();
                         } else {
                             $this->createApiResponse([
-                                'message' => 'The value of task_data with key: ' . $key . ' is invalid',
-                            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                'message' => 'The value of task_data with key: ' . $key . ' is invalid' ,
+                            ] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
                         }
                     } else {
                         return $this->createApiResponse([
-                            'message' => 'The key: ' . $key . ' of Task Attribute is not valid (Task Attribute with this ID doesn\'t exist)',
-                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                            'message' => 'The key: ' . $key . ' of Task Attribute is not valid (Task Attribute with this ID doesn\'t exist)' ,
+                        ] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
                     }
                 }
             }
 
             $response = $this->get('task_service')->getTaskResponse($task);
-            return $this->createApiResponse($response, $statusCode);
+
+            return $this->createApiResponse($response , $statusCode);
         }
 
-        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $this->createApiResponse($errors , StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 
     /**
      * @param TaskHasAssignedUser $taskHasAssignedUser
-     * @param array $requestData
-     * @param bool $create
+     * @param array               $requestData
+     * @param bool                $create
+     *
      * @return Response
      */
-    private function updateTaskHasAssignUserEntity(TaskHasAssignedUser $taskHasAssignedUser, array $requestData, $create = false)
+    private function updateTaskHasAssignUserEntity(TaskHasAssignedUser $taskHasAssignedUser , array $requestData , $create = false)
     {
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
-        $errors = $this->get('entity_processor')->processEntity($taskHasAssignedUser, $requestData);
+        $errors = $this->get('entity_processor')->processEntity($taskHasAssignedUser , $requestData);
 
         if (false === $errors) {
             $task = $taskHasAssignedUser->getTask();
@@ -1513,53 +1534,59 @@ class TaskController extends ApiBaseController implements ControllerInterface
             $this->getDoctrine()->getManager()->flush();
 
             $assignedUsersArray = $this->getArrayOfUsersAssignedToTask($task);
-            return $this->createApiResponse($assignedUsersArray, $statusCode);
+
+            return $this->createApiResponse($assignedUsersArray , $statusCode);
         }
 
-        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $this->createApiResponse($errors , StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 
     /**
      * @param User $user
      * @param Task $task
+     *
      * @return bool
      * @throws \LogicException
      */
-    private function canAddTaskFollower(User $user, Task $task):bool
+    private function canAddTaskFollower(User $user , Task $task): bool
     {
         $taskHasFollower = $task->getFollowers();
 
-        if (in_array($user, $taskHasFollower->toArray(), true)) {
+        if (in_array($user , $taskHasFollower->toArray() , true)) {
             return false;
         }
+
         return true;
     }
 
     /**
      * @param Task $task
-     * @param Tag $tag
+     * @param Tag  $tag
+     *
      * @return bool
      */
-    private function canAddTagToTask(Task $task, Tag $tag):bool
+    private function canAddTagToTask(Task $task , Tag $tag): bool
     {
         $taskHasTags = $task->getTags();
 
-        if (in_array($tag, $taskHasTags->toArray(), true)) {
+        if (in_array($tag , $taskHasTags->toArray() , true)) {
             return false;
         }
+
         return true;
     }
 
     /**
      * @param Task $task
      * @param User $user
+     *
      * @return bool
      */
-    private function canAssignUserToTask(Task $task, User $user):bool
+    private function canAssignUserToTask(Task $task , User $user): bool
     {
         $assignedUsersArray = $this->getArrayOfUsersAssignedToTask($task);
 
-        if (in_array($user, $assignedUsersArray, true)) {
+        if (in_array($user , $assignedUsersArray , true)) {
             return false;
         }
 
@@ -1568,9 +1595,10 @@ class TaskController extends ApiBaseController implements ControllerInterface
 
     /**
      * @param Task $task
+     *
      * @return array
      */
-    private function getArrayOfUsersAssignedToTask(Task $task):array
+    private function getArrayOfUsersAssignedToTask(Task $task): array
     {
         $assignedUsers = $task->getTaskHasAssignedUsers();
         $assignedUsersArray = [];

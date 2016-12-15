@@ -1356,34 +1356,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
     }
 
     /**
-     * ### Response ###
-     *      {
-     *         "0":
-     *         {
-     *           "id": 17,
-     *           "username": "user",
-     *           "email": "user@user.sk",
-     *           "roles": "[\"ROLE_USER\"]",
-     *           "is_active": true,
-     *           "acl": "[]",
-     *           "company": ⊕{...},
-     *           "followed_tasks": {}
-     *         },
-     *         "1":
-     *         {
-     *           "id": 18,
-     *           "username": "testuser2",
-     *           "email": "testuser2@user.sk",
-     *           "roles": "[\"ROLE_USER\"]",
-     *           "is_active": true,
-     *           "acl": "[]",
-     *           "company": ⊕{...},
-     *           "followed_tasks": {}
-     *         }
-     *      }
-     *
      * @ApiDoc(
-     *  description="Delete taskHasAssignedUser Entity. Returns array of users assigned to task",
+     *  description="Delete taskHasAssignedUser Entity.",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -1395,7 +1369,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *       "name"="userId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
-     *       "description"="The id of tag"
+     *       "description"="The id of user"
      *     }
      *  },
      *  headers={
@@ -1406,21 +1380,56 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *     }
      *  },
      *  statusCodes={
-     *      204 ="The Entity was successfully removed",
+     *      204 ="Assigned user was successfully removed from task",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
      *      404 ="Not found Entity"
      *  }
      * )
      *
-     * @param Request $request
      * @param int $taskId
      * @param int $userId
      * @return JsonResponse|Response
      */
-    public function removeAssignUserFromTaskAction(Request $request, int $taskId, int $userId)
+    public function removeAssignUserFromTaskAction(int $taskId, int $userId)
     {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($userId);
+
+        if (!$user instanceof User) {
+            return $this->createApiResponse([
+                'message' => 'User with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $taskHasAssignedEntity = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy([
+            'user' => $user,
+            'task' => $task
+        ]);
+
+        if (!$taskHasAssignedEntity instanceof TaskHasAssignedUser) {
+            return $this->createApiResponse([
+                'message' => 'Requested user is not assigned to the requested task!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::REMOVE_ASSIGN_USER_FROM_TASK, $taskHasAssignedEntity)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $this->getDoctrine()->getManager()->remove($taskHasAssignedEntity);
+        $this->getDoctrine()->getManager()->flush();
+
+
+        $assignedUsersArray = $this->getArrayOfUsersAssignedToTask($task);
+        return $this->createApiResponse($assignedUsersArray, StatusCodesHelper::DELETED_CODE);
     }
 
     /**

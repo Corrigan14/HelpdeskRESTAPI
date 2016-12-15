@@ -91,6 +91,8 @@ class TaskVoter implements VoterInterface
                 return $this->canAssignUserToTask($options);
             case VoteOptions::UPDATE_ASSIGN_USER_TO_TASK:
                 return $this->casUpdateAssignUserToTask($options);
+            case VoteOptions::REMOVE_ASSIGN_USER_FROM_TASK:
+                return $this->casRemoveAssignUserFromTask($options);
             default:
                 return false;
         }
@@ -471,6 +473,16 @@ class TaskVoter implements VoterInterface
 
         // Only admin or user assigned to task can update this entity
         return ($taskHasAssignedUser->getUser()->getId() === $this->user->getId()) ? true : false;
+    }
+
+    /**
+     * @param TaskHasAssignedUser $taskHasAssignedUser
+     * @return bool
+     */
+    public function casRemoveAssignUserFromTask(TaskHasAssignedUser $taskHasAssignedUser):bool
+    {
+        // User Can remove Assigned User from Task if he can UPDATE_TASK
+        return $this->canUpdate($taskHasAssignedUser->getTask());
     }
 
     /**

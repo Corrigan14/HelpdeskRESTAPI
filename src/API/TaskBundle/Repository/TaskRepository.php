@@ -41,7 +41,7 @@ class TaskRepository extends EntityRepository
             $query->setParameters($paramArray);
         }
 
-        $query->setMaxResults(self::LIMIT)->groupBy('t.id');
+        $query->setMaxResults(self::LIMIT);
 
         // Pagination calculating offset
         if (1 < $page) {

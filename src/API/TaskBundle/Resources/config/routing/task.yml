@@ -38,7 +38,7 @@ tasks_delete:
 
 tasks_add_follower_to_task:
     path:     /tasks/{taskId}/user/{userId}
-    defaults: { _controller: APITaskBundle:Task:addFollowerToTask}
+    defaults: { _controller: APITaskBundle:Task/Follower:addFollowerToTask}
     methods: [POST]
     requirements:
             taskId: '\d+'
@@ -46,7 +46,7 @@ tasks_add_follower_to_task:
 
 tasks_remove_follower_from_task:
     path:     /tasks/{taskId}/user/{userId}
-    defaults: { _controller: APITaskBundle:Task:removeFollowerFromTask}
+    defaults: { _controller: APITaskBundle:Task/Follower:removeFollowerFromTask}
     methods: [PATCH]
     requirements:
             taskId: '\d+'
@@ -54,7 +54,7 @@ tasks_remove_follower_from_task:
 
 tasks_add_tag_to_task:
     path:     /tasks/{taskId}/tag/{tagId}
-    defaults: { _controller: APITaskBundle:Task:addTagToTask}
+    defaults: { _controller: APITaskBundle:Task/Tag:addTagToTask}
     methods: [POST]
     requirements:
             taskId: '\d+'
@@ -62,7 +62,7 @@ tasks_add_tag_to_task:
 
 tasks_remove_tag_from_task:
     path:     /tasks/{taskId}/tag/{tagId}
-    defaults: { _controller: APITaskBundle:Task:removeTagFromTask}
+    defaults: { _controller: APITaskBundle:Task/Tag:removeTagFromTask}
     methods: [PATCH]
     requirements:
             taskId: '\d+'
@@ -70,7 +70,7 @@ tasks_remove_tag_from_task:
 
 tasks_assign_user_to_task:
     path:     /tasks/{taskId}/assign-user/{userId}
-    defaults: { _controller: APITaskBundle:Task:createAssignUserToTask}
+    defaults: { _controller: APITaskBundle:Task/Assign:createAssignUserToTask}
     methods: [POST]
     requirements:
             taskId: '\d+'
@@ -78,7 +78,7 @@ tasks_assign_user_to_task:
 
 tasks_update_assign_user_to_task:
     path:     /tasks/{taskId}/assign-user/{userId}/status/{statusId}
-    defaults: { _controller: APITaskBundle:Task:updateAssignUserToTask}
+    defaults: { _controller: APITaskBundle:Task/Assign:updateAssignUserToTask}
     methods: [PATCH]
     requirements:
             taskId: '\d+'
@@ -87,7 +87,7 @@ tasks_update_assign_user_to_task:
 
 tasks_remove_assign_user_from_task:
     path:     /tasks/{taskId}/assign-user/{userId}
-    defaults: { _controller: APITaskBundle:Task:removeAssignUserFromTask}
+    defaults: { _controller: APITaskBundle:Task/Assign:removeAssignUserFromTask}
     methods: [DELETE]
     requirements:
             taskId: '\d+'

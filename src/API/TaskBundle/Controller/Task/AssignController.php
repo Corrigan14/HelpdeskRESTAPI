@@ -49,6 +49,73 @@ class AssignController extends ApiBaseController
      *      }
      *
      * @ApiDoc(
+     *  description="Returns array of users assigned to task",
+     *  filters={
+     *     {
+     *       "name"="page",
+     *       "description"="Pagination, limit is set to 10 records"
+     *     }
+     *  },
+     *  requirements={
+     *     {
+     *       "name"="taskId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of task"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      201 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity"
+     *  }
+     * )
+     *
+     * @param Request $request
+     * @param int $taskId
+     * @return Response
+     */
+    public function listOfTasksAssignedUsersAction(Request $request, int $taskId)
+    {
+        $page = $request->get('page') ?: 1;
+    }
+
+    /**
+     * ### Response ###
+     *      {
+     *         "0":
+     *         {
+     *           "id": 17,
+     *           "username": "user",
+     *           "email": "user@user.sk",
+     *           "roles": "[\"ROLE_USER\"]",
+     *           "is_active": true,
+     *           "acl": "[]",
+     *           "company": ⊕{...},
+     *           "followed_tasks": {}
+     *         },
+     *         "1":
+     *         {
+     *           "id": 18,
+     *           "username": "testuser2",
+     *           "email": "testuser2@user.sk",
+     *           "roles": "[\"ROLE_USER\"]",
+     *           "is_active": true,
+     *           "acl": "[]",
+     *           "company": ⊕{...},
+     *           "followed_tasks": {}
+     *         }
+     *      }
+     *
+     * @ApiDoc(
      *  description="Assign task to the user - create taskHasAssignedUser Entity. Status of this task is set to StatusOption: NEW.
      *  Returns array of users assigned to task",
      *  requirements={

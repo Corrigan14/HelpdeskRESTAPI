@@ -8,6 +8,7 @@ use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -17,6 +18,67 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class TagController extends ApiBaseController
 {
+    /**
+     * ### Response ###
+     *      {
+     *         "0":
+     *         {
+     *            "id": 19,
+     *            "title": "Home",
+     *            "color": "DFD112",
+     *            "public": false,
+     *            "created_by": ⊕{...}
+     *         },
+     *         "1":
+     *         {
+     *            "id": 20,
+     *            "title": "Work",
+     *            "color": "DFD115",
+     *            "public": true,
+     *            "created_by": ⊕{...}
+     *         }
+     *      }
+     *
+     * @ApiDoc(
+     *  description="Returns array of tasks tags",
+     *  filters={
+     *     {
+     *       "name"="page",
+     *       "description"="Pagination, limit is set to 10 records"
+     *     }
+     *  },
+     *  requirements={
+     *     {
+     *       "name"="taskId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of task"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      201 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity"
+     *  }
+     * )
+     *
+     * @param Request $request
+     * @param int $taskId
+     * @return Response
+     */
+    public function listOfTasksTagsAction(Request $request, int $taskId)
+    {
+        $page = $request->get('page') ?: 1;
+    }
+
     /**
      * ### Response ###
      *      {

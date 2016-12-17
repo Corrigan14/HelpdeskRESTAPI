@@ -4,6 +4,7 @@ namespace API\TaskBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -11,6 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @ORM\Table(name="task_has_attachment")
  * @ORM\Entity(repositoryClass="API\TaskBundle\Repository\TaskHasAttachmentRepository")
+ * @UniqueEntity("slug")
  */
 class TaskHasAttachment
 {

@@ -155,4 +155,52 @@ class TaskHasAssignedUser
     {
         return $this->status;
     }
+
+    /**
+     * Set task
+     *
+     * @param \API\TaskBundle\Entity\Task $task
+     *
+     * @return TaskHasAssignedUser
+     */
+    public function setTask(\API\TaskBundle\Entity\Task $task)
+    {
+        $this->task = $task;
+
+        return $this;
+    }
+
+    /**
+     * Get task
+     *
+     * @return \API\TaskBundle\Entity\Task
+     */
+    public function getTask()
+    {
+        return $this->task;
+    }
+
+    /**
+     * Set user
+     *
+     * @param \API\CoreBundle\Entity\User $user
+     *
+     * @return TaskHasAssignedUser
+     */
+    public function setUser(\API\CoreBundle\Entity\User $user)
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * Get user
+     *
+     * @return \API\CoreBundle\Entity\User
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
 }

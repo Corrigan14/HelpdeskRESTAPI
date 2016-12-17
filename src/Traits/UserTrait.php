@@ -64,6 +64,7 @@ trait UserTrait
      * @var ArrayCollection
      *
      * @ORM\ManyToMany(targetEntity="API\TaskBundle\Entity\Task", mappedBy="followers")
+     *  @Exclude()
      */
     private $followedTasks;
 

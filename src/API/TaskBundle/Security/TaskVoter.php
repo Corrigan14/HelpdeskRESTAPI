@@ -95,6 +95,8 @@ class TaskVoter implements VoterInterface
                 return $this->casRemoveAssignUserFromTask($options);
             case VoteOptions::ADD_ATTACHMENT_TO_TASK:
                 return $this->canAddAttachmentToTask($options);
+            case VoteOptions::REMOVE_ATTACHMENT_FROM_TASK:
+                return $this->canRemoveAttachmentFromTask($options);
             default:
                 return false;
         }
@@ -500,6 +502,17 @@ class TaskVoter implements VoterInterface
     {
         // User Can add Attachment to Task if he can UPDATE_TASK
         return $this->canUpdate($task);
+    }
+
+    /**
+     * @param $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function canRemoveAttachmentFromTask(Task $task): bool
+    {
+        // User Can Remove Attachment from Task if he can Add this attachment to this task
+        return $this->canAddAttachmentToTask($task);
     }
 
     /**

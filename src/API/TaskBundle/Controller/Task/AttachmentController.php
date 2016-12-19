@@ -233,11 +233,50 @@ class AttachmentController extends ApiBaseController
      * @param int $taskId
      * @param string $slug
      * @return Response
+     * @throws \LogicException
      * @internal param int $userId
      */
     public function removeAttachmentFromTaskAction(int $taskId, string $slug)
     {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $file = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
+            'slug' => $slug
+        ]);
+
+        if (!$file instanceof File) {
+            return $this->createApiResponse([
+                'message' => 'Attachment with requested Slug does not exist!',
+            ], StatusCodesHelper::BAD_REQUEST_CODE);
+        }
+
+        if ($this->canAddAttachmentToTask($task, $slug)) {
+            return $this->createApiResponse([
+                'message' => 'The requested attachment is not the attachment of the requested Task!',
+            ], StatusCodesHelper::BAD_REQUEST_CODE);
+        }
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::REMOVE_ATTACHMENT_FROM_TASK, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $taskHasAttachment = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAttachment')->findOneBy([
+            'task' => $task,
+            'slug' => $slug
+        ]);
+
+        $this->getDoctrine()->getManager()->remove($taskHasAttachment);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->createApiResponse([
+            'message' => StatusCodesHelper::DELETED_MESSAGE,
+        ], StatusCodesHelper::DELETED_CODE);
     }
 
     /**

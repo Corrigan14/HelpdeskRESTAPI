@@ -1,0 +1,130 @@
+<?php
+
+namespace API\TaskBundle\Tests\Controller\Task;
+
+use API\TaskBundle\Entity\Tag;
+use API\TaskBundle\Entity\Task;
+use Igsem\APIBundle\Services\StatusCodesHelper;
+
+/**
+ * Class TagControllerTest
+ *
+ * @package API\TaskBundle\Tests\Controller\Task
+ */
+class TagControllerTest extends TaskTestCase
+{
+    /**
+     * ADD TAG TO TASK - success
+     */
+    public function testAddTagToTaskSuccess()
+    {
+        /** @var Task $task */
+        $task = $this->findOneAdminEntity();
+
+        /** @var Tag $tag */
+        $tag = $this->em->getRepository('APITaskBundle:Tag')->findOneBy([
+            'title' => 'Another Admin Public Tag'
+        ]);
+
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/tag/' . $tag->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * ADD TAG TO TASK - errors
+     */
+    public function testAddTagToTaskErrors()
+    {
+        /** @var Task $task */
+        $task = $this->findOneAdminEntity();
+
+        /** @var Tag $tag */
+        $tag = $this->em->getRepository('APITaskBundle:Tag')->findOneBy([
+            'title' => 'Another Admin Public Tag'
+        ]);
+
+        // Try to add Tag without authorization header
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/tag/' . $tag->getId());
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to add Tag to not existed Task
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/125874' . '/tag/' . $tag->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to add Tag with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/tag/' . $tag->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+
+    /**
+     * REMOVE TAG FROM TASK - success
+     */
+    public function testRemoveTagFromTaskSuccess()
+    {
+        /** @var Task $task */
+        $task = $this->findOneAdminEntity();
+
+        /** @var Tag $tag */
+        $tag = $this->em->getRepository('APITaskBundle:Tag')->findOneBy([
+            'title' => 'Another Admin Public Tag'
+        ]);
+        $this->addTagToTask($task, $tag);
+
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $task->getId() . '/tag/' . $tag->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * REMOVE TAG FROM TASK - errors
+     */
+    public function testRemoveTagFromTaskErrors()
+    {
+        /** @var Task $task */
+        $task = $this->findOneAdminEntity();
+
+        /** @var Tag $tag */
+        $tag = $this->em->getRepository('APITaskBundle:Tag')->findOneBy([
+            'title' => 'Another Admin Public Tag'
+        ]);
+        $this->addTagToTask($task, $tag);
+
+        // Try to remove Tag without authorization header
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $task->getId() . '/tag/' . $tag->getId());
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to remove Tag to not existed Task
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/125874' . '/tag/' . $tag->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to add Tag with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $task->getId() . '/tag/' . $tag->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * @param Task $task
+     * @param Tag $tag
+     * @return bool
+     */
+    private function addTagToTask(Task $task, Tag $tag): bool
+    {
+        $tags = $task->getTags();
+
+        if (in_array($tag, $tags->toArray())) {
+            return true;
+        }
+
+        $task->addTag($tag);
+        $this->em->persist($task);
+        $this->em->flush();
+
+        return true;
+    }
+}

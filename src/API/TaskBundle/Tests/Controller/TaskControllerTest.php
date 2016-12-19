@@ -699,48 +699,6 @@ class TaskControllerTest extends ApiTestCase
     }
 
     /**
-     * ADD ATTACHMENT TO TASK - success
-     */
-    public function testAddAttachmentToTaskSuccess()
-    {
-        $slug = 'zsskcd-jpg-2016-12-17-15-36';
-        $task = $this->findOneAdminEntity();
-
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/attachment/' . $slug, [], [],
-            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
-    }
-
-    /**
-     * ADD ATTACHMENT TO TASK - errors
-     */
-    public function testAddAttachmentToTaskErrors()
-    {
-        $slug = 'zsskcd-jpg-2016-12-17-15-36';
-        $task = $this->findOneAdminEntity();
-
-        // Try to update Entity without authorization header
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/attachment/' . $slug,
-            [], [], []);
-        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        // Try to add Attachment to not existed Task
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/125468' . $task->getId() . '/attachment/' . $slug, [], [],
-            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        // Try to add not existed Attachment
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/attachment/slug-fff', [], [],
-            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::BAD_REQUEST_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        // Try to add Attachment with ROLE_USER which hasn't permission to this action
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/attachment/' . $slug, [], [],
-            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
-        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
-    }
-
-    /**
      * Get the url for requests
      *
      * @return string

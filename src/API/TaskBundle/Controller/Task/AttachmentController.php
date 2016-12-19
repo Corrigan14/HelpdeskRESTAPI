@@ -223,6 +223,7 @@ class AttachmentController extends ApiBaseController
      *  },
      *  statusCodes={
      *      204 ="The attachment was successfully removed",
+     *      400 ="Bad request",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
      *      404 ="Not found entity",

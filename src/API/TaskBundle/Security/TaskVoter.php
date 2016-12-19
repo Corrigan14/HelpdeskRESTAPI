@@ -93,6 +93,8 @@ class TaskVoter implements VoterInterface
                 return $this->casUpdateAssignUserToTask($options);
             case VoteOptions::REMOVE_ASSIGN_USER_FROM_TASK:
                 return $this->casRemoveAssignUserFromTask($options);
+            case VoteOptions::ADD_ATTACHMENT_TO_TASK:
+                return $this->canAddAttachmentToTask($options);
             default:
                 return false;
         }
@@ -102,7 +104,7 @@ class TaskVoter implements VoterInterface
     /**
      * @return bool
      */
-    public function isAdmin():bool
+    public function isAdmin(): bool
     {
         return $this->decisionManager->decide($this->token, ['ROLE_ADMIN']);
     }
@@ -114,7 +116,7 @@ class TaskVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    private function canList(array $options):bool
+    private function canList(array $options): bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
@@ -155,7 +157,7 @@ class TaskVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    private function canRead(Task $task):bool
+    private function canRead(Task $task): bool
     {
 
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
@@ -205,7 +207,7 @@ class TaskVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    private function canCreate($project):bool
+    private function canCreate($project): bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
@@ -233,7 +235,7 @@ class TaskVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    private function canUpdate($task):bool
+    private function canUpdate($task): bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
@@ -289,7 +291,7 @@ class TaskVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    private function canDelete($task):bool
+    private function canDelete($task): bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
@@ -344,7 +346,7 @@ class TaskVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    public function canAddTaskFollower(array $options):bool
+    public function canAddTaskFollower(array $options): bool
     {
         $task = $options['task'];
         $follower = $options['follower'];
@@ -365,7 +367,7 @@ class TaskVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    public function canRemoveTaskFollower(array $options):bool
+    public function canRemoveTaskFollower(array $options): bool
     {
         $task = $options['task'];
 
@@ -376,8 +378,9 @@ class TaskVoter implements VoterInterface
     /**
      * @param array $options
      * @return bool
+     * @throws \InvalidArgumentException
      */
-    public function canAddTagToTask(array $options):bool
+    public function canAddTagToTask(array $options): bool
     {
         /** @var Task $task */
         $task = $options['task'];
@@ -396,8 +399,9 @@ class TaskVoter implements VoterInterface
     /**
      * @param array $options
      * @return bool
+     * @throws \InvalidArgumentException
      */
-    public function canRemoveTagFromTask(array $options):bool
+    public function canRemoveTagFromTask(array $options): bool
     {
         // User can remove tag from task if he can add it
         return $this->canAddTagToTask($options);
@@ -406,8 +410,9 @@ class TaskVoter implements VoterInterface
     /**
      * @param array $options
      * @return bool
+     * @throws \InvalidArgumentException
      */
-    public function canAssignUserToTask(array $options):bool
+    public function canAssignUserToTask(array $options): bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
@@ -465,7 +470,7 @@ class TaskVoter implements VoterInterface
      * @param TaskHasAssignedUser $taskHasAssignedUser
      * @return bool
      */
-    private function casUpdateAssignUserToTask(TaskHasAssignedUser $taskHasAssignedUser):bool
+    private function casUpdateAssignUserToTask(TaskHasAssignedUser $taskHasAssignedUser): bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
@@ -478,11 +483,23 @@ class TaskVoter implements VoterInterface
     /**
      * @param TaskHasAssignedUser $taskHasAssignedUser
      * @return bool
+     * @throws \InvalidArgumentException
      */
-    public function casRemoveAssignUserFromTask(TaskHasAssignedUser $taskHasAssignedUser):bool
+    public function casRemoveAssignUserFromTask(TaskHasAssignedUser $taskHasAssignedUser): bool
     {
         // User Can remove Assigned User from Task if he can UPDATE_TASK
         return $this->canUpdate($taskHasAssignedUser->getTask());
+    }
+
+    /**
+     * @param $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function canAddAttachmentToTask(Task $task): bool
+    {
+        // User Can add Attachment to Task if he can UPDATE_TASK
+        return $this->canUpdate($task);
     }
 
     /**
@@ -492,7 +509,8 @@ class TaskVoter implements VoterInterface
      * @param Task $task
      * @return bool
      */
-    private function userCanFollowTask(User $user, Task $task):bool
+    private
+    function userCanFollowTask(User $user, Task $task): bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
@@ -544,7 +562,8 @@ class TaskVoter implements VoterInterface
      * @internal param string $action
      *
      */
-    private function hasAclProjectRights(array $actions, int $projectId):bool
+    private
+    function hasAclProjectRights(array $actions, int $projectId): bool
     {
         $userHasProject = $this->em->getRepository('APITaskBundle:UserHasProject')->findOneBy([
             'project' => $projectId,
@@ -576,7 +595,8 @@ class TaskVoter implements VoterInterface
      * @internal param string $action
      *
      */
-    private function hasAclProjectsRights(array $actions):bool
+    private
+    function hasAclProjectsRights(array $actions): bool
     {
         $userHasProjects = $this->user->getUserHasProjects();
 
@@ -607,7 +627,8 @@ class TaskVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    private function hasAclRights($action, User $user):bool
+    private
+    function hasAclRights($action, User $user): bool
     {
         if (!in_array($action, VoteOptions::getConstants(), true)) {
             throw new \InvalidArgumentException('Action ins not valid, please list your action in the options list');

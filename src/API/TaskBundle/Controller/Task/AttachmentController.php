@@ -85,11 +85,18 @@ class AttachmentController extends ApiBaseController
      * @param Request $request
      * @param int $taskId
      * @return Response
+     * @throws \LogicException
      * @internal param int $userId
      */
     public function listOfTasksAttachmentsAction(Request $request, int $taskId)
     {
         $page = $request->get('page') ?: 1;
+
+        $thaRepository = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAttachment');
+        $options['task'] = $taskId;
+
+        $attachmentArray = $this->get('task_additional_service')->getTaskAttachmentsResponse($taskId, $page);
+        return $this->json($attachmentArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

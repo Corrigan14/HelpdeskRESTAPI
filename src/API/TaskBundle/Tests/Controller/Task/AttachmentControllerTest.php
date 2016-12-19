@@ -24,11 +24,32 @@ class AttachmentControllerTest extends TaskTestCase
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // We expect at least one Entity, response has to include array with data and _links param
-        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
-        $keys = array_keys($response['data'][0]);
-        $this->assertTrue(array_key_exists('_links' , $response));
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertTrue(array_key_exists('_links', $response));
+        $this->assertTrue(array_key_exists('data', $response));
+    }
 
-        return $keys;
+    /**
+     * LIST OF TASKS ATTACHMENTS - errors
+     */
+    public function testListOfTasksAttachmentsErrors()
+    {
+        $task = $this->findOneAdminEntity();
+
+        // Try to call function without authorization header
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $task->getId() . '/attachment',
+            [], [], []);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to call function to not existed Task
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/1254' . $task->getId() . '/attachment', [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to call function with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $task->getId() . '/attachment', [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
     /**
@@ -138,7 +159,7 @@ class AttachmentControllerTest extends TaskTestCase
         ]);
 
         if (!$taskHasAttachment instanceof TaskHasAttachment) {
-            $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId(). '/attachment/' . $slug, [], [],
+            $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/attachment/' . $slug, [], [],
                 ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
             $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
         }

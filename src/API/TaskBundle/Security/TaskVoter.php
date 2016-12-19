@@ -87,6 +87,8 @@ class TaskVoter implements VoterInterface
                 return $this->canAddTagToTask($options);
             case VoteOptions::REMOVE_TAG_FROM_TASK:
                 return $this->canRemoveTagFromTask($options);
+            case VoteOptions::SHOW_LIST_OF_TASK_TAGS:
+                return $this->canShowListOfTasksTags($options);
             case VoteOptions::ASSIGN_USER_TO_TASK:
                 return $this->canAssignUserToTask($options);
             case VoteOptions::UPDATE_ASSIGN_USER_TO_TASK:
@@ -409,6 +411,18 @@ class TaskVoter implements VoterInterface
     {
         // User can remove tag from task if he can add it
         return $this->canAddTagToTask($options);
+    }
+
+    /**
+     * @param Task $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     * @internal param array $options
+     */
+    public function canShowListOfTasksTags(Task $task): bool
+    {
+        // User Can View Tags of Task if he CAN READ this task
+        return $this->canRead($task);
     }
 
     /**

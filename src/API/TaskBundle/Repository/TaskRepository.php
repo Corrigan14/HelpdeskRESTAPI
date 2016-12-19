@@ -14,17 +14,17 @@ class TaskRepository extends EntityRepository
     /**
      * Return's all entities with specific conditions based on actual Entity
      *
-     * @param int   $page
+     * @param int $page
      * @param array $options
      *
      * @return array|null
      */
-    public function getAllAdminTasks(int $page , array $options)
+    public function getAllAdminTasks(int $page, array $options)
     {
         $query = $this->createQueryBuilder('t')
-                      ->select('t, td')
-                      ->leftJoin('t.taskData' , 'td')
-                      ->where('t.id is not NULL');
+            ->select('t, td')
+            ->leftJoin('t.taskData', 'td')
+            ->where('t.id is not NULL');
 
         $paramArray = [];
         $paramNum = 0;
@@ -61,8 +61,8 @@ class TaskRepository extends EntityRepository
     public function countAllAdminTasks(array $options)
     {
         $query = $this->createQueryBuilder('t')
-                      ->select('COUNT(t.id)')
-                      ->where('t.id is not NULL');
+            ->select('COUNT(t.id)')
+            ->where('t.id is not NULL');
 
         $paramArray = [];
         $paramNum = 0;
@@ -83,24 +83,24 @@ class TaskRepository extends EntityRepository
     }
 
     /**
-     * @param int   $page
-     * @param int   $userId
-     * @param int   $companyId
+     * @param int $page
+     * @param int $userId
+     * @param int $companyId
      * @param       $dividedProjects
      * @param array $options
      *
      * @return array|null
      */
-    public function getAllUsersTasks(int $page , int $userId , int $companyId , $dividedProjects , array $options)
+    public function getAllUsersTasks(int $page, int $userId, int $companyId, $dividedProjects, array $options)
     {
-        if (array_key_exists('VIEW_ALL_TASKS_IN_PROJECT' , $dividedProjects)) {
+        if (array_key_exists('VIEW_ALL_TASKS_IN_PROJECT', $dividedProjects)) {
             /** @var array $allTasksInProject */
             $allTasksInProject = $dividedProjects['VIEW_ALL_TASKS_IN_PROJECT'];
         } else {
             $allTasksInProject = [];
         }
 
-        if (array_key_exists('VIEW_COMPANY_TASKS_IN_PROJECT' , $dividedProjects)) {
+        if (array_key_exists('VIEW_COMPANY_TASKS_IN_PROJECT', $dividedProjects)) {
             /** @var array $companyTasksInProject */
             $companyTasksInProject = $dividedProjects['VIEW_COMPANY_TASKS_IN_PROJECT'];
         } else {
@@ -108,8 +108,8 @@ class TaskRepository extends EntityRepository
         }
 
         $query = $this->createQueryBuilder('t')
-                      ->where('t.createdBy = :userId')
-                      ->orWhere('t.requestedBy = :userId');
+            ->where('t.createdBy = :userId')
+            ->orWhere('t.requestedBy = :userId');
         $paramArray['userId'] = $userId;
 
         $paramNum = 0;
@@ -125,8 +125,8 @@ class TaskRepository extends EntityRepository
         if (count($companyTasksInProject) > 0) {
             foreach ($companyTasksInProject as $project) {
                 $query->orWhere('t.project = :project' . $paramNum)
-                      ->leftJoin('t.createdBy' , 'u')
-                      ->andWhere('u.company = :companyId');
+                    ->leftJoin('t.createdBy', 'u')
+                    ->andWhere('u.company = :companyId');
                 $paramArray['project' . $paramNum] = $project;
 
                 $paramNum++;
@@ -159,23 +159,25 @@ class TaskRepository extends EntityRepository
 
 
     /**
-     * @param int   $userId
-     * @param int   $companyId
+     * @param int $userId
+     * @param int $companyId
      * @param       $dividedProjects
      * @param array $options
      *
      * @return int
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
-    public function countAllUsersTasks(int $userId , int $companyId , $dividedProjects , array $options)
+    public function countAllUsersTasks(int $userId, int $companyId, $dividedProjects, array $options)
     {
-        if (array_key_exists('VIEW_ALL_TASKS_IN_PROJECT' , $dividedProjects)) {
+        if (array_key_exists('VIEW_ALL_TASKS_IN_PROJECT', $dividedProjects)) {
             /** @var array $allTasksInProject */
             $allTasksInProject = $dividedProjects['VIEW_ALL_TASKS_IN_PROJECT'];
         } else {
             $allTasksInProject = [];
         }
 
-        if (array_key_exists('VIEW_COMPANY_TASKS_IN_PROJECT' , $dividedProjects)) {
+        if (array_key_exists('VIEW_COMPANY_TASKS_IN_PROJECT', $dividedProjects)) {
             /** @var array $companyTasksInProject */
             $companyTasksInProject = $dividedProjects['VIEW_COMPANY_TASKS_IN_PROJECT'];
         } else {
@@ -183,9 +185,9 @@ class TaskRepository extends EntityRepository
         }
 
         $query = $this->createQueryBuilder('t')
-                      ->select('COUNT(t.id)')
-                      ->where('t.createdBy = :userId')
-                      ->orWhere('t.requestedBy = :userId');
+            ->select('COUNT(t.id)')
+            ->where('t.createdBy = :userId')
+            ->orWhere('t.requestedBy = :userId');
         $paramArray['userId'] = $userId;
 
         $paramNum = 0;
@@ -201,8 +203,8 @@ class TaskRepository extends EntityRepository
         if (count($companyTasksInProject) > 0) {
             foreach ($companyTasksInProject as $project) {
                 $query->orWhere('t.project = :project' . $paramNum)
-                      ->leftJoin('t.createdBy' , 'u')
-                      ->andWhere('u.company = :companyId');
+                    ->leftJoin('t.createdBy', 'u')
+                    ->andWhere('u.company = :companyId');
                 $paramArray['project' . $paramNum] = $project;
 
                 $paramNum++;
@@ -224,5 +226,28 @@ class TaskRepository extends EntityRepository
         }
 
         return $query->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * @param int $taskId
+     * @param int $page
+     * @return array
+     */
+    public function getTasksTags(int $taskId, int $page): array
+    {
+        $query = $this->createQueryBuilder('t')
+            ->select('t,tag')
+            ->where('t.id = :taskId')
+            ->leftJoin('t.tags', 'tag')
+            ->setParameter('taskId', $taskId);
+
+        $query->setMaxResults(TaskRepository::LIMIT);
+
+        // Pagination calculating offset
+        if (1 < $page) {
+            $query->setFirstResult(TaskRepository::LIMIT * $page - TaskRepository::LIMIT);
+        }
+
+        return $query->getQuery()->getArrayResult();
     }
 }

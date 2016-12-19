@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Services;
 
+use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Repository\TaskRepository;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
@@ -64,6 +65,34 @@ class TaskAdditionalService
         $response = [
             'data' => $attachmentsArray,
         ];
+
+        $pagination = $this->getPagination($page, $count, $routeOptions);
+
+        return array_merge($response, $pagination);
+    }
+
+    /**
+     * @param array $options
+     * @param int $page
+     * @param array $routeOptions
+     * @return array
+     */
+    public function getTaskTagsResponse(array $options, int $page, array $routeOptions): array
+    {
+        /** @var Task $task */
+        $task = $options['task'];
+        $taskTags = $task->getTags();
+        $taskTagsArray = $this->em->getRepository('APITaskBundle:Task')->getTasksTags($task->getId(), $page);
+        $count = count($taskTags);
+
+        $response = [
+            'data' => []
+        ];
+        if (count($taskTagsArray) > 0) {
+            $response = [
+                'data' => $taskTagsArray[0]['tags'],
+            ];
+        }
 
         $pagination = $this->getPagination($page, $count, $routeOptions);
 

@@ -72,6 +72,7 @@ class VoteOptions
     const REMOVE_TASK_FOLLOWER = 'remove_task_follower';
     const ADD_TAG_TO_TASK = 'add_tag_to_task';
     const REMOVE_TAG_FROM_TASK = 'remove_tag_from_task';
+    const SHOW_LIST_OF_TASK_TAGS = 'show_list_of_task_tags';
     const ASSIGN_USER_TO_TASK = 'assign_user_to_task';
     const UPDATE_ASSIGN_USER_TO_TASK = 'update_assign_user_to_task';
     const REMOVE_ASSIGN_USER_FROM_TASK = 'remove_assign_user_from_task';

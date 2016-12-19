@@ -63,7 +63,7 @@ class TagController extends ApiBaseController
      *     }
      *  },
      *  statusCodes={
-     *      201 ="The request has succeeded",
+     *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
      *      404 ="Not found Entity"
@@ -73,10 +73,35 @@ class TagController extends ApiBaseController
      * @param Request $request
      * @param int $taskId
      * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \LogicException
      */
     public function listOfTasksTagsAction(Request $request, int $taskId)
     {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_LIST_OF_TASK_TAGS, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
         $page = $request->get('page') ?: 1;
+
+        $options['task'] = $task;
+        $routeOptions = [
+            'routeName' => 'tasks_list_of_tasks_tags',
+            'routeParams' => ['taskId' => $taskId]
+        ];
+
+        $tagsArray = $this->get('task_additional_service')->getTaskTagsResponse($options, $page, $routeOptions);
+        return $this->createApiResponse($tagsArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

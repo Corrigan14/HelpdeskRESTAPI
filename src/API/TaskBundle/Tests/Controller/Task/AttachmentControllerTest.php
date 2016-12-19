@@ -13,6 +13,25 @@ use Igsem\APIBundle\Services\StatusCodesHelper;
 class AttachmentControllerTest extends TaskTestCase
 {
     /**
+     * LIST OF TASKS ATTACHMENTS - success
+     */
+    public function testListOfTasksAttachmentsSuccess()
+    {
+        $task = $this->findOneAdminEntity();
+
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $task->getId() . '/attachment', [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect at least one Entity, response has to include array with data and _links param
+        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
+        $keys = array_keys($response['data'][0]);
+        $this->assertTrue(array_key_exists('_links' , $response));
+
+        return $keys;
+    }
+
+    /**
      * ADD ATTACHMENT TO TASK - success
      */
     public function testAddAttachmentToTaskSuccess()

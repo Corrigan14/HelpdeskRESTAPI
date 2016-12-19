@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Services;
 
+use API\TaskBundle\Repository\TaskRepository;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
@@ -35,21 +36,36 @@ class TaskAdditionalService
     /**
      * Return Attachment (File) Response which includes Data, Links and is based on Pagination
      *
-     * @param int $taskId
+     * @param array $options
      * @param int $page
+     * @param array $routeOptions
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @internal param int $taskId
      */
-    public function getTaskAttachmentsResponse(int $taskId, int $page): array
+    public function getTaskAttachmentsResponse(array $options, int $page, array $routeOptions): array
     {
-        $tasks = $this->em->getRepository('APITaskBundle:TaskHasAttachment')->getAllEntities($taskId,$page);
-        $count = $this->em->getRepository('APITaskBundle:TaskHasAttachment')->countEntities($taskId);
+        $taskId = $options['task'];
 
+        $fileSlugs = $this->em->getRepository('APITaskBundle:TaskHasAttachment')->getAllAttachmentSlugs($taskId, $page);
+        $count = $this->em->getRepository('APITaskBundle:TaskHasAttachment')->countAttachmentEntities($taskId);
+
+        $attachmentsArray = [];
+        if (count($fileSlugs) > 0) {
+            foreach ($fileSlugs as $slug) {
+                $file = $this->em->getRepository('APICoreBundle:File')->findOneBy([
+                    'slug' => $slug
+                ]);
+                $attachmentsArray[] = $file;
+            }
+        }
 
         $response = [
-            'data' => $tasks,
+            'data' => $attachmentsArray,
         ];
 
-        $pagination = $this->getPagination($page, $count, $taskId);
+        $pagination = $this->getPagination($page, $count, $routeOptions);
 
         return array_merge($response, $pagination);
     }
@@ -57,33 +73,28 @@ class TaskAdditionalService
     /**
      * @param int $page
      * @param int $count
-     * @param array $options
+     * @param array $routeOptions
      * @return array
      */
-    private function getPagination(int $page, int $count, array $options)
+    private function getPagination(int $page, int $count, array $routeOptions)
     {
         $limit = TaskRepository::LIMIT;
-        $url = $this->router->generate('tasks_list');
+
+        $routeName = $routeOptions['routeName'];
+        $routeParams = $routeOptions['routeParams'];
+        $url = $this->router->generate($routeName, $routeParams);
 
         $totalNumberOfPages = ceil($count / $limit);
         $previousPage = $page > 1 ? $page - 1 : false;
         $nextPage = $page < $totalNumberOfPages ? $page + 1 : false;
 
-        $creator = $options['creator'];
-        $requestedUser = $options['requested'];
-        $project = $options['project'];
-
-        $creatorParam = (false !== $creator ? '&creator=' . $creator : false);
-        $requestedUserParam = (false !== $requestedUser ? '&requested=' . $requestedUser : false);
-        $projectParam = (false !== $project ? '&project=' . $project : false);
-
         return [
             '_links' => [
-                'self' => $url . '?page=' . $page . $creatorParam . $requestedUserParam . $projectParam,
-                'first' => $url . '?page=' . 1 . $creatorParam . $requestedUserParam . $projectParam,
-                'prev' => $previousPage ? $url . '?page=' . $previousPage . $creatorParam . $requestedUserParam . $projectParam : false,
-                'next' => $nextPage ? $url . '?page=' . $nextPage . $creatorParam . $requestedUserParam . $projectParam : false,
-                'last' => $url . '?page=' . $totalNumberOfPages . $creatorParam . $requestedUserParam . $projectParam,
+                'self' => $url . '?page=' . $page,
+                'first' => $url . '?page=' . 1,
+                'prev' => $previousPage ? $url . '?page=' . $previousPage : false,
+                'next' => $nextPage ? $url . '?page=' . $nextPage : false,
+                'last' => $url . '?page=' . $totalNumberOfPages,
             ],
             'total' => $count,
             'page' => $page,

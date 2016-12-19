@@ -23,32 +23,33 @@ class AttachmentController extends ApiBaseController
     /**
      * ### Response ###
      *      {
-     *         "0":
+     *        "data":
      *        {
-     *          "id": 2,
-     *          "name": "lamp",
-     *          "slug": "lamp-2016-12-19-02-21",
-     *          "temp_name": "phpJXtI4V",
-     *          "type": "text/plain",
-     *          "size": 35,
-     *          "upload_dir": "ee4ee8b963284e98df96aa0c04b4e9a6",
-     *          "public": false,
-     *          "created_at": "2016-12-19T02:21:50+0100",
-     *          "updated_at": "2016-12-19T02:21:50+0100"
-     *         }
-     *         "1":
+     *          "0":
+     *          {
+     *            "id": 2,
+     *            "name": "lamp",
+     *            "slug": "lamp-2016-12-19-02-21",
+     *            "temp_name": "phpJXtI4V",
+     *            "type": "text/plain",
+     *            "size": 35,
+     *            "upload_dir": "ee4ee8b963284e98df96aa0c04b4e9a6",
+     *            "public": false,
+     *            "created_at": "2016-12-19T02:21:50+0100",
+     *            "updated_at": "2016-12-19T02:21:50+0100"
+     *          }
+     *        },
+     *        "_links":
      *        {
-     *          "id": 3,
-     *          "name": "lamp2",
-     *          "slug": "lamp2-2016-12-19-02-21",
-     *          "temp_name": "phpJXtI4V",
-     *          "type": "text/plain",
-     *          "size": 38,
-     *          "upload_dir": "ee4ee8b963284e98df96aa0c04b4e9a6",
-     *          "public": false,
-     *          "created_at": "2016-12-19T02:21:50+0100",
-     *          "updated_at": "2016-12-19T02:21:50+0100"
-     *         }
+     *          "self": "/api/v1/task-bundle/tasks/7/attachment?page=1",
+     *          "first": "/api/v1/task-bundle/tasks/7/attachment?page=1",
+     *          "prev": false,
+     *          "next": false,
+     *          "last": "/api/v1/task-bundle/tasks/7/attachment?page=1"
+     *        },
+     *        "total": 1,
+     *        "page": 1,
+     *        "numberOfPages": 1
      *      }
      *
      * @ApiDoc(
@@ -85,18 +86,36 @@ class AttachmentController extends ApiBaseController
      * @param Request $request
      * @param int $taskId
      * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \LogicException
      * @internal param int $userId
      */
     public function listOfTasksAttachmentsAction(Request $request, int $taskId)
     {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_LIST_OF_TASK_ATTACHMENTS, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
         $page = $request->get('page') ?: 1;
 
-        $thaRepository = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAttachment');
         $options['task'] = $taskId;
+        $routeOptions = [
+            'routeName' => 'tasks_list_of_tasks_attachments',
+            'routeParams' => ['taskId' => $taskId]
+        ];
 
-        $attachmentArray = $this->get('task_additional_service')->getTaskAttachmentsResponse($taskId, $page);
-        return $this->json($attachmentArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $attachmentArray = $this->get('task_additional_service')->getTaskAttachmentsResponse($options, $page, $routeOptions);
+        return $this->createApiResponse($attachmentArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

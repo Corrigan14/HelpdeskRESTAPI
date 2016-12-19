@@ -97,6 +97,8 @@ class TaskVoter implements VoterInterface
                 return $this->canAddAttachmentToTask($options);
             case VoteOptions::REMOVE_ATTACHMENT_FROM_TASK:
                 return $this->canRemoveAttachmentFromTask($options);
+            case VoteOptions::SHOW_LIST_OF_TASK_ATTACHMENTS:
+                return $this->canShowListOfTaskAttachments($options);
             default:
                 return false;
         }
@@ -516,14 +518,24 @@ class TaskVoter implements VoterInterface
     }
 
     /**
+     * @param $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function canShowListOfTaskAttachments(Task $task): bool
+    {
+        // User Can View Attachments of Task if he CAN READ this task
+        return $this->canRead($task);
+    }
+
+    /**
      * User can see a task
      *
      * @param User $user
      * @param Task $task
      * @return bool
      */
-    private
-    function userCanFollowTask(User $user, Task $task): bool
+    private function userCanFollowTask(User $user, Task $task): bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;

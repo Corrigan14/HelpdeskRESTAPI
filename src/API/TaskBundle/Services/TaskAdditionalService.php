@@ -100,6 +100,34 @@ class TaskAdditionalService
     }
 
     /**
+     * @param array $options
+     * @param int $page
+     * @param array $routeOptions
+     * @return array
+     */
+    public function getTaskFollowerResponse(array $options, int $page, array $routeOptions): array
+    {
+        /** @var Task $task */
+        $task = $options['task'];
+        $taskFollowers = $task->getFollowers();
+        $taskFollowersArray = $this->em->getRepository('APITaskBundle:Task')->getTasksFollowers($task->getId(), $page);
+        $count = count($taskFollowers);
+
+        $response = [
+            'data' => []
+        ];
+        if (count($taskFollowersArray) > 0) {
+            $response = [
+                'data' => $taskFollowersArray[0]['followers'],
+            ];
+        }
+
+        $pagination = $this->getPagination($page, $count, $routeOptions);
+
+        return array_merge($response, $pagination);
+    }
+
+    /**
      * @param int $page
      * @param int $count
      * @param array $routeOptions

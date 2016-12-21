@@ -21,26 +21,30 @@ class FollowerController extends ApiBaseController
     /**
      * ### Response ###
      *      {
-     *         "0":
+     *         "data":
      *         {
-     *            "id": 85,
-     *            "username": "admin",
-     *            "email": "admin@admin.sk",
-     *            "roles": "[\"ROLE_ADMIN\"]",
-     *            "is_active": true,
-     *            "acl": "[]",
-     *            "company": ⊕{...}
+     *            "0":
+     *            {
+     *               "id": 11,
+     *               "username": "admin",
+     *               "password": "$2y$13$Mmruh1j0Y07twkywF4TvIO9WMOYISWrXMDPa24nls7mm3QMvRE10q",
+     *               "email": "admin@admin.sk",
+     *               "roles": "[\"ROLE_ADMIN\"]",
+     *               "is_active": true,
+     *               "acl": "[]"
+     *            }
      *         },
-     *         "1":
+     *         "_links":
      *         {
-     *            "id": 87,
-     *            "username": "testuser2",
-     *            "email": "testuser2@user.sk",
-     *            "roles": "[\"ROLE_USER\"]",
-     *            "is_active": true,
-     *            "acl": "[]",
-     *            "company": ⊕{...}
-     *         }
+     *              "self": "/api/v1/task-bundle/tasks/7/follower?page=1",
+     *              "first": "/api/v1/task-bundle/tasks/7/follower?page=1",
+     *              "prev": false,
+     *              "next": false,
+     *              "last": "/api/v1/task-bundle/tasks/7/follower?page=1"
+     *         },
+     *         "total": 1,
+     *         "page": 1,
+     *         "numberOfPages": 1
      *      }
      *
      * @ApiDoc(
@@ -67,7 +71,7 @@ class FollowerController extends ApiBaseController
      *     }
      *  },
      *  statusCodes={
-     *      201 ="The request has succeeded",
+     *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
      *      404 ="Not found Entity"
@@ -77,10 +81,32 @@ class FollowerController extends ApiBaseController
      * @param Request $request
      * @param int $taskId
      * @return Response
+     * @throws \LogicException
      */
     public function listOfTasksFollowersAction(Request $request, int $taskId)
     {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_LIST_OF_TASK_FOLLOWERS, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
         $page = $request->get('page') ?: 1;
+
+        $options['task'] = $task;
+        $routeOptions = [
+            'routeName' => 'tasks_list_of_tasks_followers',
+            'routeParams' => ['taskId' => $taskId]
+        ];
+
+        $followersArray = $this->get('task_additional_service')->getTaskFollowerResponse($options, $page, $routeOptions);
+        return $this->createApiResponse($followersArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

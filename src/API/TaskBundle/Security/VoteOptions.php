@@ -70,6 +70,7 @@ class VoteOptions
     // OTHER WITH TASK
     const ADD_TASK_FOLLOWER = 'add_task_follower';
     const REMOVE_TASK_FOLLOWER = 'remove_task_follower';
+    const SHOW_LIST_OF_TASK_FOLLOWERS = 'show_list_of_task_followers';
     const ADD_TAG_TO_TASK = 'add_tag_to_task';
     const REMOVE_TAG_FROM_TASK = 'remove_tag_from_task';
     const SHOW_LIST_OF_TASK_TAGS = 'show_list_of_task_tags';

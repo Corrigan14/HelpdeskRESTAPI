@@ -101,6 +101,8 @@ class TaskVoter implements VoterInterface
                 return $this->canRemoveAttachmentFromTask($options);
             case VoteOptions::SHOW_LIST_OF_TASK_ATTACHMENTS:
                 return $this->canShowListOfTaskAttachments($options);
+            case VoteOptions::SHOW_LIST_OF_TASK_FOLLOWERS:
+                return $this->canShowListOfTaskFollowers($options);
             default:
                 return false;
         }
@@ -379,6 +381,17 @@ class TaskVoter implements VoterInterface
 
         // If logged user can update task, he can add or remove follower to this task
         return $this->canUpdate($task);
+    }
+
+    /**
+     * @param $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function canShowListOfTaskFollowers(Task $task): bool
+    {
+        // User Can View Task Followers if he CAN READ this task
+        return $this->canRead($task);
     }
 
     /**

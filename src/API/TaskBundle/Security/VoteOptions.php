@@ -77,6 +77,7 @@ class VoteOptions
     const ASSIGN_USER_TO_TASK = 'assign_user_to_task';
     const UPDATE_ASSIGN_USER_TO_TASK = 'update_assign_user_to_task';
     const REMOVE_ASSIGN_USER_FROM_TASK = 'remove_assign_user_from_task';
+    const SHOW_LIST_OF_USERS_ASSIGNED_TO_TASK = 'show_list_of_users_assigned_to_task';
     const ADD_ATTACHMENT_TO_TASK = 'add_attachment_to_task';
     const REMOVE_ATTACHMENT_FROM_TASK = 'remove_attachment_from_task';
     const SHOW_LIST_OF_TASK_ATTACHMENTS = 'show_list_of_task_attachments';

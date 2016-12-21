@@ -16,6 +16,46 @@ use API\TaskBundle\Security\StatusOptions;
 class AssignControllerTest extends TaskTestCase
 {
     /**
+     * LIST OF USERS ASSIGNED TO TASK - success
+     */
+    public function testListOfUsersAssignedToTaskSuccess()
+    {
+        $task = $this->findOneAdminEntity();
+
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $task->getId() . '/assign-user', [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect at least one Entity, response has to include array with data and _links param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertTrue(array_key_exists('_links', $response));
+        $this->assertTrue(array_key_exists('data', $response));
+    }
+
+    /**
+     * LIST OF USERS ASSIGNED TO TASK - errors
+     */
+    public function testListOfUsersAssignedToTaskErrors()
+    {
+        $task = $this->findOneAdminEntity();
+
+        // Try to call function without authorization header
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $task->getId() . '/assign-user',
+            [], [], []);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to call function to not existed Task
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/1254' . $task->getId() . '/assign-user', [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to call function with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $task->getId() . '/assign-user', [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
      * ASSIGN USER TO TASK - success
      */
     public function testCreateAssignUserToTaskSuccess()

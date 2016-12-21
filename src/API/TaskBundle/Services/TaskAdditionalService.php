@@ -4,6 +4,7 @@ namespace API\TaskBundle\Services;
 
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Repository\TaskRepository;
+use API\TaskBundle\Repository\TaskHasAssignedUserRepository;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
@@ -116,9 +117,48 @@ class TaskAdditionalService
         $response = [
             'data' => []
         ];
+
         if (count($taskFollowersArray) > 0) {
+            $data = [];
+            foreach ($taskFollowersArray[0]['followers'] as $item) {
+                unset($item['password']);
+                $data[] = $item;
+            }
             $response = [
-                'data' => $taskFollowersArray[0]['followers'],
+                'data' => $data,
+            ];
+        }
+
+        $pagination = $this->getPagination($page, $count, $routeOptions);
+
+        return array_merge($response, $pagination);
+    }
+
+    /**
+     * @param array $options
+     * @param int $page
+     * @param array $routeOptions
+     * @return array
+     */
+    public function getUsersAssignedToTaskResponse(array $options, int $page, array $routeOptions): array
+    {
+        /** @var Task $task */
+        $task = $options['task'];
+        $taskAssignedUsers = $task->getTaskHasAssignedUsers();
+        $taskAssignedUsersArray = $this->em->getRepository('APITaskBundle:TaskHasAssignedUser')->getTasksAssignedUsers($task->getId(), $page);
+        $count = count($taskAssignedUsers);
+
+        $response = [
+            'data' => []
+        ];
+        if (count($taskAssignedUsersArray) > 0) {
+            $data = [];
+            foreach ($taskAssignedUsersArray as $item) {
+                unset($item['user']['password']);
+                $data[] = $item['user'];
+            }
+            $response = [
+                'data' => $data,
             ];
         }
 

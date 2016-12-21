@@ -24,28 +24,38 @@ class AssignController extends ApiBaseController
     /**
      * ### Response ###
      *      {
-     *         "0":
-     *         {
-     *           "id": 17,
-     *           "username": "user",
-     *           "email": "user@user.sk",
-     *           "roles": "[\"ROLE_USER\"]",
-     *           "is_active": true,
-     *           "acl": "[]",
-     *           "company": ⊕{...},
-     *           "followed_tasks": {}
-     *         },
-     *         "1":
-     *         {
-     *           "id": 18,
-     *           "username": "testuser2",
-     *           "email": "testuser2@user.sk",
-     *           "roles": "[\"ROLE_USER\"]",
-     *           "is_active": true,
-     *           "acl": "[]",
-     *           "company": ⊕{...},
-     *           "followed_tasks": {}
-     *         }
+     *        "data":
+     *        {
+     *          "0":
+     *          {
+     *            "id": 11,
+     *            "username": "admin",
+     *            "email": "admin@admin.sk",
+     *            "roles": "[\"ROLE_ADMIN\"]",
+     *            "is_active": true,
+     *            "acl": "[]"
+     *          },
+     *          "1":
+     *          {
+     *            "id": 12,
+     *            "username": "user",
+     *            "email": "user@user.sk",
+     *            "roles": "[\"ROLE_USER\"]",
+     *            "is_active": true,
+     *            "acl": "[]"
+     *          },
+     *        },
+     *        "_links":
+     *        {
+     *          "self": "/api/v1/task-bundle/tasks/7/assign-user?page=1",
+     *          "first": "/api/v1/task-bundle/tasks/7/assign-user?page=1",
+     *          "prev": false,
+     *          "next": false,
+     *          "last": "/api/v1/task-bundle/tasks/7/assign-user?page=1"
+     *        },
+     *        "total": 3,
+     *        "page": 1,
+     *        "numberOfPages": 1
      *      }
      *
      * @ApiDoc(
@@ -82,10 +92,32 @@ class AssignController extends ApiBaseController
      * @param Request $request
      * @param int $taskId
      * @return Response
+     * @throws \LogicException
      */
     public function listOfTasksAssignedUsersAction(Request $request, int $taskId)
     {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_LIST_OF_USERS_ASSIGNED_TO_TASK, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
         $page = $request->get('page') ?: 1;
+
+        $options['task'] = $task;
+        $routeOptions = [
+            'routeName' => 'tasks_list_of_tasks_assigned_users',
+            'routeParams' => ['taskId' => $taskId]
+        ];
+
+        $assignedUsersArray = $this->get('task_additional_service')->getUsersAssignedToTaskResponse($options, $page, $routeOptions);
+        return $this->createApiResponse($assignedUsersArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

@@ -27,7 +27,6 @@ class FollowerController extends ApiBaseController
      *            {
      *               "id": 11,
      *               "username": "admin",
-     *               "password": "$2y$13$Mmruh1j0Y07twkywF4TvIO9WMOYISWrXMDPa24nls7mm3QMvRE10q",
      *               "email": "admin@admin.sk",
      *               "roles": "[\"ROLE_ADMIN\"]",
      *               "is_active": true,

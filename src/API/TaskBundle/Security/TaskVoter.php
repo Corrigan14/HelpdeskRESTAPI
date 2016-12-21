@@ -103,6 +103,8 @@ class TaskVoter implements VoterInterface
                 return $this->canShowListOfTaskAttachments($options);
             case VoteOptions::SHOW_LIST_OF_TASK_FOLLOWERS:
                 return $this->canShowListOfTaskFollowers($options);
+            case VoteOptions::SHOW_LIST_OF_USERS_ASSIGNED_TO_TASK:
+                return $this->canShowListOfUsersAssignedToTask($options);
             default:
                 return false;
         }
@@ -520,6 +522,17 @@ class TaskVoter implements VoterInterface
     {
         // User Can remove Assigned User from Task if he can UPDATE_TASK
         return $this->canUpdate($taskHasAssignedUser->getTask());
+    }
+
+    /**
+     * @param Task $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function canShowListOfUsersAssignedToTask(Task $task): bool
+    {
+        // User Can view a list of users assigned to Task if he can READ_TASK
+        return $this->canRead($task);
     }
 
     /**

@@ -19,6 +19,3 @@ api_task_project:
 api_task_task_attribute:
     resource: "@APITaskBundle/Resources/config/routing/taskAttribute.yml"
     prefix: /
-api_task_comment:
-    resource: "@APITaskBundle/Resources/config/routing/comment.yml"
-    prefix: /

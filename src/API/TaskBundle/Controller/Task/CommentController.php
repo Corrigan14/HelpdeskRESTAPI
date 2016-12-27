@@ -1,35 +1,57 @@
 <?php
 
-namespace API\TaskBundle\Controller;
+namespace API\TaskBundle\Controller\Task;
 
+use API\TaskBundle\Entity\Task;
+use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Igsem\APIBundle\Services\StatusCodesHelper;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class CommentController
  *
- * @package API\TaskBundle\Controller
+ * @package API\TaskBundle\Controller\Task
  */
-class CommentController  extends ApiBaseController
+class CommentController extends ApiBaseController
 {
     /**
      *  ### Response ###
      *     {
      *       "data":
      *       [
+     *           "0":
+     *           {
+     *             "id": 8,
+     *             "title": "Koment - public",
+     *             "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *             "internal": false,
+     *             "email": false,
+     *             "createdAt": "2016-12-27T15:03:10+0100",
+     *             "updatedAt": "2016-12-27T15:03:10+0100"
+     *          },
+     *          "1":
      *          {
-     *            "id": "1",
+     *            "id": 11,
+     *            "title": "Email - public",
+     *            "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *            "internal": false,
+     *            "email": true,
+     *            "email_to": "a:1:{i:0;s:15:\"email@email.com\";}",
+     *            "email_cc": "a:2:{i:0;s:15:\"email2@email.sk\";i:1;s:16:\"email3@email.com\";}",
+     *            "createdAt": "2016-12-27T15:03:10+0100",
+     *            "updatedAt": "2016-12-27T15:03:10+0100"
      *          }
      *       ],
      *       "_links":
      *       {
-     *           "self": "/entity?page=1",
-     *           "first": "/entity?page=1",
+     *           "self": "/api/v1/task-bundle/tasks/21/comments?page=1",
+     *           "first": "/api/v1/task-bundle/tasks/21/comments?page=1",
      *           "prev": false,
-     *           "next": "/entity?page=2",
-     *            "last": "/entity?page=3"
+     *           "next": "/api/v1/task-bundle/tasks/21/comments?page=2",
+     *           "last": "/api/v1/task-bundle/tasks/21/comments?page=3"
      *       },
      *       "total": 22,
      *       "page": 1,
@@ -54,15 +76,7 @@ class CommentController  extends ApiBaseController
      *     },
      *     {
      *       "name"="internal",
-     *       "description"="Returns Internal comments if value is TRUE, else returns ALL comments"
-     *     },
-     *     {
-     *       "name"="email",
-     *       "description"="Returns Email comments if value is TRUE, else returns ALL comments"
-     *     },
-     *     {
-     *       "name"="comment",
-     *       "description"="Comment ID: if comment exists, just child comments are returned"
+     *       "description"="Return NO Internal comments (internal = FALSE) if value is FALSE, else returns ALL comments"
      *     }
      *  },
      *  headers={
@@ -82,11 +96,36 @@ class CommentController  extends ApiBaseController
      *
      * @param Request $request
      * @param int $taskId
-     * @return JsonResponse
+     * @return Response
+     * @throws \LogicException
      */
-    public function tasksListAction(Request $request, int $taskId)
+    public function tasksCommentsListAction(Request $request, int $taskId)
     {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
+        if (!$task instanceof Task) {
+            return $this->notFoundResponse();
+        }
+
+        // Check if logged user has access to show tasks comments
+        if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_COMMENT_TO_TASK, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $page = $request->get('page') ?: 1;
+        $internal = $request->get('internal') ?: 'all';
+
+        $options = [
+            'task' => $task,
+            'internal' => $internal
+        ];
+        $routeOptions = [
+            'routeName' => 'tasks_list_of_tasks_comments',
+            'routeParams' => ['taskId' => $taskId]
+        ];
+
+        $commentsArray = $this->get('task_additional_service')->getCommentsOfTaskResponse($options, $page, $routeOptions);
+        return $this->createApiResponse($commentsArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -130,10 +169,11 @@ class CommentController  extends ApiBaseController
      *  }
      * )
      *
+     * @param int $taskId
      * @param int $id
-     * @return JsonResponse
+     * @return Response
      */
-    public function getAction(int $id)
+    public function getTasksCommentAction(int $taskId, int $id)
     {
 
     }
@@ -175,7 +215,7 @@ class CommentController  extends ApiBaseController
      *
      * @param Request $request
      * @param int $taskId
-     * @return JsonResponse
+     * @return Response
      */
     public function createTasksCommentAction(Request $request, int $taskId)
     {
@@ -219,7 +259,7 @@ class CommentController  extends ApiBaseController
      *
      * @param Request $request
      * @param int $commentId
-     * @return JsonResponse
+     * @return Response
      */
     public function createCommentsCommentAction(Request $request, int $commentId)
     {
@@ -271,7 +311,7 @@ class CommentController  extends ApiBaseController
      *
      * @param int $id
      * @param Request $request
-     * @return JsonResponse
+     * @return Response
      */
     public function updateAction(int $id, Request $request)
     {
@@ -323,7 +363,7 @@ class CommentController  extends ApiBaseController
      *
      * @param int $id
      * @param Request $request
-     * @return JsonResponse
+     * @return Response
      */
     public function updatePartialAction(int $id, Request $request)
     {
@@ -357,7 +397,7 @@ class CommentController  extends ApiBaseController
      *
      * @param int $id
      *
-     * @return JsonResponse
+     * @return Response
      */
     public function deleteAction(int $id)
     {

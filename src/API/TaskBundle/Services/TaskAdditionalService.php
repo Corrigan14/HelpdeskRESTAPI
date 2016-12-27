@@ -168,6 +168,28 @@ class TaskAdditionalService
     }
 
     /**
+     * @param array $options
+     * @param int $page
+     * @param array $routeOptions
+     * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     */
+    public function getCommentsOfTaskResponse(array $options, int $page, array $routeOptions): array
+    {
+        $commentsArray = $this->em->getRepository('APITaskBundle:Comment')->getTaskComments($options, $page);
+        $countComments = $this->em->getRepository('APITaskBundle:Comment')->countTaskComments($options);
+
+        $response = [
+            'data' => $commentsArray
+        ];
+
+        $pagination = $this->getPagination($page, $countComments, $routeOptions);
+
+        return array_merge($response, $pagination);
+    }
+
+    /**
      * @param int $page
      * @param int $count
      * @param array $routeOptions

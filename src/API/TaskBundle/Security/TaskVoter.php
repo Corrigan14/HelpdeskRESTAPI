@@ -4,7 +4,6 @@ namespace API\TaskBundle\Security;
 
 use API\CoreBundle\Entity\Company;
 use API\CoreBundle\Entity\User;
-use API\CoreBundle\Security\ApiBaseVoter;
 use API\CoreBundle\Security\VoterInterface;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Tag;
@@ -105,6 +104,8 @@ class TaskVoter implements VoterInterface
                 return $this->canShowListOfTaskFollowers($options);
             case VoteOptions::SHOW_LIST_OF_USERS_ASSIGNED_TO_TASK:
                 return $this->canShowListOfUsersAssignedToTask($options);
+            case VoteOptions::ADD_COMMENT_TO_TASK:
+                return $this->canAddCommentToTask($options);
             default:
                 return false;
         }
@@ -276,9 +277,10 @@ class TaskVoter implements VoterInterface
             }
 
             // User can update task if he has UPDATE_USER_TASKS_IN_PROJECT access in projects ACL and
-            // The task is requested by him ar is assigned to him
+            // The task is requested by him or is assigned to him
             $actions [] = VoteOptions::UPDATE_USER_TASKS_IN_PROJECT;
             $hasAcl = $this->hasAclProjectRights($actions, $project->getId());
+
 
             if ($hasAcl && ($this->user->getId() === $task->getRequestedBy()->getId())) {
                 return true;
@@ -322,13 +324,21 @@ class TaskVoter implements VoterInterface
             }
 
             // User can delete task if he has UPDATE_USER_TASKS_IN_PROJECT access in projects ACL and
-            // The task is requested by him ar is assigned to him
+            // The task is requested by him
             $actions [] = VoteOptions::UPDATE_USER_TASKS_IN_PROJECT;
             $hasAcl = $this->hasAclProjectRights($actions, $project->getId());
 
             if ($hasAcl && ($this->user->getId() === $task->getRequestedBy()->getId())) {
                 return true;
             }
+
+            // User can delete task if he has UPDATE_USER_TASKS_IN_PROJECT access in projects ACL and
+            // The task is assigned to him
+            $assignedUsersIds = $this->getAssignedUsersIds($task);
+            if ($hasAcl && in_array($this->user->getId(), $assignedUsersIds, true)) {
+                return true;
+            }
+
         }
 
         return false;
@@ -553,6 +563,33 @@ class TaskVoter implements VoterInterface
     }
 
     /**
+     * @param $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function canAddCommentToTask(Task $task): bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        // User Can Add Comment to Task if he created or requested this task
+        if ($task->getCreatedBy()->getId() === $this->user->getId() || $task->getRequestedBy()->getId() === $this->user->getId()) {
+            return true;
+        }
+
+        // User Can Add Comment to Task if he is assigned to this Task
+        $assignedUsersIds = $this->getAssignedUsersIds($task);
+        if (in_array($this->user->getId(), $assignedUsersIds, true)) {
+            return true;
+        }
+
+        // User Can Add Comment to Task if he can UPDATE this task
+        return $this->canUpdate($task);
+
+    }
+
+    /**
      * User can see a task
      *
      * @param User $user
@@ -687,5 +724,24 @@ class TaskVoter implements VoterInterface
         }
 
         return false;
+    }
+
+    /**
+     * @param Task $task
+     * @return array
+     */
+    private function getAssignedUsersIds(Task $task): array
+    {
+        $taskHasAssignedUsers = $task->getTaskHasAssignedUsers();
+        $assignedUsers = [];
+
+        if (count($taskHasAssignedUsers) > 0) {
+            /** @var TaskHasAssignedUser $thau */
+            foreach ($taskHasAssignedUsers as $thau) {
+                $assignedUsers[] = $thau->getUser()->getId();
+            }
+        }
+
+        return $assignedUsers;
     }
 }

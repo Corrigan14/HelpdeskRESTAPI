@@ -134,3 +134,41 @@ tasks_remove_attachment_from_task:
     methods: [DELETE]
     requirements:
             taskId: '\d+'
+
+tasks_list_of_tasks_comments:
+    path:     /tasks/{taskId}/comments
+    defaults: { _controller: APITaskBundle:Task/Comment:tasksCommentsList }
+    methods: [GET]
+    requirements:
+            taskId: '\d+'
+
+tasks_comment:
+    path:     /tasks/{taskId}/comments/{commentId}
+    defaults: { _controller: APITaskBundle:Task/Comment:getTasksComment }
+    methods: [GET]
+    requirements:
+            taskId: '\d+'
+            commentId: '\d+'
+
+tasks_add_comment_to_task:
+    path:     /tasks/{taskId}/comments
+    defaults: { _controller: APITaskBundle:Task/Comment:createTasksComment }
+    methods: [POST]
+    requirements:
+            taskId: '\d+'
+
+tasks_add_comment_to_comment:
+    path:     /tasks/{taskId}/comments/{commentId}
+    defaults: { _controller: APITaskBundle:Task/Comment:createCommentsComment }
+    methods: [POST]
+    requirements:
+            taskId: '\d+'
+            commentId: '\d+'
+
+tasks_delete_tasks_comment:
+    path:     /tasks/{taskId}/comments/{commentId}
+    defaults: { _controller: APITaskBundle:Task/Comment:delete }
+    methods: [DELETE]
+    requirements:
+            taskId: '\d+'
+            commentId: '\d+'

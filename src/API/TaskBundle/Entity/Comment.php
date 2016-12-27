@@ -88,6 +88,7 @@ class Comment
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Task", inversedBy="comments")
      * @ORM\JoinColumn(name="task_id", referencedColumnName="id", nullable=false)
+     * @Serializer\Exclude()
      */
     private $task;
 
@@ -95,6 +96,7 @@ class Comment
      * Mapping entity
      *
      * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Comment", mappedBy="comment")
+     * @Serializer\Exclude()
      */
     private $inversedComment;
 
@@ -103,6 +105,7 @@ class Comment
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Comment", inversedBy="inversedComment")
      * @ORM\JoinColumn(name="parent_comment_id", referencedColumnName="id", nullable=true)
+     * @Serializer\Exclude()
      */
     private $comment;
 

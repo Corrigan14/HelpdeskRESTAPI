@@ -398,6 +398,7 @@ class TagController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      204 ="The Tag was successfully deleted",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found Tag",
      *  })
      *

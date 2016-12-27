@@ -2,21 +2,19 @@
 
 namespace API\TaskBundle\DataFixtures\ORM;
 
-use API\TaskBundle\Entity\Status;
-use API\TaskBundle\Security\StatusOptions;
+use API\CoreBundle\Entity\File;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-
 /**
- * Class StatusFixture
+ * Class FileFixture
  *
  * @package API\TaskBundle\DataFixtures\ORM
  */
-class StatusFixture implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
+class FileFixture implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
 {
 
     /**
@@ -36,22 +34,16 @@ class StatusFixture implements FixtureInterface, ContainerAwareInterface, Ordere
      */
     public function load(ObjectManager $manager)
     {
-        $status = new Status();
-        $status->setTitle(StatusOptions::NEW);
-        $manager->persist($status);
+        $file = new File();
+        $file->setName('Test file name');
+        $file->setSlug('zsskcd-jpg-2016-12-17-15-36');
+        $file->setTempName('Temp name');
+        $file->setType('jpeg');
+        $file->setSize(300);
+        $file->setUploadDir('Upload dir');
+        $file->setPublic(false);
 
-        $status = new Status();
-        $status->setTitle(StatusOptions::IN_PROGRESS);
-        $manager->persist($status);
-
-        $status = new Status();
-        $status->setTitle(StatusOptions::COMPLETED);
-        $manager->persist($status);
-
-        $status = new Status();
-        $status->setTitle(StatusOptions::CLOSED);
-        $manager->persist($status);
-
+        $manager->persist($file);
         $manager->flush();
     }
 
@@ -62,6 +54,6 @@ class StatusFixture implements FixtureInterface, ContainerAwareInterface, Ordere
      */
     public function getOrder()
     {
-        return 3;
+        return 11;
     }
 }

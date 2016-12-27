@@ -174,7 +174,8 @@ class TaskVoter implements VoterInterface
         }
 
         // User can view a task if he created it or task is requested by him
-        if ($task->getCreatedBy()->getId() === $this->user->getId() || $task->getRequestedBy()->getId() === $this->user->getId()) {
+        // and this task isn't in any Project
+        if (null === $task->getProject() && ($task->getCreatedBy()->getId() === $this->user->getId() || $task->getRequestedBy()->getId() === $this->user->getId())) {
             return true;
         }
 
@@ -200,6 +201,10 @@ class TaskVoter implements VoterInterface
                         $companyT = ($taskCreatorCompany instanceof Company ? $taskCreatorCompany : false);
 
                         return $companyU && $companyT && $companyU->getId() === $companyT->getId();
+                    } elseif (in_array(VoteOptions::VIEW_USER_TASKS_IN_PROJECT, $acl, true) && ($task->getCreatedBy()->getId() === $this->user->getId() || $task->getRequestedBy()->getId() === $this->user->getId())) {
+                        // User can view a task if this task is from project where user has access: VIEW_USERS_TASKS_IN_PROJECT
+                        // and user created or requested this task
+                        return true;
                     }
                 }
                 return false;
@@ -250,19 +255,9 @@ class TaskVoter implements VoterInterface
             return true;
         }
 
-        // User can update task if he created it
-        if ($task->getCreatedBy()->getId() === $this->user->getId()) {
-            return true;
-        }
-
         $project = $task->getProject();
 
         if ($project instanceof Project) {
-            // User can update all tasks in it's own project
-            if ($project->getCreatedBy()->getId() === $this->user->getId()) {
-                return true;
-            }
-
             // User can update task if he has UPDATE_ALL_TASKS_IN_PROJECT access in projects ACL
             $actions [] = VoteOptions::UPDATE_ALL_TASKS_IN_PROJECT;
             if ($this->hasAclProjectRights($actions, $project->getId())) {
@@ -306,19 +301,9 @@ class TaskVoter implements VoterInterface
             return true;
         }
 
-        // User can delete task if he created it
-        if ($task->getCreatedBy()->getId() === $this->user->getId()) {
-            return true;
-        }
-
         $project = $task->getProject();
 
         if ($project instanceof Project) {
-            // User can delete all tasks in it's own project
-            if ($project->getCreatedBy()->getId() === $this->user->getId()) {
-                return true;
-            }
-
             // User can delete task if he has UPDATE_ALL_TASKS_IN_PROJECT access in projects ACL
             $actions [] = VoteOptions::UPDATE_ALL_TASKS_IN_PROJECT;
             if ($this->hasAclProjectRights($actions, $project->getId())) {

@@ -2,7 +2,6 @@
 
 namespace API\TaskBundle\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use JMS\Serializer\Annotation as Serializer;
@@ -102,17 +101,9 @@ class Comment
      * Sub-comments
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Comment", inversedBy="inversedComment")
-     * @ORM\JoinColumn(name="parent_comment_id", referencedColumnName="id", nullable=true)
+     * @ORM\JoinColumn(name="comment_id", referencedColumnName="id", nullable=true)
      */
     private $comment;
-
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->inversedComment = new ArrayCollection();
-    }
 
     /**
      * Get id
@@ -290,87 +281,5 @@ class Comment
     public function getEmailBcc()
     {
         return unserialize($this->email_bcc);
-    }
-
-    /**
-     * Set task
-     *
-     * @param Task $task
-     *
-     * @return Comment
-     */
-    public function setTask(Task $task)
-    {
-        $this->task = $task;
-
-        return $this;
-    }
-
-    /**
-     * Get task
-     *
-     * @return Task
-     */
-    public function getTask()
-    {
-        return $this->task;
-    }
-
-    /**
-     * Add inversedComment
-     *
-     * @param Comment $inversedComment
-     *
-     * @return Comment
-     */
-    public function addInversedComment(Comment $inversedComment)
-    {
-        $this->inversedComment[] = $inversedComment;
-
-        return $this;
-    }
-
-    /**
-     * Remove inversedComment
-     *
-     * @param Comment $inversedComment
-     */
-    public function removeInversedComment(Comment $inversedComment)
-    {
-        $this->inversedComment->removeElement($inversedComment);
-    }
-
-    /**
-     * Get inversedComment
-     *
-     * @return ArrayCollection
-     */
-    public function getInversedComment()
-    {
-        return $this->inversedComment;
-    }
-
-    /**
-     * Set comment
-     *
-     * @param Comment $comment
-     *
-     * @return Comment
-     */
-    public function setComment(Comment $comment = null)
-    {
-        $this->comment = $comment;
-
-        return $this;
-    }
-
-    /**
-     * Get comment
-     *
-     * @return Comment
-     */
-    public function getComment()
-    {
-        return $this->comment;
     }
 }

@@ -129,6 +129,14 @@ class Task
     private $taskHasAttachments;
 
     /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Comment", mappedBy="task")
+     * @Serializer\ReadOnly()
+     */
+    private $comments;
+
+    /**
      * Task constructor.
      */
     public function __construct()
@@ -452,5 +460,39 @@ class Task
     public function getTaskHasAssignedUsers()
     {
         return $this->taskHasAssignedUsers;
+    }
+
+    /**
+     * Add taskHasAttachment
+     *
+     * @param TaskHasAttachment $taskHasAttachment
+     *
+     * @return Task
+     */
+    public function addTaskHasAttachment(TaskHasAttachment $taskHasAttachment)
+    {
+        $this->taskHasAttachments[] = $taskHasAttachment;
+
+        return $this;
+    }
+
+    /**
+     * Remove taskHasAttachment
+     *
+     * @param TaskHasAttachment $taskHasAttachment
+     */
+    public function removeTaskHasAttachment(TaskHasAttachment $taskHasAttachment)
+    {
+        $this->taskHasAttachments->removeElement($taskHasAttachment);
+    }
+
+    /**
+     * Get taskHasAttachments
+     *
+     * @return ArrayCollection
+     */
+    public function getTaskHasAttachments()
+    {
+        return $this->taskHasAttachments;
     }
 }

@@ -4,6 +4,7 @@ namespace API\TaskBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -11,6 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @ORM\Table(name="task_has_attachment")
  * @ORM\Entity(repositoryClass="API\TaskBundle\Repository\TaskHasAttachmentRepository")
+ * @UniqueEntity("slug")
  */
 class TaskHasAttachment
 {
@@ -50,5 +52,52 @@ class TaskHasAttachment
     {
         return $this->id;
     }
-}
 
+    /**
+     * Set slug
+     *
+     * @param string $slug
+     *
+     * @return TaskHasAttachment
+     */
+    public function setSlug($slug)
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
+    /**
+     * Get slug
+     *
+     * @return string
+     */
+    public function getSlug()
+    {
+        return $this->slug;
+    }
+
+    /**
+     * Set task
+     *
+     * @param Task $task
+     *
+     * @return TaskHasAttachment
+     */
+    public function setTask(Task $task)
+    {
+        $this->task = $task;
+
+        return $this;
+    }
+
+    /**
+     * Get task
+     *
+     * @return Task
+     */
+    public function getTask()
+    {
+        return $this->task;
+    }
+}

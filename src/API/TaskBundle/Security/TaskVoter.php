@@ -112,6 +112,8 @@ class TaskVoter implements VoterInterface
                 return $this->canAddCommentToTask($options);
             case VoteOptions::ADD_COMMENT_TO_COMMENT:
                 return $this->canAddCommentToComment($options);
+            case VoteOptions::DELETE_COMMENT:
+                return $this->canDeleteComment($options);
             default:
                 return false;
         }
@@ -624,6 +626,17 @@ class TaskVoter implements VoterInterface
     public function canAddCommentToComment(Task $task):bool
     {
         // User can add comment to comment if he can Add comment to Task
+        return $this->canAddCommentToTask($task);
+    }
+
+    /**
+     * @param Task $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function canDeleteComment(Task $task):bool
+    {
+        // User can delete comment if he can Add comment to Task
         return $this->canAddCommentToTask($task);
     }
 

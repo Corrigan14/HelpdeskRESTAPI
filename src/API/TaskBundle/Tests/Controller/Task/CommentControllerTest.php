@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Tests\Controller\Task;
 
+use API\TaskBundle\Entity\Comment;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 
 /**
@@ -184,7 +185,7 @@ class CommentControllerTest extends TaskTestCase
     }
 
     /**
-     * CREATE TASKS COMMENT - errors
+     * CREATE COMMENTS COMMENT - errors
      */
     public function testCreateCommentsCommentErrors()
     {
@@ -218,6 +219,45 @@ class CommentControllerTest extends TaskTestCase
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
+
+    /**
+     * DELETE COMMENT - success
+     */
+    public function testDeleteCommentSuccess()
+    {
+        $comment = $this->createComment();
+
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/comments/' . $comment->getId(),
+            [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::DELETED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * DELETE COMMENT - errors
+     */
+    public function testDeleteCommentErrors()
+    {
+        $comment = $this->createComment();
+
+        // Try to call function without authorization header
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/comments/' . $comment->getId(),
+            [], [], []);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to call function to not existed Task
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/comments/1254' . $comment->getId(),
+            [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to call function with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/comments/' . $comment->getId(),
+            [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
     /**
      * @return array
      */
@@ -229,5 +269,40 @@ class CommentControllerTest extends TaskTestCase
             'email' => false,
             'internal' => false
         ];
+    }
+
+    /**
+     * @return Comment
+     */
+    private function createComment()
+    {
+        $comment = $this->em->getRepository('APITaskBundle:Comment')->findOneBy([
+            'title' => 'Test comment'
+        ]);
+
+        if (!$comment instanceof Comment) {
+            $task = $this->em->getRepository('APITaskBundle:Task')->findOneBy([
+                'title' => 'Task 3 - admin is creator, admin is requested'
+            ]);
+
+            $adminUser = $this->em->getRepository('APICoreBundle:User')->findOneBy([
+                'username' => 'admin'
+            ]);
+
+            $commentNew = new Comment();
+            $commentNew->setTitle('Test comment');
+            $commentNew->setBody('Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien.');
+            $commentNew->setInternal(true);
+            $commentNew->setEmail(false);
+            $commentNew->setCreatedBy($adminUser);
+            $commentNew->setTask($task);
+
+            $this->em->persist($commentNew);
+            $this->em->flush();
+
+            return $commentNew;
+        }
+
+        return $comment;
     }
 }

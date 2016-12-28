@@ -105,7 +105,7 @@ class Comment
      * Sub-comments
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Comment", inversedBy="inversedComment")
-     * @ORM\JoinColumn(name="parent_comment_id", referencedColumnName="id", nullable=true)
+     * @ORM\JoinColumn(name="parent_comment_id", referencedColumnName="id", nullable=true, onDelete="CASCADE")
      * @Serializer\ReadOnly()
      */
     private $comment;

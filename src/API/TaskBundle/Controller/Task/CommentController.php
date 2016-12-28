@@ -444,9 +444,30 @@ class CommentController extends ApiBaseController
      * @param int $commentId
      *
      * @return Response
+     * @throws \LogicException
      */
     public function deleteAction(int $commentId)
     {
+        $comment = $this->getDoctrine()->getRepository('APITaskBundle:Comment')->find($commentId);
+
+        if (!$comment instanceof Comment) {
+            return $this->createApiResponse([
+                'message' => 'Parent Comment with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $task = $comment->getTask();
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::DELETE_COMMENT, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $this->getDoctrine()->getManager()->remove($comment);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->createApiResponse([
+            'message' => StatusCodesHelper::DELETED_MESSAGE,
+        ], StatusCodesHelper::DELETED_CODE);
     }
 
     /**
@@ -467,9 +488,9 @@ class CommentController extends ApiBaseController
             $this->getDoctrine()->getManager()->flush();
 
             $commentArray = $this->get('task_additional_service')->getCommentOfTaskResponse($comment);
-            return $this->createApiResponse($commentArray,StatusCodesHelper::CREATED_CODE);
+            return $this->createApiResponse($commentArray, StatusCodesHelper::CREATED_CODE);
         }
 
-        return $this->createApiResponse($errors,StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

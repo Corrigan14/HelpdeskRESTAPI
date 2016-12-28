@@ -63,4 +63,48 @@ class CommentControllerTest extends TaskTestCase
             ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
+
+    /**
+     * GET TASKS COMMENT - success
+     */
+    public function testGetTasksCommentSuccess()
+    {
+        $comment = $this->em->getRepository('APITaskBundle:Comment')->findOneBy([
+            'title' => 'Koment - public'
+        ]);
+
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/comments/' . $comment->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect Entity, response has to include array with data and _links param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertTrue(array_key_exists('_links', $response));
+        $this->assertTrue(array_key_exists('data', $response));
+    }
+
+    /**
+     * GET TASKS COMMENT - errors
+     */
+    public function testGetTasksCommentErrors()
+    {
+        $comment = $this->em->getRepository('APITaskBundle:Comment')->findOneBy([
+            'title' => 'Koment - public'
+        ]);
+
+        // Try to call function without authorization header
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/comments/' . $comment->getId(),
+            [], [], []);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to call function to not existed Comment
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/comments/12547' . $comment->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to call function with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/comments/' . $comment->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Services;
 
+use API\TaskBundle\Entity\Comment;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Repository\TaskRepository;
 use API\TaskBundle\Repository\TaskHasAssignedUserRepository;
@@ -187,6 +188,23 @@ class TaskAdditionalService
         $pagination = $this->getPagination($page, $countComments, $routeOptions);
 
         return array_merge($response, $pagination);
+    }
+
+    /**
+     * Return Entity Response which includes all data about Entity and Link to delete
+     *
+     * @param Comment $entity
+     *
+     * @return array
+     */
+    public function getCommentOfTaskResponse($entity): array
+    {
+        return [
+            'data' => $entity,
+            '_links' => [
+                'delete' => $this->router->generate('tasks_delete_tasks_comment', ['commentId' => $entity->getId()])
+            ],
+        ];
     }
 
     /**

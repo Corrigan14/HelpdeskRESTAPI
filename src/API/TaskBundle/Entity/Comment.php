@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Entity;
 
+use API\CoreBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
@@ -108,6 +109,15 @@ class Comment
      * @Serializer\ReadOnly()
      */
     private $comment;
+
+    /**
+     * @var User
+     *
+     * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="comments")
+     * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
+     * @Serializer\ReadOnly()
+     */
+    private $createdBy;
 
     /**
      * Constructor
@@ -375,5 +385,29 @@ class Comment
     public function getComment()
     {
         return $this->comment;
+    }
+
+    /**
+     * Set createdBy
+     *
+     * @param User $createdBy
+     *
+     * @return Comment
+     */
+    public function setCreatedBy(User $createdBy)
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    /**
+     * Get createdBy
+     *
+     * @return User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
     }
 }

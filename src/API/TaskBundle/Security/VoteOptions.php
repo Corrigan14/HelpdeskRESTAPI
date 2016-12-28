@@ -82,6 +82,10 @@ class VoteOptions
     const REMOVE_ATTACHMENT_FROM_TASK = 'remove_attachment_from_task';
     const SHOW_LIST_OF_TASK_ATTACHMENTS = 'show_list_of_task_attachments';
     const ADD_COMMENT_TO_TASK = 'add_comment_to_task';
+    const REMOVE_COMMENT = 'remove_comment';
+    const SHOW_LIST_OF_TASKS_COMMENTS = 'show_list_of_tasks_comments';
+    const SHOW_TASKS_COMMENT = 'show_tasks_comment';
+
 
     /**
      * @return array

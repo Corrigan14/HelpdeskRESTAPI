@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Controller\Task;
 
+use API\TaskBundle\Entity\Comment;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
@@ -97,6 +98,9 @@ class CommentController extends ApiBaseController
      * @param Request $request
      * @param int $taskId
      * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
     public function tasksCommentsListAction(Request $request, int $taskId)
@@ -108,7 +112,7 @@ class CommentController extends ApiBaseController
         }
 
         // Check if logged user has access to show tasks comments
-        if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_COMMENT_TO_TASK, $task)) {
+        if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_LIST_OF_TASKS_COMMENTS, $task)) {
             return $this->accessDeniedResponse();
         }
 
@@ -133,13 +137,27 @@ class CommentController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *           "id": "2",
+     *           "id": 9,
+     *           "title": "Koment - publik, podkomentar komentu",
+     *           "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *           "internal": true,
+     *           "email": false,
+     *           "comment":
+     *           {
+     *              "id": 8,
+     *              "title": "Koment - public",
+     *              "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *              "internal": false,
+     *              "email": false,
+     *              "created_at": "2016-12-27T15:03:10+0100",
+     *              "updated_at": "2016-12-27T15:03:10+0100"
+     *           },
+     *           "created_at": "2016-12-27T15:03:10+0100",
+     *           "updated_at": "2016-12-27T15:03:10+0100"
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/id",
-     *           "patch": "/api/v1/entityName/id",
-     *           "delete": "/api/v1/entityName/id"
+     *           "delete": "/api/v1/task-bundle/tasks/comments/9"
      *         }
      *      }
      *
@@ -147,7 +165,7 @@ class CommentController extends ApiBaseController
      *  description="Returns a Comment",
      *  requirements={
      *     {
-     *       "name"="id",
+     *       "name"="commentId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
      *       "description"="The id of processed object"
@@ -169,13 +187,26 @@ class CommentController extends ApiBaseController
      *  }
      * )
      *
-     * @param int $taskId
-     * @param int $id
+     * @param int $commentId
      * @return Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
-    public function getTasksCommentAction(int $taskId, int $id)
+    public function getTasksCommentAction(int $commentId)
     {
+        $comment = $this->getDoctrine()->getRepository('APITaskBundle:Comment')->find($commentId);
 
+        if (!$comment instanceof Comment) {
+            return $this->notFoundResponse();
+        }
+
+        $task = $comment->getTask();
+        if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_TASKS_COMMENT, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $commentArray = $this->get('task_additional_service')->getCommentOfTaskResponse($comment);
+        return $this->createApiResponse($commentArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -183,19 +214,33 @@ class CommentController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *           "id": "2",
+     *           "id": 9,
+     *           "title": "Koment - publik, podkomentar komentu",
+     *           "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *           "internal": true,
+     *           "email": false,
+     *           "comment":
+     *           {
+     *              "id": 8,
+     *              "title": "Koment - public",
+     *              "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *              "internal": false,
+     *              "email": false,
+     *              "created_at": "2016-12-27T15:03:10+0100",
+     *              "updated_at": "2016-12-27T15:03:10+0100"
+     *           },
+     *           "created_at": "2016-12-27T15:03:10+0100",
+     *           "updated_at": "2016-12-27T15:03:10+0100"
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *          "delete": "/api/v1/task-bundle/tasks/comments/9"
      *         }
      *      }
      *
      * @ApiDoc(
      *  resource = true,
-     *  description="Create a new Comment",
+     *  description="Create a new Comment to Task",
      *  input={"class"="API\TaskBundle\Entity\Comment"},
      *  headers={
      *     {
@@ -216,10 +261,17 @@ class CommentController extends ApiBaseController
      * @param Request $request
      * @param int $taskId
      * @return Response
+     * @throws \LogicException
      */
     public function createTasksCommentAction(Request $request, int $taskId)
     {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
+        if(!$task instanceof Task){
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
     }
 
     /**
@@ -227,13 +279,27 @@ class CommentController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *           "id": "2",
+     *           "id": 9,
+     *           "title": "Koment - publik, podkomentar komentu",
+     *           "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *           "internal": true,
+     *           "email": false,
+     *           "comment":
+     *           {
+     *              "id": 8,
+     *              "title": "Koment - public",
+     *              "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *              "internal": false,
+     *              "email": false,
+     *              "created_at": "2016-12-27T15:03:10+0100",
+     *              "updated_at": "2016-12-27T15:03:10+0100"
+     *           },
+     *           "created_at": "2016-12-27T15:03:10+0100",
+     *           "updated_at": "2016-12-27T15:03:10+0100"
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *          "delete": "/api/v1/task-bundle/tasks/comments/9"
      *         }
      *      }
      *
@@ -267,110 +333,6 @@ class CommentController extends ApiBaseController
     }
 
     /**
-     * ### Response ###
-     *      {
-     *        "data":
-     *        {
-     *           "id": "2",
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
-     *         }
-     *      }
-     *
-     * @ApiDoc(
-     *  description="Update the Entity (PUT)",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  input={"class"="API\TaskBundle\Entity\Comment"},
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\TaskBundle\Entity\Comment"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     *
-     * @param int $id
-     * @param Request $request
-     * @return Response
-     */
-    public function updateAction(int $id, Request $request)
-    {
-
-    }
-
-    /**
-     * ### Response ###
-     *      {
-     *        "data":
-     *        {
-     *           "id": "2",
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
-     *         }
-     *      }
-     *
-     * @ApiDoc(
-     *  description="Partially update the Entity (PATCH)",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  input={"class"="API\TaskBundle\Entity\Comment"},
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\TaskBundle\Entity\Comment"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     *
-     * @param int $id
-     * @param Request $request
-     * @return Response
-     */
-    public function updatePartialAction(int $id, Request $request)
-    {
-
-    }
-
-    /**
      * @ApiDoc(
      *  description="Delete Entity (DELETE)",
      *  requirements={
@@ -395,11 +357,11 @@ class CommentController extends ApiBaseController
      *      404 ="Not found Entity",
      *  })
      *
-     * @param int $id
+     * @param int $commentId
      *
      * @return Response
      */
-    public function deleteAction(int $id)
+    public function deleteAction(int $commentId)
     {
     }
 }

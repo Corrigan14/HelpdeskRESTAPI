@@ -104,6 +104,10 @@ class TaskVoter implements VoterInterface
                 return $this->canShowListOfTaskFollowers($options);
             case VoteOptions::SHOW_LIST_OF_USERS_ASSIGNED_TO_TASK:
                 return $this->canShowListOfUsersAssignedToTask($options);
+            case VoteOptions::SHOW_LIST_OF_TASKS_COMMENTS:
+                return $this->canShowListOfTasksComments($options);
+            case VoteOptions::SHOW_TASKS_COMMENT:
+                return $this->canShowTasksComment($options);
             case VoteOptions::ADD_COMMENT_TO_TASK:
                 return $this->canAddCommentToTask($options);
             default:
@@ -567,6 +571,28 @@ class TaskVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
+    public function canShowListOfTasksComments(Task $task): bool
+    {
+        // User can view a list of tasks comment if he can READ_TASK
+        return $this->canRead($task);
+    }
+
+    /**
+     * @param Task $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function canShowTasksComment(Task $task): bool
+    {
+        // User can view a tasks comment if he can READ_TASK
+        return $this->canRead($task);
+    }
+
+    /**
+     * @param Task $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
     public function canAddCommentToTask(Task $task): bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
@@ -586,7 +612,6 @@ class TaskVoter implements VoterInterface
 
         // User Can Add Comment to Task if he can UPDATE this task
         return $this->canUpdate($task);
-
     }
 
     /**

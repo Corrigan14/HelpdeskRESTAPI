@@ -98,6 +98,8 @@ class CompanyController extends ApiBaseController
      *
      * @param int $id
      * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -118,7 +120,6 @@ class CompanyController extends ApiBaseController
         }
 
         $entityResponse = $this->get('company_service')->getEntityResponse($company, 'company_extension');
-
 
         return $this->createApiResponse($entityResponse, StatusCodesHelper::SUCCESSFUL_CODE);
     }

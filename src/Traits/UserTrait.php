@@ -3,6 +3,7 @@
 namespace Traits;
 
 use API\CoreBundle\Entity\User;
+use API\TaskBundle\Entity\Comment;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
@@ -64,7 +65,7 @@ trait UserTrait
      * @var ArrayCollection
      *
      * @ORM\ManyToMany(targetEntity="API\TaskBundle\Entity\Task", mappedBy="followers")
-     *  @Exclude()
+     * @Exclude()
      */
     private $followedTasks;
 
@@ -75,6 +76,14 @@ trait UserTrait
      * @Serializer\Exclude()
      */
     private $taskHasAssignedUsers;
+
+    /**
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Comment", mappedBy="createdBy")
+     * @Exclude()
+     *
+     * @var ArrayCollection
+     */
+    private $comments;
 
     /**
      * Add tag
@@ -309,4 +318,36 @@ trait UserTrait
         return $this->taskHasAssignedUsers;
     }
 
+    /**
+     * Add comment to task
+     *
+     * @param Comment $comment
+     * @return User
+     */
+    public function addComment(Comment $comment)
+    {
+        $this->comments[] = $comment;
+
+        return $this;
+    }
+
+    /**
+     * Remove comment from task
+     *
+     * @param Comment $comment
+     */
+    public function removeComment(Comment $comment)
+    {
+        $this->comments->removeElement($comment);
+    }
+
+    /**
+     * Get comments
+     *
+     * @return ArrayCollection
+     */
+    public function getComments()
+    {
+        return $this->comments;
+    }
 }

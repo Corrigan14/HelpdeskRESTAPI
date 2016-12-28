@@ -39,12 +39,17 @@ class CommentFixture implements FixtureInterface, ContainerAwareInterface, Order
             'title' => 'Task 3 - admin is creator, admin is requested'
         ]);
 
+        $adminUser = $manager->getRepository('APICoreBundle:User')->findOneBy([
+            'username' => 'admin'
+        ]);
+
         $comment1 = new Comment();
         $comment1->setTitle('Koment - public');
         $comment1->setBody('Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ');
         $comment1->setEmail(false);
         $comment1->setInternal(false);
         $comment1->setTask($adminsTask);
+        $comment1->setCreatedBy($adminUser);
         $manager->persist($comment1);
         $manager->flush();
 
@@ -55,6 +60,7 @@ class CommentFixture implements FixtureInterface, ContainerAwareInterface, Order
         $comment->setInternal(true);
         $comment->setTask($adminsTask);
         $comment->setComment($comment1);
+        $comment->setCreatedBy($adminUser);
         $manager->persist($comment);
 
         $comment = new Comment();
@@ -63,6 +69,7 @@ class CommentFixture implements FixtureInterface, ContainerAwareInterface, Order
         $comment->setEmail(false);
         $comment->setInternal(true);
         $comment->setTask($adminsTask);
+        $comment->setCreatedBy($adminUser);
         $manager->persist($comment);
 
         $comment = new Comment();
@@ -73,6 +80,7 @@ class CommentFixture implements FixtureInterface, ContainerAwareInterface, Order
         $comment->setEmailTo(['email@email.com']);
         $comment->setEmailCc(['email2@email.sk', 'email3@email.com']);
         $comment->setTask($adminsTask);
+        $comment->setCreatedBy($adminUser);
         $manager->persist($comment);
 
         $manager->flush();

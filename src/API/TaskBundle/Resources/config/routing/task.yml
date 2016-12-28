@@ -143,11 +143,10 @@ tasks_list_of_tasks_comments:
             taskId: '\d+'
 
 tasks_comment:
-    path:     /tasks/{taskId}/comments/{commentId}
+    path:     /tasks/comments/{commentId}
     defaults: { _controller: APITaskBundle:Task/Comment:getTasksComment }
     methods: [GET]
     requirements:
-            taskId: '\d+'
             commentId: '\d+'
 
 tasks_add_comment_to_task:
@@ -166,9 +165,8 @@ tasks_add_comment_to_comment:
             commentId: '\d+'
 
 tasks_delete_tasks_comment:
-    path:     /tasks/{taskId}/comments/{commentId}
+    path:     /tasks/comments/{commentId}
     defaults: { _controller: APITaskBundle:Task/Comment:delete }
     methods: [DELETE]
     requirements:
-            taskId: '\d+'
             commentId: '\d+'

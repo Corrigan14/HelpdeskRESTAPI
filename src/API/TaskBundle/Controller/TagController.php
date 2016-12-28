@@ -448,6 +448,8 @@ class TagController extends ApiBaseController implements ControllerInterface
      * @param array $requestData
      * @param bool $create
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */

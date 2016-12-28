@@ -110,6 +110,8 @@ class TaskVoter implements VoterInterface
                 return $this->canShowTasksComment($options);
             case VoteOptions::ADD_COMMENT_TO_TASK:
                 return $this->canAddCommentToTask($options);
+            case VoteOptions::ADD_COMMENT_TO_COMMENT:
+                return $this->canAddCommentToComment($options);
             default:
                 return false;
         }
@@ -612,6 +614,17 @@ class TaskVoter implements VoterInterface
 
         // User Can Add Comment to Task if he can UPDATE this task
         return $this->canUpdate($task);
+    }
+
+    /**
+     * @param Task $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function canAddCommentToComment(Task $task):bool
+    {
+        // User can add comment to comment if he can Add comment to Task
+        return $this->canAddCommentToTask($task);
     }
 
     /**

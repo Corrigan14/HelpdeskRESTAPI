@@ -42,7 +42,7 @@ class Comment
      *
      * @ORM\Column(name="body", type="text")
      * @Assert\NotBlank(message="Body of comment is required")
-     * @Assert\Type("text")
+     * @Assert\Type("string")
      */
     private $body;
 

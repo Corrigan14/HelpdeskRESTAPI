@@ -30,6 +30,16 @@ class CommentController extends ApiBaseController
      *             "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
      *             "internal": false,
      *             "email": false,
+     *             "created_by":
+     *             {
+     *                "id": 35,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk",
+     *                "roles": "[\"ROLE_ADMIN\"]",
+     *                "is_active": true,
+     *                "acl": "[]",
+     *                "company": ⊕{...}
+     *             },
      *             "createdAt": "2016-12-27T15:03:10+0100",
      *             "updatedAt": "2016-12-27T15:03:10+0100"
      *          },
@@ -42,6 +52,16 @@ class CommentController extends ApiBaseController
      *            "email": true,
      *            "email_to": "a:1:{i:0;s:15:\"email@email.com\";}",
      *            "email_cc": "a:2:{i:0;s:15:\"email2@email.sk\";i:1;s:16:\"email3@email.com\";}",
+     *            "created_by":
+     *            {
+     *                "id": 35,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk",
+     *                "roles": "[\"ROLE_ADMIN\"]",
+     *                "is_active": true,
+     *                "acl": "[]",
+     *                "company": ⊕{...}
+     *            },
      *            "createdAt": "2016-12-27T15:03:10+0100",
      *            "updatedAt": "2016-12-27T15:03:10+0100"
      *          }
@@ -138,20 +158,20 @@ class CommentController extends ApiBaseController
      *        "data":
      *        {
      *           "id": 9,
-     *           "title": "Koment - publik, podkomentar komentu",
+     *           "title": "Koment - public",
      *           "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
      *           "internal": true,
      *           "email": false,
-     *           "comment":
+     *           "created_by":
      *           {
-     *              "id": 8,
-     *              "title": "Koment - public",
-     *              "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *              "internal": false,
-     *              "email": false,
-     *              "created_at": "2016-12-27T15:03:10+0100",
-     *              "updated_at": "2016-12-27T15:03:10+0100"
-     *           },
+     *              "id": 35,
+     *              "username": "admin",
+     *              "email": "admin@admin.sk",
+     *              "roles": "[\"ROLE_ADMIN\"]",
+     *              "is_active": true,
+     *              "acl": "[]",
+     *              "company": ⊕{...}
+     *            },
      *           "created_at": "2016-12-27T15:03:10+0100",
      *           "updated_at": "2016-12-27T15:03:10+0100"
      *        },
@@ -215,20 +235,20 @@ class CommentController extends ApiBaseController
      *        "data":
      *        {
      *           "id": 9,
-     *           "title": "Koment - publik, podkomentar komentu",
+     *           "title": "Koment - public, podkomentar komentu",
      *           "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
      *           "internal": true,
      *           "email": false,
-     *           "comment":
+     *           "created_by":
      *           {
-     *              "id": 8,
-     *              "title": "Koment - public",
-     *              "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *              "internal": false,
-     *              "email": false,
-     *              "created_at": "2016-12-27T15:03:10+0100",
-     *              "updated_at": "2016-12-27T15:03:10+0100"
-     *           },
+     *              "id": 35,
+     *              "username": "admin",
+     *              "email": "admin@admin.sk",
+     *              "roles": "[\"ROLE_ADMIN\"]",
+     *              "is_active": true,
+     *              "acl": "[]",
+     *              "company": ⊕{...}
+     *            },
      *           "created_at": "2016-12-27T15:03:10+0100",
      *           "updated_at": "2016-12-27T15:03:10+0100"
      *        },
@@ -241,6 +261,14 @@ class CommentController extends ApiBaseController
      * @ApiDoc(
      *  resource = true,
      *  description="Create a new Comment to Task",
+     *  requirements={
+     *     {
+     *       "name"="taskId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of task"
+     *     }
+     *  },
      *  input={"class"="API\TaskBundle\Entity\Comment"},
      *  headers={
      *     {
@@ -261,17 +289,31 @@ class CommentController extends ApiBaseController
      * @param Request $request
      * @param int $taskId
      * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
     public function createTasksCommentAction(Request $request, int $taskId)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
-        if(!$task instanceof Task){
+        if (!$task instanceof Task) {
             return $this->createApiResponse([
                 'message' => 'Task with requested Id does not exist!',
             ], StatusCodesHelper::NOT_FOUND_CODE);
         }
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_COMMENT_TO_TASK, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $data = $request->request->all();
+        $comment = new Comment();
+        $comment->setCreatedBy($this->getUser());
+        $comment->setTask($task);
+
+        return $this->updateCommentEntity($comment, $data);
     }
 
     /**
@@ -280,7 +322,7 @@ class CommentController extends ApiBaseController
      *        "data":
      *        {
      *           "id": 9,
-     *           "title": "Koment - publik, podkomentar komentu",
+     *           "title": "Koment - public, podkomentar komentu",
      *           "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
      *           "internal": true,
      *           "email": false,
@@ -294,6 +336,16 @@ class CommentController extends ApiBaseController
      *              "created_at": "2016-12-27T15:03:10+0100",
      *              "updated_at": "2016-12-27T15:03:10+0100"
      *           },
+     *           "created_by":
+     *           {
+     *              "id": 35,
+     *              "username": "admin",
+     *              "email": "admin@admin.sk",
+     *              "roles": "[\"ROLE_ADMIN\"]",
+     *              "is_active": true,
+     *              "acl": "[]",
+     *              "company": ⊕{...}
+     *            }
      *           "created_at": "2016-12-27T15:03:10+0100",
      *           "updated_at": "2016-12-27T15:03:10+0100"
      *        },
@@ -305,7 +357,15 @@ class CommentController extends ApiBaseController
      *
      * @ApiDoc(
      *  resource = true,
-     *  description="Create a new Comment",
+     *  description="Create a new child Comment to Comment",
+     *  requirements={
+     *     {
+     *       "name"="commentId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of parent comment"
+     *     }
+     *  },
      *  input={"class"="API\TaskBundle\Entity\Comment"},
      *  headers={
      *     {
@@ -326,10 +386,34 @@ class CommentController extends ApiBaseController
      * @param Request $request
      * @param int $commentId
      * @return Response
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function createCommentsCommentAction(Request $request, int $commentId)
     {
+        $comment = $this->getDoctrine()->getRepository('APITaskBundle:Comment')->find($commentId);
 
+        if (!$comment instanceof Comment) {
+            return $this->createApiResponse([
+                'message' => 'Parent Comment with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $task = $comment->getTask();
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_COMMENT_TO_COMMENT, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $data = $request->request->all();
+        $commentNew = new Comment();
+        $commentNew->setCreatedBy($this->getUser());
+        $commentNew->setTask($task);
+        $commentNew->setComment($comment);
+
+        return $this->updateCommentEntity($commentNew, $data);
     }
 
     /**
@@ -337,7 +421,7 @@ class CommentController extends ApiBaseController
      *  description="Delete Entity (DELETE)",
      *  requirements={
      *     {
-     *       "name"="id",
+     *       "name"="commentId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
      *       "description"="The id of processed object"
@@ -363,5 +447,29 @@ class CommentController extends ApiBaseController
      */
     public function deleteAction(int $commentId)
     {
+    }
+
+    /**
+     * @param $comment
+     * @param $data
+     * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \LogicException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     */
+    private function updateCommentEntity($comment, $data)
+    {
+        $errors = $this->get('entity_processor')->processEntity($comment, $data);
+
+        if (false === $errors) {
+            $this->getDoctrine()->getManager()->persist($comment);
+            $this->getDoctrine()->getManager()->flush();
+
+            $commentArray = $this->get('task_additional_service')->getCommentOfTaskResponse($comment);
+            return $this->createApiResponse($commentArray,StatusCodesHelper::CREATED_CODE);
+        }
+
+        return $this->createApiResponse($errors,StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

@@ -90,7 +90,6 @@ class AttachmentController extends ApiBaseController
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \LogicException
-     * @internal param int $userId
      */
     public function listOfTasksAttachmentsAction(Request $request, int $taskId)
     {

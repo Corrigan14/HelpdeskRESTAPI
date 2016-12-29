@@ -169,3 +169,25 @@ tasks_delete_tasks_comment:
     methods: [DELETE]
     requirements:
             commentId: '\d+'
+
+
+tasks_list_of_comments_attachments:
+    path:     /tasks/comments/{commentId}/attachment
+    defaults: { _controller: APITaskBundle:Task/CommentAttachment:listOfCommentsAttachments}
+    methods: [GET]
+    requirements:
+            commentId: '\d+'
+
+tasks_add_attachment_to_comment:
+    path:     /tasks/comments/{commentId}/attachment/{slug}
+    defaults: { _controller: APITaskBundle:Task/CommentAttachment:addAttachmentToComment}
+    methods: [POST]
+    requirements:
+            commentId: '\d+'
+
+tasks_remove_attachment_from_comment:
+    path:     /tasks/comments/{commentId}/attachment/{slug}
+    defaults: { _controller: APITaskBundle:Task/CommentAttachment:removeAttachmentFromComment}
+    methods: [DELETE]
+    requirements:
+            commentId: '\d+'

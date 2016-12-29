@@ -7,12 +7,12 @@ use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * TaskHasAttachment
+ * CommentHasAttachment
  *
- * @ORM\Table(name="task_has_attachment")
- * @ORM\Entity(repositoryClass="API\TaskBundle\Repository\TaskHasAttachmentRepository")
+ * @ORM\Table(name="comment_has_attachment")
+ * @ORM\Entity(repositoryClass="API\TaskBundle\Repository\CommentHasAttachmentRepository")
  */
-class TaskHasAttachment
+class CommentHasAttachment
 {
     /**
      * @var int
@@ -34,12 +34,13 @@ class TaskHasAttachment
     private $slug;
 
     /**
-     * @var Task
+     * @var Comment
      *
-     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Task", inversedBy="taskHasAttachments")
-     * @ORM\JoinColumn(name="task_id", referencedColumnName="id", nullable=false)
+     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Comment", inversedBy="commentHasAttachments")
+     * @ORM\JoinColumn(name="comment_id", referencedColumnName="id", nullable=false)
      */
-    private $task;
+    private $comment;
+
 
     /**
      * Get id
@@ -56,7 +57,7 @@ class TaskHasAttachment
      *
      * @param string $slug
      *
-     * @return TaskHasAttachment
+     * @return CommentHasAttachment
      */
     public function setSlug($slug)
     {
@@ -76,26 +77,26 @@ class TaskHasAttachment
     }
 
     /**
-     * Set task
+     * Set comment
      *
-     * @param Task $task
+     * @param Comment $comment
      *
-     * @return TaskHasAttachment
+     * @return CommentHasAttachment
      */
-    public function setTask(Task $task)
+    public function setComment(Comment $comment)
     {
-        $this->task = $task;
+        $this->comment = $comment;
 
         return $this;
     }
 
     /**
-     * Get task
+     * Get comment
      *
-     * @return Task
+     * @return Comment
      */
-    public function getTask()
+    public function getComment()
     {
-        return $this->task;
+        return $this->comment;
     }
 }

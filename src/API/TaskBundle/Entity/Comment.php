@@ -120,11 +120,20 @@ class Comment
     private $createdBy;
 
     /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\CommentHasAttachment", mappedBy="comment")
+     * @Serializer\ReadOnly()
+     */
+    private $commentHasAttachments;
+
+    /**
      * Constructor
      */
     public function __construct()
     {
         $this->inversedComment = new ArrayCollection();
+        $this->commentHasAttachments = new ArrayCollection();
     }
 
     /**
@@ -409,5 +418,39 @@ class Comment
     public function getCreatedBy()
     {
         return $this->createdBy;
+    }
+
+    /**
+     * Add commentHasAttachment
+     *
+     * @param CommentHasAttachment $commentHasAttachment
+     *
+     * @return Comment
+     */
+    public function addCommentHasAttachment(CommentHasAttachment $commentHasAttachment)
+    {
+        $this->commentHasAttachments[] = $commentHasAttachment;
+
+        return $this;
+    }
+
+    /**
+     * Remove commentHasAttachment
+     *
+     * @param CommentHasAttachment $commentHasAttachment
+     */
+    public function removeCommentHasAttachment(CommentHasAttachment $commentHasAttachment)
+    {
+        $this->commentHasAttachments->removeElement($commentHasAttachment);
+    }
+
+    /**
+     * Get commentHasAttachments
+     *
+     * @return ArrayCollection
+     */
+    public function getCommentHasAttachments()
+    {
+        return $this->commentHasAttachments;
     }
 }

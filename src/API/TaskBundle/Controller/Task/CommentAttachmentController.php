@@ -2,7 +2,12 @@
 
 namespace API\TaskBundle\Controller\Task;
 
+use API\CoreBundle\Entity\File;
+use API\TaskBundle\Entity\Comment;
+use API\TaskBundle\Entity\CommentHasAttachment;
+use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
+use Igsem\APIBundle\Services\StatusCodesHelper;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -87,6 +92,14 @@ class CommentAttachmentController extends ApiBaseController
      */
     public function listOfCommentsAttachmentsAction(Request $request, int $commentId)
     {
+        $comment = $this->getDoctrine()->getRepository('APITaskBundle:Comment')->find($commentId);
+
+        if (!$comment instanceof Comment) {
+            return $this->createApiResponse([
+                'message' => 'Comment with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
 
     }
 
@@ -122,7 +135,7 @@ class CommentAttachmentController extends ApiBaseController
      *      }
      *
      * @ApiDoc(
-     *  description="Add a new attachment to the Comment. Returns a list of comments attachments",
+     *  description="Add a new attachment to the Comment. Returns a list of comments attachments.",
      *  requirements={
      *     {
      *       "name"="commentId",
@@ -160,7 +173,40 @@ class CommentAttachmentController extends ApiBaseController
      */
     public function addAttachmentToCommentAction(int $commentId, string $slug)
     {
+        $comment = $this->getDoctrine()->getRepository('APITaskBundle:Comment')->find($commentId);
 
+        if (!$comment instanceof Comment) {
+            return $this->createApiResponse([
+                'message' => 'Comment with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $file = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
+            'slug' => $slug
+        ]);
+
+        if (!$file instanceof File) {
+            return $this->createApiResponse([
+                'message' => 'Attachment with requested Slug does not exist! Attachment has to be uploaded before added to comment!',
+            ], StatusCodesHelper::BAD_REQUEST_CODE);
+        }
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_ATTACHMENT_TO_COMMENT, $comment)) {
+            return $this->accessDeniedResponse();
+        }
+
+        if ($this->canAddAttachmentToComment($comment, $slug)) {
+            $commentHasAttachment = new CommentHasAttachment();
+            $commentHasAttachment->setComment($comment);
+            $commentHasAttachment->setSlug($slug);
+            $comment->addCommentHasAttachment($commentHasAttachment);
+            $this->getDoctrine()->getManager()->persist($commentHasAttachment);
+            $this->getDoctrine()->getManager()->persist($comment);
+            $this->getDoctrine()->getManager()->flush();
+        }
+
+        $commentAttachmentsArray = $this->getCommentAttachments($comment);
+        return $this->createApiResponse($commentAttachmentsArray, StatusCodesHelper::CREATED_CODE);
     }
 
     /**
@@ -204,5 +250,44 @@ class CommentAttachmentController extends ApiBaseController
     public function removeAttachmentFromCommentAction(int $commentId, string $slug)
     {
 
+    }
+
+    /**
+     * @param Comment $comment
+     * @param string $slug
+     * @return bool
+     * @throws \LogicException
+     */
+    private function canAddAttachmentToComment(Comment $comment, string $slug): bool
+    {
+        $commentHasAttachment = $this->getDoctrine()->getRepository('APITaskBundle:CommentHasAttachment')->findOneBy([
+            'slug' => $slug,
+            'comment' => $comment
+        ]);
+
+        return (!$commentHasAttachment instanceof CommentHasAttachment);
+    }
+
+    /**
+     * @param Comment $comment
+     * @return array
+     * @throws \LogicException
+     */
+    private function getCommentAttachments(Comment $comment): array
+    {
+        $commentHasAttachments = $comment->getCommentHasAttachments();
+        $attachmentsOfComments = [];
+
+        if (count($commentHasAttachments) > 0) {
+            /** @var CommentHasAttachment $cha */
+            foreach ($commentHasAttachments as $cha) {
+                $file = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
+                    'slug' => $cha->getSlug(),
+                ]);
+                $attachmentsOfComments[] = $file;
+            }
+        }
+
+        return $attachmentsOfComments;
     }
 }

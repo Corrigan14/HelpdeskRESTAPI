@@ -5,6 +5,7 @@ namespace API\TaskBundle\Security;
 use API\CoreBundle\Entity\Company;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Security\VoterInterface;
+use API\TaskBundle\Entity\Comment;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
@@ -114,6 +115,8 @@ class TaskVoter implements VoterInterface
                 return $this->canAddCommentToComment($options);
             case VoteOptions::DELETE_COMMENT:
                 return $this->canDeleteComment($options);
+            case VoteOptions::ADD_ATTACHMENT_TO_COMMENT:
+                return$this->canAddAttachmentToComment($options);
             default:
                 return false;
         }
@@ -638,6 +641,17 @@ class TaskVoter implements VoterInterface
     {
         // User can delete comment if he can Add comment to Task
         return $this->canAddCommentToTask($task);
+    }
+
+    /**
+     * @param Comment $comment
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function canAddAttachmentToComment(Comment $comment):bool
+    {
+        // User can add attachment to comment if he can Add comment to Task
+        return $this->canAddCommentToTask($comment->getTask());
     }
 
     /**

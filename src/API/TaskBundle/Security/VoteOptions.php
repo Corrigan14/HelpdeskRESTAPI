@@ -86,6 +86,9 @@ class VoteOptions
     const DELETE_COMMENT = 'delete_comment';
     const SHOW_LIST_OF_TASKS_COMMENTS = 'show_list_of_tasks_comments';
     const SHOW_TASKS_COMMENT = 'show_tasks_comment';
+    const ADD_ATTACHMENT_TO_COMMENT = 'add_attachment_to_comment';
+    const REMOVE_ATTACHMENT_FROM_COMMENT = 'remove_attachment_from_comment';
+    const SHOW_LIST_OF_COMMENTS_ATTACHMENTS = 'show_list_of_comments_attachments';
 
 
     /**

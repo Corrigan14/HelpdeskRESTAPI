@@ -40,11 +40,11 @@ class CommentAttachmentController extends ApiBaseController
      *        },
      *        "_links":
      *        {
-     *          "self": "/api/v1/task-bundle/tasks/7/attachment?page=1",
-     *          "first": "/api/v1/task-bundle/tasks/7/attachment?page=1",
+     *          "self": "/api/v1/task-bundle/tasks/comments/14/attachment?page=1",
+     *          "first": "/api/v1/task-bundle/tasks/comments/14/attachment?page=1",
      *          "prev": false,
      *          "next": false,
-     *          "last": "/api/v1/task-bundle/tasks/7/attachment?page=1"
+     *          "last": "/api/v1/task-bundle/tasks/comments/14/attachment?page=1"
      *        },
      *        "total": 1,
      *        "page": 1,
@@ -100,7 +100,20 @@ class CommentAttachmentController extends ApiBaseController
             ], StatusCodesHelper::NOT_FOUND_CODE);
         }
 
+        if(!$this->get('task_voter')->isGranted(VoteOptions::SHOW_LIST_OF_COMMENTS_ATTACHMENTS, $comment)){
+            return $this->accessDeniedResponse();
+        }
 
+        $page = $request->get('page') ?: 1;
+
+        $options['comment'] = $commentId;
+        $routeOptions = [
+            'routeName' => 'tasks_list_of_comments_attachments',
+            'routeParams' => ['commentId' => $commentId]
+        ];
+
+        $attachmentArray = $this->get('task_additional_service')->getCommentAttachmentsResponse($options, $page, $routeOptions);
+        return $this->createApiResponse($attachmentArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

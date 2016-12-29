@@ -208,6 +208,43 @@ class TaskAdditionalService
     }
 
     /**
+     * Return Attachment (File) Response which includes Data, Links and is based on Pagination
+     *
+     * @param array $options
+     * @param int $page
+     * @param array $routeOptions
+     * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @internal param int $taskId
+     */
+    public function getCommentAttachmentsResponse(array $options, int $page, array $routeOptions): array
+    {
+        $commentId = $options['comment'];
+
+        $fileSlugs = $this->em->getRepository('APITaskBundle:CommentHasAttachment')->getAllAttachmentSlugs($commentId, $page);
+        $count = $this->em->getRepository('APITaskBundle:CommentHasAttachment')->countAttachmentEntities($commentId);
+
+        $attachmentsArray = [];
+        if (count($fileSlugs) > 0) {
+            foreach ($fileSlugs as $slug) {
+                $file = $this->em->getRepository('APICoreBundle:File')->findOneBy([
+                    'slug' => $slug
+                ]);
+                $attachmentsArray[] = $file;
+            }
+        }
+
+        $response = [
+            'data' => $attachmentsArray,
+        ];
+
+        $pagination = $this->getPagination($page, $count, $routeOptions);
+
+        return array_merge($response, $pagination);
+    }
+
+    /**
      * @param int $page
      * @param int $count
      * @param array $routeOptions

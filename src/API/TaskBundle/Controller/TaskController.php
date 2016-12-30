@@ -69,16 +69,56 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *       "description"="Pagination, limit is set to 10 records"
      *     },
      *     {
+     *       "name"="status",
+     *       "description"="A list of coma separated statuses f.i. new,in_progress"
+     *     },
+     *     {
      *       "name"="project",
-     *       "description"="Project ID: if project exists, just tasks from this project are returned"
+     *       "description"="A list of coma separated ID's of Project f.i. 1,2,3"
      *     },
      *     {
      *       "name"="creator",
-     *       "description"="User ID: if user exists, just tasks which he created are returned"
+     *       "description"="A list of coma separated ID's of Creator f.i. 1,2,3"
      *     },
      *     {
-     *       "name"="requested",
-     *       "description"="User ID: if user exists, just tasks requested by him are returned"
+     *       "name"="requester",
+     *       "description"="A list of coma separated ID's of Requesters f.i. 1,2,3"
+     *     },
+     *     {
+     *       "name"="company",
+     *       "description"="A list of coma separated ID's of Companies f.i. 1,2,3"
+     *     },
+     *     {
+     *       "name"="assigned",
+     *       "description"="A list of coma separated ID's of Users f.i. 1,2,3"
+     *     },
+     *     {
+     *       "name"="tag",
+     *       "description"="A list of coma separated ID's of Tags f.i. 1,2,3"
+     *     },
+     *     {
+     *       "name"="createdTime",
+     *       "description"="A coma separated FROM, TO dates in format 2015-02-04T05:10:58+05:30"
+     *     },
+     *     {
+     *       "name"="startedTime",
+     *       "description"="A coma separated FROM, TO dates in format 2015-02-04T05:10:58+05:30"
+     *     },
+     *     {
+     *       "name"="deadlineTime",
+     *       "description"="A coma separated FROM, TO dates in format 2015-02-04T05:10:58+05:30"
+     *     },
+     *     {
+     *       "name"="closedTime",
+     *       "description"="A coma separated FROM, TO dates in format 2015-02-04T05:10:58+05:30"
+     *     },
+     *     {
+     *       "name"="archived",
+     *       "description"="If TRUE, just tasks from archived projects are returned"
+     *     },
+     *     {
+     *       "name"="addedParameters",
+     *       "description"="& separated data in form: taskAttributeId=value1,value2&taskAttributeId=value"
      *     }
      *  },
      *  headers={
@@ -106,54 +146,44 @@ class TaskController extends ApiBaseController implements ControllerInterface
     public function listAction(Request $request)
     {
         $page = $request->get('page') ?: 1;
-        $projectId = $request->get('project') ?: 'all';
-        $creatorId = $request->get('creator') ?: 'all';
-        $requestedUserId = $request->get('requested') ?: 'all';
 
-        // Check if project, creator and requested users exists
-        if ($projectId !== 'all') {
-            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
+        // Ina-beznejsia moznost ako zadavat pole hodnot v URL adrese, ktora vracia priamo pole: index.php?id[]=1&id[]=2&id[]=3&name=john
+        // na zakodovanie dat do URL je mozne pouzit encodeURIComponent
 
-            if (!$project instanceof Project) {
-                return $this->createApiResponse([
-                    'message' => 'Project with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
-            }
-            $projectParam = $projectId;
-        } else {
-            $projectParam = false;
+        $status = $request->get('status');
+        $project = $request->get('project');
+        $creator = $request->get('creator');
+        $requester = $request->get('requester');
+        $company = $request->get('company');
+        $assigned = $request->get('assigned');
+        $tag = $request->get('tag');
+        $created = $request->get('createdTime');
+        $started = $request->get('startedTime');
+        $deadline = $request->get('deadlineTime');
+        $closed = $request->get('closedTime');
+        $archived = $request->get('archived');
+        $addedParameters = $request->get('addedParameters');
+
+        $arrayOfData['status'] = explode(",", $status);
+        $arrayOfData['project'] = explode(",", $project);
+        $arrayOfData['createdBy'] = explode(",", $creator);
+        $arrayOfData['requestedBy'] = explode(",", $requester);
+        $arrayOfData['company'] = explode(",", $company);
+        $arrayOfData['assigned'] = explode(",", $assigned);
+        $arrayOfData['tag'] = explode(",", $tag);
+        $arrayOfData['created'] = explode(",", $created);
+        $arrayOfData['started'] = explode(",", $started);
+        $arrayOfData['deadline'] = explode(",", $deadline);
+        $arrayOfData['closed'] = explode(",", $closed);
+        $arrayOfData['archived'] = explode(",", $archived);
+
+        $arrayOfAddedParameters['addedParameters'] = explode("&", $addedParameters);
+        foreach ($arrayOfAddedParameters as $entity) {
+
         }
-
-        if ($creatorId !== 'all') {
-            $creator = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($creatorId);
-
-            if (!$creator instanceof User) {
-                return $this->createApiResponse([
-                    'message' => 'Creator with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
-            }
-            $creatorParam = $creatorId;
-        } else {
-            $creatorParam = false;
-        }
-
-        if ($requestedUserId !== 'all') {
-            $requestedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requestedUserId);
-
-            if (!$requestedUser instanceof User) {
-                return $this->createApiResponse([
-                    'message' => 'Requested user with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
-            }
-            $requestedUserParam = $requestedUserId;
-        } else {
-            $requestedUserParam = false;
-        }
+        dump($arrayOfAddedParameters);
 
         $options = [
-            'project' => $projectParam,
-            'creator' => $creatorParam,
-            'requested' => $requestedUserParam,
             'loggedUser' => $this->getUser(),
             'isAdmin' => $this->get('task_voter')->isAdmin()
         ];

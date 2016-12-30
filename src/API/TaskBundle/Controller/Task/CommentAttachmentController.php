@@ -100,7 +100,7 @@ class CommentAttachmentController extends ApiBaseController
             ], StatusCodesHelper::NOT_FOUND_CODE);
         }
 
-        if(!$this->get('task_voter')->isGranted(VoteOptions::SHOW_LIST_OF_COMMENTS_ATTACHMENTS, $comment)){
+        if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_LIST_OF_COMMENTS_ATTACHMENTS, $comment)) {
             return $this->accessDeniedResponse();
         }
 
@@ -224,7 +224,7 @@ class CommentAttachmentController extends ApiBaseController
 
     /**
      * @ApiDoc(
-     *  description="Remove the attachment from the Comment",
+     *  description="Remove attachment from the Comment",
      *  requirements={
      *     {
      *       "name"="commentId",
@@ -258,11 +258,48 @@ class CommentAttachmentController extends ApiBaseController
      * @param string $slug
      * @return Response
      * @throws \LogicException
-     * @internal param int $userId
      */
     public function removeAttachmentFromCommentAction(int $commentId, string $slug)
     {
+        $comment = $this->getDoctrine()->getRepository('APITaskBundle:Comment')->find($commentId);
 
+        if (!$comment instanceof Comment) {
+            return $this->createApiResponse([
+                'message' => 'Comment with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $file = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
+            'slug' => $slug
+        ]);
+
+        if (!$file instanceof File) {
+            return $this->createApiResponse([
+                'message' => 'Attachment with requested Slug does not exist!',
+            ], StatusCodesHelper::BAD_REQUEST_CODE);
+        }
+
+        $commentHasAttachment = $this->getDoctrine()->getRepository('APITaskBundle:CommentHasAttachment')->findOneBy([
+            'comment' => $comment,
+            'slug' => $slug
+        ]);
+
+        if (!$commentHasAttachment instanceof CommentHasAttachment) {
+            return $this->createApiResponse([
+                'message' => 'The requested attachment is not the attachment of the requested Task!',
+            ], StatusCodesHelper::BAD_REQUEST_CODE);
+        }
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::REMOVE_ATTACHMENT_FROM_COMMENT, $comment)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $this->getDoctrine()->getManager()->remove($commentHasAttachment);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->createApiResponse([
+            'message' => StatusCodesHelper::DELETED_MESSAGE,
+        ], StatusCodesHelper::DELETED_CODE);
     }
 
     /**

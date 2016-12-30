@@ -119,6 +119,8 @@ class TaskVoter implements VoterInterface
                 return $this->canAddAttachmentToComment($options);
             case VoteOptions::SHOW_LIST_OF_COMMENTS_ATTACHMENTS:
                 return $this->canShowListOfCommentsAttachments($options);
+            case VoteOptions::REMOVE_ATTACHMENT_FROM_COMMENT:
+                return $this->canRemoveAttachmentFromComment($options);
             default:
                 return false;
         }
@@ -665,6 +667,17 @@ class TaskVoter implements VoterInterface
     {
         // User can add attachment to comment if he can Add comment to Task
         return $this->canAddCommentToTask($comment->getTask());
+    }
+
+    /**
+     * @param Comment $comment
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function canRemoveAttachmentFromComment(Comment $comment):bool
+    {
+        // User can remove attachment from comment if he can Add attachment to
+        return $this->canAddAttachmentToComment($comment);
     }
 
     /**

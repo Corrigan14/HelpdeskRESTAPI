@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Tests\Controller\Task;
 
 use API\TaskBundle\Entity\Comment;
+use API\TaskBundle\Entity\CommentHasAttachment;
 use API\TaskBundle\Entity\Task;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 
@@ -104,12 +105,13 @@ class CommentAttachmentControllerTest extends TaskTestCase
      */
     public function testRemoveAttachmentFromCommentSuccess()
     {
-        $data = $this->findOrCreateTaskHasAttachmentEntity();
+        $data = $this->findOrCreateCommentHasAttachmentEntity();
 
         $slug = $data['slug'];
-        $task = $data['task'];
+        $comment = $data['comment'];
 
-        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $task->getId() . '/attachment/' . $slug, [], [],
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/comments/' . $comment->getId() . '/attachment/' . $slug,
+            [], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::DELETED_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
@@ -119,28 +121,31 @@ class CommentAttachmentControllerTest extends TaskTestCase
      */
     public function testRemoveAttachmentFromCommentErrors()
     {
-        $data = $this->findOrCreateTaskHasAttachmentEntity();
+        $data = $this->findOrCreateCommentHasAttachmentEntity();
 
         $slug = $data['slug'];
-        $task = $data['task'];
+        $comment = $data['comment'];
 
         // Try to remove Entity without authorization header
-        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $task->getId() . '/attachment/' . $slug,
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/comments/' . $comment->getId() . '/attachment/' . $slug,
             [], [], []);
         $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Try to remove Attachment from not existed Task
-        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/125468' . $task->getId() . '/attachment/' . $slug, [], [],
+        // Try to remove Attachment from not existed Comment
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/comments/1254' . $comment->getId() . '/attachment/' . $slug,
+            [], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Try to remove not added Attachment from Task
-        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $task->getId() . '/attachment/slug-fff', [], [],
+        // Try to remove not added Attachment from Comment
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/comments/' . $comment->getId() . '/attachment/1254' . $slug,
+            [], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::BAD_REQUEST_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to remove Attachment with ROLE_USER which hasn't permission to this action
-        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $task->getId() . '/attachment/' . $slug, [], [],
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/comments/' . $comment->getId() . '/attachment/' . $slug,
+            [], [],
             ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
@@ -148,29 +153,29 @@ class CommentAttachmentControllerTest extends TaskTestCase
     /**
      * @return array
      */
-    private function findOrCreateTaskHasAttachmentEntity(): array
+    private function findOrCreateCommentHasAttachmentEntity(): array
     {
-        // Create or find User assigned to task
-        /** @var Task $task */
-        $task = $this->findOneAdminEntity();
-
+        // Create or find Attachment added to comment
+        /** @var Comment $comment */
+        $comment = $this->findOneCommentEntity();
         /** @var string $slug */
         $slug = 'zsskcd-jpg-2016-12-17-15-36';
 
         /** @var TaskHasAssignedUser $task */
-        $taskHasAttachment = $this->em->getRepository('APITaskBundle:TaskHasAttachment')->findOneBy([
-            'task' => $task,
+        $commentHasAttachment = $this->em->getRepository('APITaskBundle:CommentHasAttachment')->findOneBy([
+            'comment' => $comment,
             'slug' => $slug,
         ]);
 
-        if (!$taskHasAttachment instanceof TaskHasAttachment) {
-            $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/attachment/' . $slug, [], [],
+        if (!$commentHasAttachment instanceof CommentHasAttachment) {
+            $this->getClient(true)->request('POST', $this->getBaseUrl() . '/comments/' . $comment->getId() . '/attachment/' . $slug,
+                [], [],
                 ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
             $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
         }
 
         return [
-            'task' => $task,
+            'comment' => $comment,
             'slug' => $slug
         ];
     }

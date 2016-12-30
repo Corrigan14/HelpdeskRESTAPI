@@ -146,51 +146,14 @@ class TaskController extends ApiBaseController implements ControllerInterface
     public function listAction(Request $request)
     {
         $page = $request->get('page') ?: 1;
+        $filter = $this->getFilterData($request);
 
-        // Ina-beznejsia moznost ako zadavat pole hodnot v URL adrese, ktora vracia priamo pole: index.php?id[]=1&id[]=2&id[]=3&name=john
-        // na zakodovanie dat do URL je mozne pouzit encodeURIComponent
-
-        $status = $request->get('status');
-        $project = $request->get('project');
-        $creator = $request->get('creator');
-        $requester = $request->get('requester');
-        $company = $request->get('company');
-        $assigned = $request->get('assigned');
-        $tag = $request->get('tag');
-        $created = $request->get('createdTime');
-        $started = $request->get('startedTime');
-        $deadline = $request->get('deadlineTime');
-        $closed = $request->get('closedTime');
-        $archived = $request->get('archived');
-        $addedParameters = $request->get('addedParameters');
-
-        $arrayOfData['status'] = explode(",", $status);
-        $arrayOfData['project'] = explode(",", $project);
-        $arrayOfData['createdBy'] = explode(",", $creator);
-        $arrayOfData['requestedBy'] = explode(",", $requester);
-        $arrayOfData['company'] = explode(",", $company);
-        $arrayOfData['assigned'] = explode(",", $assigned);
-        $arrayOfData['tag'] = explode(",", $tag);
-        $arrayOfData['created'] = explode(",", $created);
-        $arrayOfData['started'] = explode(",", $started);
-        $arrayOfData['deadline'] = explode(",", $deadline);
-        $arrayOfData['closed'] = explode(",", $closed);
-        $arrayOfData['archived'] = explode(",", $archived);
-
-        $arrayOfAddedParameters = explode("&", $addedParameters);
-
-        foreach ($arrayOfAddedParameters as $key => $value) {
-            $strpos = explode('=', $value);
-            $attributeId = $strpos[0];
-            $attributeValues = explode(",", $strpos[1]);
-            $arrayOfData[$attributeId] = $attributeValues;
-        }
-
-        dump($arrayOfData);
+        dump($filter);
 
         $options = [
             'loggedUser' => $this->getUser(),
-            'isAdmin' => $this->get('task_voter')->isAdmin()
+            'isAdmin' => $this->get('task_voter')->isAdmin(),
+            'filters' => $filter,
         ];
 
         // Check if logged user has access to show requested data
@@ -804,5 +767,81 @@ class TaskController extends ApiBaseController implements ControllerInterface
         }
 
         return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     */
+    private function getFilterData(Request $request): array
+    {
+        // Ina-beznejsia moznost ako zadavat pole hodnot v URL adrese, ktora vracia priamo pole: index.php?id[]=1&id[]=2&id[]=3&name=john
+        // na zakodovanie dat do URL je mozne pouzit encodeURIComponent
+
+        $filter = [];
+
+        $status = $request->get('status');
+        $project = $request->get('project');
+        $creator = $request->get('creator');
+        $requester = $request->get('requester');
+        $company = $request->get('company');
+        $assigned = $request->get('assigned');
+        $tag = $request->get('tag');
+        $created = $request->get('createdTime');
+        $started = $request->get('startedTime');
+        $deadline = $request->get('deadlineTime');
+        $closed = $request->get('closedTime');
+        $archived = $request->get('archived');
+        $addedParameters = $request->get('addedParameters');
+
+        if (null !== $status) {
+            $filter['status'] = explode(",", $status);
+        }
+        if (null !== $project) {
+            $filter['project'] = explode(",", $project);
+        }
+        if (null !== $creator) {
+            $filter['createdBy'] = explode(",", $creator);
+        }
+        if (null !== $requester) {
+            $filter['requestedBy'] = explode(",", $requester);
+        }
+        if (null !== $company) {
+            $filter['company'] = explode(",", $company);
+        }
+        if (null !== $assigned) {
+            $filter['assigned'] = explode(",", $assigned);
+        }
+        if (null !== $tag) {
+            $filter['tag'] = explode(",", $tag);
+        }
+        if (null !== $created) {
+            $filter['created'] = explode(",", $created);
+        }
+        if (null !== $started) {
+            $filter['started'] = explode(",", $started);
+        }
+        if (null !== $deadline) {
+            $filter['deadline'] = explode(",", $deadline);
+        }
+        if (null !== $closed) {
+            $filter['closed'] = explode(",", $closed);
+        }
+        if (null !== $archived) {
+            $filter['archived'] = explode(",", $archived);
+        }
+        if (null !== $addedParameters) {
+            $arrayOfAddedParameters = explode("&", $addedParameters);
+            if (!empty($arrayOfAddedParameters[0])) {
+                foreach ($arrayOfAddedParameters as $value) {
+                    $strpos = explode('=', $value);
+                    $attributeId = $strpos[0];
+                    $attributeValues = explode(",", $strpos[1]);
+                    $filter[$attributeId] = $attributeValues;
+                }
+            }
+        }
+
+        return $filter;
     }
 }

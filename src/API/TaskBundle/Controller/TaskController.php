@@ -177,11 +177,16 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $arrayOfData['closed'] = explode(",", $closed);
         $arrayOfData['archived'] = explode(",", $archived);
 
-        $arrayOfAddedParameters['addedParameters'] = explode("&", $addedParameters);
-        foreach ($arrayOfAddedParameters as $entity) {
+        $arrayOfAddedParameters = explode("&", $addedParameters);
 
+        foreach ($arrayOfAddedParameters as $key => $value) {
+            $strpos = explode('=', $value);
+            $attributeId = $strpos[0];
+            $attributeValues = explode(",", $strpos[1]);
+            $arrayOfData[$attributeId] = $attributeValues;
         }
-        dump($arrayOfAddedParameters);
+
+        dump($arrayOfData);
 
         $options = [
             'loggedUser' => $this->getUser(),

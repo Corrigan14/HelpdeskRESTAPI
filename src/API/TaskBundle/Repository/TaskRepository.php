@@ -15,19 +15,22 @@ class TaskRepository extends EntityRepository
      * Return's all entities with specific conditions based on actual Entity
      *
      * @param int $page
-     * @param array $filter
-     *
+     * @param array $inFilter
+     * @param array $dateFilter
+     * @param array $equalFilter
      * @return array|null
+     * @internal param array $filter
+     *
      */
-    public function getAllAdminTasks(int $page, array $filter)
+    public function getAllAdminTasks(int $page, array $inFilter, array $dateFilter, array $equalFilter)
     {
         $query = $this->createQueryBuilder('task')
             ->select('task, taskData, project, thau, status,assignedUser')
             ->leftJoin('task.taskData', 'taskData')
-            ->leftJoin('task.project','project')
-            ->leftJoin('task.createdBy','createdBy')
-            ->leftJoin('createdBy.company','company')
-            ->leftJoin('task.requestedBy','requestedBy')
+            ->leftJoin('task.project', 'project')
+            ->leftJoin('task.createdBy', 'createdBy')
+            ->leftJoin('createdBy.company', 'company')
+            ->leftJoin('task.requestedBy', 'requestedBy')
             ->leftJoin('task.taskHasAssignedUsers', 'thau')
             ->leftJoin('thau.status', 'status')
             ->leftJoin('thau.user', 'assignedUser')
@@ -35,9 +38,28 @@ class TaskRepository extends EntityRepository
 
         $paramArray = [];
         $paramNum = 0;
-        foreach ($filter as $key => $value) {
+        foreach ($inFilter as $key => $value) {
             $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
             $paramArray['parameters' . $paramNum] = $value;
+
+            $paramNum++;
+        }
+
+        foreach ($equalFilter as $key => $value) {
+            $query->andWhere($key . ' = :parameter' . $paramNum);
+            $paramArray['parameter' . $paramNum] = $value;
+
+            $paramNum++;
+        }
+
+        foreach ($dateFilter as $key => $value) {
+//            $query->add('WHERE', $query->expr()->between(
+//                $key,
+//                ':from'.$paramNum,
+//                ':to'.$paramNum
+//            ),true);
+            $query->andWhere($key . ' > :FROM' . $paramNum);
+            $paramArray['parameter' . $paramNum] = $value[0];
 
             $paramNum++;
         }
@@ -57,21 +79,22 @@ class TaskRepository extends EntityRepository
     }
 
     /**
-     * @param array $filter
-     *
+     * @param array $inFilter
+     * @param array $dateFilter
+     * @param array $equalFilter
      * @return int|null
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function countAllAdminTasks(array $filter)
+    public function countAllAdminTasks(array $inFilter, array $dateFilter, array $equalFilter)
     {
         $query = $this->createQueryBuilder('task')
             ->select('COUNT(task.id)')
             ->leftJoin('task.taskData', 'taskData')
-            ->leftJoin('task.project','project')
-            ->leftJoin('task.createdBy','createdBy')
-            ->leftJoin('createdBy.company','company')
-            ->leftJoin('task.requestedBy','requestedBy')
+            ->leftJoin('task.project', 'project')
+            ->leftJoin('task.createdBy', 'createdBy')
+            ->leftJoin('createdBy.company', 'company')
+            ->leftJoin('task.requestedBy', 'requestedBy')
             ->leftJoin('task.taskHasAssignedUsers', 'thau')
             ->leftJoin('thau.status', 'status')
             ->leftJoin('thau.user', 'assignedUser')
@@ -79,7 +102,7 @@ class TaskRepository extends EntityRepository
 
         $paramArray = [];
         $paramNum = 0;
-        foreach ($filter as $key => $value) {
+        foreach ($inFilter as $key => $value) {
             $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
             $paramArray['parameters' . $paramNum] = $value;
 

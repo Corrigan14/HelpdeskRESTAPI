@@ -38,6 +38,7 @@ class ProjectFixture implements FixtureInterface, ContainerAwareInterface, Order
             $project->setTitle('Project of user 1');
             $project->setCreatedBy($userUser);
             $project->setDescription('Description of project 1.');
+            $project->setIsActive(false);
 
             $manager->persist($project);
 

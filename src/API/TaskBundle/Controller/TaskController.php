@@ -97,6 +97,10 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *       "description"="A list of coma separated ID's of Tags f.i. 1,2,3"
      *     },
      *     {
+     *       "name"="follower",
+     *       "description"="A list of coma separated ID's of Task Followers f.i. 1,2,3"
+     *     },
+     *     {
      *       "name"="createdTime",
      *       "description"="A coma separated FROM, TO dates in format 2015-02-04T05:10:58+05:30"
      *     },
@@ -151,7 +155,9 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $options = [
             'loggedUser' => $this->getUser(),
             'isAdmin' => $this->get('task_voter')->isAdmin(),
-            'filters' => $filterData['filter'],
+            'inFilters' => $filterData['inFilter'],
+            'equalFilters' => $filterData['equalFilter'],
+            'dateFilters' => $filterData['dateFilter'],
             'filtersForUrl' => $filterData['filterForUrl']
         ];
 
@@ -777,7 +783,9 @@ class TaskController extends ApiBaseController implements ControllerInterface
         // Ina-beznejsia moznost ako zadavat pole hodnot v URL adrese, ktora vracia priamo pole: index.php?id[]=1&id[]=2&id[]=3&name=john
         // na zakodovanie dat do URL je mozne pouzit encodeURIComponent
 
-        $filter = [];
+        $inFilter = [];
+        $dateFilter = [];
+        $equalFilter = [];
         $filterForUrl = [];
 
         $status = $request->get('status');
@@ -787,6 +795,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $company = $request->get('company');
         $assigned = $request->get('assigned');
         $tag = $request->get('tag');
+        $follower = $request->get('follower');
         $created = $request->get('createdTime');
         $started = $request->get('startedTime');
         $deadline = $request->get('deadlineTime');
@@ -795,52 +804,56 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $addedParameters = $request->get('addedParameters');
 
         if (null !== $status) {
-            $filter['status.id'] = explode(",", $status);
+            $inFilter['status.id'] = explode(",", $status);
             $filterForUrl['status'] = '&status=' . $status;
         }
         if (null !== $project) {
-            $filter['project.id'] = explode(",", $project);
+            $inFilter['project.id'] = explode(",", $project);
             $filterForUrl['project'] = '&project=' . $project;
         }
         if (null !== $creator) {
-            $filter['createdBy.id'] = explode(",", $creator);
+            $inFilter['createdBy.id'] = explode(",", $creator);
             $filterForUrl['createdBy'] = '&creator=' . $creator;
         }
         if (null !== $requester) {
-            $filter['requestedBy.id'] = explode(",", $requester);
+            $inFilter['requestedBy.id'] = explode(",", $requester);
             $filterForUrl['requestedBy'] = '&requester=' . $requester;
         }
         if (null !== $company) {
-            $filter['company.id'] = explode(",", $company);
+            $inFilter['company.id'] = explode(",", $company);
             $filterForUrl['company'] = '&company=' . $company;
         }
         if (null !== $assigned) {
-            $filter['assignedUser.id'] = explode(",", $assigned);
+            $inFilter['assignedUser.id'] = explode(",", $assigned);
             $filterForUrl['assigned'] = '&assigned=' . $assigned;
         }
         if (null !== $tag) {
-            $filter['tag'] = explode(",", $tag);
+            $inFilter['tags'] = explode(",", $tag);
             $filterForUrl['tag'] = '&tag=' . $status;
         }
+        if (null !== $follower) {
+            $inFilter['followers'] = explode(",", $follower);
+            $filterForUrl['followers'] = '&follower=' . $status;
+        }
         if (null !== $created) {
-            $filter['created'] = explode(",", $created);
+            $dateFilter['created'] = explode(",", $created);
             $filterForUrl['created'] = '&createdTime=' . $created;
         }
         if (null !== $started) {
-            $filter['started'] = explode(",", $started);
+            $dateFilter['started'] = explode(",", $started);
             $filterForUrl['started'] = '&startedTime=' . $started;
         }
         if (null !== $deadline) {
-            $filter['deadline'] = explode(",", $deadline);
+            $dateFilter['deadline'] = explode(",", $deadline);
             $filterForUrl['deadline'] = '&deadlineTime=' . $deadline;
         }
         if (null !== $closed) {
-            $filter['closed'] = explode(",", $closed);
+            $dateFilter['closed'] = explode(",", $closed);
             $filterForUrl['closed'] = '&closedTime=' . $closed;
         }
-        if (null !== $archived) {
-            $filter['archived'] = explode(",", $archived);
-            $filterForUrl['archived'] = '&archived=' . $archived;
+        if ('true' === strtolower($archived)) {
+            $equalFilter['project.is_active'] = 0;
+            $filterForUrl['archived'] = '&archived=TRUE';
         }
         if (null !== $addedParameters) {
             $arrayOfAddedParameters = explode("&", $addedParameters);
@@ -850,13 +863,15 @@ class TaskController extends ApiBaseController implements ControllerInterface
                     $strpos = explode('=', $value);
                     $attributeId = $strpos[0];
                     $attributeValues = explode(",", $strpos[1]);
-                    $filter[$attributeId] = $attributeValues;
+                    $inFilter[$attributeId] = $attributeValues;
                 }
             }
         }
 
         return [
-            'filter' => $filter,
+            'inFilter' => $inFilter,
+            'equalFilter' => $equalFilter,
+            'dateFilter' => $dateFilter,
             'filterForUrl' => $filterForUrl
         ];
     }

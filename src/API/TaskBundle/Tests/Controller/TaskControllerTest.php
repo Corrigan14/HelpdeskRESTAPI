@@ -91,6 +91,16 @@ class TaskControllerTest extends ApiTestCase
         // We expect at least one Entity, response has to include array with data and _links param
         $response = json_decode($this->getClient()->getResponse()->getContent() , true);
         $this->assertTrue(array_key_exists('data' , $response));
+
+        // Load list of data of Task Entity as Admin with filter: archived (project of task is not active)
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1&archived=TRUE',
+            [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect at least one Entity, response has to include array with data and _links param
+        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
+        $this->assertTrue(array_key_exists('data' , $response));
     }
 
     /**

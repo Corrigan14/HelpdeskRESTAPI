@@ -114,7 +114,7 @@ class TaskService
 
         return [
             '_links' => [
-                'self' => $url . '?page=' . $page .$params,
+                'self' => $url . '?page=' . $page . $params,
                 'first' => $url . '?page=' . 1 . $params,
                 'prev' => $previousPage ? $url . '?page=' . $previousPage . $params : false,
                 'next' => $nextPage ? $url . '?page=' . $nextPage . $params : false,
@@ -140,13 +140,15 @@ class TaskService
         /** @var User $loggedUser */
         $loggedUser = $options['loggedUser'];
         $isAdmin = $options['isAdmin'];
-        $filters = $options['filters'];
+        $inFilters = $options['inFilters'];
+        $equalFilters = $options['equalFilters'];
+        $dateFilters = $options['dateFilters'];
         $filtersForUrl = $options['filtersForUrl'];
 
         // Return's all Tasks - logged user is ADMIN
         if ($isAdmin) {
-            $tasks = $this->em->getRepository('APITaskBundle:Task')->getAllAdminTasks($page, $filters);
-            $count = $this->em->getRepository('APITaskBundle:Task')->countAllAdminTasks($filters);
+            $tasks = $this->em->getRepository('APITaskBundle:Task')->getAllAdminTasks($page, $inFilters, $dateFilters, $equalFilters);
+            $count = $this->em->getRepository('APITaskBundle:Task')->countAllAdminTasks($inFilters, $dateFilters, $equalFilters);
             return [
                 'tasks' => $tasks,
                 'count' => $count

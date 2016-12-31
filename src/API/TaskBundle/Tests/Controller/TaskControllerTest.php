@@ -24,54 +24,30 @@ class TaskControllerTest extends ApiTestCase
     {
         parent::testListSuccess();
 
-        $creatorUser = $this->em->getRepository('APICoreBundle:User')->findOneBy([
+        $userUser = $this->em->getRepository('APICoreBundle:User')->findOneBy([
             'username' => 'user'
         ]);
 
-        $usersProject = $this->em->getRepository('APITaskBundle:Project')->findOneBy([
-            'title' => 'Project of user 1',
+        $task = $this->em->getRepository('APITaskBundle:Task')->findOneBy([
+            'title' => 'Task 1 - user is creator, user is requested'
         ]);
 
-        // Load list of data of Task Entity as Admin with filter: creator
-        $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1&creator=' . $creatorUser->getId(), [], [],
+        $status = $this->em->getRepository('APITaskBundle:Status')->findOneBy([
+            'title' => 'Completed'
+        ]);
+
+        // Load list of data of Task Entity as Admin with filter: status
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1&status=' . $status->getId(), [], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // We expect two Entities
-        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
-        $count = 0;
-        foreach ($response['data'] as $res) {
-            $count++;
-        }
-        $this->assertEquals(2, $count);
-
-        // Load list of data of Task Entity as Admin with filter: creator, requested
-        $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1&creator=' . $creatorUser->getId() . '&requested=' . $creatorUser->getId(),
-            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        // We expect two Entities
+        // We expect one Entity
         $response = json_decode($this->getClient()->getResponse()->getContent(), true);
         $count = 0;
         foreach ($response['data'] as $res) {
             $count++;
         }
         $this->assertEquals(1, $count);
-
-        // Load list of data of Task Entity as User with filter: project (user's project)
-        $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1&project=' . $usersProject->getId(),
-            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        // We expect two Entities
-        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
-        $count = 0;
-        foreach ($response['data'] as $res) {
-            $count++;
-        }
-        $this->assertEquals(2, $count);
-
-        // Load list of data of Task Entity
     }
 
     /**
@@ -79,21 +55,7 @@ class TaskControllerTest extends ApiTestCase
      */
     public function testListErrors()
     {
-        parent::testListErrors();
 
-        $adminsProject = $this->em->getRepository('APITaskBundle:Project')->findOneBy([
-            'title' => 'Project of admin 2',
-        ]);
-
-        // Try to load list of entities with filter creator set to not existed entity
-        $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1&creator=1257489', [], [],
-            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        // Try to load list of entities: User can see a list of tasks of projects without access to this action
-        $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1&project=' . $adminsProject->getId(), [], [],
-            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
-        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
     /**

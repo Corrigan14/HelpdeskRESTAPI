@@ -105,21 +105,20 @@ class TaskService
         $previousPage = $page > 1 ? $page - 1 : false;
         $nextPage = $page < $totalNumberOfPages ? $page + 1 : false;
 
-        $creator = $options['creator'];
-        $requestedUser = $options['requested'];
-        $project = $options['project'];
+        $filters = $options['filtersForUrl'];
+        $params = '';
 
-        $creatorParam = (false !== $creator ? '&creator=' . $creator : false);
-        $requestedUserParam = (false !== $requestedUser ? '&requested=' . $requestedUser : false);
-        $projectParam = (false !== $project ? '&project=' . $project : false);
+        foreach ($filters as $filter) {
+            $params .= $filter;
+        }
 
         return [
             '_links' => [
-                'self' => $url . '?page=' . $page . $creatorParam . $requestedUserParam . $projectParam,
-                'first' => $url . '?page=' . 1 . $creatorParam . $requestedUserParam . $projectParam,
-                'prev' => $previousPage ? $url . '?page=' . $previousPage . $creatorParam . $requestedUserParam . $projectParam : false,
-                'next' => $nextPage ? $url . '?page=' . $nextPage . $creatorParam . $requestedUserParam . $projectParam : false,
-                'last' => $url . '?page=' . $totalNumberOfPages . $creatorParam . $requestedUserParam . $projectParam,
+                'self' => $url . '?page=' . $page .$params,
+                'first' => $url . '?page=' . 1 . $params,
+                'prev' => $previousPage ? $url . '?page=' . $previousPage . $params : false,
+                'next' => $nextPage ? $url . '?page=' . $nextPage . $params : false,
+                'last' => $url . '?page=' . $totalNumberOfPages . $params,
             ],
             'total' => $count,
             'page' => $page,
@@ -141,17 +140,13 @@ class TaskService
         /** @var User $loggedUser */
         $loggedUser = $options['loggedUser'];
         $isAdmin = $options['isAdmin'];
-
-        $optionsNeeded = [
-            't.createdBy' => $options['creator'],
-            't.requestedBy' => $options['requested'],
-            't.project' => $options['project']
-        ];
+        $filters = $options['filters'];
+        $filtersForUrl = $options['filtersForUrl'];
 
         // Return's all Tasks - logged user is ADMIN
         if ($isAdmin) {
-            $tasks = $this->em->getRepository('APITaskBundle:Task')->getAllAdminTasks($page, $optionsNeeded);
-            $count = $this->em->getRepository('APITaskBundle:Task')->countAllAdminTasks($optionsNeeded);
+            $tasks = $this->em->getRepository('APITaskBundle:Task')->getAllAdminTasks($page, $filters);
+            $count = $this->em->getRepository('APITaskBundle:Task')->countAllAdminTasks($filters);
             return [
                 'tasks' => $tasks,
                 'count' => $count

@@ -15,26 +15,28 @@ class TaskRepository extends EntityRepository
      * Return's all entities with specific conditions based on actual Entity
      *
      * @param int $page
-     * @param array $options
+     * @param array $filter
      *
      * @return array|null
      */
-    public function getAllAdminTasks(int $page, array $options)
+    public function getAllAdminTasks(int $page, array $filter)
     {
-        $query = $this->createQueryBuilder('t')
-            ->select('t, td')
-            ->leftJoin('t.taskData', 'td')
-            ->where('t.id is not NULL');
+        $query = $this->createQueryBuilder('task')
+            ->select('task, taskData, project, thau, status,assignedUser')
+            ->leftJoin('task.taskData', 'taskData')
+            ->leftJoin('task.project','project')
+            ->leftJoin('task.taskHasAssignedUsers', 'thau')
+            ->leftJoin('thau.status', 'status')
+            ->leftJoin('thau.user', 'assignedUser')
+            ->where('task.id is not NULL');
 
         $paramArray = [];
         $paramNum = 0;
-        foreach ($options as $key => $value) {
-            if (false !== $value) {
-                $query->andWhere($key . '= :parameter' . $paramNum);
-                $paramArray['parameter' . $paramNum] = $value;
+        foreach ($filter as $key => $value) {
+            $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
+            $paramArray['parameters' . $paramNum] = $value;
 
-                $paramNum++;
-            }
+            $paramNum++;
         }
 
         if (!empty($paramArray)) {
@@ -52,27 +54,30 @@ class TaskRepository extends EntityRepository
     }
 
     /**
-     * @param array $options
+     * @param array $filter
      *
      * @return int|null
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function countAllAdminTasks(array $options)
+    public function countAllAdminTasks(array $filter)
     {
-        $query = $this->createQueryBuilder('t')
-            ->select('COUNT(t.id)')
-            ->where('t.id is not NULL');
+        $query = $this->createQueryBuilder('task')
+            ->select('COUNT(task.id)')
+            ->leftJoin('task.taskData', 'taskData')
+            ->leftJoin('task.project','project')
+            ->leftJoin('task.taskHasAssignedUsers', 'thau')
+            ->leftJoin('thau.status', 'status')
+            ->leftJoin('thau.user', 'assignedUser')
+            ->where('task.id is not NULL');
 
         $paramArray = [];
         $paramNum = 0;
-        foreach ($options as $key => $value) {
-            if (false !== $value) {
-                $query->andWhere($key . '= :parameter' . $paramNum);
-                $paramArray['parameter' . $paramNum] = $value;
+        foreach ($filter as $key => $value) {
+            $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
+            $paramArray['parameters' . $paramNum] = $value;
 
-                $paramNum++;
-            }
+            $paramNum++;
         }
 
         if (!empty($paramArray)) {

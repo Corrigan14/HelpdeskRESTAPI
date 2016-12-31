@@ -70,7 +70,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *     },
      *     {
      *       "name"="status",
-     *       "description"="A list of coma separated statuses f.i. new,in_progress"
+     *       "description"="A list of coma separated ID's of statuses f.i. 1,2,3,4"
      *     },
      *     {
      *       "name"="project",
@@ -146,14 +146,13 @@ class TaskController extends ApiBaseController implements ControllerInterface
     public function listAction(Request $request)
     {
         $page = $request->get('page') ?: 1;
-        $filter = $this->getFilterData($request);
-
-        dump($filter);
+        $filterData = $this->getFilterData($request);
 
         $options = [
             'loggedUser' => $this->getUser(),
             'isAdmin' => $this->get('task_voter')->isAdmin(),
-            'filters' => $filter,
+            'filters' => $filterData['filter'],
+            'filtersForUrl' => $filterData['filterForUrl']
         ];
 
         // Check if logged user has access to show requested data
@@ -779,6 +778,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
         // na zakodovanie dat do URL je mozne pouzit encodeURIComponent
 
         $filter = [];
+        $filterForUrl = [];
 
         $status = $request->get('status');
         $project = $request->get('project');
@@ -795,44 +795,57 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $addedParameters = $request->get('addedParameters');
 
         if (null !== $status) {
-            $filter['status'] = explode(",", $status);
+            $filter['status.id'] = explode(",", $status);
+            $filterForUrl['status'] = '&status=' . $status;
         }
         if (null !== $project) {
-            $filter['project'] = explode(",", $project);
+            $filter['project.id'] = explode(",", $project);
+            $filterForUrl['project'] = '&project=' . $project;
         }
         if (null !== $creator) {
             $filter['createdBy'] = explode(",", $creator);
+            $filterForUrl['createdBy'] = '&creator=' . $creator;
         }
         if (null !== $requester) {
             $filter['requestedBy'] = explode(",", $requester);
+            $filterForUrl['requestedBy'] = '&requester=' . $requester;
         }
         if (null !== $company) {
             $filter['company'] = explode(",", $company);
+            $filterForUrl['company'] = '&company=' . $company;
         }
         if (null !== $assigned) {
             $filter['assigned'] = explode(",", $assigned);
+            $filterForUrl['assigned'] = '&assigned=' . $assigned;
         }
         if (null !== $tag) {
             $filter['tag'] = explode(",", $tag);
+            $filterForUrl['tag'] = '&tag=' . $status;
         }
         if (null !== $created) {
             $filter['created'] = explode(",", $created);
+            $filterForUrl['created'] = '&createdTime=' . $created;
         }
         if (null !== $started) {
             $filter['started'] = explode(",", $started);
+            $filterForUrl['started'] = '&startedTime=' . $started;
         }
         if (null !== $deadline) {
             $filter['deadline'] = explode(",", $deadline);
+            $filterForUrl['deadline'] = '&deadlineTime=' . $deadline;
         }
         if (null !== $closed) {
             $filter['closed'] = explode(",", $closed);
+            $filterForUrl['closed'] = '&closedTime=' . $closed;
         }
         if (null !== $archived) {
             $filter['archived'] = explode(",", $archived);
+            $filterForUrl['archived'] = '&archived=' . $archived;
         }
         if (null !== $addedParameters) {
             $arrayOfAddedParameters = explode("&", $addedParameters);
             if (!empty($arrayOfAddedParameters[0])) {
+                $filterForUrl['addedParameters'] = '&addedParameters=' . $arrayOfAddedParameters;
                 foreach ($arrayOfAddedParameters as $value) {
                     $strpos = explode('=', $value);
                     $attributeId = $strpos[0];
@@ -842,6 +855,9 @@ class TaskController extends ApiBaseController implements ControllerInterface
             }
         }
 
-        return $filter;
+        return [
+            'filter' => $filter,
+            'filterForUrl' => $filterForUrl
+        ];
     }
 }

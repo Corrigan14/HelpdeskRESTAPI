@@ -803,19 +803,19 @@ class TaskController extends ApiBaseController implements ControllerInterface
             $filterForUrl['project'] = '&project=' . $project;
         }
         if (null !== $creator) {
-            $filter['createdBy'] = explode(",", $creator);
+            $filter['createdBy.id'] = explode(",", $creator);
             $filterForUrl['createdBy'] = '&creator=' . $creator;
         }
         if (null !== $requester) {
-            $filter['requestedBy'] = explode(",", $requester);
+            $filter['requestedBy.id'] = explode(",", $requester);
             $filterForUrl['requestedBy'] = '&requester=' . $requester;
         }
         if (null !== $company) {
-            $filter['company'] = explode(",", $company);
+            $filter['company.id'] = explode(",", $company);
             $filterForUrl['company'] = '&company=' . $company;
         }
         if (null !== $assigned) {
-            $filter['assigned'] = explode(",", $assigned);
+            $filter['assignedUser.id'] = explode(",", $assigned);
             $filterForUrl['assigned'] = '&assigned=' . $assigned;
         }
         if (null !== $tag) {

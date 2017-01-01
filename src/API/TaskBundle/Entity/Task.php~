@@ -53,6 +53,20 @@ class Task
     private $deadline;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="started_at", type="datetime", nullable=true)
+     */
+    private $startedAt;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="closed_at", type="datetime", nullable=true)
+     */
+    private $closedAt;
+
+    /**
      * @var bool
      *
      * @ORM\Column(name="important", type="boolean", options={"default":0})

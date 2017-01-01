@@ -53,6 +53,20 @@ class Task
     private $deadline;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="started_at", type="datetime", nullable=true)
+     */
+    private $startedAt;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="closed_at", type="datetime", nullable=true)
+     */
+    private $closedAt;
+
+    /**
      * @var bool
      *
      * @ORM\Column(name="important", type="boolean", options={"default":0})
@@ -529,5 +543,53 @@ class Task
     public function getComments()
     {
         return $this->comments;
+    }
+
+    /**
+     * Set startedAt
+     *
+     * @param \DateTime $startedAt
+     *
+     * @return Task
+     */
+    public function setStartedAt($startedAt)
+    {
+        $this->startedAt = $startedAt;
+
+        return $this;
+    }
+
+    /**
+     * Get startedAt
+     *
+     * @return \DateTime
+     */
+    public function getStartedAt()
+    {
+        return $this->startedAt;
+    }
+
+    /**
+     * Set closedAt
+     *
+     * @param \DateTime $closedAt
+     *
+     * @return Task
+     */
+    public function setClosedAt($closedAt)
+    {
+        $this->closedAt = $closedAt;
+
+        return $this;
+    }
+
+    /**
+     * Get closedAt
+     *
+     * @return \DateTime
+     */
+    public function getClosedAt()
+    {
+        return $this->closedAt;
     }
 }

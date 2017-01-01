@@ -53,15 +53,15 @@ class TaskRepository extends EntityRepository
         }
 
         foreach ($dateFilter as $key => $value) {
-//            $query->add('WHERE', $query->expr()->between(
-//                $key,
-//                ':from'.$paramNum,
-//                ':to'.$paramNum
-//            ),true);
-            $query->andWhere($key . ' > :FROM' . $paramNum);
-            $paramArray['parameter' . $paramNum] = $value[0];
+            if (isset($value[0])) {
+                if (isset($value[1])) {
+                    $query->andWhere($query->expr()->between($key, ':FROM' . $paramNum, ':TO' . $paramNum));
+                    $paramArray['FROM' . $paramNum] = $value[0];
+                    $paramArray['TO' . $paramNum] = $value[1];
 
-            $paramNum++;
+                    $paramNum++;
+                }
+            }
         }
 
         if (!empty($paramArray)) {

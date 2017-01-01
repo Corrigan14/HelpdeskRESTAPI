@@ -75,5 +75,28 @@ class CommentHasAttachment
     {
         return $this->slug;
     }
-}
 
+    /**
+     * Set comment
+     *
+     * @param Comment $comment
+     *
+     * @return CommentHasAttachment
+     */
+    public function setComment(Comment $comment)
+    {
+        $this->comment = $comment;
+
+        return $this;
+    }
+
+    /**
+     * Get comment
+     *
+     * @return Comment
+     */
+    public function getComment()
+    {
+        return $this->comment;
+    }
+}

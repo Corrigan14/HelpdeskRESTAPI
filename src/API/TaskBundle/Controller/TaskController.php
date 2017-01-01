@@ -777,6 +777,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
     /**
      * @param Request $request
      * @return array
+     * @throws \LogicException
      */
     private function getFilterData(Request $request): array
     {
@@ -836,19 +837,19 @@ class TaskController extends ApiBaseController implements ControllerInterface
             $filterForUrl['followers'] = '&follower=' . $status;
         }
         if (null !== $created) {
-            $dateFilter['created'] = explode(",", $created);
+            $dateFilter['task.createdAt'] = explode(",", $created);
             $filterForUrl['created'] = '&createdTime=' . $created;
         }
         if (null !== $started) {
-            $dateFilter['started'] = explode(",", $started);
+            $dateFilter['task.startedAt'] = explode(",", $started);
             $filterForUrl['started'] = '&startedTime=' . $started;
         }
         if (null !== $deadline) {
-            $dateFilter['deadline'] = explode(",", $deadline);
+            $dateFilter['task.deadline'] = explode(",", $deadline);
             $filterForUrl['deadline'] = '&deadlineTime=' . $deadline;
         }
         if (null !== $closed) {
-            $dateFilter['closed'] = explode(",", $closed);
+            $dateFilter['task.closedAt'] = explode(",", $closed);
             $filterForUrl['closed'] = '&closedTime=' . $closed;
         }
         if ('true' === strtolower($archived)) {
@@ -862,8 +863,15 @@ class TaskController extends ApiBaseController implements ControllerInterface
                 foreach ($arrayOfAddedParameters as $value) {
                     $strpos = explode('=', $value);
                     $attributeId = $strpos[0];
-                    $attributeValues = explode(",", $strpos[1]);
-                    $inFilter[$attributeId] = $attributeValues;
+
+                    // Check if TaskAttribute exists, select filetr type based on it's TYPE
+                    $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($attributeId);
+                    if ($taskAttribute instanceof TaskAttribute) {
+                        $typeOfTaskAttribute = $taskAttribute->getType();
+                        $attributeValues = explode(",", $strpos[1]);
+
+                        $inFilter[$attributeId] = $attributeValues;
+                    }
                 }
             }
         }

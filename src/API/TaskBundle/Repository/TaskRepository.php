@@ -45,6 +45,8 @@ class TaskRepository extends EntityRepository
         $paramArray = [];
         $paramNum = 0;
         foreach ($inFilter as $key => $value) {
+            // check if key is allowed
+
             $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
             $paramArray['parameters' . $paramNum] = $value;
 
@@ -132,7 +134,7 @@ class TaskRepository extends EntityRepository
         $dateFilterAddedParams = $options['dateFilterAddedParams'];
 
         $query = $this->createQueryBuilder('task')
-            ->select('COUNT(task.id)')
+            ->select('COUNT(DISTINCT task)')
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')
@@ -210,6 +212,7 @@ class TaskRepository extends EntityRepository
             $query->setParameters($paramArray);
         }
 
+        $query->groupBy('task.id');
         return $query->getQuery()->getSingleScalarResult();
     }
 

@@ -15,18 +15,22 @@ class TaskRepository extends EntityRepository
      * Return's all entities with specific conditions based on actual Entity
      *
      * @param int $page
-     * @param array $inFilter
-     * @param array $dateFilter
-     * @param array $equalFilter
-     * @return array|null
-     * @internal param array $filter
-     *
+     * @param array $options
+     * @return array
      */
-    public function getAllAdminTasks(int $page, array $inFilter, array $dateFilter, array $equalFilter)
+    public function getAllAdminTasks(int $page, array $options)
     {
+        $inFilter = $options['inFilter'];
+        $equalFilter = $options['equalFilter'];
+        $dateFilter = $options['dateFilter'];
+        $inFilterAddedParams = $options['inFilterAddedParams'];
+        $equalFilterAddedParams = $options['equalFilterAddedParams'];
+        $dateFilterAddedParams = $options['dateFilterAddedParams'];
+
         $query = $this->createQueryBuilder('task')
             ->select('task, taskData, project, thau, status,assignedUser')
             ->leftJoin('task.taskData', 'taskData')
+            ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')
             ->leftJoin('task.createdBy', 'createdBy')
             ->leftJoin('createdBy.company', 'company')
@@ -64,6 +68,38 @@ class TaskRepository extends EntityRepository
             }
         }
 
+        foreach ($inFilterAddedParams as $key => $value) {
+            $query->andWhere('taskAttribute.id = :attributeId');
+            $query->andWhere('taskData.value IN (:parameters' . $paramNum . ')');
+            $paramArray['parameters' . $paramNum] = $value;
+            $paramArray['attributeId'] = $key;
+
+            $paramNum++;
+        }
+
+        foreach ($equalFilterAddedParams as $key => $value) {
+            $query->andWhere('taskAttribute.id = :attributeId');
+            $query->andWhere('taskData.value = :parameter' . $paramNum);
+            $paramArray['parameter' . $paramNum] = $value;
+            $paramArray['attributeId'] = $key;
+
+            $paramNum++;
+        }
+
+        foreach ($dateFilterAddedParams as $key => $value) {
+            if (isset($value[0])) {
+                if (isset($value[1])) {
+                    $query->andWhere('taskAttribute.id = :attributeId');
+                    $query->andWhere($query->expr()->between('taskData.value', ':FROM' . $paramNum, ':TO' . $paramNum));
+                    $paramArray['FROM' . $paramNum] = $value[0];
+                    $paramArray['TO' . $paramNum] = $value[1];
+                    $paramArray['attributeId'] = $key;
+
+                    $paramNum++;
+                }
+            }
+        }
+
         if (!empty($paramArray)) {
             $query->setParameters($paramArray);
         }
@@ -79,15 +115,18 @@ class TaskRepository extends EntityRepository
     }
 
     /**
-     * @param array $inFilter
-     * @param array $dateFilter
-     * @param array $equalFilter
-     * @return int|null
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
+     * @param array $options
+     * @return mixed
      */
-    public function countAllAdminTasks(array $inFilter, array $dateFilter, array $equalFilter)
+    public function countAllAdminTasks(array $options)
     {
+        $inFilter = $options['inFilter'];
+        $equalFilter = $options['equalFilter'];
+        $dateFilter = $options['dateFilter'];
+        $inFilterAddedParams = $options['inFilterAddedParams'];
+        $equalFilterAddedParams = $options['equalFilterAddedParams'];
+        $dateFilterAddedParams = $options['dateFilterAddedParams'];
+
         $query = $this->createQueryBuilder('task')
             ->select('COUNT(task.id)')
             ->leftJoin('task.taskData', 'taskData')

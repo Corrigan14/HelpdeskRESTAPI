@@ -155,9 +155,12 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $options = [
             'loggedUser' => $this->getUser(),
             'isAdmin' => $this->get('task_voter')->isAdmin(),
-            'inFilters' => $filterData['inFilter'],
-            'equalFilters' => $filterData['equalFilter'],
-            'dateFilters' => $filterData['dateFilter'],
+            'inFilter' => $filterData['inFilter'],
+            'equalFilter' => $filterData['equalFilter'],
+            'dateFilter' => $filterData['dateFilter'],
+            'inFilterAddedParams' => $filterData['inFilterAddedParams'],
+            'equalFilterAddedParams' => $filterData['equalFilterAddedParams'],
+            'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
             'filtersForUrl' => $filterData['filterForUrl']
         ];
 
@@ -787,6 +790,11 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $inFilter = [];
         $dateFilter = [];
         $equalFilter = [];
+
+        $inFilterAddedParams = [];
+        $dateFilterAddedParams = [];
+        $equalFilterAddedParams = [];
+
         $filterForUrl = [];
 
         $status = $request->get('status');
@@ -858,8 +866,10 @@ class TaskController extends ApiBaseController implements ControllerInterface
         }
         if (null !== $addedParameters) {
             $arrayOfAddedParameters = explode("&", $addedParameters);
+
             if (!empty($arrayOfAddedParameters[0])) {
-                $filterForUrl['addedParameters'] = '&addedParameters=' . $arrayOfAddedParameters;
+                $filterForUrl['addedParameters'] = '&addedParameters=' . $addedParameters;
+
                 foreach ($arrayOfAddedParameters as $value) {
                     $strpos = explode('=', $value);
                     $attributeId = $strpos[0];
@@ -870,7 +880,19 @@ class TaskController extends ApiBaseController implements ControllerInterface
                         $typeOfTaskAttribute = $taskAttribute->getType();
                         $attributeValues = explode(",", $strpos[1]);
 
-                        $inFilter[$attributeId] = $attributeValues;
+                        if ('checkbox' === $typeOfTaskAttribute) {
+                            if ('true' === strtolower($strpos[1])) {
+                                $equalFilterAddedParams[$attributeId] = 1;
+                            } elseif ('false' === strtolower($strpos[1])) {
+                                $equalFilterAddedParams[$attributeId] = 0;
+                            }
+                        }
+
+                        if ('date' === $typeOfTaskAttribute) {
+                            $dateFilterAddedParams[$attributeId] = $attributeValues;
+                        }
+
+                        $inFilterAddedParams[$attributeId] = $attributeValues;
                     }
                 }
             }
@@ -880,6 +902,9 @@ class TaskController extends ApiBaseController implements ControllerInterface
             'inFilter' => $inFilter,
             'equalFilter' => $equalFilter,
             'dateFilter' => $dateFilter,
+            'inFilterAddedParams' => $inFilterAddedParams,
+            'equalFilterAddedParams' => $equalFilterAddedParams,
+            'dateFilterAddedParams' => $dateFilterAddedParams,
             'filterForUrl' => $filterForUrl
         ];
     }

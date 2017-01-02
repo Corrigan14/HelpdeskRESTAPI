@@ -140,15 +140,11 @@ class TaskService
         /** @var User $loggedUser */
         $loggedUser = $options['loggedUser'];
         $isAdmin = $options['isAdmin'];
-        $inFilters = $options['inFilters'];
-        $equalFilters = $options['equalFilters'];
-        $dateFilters = $options['dateFilters'];
-        $filtersForUrl = $options['filtersForUrl'];
 
         // Return's all Tasks - logged user is ADMIN
         if ($isAdmin) {
-            $tasks = $this->em->getRepository('APITaskBundle:Task')->getAllAdminTasks($page, $inFilters, $dateFilters, $equalFilters);
-            $count = $this->em->getRepository('APITaskBundle:Task')->countAllAdminTasks($inFilters, $dateFilters, $equalFilters);
+            $tasks = $this->em->getRepository('APITaskBundle:Task')->getAllAdminTasks($page, $options);
+            $count = $this->em->getRepository('APITaskBundle:Task')->countAllAdminTasks($options);
             return [
                 'tasks' => $tasks,
                 'count' => $count

@@ -837,12 +837,12 @@ class TaskController extends ApiBaseController implements ControllerInterface
             $filterForUrl['assigned'] = '&assigned=' . $assigned;
         }
         if (null !== $tag) {
-            $inFilter['tags'] = explode(",", $tag);
-            $filterForUrl['tag'] = '&tag=' . $status;
+            $inFilter['tags.id'] = explode(",", $tag);
+            $filterForUrl['tag'] = '&tag=' . $tag;
         }
         if (null !== $follower) {
-            $inFilter['followers'] = explode(",", $follower);
-            $filterForUrl['followers'] = '&follower=' . $status;
+            $inFilter['followers.id'] = explode(",", $follower);
+            $filterForUrl['followers'] = '&follower=' . $follower;
         }
         if (null !== $created) {
             $dateFilter['task.createdAt'] = explode(",", $created);
@@ -874,7 +874,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
                     $strpos = explode('=', $value);
                     $attributeId = $strpos[0];
 
-                    // Check if TaskAttribute exists, select filetr type based on it's TYPE
+                    // Check if TaskAttribute exists, select filter type based on it's TYPE
                     $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($attributeId);
                     if ($taskAttribute instanceof TaskAttribute) {
                         $typeOfTaskAttribute = $taskAttribute->getType();

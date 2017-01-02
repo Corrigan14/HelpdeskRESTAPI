@@ -49,18 +49,18 @@ class TaskControllerTest extends ApiTestCase
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // We expect at least one Entity, response has to include array with data and _links param
-        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
-        $this->assertTrue(array_key_exists('data' , $response));
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertTrue(array_key_exists('data', $response));
 
         // Load list of data of Task Entity as Admin with filter: status and project
-        $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1&status=' . $status->getId().'&project='.$userProject->getId(),
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1&status=' . $status->getId() . '&project=' . $userProject->getId(),
             [], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // We expect at least one Entity, response has to include array with data and _links param
-        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
-        $this->assertTrue(array_key_exists('data' , $response));
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertTrue(array_key_exists('data', $response));
 
         // Load list of data of Task Entity as Admin with filter: createdBy
         $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1&creator=' . $userUser->getId(),
@@ -69,28 +69,28 @@ class TaskControllerTest extends ApiTestCase
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // We expect at least one Entity, response has to include array with data and _links param
-        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
-        $this->assertTrue(array_key_exists('data' , $response));
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertTrue(array_key_exists('data', $response));
 
         // Load list of data of Task Entity as Admin with filter: createdBy and requestedBy
-        $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1&creator=' . $userUser->getId().'&requester='.$userUser->getId(),
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1&creator=' . $userUser->getId() . '&requester=' . $userUser->getId(),
             [], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // We expect at least one Entity, response has to include array with data and _links param
-        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
-        $this->assertTrue(array_key_exists('data' , $response));
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertTrue(array_key_exists('data', $response));
 
         // Load list of data of Task Entity as Admin with filter: requestedBy and company
-        $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1&requester=' . $userUser->getId().'&company='.$userCompany->getId(),
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1&requester=' . $userUser->getId() . '&company=' . $userCompany->getId(),
             [], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // We expect at least one Entity, response has to include array with data and _links param
-        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
-        $this->assertTrue(array_key_exists('data' , $response));
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertTrue(array_key_exists('data', $response));
 
         // Load list of data of Task Entity as Admin with filter: archived (project of task is not active)
         $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1&archived=TRUE',
@@ -100,6 +100,18 @@ class TaskControllerTest extends ApiTestCase
 
         // Load list of data of Task Entity as Admin with filter: createdTime and startedTime
         $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1&createdTime=2016-12-28+19:50:56,2016-12-30+19:50:56&startedTime=2016-12-28+19:50:56,2016-12-30+19:50:56',
+            [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Load list of data of Task Entity as Admin with filter: tag, follower
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1&tag=1,2&follower=12',
+            [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Load list of data of Task Entity as Admin with filter: addedAttribute
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1addedParameters=32=select1',
             [], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());

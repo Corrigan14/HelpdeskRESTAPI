@@ -4,6 +4,7 @@ namespace Traits;
 
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Comment;
+use API\TaskBundle\Entity\Filter;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
@@ -84,6 +85,14 @@ trait UserTrait
      * @var ArrayCollection
      */
     private $comments;
+
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Filter", mappedBy="project")
+     * @Exclude()
+     */
+    private $filters;
 
     /**
      * Add tag
@@ -349,5 +358,39 @@ trait UserTrait
     public function getComments()
     {
         return $this->comments;
+    }
+
+    /**
+     * Add filter
+     *
+     * @param Filter $filter
+     *
+     * @return Project
+     */
+    public function addFilter(Filter $filter)
+    {
+        $this->filters[] = $filter;
+
+        return $this;
+    }
+
+    /**
+     * Remove filter
+     *
+     * @param Filter $filter
+     */
+    public function removeFilter(Filter $filter)
+    {
+        $this->filters->removeElement($filter);
+    }
+
+    /**
+     * Get filters
+     *
+     * @return ArrayCollection
+     */
+    public function getFilters()
+    {
+        return $this->filters;
     }
 }

@@ -82,12 +82,21 @@ class Project
     private $tasks;
 
     /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Filter", mappedBy="project")
+     * @Exclude()
+     */
+    private $filters;
+
+    /**
      * Project constructor.
      */
     public function __construct()
     {
         $this->userHasProjects = new ArrayCollection();
         $this->tasks = new ArrayCollection();
+        $this->filters = new ArrayCollection();
     }
 
     /**

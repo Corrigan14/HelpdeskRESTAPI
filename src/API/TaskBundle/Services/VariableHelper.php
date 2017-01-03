@@ -19,6 +19,23 @@ class VariableHelper
     const INTEGER_NUMBER = 'integer_number';
     const CHECKBOX = 'checkbox';
 
+    // Allowed keys in filter array
+    public static $allowedKeysInFilter = [
+        'status.id',
+        'project.id',
+        'createdBy.id',
+        'requestedBy.id',
+        'company.id',
+        'assignedUser.id',
+        'tags.id',
+        'followers.id',
+        'task.createdAt',
+        'task.startedAt',
+        'task.deadline',
+        'task.closedAt',
+        'project.is_active'
+    ];
+
     /**
      * @return array
      */

@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Repository;
 
+use API\TaskBundle\Services\VariableHelper;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -61,36 +62,38 @@ class TaskRepository extends EntityRepository
 
         foreach ($inFilter as $key => $value) {
             // check if key is allowed
+            if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
+                $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
+                $paramArray['parameters' . $paramNum] = $value;
 
-            $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
-            $paramArray['parameters' . $paramNum] = $value;
-
-            $paramNum++;
+                $paramNum++;
+            }
         }
 
         foreach ($equalFilter as $key => $value) {
+            if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
+                $query->andWhere($key . ' = :parameter' . $paramNum);
+                $paramArray['parameter' . $paramNum] = $value;
 
-            $query->andWhere($key . ' = :parameter' . $paramNum);
-            $paramArray['parameter' . $paramNum] = $value;
-
-            $paramNum++;
+                $paramNum++;
+            }
         }
 
         foreach ($dateFilter as $key => $value) {
+            if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
+                if (isset($value[0])) {
+                    if (isset($value[1])) {
+                        $query->andWhere($query->expr()->between($key, ':FROM' . $paramNum, ':TO' . $paramNum));
+                        $paramArray['FROM' . $paramNum] = $value[0];
+                        $paramArray['TO' . $paramNum] = $value[1];
 
-            if (isset($value[0])) {
-                if (isset($value[1])) {
-                    $query->andWhere($query->expr()->between($key, ':FROM' . $paramNum, ':TO' . $paramNum));
-                    $paramArray['FROM' . $paramNum] = $value[0];
-                    $paramArray['TO' . $paramNum] = $value[1];
-
-                    $paramNum++;
+                        $paramNum++;
+                    }
                 }
             }
         }
 
         foreach ($inFilterAddedParams as $key => $value) {
-
             $query->andWhere('taskAttribute.id = :attributeId');
             $query->andWhere('taskData.value IN (:parameters' . $paramNum . ')');
             $paramArray['parameters' . $paramNum] = $value;
@@ -100,7 +103,6 @@ class TaskRepository extends EntityRepository
         }
 
         foreach ($equalFilterAddedParams as $key => $value) {
-
             $query->andWhere('taskAttribute.id = :attributeId');
             $query->andWhere('taskData.value = :parameter' . $paramNum);
             $paramArray['parameter' . $paramNum] = $value;
@@ -110,7 +112,6 @@ class TaskRepository extends EntityRepository
         }
 
         foreach ($dateFilterAddedParams as $key => $value) {
-
             if (isset($value[0])) {
                 if (isset($value[1])) {
                     $query->andWhere('taskAttribute.id = :attributeId');
@@ -188,27 +189,33 @@ class TaskRepository extends EntityRepository
         }
 
         foreach ($inFilter as $key => $value) {
-            $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
-            $paramArray['parameters' . $paramNum] = $value;
+            if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
+                $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
+                $paramArray['parameters' . $paramNum] = $value;
 
-            $paramNum++;
+                $paramNum++;
+            }
         }
 
         foreach ($equalFilter as $key => $value) {
-            $query->andWhere($key . ' = :parameter' . $paramNum);
-            $paramArray['parameter' . $paramNum] = $value;
+            if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
+                $query->andWhere($key . ' = :parameter' . $paramNum);
+                $paramArray['parameter' . $paramNum] = $value;
 
-            $paramNum++;
+                $paramNum++;
+            }
         }
 
         foreach ($dateFilter as $key => $value) {
-            if (isset($value[0])) {
-                if (isset($value[1])) {
-                    $query->andWhere($query->expr()->between($key, ':FROM' . $paramNum, ':TO' . $paramNum));
-                    $paramArray['FROM' . $paramNum] = $value[0];
-                    $paramArray['TO' . $paramNum] = $value[1];
+            if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
+                if (isset($value[0])) {
+                    if (isset($value[1])) {
+                        $query->andWhere($query->expr()->between($key, ':FROM' . $paramNum, ':TO' . $paramNum));
+                        $paramArray['FROM' . $paramNum] = $value[0];
+                        $paramArray['TO' . $paramNum] = $value[1];
 
-                    $paramNum++;
+                        $paramNum++;
+                    }
                 }
             }
         }

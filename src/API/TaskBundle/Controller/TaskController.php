@@ -34,8 +34,19 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *            "description": "Description of Task 1",
      *            "deadline": null,
      *            "important": false,
-     *            "createdAt": ⊕{...}
-     *            "updatedAt": ⊕{...}
+     *            "createdAt": ⊕{...},
+     *            "updatedAt": ⊕{...},
+     *            "taskData":
+     *            [
+     *              {
+     *                "id": 23,
+     *                "value": "some input"
+     *              },
+     *              {
+     *                "id": 24,
+     *                "value": "select1"
+     *              }
+     *            ]
      *          },
      *         {
      *            "id": 8,
@@ -43,8 +54,9 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *            "description": "Description of Task 2",
      *            "deadline": null,
      *            "important": false,
-     *            "createdAt": ⊕{...}
-     *            "updatedAt": ⊕{...}
+     *            "createdAt": ⊕{...},
+     *            "updatedAt": ⊕{...},
+     *            "taskData":[]
      *         },
      *       ],
      *       "_links":
@@ -162,6 +174,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
             'inFilter' => $filterData['inFilter'],
             'equalFilter' => $filterData['equalFilter'],
             'dateFilter' => $filterData['dateFilter'],
+            'searchFilter' => $filterData['searchFilter'],
             'inFilterAddedParams' => $filterData['inFilterAddedParams'],
             'equalFilterAddedParams' => $filterData['equalFilterAddedParams'],
             'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
@@ -794,6 +807,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $inFilter = [];
         $dateFilter = [];
         $equalFilter = [];
+        $searchFilter = null;
 
         $inFilterAddedParams = [];
         $dateFilterAddedParams = [];
@@ -801,6 +815,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
 
         $filterForUrl = [];
 
+        $search = $request->get('search');
         $status = $request->get('status');
         $project = $request->get('project');
         $creator = $request->get('creator');
@@ -816,6 +831,10 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $archived = $request->get('archived');
         $addedParameters = $request->get('addedParameters');
 
+        if (null !== $search) {
+            $searchFilter = $search;
+            $filterForUrl['search'] = '&search=' . $search;
+        }
         if (null !== $status) {
             $inFilter['status.id'] = explode(",", $status);
             $filterForUrl['status'] = '&status=' . $status;
@@ -906,6 +925,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
             'inFilter' => $inFilter,
             'equalFilter' => $equalFilter,
             'dateFilter' => $dateFilter,
+            'searchFilter' => $searchFilter,
             'inFilterAddedParams' => $inFilterAddedParams,
             'equalFilterAddedParams' => $equalFilterAddedParams,
             'dateFilterAddedParams' => $dateFilterAddedParams,

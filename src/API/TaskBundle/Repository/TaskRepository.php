@@ -23,12 +23,13 @@ class TaskRepository extends EntityRepository
         $inFilter = $options['inFilter'];
         $equalFilter = $options['equalFilter'];
         $dateFilter = $options['dateFilter'];
+        $searchFilter = $options['searchFilter'];
         $inFilterAddedParams = $options['inFilterAddedParams'];
         $equalFilterAddedParams = $options['equalFilterAddedParams'];
         $dateFilterAddedParams = $options['dateFilterAddedParams'];
 
         $query = $this->createQueryBuilder('task')
-            ->select('task, taskData, project, thau, status,assignedUser')
+            ->select('task, taskData')
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')
@@ -37,13 +38,27 @@ class TaskRepository extends EntityRepository
             ->leftJoin('task.requestedBy', 'requestedBy')
             ->leftJoin('task.taskHasAssignedUsers', 'thau')
             ->leftJoin('thau.status', 'status')
-            ->leftJoin('thau.user', 'assignedUser')
-            ->innerJoin('task.tags', 'tags')
-            ->innerJoin('task.followers', 'followers')
-            ->where('task.id is not NULL');
+            ->leftJoin('thau.user', 'assignedUser');
+
+        if (array_key_exists('tags.id', $inFilter)) {
+            $query->innerJoin('task.tags', 'tags');
+        }
+
+        if (array_key_exists('followers.id', $inFilter)) {
+            $query->innerJoin('task.followers', 'followers');
+        }
+
+        $query->where('task.id is not NULL');
 
         $paramArray = [];
         $paramNum = 0;
+        if (null !== $searchFilter) {
+            $query->andWhere('task.id LIKE :taskIdParam');
+            $query->orWhere('task.title LIKE :taskTitleParam');
+            $paramArray['taskIdParam'] = '%' . $searchFilter . '%';
+            $paramArray['taskTitleParam'] = '%' . $searchFilter . '%';
+        }
+
         foreach ($inFilter as $key => $value) {
             // check if key is allowed
 
@@ -54,6 +69,7 @@ class TaskRepository extends EntityRepository
         }
 
         foreach ($equalFilter as $key => $value) {
+
             $query->andWhere($key . ' = :parameter' . $paramNum);
             $paramArray['parameter' . $paramNum] = $value;
 
@@ -61,6 +77,7 @@ class TaskRepository extends EntityRepository
         }
 
         foreach ($dateFilter as $key => $value) {
+
             if (isset($value[0])) {
                 if (isset($value[1])) {
                     $query->andWhere($query->expr()->between($key, ':FROM' . $paramNum, ':TO' . $paramNum));
@@ -73,6 +90,7 @@ class TaskRepository extends EntityRepository
         }
 
         foreach ($inFilterAddedParams as $key => $value) {
+
             $query->andWhere('taskAttribute.id = :attributeId');
             $query->andWhere('taskData.value IN (:parameters' . $paramNum . ')');
             $paramArray['parameters' . $paramNum] = $value;
@@ -82,6 +100,7 @@ class TaskRepository extends EntityRepository
         }
 
         foreach ($equalFilterAddedParams as $key => $value) {
+
             $query->andWhere('taskAttribute.id = :attributeId');
             $query->andWhere('taskData.value = :parameter' . $paramNum);
             $paramArray['parameter' . $paramNum] = $value;
@@ -91,6 +110,7 @@ class TaskRepository extends EntityRepository
         }
 
         foreach ($dateFilterAddedParams as $key => $value) {
+
             if (isset($value[0])) {
                 if (isset($value[1])) {
                     $query->andWhere('taskAttribute.id = :attributeId');
@@ -105,6 +125,7 @@ class TaskRepository extends EntityRepository
         }
 
         if (!empty($paramArray)) {
+
             $query->setParameters($paramArray);
         }
 
@@ -129,6 +150,7 @@ class TaskRepository extends EntityRepository
         $inFilter = $options['inFilter'];
         $equalFilter = $options['equalFilter'];
         $dateFilter = $options['dateFilter'];
+        $searchFilter = $options['searchFilter'];
         $inFilterAddedParams = $options['inFilterAddedParams'];
         $equalFilterAddedParams = $options['equalFilterAddedParams'];
         $dateFilterAddedParams = $options['dateFilterAddedParams'];
@@ -143,13 +165,28 @@ class TaskRepository extends EntityRepository
             ->leftJoin('task.requestedBy', 'requestedBy')
             ->leftJoin('task.taskHasAssignedUsers', 'thau')
             ->leftJoin('thau.status', 'status')
-            ->leftJoin('thau.user', 'assignedUser')
-            ->innerJoin('task.tags', 'tags')
-            ->innerJoin('task.followers', 'followers')
-            ->where('task.id is not NULL');
+            ->leftJoin('thau.user', 'assignedUser');
+
+        if (array_key_exists('tags.id', $inFilter)) {
+            $query->innerJoin('task.tags', 'tags');
+        }
+
+        if (array_key_exists('followers.id', $inFilter)) {
+            $query->innerJoin('task.followers', 'followers');
+        }
+
+        $query->where('task.id is not NULL');
 
         $paramArray = [];
         $paramNum = 0;
+
+        if (null !== $searchFilter) {
+            $query->andWhere('task.id LIKE :taskIdParam');
+            $query->orWhere('task.title LIKE :taskTitleParam');
+            $paramArray['taskIdParam'] = '%' . $searchFilter . '%';
+            $paramArray['taskTitleParam'] = '%' . $searchFilter . '%';
+        }
+
         foreach ($inFilter as $key => $value) {
             $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
             $paramArray['parameters' . $paramNum] = $value;
@@ -212,7 +249,6 @@ class TaskRepository extends EntityRepository
             $query->setParameters($paramArray);
         }
 
-        $query->groupBy('task.id');
         return $query->getQuery()->getSingleScalarResult();
     }
 

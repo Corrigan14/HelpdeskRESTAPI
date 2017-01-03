@@ -121,6 +121,14 @@ class Task
     private $taskHasAssignedUsers;
 
     /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskHasAttachment", mappedBy="task")
+     * @Serializer\ReadOnly()
+     */
+    private $taskHasAttachments;
+
+    /**
      * Task constructor.
      */
     public function __construct()
@@ -129,6 +137,7 @@ class Task
         $this->followers = new ArrayCollection();
         $this->tags = new ArrayCollection();
         $this->taskHasAssignedUsers = new ArrayCollection();
+        $this->taskHasAttachments = new ArrayCollection();
     }
 
     /**
@@ -443,5 +452,39 @@ class Task
     public function getTaskHasAssignedUsers()
     {
         return $this->taskHasAssignedUsers;
+    }
+
+    /**
+     * Add taskHasAttachment
+     *
+     * @param TaskHasAttachment $taskHasAttachment
+     *
+     * @return Task
+     */
+    public function addTaskHasAttachment(TaskHasAttachment $taskHasAttachment)
+    {
+        $this->taskHasAttachments[] = $taskHasAttachment;
+
+        return $this;
+    }
+
+    /**
+     * Remove taskHasAttachment
+     *
+     * @param TaskHasAttachment $taskHasAttachment
+     */
+    public function removeTaskHasAttachment(TaskHasAttachment $taskHasAttachment)
+    {
+        $this->taskHasAttachments->removeElement($taskHasAttachment);
+    }
+
+    /**
+     * Get taskHasAttachments
+     *
+     * @return ArrayCollection
+     */
+    public function getTaskHasAttachments()
+    {
+        return $this->taskHasAttachments;
     }
 }

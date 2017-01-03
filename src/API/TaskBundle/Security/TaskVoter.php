@@ -87,12 +87,24 @@ class TaskVoter implements VoterInterface
                 return $this->canAddTagToTask($options);
             case VoteOptions::REMOVE_TAG_FROM_TASK:
                 return $this->canRemoveTagFromTask($options);
+            case VoteOptions::SHOW_LIST_OF_TASK_TAGS:
+                return $this->canShowListOfTasksTags($options);
             case VoteOptions::ASSIGN_USER_TO_TASK:
                 return $this->canAssignUserToTask($options);
             case VoteOptions::UPDATE_ASSIGN_USER_TO_TASK:
                 return $this->casUpdateAssignUserToTask($options);
             case VoteOptions::REMOVE_ASSIGN_USER_FROM_TASK:
                 return $this->casRemoveAssignUserFromTask($options);
+            case VoteOptions::ADD_ATTACHMENT_TO_TASK:
+                return $this->canAddAttachmentToTask($options);
+            case VoteOptions::REMOVE_ATTACHMENT_FROM_TASK:
+                return $this->canRemoveAttachmentFromTask($options);
+            case VoteOptions::SHOW_LIST_OF_TASK_ATTACHMENTS:
+                return $this->canShowListOfTaskAttachments($options);
+            case VoteOptions::SHOW_LIST_OF_TASK_FOLLOWERS:
+                return $this->canShowListOfTaskFollowers($options);
+            case VoteOptions::SHOW_LIST_OF_USERS_ASSIGNED_TO_TASK:
+                return $this->canShowListOfUsersAssignedToTask($options);
             default:
                 return false;
         }
@@ -102,7 +114,7 @@ class TaskVoter implements VoterInterface
     /**
      * @return bool
      */
-    public function isAdmin():bool
+    public function isAdmin(): bool
     {
         return $this->decisionManager->decide($this->token, ['ROLE_ADMIN']);
     }
@@ -114,7 +126,7 @@ class TaskVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    private function canList(array $options):bool
+    private function canList(array $options): bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
@@ -149,21 +161,21 @@ class TaskVoter implements VoterInterface
     }
 
     /**
-     * User can see a task
+     * User can view a task
      *
      * @param  $task
      * @return bool
      * @throws \InvalidArgumentException
      */
-    private function canRead(Task $task):bool
+    private function canRead(Task $task): bool
     {
-
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
         }
 
-        // User can see a task if he created it or task is requested by him
-        if ($task->getCreatedBy()->getId() === $this->user->getId() || $task->getRequestedBy()->getId() === $this->user->getId()) {
+        // User can view a task if he created it or task is requested by him
+        // and this task isn't in any Project
+        if (null === $task->getProject() && ($task->getCreatedBy()->getId() === $this->user->getId() || $task->getRequestedBy()->getId() === $this->user->getId())) {
             return true;
         }
 
@@ -176,11 +188,11 @@ class TaskVoter implements VoterInterface
             if ($userHasProject instanceof UserHasProject) {
                 $acl = $userHasProject->getAcl();
                 if (null !== $acl) {
-                    // User can see a task if this task is from project where user has access: VIEW_ALL_TASKS_IN_PROJECT
+                    // User can view a task if this task is from project where user has access: VIEW_ALL_TASKS_IN_PROJECT
                     if (in_array(VoteOptions::VIEW_ALL_TASKS_IN_PROJECT, $acl, true)) {
                         return true;
                     } elseif (in_array(VoteOptions::VIEW_COMPANY_TASKS_IN_PROJECT, $acl, true)) {
-                        // User can see a task if this task is from project where user has access: VIEW_COMPANY_TASKS_IN_PROJECT
+                        // User can view a task if this task is from project where user has access: VIEW_COMPANY_TASKS_IN_PROJECT
                         // and user is from the same company like creator of task
                         $usersCompany = $this->user->getCompany();
                         $companyU = ($usersCompany instanceof Company ? $usersCompany : false);
@@ -189,6 +201,10 @@ class TaskVoter implements VoterInterface
                         $companyT = ($taskCreatorCompany instanceof Company ? $taskCreatorCompany : false);
 
                         return $companyU && $companyT && $companyU->getId() === $companyT->getId();
+                    } elseif (in_array(VoteOptions::VIEW_USER_TASKS_IN_PROJECT, $acl, true) && ($task->getCreatedBy()->getId() === $this->user->getId() || $task->getRequestedBy()->getId() === $this->user->getId())) {
+                        // User can view a task if this task is from project where user has access: VIEW_USERS_TASKS_IN_PROJECT
+                        // and user created or requested this task
+                        return true;
                     }
                 }
                 return false;
@@ -205,7 +221,7 @@ class TaskVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    private function canCreate($project):bool
+    private function canCreate($project): bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
@@ -233,25 +249,15 @@ class TaskVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    private function canUpdate($task):bool
+    private function canUpdate($task): bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
-            return true;
-        }
-
-        // User can update task if he created it
-        if ($task->getCreatedBy()->getId() === $this->user->getId()) {
             return true;
         }
 
         $project = $task->getProject();
 
         if ($project instanceof Project) {
-            // User can update all tasks in it's own project
-            if ($project->getCreatedBy()->getId() === $this->user->getId()) {
-                return true;
-            }
-
             // User can update task if he has UPDATE_ALL_TASKS_IN_PROJECT access in projects ACL
             $actions [] = VoteOptions::UPDATE_ALL_TASKS_IN_PROJECT;
             if ($this->hasAclProjectRights($actions, $project->getId())) {
@@ -289,25 +295,15 @@ class TaskVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    private function canDelete($task):bool
+    private function canDelete($task): bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
-            return true;
-        }
-
-        // User can delete task if he created it
-        if ($task->getCreatedBy()->getId() === $this->user->getId()) {
             return true;
         }
 
         $project = $task->getProject();
 
         if ($project instanceof Project) {
-            // User can delete all tasks in it's own project
-            if ($project->getCreatedBy()->getId() === $this->user->getId()) {
-                return true;
-            }
-
             // User can delete task if he has UPDATE_ALL_TASKS_IN_PROJECT access in projects ACL
             $actions [] = VoteOptions::UPDATE_ALL_TASKS_IN_PROJECT;
             if ($this->hasAclProjectRights($actions, $project->getId())) {
@@ -344,7 +340,7 @@ class TaskVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    public function canAddTaskFollower(array $options):bool
+    public function canAddTaskFollower(array $options): bool
     {
         $task = $options['task'];
         $follower = $options['follower'];
@@ -365,7 +361,7 @@ class TaskVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    public function canRemoveTaskFollower(array $options):bool
+    public function canRemoveTaskFollower(array $options): bool
     {
         $task = $options['task'];
 
@@ -374,10 +370,22 @@ class TaskVoter implements VoterInterface
     }
 
     /**
+     * @param $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function canShowListOfTaskFollowers(Task $task): bool
+    {
+        // User Can View Task Followers if he CAN READ this task
+        return $this->canRead($task);
+    }
+
+    /**
      * @param array $options
      * @return bool
+     * @throws \InvalidArgumentException
      */
-    public function canAddTagToTask(array $options):bool
+    public function canAddTagToTask(array $options): bool
     {
         /** @var Task $task */
         $task = $options['task'];
@@ -396,18 +404,32 @@ class TaskVoter implements VoterInterface
     /**
      * @param array $options
      * @return bool
+     * @throws \InvalidArgumentException
      */
-    public function canRemoveTagFromTask(array $options):bool
+    public function canRemoveTagFromTask(array $options): bool
     {
         // User can remove tag from task if he can add it
         return $this->canAddTagToTask($options);
     }
 
     /**
+     * @param Task $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     * @internal param array $options
+     */
+    public function canShowListOfTasksTags(Task $task): bool
+    {
+        // User Can View Tags of Task if he CAN READ this task
+        return $this->canRead($task);
+    }
+
+    /**
      * @param array $options
      * @return bool
+     * @throws \InvalidArgumentException
      */
-    public function canAssignUserToTask(array $options):bool
+    public function canAssignUserToTask(array $options): bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
@@ -465,7 +487,7 @@ class TaskVoter implements VoterInterface
      * @param TaskHasAssignedUser $taskHasAssignedUser
      * @return bool
      */
-    private function casUpdateAssignUserToTask(TaskHasAssignedUser $taskHasAssignedUser):bool
+    private function casUpdateAssignUserToTask(TaskHasAssignedUser $taskHasAssignedUser): bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
@@ -478,11 +500,56 @@ class TaskVoter implements VoterInterface
     /**
      * @param TaskHasAssignedUser $taskHasAssignedUser
      * @return bool
+     * @throws \InvalidArgumentException
      */
-    public function casRemoveAssignUserFromTask(TaskHasAssignedUser $taskHasAssignedUser):bool
+    public function casRemoveAssignUserFromTask(TaskHasAssignedUser $taskHasAssignedUser): bool
     {
         // User Can remove Assigned User from Task if he can UPDATE_TASK
         return $this->canUpdate($taskHasAssignedUser->getTask());
+    }
+
+    /**
+     * @param Task $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function canShowListOfUsersAssignedToTask(Task $task): bool
+    {
+        // User Can view a list of users assigned to Task if he can READ_TASK
+        return $this->canRead($task);
+    }
+
+    /**
+     * @param $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function canAddAttachmentToTask(Task $task): bool
+    {
+        // User Can add Attachment to Task if he can UPDATE_TASK
+        return $this->canUpdate($task);
+    }
+
+    /**
+     * @param $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function canRemoveAttachmentFromTask(Task $task): bool
+    {
+        // User Can Remove Attachment from Task if he can Add this attachment to this task
+        return $this->canAddAttachmentToTask($task);
+    }
+
+    /**
+     * @param $task
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function canShowListOfTaskAttachments(Task $task): bool
+    {
+        // User Can View Attachments of Task if he CAN READ this task
+        return $this->canRead($task);
     }
 
     /**
@@ -492,7 +559,7 @@ class TaskVoter implements VoterInterface
      * @param Task $task
      * @return bool
      */
-    private function userCanFollowTask(User $user, Task $task):bool
+    private function userCanFollowTask(User $user, Task $task): bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
@@ -512,11 +579,11 @@ class TaskVoter implements VoterInterface
             if ($userHasProject instanceof UserHasProject) {
                 $acl = $userHasProject->getAcl();
                 if (null !== $acl) {
-                    // User can see a task if this task is from project where user has access: VIEW_ALL_TASKS_IN_PROJECT
+                    // User can view a task if this task is from project where user has access: VIEW_ALL_TASKS_IN_PROJECT
                     if (in_array(VoteOptions::VIEW_ALL_TASKS_IN_PROJECT, $acl, true)) {
                         return true;
                     } elseif (in_array(VoteOptions::VIEW_COMPANY_TASKS_IN_PROJECT, $acl, true)) {
-                        // User can see a task if this task is from project where user has access: VIEW_COMPANY_TASKS_IN_PROJECT
+                        // User can view a task if this task is from project where user has access: VIEW_COMPANY_TASKS_IN_PROJECT
                         // and user is from the same company like creator of task
                         $usersCompany = $user->getCompany();
                         $companyU = ($usersCompany instanceof Company ? $usersCompany : false);
@@ -544,7 +611,7 @@ class TaskVoter implements VoterInterface
      * @internal param string $action
      *
      */
-    private function hasAclProjectRights(array $actions, int $projectId):bool
+    private function hasAclProjectRights(array $actions, int $projectId): bool
     {
         $userHasProject = $this->em->getRepository('APITaskBundle:UserHasProject')->findOneBy([
             'project' => $projectId,
@@ -576,7 +643,7 @@ class TaskVoter implements VoterInterface
      * @internal param string $action
      *
      */
-    private function hasAclProjectsRights(array $actions):bool
+    private function hasAclProjectsRights(array $actions): bool
     {
         $userHasProjects = $this->user->getUserHasProjects();
 
@@ -607,7 +674,7 @@ class TaskVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    private function hasAclRights($action, User $user):bool
+    private function hasAclRights($action, User $user): bool
     {
         if (!in_array($action, VoteOptions::getConstants(), true)) {
             throw new \InvalidArgumentException('Action ins not valid, please list your action in the options list');

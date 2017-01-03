@@ -49,7 +49,7 @@ class TaskService
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function getTasksResponse(int $page, array $options):array
+    public function getTasksResponse(int $page, array $options): array
     {
         $data = $this->getRequiredTasks($page, $options);
         $tasks = $data['tasks'];
@@ -84,8 +84,8 @@ class TaskService
     private function getTaskLinks(int $id)
     {
         return [
-            'put' => $this->router->generate('tasks_update', ['id' => $id, 'projectId'=>'all','requestedUserId'=>'all']),
-            'patch' => $this->router->generate('tasks_partial_update', ['id' => $id, 'projectId'=>'all','requestedUserId'=>'all']),
+            'put' => $this->router->generate('tasks_update', ['id' => $id, 'projectId' => 'all', 'requestedUserId' => 'all']),
+            'patch' => $this->router->generate('tasks_partial_update', ['id' => $id, 'projectId' => 'all', 'requestedUserId' => 'all']),
             'delete' => $this->router->generate('tasks_delete', ['id' => $id]),
         ];
     }

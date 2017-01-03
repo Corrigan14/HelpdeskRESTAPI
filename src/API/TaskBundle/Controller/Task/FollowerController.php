@@ -7,9 +7,9 @@ use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class FollowerController
@@ -18,6 +18,96 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
  */
 class FollowerController extends ApiBaseController
 {
+    /**
+     * ### Response ###
+     *      {
+     *         "data":
+     *         {
+     *            "0":
+     *            {
+     *               "id": 11,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk",
+     *               "roles": "[\"ROLE_ADMIN\"]",
+     *               "is_active": true,
+     *               "acl": "[]"
+     *            }
+     *         },
+     *         "_links":
+     *         {
+     *              "self": "/api/v1/task-bundle/tasks/7/follower?page=1",
+     *              "first": "/api/v1/task-bundle/tasks/7/follower?page=1",
+     *              "prev": false,
+     *              "next": false,
+     *              "last": "/api/v1/task-bundle/tasks/7/follower?page=1"
+     *         },
+     *         "total": 1,
+     *         "page": 1,
+     *         "numberOfPages": 1
+     *      }
+     *
+     * @ApiDoc(
+     *  description="Returns array of tasks followers",
+     *  filters={
+     *     {
+     *       "name"="page",
+     *       "description"="Pagination, limit is set to 10 records"
+     *     }
+     *  },
+     *  requirements={
+     *     {
+     *       "name"="taskId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of task"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity"
+     *  }
+     * )
+     *
+     * @param Request $request
+     * @param int $taskId
+     * @return Response
+     * @throws \LogicException
+     */
+    public function listOfTasksFollowersAction(Request $request, int $taskId)
+    {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_LIST_OF_TASK_FOLLOWERS, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $page = $request->get('page') ?: 1;
+
+        $options['task'] = $task;
+        $routeOptions = [
+            'routeName' => 'tasks_list_of_tasks_followers',
+            'routeParams' => ['taskId' => $taskId]
+        ];
+
+        $followersArray = $this->get('task_additional_service')->getTaskFollowerResponse($options, $page, $routeOptions);
+        return $this->createApiResponse($followersArray, StatusCodesHelper::SUCCESSFUL_CODE);
+    }
+
     /**
      * ### Response ###
      *      {
@@ -76,7 +166,7 @@ class FollowerController extends ApiBaseController
      *
      * @param int $taskId
      * @param int $userId
-     * @return JsonResponse|Response
+     * @return Response
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -177,7 +267,7 @@ class FollowerController extends ApiBaseController
      *
      * @param int $taskId
      * @param int $userId
-     * @return JsonResponse|Response
+     * @return Response
      * @throws \LogicException
      */
     public function removeFollowerFromTaskAction(int $taskId, int $userId)
@@ -227,7 +317,7 @@ class FollowerController extends ApiBaseController
      * @return bool
      * @throws \LogicException
      */
-    private function canAddTaskFollower(User $user, Task $task):bool
+    private function canAddTaskFollower(User $user, Task $task): bool
     {
         $taskHasFollower = $task->getFollowers();
 
@@ -236,4 +326,5 @@ class FollowerController extends ApiBaseController
         }
         return true;
     }
+
 }

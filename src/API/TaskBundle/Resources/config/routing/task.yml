@@ -1,43 +1,50 @@
 tasks_list:
     path:     /tasks
-    defaults: { _controller: APITaskBundle:Task/Task:list }
+    defaults: { _controller: APITaskBundle:Task:list }
     methods: [GET]
 
 task:
     path:     /tasks/{id}
-    defaults: { _controller: APITaskBundle:Task/Task:get }
+    defaults: { _controller: APITaskBundle:Task:get }
     methods: [GET]
     requirements:
         id: '\d+'
 
 tasks_create:
     path:     /tasks/project/{projectId}/user/{requestedUserId}
-    defaults: { _controller: APITaskBundle:Task/Task:create }
+    defaults: { _controller: APITaskBundle:Task:create }
     methods: [POST]
 
 tasks_update:
     path:     /tasks/{id}/project/{projectId}/user/{requestedUserId}
-    defaults: { _controller: APITaskBundle:Task/Task:update }
+    defaults: { _controller: APITaskBundle:Task:update }
     methods: [PUT]
     requirements:
             id: '\d+'
 
 tasks_partial_update:
     path:     /tasks/{id}/project/{projectId}/user/{requestedUserId}
-    defaults: { _controller: APITaskBundle:Task/Task:updatePartial }
+    defaults: { _controller: APITaskBundle:Task:updatePartial }
     methods: [PATCH]
     requirements:
             id: '\d+'
 
 tasks_delete:
     path:     /tasks/{id}
-    defaults: { _controller: APITaskBundle:Task/Task:delete }
+    defaults: { _controller: APITaskBundle:Task:delete }
     methods: [DELETE]
     requirements:
             id: '\d+'
 
+tasks_list_of_tasks_followers:
+    path:     /tasks/{taskId}/follower
+    defaults: { _controller: APITaskBundle:Task/Follower:listOfTasksFollowers}
+    methods: [GET]
+    requirements:
+            taskId: '\d+'
+
 tasks_add_follower_to_task:
-    path:     /tasks/{taskId}/user/{userId}
+    path:     /tasks/{taskId}/follower/{userId}
     defaults: { _controller: APITaskBundle:Task/Follower:addFollowerToTask}
     methods: [POST]
     requirements:
@@ -45,12 +52,19 @@ tasks_add_follower_to_task:
             userId: '\d+'
 
 tasks_remove_follower_from_task:
-    path:     /tasks/{taskId}/user/{userId}
+    path:     /tasks/{taskId}/follower/{userId}
     defaults: { _controller: APITaskBundle:Task/Follower:removeFollowerFromTask}
     methods: [PATCH]
     requirements:
             taskId: '\d+'
             userId: '\d+'
+
+tasks_list_of_tasks_tags:
+    path:     /tasks/{taskId}/tag
+    defaults: { _controller: APITaskBundle:Task/Tag:listOfTasksTags}
+    methods: [GET]
+    requirements:
+            taskId: '\d+'
 
 tasks_add_tag_to_task:
     path:     /tasks/{taskId}/tag/{tagId}
@@ -67,6 +81,13 @@ tasks_remove_tag_from_task:
     requirements:
             taskId: '\d+'
             tagId: '\d+'
+
+tasks_list_of_tasks_assigned_users:
+    path:     /tasks/{taskId}/assign-user
+    defaults: { _controller: APITaskBundle:Task/Assign:listOfTasksAssignedUsers}
+    methods: [GET]
+    requirements:
+            taskId: '\d+'
 
 tasks_assign_user_to_task:
     path:     /tasks/{taskId}/assign-user/{userId}
@@ -92,3 +113,24 @@ tasks_remove_assign_user_from_task:
     requirements:
             taskId: '\d+'
             userId: '\d+'
+
+tasks_list_of_tasks_attachments:
+    path:     /tasks/{taskId}/attachment
+    defaults: { _controller: APITaskBundle:Task/Attachment:listOfTasksAttachments}
+    methods: [GET]
+    requirements:
+            taskId: '\d+'
+
+tasks_add_attachment_to_task:
+    path:     /tasks/{taskId}/attachment/{slug}
+    defaults: { _controller: APITaskBundle:Task/Attachment:addAttachmentToTask}
+    methods: [POST]
+    requirements:
+            taskId: '\d+'
+
+tasks_remove_attachment_from_task:
+    path:     /tasks/{taskId}/attachment/{slug}
+    defaults: { _controller: APITaskBundle:Task/Attachment:removeAttachmentFromTask}
+    methods: [DELETE]
+    requirements:
+            taskId: '\d+'

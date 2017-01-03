@@ -7,9 +7,9 @@ use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class TagController
@@ -18,6 +18,92 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
  */
 class TagController extends ApiBaseController
 {
+    /**
+     * ### Response ###
+     *      {
+     *         "0":
+     *         {
+     *            "id": 19,
+     *            "title": "Home",
+     *            "color": "DFD112",
+     *            "public": false,
+     *            "created_by": ⊕{...}
+     *         },
+     *         "1":
+     *         {
+     *            "id": 20,
+     *            "title": "Work",
+     *            "color": "DFD115",
+     *            "public": true,
+     *            "created_by": ⊕{...}
+     *         }
+     *      }
+     *
+     * @ApiDoc(
+     *  description="Returns array of tasks tags",
+     *  filters={
+     *     {
+     *       "name"="page",
+     *       "description"="Pagination, limit is set to 10 records"
+     *     }
+     *  },
+     *  requirements={
+     *     {
+     *       "name"="taskId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of task"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity"
+     *  }
+     * )
+     *
+     * @param Request $request
+     * @param int $taskId
+     * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \LogicException
+     */
+    public function listOfTasksTagsAction(Request $request, int $taskId)
+    {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_LIST_OF_TASK_TAGS, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $page = $request->get('page') ?: 1;
+
+        $options['task'] = $task;
+        $routeOptions = [
+            'routeName' => 'tasks_list_of_tasks_tags',
+            'routeParams' => ['taskId' => $taskId]
+        ];
+
+        $tagsArray = $this->get('task_additional_service')->getTaskTagsResponse($options, $page, $routeOptions);
+        return $this->createApiResponse($tagsArray, StatusCodesHelper::SUCCESSFUL_CODE);
+    }
+
     /**
      * ### Response ###
      *      {
@@ -72,7 +158,9 @@ class TagController extends ApiBaseController
      *
      * @param int $taskId
      * @param int $tagId
-     * @return JsonResponse|Response
+     * @return Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function addTagToTaskAction(int $taskId, int $tagId)
     {
@@ -167,7 +255,8 @@ class TagController extends ApiBaseController
      *
      * @param int $taskId
      * @param int $tagId
-     * @return JsonResponse|Response
+     * @return Response
+     * @throws \LogicException
      */
     public function removeTagFromTaskAction(int $taskId, int $tagId)
     {
@@ -217,7 +306,7 @@ class TagController extends ApiBaseController
      * @param Tag $tag
      * @return bool
      */
-    private function canAddTagToTask(Task $task, Tag $tag):bool
+    private function canAddTagToTask(Task $task, Tag $tag): bool
     {
         $taskHasTags = $task->getTags();
 

@@ -49,7 +49,7 @@ class Status
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskHasAssignedUser", mappedBy="taskHasAssignedUsers")
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskHasAssignedUser", mappedBy="status")
      * @Serializer\Exclude()
      */
     private $taskHasAssignedUsers;

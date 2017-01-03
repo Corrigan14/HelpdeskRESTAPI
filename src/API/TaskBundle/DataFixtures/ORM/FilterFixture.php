@@ -53,6 +53,9 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
         $filter->setFilter($filterData);
         $filter->setPublic(true);
         $filter->setCreatedBy($user);
+        $filter->setIsActive(true);
+        $filter->setReport(false);
+        $filter->setDefault(false);
 
         $manager->persist($filter);
 
@@ -61,6 +64,9 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
         $filter->setFilter($filterData);
         $filter->setPublic(false);
         $filter->setCreatedBy($admin);
+        $filter->setIsActive(true);
+        $filter->setReport(false);
+        $filter->setDefault(false);
 
         $manager->persist($filter);
 
@@ -70,6 +76,21 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
         $filter->setPublic(false);
         $filter->setProject($project);
         $filter->setCreatedBy($user);
+        $filter->setIsActive(true);
+        $filter->setReport(false);
+        $filter->setDefault(false);
+
+        $manager->persist($filter);
+
+        $filter = new Filter();
+        $filter->setTitle('Users PROJECT DEFAULT PRIVATE Filter where status=new, creator = admin, user, archived = true');
+        $filter->setFilter($filterData);
+        $filter->setPublic(false);
+        $filter->setProject($project);
+        $filter->setCreatedBy($user);
+        $filter->setDefault(true);
+        $filter->setIsActive(true);
+        $filter->setReport(false);
 
         $manager->persist($filter);
         $manager->flush();

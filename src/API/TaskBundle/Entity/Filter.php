@@ -52,6 +52,27 @@ class Filter
     private $filter;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="`report`", type="boolean", options={"default":0})
+     */
+    private $report;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="is_active", type="boolean", options={"default":1})
+     */
+    private $is_active;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="`default`", type="boolean", options={"default":0})
+     */
+    private $default;
+
+    /**
      * @var User
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="filters")
@@ -198,5 +219,77 @@ class Filter
     public function getProject()
     {
         return $this->project;
+    }
+
+    /**
+     * Set report
+     *
+     * @param boolean $report
+     *
+     * @return Filter
+     */
+    public function setReport($report)
+    {
+        $this->report = $report;
+
+        return $this;
+    }
+
+    /**
+     * Get report
+     *
+     * @return boolean
+     */
+    public function getReport()
+    {
+        return $this->report;
+    }
+
+    /**
+     * Set isActive
+     *
+     * @param boolean $isActive
+     *
+     * @return Filter
+     */
+    public function setIsActive($isActive)
+    {
+        $this->is_active = $isActive;
+
+        return $this;
+    }
+
+    /**
+     * Get isActive
+     *
+     * @return boolean
+     */
+    public function getIsActive()
+    {
+        return $this->is_active;
+    }
+
+    /**
+     * Set default
+     *
+     * @param boolean $default
+     *
+     * @return Filter
+     */
+    public function setDefault($default)
+    {
+        $this->default = $default;
+
+        return $this;
+    }
+
+    /**
+     * Get default
+     *
+     * @return boolean
+     */
+    public function getDefault()
+    {
+        return $this->default;
     }
 }

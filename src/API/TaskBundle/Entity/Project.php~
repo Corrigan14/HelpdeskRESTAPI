@@ -272,4 +272,38 @@ class Project
     {
         return $this->tasks;
     }
+
+    /**
+     * Add filter
+     *
+     * @param Filter $filter
+     *
+     * @return Project
+     */
+    public function addFilter(Filter $filter)
+    {
+        $this->filters[] = $filter;
+
+        return $this;
+    }
+
+    /**
+     * Remove filter
+     *
+     * @param Filter $filter
+     */
+    public function removeFilter(Filter $filter)
+    {
+        $this->filters->removeElement($filter);
+    }
+
+    /**
+     * Get filters
+     *
+     * @return ArrayCollection
+     */
+    public function getFilters()
+    {
+        return $this->filters;
+    }
 }

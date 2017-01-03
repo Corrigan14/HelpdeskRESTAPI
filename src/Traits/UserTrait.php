@@ -89,7 +89,7 @@ trait UserTrait
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Filter", mappedBy="project")
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Filter", mappedBy="createdBy")
      * @Exclude()
      */
     private $filters;

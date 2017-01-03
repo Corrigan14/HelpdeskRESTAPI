@@ -69,6 +69,10 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *       "description"="Pagination, limit is set to 10 records"
      *     },
      *     {
+     *       "name"="search",
+     *       "description"="Search string - system is searching in ID and TITLE"
+     *     },
+     *     {
      *       "name"="status",
      *       "description"="A list of coma separated ID's of statuses f.i. 1,2,3,4"
      *     },

@@ -196,23 +196,35 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *     },
      *     {
      *       "name"="project",
-     *       "description"="A list of coma separated ID's of Project f.i. 1,2,3"
+     *       "description"="A list of coma separated ID's of Project f.i. 1,2,3.
+     *        Another options:
+     *          NOT - just tasks without projects are returned,
+     *          CURRENT-USER - just tasks from actually logged user's projects are returned."
      *     },
      *     {
      *       "name"="creator",
-     *       "description"="A list of coma separated ID's of Creator f.i. 1,2,3"
+     *       "description"="A list of coma separated ID's of Creator f.i. 1,2,3
+     *        Another option:
+     *          CURRENT-USER - just tasks created by actually logged user are returned."
      *     },
      *     {
      *       "name"="requester",
-     *       "description"="A list of coma separated ID's of Requesters f.i. 1,2,3"
+     *       "description"="A list of coma separated ID's of Requesters f.i. 1,2,3
+     *        Another option:
+     *          CURRENT-USER - just tasks requested by actually logged user are returned."
      *     },
      *     {
      *       "name"="company",
-     *       "description"="A list of coma separated ID's of Companies f.i. 1,2,3"
+     *       "description"="A list of coma separated ID's of Companies f.i. 1,2,3
+     *        Another options:
+     *          CURRENT-USER - just tasks created by users with the same company like logged user are returned."
      *     },
      *     {
      *       "name"="assigned",
-     *       "description"="A list of coma separated ID's of Users f.i. 1,2,3"
+     *       "description"="A list of coma separated ID's of Users f.i. 1,2,3
+     *        Another option:
+     *          NOT - just tasks which aren't assigned to nobody are returned,
+     *          CURRENT-USER - just tasks assigned to actually logged user are returned."
      *     },
      *     {
      *       "name"="tag",
@@ -220,23 +232,25 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *     },
      *     {
      *       "name"="follower",
-     *       "description"="A list of coma separated ID's of Task Followers f.i. 1,2,3"
+     *       "description"="A list of coma separated ID's of Task Followers f.i. 1,2,3
+     *        Another option:
+     *          CURRENT-USER - just tasks followed by actually logged user are returned."
      *     },
      *     {
      *       "name"="createdTime",
-     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30, TO=2015-02-04T05:10:58+05:30"
+     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30"
      *     },
      *     {
      *       "name"="startedTime",
-     *       "description"="A coma separated FROM, TO dates in format 2015-02-04T05:10:58+05:30"
+     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30"
      *     },
      *     {
      *       "name"="deadlineTime",
-     *       "description"="A coma separated FROM, TO dates in format 2015-02-04T05:10:58+05:30"
+     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30"
      *     },
      *     {
      *       "name"="closedTime",
-     *       "description"="A coma separated FROM, TO dates in format 2015-02-04T05:10:58+05:30"
+     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30"
      *     },
      *     {
      *       "name"="archived",
@@ -279,6 +293,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
             'isAdmin' => $this->get('task_voter')->isAdmin(),
             'inFilter' => $filterData['inFilter'],
             'equalFilter' => $filterData['equalFilter'],
+            'isNullFilter' => $filterData['isNullFilter'],
             'dateFilter' => $filterData['dateFilter'],
             'searchFilter' => $filterData['searchFilter'],
             'inFilterAddedParams' => $filterData['inFilterAddedParams'],
@@ -913,6 +928,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $inFilter = [];
         $dateFilter = [];
         $equalFilter = [];
+        $isNullFilter = [];
         $searchFilter = null;
 
         $inFilterAddedParams = [];
@@ -946,23 +962,47 @@ class TaskController extends ApiBaseController implements ControllerInterface
             $filterForUrl['status'] = '&status=' . $status;
         }
         if (null !== $project) {
-            $inFilter['project.id'] = explode(",", $project);
+            if ('not' === strtolower($project)) {
+                $isNullFilter[] = 'task.project';
+            } elseif ('current-user' === strtolower($project)) {
+                $equalFilter['projectCreator.id'] = $this->getUser()->getId();
+            } else {
+                $inFilter['project.id'] = explode(",", $project);
+            }
             $filterForUrl['project'] = '&project=' . $project;
         }
         if (null !== $creator) {
-            $inFilter['createdBy.id'] = explode(",", $creator);
+            if ('current-user' === strtolower($creator)) {
+                $equalFilter['createdBy.id'] = $this->getUser()->getId();
+            } else {
+                $inFilter['createdBy.id'] = explode(",", $creator);
+            }
             $filterForUrl['createdBy'] = '&creator=' . $creator;
         }
         if (null !== $requester) {
-            $inFilter['requestedBy.id'] = explode(",", $requester);
+            if ('current-user' === strtolower($requester)) {
+                $equalFilter['requestedBy.id'] = $this->getUser()->getId();
+            } else {
+                $inFilter['requestedBy.id'] = explode(",", $requester);
+            }
             $filterForUrl['requestedBy'] = '&requester=' . $requester;
         }
         if (null !== $company) {
-            $inFilter['company.id'] = explode(",", $company);
+            if ('current-user' === strtolower($company)) {
+                $equalFilter['company.id'] = $this->getUser()->getId();
+            } else {
+                $inFilter['company.id'] = explode(",", $company);
+            }
             $filterForUrl['company'] = '&company=' . $company;
         }
         if (null !== $assigned) {
-            $inFilter['assignedUser.id'] = explode(",", $assigned);
+            if ('not' === strtolower($assigned)) {
+                $isNullFilter[] = 'thau.user';
+            } elseif ('current-user' === strtolower($assigned)) {
+                $equalFilter['assignedUser.id'] = $this->getUser()->getId();
+            } else {
+                $inFilter['assignedUser.id'] = explode(",", $assigned);
+            }
             $filterForUrl['assigned'] = '&assigned=' . $assigned;
         }
         if (null !== $tag) {
@@ -970,7 +1010,11 @@ class TaskController extends ApiBaseController implements ControllerInterface
             $filterForUrl['tag'] = '&tag=' . $tag;
         }
         if (null !== $follower) {
-            $inFilter['followers.id'] = explode(",", $follower);
+            if ('current-user' === $follower) {
+                $equalFilter['followers.id'] = $this->getUser()->getId();
+            } else {
+                $inFilter['followers.id'] = explode(",", $follower);
+            }
             $filterForUrl['followers'] = '&follower=' . $follower;
         }
         if (null !== $created) {
@@ -1047,6 +1091,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
             'inFilter' => $inFilter,
             'equalFilter' => $equalFilter,
             'dateFilter' => $dateFilter,
+            'isNullFilter' => $isNullFilter,
             'searchFilter' => $searchFilter,
             'inFilterAddedParams' => $inFilterAddedParams,
             'equalFilterAddedParams' => $equalFilterAddedParams,

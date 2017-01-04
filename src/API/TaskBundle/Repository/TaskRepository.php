@@ -24,6 +24,7 @@ class TaskRepository extends EntityRepository
         $inFilter = $options['inFilter'];
         $equalFilter = $options['equalFilter'];
         $dateFilter = $options['dateFilter'];
+        $isNullFilter = $options['isNullFilter'];
         $searchFilter = $options['searchFilter'];
         $inFilterAddedParams = $options['inFilterAddedParams'];
         $equalFilterAddedParams = $options['equalFilterAddedParams'];
@@ -34,6 +35,7 @@ class TaskRepository extends EntityRepository
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')
+            ->leftJoin('project.createdBy','projectCreator')
             ->leftJoin('task.createdBy', 'createdBy')
             ->leftJoin('createdBy.company', 'company')
             ->leftJoin('task.requestedBy', 'requestedBy')
@@ -45,7 +47,7 @@ class TaskRepository extends EntityRepository
             $query->innerJoin('task.tags', 'tags');
         }
 
-        if (array_key_exists('followers.id', $inFilter)) {
+        if (array_key_exists('followers.id', $inFilter) || array_key_exists('followers.id', $equalFilter)) {
             $query->innerJoin('task.followers', 'followers');
         }
 
@@ -60,8 +62,15 @@ class TaskRepository extends EntityRepository
             $paramArray['taskTitleParam'] = '%' . $searchFilter . '%';
         }
 
+        foreach ($isNullFilter as $value) {
+            // check if query is allowed
+            if (in_array($value, VariableHelper::$allowedKeysInFilter)) {
+                $query->andWhere($value.' IS NULL');
+            }
+        }
+
         foreach ($inFilter as $key => $value) {
-            // check if key is allowed
+            // check if query is allowed
             if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
                 $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
                 $paramArray['parameters' . $paramNum] = $value;
@@ -159,6 +168,7 @@ class TaskRepository extends EntityRepository
         $inFilter = $options['inFilter'];
         $equalFilter = $options['equalFilter'];
         $dateFilter = $options['dateFilter'];
+        $isNullFilter = $options['isNullFilter'];
         $searchFilter = $options['searchFilter'];
         $inFilterAddedParams = $options['inFilterAddedParams'];
         $equalFilterAddedParams = $options['equalFilterAddedParams'];
@@ -169,6 +179,7 @@ class TaskRepository extends EntityRepository
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')
+            ->leftJoin('project.createdBy','projectCreator')
             ->leftJoin('task.createdBy', 'createdBy')
             ->leftJoin('createdBy.company', 'company')
             ->leftJoin('task.requestedBy', 'requestedBy')
@@ -180,7 +191,7 @@ class TaskRepository extends EntityRepository
             $query->innerJoin('task.tags', 'tags');
         }
 
-        if (array_key_exists('followers.id', $inFilter)) {
+        if (array_key_exists('followers.id', $inFilter) || array_key_exists('followers.id', $equalFilter)) {
             $query->innerJoin('task.followers', 'followers');
         }
 
@@ -194,6 +205,13 @@ class TaskRepository extends EntityRepository
             $query->orWhere('task.title LIKE :taskTitleParam');
             $paramArray['taskIdParam'] = '%' . $searchFilter . '%';
             $paramArray['taskTitleParam'] = '%' . $searchFilter . '%';
+        }
+
+        foreach ($isNullFilter as $value) {
+            // check if query is allowed
+            if (in_array($value, VariableHelper::$allowedKeysInFilter)) {
+                $query->andWhere($value.' IS NULL');
+            }
         }
 
         foreach ($inFilter as $key => $value) {

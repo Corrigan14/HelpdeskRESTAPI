@@ -33,7 +33,11 @@ class VariableHelper
         'task.startedAt',
         'task.deadline',
         'task.closedAt',
-        'project.is_active'
+        'project.is_active',
+        'task.project',
+        'projectCreator.id',
+        'thau.user',
+        'task.tags'
     ];
 
     /**

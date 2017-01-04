@@ -30,7 +30,7 @@ class TaskRepository extends EntityRepository
         $dateFilterAddedParams = $options['dateFilterAddedParams'];
 
         $query = $this->createQueryBuilder('task')
-            ->select('task, taskData')
+            ->select('task, taskData, taskAttribute, project, createdBy, company, requestedBy, thau, status, assignedUser')
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')
@@ -81,14 +81,22 @@ class TaskRepository extends EntityRepository
 
         foreach ($dateFilter as $key => $value) {
             if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
-                if (isset($value[0])) {
-                    if (isset($value[1])) {
-                        $query->andWhere($query->expr()->between($key, ':FROM' . $paramNum, ':TO' . $paramNum));
-                        $paramArray['FROM' . $paramNum] = $value[0];
-                        $paramArray['TO' . $paramNum] = $value[1];
+                if (isset($value['from']) && isset($value['to'])) {
+                    $query->andWhere($query->expr()->between($key, ':FROM' . $paramNum, ':TO' . $paramNum));
+                    $paramArray['FROM' . $paramNum] = $value['from'];
+                    $paramArray['TO' . $paramNum] = $value['to'];
 
-                        $paramNum++;
-                    }
+                    $paramNum++;
+                } elseif (isset($value['from']) && !isset($value['to'])) {
+                    $query->andWhere($key . '>= :FROM' . $paramNum);
+                    $paramArray['FROM' . $paramNum] = $value['from'];
+
+                    $paramNum++;
+                } elseif (isset($value['to']) && !isset($value['from'])) {
+                    $query->andWhere($key . '<= :TO' . $paramNum);
+                    $paramArray['TO' . $paramNum] = $value['to'];
+
+                    $paramNum++;
                 }
             }
         }
@@ -208,18 +216,25 @@ class TaskRepository extends EntityRepository
 
         foreach ($dateFilter as $key => $value) {
             if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
-                if (isset($value[0])) {
-                    if (isset($value[1])) {
-                        $query->andWhere($query->expr()->between($key, ':FROM' . $paramNum, ':TO' . $paramNum));
-                        $paramArray['FROM' . $paramNum] = $value[0];
-                        $paramArray['TO' . $paramNum] = $value[1];
+                if (isset($value['from']) && isset($value['to'])) {
+                    $query->andWhere($query->expr()->between($key, ':FROM' . $paramNum, ':TO' . $paramNum));
+                    $paramArray['FROM' . $paramNum] = $value['from'];
+                    $paramArray['TO' . $paramNum] = $value['to'];
 
-                        $paramNum++;
-                    }
+                    $paramNum++;
+                } elseif (isset($value['from']) && !isset($value['to'])) {
+                    $query->andWhere($key . '>= :FROM' . $paramNum);
+                    $paramArray['FROM' . $paramNum] = $value['from'];
+
+                    $paramNum++;
+                } elseif (isset($value['to']) && !isset($value['from'])) {
+                    $query->andWhere($key . '<= :TO' . $paramNum);
+                    $paramArray['TO' . $paramNum] = $value['to'];
+
+                    $paramNum++;
                 }
             }
         }
-
         foreach ($inFilterAddedParams as $key => $value) {
             $query->andWhere('taskAttribute.id = :attributeId');
             $query->andWhere('taskData.value IN (:parameters' . $paramNum . ')');

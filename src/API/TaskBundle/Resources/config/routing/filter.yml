@@ -1,0 +1,59 @@
+filter_list:
+    path:     /filters
+    defaults: { _controller: APITaskBundle:Filter:list }
+    methods: [GET]
+
+filter_project_list:
+    path:     /filters/project/{projectId}
+    defaults: { _controller: APITaskBundle:Filter:listProjectFilters }
+    methods: [GET]
+    requirements:
+        projectId: '\d+'
+
+filter:
+    path:     /filters/{id}
+    defaults: { _controller: APITaskBundle:Filter:get }
+    methods: [GET]
+    requirements:
+        id: '\d+'
+
+filter_create:
+    path:     /filters
+    defaults: { _controller: APITaskBundle:Filter:create }
+    methods: [POST]
+
+filter_project_create:
+    path:     /filters/project/{projectId}
+    defaults: { _controller: APITaskBundle:Filter:createProjectsFilter }
+    methods: [POST]
+    requirements:
+        projectId: '\d+'
+
+filter_update:
+    path:     /filters/{id}
+    defaults: { _controller: APITaskBundle:Filter:update }
+    methods: [PUT]
+    requirements:
+            id: '\d+'
+
+filter_partial_update:
+    path:     /filters/{id}
+    defaults: { _controller: APITaskBundle:Filter:updatePartial }
+    methods: [PATCH]
+    requirements:
+            id: '\d+'
+
+filter_project_partial_update:
+    path:     /filters/{id}/project/{projectId}
+    defaults: { _controller: APITaskBundle:Filter:updateProjectFilter }
+    methods: [PATCH]
+    requirements:
+            id: '\d+'
+            projectId: '\d+'
+
+filter_delete:
+    path:     /filters/{id}
+    defaults: { _controller: APITaskBundle:Filter:delete }
+    methods: [DELETE]
+    requirements:
+            id: '\d+'

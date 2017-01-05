@@ -3,6 +3,7 @@
 namespace API\TaskBundle\DataFixtures\ORM;
 
 use API\TaskBundle\Entity\Status;
+use API\TaskBundle\Security\StatusOptions;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -36,19 +37,19 @@ class StatusFixture implements FixtureInterface, ContainerAwareInterface, Ordere
     public function load(ObjectManager $manager)
     {
         $status = new Status();
-        $status->setTitle('New');
+        $status->setTitle(StatusOptions::NEW);
         $manager->persist($status);
 
         $status = new Status();
-        $status->setTitle('In Progress');
+        $status->setTitle(StatusOptions::IN_PROGRESS);
         $manager->persist($status);
 
         $status = new Status();
-        $status->setTitle('Completed');
+        $status->setTitle(StatusOptions::COMPLETED);
         $manager->persist($status);
 
         $status = new Status();
-        $status->setTitle('Closed');
+        $status->setTitle(StatusOptions::CLOSED);
         $manager->persist($status);
 
         $manager->flush();

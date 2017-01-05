@@ -398,6 +398,7 @@ class TagController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      204 ="The Tag was successfully deleted",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found Tag",
      *  })
      *
@@ -447,6 +448,8 @@ class TagController extends ApiBaseController implements ControllerInterface
      * @param array $requestData
      * @param bool $create
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */

@@ -2,10 +2,13 @@
 
 namespace API\TaskBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use JMS\Serializer\Annotation\ReadOnly;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Status
@@ -43,6 +46,21 @@ class Status
      */
     private $is_active = true;
 
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskHasAssignedUser", mappedBy="status")
+     * @Serializer\Exclude()
+     */
+    private $taskHasAssignedUsers;
+
+    /**
+     * Status constructor.
+     */
+    public function __construct()
+    {
+        $this->taskHasAssignedUsers = new ArrayCollection();
+    }
 
     /**
      * Get id
@@ -100,5 +118,39 @@ class Status
     public function getIsActive()
     {
         return $this->is_active;
+    }
+
+    /**
+     * Add taskHasAssignedUser
+     *
+     * @param TaskHasAssignedUser $taskHasAssignedUser
+     *
+     * @return Status
+     */
+    public function addTaskHasAssignedUser(TaskHasAssignedUser $taskHasAssignedUser)
+    {
+        $this->taskHasAssignedUsers[] = $taskHasAssignedUser;
+
+        return $this;
+    }
+
+    /**
+     * Remove taskHasAssignedUser
+     *
+     * @param TaskHasAssignedUser $taskHasAssignedUser
+     */
+    public function removeTaskHasAssignedUser(TaskHasAssignedUser $taskHasAssignedUser)
+    {
+        $this->taskHasAssignedUsers->removeElement($taskHasAssignedUser);
+    }
+
+    /**
+     * Get taskHasAssignedUsers
+     *
+     * @return Collection
+     */
+    public function getTaskHasAssignedUsers()
+    {
+        return $this->taskHasAssignedUsers;
     }
 }

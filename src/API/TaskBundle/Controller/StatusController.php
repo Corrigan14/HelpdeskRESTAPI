@@ -187,6 +187,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \LogicException
      * @throws \InvalidArgumentException
      */
     public function createAction(Request $request)

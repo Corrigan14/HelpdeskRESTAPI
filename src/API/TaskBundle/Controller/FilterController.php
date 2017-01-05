@@ -4,6 +4,7 @@ namespace API\TaskBundle\Controller;
 
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
+use Igsem\APIBundle\Services\StatusCodesHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -13,7 +14,7 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
  *
  * @package API\TaskBundle\Controller
  */
-class FilterController extends ApiBaseController  implements ControllerInterface
+class FilterController extends ApiBaseController implements ControllerInterface
 {
     /**
      *  ### Response ###
@@ -51,7 +52,7 @@ class FilterController extends ApiBaseController  implements ControllerInterface
      *     },
      *     {
      *       "name"="isActive",
-     *       "description"="Return's only ACTIVE project if this param is TRUE, only INACTIVE projects if param is FALSE"
+     *       "description"="Return's only ACTIVE filters if this param is TRUE, only INACTIVE filters if param is FALSE"
      *     }
      *  },
      *  headers={
@@ -73,7 +74,26 @@ class FilterController extends ApiBaseController  implements ControllerInterface
      */
     public function listAction(Request $request)
     {
-        // TODO: Implement listAction() method.
+        $page = $request->get('page') ?: 1;
+        $isActive = $request->get('isActive');
+        $public = $request->get('public');
+
+        $filtersForUrl = [];
+        if (null !== $public) {
+            $filtersForUrl['public'] = '&public=' . $public;
+        }
+        if (null !== $isActive) {
+            $filtersForUrl['isActive'] = '&isActive=' . $isActive;
+        }
+
+        $options = [
+            'loggedUser' => $this->getUser(),
+            'isActive' => strtolower($isActive),
+            'public' => strtolower($public),
+            'filtersForUrl' => $filtersForUrl
+        ];
+
+        return $this->json($this->get('filter_service')->getFiltersResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

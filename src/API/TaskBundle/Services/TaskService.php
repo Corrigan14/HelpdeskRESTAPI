@@ -59,7 +59,11 @@ class TaskService
             'data' => $tasks,
         ];
 
-        $pagination = $this->getPagination($page, $count, $options);
+        $url = $this->router->generate('tasks_list');
+        $limit = TaskRepository::LIMIT;
+        $filters = $options['filtersForUrl'];
+
+        $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);
 
         return array_merge($response, $pagination);
     }
@@ -87,42 +91,6 @@ class TaskService
             'put' => $this->router->generate('tasks_update', ['id' => $id, 'projectId' => 'all', 'requestedUserId' => 'all']),
             'patch' => $this->router->generate('tasks_partial_update', ['id' => $id, 'projectId' => 'all', 'requestedUserId' => 'all']),
             'delete' => $this->router->generate('tasks_delete', ['id' => $id]),
-        ];
-    }
-
-    /**
-     * @param int $page
-     * @param int $count
-     * @param array $options
-     * @return array
-     */
-    private function getPagination(int $page, int $count, array $options)
-    {
-        $limit = TaskRepository::LIMIT;
-        $url = $this->router->generate('tasks_list');
-
-        $totalNumberOfPages = ceil($count / $limit);
-        $previousPage = $page > 1 ? $page - 1 : false;
-        $nextPage = $page < $totalNumberOfPages ? $page + 1 : false;
-
-        $filters = $options['filtersForUrl'];
-        $params = '';
-
-        foreach ($filters as $filter) {
-            $params .= $filter;
-        }
-
-        return [
-            '_links' => [
-                'self' => $url . '?page=' . $page . $params,
-                'first' => $url . '?page=' . 1 . $params,
-                'prev' => $previousPage ? $url . '?page=' . $previousPage . $params : false,
-                'next' => $nextPage ? $url . '?page=' . $nextPage . $params : false,
-                'last' => $url . '?page=' . $totalNumberOfPages . $params,
-            ],
-            'total' => $count,
-            'page' => $page,
-            'numberOfPages' => $totalNumberOfPages,
         ];
     }
 

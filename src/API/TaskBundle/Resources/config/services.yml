@@ -34,3 +34,6 @@ services:
     task_additional_service:
           class: API\TaskBundle\Services\TaskAdditionalService
           arguments: ["@doctrine.orm.entity_manager", "@router"]
+    filter_service:
+              class: API\TaskBundle\Services\FilterService
+              arguments: ["@doctrine.orm.entity_manager", "@router"]

@@ -21,6 +21,7 @@ class FilterRepository extends EntityRepository implements RepositoryInterface
      */
     public function getAllEntities(int $page, array $options = [])
     {
+        $query = $this->createQueryBuilder('f');
         return [];
     }
 

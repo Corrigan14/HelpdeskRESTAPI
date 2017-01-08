@@ -92,6 +92,7 @@ class VoteOptions
 
     // FILTER CRUD
     const SHOW_FILTER = 'show_filter';
+    const CREATE_PUBLIC_FILTER = 'create_public_filter';
     const CREATE_FILTER = 'create_filter';
     const UPDATE_FILTER = 'update_filter';
     const DELETE_FILTER = 'delete_filter';

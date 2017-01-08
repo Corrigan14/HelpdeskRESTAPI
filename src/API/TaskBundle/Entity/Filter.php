@@ -47,7 +47,7 @@ class Filter
      * @var string
      *
      * @ORM\Column(name="filter", type="text")
-     * @Assert\NotBlank(message="Filter array is required!")
+     * @Assert\NotBlank(message="Filter is required!")
      */
     private $filter;
 
@@ -62,6 +62,7 @@ class Filter
      * @var bool
      *
      * @ORM\Column(name="is_active", type="boolean", options={"default":1})
+     * @Serializer\ReadOnly()
      */
     private $is_active;
 
@@ -152,13 +153,13 @@ class Filter
     /**
      * Set filter
      *
-     * @param array $filter
+     * @param string $filter
      *
      * @return Filter
      */
     public function setFilter($filter)
     {
-        $this->filter = serialize($filter);
+        $this->filter = $filter;
 
         return $this;
     }
@@ -166,11 +167,11 @@ class Filter
     /**
      * Get filter
      *
-     * @return array
+     * @return string
      */
     public function getFilter()
     {
-        return unserialize($this->filter);
+        return $this->filter;
     }
 
     /**

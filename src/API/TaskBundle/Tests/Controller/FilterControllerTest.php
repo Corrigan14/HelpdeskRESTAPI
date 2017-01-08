@@ -38,19 +38,20 @@ class FixtureControllerTest extends ApiTestCase
     {
         parent::testPostSingleErrors();
 
-        $data = $this->returnPostTestData();
+        $publicData = $this->returnPublicPostTestData();
+        $invalidData = $this->returnInvalidData();
 
         // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
         // entity corresponding to the post data
         $this->removeTestEntity();
 
-        // Try to add Entity with ROLE_USER which hasn't permission to this action
-        $this->getClient(true)->request('POST', $this->getBaseUrl(), $data, [],
+        // Try to add Entity with ROLE_USER which hasn't permission to create PUBLIc filter this action
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), $publicData, [],
             ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Try to add Entity with invalid parameters
-        $this->getClient(true)->request('POST', $this->getBaseUrl(), ['title' => 'test', 'status' => 28], [],
+        // Try to add Entity with invalid parameters - not existed Filter attribute
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), $invalidData, [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
@@ -90,14 +91,6 @@ class FixtureControllerTest extends ApiTestCase
      */
     public function createEntity()
     {
-        $status = $this->em->getRepository('APITaskBundle:Status')->findOneBy([
-            'title' => 'new'
-        ]);
-
-        $user = $this->em->getRepository('APICoreBundle:User')->findOneBy([
-            'username' => 'user'
-        ]);
-
         $admin = $this->em->getRepository('APICoreBundle:User')->findOneBy([
             'username' => 'admin'
         ]);
@@ -106,11 +99,7 @@ class FixtureControllerTest extends ApiTestCase
             'title' => 'Project of user 1'
         ]);
 
-        $filterData = [
-            FilterAttributeOptions::STATUS => $status->getId(),
-            FilterAttributeOptions::CREATOR => $user->getId(), $admin->getId(),
-            FilterAttributeOptions::ARCHIVED => TRUE
-        ];
+        $filterData = 'status=53&project61&creator=41,42&requester=42';
 
         $filter = new Filter();
         $filter->setTitle('Admins PRIVATE Filter for TEST');
@@ -133,7 +122,9 @@ class FixtureControllerTest extends ApiTestCase
      */
     public function removeTestEntity()
     {
-        $this->removeFilter('Admins PRIVATE Filter where status=new, creator = admin, user, archived = true');
+        $this->removeFilter('Admins PRIVATE Filter for TEST');
+        $this->removeFilter('Post test filter');
+        $this->removeFilter('Update test filter');
     }
 
     /**
@@ -156,18 +147,20 @@ class FixtureControllerTest extends ApiTestCase
         ]);
 
         return [
-            FilterAttributeOptions::STATUS => $status->getId(),
-            FilterAttributeOptions::CREATOR => $user->getId(), $admin->getId(),
-            FilterAttributeOptions::ARCHIVED => TRUE
+            'title' => 'Post test filter',
+            'filter' => 'status=' . $status->getId() . '&creator=' . $user->getId() . ',' . $admin->getId(),
+            'public' => false,
+            'report' => false,
+            'default' => false
         ];
     }
 
     /**
-     * Return Update data
+     * Return Post data
      *
      * @return array
      */
-    public function returnUpdateTestData()
+    public function returnPublicPostTestData()
     {
         $status = $this->em->getRepository('APITaskBundle:Status')->findOneBy([
             'title' => 'new'
@@ -182,9 +175,59 @@ class FixtureControllerTest extends ApiTestCase
         ]);
 
         return [
-            FilterAttributeOptions::STATUS => $status->getId(),
-            FilterAttributeOptions::CREATOR => $user->getId(), $admin->getId(),
-            FilterAttributeOptions::ARCHIVED => TRUE
+            'title' => 'Post test filter',
+            'filter' => 'status=' . $status->getId() . '&creator=' . $user->getId() . ',' . $admin->getId(),
+            'public' => true,
+            'report' => false,
+            'default' => false
+        ];
+    }
+
+    /**
+     * Return Post data
+     *
+     * @return array
+     */
+    public function returnInvalidData()
+    {
+        $status = $this->em->getRepository('APITaskBundle:Status')->findOneBy([
+            'title' => 'new'
+        ]);
+
+        $user = $this->em->getRepository('APICoreBundle:User')->findOneBy([
+            'username' => 'user'
+        ]);
+
+        $admin = $this->em->getRepository('APICoreBundle:User')->findOneBy([
+            'username' => 'admin'
+        ]);
+
+        return [
+            'title' => 'Post test filter',
+            'filter' => 'status=' . $status->getId() . '&creator=' . $user->getId() . ',' . $admin->getId().'&gagaha=125',
+            'public' => false,
+            'report' => false,
+            'default' => false
+        ];
+    }
+
+    /**
+     * Return Update data
+     *
+     * @return array
+     */
+    public function returnUpdateTestData()
+    {
+        $user = $this->em->getRepository('APICoreBundle:User')->findOneBy([
+            'username' => 'user'
+        ]);
+
+        return [
+            'title' => 'Update test filter',
+            'filter' => '&creator=' . $user->getId(),
+            'public' => false,
+            'report' => false,
+            'default' => false
         ];
     }
 

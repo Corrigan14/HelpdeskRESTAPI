@@ -4,6 +4,7 @@ namespace API\TaskBundle\Controller;
 
 use API\TaskBundle\Entity\Filter;
 use API\TaskBundle\Security\VoteOptions;
+use API\TaskBundle\Services\FilterAttributeOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
 use Igsem\APIBundle\Services\StatusCodesHelper;
@@ -48,7 +49,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *              "id": 1,
      *              "title": "Users PUBLIC Filter where status=new, creator = admin, user, archived = true",
      *              "public": true,
-     *              "filter": "a:4:{s:6:\"status\";i:49;s:7:\"creator\";i:39;i:0;i:38;s:8:\"archived\";b:1;}",
+     *              "filter": "status=53&project61&creator=41,42&requester=42",
      *              "report": false,
      *              "is_active": true,
      *              "default": false,
@@ -186,7 +187,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *           "id": 2,
      *           "title": "Admins PRIVATE Filter where status=new, creator = admin, user, archived = true",
      *           "public": false,
-     *           "filter": "a:4:{s:6:\"status\";i:49;s:7:\"creator\";i:39;i:0;i:38;s:8:\"archived\";b:1;}",
+     *           "filter": "status=53&project61&creator=41,42&requester=42",
      *           "report": false,
      *           "is_active": true,
      *           "default": false,
@@ -318,7 +319,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *           "id": 2,
      *           "title": "Admins PRIVATE Filter where status=new, creator = admin, user, archived = true",
      *           "public": false,
-     *           "filter": "a:4:{s:6:\"status\";i:49;s:7:\"creator\";i:39;i:0;i:38;s:8:\"archived\";b:1;}",
+     *           "filter": "status=53&project61&creator=41,42&requester=42",
      *           "report": false,
      *           "is_active": true,
      *           "default": false,
@@ -398,7 +399,9 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *
      * @ApiDoc(
      *  resource = true,
-     *  description="Create a new Filter Entity",
+     *  description="Create a new Filter Entity.
+     *  Filter field is expected & separated string like: status=53&project61&creator=41,42&requester=42
+     *  Allowed filter options are saved in FilterAttributeOptions file.",
      *  input={"class"="API\TaskBundle\Entity\Filter"},
      *  headers={
      *     {
@@ -417,12 +420,37 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
-     * @return JsonResponse
+     * @return Response
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function createAction(Request $request)
     {
-        // TODO: Implement createAction() method.
+        $filter = new Filter();
+        $requestData = $request->request->all();
+
+        if (!$this->get('filter_voter')->isGranted(VoteOptions::CREATE_FILTER)) {
+            return $this->accessDeniedResponse();
+        }
+
+        // Check if user can create PUBLIC filter
+        if (true === $requestData['public']) {
+            if (!$this->get('filter_voter')->isGranted(VoteOptions::CREATE_PUBLIC_FILTER)) {
+                return $this->accessDeniedResponse();
+            }
+            $filter->setPublic(true);
+        } else {
+            $filter->setPublic(false);
+        }
+
+        $filter->setIsActive(true);
+        $filter->setCreatedBy($this->getUser());
+
+        return $this->updateEntity($filter, $requestData, true);
     }
+
 
     /**
      * ### Response ###
@@ -432,7 +460,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *           "id": 2,
      *           "title": "Admins PRIVATE Filter where status=new, creator = admin, user, archived = true",
      *           "public": false,
-     *           "filter": "a:4:{s:6:\"status\";i:49;s:7:\"creator\";i:39;i:0;i:38;s:8:\"archived\";b:1;}",
+     *           "filter": "status=53&project61&creator=41,42&requester=42",
      *           "report": false,
      *           "is_active": true,
      *           "default": false,
@@ -547,7 +575,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *           "id": 2,
      *           "title": "Admins PRIVATE Filter where status=new, creator = admin, user, archived = true",
      *           "public": false,
-     *           "filter": "a:4:{s:6:\"status\";i:49;s:7:\"creator\";i:39;i:0;i:38;s:8:\"archived\";b:1;}",
+     *           "filter": "status=53&project61&creator=41,42&requester=42",
      *           "report": false,
      *           "is_active": true,
      *           "default": false,
@@ -670,7 +698,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *           "id": 2,
      *           "title": "Admins PRIVATE Filter where status=new, creator = admin, user, archived = true",
      *           "public": false,
-     *           "filter": "a:4:{s:6:\"status\";i:49;s:7:\"creator\";i:39;i:0;i:38;s:8:\"archived\";b:1;}",
+     *           "filter": "status=53&project61&creator=41,42&requester=42",
      *           "report": false,
      *           "is_active": true,
      *           "default": false,
@@ -794,7 +822,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *           "id": 2,
      *           "title": "Admins PRIVATE Filter where status=new, creator = admin, user, archived = true",
      *           "public": false,
-     *           "filter": "a:4:{s:6:\"status\";i:49;s:7:\"creator\";i:39;i:0;i:38;s:8:\"archived\";b:1;}",
+     *           "filter": "status=53&project61&creator=41,42&requester=42",
      *           "report": false,
      *           "is_active": true,
      *           "default": false,
@@ -941,5 +969,44 @@ class FilterController extends ApiBaseController implements ControllerInterface
     public function deleteAction(int $id)
     {
         // TODO: Implement deleteAction() method.
+    }
+
+    /**
+     * @param Filter $filter
+     * @param array $data
+     * @param bool $create
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \InvalidArgumentException
+     *
+     * @return Response
+     * @throws \LogicException
+     */
+    private function updateEntity(Filter $filter, array $data, $create = false)
+    {
+        $statusCode = $this->getCreateUpdateStatusCode($create);
+
+        // Check if every key sent in filter array is allowed in FilterOptions
+        $filters = explode('&', $data['filter']);
+
+        foreach ($filters as $key => $value) {
+            $filterAttribute = explode('=', $value);
+            if (!in_array($filterAttribute[0], FilterAttributeOptions::getConstants())) {
+                return $this->createApiResponse([
+                    'message' => 'Requested filter parameter ' . $filterAttribute[0] . ' is not allowed!',
+                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            }
+        }
+
+        $errors = $this->get('entity_processor')->processEntity($filter, $data);
+        if (false === $errors) {
+            $this->getDoctrine()->getManager()->persist($filter);
+            $this->getDoctrine()->getManager()->flush();
+
+            $response = $this->get('filter_service')->getFilterResponse($filter);
+            return $this->createApiResponse($response, $statusCode);
+        }
+
+        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

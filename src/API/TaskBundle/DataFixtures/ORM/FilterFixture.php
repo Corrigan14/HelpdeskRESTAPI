@@ -29,28 +29,26 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
         $status = $manager->getRepository('APITaskBundle:Status')->findOneBy([
             'title' => 'new'
         ]);
+        $statId = $status->getId();
 
         $user = $manager->getRepository('APICoreBundle:User')->findOneBy([
             'username' => 'user'
         ]);
+        $userId = $user->getId();
 
         $admin = $manager->getRepository('APICoreBundle:User')->findOneBy([
             'username' => 'admin'
         ]);
+        $adminId = $admin->getId();
 
         $project = $manager->getRepository('APITaskBundle:Project')->findOneBy([
             'title' => 'Project of user 1'
         ]);
-
-        $filterData = [
-            FilterAttributeOptions::STATUS => $status->getId(),
-            FilterAttributeOptions::CREATOR => $user->getId(), $admin->getId(),
-            FilterAttributeOptions::ARCHIVED => TRUE
-        ];
+        $projectId = $project->getId();
 
         $filter = new Filter();
         $filter->setTitle('Users PUBLIC Filter where status=new, creator = admin, user, archived = true');
-        $filter->setFilter($filterData);
+        $filter->setFilter('status=' . $statId . '&project' . $projectId . '&creator=' . $adminId . ',' . $userId . '&requester=' . $userId);
         $filter->setPublic(true);
         $filter->setCreatedBy($user);
         $filter->setIsActive(true);
@@ -61,7 +59,7 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
 
         $filter = new Filter();
         $filter->setTitle('Admins PRIVATE Filter where status=new, creator = admin, user, archived = true');
-        $filter->setFilter($filterData);
+        $filter->setFilter('status=' . $statId . '&project' . $projectId . '&creator=' . $adminId . ',' . $userId . '&requester=' . $userId);
         $filter->setPublic(false);
         $filter->setCreatedBy($admin);
         $filter->setIsActive(true);
@@ -72,7 +70,7 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
 
         $filter = new Filter();
         $filter->setTitle('Users PROJECT PRIVATE Filter where status=new, creator = admin, user, archived = true');
-        $filter->setFilter($filterData);
+        $filter->setFilter('status=' . $statId . '&project' . $projectId . '&creator=' . $adminId . ',' . $userId . '&requester=' . $userId);
         $filter->setPublic(false);
         $filter->setProject($project);
         $filter->setCreatedBy($user);
@@ -84,7 +82,7 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
 
         $filter = new Filter();
         $filter->setTitle('Users PROJECT DEFAULT PRIVATE Filter where status=new, creator = admin, user, archived = true');
-        $filter->setFilter($filterData);
+        $filter->setFilter('status=' . $statId . '&project' . $projectId . '&creator=' . $adminId . ',' . $userId . '&requester=' . $userId);
         $filter->setPublic(false);
         $filter->setProject($project);
         $filter->setCreatedBy($user);

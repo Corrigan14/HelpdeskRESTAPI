@@ -27,7 +27,7 @@ class FilterVoter extends ApiBaseVoter implements VoterInterface
      *
      * @return bool
      */
-    public function isGranted($action, $options)
+    public function isGranted($action, $options = false)
     {
         $this->user = $this->token->getUser();
 
@@ -39,8 +39,10 @@ class FilterVoter extends ApiBaseVoter implements VoterInterface
         switch ($action) {
             case VoteOptions::SHOW_FILTER:
                 return $this->canViewFilter($options);
+            case VoteOptions::CREATE_PUBLIC_FILTER:
+                return $this->canCreatePublicFilter();
             case VoteOptions::CREATE_FILTER:
-                return $this->canCreateFilter($options);
+                return $this->canCreateFilter();
             case VoteOptions::UPDATE_FILTER:
                 return $this->canUpdateFilter($options);
             case VoteOptions::DELETE_FILTER:
@@ -74,12 +76,29 @@ class FilterVoter extends ApiBaseVoter implements VoterInterface
     }
 
     /**
-     * @param array $options
      * @return bool
      */
-    private function canCreateFilter(array $options): bool
+    private function canCreateFilter(): bool
     {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
 
+        // Everybody can create it's own filter
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    private function canCreatePublicFilter(): bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        // User can create public filter if he has ACL CAN_CREATE_PUBLIC_FILTER
+        return $this->hasAclRights(VoteOptions::CREATE_PUBLIC_FILTER, $this->user, VoteOptions::getConstants());
     }
 
 

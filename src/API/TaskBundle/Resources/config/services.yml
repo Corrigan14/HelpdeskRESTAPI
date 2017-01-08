@@ -13,6 +13,9 @@ services:
     project_voter:
         class: API\TaskBundle\Security\ProjectVoter
         arguments: ["@security.access.decision_manager","@security.token_storage"]
+    filter_voter:
+        class: API\TaskBundle\Security\FilterVoter
+        arguments: ["@security.access.decision_manager","@security.token_storage"]
     company_service:
           class: API\TaskBundle\Services\CompanyService
           arguments: ["@doctrine.orm.entity_manager", "@router"]

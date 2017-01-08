@@ -2,12 +2,15 @@
 
 namespace API\TaskBundle\Controller;
 
+use API\TaskBundle\Entity\Filter;
+use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class FilterController
@@ -137,6 +140,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return JsonResponse
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
     public function listAction(Request $request)
@@ -178,13 +183,84 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "2",
+     *           "id": 2,
+     *           "title": "Admins PRIVATE Filter where status=new, creator = admin, user, archived = true",
+     *           "public": false,
+     *           "filter": "a:4:{s:6:\"status\";i:49;s:7:\"creator\";i:39;i:0;i:38;s:8:\"archived\";b:1;}",
+     *           "report": false,
+     *           "is_active": true,
+     *           "default": false,
+     *           "created_by":
+     *           {
+     *              "id": 38,
+     *              "username": "admin",
+     *              "email": "admin@admin.sk",
+     *              "roles": "[\"ROLE_ADMIN\"]",
+     *              "is_active": true,
+     *              "company":
+     *              {
+     *                 "id": 25,
+     *                 "title": "Web-Solutions",
+     *                 "ico": "1102587",
+     *                 "dic": "12587459644",
+     *                 "street": "Cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true,
+     *                 "company_data":
+     *                 {
+     *                    "0":
+     *                    {
+     *                       "id": 25,
+     *                       "value": "10",
+     *                       "company_attribute":
+     *                       {
+     *                          "id": 39,
+     *                          "title": "integer number company additional attribute",
+     *                          "type": "integer_number",
+     *                          "is_active": true
+     *                       }
+     *                    },
+     *                    "1":
+     *                   {
+     *                      "id": 26,
+     *                      "value": "String DATA",
+     *                      "company_attribute":
+     *                      {
+     *                         "id": 37,
+     *                         "title": "input company additional attribute",
+     *                         "type": "input",
+     *                         "is_active": true
+     *                      }
+     *                   }
+     *                 }
+     *              }
+     *           },
+     *           "project":
+     *           {
+     *              "id": 58,
+     *              "title": "Project of admin",
+     *              "description": "Description of project of admin.",
+     *              "is_active": true,
+     *              "created_by":
+     *              {
+     *                  "id": 38,
+     *                  "username": "user222",
+     *                  "email": "user222@admin.sk",
+     *                  "roles": "[\"ROLE_USER\"]",
+     *                  "is_active": true,
+     *                  "company": null
+     *               }
+     *            }
+     *           "created_at": "2017-01-03T17:40:43+0100",
+     *           "updated_at": "2017-01-03T17:40:43+0100"
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/id",
-     *           "patch": "/api/v1/entityName/id",
-     *           "delete": "/api/v1/entityName/id"
+     *           "put": "/api/v1/task-bundle/filters/2",
+     *           "patch": "/api/v1/task-bundle/filters/2",
+     *           "delete": "/api/v1/task-bundle/filters/2"
      *         }
      *      }
      *
@@ -215,11 +291,23 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param int $id
-     * @return JsonResponse
+     * @return Response
+     * @throws \LogicException
      */
     public function getAction(int $id)
     {
-        // TODO: Implement getAction() method.
+        $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
+
+        if (!$filter instanceof Filter) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('filter_voter')->isGranted(VoteOptions::SHOW_FILTER, $filter)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $filterArray = $this->get('filter_service')->getFilterResponse($filter);
+        return $this->createApiResponse($filterArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -227,13 +315,84 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "2",
+     *           "id": 2,
+     *           "title": "Admins PRIVATE Filter where status=new, creator = admin, user, archived = true",
+     *           "public": false,
+     *           "filter": "a:4:{s:6:\"status\";i:49;s:7:\"creator\";i:39;i:0;i:38;s:8:\"archived\";b:1;}",
+     *           "report": false,
+     *           "is_active": true,
+     *           "default": false,
+     *           "created_by":
+     *           {
+     *              "id": 38,
+     *              "username": "admin",
+     *              "email": "admin@admin.sk",
+     *              "roles": "[\"ROLE_ADMIN\"]",
+     *              "is_active": true,
+     *              "company":
+     *              {
+     *                 "id": 25,
+     *                 "title": "Web-Solutions",
+     *                 "ico": "1102587",
+     *                 "dic": "12587459644",
+     *                 "street": "Cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true,
+     *                 "company_data":
+     *                 {
+     *                    "0":
+     *                    {
+     *                       "id": 25,
+     *                       "value": "10",
+     *                       "company_attribute":
+     *                       {
+     *                          "id": 39,
+     *                          "title": "integer number company additional attribute",
+     *                          "type": "integer_number",
+     *                          "is_active": true
+     *                       }
+     *                    },
+     *                    "1":
+     *                   {
+     *                      "id": 26,
+     *                      "value": "String DATA",
+     *                      "company_attribute":
+     *                      {
+     *                         "id": 37,
+     *                         "title": "input company additional attribute",
+     *                         "type": "input",
+     *                         "is_active": true
+     *                      }
+     *                   }
+     *                 }
+     *              }
+     *           },
+     *           "project":
+     *           {
+     *              "id": 58,
+     *              "title": "Project of admin",
+     *              "description": "Description of project of admin.",
+     *              "is_active": true,
+     *              "created_by":
+     *              {
+     *                  "id": 38,
+     *                  "username": "user222",
+     *                  "email": "user222@admin.sk",
+     *                  "roles": "[\"ROLE_USER\"]",
+     *                  "is_active": true,
+     *                  "company": null
+     *               }
+     *            }
+     *           "created_at": "2017-01-03T17:40:43+0100",
+     *           "updated_at": "2017-01-03T17:40:43+0100"
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *           "put": "/api/v1/task-bundle/filters/2",
+     *           "patch": "/api/v1/task-bundle/filters/2",
+     *           "delete": "/api/v1/task-bundle/filters/2"
      *         }
      *      }
      *
@@ -270,13 +429,84 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "2",
+     *           "id": 2,
+     *           "title": "Admins PRIVATE Filter where status=new, creator = admin, user, archived = true",
+     *           "public": false,
+     *           "filter": "a:4:{s:6:\"status\";i:49;s:7:\"creator\";i:39;i:0;i:38;s:8:\"archived\";b:1;}",
+     *           "report": false,
+     *           "is_active": true,
+     *           "default": false,
+     *           "created_by":
+     *           {
+     *              "id": 38,
+     *              "username": "admin",
+     *              "email": "admin@admin.sk",
+     *              "roles": "[\"ROLE_ADMIN\"]",
+     *              "is_active": true,
+     *              "company":
+     *              {
+     *                 "id": 25,
+     *                 "title": "Web-Solutions",
+     *                 "ico": "1102587",
+     *                 "dic": "12587459644",
+     *                 "street": "Cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true,
+     *                 "company_data":
+     *                 {
+     *                    "0":
+     *                    {
+     *                       "id": 25,
+     *                       "value": "10",
+     *                       "company_attribute":
+     *                       {
+     *                          "id": 39,
+     *                          "title": "integer number company additional attribute",
+     *                          "type": "integer_number",
+     *                          "is_active": true
+     *                       }
+     *                    },
+     *                    "1":
+     *                   {
+     *                      "id": 26,
+     *                      "value": "String DATA",
+     *                      "company_attribute":
+     *                      {
+     *                         "id": 37,
+     *                         "title": "input company additional attribute",
+     *                         "type": "input",
+     *                         "is_active": true
+     *                      }
+     *                   }
+     *                 }
+     *              }
+     *           },
+     *           "project":
+     *           {
+     *              "id": 58,
+     *              "title": "Project of admin",
+     *              "description": "Description of project of admin.",
+     *              "is_active": true,
+     *              "created_by":
+     *              {
+     *                  "id": 38,
+     *                  "username": "user222",
+     *                  "email": "user222@admin.sk",
+     *                  "roles": "[\"ROLE_USER\"]",
+     *                  "is_active": true,
+     *                  "company": null
+     *               }
+     *            }
+     *           "created_at": "2017-01-03T17:40:43+0100",
+     *           "updated_at": "2017-01-03T17:40:43+0100"
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *           "put": "/api/v1/task-bundle/filters/2",
+     *           "patch": "/api/v1/task-bundle/filters/2",
+     *           "delete": "/api/v1/task-bundle/filters/2"
      *         }
      *      }
      *
@@ -312,15 +542,86 @@ class FilterController extends ApiBaseController implements ControllerInterface
     /**
      * ### Response ###
      *      {
-     *        "data":
+     *       "data":
      *        {
-     *           "id": "2",
+     *           "id": 2,
+     *           "title": "Admins PRIVATE Filter where status=new, creator = admin, user, archived = true",
+     *           "public": false,
+     *           "filter": "a:4:{s:6:\"status\";i:49;s:7:\"creator\";i:39;i:0;i:38;s:8:\"archived\";b:1;}",
+     *           "report": false,
+     *           "is_active": true,
+     *           "default": false,
+     *           "created_by":
+     *           {
+     *              "id": 38,
+     *              "username": "admin",
+     *              "email": "admin@admin.sk",
+     *              "roles": "[\"ROLE_ADMIN\"]",
+     *              "is_active": true,
+     *              "company":
+     *              {
+     *                 "id": 25,
+     *                 "title": "Web-Solutions",
+     *                 "ico": "1102587",
+     *                 "dic": "12587459644",
+     *                 "street": "Cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true,
+     *                 "company_data":
+     *                 {
+     *                    "0":
+     *                    {
+     *                       "id": 25,
+     *                       "value": "10",
+     *                       "company_attribute":
+     *                       {
+     *                          "id": 39,
+     *                          "title": "integer number company additional attribute",
+     *                          "type": "integer_number",
+     *                          "is_active": true
+     *                       }
+     *                    },
+     *                    "1":
+     *                   {
+     *                      "id": 26,
+     *                      "value": "String DATA",
+     *                      "company_attribute":
+     *                      {
+     *                         "id": 37,
+     *                         "title": "input company additional attribute",
+     *                         "type": "input",
+     *                         "is_active": true
+     *                      }
+     *                   }
+     *                 }
+     *              }
+     *           },
+     *           "project":
+     *           {
+     *              "id": 58,
+     *              "title": "Project of admin",
+     *              "description": "Description of project of admin.",
+     *              "is_active": true,
+     *              "created_by":
+     *              {
+     *                  "id": 38,
+     *                  "username": "user222",
+     *                  "email": "user222@admin.sk",
+     *                  "roles": "[\"ROLE_USER\"]",
+     *                  "is_active": true,
+     *                  "company": null
+     *               }
+     *            }
+     *           "created_at": "2017-01-03T17:40:43+0100",
+     *           "updated_at": "2017-01-03T17:40:43+0100"
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *           "put": "/api/v1/task-bundle/filters/2",
+     *           "patch": "/api/v1/task-bundle/filters/2",
+     *           "delete": "/api/v1/task-bundle/filters/2"
      *         }
      *      }
      *
@@ -366,13 +667,84 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "2",
+     *           "id": 2,
+     *           "title": "Admins PRIVATE Filter where status=new, creator = admin, user, archived = true",
+     *           "public": false,
+     *           "filter": "a:4:{s:6:\"status\";i:49;s:7:\"creator\";i:39;i:0;i:38;s:8:\"archived\";b:1;}",
+     *           "report": false,
+     *           "is_active": true,
+     *           "default": false,
+     *           "created_by":
+     *           {
+     *              "id": 38,
+     *              "username": "admin",
+     *              "email": "admin@admin.sk",
+     *              "roles": "[\"ROLE_ADMIN\"]",
+     *              "is_active": true,
+     *              "company":
+     *              {
+     *                 "id": 25,
+     *                 "title": "Web-Solutions",
+     *                 "ico": "1102587",
+     *                 "dic": "12587459644",
+     *                 "street": "Cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true,
+     *                 "company_data":
+     *                 {
+     *                    "0":
+     *                    {
+     *                       "id": 25,
+     *                       "value": "10",
+     *                       "company_attribute":
+     *                       {
+     *                          "id": 39,
+     *                          "title": "integer number company additional attribute",
+     *                          "type": "integer_number",
+     *                          "is_active": true
+     *                       }
+     *                    },
+     *                    "1":
+     *                   {
+     *                      "id": 26,
+     *                      "value": "String DATA",
+     *                      "company_attribute":
+     *                      {
+     *                         "id": 37,
+     *                         "title": "input company additional attribute",
+     *                         "type": "input",
+     *                         "is_active": true
+     *                      }
+     *                   }
+     *                 }
+     *              }
+     *           },
+     *           "project":
+     *           {
+     *              "id": 58,
+     *              "title": "Project of admin",
+     *              "description": "Description of project of admin.",
+     *              "is_active": true,
+     *              "created_by":
+     *              {
+     *                  "id": 38,
+     *                  "username": "user222",
+     *                  "email": "user222@admin.sk",
+     *                  "roles": "[\"ROLE_USER\"]",
+     *                  "is_active": true,
+     *                  "company": null
+     *               }
+     *            }
+     *           "created_at": "2017-01-03T17:40:43+0100",
+     *           "updated_at": "2017-01-03T17:40:43+0100"
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *           "put": "/api/v1/task-bundle/filters/2",
+     *           "patch": "/api/v1/task-bundle/filters/2",
+     *           "delete": "/api/v1/task-bundle/filters/2"
      *         }
      *      }
      *
@@ -419,13 +791,84 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "2",
+     *           "id": 2,
+     *           "title": "Admins PRIVATE Filter where status=new, creator = admin, user, archived = true",
+     *           "public": false,
+     *           "filter": "a:4:{s:6:\"status\";i:49;s:7:\"creator\";i:39;i:0;i:38;s:8:\"archived\";b:1;}",
+     *           "report": false,
+     *           "is_active": true,
+     *           "default": false,
+     *           "created_by":
+     *           {
+     *              "id": 38,
+     *              "username": "admin",
+     *              "email": "admin@admin.sk",
+     *              "roles": "[\"ROLE_ADMIN\"]",
+     *              "is_active": true,
+     *              "company":
+     *              {
+     *                 "id": 25,
+     *                 "title": "Web-Solutions",
+     *                 "ico": "1102587",
+     *                 "dic": "12587459644",
+     *                 "street": "Cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true,
+     *                 "company_data":
+     *                 {
+     *                    "0":
+     *                    {
+     *                       "id": 25,
+     *                       "value": "10",
+     *                       "company_attribute":
+     *                       {
+     *                          "id": 39,
+     *                          "title": "integer number company additional attribute",
+     *                          "type": "integer_number",
+     *                          "is_active": true
+     *                       }
+     *                    },
+     *                    "1":
+     *                   {
+     *                      "id": 26,
+     *                      "value": "String DATA",
+     *                      "company_attribute":
+     *                      {
+     *                         "id": 37,
+     *                         "title": "input company additional attribute",
+     *                         "type": "input",
+     *                         "is_active": true
+     *                      }
+     *                   }
+     *                 }
+     *              }
+     *           },
+     *           "project":
+     *           {
+     *              "id": 58,
+     *              "title": "Project of admin",
+     *              "description": "Description of project of admin.",
+     *              "is_active": true,
+     *              "created_by":
+     *              {
+     *                  "id": 38,
+     *                  "username": "user222",
+     *                  "email": "user222@admin.sk",
+     *                  "roles": "[\"ROLE_USER\"]",
+     *                  "is_active": true,
+     *                  "company": null
+     *               }
+     *            }
+     *           "created_at": "2017-01-03T17:40:43+0100",
+     *           "updated_at": "2017-01-03T17:40:43+0100"
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *           "put": "/api/v1/task-bundle/filters/2",
+     *           "patch": "/api/v1/task-bundle/filters/2",
+     *           "delete": "/api/v1/task-bundle/filters/2"
      *         }
      *      }
      *

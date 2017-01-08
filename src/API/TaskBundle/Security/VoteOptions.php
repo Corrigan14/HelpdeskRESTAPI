@@ -90,6 +90,11 @@ class VoteOptions
     const REMOVE_ATTACHMENT_FROM_COMMENT = 'remove_attachment_from_comment';
     const SHOW_LIST_OF_COMMENTS_ATTACHMENTS = 'show_list_of_comments_attachments';
 
+    // FILTER CRUD
+    const SHOW_FILTER = 'show_filter';
+    const CREATE_FILTER = 'create_filter';
+    const UPDATE_FILTER = 'update_filter';
+    const DELETE_FILTER = 'delete_filter';
 
     /**
      * @return array

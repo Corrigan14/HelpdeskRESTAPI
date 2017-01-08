@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Services;
 
 
+use API\TaskBundle\Entity\Filter;
 use API\TaskBundle\Repository\FilterRepository;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
@@ -41,8 +42,10 @@ class FilterService
      * @param int $page
      * @param array $options
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
-    public function getFiltersResponse(int $page, array $options):array
+    public function getFiltersResponse(int $page, array $options): array
     {
         $filters = $this->em->getRepository('APITaskBundle:Filter')->getAllEntities($page, $options);
         $count = $this->em->getRepository('APITaskBundle:Filter')->countEntities($options);
@@ -58,5 +61,31 @@ class FilterService
         $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);
 
         return array_merge($response, $pagination);
+    }
+
+    /**
+     * @param Filter $filter
+     * @return array
+     */
+    public function getFilterResponse(Filter $filter): array
+    {
+        return [
+            'data' => $filter,
+            '_links' => $this->getFilterLinks($filter->getId()),
+        ];
+    }
+
+    /**
+     * @param int $id
+     *
+     * @return array
+     */
+    private function getFilterLinks(int $id)
+    {
+        return [
+            'put' => $this->router->generate('filter_update', ['id' => $id]),
+            'patch' => $this->router->generate('filter_partial_update', ['id' => $id]),
+            'delete' => $this->router->generate('filter_delete', ['id' => $id]),
+        ];
     }
 }

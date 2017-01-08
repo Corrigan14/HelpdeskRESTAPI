@@ -35,7 +35,7 @@ class TaskRepository extends EntityRepository
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')
-            ->leftJoin('project.createdBy','projectCreator')
+            ->leftJoin('project.createdBy', 'projectCreator')
             ->leftJoin('task.createdBy', 'createdBy')
             ->leftJoin('createdBy.company', 'company')
             ->leftJoin('task.requestedBy', 'requestedBy')
@@ -65,7 +65,7 @@ class TaskRepository extends EntityRepository
         foreach ($isNullFilter as $value) {
             // check if query is allowed
             if (in_array($value, VariableHelper::$allowedKeysInFilter)) {
-                $query->andWhere($value.' IS NULL');
+                $query->andWhere($value . ' IS NULL');
             }
         }
 
@@ -143,7 +143,6 @@ class TaskRepository extends EntityRepository
         }
 
         if (!empty($paramArray)) {
-
             $query->setParameters($paramArray);
         }
 
@@ -179,7 +178,7 @@ class TaskRepository extends EntityRepository
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')
-            ->leftJoin('project.createdBy','projectCreator')
+            ->leftJoin('project.createdBy', 'projectCreator')
             ->leftJoin('task.createdBy', 'createdBy')
             ->leftJoin('createdBy.company', 'company')
             ->leftJoin('task.requestedBy', 'requestedBy')
@@ -210,7 +209,7 @@ class TaskRepository extends EntityRepository
         foreach ($isNullFilter as $value) {
             // check if query is allowed
             if (in_array($value, VariableHelper::$allowedKeysInFilter)) {
-                $query->andWhere($value.' IS NULL');
+                $query->andWhere($value . ' IS NULL');
             }
         }
 

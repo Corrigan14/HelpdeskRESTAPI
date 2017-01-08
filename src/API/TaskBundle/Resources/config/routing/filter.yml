@@ -3,13 +3,6 @@ filter_list:
     defaults: { _controller: APITaskBundle:Filter:list }
     methods: [GET]
 
-filter_project_list:
-    path:     /filters/project/{projectId}
-    defaults: { _controller: APITaskBundle:Filter:listProjectFilters }
-    methods: [GET]
-    requirements:
-        projectId: '\d+'
-
 filter:
     path:     /filters/{id}
     defaults: { _controller: APITaskBundle:Filter:get }

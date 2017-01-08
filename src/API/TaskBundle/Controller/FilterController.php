@@ -22,16 +22,71 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *       "data":
      *       [
      *          {
-     *            "id": "1",
+     *             "id": 2,
+     *             "title": "Admins PRIVATE Filter where status=new, creator = admin, user, archived = true",
+     *             "public": false,
+     *             "filter": "a:4:{s:6:\"status\";i:49;s:7:\"creator\";i:39;i:0;i:38;s:8:\"archived\";b:1;}",
+     *             "report": false,
+     *             "is_active": true,
+     *             "default": false,
+     *             "createdBy":
+     *             {
+     *                "id": 38,
+     *                "username": "admin",
+     *                "password": "$2y$13$NGzQjENbAf8ooYzIxqMhyuXjXjOMX/mxyJk3.0aO3wDjo6i8E8//m",
+     *                "email": "admin@admin.sk",
+     *                "roles": "[\"ROLE_ADMIN\"]",
+     *                "is_active": true,
+     *                "image": null
+     *             },
+     *             "project": null
+     *          },
+     *          {
+     *              "id": 1,
+     *              "title": "Users PUBLIC Filter where status=new, creator = admin, user, archived = true",
+     *              "public": true,
+     *              "filter": "a:4:{s:6:\"status\";i:49;s:7:\"creator\";i:39;i:0;i:38;s:8:\"archived\";b:1;}",
+     *              "report": false,
+     *              "is_active": true,
+     *              "default": false,
+     *              "createdBy":
+     *             {
+     *                "id": 39,
+     *                "username": "user",
+     *                "password": "$2y$13$cRIMO.MJJp1DrsB89ru97.4q2NftRbXBCiKBPSfcb/bUKgXCtuJ1q",
+     *                "email": "user@user.sk",
+     *                "roles": "[\"ROLE_USER\"]",
+     *                "is_active": true,
+     *                "image": null
+     *             },
+     *             "project":
+     *             {
+     *                "id": 58,
+     *                "title": "Project of admin",
+     *                "description": "Description of project of admin.",
+     *                "is_active": true,
+     *                "createdAt":
+     *                {
+     *                    "date": "2017-01-03 17:40:43.000000",
+     *                    "timezone_type": 3,
+     *                    "timezone": "Europe/Berlin"
+     *                },
+     *                "updatedAt":
+     *                {
+     *                    "date": "2017-01-03 17:40:43.000000",
+     *                    "timezone_type": 3,
+     *                    "timezone": "Europe/Berlin"
+     *                }
+     *             }
      *          }
      *       ],
      *       "_links":
      *       {
-     *           "self": "/entity?page=1",
-     *           "first": "/entity?page=1",
+     *           "self": "/api/v1/task-bundle/filters?page=1",
+     *           "first": "/api/v1/task-bundle/filters?page=1",
      *           "prev": false,
-     *           "next": "/entity?page=2",
-     *            "last": "/entity?page=3"
+     *           "next": "/api/v1/task-bundle/filters?page=2",
+     *            "last": "/api/v1/task-bundle/filters?page=3"
      *       },
      *       "total": 22,
      *       "page": 1,
@@ -48,11 +103,23 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *     },
      *     {
      *       "name"="public",
-     *       "description"="If param is FALSE, return's only logged user's filter's - without PUBLIC filters"
+     *       "description"="Return's only PUBLIC filters if this param is TRUE, only logged user's filter's without
+     *       PUBLIC filters, if param is FALSE. Else returns both: PUBLIC filters and filters created by logged user."
      *     },
      *     {
      *       "name"="isActive",
      *       "description"="Return's only ACTIVE filters if this param is TRUE, only INACTIVE filters if param is FALSE"
+     *     },
+     *     {
+     *       "name"="report",
+     *       "description"="Return's only REPORT filters if this param is TRUE, only FILTER filters if param is FALSE"
+     *     },
+     *     {
+     *       "name"="project",
+     *       "description"="A list of coma separated ID's of Project f.i. 1,2,3.
+     *        Another options:
+     *          NOT - just filters without projects are returned,
+     *          CURRENT-USER - just filters for actually logged user's projects are returned."
      *     }
      *  },
      *  headers={
@@ -64,19 +131,21 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *  },
      *  statusCodes={
      *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied"
+     *      401 ="Unauthorized request"
      *  }
      * )
      *
      * @param Request $request
      * @return JsonResponse
+     * @throws \LogicException
      */
     public function listAction(Request $request)
     {
         $page = $request->get('page') ?: 1;
         $isActive = $request->get('isActive');
         $public = $request->get('public');
+        $report = $request->get('report');
+        $project = $request->get('project');
 
         $filtersForUrl = [];
         if (null !== $public) {
@@ -85,90 +154,23 @@ class FilterController extends ApiBaseController implements ControllerInterface
         if (null !== $isActive) {
             $filtersForUrl['isActive'] = '&isActive=' . $isActive;
         }
+        if (null !== $report) {
+            $filtersForUrl['isActive'] = '&report=' . $report;
+        }
+        if (null !== $project) {
+            $filtersForUrl['project'] = '&project=' . $project;
+        }
 
         $options = [
-            'loggedUser' => $this->getUser(),
+            'loggedUserId' => $this->getUser()->getId(),
             'isActive' => strtolower($isActive),
             'public' => strtolower($public),
+            'report' => strtolower($report),
+            'project' => strtolower($project),
             'filtersForUrl' => $filtersForUrl
         ];
 
         return $this->json($this->get('filter_service')->getFiltersResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);
-    }
-
-    /**
-     *  ### Response ###
-     *     {
-     *       "data":
-     *       [
-     *          {
-     *            "id": "1",
-     *          }
-     *       ],
-     *       "_links":
-     *       {
-     *           "self": "/entity?page=1",
-     *           "first": "/entity?page=1",
-     *           "prev": false,
-     *           "next": "/entity?page=2",
-     *            "last": "/entity?page=3"
-     *       },
-     *       "total": 22,
-     *       "page": 1,
-     *       "numberOfPages": 3
-     *     }
-     *
-     *
-     * @ApiDoc(
-     *  description="Returns a list of Logged user's Filters",
-     *  requirements={
-     *     {
-     *       "name"="projectId",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of project"
-     *     }
-     *  },
-     *  filters={
-     *     {
-     *       "name"="page",
-     *       "description"="Pagination, limit is set to 10 records"
-     *     },
-     *     {
-     *       "name"="public",
-     *       "description"="If param is FALSE, return's only logged user's filter's - without PUBLIC filters"
-     *     },
-     *     {
-     *       "name"="isActive",
-     *       "description"="Return's only ACTIVE project if this param is TRUE, only INACTIVE projects if param is FALSE"
-     *     },
-     *     {
-     *       "name"="default",
-     *       "description"="Return's only DEFAULT project's filter if param is TRUE"
-     *     }
-     *  },
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found entity"
-     *  }
-     * )
-     *
-     * @param Request $request
-     * @param int $projectId
-     * @return JsonResponse
-     */
-    public function listProjectFiltersAction(Request $request, int $projectId)
-    {
-        // TODO: Implement listAction() method.
     }
 
     /**

@@ -54,7 +54,7 @@ class Filter
     /**
      * @var bool
      *
-     * @ORM\Column(name="report", type="boolean", options={"default":0})
+     * @ORM\Column(name="`report`", type="boolean", options={"default":0})
      */
     private $report;
 
@@ -68,7 +68,7 @@ class Filter
     /**
      * @var bool
      *
-     * @ORM\Column(name="default", type="boolean", options={"default":0})
+     * @ORM\Column(name="`default`", type="boolean", options={"default":0})
      */
     private $default;
 

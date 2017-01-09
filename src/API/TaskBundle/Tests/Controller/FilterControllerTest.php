@@ -57,6 +57,66 @@ class FixtureControllerTest extends ApiTestCase
     }
 
     /**
+     * POST SINGLE FILTER FOR PROJECT - success
+     */
+    public function testCreateFilterForProjectSuccess()
+    {
+        $data = $this->returnPostProjectTestData();
+        $project = $this->em->getRepository('APITaskBundle:Project')->findOneBy([
+            'title' => 'Project of user 1'
+        ]);
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        // Create Entity (as admin)
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $project->getId(), $data, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect Entity, response has to include array with data and _links param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertTrue(array_key_exists('data', $response));
+        $this->assertTrue(array_key_exists('_links', $response));
+    }
+
+    /**
+     *  POST SINGLE FILTER FOR PROJECT - errors
+     */
+    public function testCreateFilterForProjectErrors()
+    {
+        $data = $this->returnPostProjectTestData();
+        $invalidData = $this->returnInvalidData();
+        $project = $this->em->getRepository('APITaskBundle:Project')->findOneBy([
+            'title' => 'Project of admin'
+        ]);
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        // Try to create test Entity, without authorization header
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $project->getId(), $data);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to add Entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $project->getId(), $data, [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to add Entity with not existed project Id
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/1254' . $project->getId(), $data, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to add Entity with invalid parameters - not existed Filter attribute
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $project->getId(), $invalidData, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
      * Get the url for requests
      *
      * @return string
@@ -124,6 +184,7 @@ class FixtureControllerTest extends ApiTestCase
     {
         $this->removeFilter('Admins PRIVATE Filter for TEST');
         $this->removeFilter('Post test filter');
+        $this->removeFilter('Post PROJECT test filter');
         $this->removeFilter('Update test filter');
     }
 
@@ -188,6 +249,35 @@ class FixtureControllerTest extends ApiTestCase
      *
      * @return array
      */
+    public function returnPostProjectTestData()
+    {
+        $status = $this->em->getRepository('APITaskBundle:Status')->findOneBy([
+            'title' => 'new'
+        ]);
+
+        $user = $this->em->getRepository('APICoreBundle:User')->findOneBy([
+            'username' => 'user'
+        ]);
+
+        $admin = $this->em->getRepository('APICoreBundle:User')->findOneBy([
+            'username' => 'admin'
+        ]);
+
+        return [
+            'title' => 'Post PROJECT test filter',
+            'filter' => 'status=' . $status->getId() . '&creator=' . $user->getId() . ',' . $admin->getId(),
+            'public' => false,
+            'report' => false,
+            'default' => false
+        ];
+    }
+
+
+    /**
+     * Return Post data
+     *
+     * @return array
+     */
     public function returnInvalidData()
     {
         $status = $this->em->getRepository('APITaskBundle:Status')->findOneBy([
@@ -204,7 +294,7 @@ class FixtureControllerTest extends ApiTestCase
 
         return [
             'title' => 'Post test filter',
-            'filter' => 'status=' . $status->getId() . '&creator=' . $user->getId() . ',' . $admin->getId().'&gagaha=125',
+            'filter' => 'status=' . $status->getId() . '&creator=' . $user->getId() . ',' . $admin->getId() . '&gagaha=125',
             'public' => false,
             'report' => false,
             'default' => false

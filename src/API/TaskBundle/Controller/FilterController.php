@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Controller;
 
 use API\TaskBundle\Entity\Filter;
+use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Security\VoteOptions;
 use API\TaskBundle\Services\FilterAttributeOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
@@ -438,7 +439,9 @@ class FilterController extends ApiBaseController implements ControllerInterface
         // Check if user can create PUBLIC filter
         if (true === $requestData['public']) {
             if (!$this->get('filter_voter')->isGranted(VoteOptions::CREATE_PUBLIC_FILTER)) {
-                return $this->accessDeniedResponse();
+                return $this->createApiResponse([
+                    'message' => 'You have not permission to create PUBLIC filter!',
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
             }
             $filter->setPublic(true);
         } else {
@@ -560,11 +563,41 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @param int $projectId
-     * @return JsonResponse
+     * @return Response
      */
     public function createProjectsFilterAction(Request $request, int $projectId)
     {
-        // TODO: Implement createAction() method.
+        $filter = new Filter();
+        $requestData = $request->request->all();
+
+        $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
+        if (!$project instanceof Project) {
+            return $this->createApiResponse([
+                'message' => 'Project with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        if (!$this->get('filter_voter')->isGranted(VoteOptions::CREATE_PROJECT_FILTER, $project)) {
+            return $this->accessDeniedResponse();
+        }
+
+        // Check if user can create PUBLIC filter
+        if (true === $requestData['public']) {
+            if (!$this->get('filter_voter')->isGranted(VoteOptions::CREATE_PUBLIC_PROJECT_FILTER)) {
+                return $this->createApiResponse([
+                    'message' => 'You have not permission to create PUBLIC filter in this project!',
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            }
+            $filter->setPublic(true);
+        } else {
+            $filter->setPublic(false);
+        }
+
+        $filter->setIsActive(true);
+        $filter->setCreatedBy($this->getUser());
+        $filter->setProject($project);
+
+        return $this->updateEntity($filter, $requestData, true);
     }
 
     /**

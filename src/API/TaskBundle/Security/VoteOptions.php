@@ -94,6 +94,8 @@ class VoteOptions
     const SHOW_FILTER = 'show_filter';
     const CREATE_PUBLIC_FILTER = 'create_public_filter';
     const CREATE_FILTER = 'create_filter';
+    const CREATE_PROJECT_FILTER = 'create_project_filter';
+    const CREATE_PUBLIC_PROJECT_FILTER = 'create_public_project_filter';
     const UPDATE_FILTER = 'update_filter';
     const DELETE_FILTER = 'delete_filter';
 

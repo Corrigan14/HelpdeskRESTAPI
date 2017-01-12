@@ -77,6 +77,8 @@ class FilterVoter implements VoterInterface
                 return $this->canCreatePublicProjectFilter($options);
             case VoteOptions::UPDATE_FILTER:
                 return $this->canUpdateFilter($options);
+            case VoteOptions::UPDATE_PROJECT_FILTER:
+                return $this->canUpdateProjectFilter($options);
             case VoteOptions::DELETE_FILTER:
                 return $this->canDeleteFilter($options);
             default:
@@ -129,7 +131,12 @@ class FilterVoter implements VoterInterface
             return true;
         }
 
-        // User can create public filter if he has ACL CAN_CREATE_PUBLIC_FILTER
+        // User can create public filter if he has ACL CREATE_PUBLIC_FILTER
+        $userACL = $this->user->getAcl();
+        if (in_array(VoteOptions::CREATE_PUBLIC_FILTER, $userACL, true)) {
+            return true;
+        }
+
         return false;
     }
 
@@ -195,7 +202,47 @@ class FilterVoter implements VoterInterface
      */
     private function canUpdateFilter(Filter $filter): bool
     {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
 
+        // User can update filter if he created it
+        if ($this->user->getId() === $filter->getCreatedBy()->getId()) {
+            return true;
+        }
+
+        return false;
+    }
+
+
+    /**
+     * @param array $options
+     * @return bool
+     */
+    private function canUpdateProjectFilter(array $options): bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        $filter = $options['filter'];
+        $project = $options['project'];
+
+        // User can update filter if he created it
+        if ($this->user->getId() === $filter->getCreatedBy()->getId()) {
+            // User can create filter in project if he has ANY permission to this project
+            $userHasProject = $this->em->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+                'user' => $this->user,
+                'project' => $project
+            ]);
+            if ($userHasProject instanceof UserHasProject) {
+                return true;
+            }
+
+            return false;
+        }
+
+        return false;
     }
 
 

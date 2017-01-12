@@ -716,11 +716,36 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @param Request $request
-     * @return JsonResponse
+     * @return Response
      */
     public function updateAction(int $id, Request $request)
     {
-        // TODO: Implement updateAction() method.
+        $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
+        $requestData = $request->request->all();
+
+        if (!$filter instanceof Filter) {
+            return $this->createApiResponse([
+                'message' => 'Filter with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        if (!$this->get('filter_voter')->isGranted(VoteOptions::UPDATE_FILTER, $filter)) {
+            return $this->accessDeniedResponse();
+        }
+
+        // Check if user can create PUBLIC filter
+        if (isset($requestData['public']) && true === $requestData['public']) {
+            if (!$this->get('filter_voter')->isGranted(VoteOptions::CREATE_PUBLIC_FILTER)) {
+                return $this->createApiResponse([
+                    'message' => 'You have not permission to create PUBLIC filter!',
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            }
+            $filter->setPublic(true);
+        } else {
+            $filter->setPublic(false);
+        }
+
+        return $this->updateEntity($filter, $requestData);
     }
 
     /**
@@ -840,11 +865,50 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param int $projectId
      * @param Request $request
-     * @return JsonResponse
+     * @return Response
      */
     public function updateProjectFilterAction(int $id, int $projectId, Request $request)
     {
-        // TODO: Implement updateAction() method.
+        $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
+        $requestData = $request->request->all();
+
+        if (!$filter instanceof Filter) {
+            return $this->createApiResponse([
+                'message' => 'Filter with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
+        if (!$project instanceof Project) {
+            return $this->createApiResponse([
+                'message' => 'Project with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $options = [
+            'filter' => $filter,
+            'project' => $project
+        ];
+
+        if (!$this->get('filter_voter')->isGranted(VoteOptions::UPDATE_PROJECT_FILTER, $options)) {
+            return $this->accessDeniedResponse();
+        }
+
+        // Check if user can create PUBLIC filter
+        if (isset($requestData['public']) && true === $requestData['public']) {
+            if (!$this->get('filter_voter')->isGranted(VoteOptions::CREATE_PUBLIC_PROJECT_FILTER, $project)) {
+                return $this->createApiResponse([
+                    'message' => 'You have not permission to create PUBLIC filter in this project!',
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            }
+            $filter->setPublic(true);
+        } else {
+            $filter->setPublic(false);
+        }
+
+        $filter->setProject($project);
+
+        return $this->updateEntity($filter, $requestData);
     }
 
     /**
@@ -963,11 +1027,34 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @param Request $request
-     * @return JsonResponse
+     * @return Response
      */
     public function updatePartialAction(int $id, Request $request)
     {
-        // TODO: Implement updatePartialAction() method.
+        $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
+        $requestData = $request->request->all();
+
+        if (!$filter instanceof Filter) {
+            return $this->notFoundResponse();
+        }
+
+        if (!$this->get('filter_voter')->isGranted(VoteOptions::UPDATE_FILTER, $filter)) {
+            return $this->accessDeniedResponse();
+        }
+
+        // Check if user can create PUBLIC filter
+        if (isset($requestData['public']) && true === $requestData['public']) {
+            if (!$this->get('filter_voter')->isGranted(VoteOptions::CREATE_PUBLIC_FILTER)) {
+                return $this->createApiResponse([
+                    'message' => 'You have not permission to create PUBLIC filter!',
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            }
+            $filter->setPublic(true);
+        } else {
+            $filter->setPublic(false);
+        }
+
+        return $this->updateEntity($filter, $requestData);
     }
 
     /**
@@ -1020,14 +1107,16 @@ class FilterController extends ApiBaseController implements ControllerInterface
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         // Check if every key sent in filter array is allowed in FilterOptions
-        $filters = explode('&', $data['filter']);
+        if (isset($data['filter'])) {
+            $filters = explode('&', $data['filter']);
 
-        foreach ($filters as $key => $value) {
-            $filterAttribute = explode('=', $value);
-            if (!in_array($filterAttribute[0], FilterAttributeOptions::getConstants())) {
-                return $this->createApiResponse([
-                    'message' => 'Requested filter parameter ' . $filterAttribute[0] . ' is not allowed!',
-                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            foreach ($filters as $key => $value) {
+                $filterAttribute = explode('=', $value);
+                if (!in_array($filterAttribute[0], FilterAttributeOptions::getConstants())) {
+                    return $this->createApiResponse([
+                        'message' => 'Requested filter parameter ' . $filterAttribute[0] . ' is not allowed!',
+                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                }
             }
         }
 

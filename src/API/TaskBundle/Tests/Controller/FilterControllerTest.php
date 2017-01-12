@@ -117,6 +117,87 @@ class FixtureControllerTest extends ApiTestCase
     }
 
     /**
+     * UPDATE SINGLE - errors
+     */
+    public function testUpdateSingleErrors()
+    {
+        parent::testUpdateSingleErrors();
+
+        $data = $this->returnUpdateTestData();
+        $invalidData = $this->returnInvalidData();
+        $filter = $this->findOneEntity();
+
+        // Try to update Entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $filter->getId(), $data, [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update Entity with invalid parameters - not existed Filter attribute
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $filter->getId(), $invalidData, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+
+    /**
+     * UPDATE SINGLE PROJECT FILTER - success
+     */
+    public function testUpdateProjectFilterSuccess()
+    {
+        $data = $this->returnUpdateTestData();
+        /** @var Filter $filter */
+        $filter = $this->findOneEntity();
+        $project = $this->em->getRepository('APITaskBundle:Project')->findOneBy([
+            'title' => 'Project of admin'
+        ]);
+
+        // Update Entity: POST method (as admin)
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $filter->getId() . '/project/' . $project->getId(),
+            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+
+    /**
+     * UPDATE SINGLE PROJECT FILTER - errors
+     */
+    public function testUpdateProjectFilterErrors()
+    {
+        $data = $this->returnUpdateTestData();
+        $invalidData = $this->returnInvalidData();
+        /** @var Filter $filter */
+        $filter = $this->findOneEntity();
+        $project = $this->em->getRepository('APITaskBundle:Project')->findOneBy([
+            'title' => 'Project of admin'
+        ]);
+
+        // Try to update test Entity without authorization header
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $filter->getId() . '/project/' . $project->getId(),
+            $data, [], []);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update not existed filter Entity
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/1254' . $filter->getId() . '/project/' . $project->getId(),
+            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update test Entity with not existed project ID
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $filter->getId() . '/project/1254' . $project->getId(),
+            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update Entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $filter->getId() . '/project/' . $project->getId(),
+            $data, [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update Entity with invalid parameters - not existed Filter attribute
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $filter->getId() . '/project/' . $project->getId(),
+            $invalidData, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
      * Get the url for requests
      *
      * @return string
@@ -308,14 +389,8 @@ class FixtureControllerTest extends ApiTestCase
      */
     public function returnUpdateTestData()
     {
-        $user = $this->em->getRepository('APICoreBundle:User')->findOneBy([
-            'username' => 'user'
-        ]);
-
         return [
             'title' => 'Update test filter',
-            'filter' => '&creator=' . $user->getId(),
-            'public' => false,
             'report' => false,
             'default' => false
         ];

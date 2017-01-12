@@ -97,6 +97,7 @@ class VoteOptions
     const CREATE_PROJECT_FILTER = 'create_project_filter';
     const CREATE_PUBLIC_PROJECT_FILTER = 'create_public_project_filter';
     const UPDATE_FILTER = 'update_filter';
+    const UPDATE_PROJECT_FILTER = 'update_project_filter';
     const DELETE_FILTER = 'delete_filter';
 
     /**

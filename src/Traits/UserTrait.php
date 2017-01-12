@@ -10,6 +10,7 @@ use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
 use API\TaskBundle\Entity\UserHasProject;
+use API\TaskBundle\Entity\UserRole;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use JMS\Serializer\Annotation as Serializer;
@@ -93,6 +94,16 @@ trait UserTrait
      * @Exclude()
      */
     private $filters;
+
+    /**
+     * @var UserRole
+     *
+     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\UserRole", inversedBy="users")
+     * @ORM\JoinColumn(name="user_role_id", referencedColumnName="id", nullable=true)
+     * @Serializer\ReadOnly()
+     */
+    private $user_role;
+
 
     /**
      * Add tag
@@ -392,5 +403,29 @@ trait UserTrait
     public function getFilters()
     {
         return $this->filters;
+    }
+
+    /**
+     * Set userRole
+     *
+     * @param UserRole $userRole
+     *
+     * @return User
+     */
+    public function setUserRole(UserRole $userRole)
+    {
+        $this->user_role = $userRole;
+
+        return $this;
+    }
+
+    /**
+     * Get userRole
+     *
+     * @return User
+     */
+    public function getUserRole()
+    {
+        return $this->user_role;
     }
 }

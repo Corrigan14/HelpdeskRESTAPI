@@ -3,7 +3,6 @@
 namespace API\TaskBundle\Tests\Controller;
 
 use API\TaskBundle\Entity\Filter;
-use API\TaskBundle\Services\FilterAttributeOptions;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 

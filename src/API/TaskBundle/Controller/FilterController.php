@@ -564,6 +564,10 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @param Request $request
      * @param int $projectId
      * @return Response
+     * @throws \LogicException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \InvalidArgumentException
      */
     public function createProjectsFilterAction(Request $request, int $projectId)
     {
@@ -717,6 +721,10 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response
+     * @throws \LogicException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \InvalidArgumentException
      */
     public function updateAction(int $id, Request $request)
     {
@@ -866,6 +874,10 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @param int $projectId
      * @param Request $request
      * @return Response
+     * @throws \LogicException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \InvalidArgumentException
      */
     public function updateProjectFilterAction(int $id, int $projectId, Request $request)
     {
@@ -1028,6 +1040,10 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response
+     * @throws \LogicException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \InvalidArgumentException
      */
     public function updatePartialAction(int $id, Request $request)
     {
@@ -1085,6 +1101,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @param int $id
      *
      * @return Response
+     * @throws \LogicException
      */
     public function deleteAction(int $id)
     {

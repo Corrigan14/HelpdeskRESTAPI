@@ -252,6 +252,15 @@ class FilterVoter implements VoterInterface
      */
     private function canDeleteFilter(Filter $filter): bool
     {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
 
+        // User can delete filter if he created it
+        if ($filter->getCreatedBy()->getId() === $this->user->getId()) {
+            return true;
+        }
+
+        return false;
     }
 }

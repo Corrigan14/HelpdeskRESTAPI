@@ -1084,11 +1084,28 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      *
-     * @return JsonResponse
+     * @return Response
      */
     public function deleteAction(int $id)
     {
-        // TODO: Implement deleteAction() method.
+        $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
+
+        if (!$filter instanceof Filter) {
+            return $this->createApiResponse([
+                'message' => 'Filter with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        if (!$this->get('filter_voter')->isGranted(VoteOptions::DELETE_FILTER, $filter)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $this->getDoctrine()->getManager()->remove($filter);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->createApiResponse([
+            'message' => StatusCodesHelper::DELETED_MESSAGE,
+        ], StatusCodesHelper::DELETED_CODE);
     }
 
     /**

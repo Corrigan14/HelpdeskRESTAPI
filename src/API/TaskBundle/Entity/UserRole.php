@@ -67,6 +67,15 @@ class UserRole
     private $is_active;
 
     /**
+     * @var int
+     *
+     * @ORM\Column(name="`order`", type="integer")
+     * @Assert\NotBlank(message="Order is required")
+     * @Assert\Type("integer")
+     */
+    private $order;
+
+    /**
      * @var ArrayCollection
      *
      * @ORM\OneToMany(targetEntity="API\CoreBundle\Entity\User", mappedBy="user_role")
@@ -244,5 +253,29 @@ class UserRole
     public function getUsers()
     {
         return $this->users;
+    }
+
+    /**
+     * Set order
+     *
+     * @param integer $order
+     *
+     * @return UserRole
+     */
+    public function setOrder($order)
+    {
+        $this->order = $order;
+
+        return $this;
+    }
+
+    /**
+     * Get order
+     *
+     * @return integer
+     */
+    public function getOrder()
+    {
+        return $this->order;
     }
 }

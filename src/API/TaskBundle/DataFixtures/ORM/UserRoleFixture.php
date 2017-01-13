@@ -64,6 +64,7 @@ class UserRoleFixture implements FixtureInterface, ContainerAwareInterface, Orde
         $userRole->setIsActive(true);
         $userRole->setHomepage(self::BASE_URL);
         $userRole->setAcl($adminAcl);
+        $userRole->setOrder(1);
 
         $manager->persist($userRole);
 
@@ -82,6 +83,7 @@ class UserRoleFixture implements FixtureInterface, ContainerAwareInterface, Orde
         $userRole->setIsActive(true);
         $userRole->setHomepage(self::BASE_URL);
         $userRole->setAcl($managerAcl);
+        $userRole->setOrder(2);
 
         $manager->persist($userRole);
 
@@ -98,6 +100,7 @@ class UserRoleFixture implements FixtureInterface, ContainerAwareInterface, Orde
         $userRole->setIsActive(true);
         $userRole->setHomepage(self::BASE_URL);
         $userRole->setAcl($agentAcl);
+        $userRole->setOrder(3);
 
         $manager->persist($userRole);
 
@@ -110,6 +113,7 @@ class UserRoleFixture implements FixtureInterface, ContainerAwareInterface, Orde
         $userRole->setIsActive(true);
         $userRole->setHomepage(self::BASE_URL);
         $userRole->setAcl($customerAcl);
+        $userRole->setOrder(4);
 
         $manager->persist($userRole);
 

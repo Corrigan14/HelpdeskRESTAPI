@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Entity;
 
+use API\CoreBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
@@ -66,6 +67,15 @@ class UserRole
     private $is_active;
 
     /**
+     * @var int
+     *
+     * @ORM\Column(name="order", type="integer")
+     * @Assert\NotBlank(message="Order is required")
+     * @Assert\Type("int")
+     */
+    private $order;
+
+    /**
      * @var ArrayCollection
      *
      * @ORM\OneToMany(targetEntity="API\CoreBundle\Entity\User", mappedBy="user_role")
@@ -73,6 +83,13 @@ class UserRole
      */
     private $users;
 
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->users = new ArrayCollection();
+    }
 
     /**
      * Get id
@@ -159,13 +176,13 @@ class UserRole
     /**
      * Set acl
      *
-     * @param string $acl
+     * @param array $acl
      *
      * @return UserRole
      */
-    public function setAcl($acl)
+    public function setAcl(array $acl)
     {
-        $this->acl = $acl;
+        $this->acl = json_encode($acl);
 
         return $this;
     }
@@ -173,11 +190,11 @@ class UserRole
     /**
      * Get acl
      *
-     * @return string
+     * @return array
      */
     public function getAcl()
     {
-        return $this->acl;
+        return json_decode($this->acl);
     }
 
     /**
@@ -203,5 +220,38 @@ class UserRole
     {
         return $this->is_active;
     }
-}
 
+    /**
+     * Add user
+     *
+     * @param User $user
+     *
+     * @return UserRole
+     */
+    public function addUser(User $user)
+    {
+        $this->users[] = $user;
+
+        return $this;
+    }
+
+    /**
+     * Remove user
+     *
+     * @param User $user
+     */
+    public function removeUser(User $user)
+    {
+        $this->users->removeElement($user);
+    }
+
+    /**
+     * Get users
+     *
+     * @return ArrayCollection
+     */
+    public function getUsers()
+    {
+        return $this->users;
+    }
+}

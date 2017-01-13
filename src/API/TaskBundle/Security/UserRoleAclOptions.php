@@ -34,8 +34,6 @@ class UserRoleAclOptions
     // User can update All Tasks
     const UPDATE_ALL_TASKS = 'update_all_tasks';
 
-    // Create User Entity with ROLE CUSTOMER
-    const CREATE_USER_WITH_ROLE_CUSTOMER = 'create_user_with_role_customer';
     // CRUD for User Entity
     const USER_SETTINGS = 'user_settings';
     // CRUD for UserRole Entity

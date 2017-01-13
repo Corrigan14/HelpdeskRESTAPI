@@ -72,7 +72,6 @@ class UserRoleFixture implements FixtureInterface, ContainerAwareInterface, Orde
             UserRoleAclOptions::LOGIN_TO_SYSTEM,
             UserRoleAclOptions::CREATE_TASKS,
             UserRoleAclOptions::CREATE_PROJECTS,
-            UserRoleAclOptions::CREATE_USER_WITH_ROLE_CUSTOMER,
             UserRoleAclOptions::COMPANY_SETTINGS,
             UserRoleAclOptions::REPORT_FILTERS,
             UserRoleAclOptions::SENT_EMAILS_FROM_COMMENTS,
@@ -91,7 +90,6 @@ class UserRoleFixture implements FixtureInterface, ContainerAwareInterface, Orde
             UserRoleAclOptions::LOGIN_TO_SYSTEM,
             UserRoleAclOptions::CREATE_TASKS,
             UserRoleAclOptions::CREATE_PROJECTS,
-            UserRoleAclOptions::CREATE_USER_WITH_ROLE_CUSTOMER,
             UserRoleAclOptions::COMPANY_SETTINGS,
             UserRoleAclOptions::SENT_EMAILS_FROM_COMMENTS,
         ];

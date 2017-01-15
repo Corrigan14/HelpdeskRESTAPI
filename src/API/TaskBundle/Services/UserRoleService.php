@@ -36,7 +36,7 @@ class UserRoleService
      * @param array $options
      * @return array
      */
-    public function getUserRoleResponse(int $page, array $options):array
+    public function getUserRolesResponse(int $page, array $options):array
     {
         $data = $this->em->getRepository('APITaskBundle:UserRole')->getAllEntities($page, $options);
         $count = $this->em->getRepository('APITaskBundle:UserRole')->countEntities($options);
@@ -58,7 +58,7 @@ class UserRoleService
      * @param UserRole $userRole
      * @return array
      */
-    public function getFilterResponse(UserRole $userRole): array
+    public function getUserRoleResponse(UserRole $userRole): array
     {
         return [
             'data' => $userRole,

@@ -104,6 +104,7 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *
      * @param Request $request
      * @return Response
+     * @throws \LogicException
      */
     public function listAction(Request $request)
     {
@@ -125,7 +126,7 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
             'filtersForUrl' => $filtersForUrl
         ];
 
-        $userRolesArray = $this->get('user_role_service')->getUserRoleResponse($page, $options);
+        $userRolesArray = $this->get('user_role_service')->getUserRolesResponse($page, $options);
         return $this->json($userRolesArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
@@ -171,11 +172,31 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      * )
      *
      * @param int $id
-     * @return JsonResponse
+     * @return Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function getAction(int $id)
     {
-        // TODO: Implement getAction() method.
+        $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($id);
+
+        if (!$userRole instanceof UserRole) {
+            return $this->createApiResponse([
+                'message' => 'User role with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::USER_ROLE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $userRoleArray = $this->get('user_role_service')->getUserRoleResponse($userRole);
+        return $this->createApiResponse($userRoleArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

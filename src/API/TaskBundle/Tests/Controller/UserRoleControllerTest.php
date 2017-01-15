@@ -30,6 +30,21 @@ class UserRoleControllerTest extends ApiTestCase
     }
 
     /**
+     * GET SINGLE - errors
+     */
+    public function testGetSingleErrors()
+    {
+        parent::testGetSingleErrors();
+
+        $entity = $this->findOneEntity();
+
+        // Try to load Entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('GET', $this->getBaseUrl().'/'.$entity->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
      * Get the url for requests
      *
      * @return string

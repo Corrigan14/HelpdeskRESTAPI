@@ -125,6 +125,6 @@ class UserRoleFixture implements FixtureInterface, ContainerAwareInterface, Orde
      */
     public function getOrder()
     {
-        return 15;
+        return 1;
     }
 }

@@ -144,7 +144,7 @@ class UserRoleControllerTest extends ApiTestCase
         // Try to load Entity with ROLE_USER which hasn't permission to this action
         $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(), [], [],
             ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
-        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
     }
 
@@ -166,7 +166,7 @@ class UserRoleControllerTest extends ApiTestCase
     public function findOneEntity()
     {
         $userRole = $this->em->getRepository('APITaskBundle:UserRole')->findOneBy([
-            'title' => 'ADMIN'
+            'title' => 'TEST USER ROLE'
         ]);
 
         if ($userRole instanceof UserRole) {
@@ -211,6 +211,7 @@ class UserRoleControllerTest extends ApiTestCase
         $userRole->setIsActive(true);
         $userRole->setHomepage(self::BASE_URL);
         $userRole->setAcl($adminAcl);
+        $userRole->setOrder(2);
 
         $this->em->persist($userRole);
         $this->em->flush();

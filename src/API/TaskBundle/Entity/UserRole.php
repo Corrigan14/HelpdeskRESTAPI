@@ -39,7 +39,7 @@ class UserRole
      * @var string
      *
      * @ORM\Column(name="description", type="text", nullable=true)
-     * @Assert\Type("text")
+     * @Assert\Type("string")
      */
     private $description;
 
@@ -47,6 +47,7 @@ class UserRole
      * @var string
      *
      * @ORM\Column(name="homepage", type="string", length=255)
+     * @Assert\NotBlank(message="Homepage definition is required")
      * @Assert\Type("string")
      */
     private $homepage;
@@ -55,14 +56,14 @@ class UserRole
      * @var string
      *
      * @ORM\Column(name="acl", type="text")
-     * @Assert\Type("text")
+     * @Assert\NotBlank(message="ACL rules are required")
      */
     private $acl;
 
     /**
      * @var bool
      *
-     * @ORM\Column(name="is_active", type="boolean")
+     * @ORM\Column(name="is_active", type="boolean", options={"default: 1"})
      */
     private $is_active;
 

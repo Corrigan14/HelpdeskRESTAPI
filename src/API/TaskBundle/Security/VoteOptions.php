@@ -9,6 +9,12 @@ namespace API\TaskBundle\Security;
  */
 class VoteOptions
 {
+    // USER CRUD
+    const CREATE_USER_WITH_USER_ROLE = 'create_user';
+    const UPDATE_USER_WITH_USER_ROLE = 'update_user';
+
+
+
     // TAG CRUD
     const CREATE_PUBLIC_TAG = 'create_public_tag';
     const SHOW_TAG = 'show_tag';

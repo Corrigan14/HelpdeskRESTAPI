@@ -25,3 +25,6 @@ api_task_filter:
 api_task_user_role:
     resource: "@APITaskBundle/Resources/config/routing/userRole.yml"
     prefix: /
+api_task_custom_user:
+    resource: "@APITaskBundle/Resources/config/routing/userCustom.yml"
+    prefix: /

@@ -7,6 +7,9 @@ services:
     tag_voter:
         class: API\TaskBundle\Security\TagVoter
         arguments: ["@security.access.decision_manager","@security.token_storage"]
+    user_custom_voter:
+        class: API\TaskBundle\Security\UserVoter
+        arguments: ["@security.access.decision_manager","@security.token_storage"]
     status_voter:
         class: API\TaskBundle\Security\StatusVoter
         arguments: ["@security.access.decision_manager","@security.token_storage"]

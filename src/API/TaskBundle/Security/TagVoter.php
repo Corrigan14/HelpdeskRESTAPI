@@ -38,8 +38,6 @@ class TagVoter extends ApiBaseVoter implements VoterInterface
         }
 
         switch ($action) {
-            case VoteOptions::CREATE_PUBLIC_TAG:
-                return $this->canCreatePublicTag();
             case VoteOptions::SHOW_TAG:
                 return $this->canReadTag($tag);
             case VoteOptions::UPDATE_TAG:
@@ -52,19 +50,6 @@ class TagVoter extends ApiBaseVoter implements VoterInterface
     }
 
     /**
-     * @return bool
-     * @throws \InvalidArgumentException
-     */
-    private function canCreatePublicTag(): bool
-    {
-        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
-            return true;
-        }
-
-        return $this->hasAclRights(VoteOptions::CREATE_PUBLIC_TAG, $this->user, VoteOptions::getConstants());
-    }
-
-    /**
      * @param Tag $tag
      * @return bool
      * @internal param int $tagId
@@ -72,11 +57,7 @@ class TagVoter extends ApiBaseVoter implements VoterInterface
      */
     private function canReadTag(Tag $tag): bool
     {
-        if ($tag->getPublic() || $this->user->getId() === $tag->getCreatedBy()->getId()) {
-            return true;
-        }
-
-        return false;
+        return ($tag->getPublic() || $this->user->getId() === $tag->getCreatedBy()->getId());
     }
 
     /**
@@ -87,11 +68,7 @@ class TagVoter extends ApiBaseVoter implements VoterInterface
      */
     private function canUpdateTag(Tag $tag): bool
     {
-        if ($this->user->getId() === $tag->getCreatedBy()->getId()) {
-            return true;
-        }
-
-        return false;
+        return ($this->user->getId() === $tag->getCreatedBy()->getId());
     }
 
     /**
@@ -102,11 +79,5 @@ class TagVoter extends ApiBaseVoter implements VoterInterface
      */
     private function canDeleteTag(Tag $tag): bool
     {
-        if ($this->user->getId() === $tag->getCreatedBy()->getId()) {
-            return true;
-        }
-
-        return false;
+        return ($this->user->getId() === $tag->getCreatedBy()->getId());
     }
-
-}

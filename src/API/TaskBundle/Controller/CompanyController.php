@@ -3,9 +3,9 @@
 namespace API\TaskBundle\Controller;
 
 use API\CoreBundle\Entity\Company;
-use API\CoreBundle\Security\VoteOptions;
 use API\TaskBundle\Entity\CompanyAttribute;
 use API\TaskBundle\Entity\CompanyData;
+use API\TaskBundle\Security\UserRoleAclOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -105,11 +105,16 @@ class CompanyController extends ApiBaseController
      */
     public function getAction(int $id)
     {
-        $company = $this->get('company_service')->getFullCompany($id);
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
+            'user' => $this->getUser()
+        ];
 
-        if (!$this->get('company_voter')->isGranted(VoteOptions::SHOW_COMPANY, $company)) {
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
+
+        $company = $this->get('company_service')->getFullCompany($id);
 
         if (!$company instanceof Company) {
             $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
@@ -197,12 +202,21 @@ class CompanyController extends ApiBaseController
      *
      * @param Request $request
      * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
     public function createAction(Request $request)
     {
-        if (!$this->get('company_voter')->isGranted(VoteOptions::CREATE_COMPANY)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -296,16 +310,25 @@ class CompanyController extends ApiBaseController
      * @param Request $request
      * @param int $id
      * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
     public function updateAction(Request $request, int $id)
     {
-        $company = $this->get('company_service')->getFullCompany($id);
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
+            'user' => $this->getUser()
+        ];
 
-        if (!$this->get('company_voter')->isGranted(VoteOptions::UPDATE_COMPANY, $company)) {
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
+
+        $company = $this->get('company_service')->getFullCompany($id);
 
         if (!$company instanceof Company) {
             $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
@@ -399,16 +422,25 @@ class CompanyController extends ApiBaseController
      * @param Request $request
      * @param int $id
      * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
     public function updatePartiallyAction(Request $request, int $id)
     {
-        $company = $this->get('company_service')->getFullCompany($id);
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
+            'user' => $this->getUser()
+        ];
 
-        if (!$this->get('company_voter')->isGranted(VoteOptions::UPDATE_COMPANY, $company)) {
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
+
+        $company = $this->get('company_service')->getFullCompany($id);
 
         if (!$company instanceof Company) {
             $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
@@ -425,6 +457,10 @@ class CompanyController extends ApiBaseController
      * @param bool $create
      *
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -482,11 +518,10 @@ class CompanyController extends ApiBaseController
             }
 
             $fullCompanyEntity = $this->get('company_service')->getFullCompany($company->getId());
-//            $fullCompanyEntity = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($company->getId());
             $entityResponse = $this->get('company_service')->getEntityResponse($fullCompanyEntity, 'company_extension');
             return $this->createApiResponse($entityResponse, $statusCode);
         }
 
-        return $this->invalidParametersResponse();
+        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

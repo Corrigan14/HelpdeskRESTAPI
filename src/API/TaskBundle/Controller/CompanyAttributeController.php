@@ -204,6 +204,8 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -275,6 +277,9 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
     public function updateAction(int $id, Request $request)
@@ -349,6 +354,9 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
     public function updatePartialAction(int $id, Request $request)
@@ -466,6 +474,6 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             return $this->createApiResponse($companyAttributeArray, $statusCode);
         }
 
-        return $this->invalidParametersResponse();
+        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

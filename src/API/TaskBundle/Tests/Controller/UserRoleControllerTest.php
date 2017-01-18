@@ -215,6 +215,8 @@ class UserRoleControllerTest extends ApiTestCase
 
         $this->em->persist($userRole);
         $this->em->flush();
+
+        return $userRole;
     }
 
     /**

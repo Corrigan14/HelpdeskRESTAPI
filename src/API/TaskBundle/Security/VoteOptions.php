@@ -13,20 +13,10 @@ class VoteOptions
     const CREATE_USER_WITH_USER_ROLE = 'create_user';
     const UPDATE_USER_WITH_USER_ROLE = 'update_user';
 
-
-
     // TAG CRUD
-    const CREATE_PUBLIC_TAG = 'create_public_tag';
     const SHOW_TAG = 'show_tag';
     const UPDATE_TAG = 'update_tag';
     const DELETE_TAG = 'delete_tag';
-
-    // STATUS CRUD
-    const CREATE_STATUS = 'create_status';
-    const SHOW_STATUS = 'read_status';
-    const UPDATE_STATUS = 'update_status';
-    const DELETE_STATUS = 'delete_status';
-    const LIST_STATUSES = 'list_statuses';
 
     // PROJECT CRUD
     const CREATE_PROJECT = 'create_project';

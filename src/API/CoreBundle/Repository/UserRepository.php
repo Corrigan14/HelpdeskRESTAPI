@@ -92,17 +92,23 @@ class UserRepository extends EntityRepository
                     $isActiveParam = 0;
                 }
                 return $this->createQueryBuilder('u')
-                    ->select('u,d,userRole')
+                    ->select('u,d,userRole,company,companyData,companyAttribute')
                     ->where('u.is_active = :isActive')
                     ->leftJoin('u.detailData', 'd')
                     ->leftJoin('u.user_role', 'userRole')
+                    ->leftJoin('u.company', 'company')
+                    ->leftJoin('company.companyData', 'companyData')
+                    ->leftJoin('companyData.companyAttribute', 'companyAttribute')
                     ->setParameter('isActive', $isActiveParam)
                     ->getQuery();
             } else {
                 return $this->createQueryBuilder('u')
-                    ->select('u,d,userRole')
+                    ->select('u,d,userRole,company,companyData,companyAttribute')
                     ->leftJoin('u.detailData', 'd')
                     ->leftJoin('u.user_role', 'userRole')
+                    ->leftJoin('u.company', 'company')
+                    ->leftJoin('company.companyData', 'companyData')
+                    ->leftJoin('companyData.companyAttribute', 'companyAttribute')
                     ->getQuery();
             };
         }

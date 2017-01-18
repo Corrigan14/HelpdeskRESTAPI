@@ -62,6 +62,45 @@ class UserController extends ApiBaseController implements ControllerInterface
      *              "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
      *              "is_active": true,
      *              "order": 2
+     *            },
+     *            "company":
+     *            {
+     *              "id": 1,
+     *              "title": "Web-Solutions",
+     *              "ico": "1102587",
+     *              "dic": "12587459644",
+     *              "street": "Cesta 125",
+     *              "city": "Bratislava",
+     *              "zip": "021478",
+     *              "country": "Slovenska Republika",
+     *              "is_active": true,
+     *              "company_data": {
+     *              "0":
+     *              {
+     *                 "id": 44,
+     *                 "value": "data val",
+     *                 "company_attribute":
+     *              {
+     *                 "id": 1,
+     *                 "title": "input company additional attribute",
+     *                 "type": "input",
+     *                 "is_active": true
+     *               }
+     *             },
+     *             "1":
+     *             {
+     *                "id": 45,
+     *                "value": "data valluesgyda gfg",
+     *                "company_attribute":
+     *                {
+     *                  "id": 2,
+     *                  "title": "select company additional attribute",
+     *                  "type": "simple_select",
+     *                  "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *                  "is_active": true
+     *                }
+     *             }
+     *        },
      *            }
      *          },
      *       ],
@@ -160,6 +199,16 @@ class UserController extends ApiBaseController implements ControllerInterface
      *              "city": "Bratislava",
      *              "zip": "025874",
      *              "country": "SR"
+     *           },
+     *           "user_role":
+     *           {
+     *              "id": 26,
+     *              "title": "MANAGER",
+     *              "description": null,
+     *              "homepage": "/",
+     *              "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *              "is_active": true,
+     *              "order": 2
      *           },
      *          "company":
      *           {

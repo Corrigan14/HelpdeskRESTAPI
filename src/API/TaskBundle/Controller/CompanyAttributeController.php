@@ -3,7 +3,7 @@
 namespace API\TaskBundle\Controller;
 
 use API\TaskBundle\Entity\CompanyAttribute;
-use API\TaskBundle\Security\VoteOptions;
+use API\TaskBundle\Security\UserRoleAclOptions;
 use API\TaskBundle\Services\VariableHelper;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
@@ -76,7 +76,12 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      */
     public function listAction(Request $request)
     {
-        if (!$this->get('company_attribute_voter')->isGranted(VoteOptions::LIST_COMPANY_ATTRIBUTES)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -144,7 +149,12 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             return $this->notFoundResponse();
         }
 
-        if (!$this->get('company_attribute_voter')->isGranted(VoteOptions::SHOW_COMPANY_ATTRIBUTE)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -199,7 +209,12 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      */
     public function createAction(Request $request)
     {
-        if (!$this->get('company_attribute_voter')->isGranted(VoteOptions::CREATE_COMPANY_ATTRIBUTE)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -270,7 +285,12 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             return $this->notFoundResponse();
         }
 
-        if (!$this->get('company_attribute_voter')->isGranted(VoteOptions::UPDATE_COMPANY_ATTRIBUTE)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -339,7 +359,12 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             return $this->notFoundResponse();
         }
 
-        if (!$this->get('company_attribute_voter')->isGranted(VoteOptions::UPDATE_COMPANY_ATTRIBUTE)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -386,7 +411,12 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             return $this->notFoundResponse();
         }
 
-        if (!$this->get('company_attribute_voter')->isGranted(VoteOptions::DELETE_COMPANY_ATTRIBUTE)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -405,6 +435,8 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      * @param $requestData
      * @param bool $create
      * @return Response
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */

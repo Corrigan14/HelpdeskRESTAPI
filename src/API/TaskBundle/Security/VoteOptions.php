@@ -28,13 +28,6 @@ class VoteOptions
     const DELETE_STATUS = 'delete_status';
     const LIST_STATUSES = 'list_statuses';
 
-    // COMPANY ATTRIBUTE CRUD
-    const CREATE_COMPANY_ATTRIBUTE = 'create_company_attribute';
-    const SHOW_COMPANY_ATTRIBUTE = 'read_company_attribute';
-    const UPDATE_COMPANY_ATTRIBUTE = 'update_company_attribute';
-    const DELETE_COMPANY_ATTRIBUTE = 'delete_company_attribute';
-    const LIST_COMPANY_ATTRIBUTES = 'list_company_attributes';
-
     // PROJECT CRUD
     const CREATE_PROJECT = 'create_project';
     const LIST_PROJECTS = 'list_projects';

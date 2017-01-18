@@ -64,9 +64,9 @@ class UserController extends ApiBaseController
      *         },
      *         "_links": ▿
      *         {
-     *            "put": "/api/v1/core-bundle/users/12",
-     *            "patch": "/api/v1/core-bundle/users/12",
-     *            "delete": "/api/v1/core-bundle/users/12"
+     *            "put": "/api/v1/task-bundle/users/12",
+     *            "patch": "/api/v1/task-bundle/users/12",
+     *            "delete": "/api/v1/task-bundle/users/12"
      *         }
      *      }
      *
@@ -246,23 +246,6 @@ class UserController extends ApiBaseController
 
     public function updateAction(int $id, Request $request, $companyId = false)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER, $id)) {
-            return $this->accessDeniedResponse();
-        }
-
-        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
-        $requestData = $request->request->all();
-
-
-        if ($user instanceof User && $companyId) {
-            try {
-                $this->setCompanyToUser($user, $companyId);
-            } catch (\InvalidArgumentException $e) {
-                return $this->notFoundResponse();
-            }
-        }
-
-        return $this->updateUser($user, $requestData);
 
     }
 
@@ -354,25 +337,6 @@ class UserController extends ApiBaseController
 
     public function updatePartialAction(int $id, Request $request, $companyId = false)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER, $id)) {
-            return $this->accessDeniedResponse();
-
-        }
-
-        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
-
-        $requestData = $request->request->all();
-
-
-        if ($user instanceof User && $companyId) {
-            try {
-                $this->setCompanyToUser($user, $companyId);
-            } catch (\InvalidArgumentException $e) {
-                return $this->notFoundResponse();
-            }
-        }
-
-        return $this->updateUser($user, $requestData);
 
     }
 
@@ -432,7 +396,7 @@ class UserController extends ApiBaseController
             }
         }
 
-        return $this->invalidParametersResponse();
+        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 
     /**

@@ -13,9 +13,6 @@ services:
     status_voter:
         class: API\TaskBundle\Security\StatusVoter
         arguments: ["@security.access.decision_manager","@security.token_storage"]
-    company_attribute_voter:
-        class: API\TaskBundle\Security\CompanyAttributeVoter
-        arguments: ["@security.access.decision_manager","@security.token_storage"]
     project_voter:
         class: API\TaskBundle\Security\ProjectVoter
         arguments: ["@security.access.decision_manager","@security.token_storage"]

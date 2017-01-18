@@ -5,7 +5,6 @@ namespace API\TaskBundle\Security;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Security\VoterInterface;
 use API\TaskBundle\Entity\Filter;
-use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\UserHasProject;
 use Doctrine\ORM\EntityManager;
 use Prophecy\Argument\Token\TokenInterface;

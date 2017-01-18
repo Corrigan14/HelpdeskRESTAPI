@@ -5,6 +5,7 @@ namespace API\CoreBundle\Controller;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
 use API\CoreBundle\Security\VoteOptions;
+use API\TaskBundle\Security\UserRoleAclOptions;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
@@ -32,7 +33,16 @@ class UserController extends ApiBaseController implements ControllerInterface
      *            "username": "admin",
      *            "roles": "[\"ROLE_ADMIN\"]",
      *            "is_active": true,
-     *            "acl": "[]"
+     *            "user_role":
+     *            {
+     *                "id": 2,
+     *                "title": "MANAGER",
+     *                "description": null,
+     *                "homepage": "/",
+     *                "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                "is_active": true
+     *                "order": 2
+     *            }
      *          }
      *       ],
      *       "_links":
@@ -82,12 +92,18 @@ class UserController extends ApiBaseController implements ControllerInterface
      * @param Request $request
      *
      * @return Response|JsonResponse
+     * @throws \LogicException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
      */
     public function listAction(Request $request)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::LIST_USERS)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::USER_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -277,22 +293,50 @@ class UserController extends ApiBaseController implements ControllerInterface
      */
     public function createAction(Request $request, $companyId = false)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::CREATE_USER)) {
+        $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($userRoleId);
+
+        if (!$userRole instanceof UserRole) {
+            return $this->createApiResponse([
+                'message' => 'User role with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        // Check if user has permission to CRUD User entity
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::USER_SETTINGS,
+            'user' => $this->getUser()
+        ];
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
+        }
+
+        // Check if user can create User entity with requested User Role
+        $voteOptions = [
+            'userRole' => $userRole
+        ];
+        if (!$this->get('user_custom_voter')->isGranted(\API\TaskBundle\Security\VoteOptions::CREATE_USER_WITH_USER_ROLE, $voteOptions)) {
+            return $this->createApiResponse([
+                'message' => 'You can not create user with selected User Role!',
+            ], StatusCodesHelper::ACCESS_DENIED_CODE);
         }
 
         $requestData = $request->request->all();
 
         $user = new User();
-        //avatar
+        $user->setUserRole($userRole);
+        $user->setIsActive(true);
+        if ($userRole->getTitle() === 'ADMIN') {
+            $user->setRoles(['ROLE_ADMIN']);
+        } else {
+            $user->setRoles(['ROLE_USER']);
+        }
+
+        // Upload and save avatar
         $file = $request->files->get('image');
-        if (null != $file) {
+        if (null !== $file) {
             $imageSlug = $this->get('upload_helper')->uploadFile($file, true);
             $user->setImage($imageSlug);
         }
-
-        $user->setRoles(['ROLE_USER']);
-        $user->setIsActive(true);
 
         if ($companyId) {
             try {
@@ -303,7 +347,6 @@ class UserController extends ApiBaseController implements ControllerInterface
         }
 
         return $this->updateUser($user, $requestData, true);
-
     }
 
     /**

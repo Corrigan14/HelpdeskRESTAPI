@@ -15,7 +15,7 @@ class UserRepository extends EntityRepository
     /**
      * Default User fields in case no custom fields are defined
      */
-    const DEFAULT_FIELDS = ['id', 'email', 'username', 'roles', 'is_active', 'acl'];
+    const DEFAULT_FIELDS = ['id', 'email', 'username', 'roles', 'is_active'];
     const LIMIT = 10;
 
     use UserRepositoryTrait;
@@ -51,11 +51,13 @@ class UserRepository extends EntityRepository
      *
      * @param string|bool $isActive
      * @return int
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function countUsers($isActive = false): int
     {
-        if ('true' == $isActive || 'false' == $isActive) {
-            if ($isActive == 'true') {
+        if ('true' === $isActive || 'false' === $isActive) {
+            if ($isActive === 'true') {
                 $isActiveParam = 1;
             } else {
                 $isActiveParam = 0;
@@ -105,8 +107,8 @@ class UserRepository extends EntityRepository
             $values[] = 'u.id';
         }
 
-        if ('true' == $isActive || 'false' == $isActive) {
-            if ($isActive == 'true') {
+        if ('true' === $isActive || 'false' === $isActive) {
+            if ($isActive === 'true') {
                 $isActiveParam = 1;
             } else {
                 $isActiveParam = 0;
@@ -115,12 +117,14 @@ class UserRepository extends EntityRepository
                 ->select($values)
                 ->where('u.is_active = :isActive')
                 ->leftJoin('u.detailData', 'd')
+                ->leftJoin('u.userRole','userRole')
                 ->setParameter('isActive', $isActiveParam)
                 ->getQuery();
         } else {
             return $this->createQueryBuilder('u')
                 ->select($values)
                 ->leftJoin('u.detailData', 'd')
+                ->leftJoin('u.userRole','userRole')
                 ->getQuery();
         };
     }

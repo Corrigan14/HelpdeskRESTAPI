@@ -1,9 +1,7 @@
 <?php
 namespace API\CoreBundle\Entity;
 
-
 use API\CoreBundle\Services\Traits\FeaturedImageEntity;
-use API\TaskBundle\Entity\Tag;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ReadOnly;
@@ -88,13 +86,6 @@ class User implements AdvancedUserInterface , \Serializable
     private $is_active = true;
 
     /**
-     * @ORM\Column(name="acl", type="text", nullable=true)
-     *
-     * @var array
-     */
-    private $acl;
-
-    /**
      * @var UserData
      * @ORM\OneToOne(targetEntity="UserData", mappedBy="user", orphanRemoval=true)
      * @MaxDepth(1)
@@ -113,7 +104,6 @@ class User implements AdvancedUserInterface , \Serializable
     public function __construct()
     {
         $this->is_active = true;
-        $this->acl = json_encode([]);
         $this->tags = new ArrayCollection();
     }
 
@@ -237,22 +227,6 @@ class User implements AdvancedUserInterface , \Serializable
     public function getIsActive()
     {
         return $this->is_active;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAcl(): array
-    {
-        return json_decode($this->acl);
-    }
-
-    /**
-     * @param array $acl
-     */
-    public function setAcl(array $acl)
-    {
-        $this->acl = json_encode($acl);
     }
 
     /**

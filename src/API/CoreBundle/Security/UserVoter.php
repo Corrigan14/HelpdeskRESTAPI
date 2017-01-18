@@ -43,8 +43,6 @@ class UserVoter extends ApiBaseVoter implements VoterInterface
                 return $this->canUpdate($targetUserId);
             case VoteOptions::DELETE_USER:
                 return $this->canDelete($targetUserId);
-            case VoteOptions::LIST_USERS:
-                return $this->canList();
             default:
                 return false;
         }
@@ -115,17 +113,4 @@ class UserVoter extends ApiBaseVoter implements VoterInterface
         return $this->hasAclRights(VoteOptions::DELETE_USER, $this->user);
     }
 
-    /**
-     *
-     * @return bool
-     * @throws \InvalidArgumentException
-     */
-    private function canList(): bool
-    {
-        if ($this->decisionManager->decide($this->token , ['ROLE_ADMIN'])) {
-            return true;
-        }
-
-        return $this->hasAclRights(VoteOptions::LIST_USERS, $this->user);
-    }
 }

@@ -99,11 +99,6 @@ class FixtureControllerTest extends ApiTestCase
         $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $project->getId(), $data);
         $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Try to add Entity with ROLE_USER which hasn't permission to this action
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $project->getId(), $data, [],
-            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
-        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
-
         // Try to add Entity with not existed project Id
         $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/1254' . $project->getId(), $data, [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);

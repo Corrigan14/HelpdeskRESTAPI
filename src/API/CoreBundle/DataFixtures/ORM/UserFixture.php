@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: julius
- * Date: 3/20/16
- * Time: 12:38 PM
- */
 
 namespace API\CoreBundle\DataFixtures\ORM;
 
@@ -20,7 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @package ScrumBundle\DataFixtures\ORM
  */
-class UserFixture implements FixtureInterface , ContainerAwareInterface , OrderedFixtureInterface
+class UserFixture implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
 {
     /**
      * @var ContainerInterface
@@ -49,48 +43,103 @@ class UserFixture implements FixtureInterface , ContainerAwareInterface , Ordere
     public function load(ObjectManager $manager)
     {
         $companyWS = $manager->getRepository('APICoreBundle:Company')->findOneBy([
-           'title' => 'Web-Solutions'
+            'title' => 'Web-Solutions'
         ]);
 
         $companyLS = $manager->getRepository('APICoreBundle:Company')->findOneBy([
-           'title' => 'LanSystems'
+            'title' => 'LanSystems'
+        ]);
+
+        $adminUserRole = $manager->getRepository('APITaskBundle:UserRole')->findOneBy([
+            'title' => 'ADMIN'
+        ]);
+
+        $managerUserRole = $manager->getRepository('APITaskBundle:UserRole')->findOneBy([
+            'title' => 'MANAGER'
+        ]);
+
+        $agentUserRole = $manager->getRepository('APITaskBundle:UserRole')->findOneBy([
+            'title' => 'AGENT'
+        ]);
+
+        $customerUserRole = $manager->getRepository('APITaskBundle:UserRole')->findOneBy([
+            'title' => 'CUSTOMER'
         ]);
 
         $user = new User();
         $user->setEmail('admin@admin.sk')
-             ->setUsername('admin')
-             ->setRoles(['ROLE_ADMIN']);
+            ->setUsername('admin')
+            ->setRoles(['ROLE_ADMIN']);
         $plainPassword = 'admin';
         $encoder = $this->container->get('security.password_encoder');
-        $encoded = $encoder->encodePassword($user , $plainPassword);
+        $encoded = $encoder->encodePassword($user, $plainPassword);
         $user->setPassword($encoded);
         $user->setCompany($companyWS);
+        $user->setUserRole($adminUserRole);
+        $manager->persist($user);
+
+
+        $user = new User();
+        $user->setEmail('manager@manager.sk')
+            ->setUsername('manager')
+            ->setRoles(['ROLE_USER']);
+        $plainPassword = 'manager';
+        $encoder = $this->container->get('security.password_encoder');
+        $encoded = $encoder->encodePassword($user, $plainPassword);
+        $user->setPassword($encoded);
+        $user->setCompany($companyLS);
+        $user->setUserRole($managerUserRole);
+        $manager->persist($user);
+
+        $user = new User();
+        $user->setEmail('agent@agent.sk')
+            ->setUsername('agent')
+            ->setRoles(['ROLE_USER']);
+        $plainPassword = 'agent';
+        $encoder = $this->container->get('security.password_encoder');
+        $encoded = $encoder->encodePassword($user, $plainPassword);
+        $user->setPassword($encoded);
+        $user->setCompany($companyLS);
+        $user->setUserRole($agentUserRole);
+        $manager->persist($user);
+
+        $user = new User();
+        $user->setEmail('customer@customer.sk')
+            ->setUsername('customer')
+            ->setRoles(['ROLE_USER']);
+        $plainPassword = 'customer';
+        $encoder = $this->container->get('security.password_encoder');
+        $encoded = $encoder->encodePassword($user, $plainPassword);
+        $user->setPassword($encoded);
+        $user->setCompany($companyLS);
+        $user->setUserRole($customerUserRole);
         $manager->persist($user);
 
         $user = new User();
         $user->setEmail('user@user.sk')
-             ->setUsername('user')
-             ->setRoles(['ROLE_USER']);
+            ->setUsername('user')
+            ->setRoles(['ROLE_USER']);
         $plainPassword = 'user';
         $encoder = $this->container->get('security.password_encoder');
-        $encoded = $encoder->encodePassword($user , $plainPassword);
+        $encoded = $encoder->encodePassword($user, $plainPassword);
         $user->setPassword($encoded);
         $user->setCompany($companyLS);
+        $user->setUserRole($customerUserRole);
         $manager->persist($user);
 
         $user = new User();
         $user->setEmail('testuser2@user.sk')
-             ->setUsername('testuser2')
-             ->setRoles(['ROLE_USER']);
+            ->setUsername('testuser22')
+            ->setRoles(['ROLE_USER']);
         $plainPassword = 'testuser';
         $encoder = $this->container->get('security.password_encoder');
-        $encoded = $encoder->encodePassword($user , $plainPassword);
+        $encoded = $encoder->encodePassword($user, $plainPassword);
         $user->setPassword($encoded);
         $user->setCompany($companyLS);
+        $user->setUserRole($customerUserRole);
         $manager->persist($user);
 
         $manager->flush();
-
     }
 
     /**

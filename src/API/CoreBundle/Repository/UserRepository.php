@@ -15,7 +15,6 @@ class UserRepository extends EntityRepository
     /**
      * Default User fields in case no custom fields are defined
      */
-    const DEFAULT_FIELDS = ['id', 'email', 'username', 'roles', 'is_active'];
     const LIMIT = 10;
 
     use UserRepositoryTrait;
@@ -85,11 +84,30 @@ class UserRepository extends EntityRepository
      */
     private function getUserQuery(array $fields = [], $isActive)
     {
-        $values = [];
         if (0 === count($fields)) {
-            $fields = self::DEFAULT_FIELDS;
+            if ('true' === $isActive || 'false' === $isActive) {
+                if ($isActive === 'true') {
+                    $isActiveParam = 1;
+                } else {
+                    $isActiveParam = 0;
+                }
+                return $this->createQueryBuilder('u')
+                    ->select('u,d,userRole')
+                    ->where('u.is_active = :isActive')
+                    ->leftJoin('u.detailData', 'd')
+                    ->leftJoin('u.user_role', 'userRole')
+                    ->setParameter('isActive', $isActiveParam)
+                    ->getQuery();
+            } else {
+                return $this->createQueryBuilder('u')
+                    ->select('u,d,userRole')
+                    ->leftJoin('u.detailData', 'd')
+                    ->leftJoin('u.user_role', 'userRole')
+                    ->getQuery();
+            };
         }
 
+        $values = [];
         /**
          * We are checking if fields exists in related entities, this way we avoid attacks and typing errors
          */
@@ -117,14 +135,14 @@ class UserRepository extends EntityRepository
                 ->select($values)
                 ->where('u.is_active = :isActive')
                 ->leftJoin('u.detailData', 'd')
-                ->leftJoin('u.userRole','userRole')
+                ->leftJoin('u.user_role', 'userRole')
                 ->setParameter('isActive', $isActiveParam)
                 ->getQuery();
         } else {
             return $this->createQueryBuilder('u')
                 ->select($values)
                 ->leftJoin('u.detailData', 'd')
-                ->leftJoin('u.userRole','userRole')
+                ->leftJoin('u.user_role', 'userRole')
                 ->getQuery();
         };
     }

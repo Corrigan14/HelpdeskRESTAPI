@@ -43,29 +43,25 @@ class UserService
      * @param string $isActive
      * @return array
      */
-    public function getUsersResponse(array $fields , int $page, $isActive)
+    public function getUsersResponse(array $fields, int $page, $isActive)
     {
-        if (0 === count($fields)) {
-            $fields = UserRepository::DEFAULT_FIELDS;
-        }
-
         /** @var UserRepository $userRepository */
         $userRepository = $this->em->getRepository('APICoreBundle:User');
-        $users = $userRepository->getCustomUsers($fields , $page, $isActive);
+        $users = $userRepository->getCustomUsers($fields, $page, $isActive);
 
         $response = [
-            'data' => $users ,
+            'data' => $users,
         ];
         $pagination = HateoasHelper::getPagination(
-            $this->router->generate('users_list') ,
-            $page ,
+            $this->router->generate('users_list'),
+            $page,
             $userRepository->countUsers($isActive),
-            UserRepository::LIMIT ,
+            UserRepository::LIMIT,
             $fields,
             $isActive
         );
 
-        return array_merge($response , $pagination);
+        return array_merge($response, $pagination);
     }
 
     /**
@@ -78,8 +74,8 @@ class UserService
     public function getUserResponse(User $user)
     {
         return [
-            'data'   => $user ,
-            '_links' => $this->getUserLinks($user->getId()) ,
+            'data' => $user,
+            '_links' => $this->getUserLinks($user->getId()),
         ];
     }
 
@@ -91,9 +87,9 @@ class UserService
     private function getUserLinks(int $id)
     {
         return [
-            'put'    => $this->router->generate('user_update' , ['id' => $id]) ,
-            'patch'  => $this->router->generate('user_partial_update' , ['id' => $id]) ,
-            'delete' => $this->router->generate('user_delete' , ['id' => $id]) ,
+            'put' => $this->router->generate('user_update', ['id' => $id]),
+            'patch' => $this->router->generate('user_partial_update', ['id' => $id]),
+            'delete' => $this->router->generate('user_delete', ['id' => $id]),
         ];
     }
 }

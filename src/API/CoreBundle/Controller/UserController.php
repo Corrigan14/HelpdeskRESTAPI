@@ -43,7 +43,27 @@ class UserController extends ApiBaseController implements ControllerInterface
      *                "is_active": true
      *                "order": 2
      *            }
-     *          }
+     *          },
+     *         {
+     *            "id": 69,
+     *            "username": "manager",
+     *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
+     *            "email": "manager@manager.sk",
+     *            "roles": "[\"ROLE_USER\"]",
+     *            "is_active": true,
+     *            "image": null,
+     *            "detailData": null,
+     *            "user_role":
+     *            {
+     *              "id": 26,
+     *              "title": "MANAGER",
+     *              "description": null,
+     *              "homepage": "/",
+     *              "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *              "is_active": true,
+     *              "order": 2
+     *            }
+     *          },
      *       ],
      *       "_links":
      *       {
@@ -112,7 +132,6 @@ class UserController extends ApiBaseController implements ControllerInterface
         $isActive = $request->get('isActive') ?: 'all';
 
         return $this->json($this->get('api_user.service')->getUsersResponse($fields, $page, $isActive), StatusCodesHelper::SUCCESSFUL_CODE);
-
     }
 
     /**

@@ -81,3 +81,4 @@ class TagVoter extends ApiBaseVoter implements VoterInterface
     {
         return ($this->user->getId() === $tag->getCreatedBy()->getId());
     }
+}

@@ -115,6 +115,16 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *                   "zip": "021478",
      *                   "country": "Slovenska Republika",
      *                   "is_active": true
+     *                 },
+     *                 "user_role":
+     *                 {
+     *                   "id": 2,
+     *                   "title": "MANAGER",
+     *                   "description": null,
+     *                   "homepage": "/",
+     *                   "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                   "is_active": true
+     *                   "order": 2
      *                 }
      *             },
      *             "requestedBy":
@@ -125,7 +135,17 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *                "email": "user@user.sk",
      *                "roles": "[\"ROLE_USER\"]",
      *                "is_active": true,
-     *                "image": null
+     *                "image": null,
+     *                "user_role":
+     *                 {
+     *                   "id": 2,
+     *                   "title": "MANAGER",
+     *                   "description": null,
+     *                   "homepage": "/",
+     *                   "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                   "is_active": true
+     *                   "order": 2
+     *                 }
      *             },
      *             "taskHasAssignedUsers":
      *             [

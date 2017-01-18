@@ -254,14 +254,6 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      */
     public function getAction(int $id)
     {
-        $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($id);
-
-        if (!$userRole instanceof UserRole) {
-            return $this->createApiResponse([
-                'message' => 'User role with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
-        }
-
         $aclOptions = [
             'acl' => UserRoleAclOptions::USER_ROLE_SETTINGS,
             'user' => $this->getUser()
@@ -269,6 +261,14 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
+        }
+
+        $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($id);
+
+        if (!$userRole instanceof UserRole) {
+            return $this->createApiResponse([
+                'message' => 'User role with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
         }
 
         $userRoleArray = $this->get('user_role_service')->getUserRoleResponse($userRole);
@@ -541,6 +541,15 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      */
     public function updateAction(int $id, Request $request)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::USER_ROLE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($id);
 
         if (!$userRole instanceof UserRole) {
@@ -552,15 +561,6 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
             return $this->createApiResponse([
                 'message' => 'You can not update ADMIN role!',
             ], StatusCodesHelper::ACCESS_DENIED_CODE);
-        }
-
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::USER_ROLE_SETTINGS,
-            'user' => $this->getUser()
-        ];
-
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
         }
 
         $requestData = $request->request->all();
@@ -696,6 +696,15 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      */
     public function updatePartialAction(int $id, Request $request)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::USER_ROLE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($id);
 
         if (!$userRole instanceof UserRole) {
@@ -707,15 +716,6 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
             return $this->createApiResponse([
                 'message' => 'You can not update ADMIN role!',
             ], StatusCodesHelper::ACCESS_DENIED_CODE);
-        }
-
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::USER_ROLE_SETTINGS,
-            'user' => $this->getUser()
-        ];
-
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
         }
 
         $requestData = $request->request->all();
@@ -755,6 +755,15 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      */
     public function deleteAction(int $id)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::USER_ROLE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($id);
 
         if (!$userRole instanceof UserRole) {
@@ -766,15 +775,6 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
             return $this->createApiResponse([
                 'message' => 'You can not delete ADMIN role!',
             ], StatusCodesHelper::ACCESS_DENIED_CODE);
-        }
-
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::USER_ROLE_SETTINGS,
-            'user' => $this->getUser()
-        ];
-
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
         }
 
         $userRole->setIsActive(false);

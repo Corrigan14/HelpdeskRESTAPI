@@ -3,7 +3,7 @@
 namespace API\TaskBundle\Controller;
 
 use API\TaskBundle\Entity\TaskAttribute;
-use API\TaskBundle\Security\VoteOptions;
+use API\TaskBundle\Security\UserRoleAclOptions;
 use API\TaskBundle\Services\VariableHelper;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
@@ -85,7 +85,12 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      */
     public function listAction(Request $request)
     {
-        if (!$this->get('task_attribute_voter')->isGranted(VoteOptions::LIST_TASK_ATTRIBUTES)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::TASK_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -149,14 +154,19 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      */
     public function getAction(int $id)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::TASK_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $ta = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($id);
 
         if (!$ta instanceof TaskAttribute) {
             return $this->notFoundResponse();
-        }
-
-        if (!$this->get('task_attribute_voter')->isGranted(VoteOptions::SHOW_TASK_ATTRIBUTE)) {
-            return $this->accessDeniedResponse();
         }
 
         $caArray = $this->get('task_attribute_service')->getTaskAttributeResponse($ta);
@@ -215,7 +225,12 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      */
     public function createAction(Request $request)
     {
-        if (!$this->get('task_attribute_voter')->isGranted(VoteOptions::CREATE_TASK_ATTRIBUTE)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::TASK_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -286,14 +301,19 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      */
     public function updateAction(int $id, Request $request)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::TASK_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($id);
 
         if (!$taskAttribute instanceof TaskAttribute) {
             return $this->notFoundResponse();
-        }
-
-        if (!$this->get('task_attribute_voter')->isGranted(VoteOptions::UPDATE_TASK_ATTRIBUTE)) {
-            return $this->accessDeniedResponse();
         }
 
         $requestData = $request->request->all();
@@ -361,14 +381,19 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      */
     public function updatePartialAction(int $id, Request $request)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::TASK_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($id);
 
         if (!$taskAttribute instanceof TaskAttribute) {
             return $this->notFoundResponse();
-        }
-
-        if (!$this->get('task_attribute_voter')->isGranted(VoteOptions::UPDATE_TASK_ATTRIBUTE)) {
-            return $this->accessDeniedResponse();
         }
 
         $requestData = $request->request->all();
@@ -408,14 +433,19 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      */
     public function deleteAction(int $id)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::TASK_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($id);
 
         if (!$taskAttribute instanceof TaskAttribute) {
             return $this->notFoundResponse();
-        }
-
-        if (!$this->get('task_attribute_voter')->isGranted(VoteOptions::DELETE_TASK_ATTRIBUTE)) {
-            return $this->accessDeniedResponse();
         }
 
         $taskAttribute->setIsActive(false);
@@ -478,14 +508,19 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      */
     public function restoreAction(int $id)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::TASK_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($id);
 
         if (!$taskAttribute instanceof TaskAttribute) {
             return $this->notFoundResponse();
-        }
-
-        if (!$this->get('task_attribute_voter')->isGranted(VoteOptions::DELETE_TASK_ATTRIBUTE)) {
-            return $this->accessDeniedResponse();
         }
 
         $taskAttribute->setIsActive(true);
@@ -536,6 +571,6 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
             return $this->createApiResponse($taskAttributeResponse, $statusCode);
         }
 
-        return $this->invalidParametersResponse();
+        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

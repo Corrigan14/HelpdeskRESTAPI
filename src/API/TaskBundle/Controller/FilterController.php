@@ -494,7 +494,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
         $requestData = $request->request->all();
 
         // Check if user can create PUBLIC filter (it's role has SHARE_FILTER ACL)
-        if (true === $requestData['public']) {
+        if (isset($requestData['public']) && true === $requestData['public']) {
             $aclOptions = [
                 'acl' => UserRoleAclOptions::SHARE_FILTERS,
                 'user' => $this->getUser()
@@ -667,7 +667,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
         }
 
         // Check if user can create PUBLIC filter (it's role has PROJECT_SHARED_FILTER ACL)
-        if (true === $requestData['public']) {
+        if (isset($requestData['public']) && true === $requestData['public']) {
             $aclOptions = [
                 'acl' => UserRoleAclOptions::PROJECT_SHARED_FILTERS,
                 'user' => $this->getUser()
@@ -851,7 +851,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
         }
 
         // Check if user can create PUBLIC filter (it's role has SHARE_FILTER ACL)
-        if (true === $requestData['public']) {
+        if (isset($requestData['public']) && true === $requestData['public']) {
             $aclOptions = [
                 'acl' => UserRoleAclOptions::SHARE_FILTERS,
                 'user' => $this->getUser()
@@ -1044,7 +1044,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
         }
 
         // Check if user can create PUBLIC filter (it's role has PROJECT_SHARED_FILTER ACL)
-        if (true === $requestData['public']) {
+        if (isset($requestData['public']) && true === $requestData['public']) {
             $aclOptions = [
                 'acl' => UserRoleAclOptions::PROJECT_SHARED_FILTERS,
                 'user' => $this->getUser()
@@ -1224,7 +1224,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
         }
 
         // Check if user can create PUBLIC filter (it's role has SHARE_FILTER ACL)
-        if (true === $requestData['public']) {
+        if (isset($requestData['public']) && true === $requestData['public']) {
             $aclOptions = [
                 'acl' => UserRoleAclOptions::SHARE_FILTERS,
                 'user' => $this->getUser()

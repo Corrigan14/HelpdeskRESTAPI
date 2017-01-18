@@ -67,14 +67,6 @@ class FilterVoter implements VoterInterface
         switch ($action) {
             case VoteOptions::SHOW_FILTER:
                 return $this->canViewFilter($options);
-            case VoteOptions::CREATE_PUBLIC_FILTER:
-                return $this->canCreatePublicFilter();
-            case VoteOptions::CREATE_FILTER:
-                return $this->canCreateFilter();
-            case VoteOptions::CREATE_PROJECT_FILTER:
-                return $this->canCreateProjectFilter($options);
-            case VoteOptions::CREATE_PUBLIC_PROJECT_FILTER:
-                return $this->canCreatePublicProjectFilter($options);
             case VoteOptions::UPDATE_FILTER:
                 return $this->canUpdateFilter($options);
             case VoteOptions::UPDATE_PROJECT_FILTER:
@@ -108,93 +100,6 @@ class FilterVoter implements VoterInterface
 
         return false;
     }
-
-    /**
-     * @return bool
-     */
-    private function canCreateFilter(): bool
-    {
-        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
-            return true;
-        }
-
-        // Everybody can create it's own filter
-        return true;
-    }
-
-    /**
-     * @return bool
-     */
-    private function canCreatePublicFilter(): bool
-    {
-        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
-            return true;
-        }
-
-        // User can create public filter if he has ACL CREATE_PUBLIC_FILTER
-        $userACL = $this->user->getAcl();
-        if (in_array(VoteOptions::CREATE_PUBLIC_FILTER, $userACL, true)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * @param Project $project
-     * @return bool
-     */
-    private function canCreateProjectFilter(Project $project): bool
-    {
-        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
-            return true;
-        }
-
-        // User can create filter in project if he created this project
-        if ($project->getCreatedBy()->getId() === $this->user->getId()) {
-            return true;
-        }
-
-        // User can create filter in project if he has ANY permission to this project
-        $userHasProject = $this->em->getRepository('APITaskBundle:UserHasProject')->findOneBy([
-            'user' => $this->user,
-            'project' => $project
-        ]);
-        if ($userHasProject instanceof UserHasProject) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * @param Project $project
-     * @return bool
-     */
-    private function canCreatePublicProjectFilter(Project $project): bool
-    {
-        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
-            return true;
-        }
-
-        // User can create PUBLIC filter in project if he created this project
-        if ($project->getCreatedBy()->getId() === $this->user->getId()) {
-            return true;
-        }
-
-        // User can create PUBLIC filter in project if he has CREATE_PUBLIC_PROJECT_FILTER permission to this project
-        $userHasProject = $this->em->getRepository('APITaskBundle:UserHasProject')->findOneBy([
-            'user' => $this->user,
-            'project' => $project
-        ]);
-        if ($userHasProject instanceof UserHasProject) {
-            $acl = $userHasProject->getAcl();
-            return in_array(VoteOptions::CREATE_PUBLIC_PROJECT_FILTER, $acl);
-        }
-
-        return false;
-    }
-
 
     /**
      * @param Filter $filter

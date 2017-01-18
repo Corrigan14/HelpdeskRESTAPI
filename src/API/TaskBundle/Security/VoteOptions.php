@@ -9,14 +9,22 @@ namespace API\TaskBundle\Security;
  */
 class VoteOptions
 {
-    // USER CRUD
+    // USER VOTE OPTIONS
     const CREATE_USER_WITH_USER_ROLE = 'create_user';
     const UPDATE_USER_WITH_USER_ROLE = 'update_user';
 
-    // TAG CRUD
+    // TAG VOTE OPTIONS
     const SHOW_TAG = 'show_tag';
     const UPDATE_TAG = 'update_tag';
     const DELETE_TAG = 'delete_tag';
+
+    // FILTER VOTE OPTIONS
+    const SHOW_FILTER = 'show_filter';
+    const UPDATE_FILTER = 'update_filter';
+    const UPDATE_PROJECT_FILTER = 'update_project_filter';
+    const DELETE_FILTER = 'delete_filter';
+
+
 
     // PROJECT CRUD
     const CREATE_PROJECT = 'create_project';
@@ -40,13 +48,6 @@ class VoteOptions
     const SOLVE_ALL_TASKS_IN_PROJECT = 'solve_all_tasks_in_project';
     const SOLVE_COMPANY_TASKS_IN_PROJECT = 'solve_company_tasks_in_project';
     const SOLVE_USER_TASKS_IN_PROJECT = 'solve_user_tasks_in_project';
-
-    // TASK ATTRIBUTE CRUD
-    const CREATE_TASK_ATTRIBUTE = 'create_task_attribute';
-    const SHOW_TASK_ATTRIBUTE = 'read_task_attribute';
-    const UPDATE_TASK_ATTRIBUTE = 'update_task_attribute';
-    const DELETE_TASK_ATTRIBUTE = 'delete_task_attribute';
-    const LIST_TASK_ATTRIBUTES = 'list_task_attributes';
 
     // TASK CRUD
     const LIST_TASKS = 'list_tasks';
@@ -78,16 +79,6 @@ class VoteOptions
     const ADD_ATTACHMENT_TO_COMMENT = 'add_attachment_to_comment';
     const REMOVE_ATTACHMENT_FROM_COMMENT = 'remove_attachment_from_comment';
     const SHOW_LIST_OF_COMMENTS_ATTACHMENTS = 'show_list_of_comments_attachments';
-
-    // FILTER CRUD
-    const SHOW_FILTER = 'show_filter';
-    const CREATE_PUBLIC_FILTER = 'create_public_filter';
-    const CREATE_FILTER = 'create_filter';
-    const CREATE_PROJECT_FILTER = 'create_project_filter';
-    const CREATE_PUBLIC_PROJECT_FILTER = 'create_public_project_filter';
-    const UPDATE_FILTER = 'update_filter';
-    const UPDATE_PROJECT_FILTER = 'update_project_filter';
-    const DELETE_FILTER = 'delete_filter';
 
     /**
      * @return array

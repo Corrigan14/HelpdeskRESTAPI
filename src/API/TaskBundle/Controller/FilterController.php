@@ -4,6 +4,7 @@ namespace API\TaskBundle\Controller;
 
 use API\TaskBundle\Entity\Filter;
 use API\TaskBundle\Entity\Project;
+use API\TaskBundle\Security\UserRoleAclOptions;
 use API\TaskBundle\Security\VoteOptions;
 use API\TaskBundle\Services\FilterAttributeOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
@@ -42,7 +43,17 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *                "email": "admin@admin.sk",
      *                "roles": "[\"ROLE_ADMIN\"]",
      *                "is_active": true,
-     *                "image": null
+     *                "image": null,
+     *                "user_role":
+     *                {
+     *                   "id": 2,
+     *                   "title": "MANAGER",
+     *                   "description": null,
+     *                   "homepage": "/",
+     *                   "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                   "is_active": true
+     *                   "order": 2
+     *                }
      *             },
      *             "project": null
      *          },
@@ -55,17 +66,27 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *              "is_active": true,
      *              "default": false,
      *              "createdBy":
-     *             {
+     *              {
      *                "id": 39,
      *                "username": "user",
      *                "password": "$2y$13$cRIMO.MJJp1DrsB89ru97.4q2NftRbXBCiKBPSfcb/bUKgXCtuJ1q",
      *                "email": "user@user.sk",
      *                "roles": "[\"ROLE_USER\"]",
      *                "is_active": true,
-     *                "image": null
-     *             },
-     *             "project":
-     *             {
+     *                "image": null,
+     *                "user_role":
+     *                {
+     *                   "id": 2,
+     *                   "title": "MANAGER",
+     *                   "description": null,
+     *                   "homepage": "/",
+     *                   "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                   "is_active": true
+     *                   "order": 2
+     *                }
+     *              },
+     *              "project":
+     *              {
      *                "id": 58,
      *                "title": "Project of admin",
      *                "description": "Description of project of admin.",
@@ -237,6 +258,16 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *                      }
      *                   }
      *                 }
+     *              },
+     *              "user_role":
+     *              {
+     *                 "id": 2,
+     *                 "title": "MANAGER",
+     *                 "description": null,
+     *                 "homepage": "/",
+     *                 "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                 "is_active": true
+     *                 "order": 2
      *              }
      *           },
      *           "project":
@@ -252,7 +283,17 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *                  "email": "user222@admin.sk",
      *                  "roles": "[\"ROLE_USER\"]",
      *                  "is_active": true,
-     *                  "company": null
+     *                  "company": null,
+     *                  "user_role":
+     *                  {
+     *                    "id": 2,
+     *                    "title": "MANAGER",
+     *                    "description": null,
+     *                    "homepage": "/",
+     *                    "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                    "is_active": true
+     *                    "order": 2
+     *                  }
      *               }
      *            }
      *           "created_at": "2017-01-03T17:40:43+0100",
@@ -369,6 +410,16 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *                      }
      *                   }
      *                 }
+     *              },
+     *              "user_role":
+     *              {
+     *                 "id": 2,
+     *                 "title": "MANAGER",
+     *                 "description": null,
+     *                 "homepage": "/",
+     *                 "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                 "is_active": true
+     *                 "order": 2
      *              }
      *           },
      *           "project":
@@ -384,7 +435,17 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *                  "email": "user222@admin.sk",
      *                  "roles": "[\"ROLE_USER\"]",
      *                  "is_active": true,
-     *                  "company": null
+     *                  "company": null,
+     *                  "user_role":
+     *                  {
+     *                     "id": 2,
+     *                     "title": "MANAGER",
+     *                     "description": null,
+     *                     "homepage": "/",
+     *                     "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                     "is_active": true
+     *                     "order": 2
+     *                  }
      *               }
      *            }
      *           "created_at": "2017-01-03T17:40:43+0100",
@@ -432,18 +493,22 @@ class FilterController extends ApiBaseController implements ControllerInterface
         $filter = new Filter();
         $requestData = $request->request->all();
 
-        if (!$this->get('filter_voter')->isGranted(VoteOptions::CREATE_FILTER)) {
-            return $this->accessDeniedResponse();
-        }
-
-        // Check if user can create PUBLIC filter
+        // Check if user can create PUBLIC filter (it's role has SHARE_FILTER ACL)
         if (true === $requestData['public']) {
-            if (!$this->get('filter_voter')->isGranted(VoteOptions::CREATE_PUBLIC_FILTER)) {
+            $aclOptions = [
+                'acl' => UserRoleAclOptions::SHARE_FILTERS,
+                'user' => $this->getUser()
+            ];
+
+            if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+                $filter->setPublic(false);
                 return $this->createApiResponse([
                     'message' => 'You have not permission to create PUBLIC filter!',
                 ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            } else {
+                $filter->setPublic(true);
             }
-            $filter->setPublic(true);
+            unset($requestData['public']);
         } else {
             $filter->setPublic(false);
         }
@@ -512,6 +577,16 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *                      }
      *                   }
      *                 }
+     *              },
+     *              "user_role":
+     *              {
+     *                 "id": 2,
+     *                 "title": "MANAGER",
+     *                 "description": null,
+     *                 "homepage": "/",
+     *                 "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                 "is_active": true
+     *                 "order": 2
      *              }
      *           },
      *           "project":
@@ -527,7 +602,17 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *                  "email": "user222@admin.sk",
      *                  "roles": "[\"ROLE_USER\"]",
      *                  "is_active": true,
-     *                  "company": null
+     *                  "company": null,
+     *                  "user_role":
+     *                  {
+     *                     "id": 2,
+     *                     "title": "MANAGER",
+     *                     "description": null,
+     *                     "homepage": "/",
+     *                     "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                     "is_active": true
+     *                     "order": 2
+     *                  }
      *               }
      *            }
      *           "created_at": "2017-01-03T17:40:43+0100",
@@ -581,18 +666,22 @@ class FilterController extends ApiBaseController implements ControllerInterface
             ], StatusCodesHelper::NOT_FOUND_CODE);
         }
 
-        if (!$this->get('filter_voter')->isGranted(VoteOptions::CREATE_PROJECT_FILTER, $project)) {
-            return $this->accessDeniedResponse();
-        }
-
-        // Check if user can create PUBLIC filter
+        // Check if user can create PUBLIC filter (it's role has PROJECT_SHARED_FILTER ACL)
         if (true === $requestData['public']) {
-            if (!$this->get('filter_voter')->isGranted(VoteOptions::CREATE_PUBLIC_PROJECT_FILTER)) {
+            $aclOptions = [
+                'acl' => UserRoleAclOptions::PROJECT_SHARED_FILTERS,
+                'user' => $this->getUser()
+            ];
+
+            if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+                $filter->setPublic(false);
                 return $this->createApiResponse([
-                    'message' => 'You have not permission to create PUBLIC filter in this project!',
+                    'message' => 'You have not permission to create PUBLIC filters in Projects!',
                 ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            } else {
+                $filter->setPublic(true);
             }
-            $filter->setPublic(true);
+            unset($requestData['public']);
         } else {
             $filter->setPublic(false);
         }
@@ -607,7 +696,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
     /**
      * ### Response ###
      *      {
-     *       "data":
+     *         "data":
      *        {
      *           "id": 2,
      *           "title": "Admins PRIVATE Filter where status=new, creator = admin, user, archived = true",
@@ -661,6 +750,16 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *                      }
      *                   }
      *                 }
+     *              },
+     *              "user_role":
+     *              {
+     *                 "id": 2,
+     *                 "title": "MANAGER",
+     *                 "description": null,
+     *                 "homepage": "/",
+     *                 "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                 "is_active": true
+     *                 "order": 2
      *              }
      *           },
      *           "project":
@@ -676,7 +775,17 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *                  "email": "user222@admin.sk",
      *                  "roles": "[\"ROLE_USER\"]",
      *                  "is_active": true,
-     *                  "company": null
+     *                  "company": null,
+     *                  "user_role":
+     *                  {
+     *                     "id": 2,
+     *                     "title": "MANAGER",
+     *                     "description": null,
+     *                     "homepage": "/",
+     *                     "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                     "is_active": true
+     *                     "order": 2
+     *                  }
      *               }
      *            }
      *           "created_at": "2017-01-03T17:40:43+0100",
@@ -741,14 +850,22 @@ class FilterController extends ApiBaseController implements ControllerInterface
             return $this->accessDeniedResponse();
         }
 
-        // Check if user can create PUBLIC filter
-        if (isset($requestData['public']) && true === $requestData['public']) {
-            if (!$this->get('filter_voter')->isGranted(VoteOptions::CREATE_PUBLIC_FILTER)) {
+        // Check if user can create PUBLIC filter (it's role has SHARE_FILTER ACL)
+        if (true === $requestData['public']) {
+            $aclOptions = [
+                'acl' => UserRoleAclOptions::SHARE_FILTERS,
+                'user' => $this->getUser()
+            ];
+
+            if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+                $filter->setPublic(false);
                 return $this->createApiResponse([
                     'message' => 'You have not permission to create PUBLIC filter!',
                 ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            } else {
+                $filter->setPublic(true);
             }
-            $filter->setPublic(true);
+            unset($requestData['public']);
         } else {
             $filter->setPublic(false);
         }
@@ -813,6 +930,16 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *                      }
      *                   }
      *                 }
+     *              },
+     *              "user_role":
+     *              {
+     *                 "id": 2,
+     *                 "title": "MANAGER",
+     *                 "description": null,
+     *                 "homepage": "/",
+     *                 "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                 "is_active": true
+     *                 "order": 2
      *              }
      *           },
      *           "project":
@@ -828,7 +955,17 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *                  "email": "user222@admin.sk",
      *                  "roles": "[\"ROLE_USER\"]",
      *                  "is_active": true,
-     *                  "company": null
+     *                  "company": null,
+     *                  "user_role":
+     *                  {
+     *                     "id": 2,
+     *                     "title": "MANAGER",
+     *                     "description": null,
+     *                     "homepage": "/",
+     *                     "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                     "is_active": true
+     *                     "order": 2
+     *                  }
      *               }
      *            }
      *           "created_at": "2017-01-03T17:40:43+0100",
@@ -906,14 +1043,22 @@ class FilterController extends ApiBaseController implements ControllerInterface
             return $this->accessDeniedResponse();
         }
 
-        // Check if user can create PUBLIC filter
-        if (isset($requestData['public']) && true === $requestData['public']) {
-            if (!$this->get('filter_voter')->isGranted(VoteOptions::CREATE_PUBLIC_PROJECT_FILTER, $project)) {
+        // Check if user can create PUBLIC filter (it's role has PROJECT_SHARED_FILTER ACL)
+        if (true === $requestData['public']) {
+            $aclOptions = [
+                'acl' => UserRoleAclOptions::PROJECT_SHARED_FILTERS,
+                'user' => $this->getUser()
+            ];
+
+            if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+                $filter->setPublic(false);
                 return $this->createApiResponse([
-                    'message' => 'You have not permission to create PUBLIC filter in this project!',
+                    'message' => 'You have not permission to create PUBLIC filters in Projects!',
                 ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            } else {
+                $filter->setPublic(true);
             }
-            $filter->setPublic(true);
+            unset($requestData['public']);
         } else {
             $filter->setPublic(false);
         }
@@ -980,6 +1125,16 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *                      }
      *                   }
      *                 }
+     *              },
+     *              "user_role":
+     *              {
+     *                 "id": 2,
+     *                 "title": "MANAGER",
+     *                 "description": null,
+     *                 "homepage": "/",
+     *                 "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                 "is_active": true
+     *                 "order": 2
      *              }
      *           },
      *           "project":
@@ -995,7 +1150,17 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *                  "email": "user222@admin.sk",
      *                  "roles": "[\"ROLE_USER\"]",
      *                  "is_active": true,
-     *                  "company": null
+     *                  "company": null,
+     *                  "user_role":
+     *                  {
+     *                     "id": 2,
+     *                     "title": "MANAGER",
+     *                     "description": null,
+     *                     "homepage": "/",
+     *                     "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                     "is_active": true
+     *                     "order": 2
+     *                  }
      *               }
      *            }
      *           "created_at": "2017-01-03T17:40:43+0100",
@@ -1058,14 +1223,22 @@ class FilterController extends ApiBaseController implements ControllerInterface
             return $this->accessDeniedResponse();
         }
 
-        // Check if user can create PUBLIC filter
-        if (isset($requestData['public']) && true === $requestData['public']) {
-            if (!$this->get('filter_voter')->isGranted(VoteOptions::CREATE_PUBLIC_FILTER)) {
+        // Check if user can create PUBLIC filter (it's role has SHARE_FILTER ACL)
+        if (true === $requestData['public']) {
+            $aclOptions = [
+                'acl' => UserRoleAclOptions::SHARE_FILTERS,
+                'user' => $this->getUser()
+            ];
+
+            if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+                $filter->setPublic(false);
                 return $this->createApiResponse([
                     'message' => 'You have not permission to create PUBLIC filter!',
                 ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            } else {
+                $filter->setPublic(true);
             }
-            $filter->setPublic(true);
+            unset($requestData['public']);
         } else {
             $filter->setPublic(false);
         }
@@ -1146,12 +1319,32 @@ class FilterController extends ApiBaseController implements ControllerInterface
 
             foreach ($filters as $key => $value) {
                 $filterAttribute = explode('=', $value);
-                if (!in_array($filterAttribute[0], FilterAttributeOptions::getConstants())) {
+                if (!in_array($filterAttribute[0], FilterAttributeOptions::getConstants(), true)) {
                     return $this->createApiResponse([
                         'message' => 'Requested filter parameter ' . $filterAttribute[0] . ' is not allowed!',
                     ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 }
             }
+        }
+
+        // Check if user can create REPORT Filter (it's role has to have ACL REPORT_FILTERS)
+        if (isset($data['report']) && $data['report']) {
+            $aclOptions = [
+                'acl' => UserRoleAclOptions::REPORT_FILTERS,
+                'user' => $this->getUser()
+            ];
+
+            if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+                $filter->setReport(false);
+                return $this->createApiResponse([
+                    'message' => 'You have not permission to create REPORT filter!',
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            } else {
+                $filter->setReport(true);
+            }
+            unset($data['report']);
+        } else {
+            $filter->setReport(false);
         }
 
         $errors = $this->get('entity_processor')->processEntity($filter, $data);

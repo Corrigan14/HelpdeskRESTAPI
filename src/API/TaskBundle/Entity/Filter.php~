@@ -74,6 +74,14 @@ class Filter
     private $default;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="icon_class", type="string", length=255)
+     * @Assert\Type("string")
+     */
+    private $icon_class;
+
+    /**
      * @var User
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="filters")

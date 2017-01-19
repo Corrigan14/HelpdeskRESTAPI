@@ -4,6 +4,7 @@ namespace API\TaskBundle\Repository;
 
 use API\TaskBundle\Services\VariableHelper;
 use Doctrine\ORM\EntityRepository;
+use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
  * TaskRepository
@@ -26,6 +27,7 @@ class TaskRepository extends EntityRepository
         $dateFilter = $options['dateFilter'];
         $isNullFilter = $options['isNullFilter'];
         $searchFilter = $options['searchFilter'];
+        $notAndCurrentFilter = $options['notAndCurrentFilter'];
         $inFilterAddedParams = $options['inFilterAddedParams'];
         $equalFilterAddedParams = $options['equalFilterAddedParams'];
         $dateFilterAddedParams = $options['dateFilterAddedParams'];
@@ -88,6 +90,14 @@ class TaskRepository extends EntityRepository
             }
         }
 
+        foreach ($notAndCurrentFilter as $filter) {
+            if (in_array($filter['not'], VariableHelper::$allowedKeysInFilter) && in_array($filter['equal']['key'], VariableHelper::$allowedKeysInFilter)) {
+                $query->andWhere($filter['not'] . ' IS NULL');
+                $query->orWhere($filter['equal']['key'] . ' = :parameter' . $paramNum);
+                $paramArray['parameter' . $paramNum] = $filter['equal']['value'];
+            }
+        }
+
         foreach ($dateFilter as $key => $value) {
             if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
                 if (isset($value['from']) && isset($value['to'])) {
@@ -102,9 +112,15 @@ class TaskRepository extends EntityRepository
 
                     $paramNum++;
                 } elseif (isset($value['to']) && !isset($value['from'])) {
-                    $query->andWhere($key . '<= :TO' . $paramNum);
-                    $paramArray['TO' . $paramNum] = $value['to'];
-
+                    if (strtolower($value['to']) === 'now') {
+                        $query->andWhere($key . '<= :TO' . $paramNum);
+                        $nowDate = new \DateTime();
+                        $nowDate->format('Y-m-d H:i:s');
+                        $paramArray['TO' . $paramNum] = $nowDate;
+                    } else {
+                        $query->andWhere($key . '<= :TO' . $paramNum);
+                        $paramArray['TO' . $paramNum] = $value['to'];
+                    }
                     $paramNum++;
                 }
             }

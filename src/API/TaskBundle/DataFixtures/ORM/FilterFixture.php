@@ -4,6 +4,7 @@ namespace API\TaskBundle\DataFixtures\ORM;
 
 
 use API\TaskBundle\Entity\Filter;
+use API\TaskBundle\Security\StatusOptions;
 use API\TaskBundle\Services\FilterAttributeOptions;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
@@ -27,70 +28,67 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
     public function load(ObjectManager $manager)
     {
         $status = $manager->getRepository('APITaskBundle:Status')->findOneBy([
-            'title' => 'new'
+            'title' => StatusOptions::NEW
         ]);
-        $statId = $status->getId();
+        $newStatId = $status->getId();
 
-        $user = $manager->getRepository('APICoreBundle:User')->findOneBy([
-            'username' => 'user'
+        $status = $manager->getRepository('APITaskBundle:Status')->findOneBy([
+            'title' => StatusOptions::IN_PROGRESS
         ]);
-        $userId = $user->getId();
+        $inProgressStatId = $status->getId();
 
         $admin = $manager->getRepository('APICoreBundle:User')->findOneBy([
             'username' => 'admin'
         ]);
-        $adminId = $admin->getId();
-
-        $project = $manager->getRepository('APITaskBundle:Project')->findOneBy([
-            'title' => 'Project of user 1'
-        ]);
-        $projectId = $project->getId();
 
         $filter = new Filter();
         $filter->setTitle('DO IT');
-        $filter->setFilter('status=' . $statId . '&project' . $projectId . '&creator=' . $adminId . ',' . $userId . '&requester=' . $userId);
+        $filter->setFilter('&status=' . $newStatId . ',' . $inProgressStatId . '&assigned=not,current-user');
         $filter->setPublic(true);
-        $filter->setCreatedBy($user);
+        $filter->setCreatedBy($admin);
         $filter->setIsActive(true);
         $filter->setReport(false);
-        $filter->setDefault(false);
+        $filter->setDefault(true);
+        $filter->setIconClass('&#xE88A;');
 
         $manager->persist($filter);
 
         $filter = new Filter();
-        $filter->setTitle('Admins PRIVATE Filter where status=new, creator = admin, user, archived = true');
-        $filter->setFilter('status=' . $statId . '&project' . $projectId . '&creator=' . $adminId . ',' . $userId . '&requester=' . $userId);
-        $filter->setPublic(false);
+        $filter->setTitle('IMPORTANT');
+        $filter->setFilter('&important=TRUE&assigned=current-user');
+        $filter->setPublic(true);
         $filter->setCreatedBy($admin);
         $filter->setIsActive(true);
         $filter->setReport(false);
         $filter->setDefault(false);
+        $filter->setIconClass('&#xE838;');
 
         $manager->persist($filter);
 
         $filter = new Filter();
-        $filter->setTitle('Users PROJECT PRIVATE Filter where status=new, creator = admin, user, archived = true');
-        $filter->setFilter('status=' . $statId . '&project' . $projectId . '&creator=' . $adminId . ',' . $userId . '&requester=' . $userId);
-        $filter->setPublic(false);
-        $filter->setProject($project);
-        $filter->setCreatedBy($user);
+        $filter->setTitle('SCHEDULED');
+        $filter->setFilter('&startedTime=TO=now');
+        $filter->setPublic(true);
+        $filter->setCreatedBy($admin);
         $filter->setIsActive(true);
         $filter->setReport(false);
         $filter->setDefault(false);
+        $filter->setIconClass('&#xE858;');
 
         $manager->persist($filter);
 
         $filter = new Filter();
-        $filter->setTitle('Users PROJECT DEFAULT PRIVATE Filter where status=new, creator = admin, user, archived = true');
-        $filter->setFilter('status=' . $statId . '&project' . $projectId . '&creator=' . $adminId . ',' . $userId . '&requester=' . $userId);
-        $filter->setPublic(false);
-        $filter->setProject($project);
-        $filter->setCreatedBy($user);
-        $filter->setDefault(true);
+        $filter->setTitle('REQUESTED');
+        $filter->setFilter('&requester=current-user');
+        $filter->setPublic(true);
+        $filter->setCreatedBy($admin);
         $filter->setIsActive(true);
         $filter->setReport(false);
+        $filter->setDefault(false);
+        $filter->setIconClass('&#xE7EF;');
 
         $manager->persist($filter);
+
         $manager->flush();
     }
 

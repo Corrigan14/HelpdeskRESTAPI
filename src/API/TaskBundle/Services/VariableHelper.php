@@ -37,7 +37,8 @@ class VariableHelper
         'task.project',
         'projectCreator.id',
         'thau.user',
-        'task.tags'
+        'task.tags',
+        'task.important'
     ];
 
     /**

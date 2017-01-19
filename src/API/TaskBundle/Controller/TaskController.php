@@ -258,23 +258,35 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *     },
      *     {
      *       "name"="createdTime",
-     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30"
+     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30
+     *        Another option:
+     *          TO=NOW - just tasks created to NOW datetime are returned."
      *     },
      *     {
      *       "name"="startedTime",
-     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30"
+     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30
+     *        Another option:
+     *          TO=NOW - just tasks started to NOW datetime are returned."
      *     },
      *     {
      *       "name"="deadlineTime",
-     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30"
+     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30
+     *       Another option:
+     *          TO=NOW - just tasks with deadline to NOW datetime are returned."
      *     },
      *     {
      *       "name"="closedTime",
-     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30"
+     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30
+     *       Another option:
+     *          TO=NOW - just tasks closed to NOW datetime are returned."
      *     },
      *     {
      *       "name"="archived",
      *       "description"="If TRUE, just tasks from archived projects are returned"
+     *     },
+     *     {
+     *       "name"="important",
+     *       "description"="If TRUE, just IMPORTANT tasks are returned"
      *     },
      *     {
      *       "name"="addedParameters",
@@ -316,6 +328,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
             'isNullFilter' => $filterData['isNullFilter'],
             'dateFilter' => $filterData['dateFilter'],
             'searchFilter' => $filterData['searchFilter'],
+            'notAndCurrentFilter' => $filterData['notAndCurrentFilter'],
             'inFilterAddedParams' => $filterData['inFilterAddedParams'],
             'equalFilterAddedParams' => $filterData['equalFilterAddedParams'],
             'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
@@ -949,6 +962,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $dateFilter = [];
         $equalFilter = [];
         $isNullFilter = [];
+        $notAndCurrentFilter = [];
         $searchFilter = null;
 
         $inFilterAddedParams = [];
@@ -971,6 +985,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $deadline = $request->get('deadlineTime');
         $closed = $request->get('closedTime');
         $archived = $request->get('archived');
+        $important = $request->get('important');
         $addedParameters = $request->get('addedParameters');
 
         if (null !== $search) {
@@ -1016,13 +1031,24 @@ class TaskController extends ApiBaseController implements ControllerInterface
             $filterForUrl['company'] = '&company=' . $company;
         }
         if (null !== $assigned) {
-            if ('not' === strtolower($assigned)) {
+            $assignedArray = explode(",", $assigned);
+
+            if (in_array('not', $assignedArray) && in_array('current-user', $assignedArray)) {
+                $notAndCurrentFilter[] = [
+                    'not' => 'thau.user',
+                    'equal' => [
+                        'key' => 'assignedUser.id',
+                        'value' => $this->getUser()->getId()
+                    ],
+                ];
+            } elseif ('not' === strtolower($assigned)) {
                 $isNullFilter[] = 'thau.user';
             } elseif ('current-user' === strtolower($assigned)) {
                 $equalFilter['assignedUser.id'] = $this->getUser()->getId();
             } else {
                 $inFilter['assignedUser.id'] = explode(",", $assigned);
             }
+
             $filterForUrl['assigned'] = '&assigned=' . $assigned;
         }
         if (null !== $tag) {
@@ -1073,6 +1099,10 @@ class TaskController extends ApiBaseController implements ControllerInterface
             $equalFilter['project.is_active'] = 0;
             $filterForUrl['archived'] = '&archived=TRUE';
         }
+        if ('true' === strtolower($important)) {
+            $equalFilter['task.important'] = 1;
+            $filterForUrl['important'] = '&important=TRUE';
+        }
         if (null !== $addedParameters) {
             $arrayOfAddedParameters = explode("&", $addedParameters);
 
@@ -1113,6 +1143,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
             'dateFilter' => $dateFilter,
             'isNullFilter' => $isNullFilter,
             'searchFilter' => $searchFilter,
+            'notAndCurrentFilter' => $notAndCurrentFilter,
             'inFilterAddedParams' => $inFilterAddedParams,
             'equalFilterAddedParams' => $equalFilterAddedParams,
             'dateFilterAddedParams' => $dateFilterAddedParams,

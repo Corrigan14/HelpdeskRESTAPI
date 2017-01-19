@@ -61,7 +61,7 @@ class Filter
     /**
      * @var bool
      *
-     * @ORM\Column(name="is_active", type="boolean", options={"default":1})
+     * @ORM\Column(name="is_active", type="boolean", options={"default":1}, nullable=true)
      * @Serializer\ReadOnly()
      */
     private $is_active;

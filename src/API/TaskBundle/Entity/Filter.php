@@ -74,6 +74,14 @@ class Filter
     private $default;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="icon_class", type="string", length=255)
+     * @Assert\Type("string")
+     */
+    private $icon_class;
+
+    /**
      * @var User
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="filters")
@@ -292,5 +300,29 @@ class Filter
     public function getDefault()
     {
         return $this->default;
+    }
+
+    /**
+     * Set iconClass
+     *
+     * @param string $iconClass
+     *
+     * @return Filter
+     */
+    public function setIconClass($iconClass)
+    {
+        $this->icon_class = $iconClass;
+
+        return $this;
+    }
+
+    /**
+     * Get iconClass
+     *
+     * @return string
+     */
+    public function getIconClass()
+    {
+        return $this->icon_class;
     }
 }

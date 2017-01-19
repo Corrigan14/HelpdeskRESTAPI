@@ -47,7 +47,7 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
         $projectId = $project->getId();
 
         $filter = new Filter();
-        $filter->setTitle('Users PUBLIC Filter where status=new, creator = admin, user, archived = true');
+        $filter->setTitle('DO IT');
         $filter->setFilter('status=' . $statId . '&project' . $projectId . '&creator=' . $adminId . ',' . $userId . '&requester=' . $userId);
         $filter->setPublic(true);
         $filter->setCreatedBy($user);

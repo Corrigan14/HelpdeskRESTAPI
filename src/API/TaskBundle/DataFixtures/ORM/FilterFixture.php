@@ -41,9 +41,13 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
             'username' => 'admin'
         ]);
 
+        $doItFilter = [
+            FilterAttributeOptions::STATUS => $newStatId . ',' . $inProgressStatId,
+            FilterAttributeOptions::ASSIGNED => 'not,current-user'
+        ];
         $filter = new Filter();
         $filter->setTitle('DO IT');
-        $filter->setFilter('&status=' . $newStatId . ',' . $inProgressStatId . '&assigned=not,current-user');
+        $filter->setFilter($doItFilter);
         $filter->setPublic(true);
         $filter->setCreatedBy($admin);
         $filter->setIsActive(true);
@@ -53,9 +57,13 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
 
         $manager->persist($filter);
 
+        $importantFilter = [
+            FilterAttributeOptions::IMPORTANT => 'TRUE',
+            FilterAttributeOptions::ASSIGNED => 'current-user'
+        ];
         $filter = new Filter();
         $filter->setTitle('IMPORTANT');
-        $filter->setFilter('&important=TRUE&assigned=current-user');
+        $filter->setFilter($importantFilter);
         $filter->setPublic(true);
         $filter->setCreatedBy($admin);
         $filter->setIsActive(true);
@@ -65,9 +73,12 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
 
         $manager->persist($filter);
 
+        $scheduledFilter = [
+            FilterAttributeOptions::STARTED => 'TO=now'
+        ];
         $filter = new Filter();
         $filter->setTitle('SCHEDULED');
-        $filter->setFilter('&startedTime=TO=now');
+        $filter->setFilter($scheduledFilter);
         $filter->setPublic(true);
         $filter->setCreatedBy($admin);
         $filter->setIsActive(true);
@@ -77,9 +88,12 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
 
         $manager->persist($filter);
 
+        $requestedFilter = [
+            FilterAttributeOptions::REQUESTER => 'current-user'
+        ];
         $filter = new Filter();
         $filter->setTitle('REQUESTED');
-        $filter->setFilter('&requester=current-user');
+        $filter->setFilter($requestedFilter);
         $filter->setPublic(true);
         $filter->setCreatedBy($admin);
         $filter->setIsActive(true);

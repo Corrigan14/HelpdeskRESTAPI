@@ -18,12 +18,14 @@ class FilterAttributeOptions
     const ASSIGNED = 'assigned';
     const TAG = 'tag';
     const FOLLOWER = 'follower';
-    const CREATED = 'created';
-    const STARTED = 'started';
-    const DEADLINE = 'deadline';
-    const CLOSED = 'closed';
+    const CREATED = 'createdTime';
+    const STARTED = 'startedTime';
+    const DEADLINE = 'deadlineTime';
+    const CLOSED = 'closedTime';
     const ARCHIVED = 'archived';
+    const IMPORTANT = 'important';
     const ADDED_PARAMETERS = 'addedParameters';
+    const SEARCH = 'search';
 
     /**
      * @return array

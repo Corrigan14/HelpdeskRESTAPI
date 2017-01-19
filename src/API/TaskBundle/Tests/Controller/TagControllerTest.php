@@ -27,7 +27,7 @@ class TagControllerTest extends ApiTestCase
         $privateUsersTag = $this->getPrivateUsersEntityTag();
 
         // Try to load private Tag Entity of another user: 403 ACCESS DENIED
-        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/'.$privateUsersTag->getId(), [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $privateUsersTag->getId(), [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
@@ -77,7 +77,7 @@ class TagControllerTest extends ApiTestCase
     /**
      * Return a single entity from db for testing CRUD
      *
-     * @return object
+     * @return Tag
      */
     public function findOneEntity()
     {
@@ -98,7 +98,7 @@ class TagControllerTest extends ApiTestCase
     /**
      * Create and return a single entity from db for testing CRUD
      *
-     * @return object
+     * @return Tag
      */
     public function createEntity()
     {
@@ -168,7 +168,7 @@ class TagControllerTest extends ApiTestCase
     /**
      * Create/Find and return a single private tag created by user
      *
-     * @return object
+     * @return Tag
      */
     private function getPrivateUsersEntityTag()
     {

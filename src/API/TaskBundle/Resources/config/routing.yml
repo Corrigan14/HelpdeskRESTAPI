@@ -10,3 +10,21 @@ api_task_status:
 api_task_company_attribute:
     resource: "@APITaskBundle/Resources/config/routing/companyAttribute.yml"
     prefix: /
+api_task_company_data:
+    resource: "@APITaskBundle/Resources/config/routing/companyExtension.yml"
+    prefix: /
+api_task_project:
+    resource: "@APITaskBundle/Resources/config/routing/project.yml"
+    prefix: /
+api_task_task_attribute:
+    resource: "@APITaskBundle/Resources/config/routing/taskAttribute.yml"
+    prefix: /
+api_task_filter:
+    resource: "@APITaskBundle/Resources/config/routing/filter.yml"
+    prefix: /
+api_task_user_role:
+    resource: "@APITaskBundle/Resources/config/routing/userRole.yml"
+    prefix: /
+api_task_custom_user:
+    resource: "@APITaskBundle/Resources/config/routing/userCustom.yml"
+    prefix: /

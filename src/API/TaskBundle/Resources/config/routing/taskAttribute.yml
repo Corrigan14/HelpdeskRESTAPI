@@ -1,0 +1,44 @@
+task_attribute_list:
+    path:     /task-attributes
+    defaults: { _controller: APITaskBundle:TaskAttribute:list }
+    methods: [GET]
+
+task_attributes:
+    path:     /task-attributes/{id}
+    defaults: { _controller: APITaskBundle:TaskAttribute:get }
+    methods: [GET]
+    requirements:
+        id: '\d+'
+
+task_attribute_create:
+    path:     /task-attributes
+    defaults: { _controller: APITaskBundle:TaskAttribute:create }
+    methods: [POST]
+
+task_attribute_update:
+    path:     /task-attributes/{id}
+    defaults: { _controller: APITaskBundle:TaskAttribute:update }
+    methods: [PUT]
+    requirements:
+            id: '\d+'
+
+task_attribute_partial_update:
+    path:     /task-attributes/{id}
+    defaults: { _controller: APITaskBundle:TaskAttribute:updatePartial }
+    methods: [PATCH]
+    requirements:
+            id: '\d+'
+
+task_attribute_delete:
+    path:     /task-attributes/{id}
+    defaults: { _controller: APITaskBundle:TaskAttribute:delete }
+    methods: [DELETE]
+    requirements:
+            id: '\d+'
+
+task_attribute_restore:
+    path:     /task-attributes/{id}/restore
+    defaults: { _controller: APITaskBundle:TaskAttribute:restore }
+    methods: [PATCH]
+    requirements:
+            id: '\d+'

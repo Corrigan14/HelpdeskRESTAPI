@@ -43,6 +43,8 @@ class StatusRepository extends EntityRepository implements RepositoryInterface
      * @param array $options
      *
      * @return int
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function countEntities(array $options = [])
     {

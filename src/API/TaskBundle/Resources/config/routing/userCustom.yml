@@ -1,0 +1,78 @@
+user_custom_create:
+    path:     /users/user-role/{userRoleId}
+    defaults: { _controller: APITaskBundle:User:create }
+    methods: [POST]
+    requirements:
+          userRoleId: '\d+'
+
+user_custom_create_with_company:
+    path:     /users/user-role/{userRoleId}/company/{companyId}
+    defaults: { _controller: APITaskBundle:User:create }
+    methods: [POST]
+    requirements:
+        companyId: '\d+'
+        userRoleId: '\d+'
+
+user_custom_update:
+    path:     /users/{id}
+    defaults: { _controller: APITaskBundle:User:update }
+    methods: [PUT]
+    requirements:
+        id: '\d+'
+
+user_custom_update_with_user_role:
+    path:     /users/{id}/user-role/{userRoleId}
+    defaults: { _controller: APITaskBundle:User:update }
+    methods: [PUT]
+    requirements:
+        id: '\d+'
+        userRoleId: '\d+'
+
+user_custom_update_with_company:
+    path:     /users/{id}/company/{companyId}
+    defaults: { _controller: APITaskBundle:User:update }
+    methods: [PUT]
+    requirements:
+        id: '\d+'
+        companyId: '\d+'
+
+user_custom_update_with_company_and_user_role:
+    path:     /users/{id}/user-role/{userRoleId}/company/{companyId}
+    defaults: { _controller: APITaskBundle:User:update }
+    methods: [PUT]
+    requirements:
+        id: '\d+'
+        companyId: '\d+'
+        userRoleId: '\d+'
+
+user_custom_partial_update:
+    path:     /users/{id}
+    defaults: { _controller: APITaskBundle:User:updatePartial }
+    methods: [PATCH]
+    requirements:
+        id: '\d+'
+
+user_custom_partial_update_with_user_role:
+    path:     /users/{id}/user-role/{userRoleId}
+    defaults: { _controller: APITaskBundle:User:updatePartial }
+    methods: [PATCH]
+    requirements:
+        id: '\d+'
+        userRoleId: '\d+'
+
+user_custom_partial_update_with_company:
+    path:     /users/{id}/company/{companyId}
+    defaults: { _controller: APITaskBundle:User:updatePartial }
+    methods: [PATCH]
+    requirements:
+        id: '\d+'
+        companyId: '\d+'
+
+user_custom_partial_update_with_company_and_user_role:
+    path:     /users/{id}/user-role/{userRoleId}/company/{companyId}
+    defaults: { _controller: APITaskBundle:User:updatePartial }
+    methods: [PATCH]
+    requirements:
+        id: '\d+'
+        companyId: '\d+'
+        userRoleId: '\d+'

@@ -3,7 +3,7 @@
 namespace API\TaskBundle\Controller;
 
 use API\TaskBundle\Entity\Status;
-use API\TaskBundle\Security\VoteOptions;
+use API\TaskBundle\Security\UserRoleAclOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
 use Igsem\APIBundle\Services\StatusCodesHelper;
@@ -45,7 +45,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *
      *
      * @ApiDoc(
-     *  description="Returns a list of Entities (GET)",
+     *  description="Returns a list of Status Entities",
      *  filters={
      *     {
      *       "name"="page",
@@ -68,10 +68,17 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function listAction(Request $request)
     {
-        if (!$this->get('status_voter')->isGranted(VoteOptions::LIST_STATUSES)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::STATUS_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -100,7 +107,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *      }
      *
      * @ApiDoc(
-     *  description="Returns an Entity (GET)",
+     *  description="Returns a Status Entity",
      *  requirements={
      *     {
      *       "name"="id",
@@ -127,17 +134,23 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function getAction(int $id)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::STATUS_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($id);
 
         if (!$status instanceof Status) {
             return $this->notFoundResponse();
-        }
-
-        if (!$this->get('status_voter')->isGranted(VoteOptions::SHOW_STATUS, $status)) {
-            return $this->accessDeniedResponse();
         }
 
         $statusArray = $this->get('api_base.service')->getEntityResponse($status, 'status');
@@ -164,7 +177,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *
      * @ApiDoc(
      *  resource = true,
-     *  description="Create a new Entity (POST)",
+     *  description="Create a new Status Entity",
      *  input={"class"="API\TaskBundle\Entity\Status"},
      *  headers={
      *     {
@@ -184,10 +197,19 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function createAction(Request $request)
     {
-        if (!$this->get('status_voter')->isGranted(VoteOptions::CREATE_STATUS)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::STATUS_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -216,7 +238,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *      }
      *
      * @ApiDoc(
-     *  description="Update the Entity (PUT)",
+     *  description="Update the Status Entity",
      *  requirements={
      *     {
      *       "name"="id",
@@ -246,17 +268,26 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
      */
     public function updateAction(int $id, Request $request)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::STATUS_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($id);
 
         if (!$status instanceof Status) {
             return $this->notFoundResponse();
-        }
-
-        if (!$this->get('status_voter')->isGranted(VoteOptions::UPDATE_STATUS, $status)) {
-            return $this->accessDeniedResponse();
         }
 
         $requestData = $request->request->all();
@@ -282,7 +313,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *      }
      *
      * @ApiDoc(
-     *  description="Partially update the Entity (PATCH)",
+     *  description="Partially update the Status Entity",
      *  requirements={
      *     {
      *       "name"="id",
@@ -312,17 +343,26 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
      */
     public function updatePartialAction(int $id, Request $request)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::STATUS_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($id);
 
         if (!$status instanceof Status) {
             return $this->notFoundResponse();
-        }
-
-        if (!$this->get('status_voter')->isGranted(VoteOptions::UPDATE_STATUS, $status)) {
-            return $this->accessDeniedResponse();
         }
 
         $requestData = $request->request->all();
@@ -332,7 +372,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
 
     /**
      * @ApiDoc(
-     *  description="Delete Entity (DELETE)",
+     *  description="Delete Status Entity",
      *  requirements={
      *     {
      *       "name"="id",
@@ -358,17 +398,23 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @param int $id
      *
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function deleteAction(int $id)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::STATUS_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($id);
 
         if (!$status instanceof Status) {
             return $this->notFoundResponse();
-        }
-
-        if (!$this->get('status_voter')->isGranted(VoteOptions::DELETE_STATUS, $status)) {
-            return $this->accessDeniedResponse();
         }
 
         $status->setIsActive(false);
@@ -386,6 +432,10 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @param bool $create
      *
      * @return Response|JsonResponse
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
      */
     private function updateStatus(Status $status, $requestData, $create = false)
     {
@@ -400,6 +450,6 @@ class StatusController extends ApiBaseController implements ControllerInterface
             return $this->createApiResponse($this->get('api_base.service')->getEntityResponse($status, 'status'), $statusCode);
         }
 
-        return $this->invalidParametersResponse();
+        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

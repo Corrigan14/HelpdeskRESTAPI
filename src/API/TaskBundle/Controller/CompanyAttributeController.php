@@ -3,7 +3,7 @@
 namespace API\TaskBundle\Controller;
 
 use API\TaskBundle\Entity\CompanyAttribute;
-use API\TaskBundle\Security\VoteOptions;
+use API\TaskBundle\Security\UserRoleAclOptions;
 use API\TaskBundle\Services\VariableHelper;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
@@ -71,10 +71,17 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function listAction(Request $request)
     {
-        if (!$this->get('company_attribute_voter')->isGranted(VoteOptions::LIST_COMPANY_ATTRIBUTES)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -132,6 +139,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *
      * @param int $id
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function getAction(int $id)
     {
@@ -141,7 +149,12 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             return $this->notFoundResponse();
         }
 
-        if (!$this->get('company_attribute_voter')->isGranted(VoteOptions::SHOW_COMPANY_ATTRIBUTE)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -191,10 +204,19 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function createAction(Request $request)
     {
-        if (!$this->get('company_attribute_voter')->isGranted(VoteOptions::CREATE_COMPANY_ATTRIBUTE)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -255,6 +277,10 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
      */
     public function updateAction(int $id, Request $request)
     {
@@ -264,7 +290,12 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             return $this->notFoundResponse();
         }
 
-        if (!$this->get('company_attribute_voter')->isGranted(VoteOptions::UPDATE_COMPANY_ATTRIBUTE)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -323,6 +354,10 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
      */
     public function updatePartialAction(int $id, Request $request)
     {
@@ -332,7 +367,12 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             return $this->notFoundResponse();
         }
 
-        if (!$this->get('company_attribute_voter')->isGranted(VoteOptions::UPDATE_COMPANY_ATTRIBUTE)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -369,6 +409,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      * @param int $id
      *
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function deleteAction(int $id)
     {
@@ -378,7 +419,12 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             return $this->notFoundResponse();
         }
 
-        if (!$this->get('company_attribute_voter')->isGranted(VoteOptions::DELETE_COMPANY_ATTRIBUTE)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -397,6 +443,10 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      * @param $requestData
      * @param bool $create
      * @return Response
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     private function updateCompanyAttribute($companyAttribute, $requestData, $create = false)
     {
@@ -424,6 +474,6 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             return $this->createApiResponse($companyAttributeArray, $statusCode);
         }
 
-        return $this->invalidParametersResponse();
+        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

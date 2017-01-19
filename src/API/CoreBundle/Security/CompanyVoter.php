@@ -1,17 +1,15 @@
 <?php
 
-namespace API\TaskBundle\Security;
+namespace API\CoreBundle\Security;
 
+use API\CoreBundle\Entity\Company;
 use API\CoreBundle\Entity\User;
-use API\CoreBundle\Security\ApiBaseVoter;
-use API\CoreBundle\Security\VoterInterface;
 
 /**
- * Class StatusVoter
- *
- * @package API\TaskBundle\Security
+ * Class CompanyVoter
+ * @package API\CoreBundle\Security
  */
-class StatusVoter extends ApiBaseVoter implements VoterInterface
+class CompanyVoter extends ApiBaseVoter implements VoterInterface
 {
     /** @var  User */
     private $user;
@@ -22,11 +20,11 @@ class StatusVoter extends ApiBaseVoter implements VoterInterface
      *
      * @param string $action
      *
-     * @param mixed $status
+     * @param mixed $options
      *
      * @return bool
      */
-    public function isGranted($action, $status = false)
+    public function isGranted($action, $options = [])
     {
         $this->user = $this->token->getUser();
 
@@ -36,16 +34,16 @@ class StatusVoter extends ApiBaseVoter implements VoterInterface
         }
 
         switch ($action) {
-            case VoteOptions::LIST_STATUSES:
-                return $this->canList();
-            case VoteOptions::SHOW_STATUS:
-                return $this->canRead();
-            case VoteOptions::CREATE_STATUS:
+            case VoteOptions::CREATE_COMPANY:
                 return $this->canCreate();
-            case VoteOptions::UPDATE_STATUS;
+            case VoteOptions::SHOW_COMPANY:
+                return $this->canRead($options);
+            case VoteOptions::UPDATE_COMPANY:
                 return $this->canUpdate();
-            case VoteOptions::DELETE_STATUS;
+            case VoteOptions::DELETE_COMPANY:
                 return $this->canDelete();
+            case VoteOptions::LIST_COMPANIES:
+                return $this->canList();
             default:
                 return false;
         }
@@ -60,19 +58,24 @@ class StatusVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
-        return $this->hasAclRights(VoteOptions::LIST_STATUSES, $this->user, VoteOptions::getConstants());
+        return $this->hasAclRights(VoteOptions::LIST_COMPANIES, $this->user);
     }
 
     /**
+     * @param Company $company
      * @return bool
      */
-    private function canRead():bool
+    private function canRead($company):bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
         }
 
-        return $this->hasAclRights(VoteOptions::SHOW_STATUS, $this->user, VoteOptions::getConstants());
+        if ($this->user->getCompany() === $company) {
+            return true;
+        }
+
+        return $this->hasAclRights(VoteOptions::SHOW_COMPANY, $this->user);
     }
 
     /**
@@ -84,7 +87,7 @@ class StatusVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
-        return $this->hasAclRights(VoteOptions::CREATE_STATUS, $this->user, VoteOptions::getConstants());
+        return $this->hasAclRights(VoteOptions::CREATE_COMPANY, $this->user);
     }
 
     /**
@@ -96,7 +99,7 @@ class StatusVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
-        return $this->hasAclRights(VoteOptions::UPDATE_STATUS, $this->user, VoteOptions::getConstants());
+        return $this->hasAclRights(VoteOptions::UPDATE_COMPANY, $this->user);
     }
 
     /**
@@ -108,6 +111,6 @@ class StatusVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
-        return $this->hasAclRights(VoteOptions::DELETE_STATUS, $this->user, VoteOptions::getConstants());
+        return $this->hasAclRights(VoteOptions::DELETE_COMPANY, $this->user);
     }
 }

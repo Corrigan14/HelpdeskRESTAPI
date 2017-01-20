@@ -455,6 +455,30 @@ class TaskRepository extends EntityRepository
 
     /**
      * @param int $taskId
+     * @return array
+     */
+    public function getTask(int $taskId)
+    {
+        $query = $this->createQueryBuilder('task')
+            ->select('task, taskData, taskAttribute, project, createdBy, company, requestedBy, thau, status, assignedUser')
+            ->leftJoin('task.taskData', 'taskData')
+            ->leftJoin('taskData.taskAttribute', 'taskAttribute')
+            ->leftJoin('task.project', 'project')
+            ->leftJoin('project.createdBy', 'projectCreator')
+            ->leftJoin('task.createdBy', 'createdBy')
+            ->leftJoin('createdBy.company', 'company')
+            ->leftJoin('task.requestedBy', 'requestedBy')
+            ->leftJoin('task.taskHasAssignedUsers', 'thau')
+            ->leftJoin('thau.status', 'status')
+            ->leftJoin('thau.user', 'assignedUser')
+            ->where('task.id = :taskId')
+            ->setParameter('taskId', $taskId);
+
+        return $query->getQuery()->getArrayResult();
+    }
+
+    /**
+     * @param int $taskId
      * @param int $page
      * @return array
      */

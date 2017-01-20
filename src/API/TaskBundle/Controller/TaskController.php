@@ -593,31 +593,123 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *          "id": 1,
-     *          "title": "Task 1 - user is creator, user is requested",
-     *          "description": "Description of Task 1",
-     *          "important": false,
-     *          "created_by":⊕{...},
-     *          "requested_by": ⊕{...},
-     *          "project": ⊕{...},
-     *          "task_data":
+     *          "0":
      *          {
-     *             "0":
+     *             "id": 92,
+     *             "title": "Task 1 - user is creator, user is requested",
+     *             "description": "Description of Task 1",
+     *             "important": false,
+     *             "createdAt": "2017-01-19T17:47:22+0100",
+     *             "updatedAt": "2017-01-19T17:47:22+0100",
+     *             "taskData":
      *             {
-     *               "id": 1,
-     *               "value": "some input"
+     *               "0":
+     *               {
+     *                  "id": 61,
+     *                  "value": "some input",
+     *                  "taskAttribute":
+     *                   {
+     *                       "id": 85,
+     *                       "title": "input task additional attribute",
+     *                       "type": "input",
+     *                       "is_active": true
+     *                   }
+     *               },
+     *               "1":
+     *               {
+     *                  "id": 62,
+     *                  "value": "select1",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 86,
+     *                     "title": "select task additional attribute",
+     *                     "type": "simple_select",
+     *                     "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *                     "is_active": true
+     *                   }
+     *                }
      *             },
-     *            "1":
-     *            {
-     *              "id": 2,
-     *              "value": "select1"
-     *            }
+     *             "project":
+     *             {
+     *                "id": 141,
+     *                "title": "Project of user 1",
+     *                "description": "Description of project 1.",
+     *                "is_active": false,
+     *                "createdAt": "2017-01-19T17:47:22+0100",
+     *                "updatedAt": "2017-01-19T17:47:22+0100"
+     *             },
+     *             "createdBy":
+     *             {
+     *                "id": 116,
+     *                "username": "user",
+     *                "password": "$2y$13$uMaX2SHUoFErPHs2ojwe6.JCZrvCJlHKJ3D2O1BPBRWl/.TtZPzhK",
+     *                "email": "user@user.sk",
+     *                "roles": "[\"ROLE_USER\"]",
+     *                "is_active": true,
+     *                "acl": "[]",
+     *                "company":
+     *                {
+     *                   "id": 87,
+     *                   "title": "LanSystems",
+     *                   "ico": "110258782",
+     *                   "dic": "12587458996244",
+     *                   "street": "Ina cesta 125",
+     *                   "city": "Bratislava",
+     *                   "zip": "021478",
+     *                   "country": "Slovenska Republika",
+     *                   "is_active": true
+     *                 }
+     *             },
+     *             "requestedBy":
+     *             {
+     *                "id": 116,
+     *                "username": "user",
+     *                "password": "$2y$13$uMaX2SHUoFErPHs2ojwe6.JCZrvCJlHKJ3D2O1BPBRWl/.TtZPzhK",
+     *                "email": "user@user.sk",
+     *                "roles": "[\"ROLE_USER\"]",
+     *                "is_active": true,
+     *                "acl": "[]",
+     *                "company":
+     *                {
+     *                   "id": 87,
+     *                   "title": "LanSystems",
+     *                   "ico": "110258782",
+     *                   "dic": "12587458996244",
+     *                   "street": "Ina cesta 125",
+     *                   "city": "Bratislava",
+     *                   "zip": "021478",
+     *                   "country": "Slovenska Republika",
+     *                   "is_active": true
+     *                 }
+     *              },
+     *              "taskHasAssignedUsers":
+     *              {
+     *                 "0":
+     *                 {
+     *                    "id": 42,
+     *                    "createdAt": "2017-01-19T17:47:22+0100",
+     *                    "updatedAt": "2017-01-19T17:47:22+0100",
+     *                    "status":
+     *                    {
+     *                       "id": 126,
+     *                       "title": "new",
+     *                       "is_active": true
+     *                     },
+     *                     "user":
+     *                     {
+     *                        "id": 116,
+     *                        "username": "user",
+     *                        "password": "$2y$13$uMaX2SHUoFErPHs2ojwe6.JCZrvCJlHKJ3D2O1BPBRWl/.TtZPzhK",
+     *                        "email": "user@user.sk",
+     *                        "roles": "[\"ROLE_USER\"]",
+     *                        "is_active": true,
+     *                        "acl": "[]"
+     *                      }
+     *                   }
+     *                 }
+     *              }
      *          }
-     *          "followers": ⊕{...}
-     *          "tags": ⊕{...}
-     *          "created_at": "2016-12-09T07:39:52+0100",
-     *          "updated_at": "2016-12-09T07:39:52+0100"
-     *      },
+     *        },
      *       "_links":
      *       {
      *         "put": "/api/v1/task-bundle/tasks/1/project/all/user/all",
@@ -668,8 +760,9 @@ class TaskController extends ApiBaseController implements ControllerInterface
         }
 
         $response = $this->get('task_service')->getTaskResponse($task);
-
-        return $this->createApiResponse($response, StatusCodesHelper::SUCCESSFUL_CODE);
+        $responseData['data'] = $response['data'][0];
+        $responseLinks['_links'] = $response['_links'];
+        return $this->createApiResponse(array_merge($responseData,$responseLinks), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

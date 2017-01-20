@@ -420,6 +420,22 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *                "roles": "[\"ROLE_USER\"]",
      *                "is_active": true,
      *                "image": null,
+     *                "detailData":
+     *                {
+     *                  "name": "Martina",
+     *                  "surname": "Kollar",
+     *                  "title_before": null,
+     *                  "title_after": null,
+     *                  "function": "developer",
+     *                  "mobile": "00421 0987 544",
+     *                  "tel": null,
+     *                  "fax": null,
+     *                  "signature": "Martina Kollar, Web-Solutions",
+     *                  "street": "Nova 487",
+     *                  "city": "Bratislava",
+     *                  "zip": "025874",
+     *                  "country": "SR"
+     *                },
      *                "company":
      *                {
      *                   "id": 65,
@@ -647,6 +663,22 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *                "roles": "[\"ROLE_USER\"]",
      *                "is_active": true,
      *                "acl": "[]",
+     *                "detailData":
+     *                {
+     *                  "name": "Martina",
+     *                  "surname": "Kollar",
+     *                  "title_before": null,
+     *                  "title_after": null,
+     *                  "function": "developer",
+     *                  "mobile": "00421 0987 544",
+     *                  "tel": null,
+     *                  "fax": null,
+     *                  "signature": "Martina Kollar, Web-Solutions",
+     *                  "street": "Nova 487",
+     *                  "city": "Bratislava",
+     *                  "zip": "025874",
+     *                  "country": "SR"
+     *                },
      *                "company":
      *                {
      *                   "id": 87,
@@ -669,6 +701,22 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *                "roles": "[\"ROLE_USER\"]",
      *                "is_active": true,
      *                "acl": "[]",
+     *                "detailData":
+     *                {
+     *                  "name": "Martina",
+     *                  "surname": "Kollar",
+     *                  "title_before": null,
+     *                  "title_after": null,
+     *                  "function": "developer",
+     *                  "mobile": "00421 0987 544",
+     *                  "tel": null,
+     *                  "fax": null,
+     *                  "signature": "Martina Kollar, Web-Solutions",
+     *                  "street": "Nova 487",
+     *                  "city": "Bratislava",
+     *                  "zip": "025874",
+     *                  "country": "SR"
+     *                },
      *                "company":
      *                {
      *                   "id": 87,

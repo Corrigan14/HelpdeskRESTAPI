@@ -42,7 +42,7 @@ class Filter
     private $public;
 
     /**
-     * Serialized array of task filters
+     * Array of task filters
      *
      * @var string
      *
@@ -61,7 +61,7 @@ class Filter
     /**
      * @var bool
      *
-     * @ORM\Column(name="is_active", type="boolean", options={"default":1})
+     * @ORM\Column(name="is_active", type="boolean", options={"default":1}, nullable=true)
      * @Serializer\ReadOnly()
      */
     private $is_active;
@@ -72,6 +72,14 @@ class Filter
      * @ORM\Column(name="`default`", type="boolean", options={"default":0})
      */
     private $default;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="icon_class", type="string", length=255)
+     * @Assert\Type("string")
+     */
+    private $icon_class;
 
     /**
      * @var User
@@ -153,13 +161,13 @@ class Filter
     /**
      * Set filter
      *
-     * @param string $filter
+     * @param array $filter
      *
      * @return Filter
      */
-    public function setFilter($filter)
+    public function setFilter(array $filter)
     {
-        $this->filter = $filter;
+        $this->filter = json_encode($filter);
 
         return $this;
     }
@@ -167,11 +175,11 @@ class Filter
     /**
      * Get filter
      *
-     * @return string
+     * @return array
      */
     public function getFilter()
     {
-        return $this->filter;
+        return json_decode($this->filter, true);
     }
 
     /**
@@ -292,5 +300,29 @@ class Filter
     public function getDefault()
     {
         return $this->default;
+    }
+
+    /**
+     * Set iconClass
+     *
+     * @param string $iconClass
+     *
+     * @return Filter
+     */
+    public function setIconClass($iconClass)
+    {
+        $this->icon_class = $iconClass;
+
+        return $this;
+    }
+
+    /**
+     * Get iconClass
+     *
+     * @return string
+     */
+    public function getIconClass()
+    {
+        return $this->icon_class;
     }
 }

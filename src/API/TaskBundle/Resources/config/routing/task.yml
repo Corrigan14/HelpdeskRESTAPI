@@ -3,6 +3,13 @@ tasks_list:
     defaults: { _controller: APITaskBundle:Task:list }
     methods: [GET]
 
+tasks_list_saved_filter:
+    path:     /tasks/filter/{filterId}
+    defaults: { _controller: APITaskBundle:Task:listSavedFilter }
+    methods: [GET]
+    requirements:
+        filterId: '\d+'
+
 task:
     path:     /tasks/{id}
     defaults: { _controller: APITaskBundle:Task:get }

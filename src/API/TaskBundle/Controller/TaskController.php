@@ -615,8 +615,18 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *             "title": "Task 1 - user is creator, user is requested",
      *             "description": "Description of Task 1",
      *             "important": false,
-     *             "createdAt": "2017-01-19T17:47:22+0100",
-     *             "updatedAt": "2017-01-19T17:47:22+0100",
+     *             "createdAt":
+     *             {
+     *                "date": "2017-01-03 14:16:51.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
+     *             },
+     *             "updatedAt":
+     *             {
+     *                "date": "2017-01-03 14:16:51.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
+     *             },
      *             "taskData":
      *             {
      *               "0":
@@ -810,7 +820,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $response = $this->get('task_service')->getTaskResponse($task);
         $responseData['data'] = $response['data'][0];
         $responseLinks['_links'] = $response['_links'];
-        return $this->createApiResponse(array_merge($responseData,$responseLinks), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json(array_merge($responseData,$responseLinks), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

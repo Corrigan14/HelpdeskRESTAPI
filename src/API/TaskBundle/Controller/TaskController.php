@@ -820,7 +820,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $response = $this->get('task_service')->getTaskResponse($task);
         $responseData['data'] = $response['data'][0];
         $responseLinks['_links'] = $response['_links'];
-        return $this->json(array_merge($responseData,$responseLinks), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json(array_merge($responseData, $responseLinks), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -1350,21 +1350,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
      */
     private function getFilterData(Request $request): array
     {
-        // Ina-beznejsia moznost ako zadavat pole hodnot v URL adrese, ktora vracia priamo pole: index.php?id[]=1&id[]=2&id[]=3&name=john
-        // na zakodovanie dat do URL je mozne pouzit encodeURIComponent
-
-        $inFilter = [];
-        $dateFilter = [];
-        $equalFilter = [];
-        $isNullFilter = [];
-        $notAndCurrentFilter = [];
-        $searchFilter = null;
-
-        $inFilterAddedParams = [];
-        $dateFilterAddedParams = [];
-        $equalFilterAddedParams = [];
-
-        $filterForUrl = [];
+        $data = [];
 
         $search = $request->get('search');
         $status = $request->get('status');
@@ -1384,174 +1370,128 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $addedParameters = $request->get('addedParameters');
 
         if (null !== $search) {
-            $searchFilter = $search;
-            $filterForUrl['search'] = '&search=' . $search;
+            $data[FilterAttributeOptions::SEARCH] = $search;
         }
         if (null !== $status) {
-            $inFilter['status.id'] = explode(",", $status);
-            $filterForUrl['status'] = '&status=' . $status;
+            $data[FilterAttributeOptions::STATUS] = $status;
         }
         if (null !== $project) {
-            if ('not' === strtolower($project)) {
-                $isNullFilter[] = 'task.project';
-            } elseif ('current-user' === strtolower($project)) {
-                $equalFilter['projectCreator.id'] = $this->getUser()->getId();
-            } else {
-                $inFilter['project.id'] = explode(",", $project);
-            }
-            $filterForUrl['project'] = '&project=' . $project;
+            $data[FilterAttributeOptions::PROJECT] = $project;
         }
         if (null !== $creator) {
-            if ('current-user' === strtolower($creator)) {
-                $equalFilter['createdBy.id'] = $this->getUser()->getId();
-            } else {
-                $inFilter['createdBy.id'] = explode(",", $creator);
-            }
-            $filterForUrl['createdBy'] = '&creator=' . $creator;
+            $data[FilterAttributeOptions::CREATOR] = $creator;
         }
         if (null !== $requester) {
-            if ('current-user' === strtolower($requester)) {
-                $equalFilter['requestedBy.id'] = $this->getUser()->getId();
-            } else {
-                $inFilter['requestedBy.id'] = explode(",", $requester);
-            }
-            $filterForUrl['requestedBy'] = '&requester=' . $requester;
+            $data[FilterAttributeOptions::REQUESTER] = $requester;
         }
         if (null !== $company) {
-            if ('current-user' === strtolower($company)) {
-                $equalFilter['company.id'] = $this->getUser()->getId();
-            } else {
-                $inFilter['company.id'] = explode(",", $company);
-            }
-            $filterForUrl['company'] = '&company=' . $company;
+            $data[FilterAttributeOptions::COMPANY] = $company;
         }
         if (null !== $assigned) {
-            $assignedArray = explode(",", $assigned);
-
-            if (in_array('not', $assignedArray) && in_array('current-user', $assignedArray)) {
-                $notAndCurrentFilter[] = [
-                    'not' => 'thau.user',
-                    'equal' => [
-                        'key' => 'assignedUser.id',
-                        'value' => $this->getUser()->getId()
-                    ],
-                ];
-            } elseif ('not' === strtolower($assigned)) {
-                $isNullFilter[] = 'thau.user';
-            } elseif ('current-user' === strtolower($assigned)) {
-                $equalFilter['assignedUser.id'] = $this->getUser()->getId();
-            } else {
-                $inFilter['assignedUser.id'] = explode(",", $assigned);
-            }
-
-            $filterForUrl['assigned'] = '&assigned=' . $assigned;
+            $data[FilterAttributeOptions::ASSIGNED] = $assigned;
         }
         if (null !== $tag) {
-            $inFilter['tags.id'] = explode(",", $tag);
-            $filterForUrl['tag'] = '&tag=' . $tag;
+            $data[FilterAttributeOptions::TAG] = $tag;
         }
         if (null !== $follower) {
-            if ('current-user' === $follower) {
-                $equalFilter['followers.id'] = $this->getUser()->getId();
-            } else {
-                $inFilter['followers.id'] = explode(",", $follower);
-            }
-            $filterForUrl['followers'] = '&follower=' . $follower;
+            $data[FilterAttributeOptions::FOLLOWER] = $follower;
         }
         if (null !== $created) {
-            $fromToData = $this->separateFromToDateData($created);
-            $dateFilter['task.createdAt'] = [
-                'from' => $fromToData['from'],
-                'to' => $fromToData['to']
-            ];
-            $filterForUrl['created'] = '&createdTime=' . $created;
+            $data[FilterAttributeOptions::CREATED] = $created;
         }
         if (null !== $started) {
-            $fromToData = $this->separateFromToDateData($started);
-            $dateFilter['task.startedAt'] = [
-                'from' => $fromToData['from'],
-                'to' => $fromToData['to']
-            ];
-            $filterForUrl['started'] = '&startedTime=' . $started;
+            $data[FilterAttributeOptions::STARTED] = $started;
         }
         if (null !== $deadline) {
-            $fromToData = $this->separateFromToDateData($deadline);
-            $dateFilter['task.deadline'] = [
-                'from' => $fromToData['from'],
-                'to' => $fromToData['to']
-            ];
-            $filterForUrl['deadline'] = '&deadlineTime=' . $deadline;
+            $data[FilterAttributeOptions::DEADLINE] = $deadline;
         }
         if (null !== $closed) {
-            $fromToData = $this->separateFromToDateData($closed);
-            $dateFilter['task.closedAt'] = [
-                'from' => $fromToData['from'],
-                'to' => $fromToData['to']
-            ];
-            $filterForUrl['closed'] = '&closedTime=' . $closed;
+            $data[FilterAttributeOptions::CLOSED] = $closed;
         }
         if ('true' === strtolower($archived)) {
-            $equalFilter['project.is_active'] = 0;
-            $filterForUrl['archived'] = '&archived=TRUE';
+            $data[FilterAttributeOptions::ARCHIVED] = $archived;
         }
         if ('true' === strtolower($important)) {
-            $equalFilter['task.important'] = 1;
-            $filterForUrl['important'] = '&important=TRUE';
+            $data[FilterAttributeOptions::IMPORTANT] = $important;
         }
         if (null !== $addedParameters) {
-            $arrayOfAddedParameters = explode("&", $addedParameters);
-
-            if (!empty($arrayOfAddedParameters[0])) {
-                $filterForUrl['addedParameters'] = '&addedParameters=' . $addedParameters;
-
-                foreach ($arrayOfAddedParameters as $value) {
-                    $strpos = explode('=', $value);
-                    $attributeId = $strpos[0];
-
-                    // Check if TaskAttribute exists, select filter type based on it's TYPE
-                    $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($attributeId);
-                    if ($taskAttribute instanceof TaskAttribute) {
-                        $typeOfTaskAttribute = $taskAttribute->getType();
-                        $attributeValues = explode(",", $strpos[1]);
-
-                        if ('checkbox' === $typeOfTaskAttribute) {
-                            if ('true' === strtolower($strpos[1])) {
-                                $equalFilterAddedParams[$attributeId] = 1;
-                            } elseif ('false' === strtolower($strpos[1])) {
-                                $equalFilterAddedParams[$attributeId] = 0;
-                            }
-                        }
-
-                        if ('date' === $typeOfTaskAttribute) {
-                            $dateFilterAddedParams[$attributeId] = $attributeValues;
-                        }
-
-                        $inFilterAddedParams[$attributeId] = $attributeValues;
-                    }
-                }
-            }
+            $data[FilterAttributeOptions::ADDED_PARAMETERS] = $addedParameters;
         }
 
-        return [
-            'inFilter' => $inFilter,
-            'equalFilter' => $equalFilter,
-            'dateFilter' => $dateFilter,
-            'isNullFilter' => $isNullFilter,
-            'searchFilter' => $searchFilter,
-            'notAndCurrentFilter' => $notAndCurrentFilter,
-            'inFilterAddedParams' => $inFilterAddedParams,
-            'equalFilterAddedParams' => $equalFilterAddedParams,
-            'dateFilterAddedParams' => $dateFilterAddedParams,
-            'filterForUrl' => $filterForUrl
-        ];
+        return $this->processFilterData($data);
     }
 
     /**
      * @param array $filterDataArray
      * @return array
+     * @throws \LogicException
      */
     private function getFilterDataFromSavedFilterArray(array $filterDataArray): array
     {
+        $data = [];
+
+        if (isset($filterDataArray[FilterAttributeOptions::SEARCH])) {
+            $data[FilterAttributeOptions::SEARCH] = $filterDataArray[FilterAttributeOptions::SEARCH];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::STATUS])) {
+            $data[FilterAttributeOptions::STATUS] = $filterDataArray[FilterAttributeOptions::STATUS];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::PROJECT])) {
+            $data[FilterAttributeOptions::PROJECT] = $filterDataArray[FilterAttributeOptions::PROJECT];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::CREATOR])) {
+            $data[FilterAttributeOptions::CREATOR] = $filterDataArray[FilterAttributeOptions::CREATOR];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::REQUESTER])) {
+            $data[FilterAttributeOptions::REQUESTER] = $filterDataArray[FilterAttributeOptions::REQUESTER];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::COMPANY])) {
+            $data[FilterAttributeOptions::COMPANY] = $filterDataArray[FilterAttributeOptions::COMPANY];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::ASSIGNED])) {
+            $data[FilterAttributeOptions::ASSIGNED] = $filterDataArray[FilterAttributeOptions::ASSIGNED];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::TAG])) {
+            $data[FilterAttributeOptions::TAG] = $filterDataArray[FilterAttributeOptions::TAG];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::FOLLOWER])) {
+            $data[FilterAttributeOptions::FOLLOWER] = $filterDataArray[FilterAttributeOptions::FOLLOWER];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::CREATED])) {
+            $data[FilterAttributeOptions::CREATED] = $filterDataArray[FilterAttributeOptions::CREATED];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::STARTED])) {
+            $data[FilterAttributeOptions::STARTED] = $filterDataArray[FilterAttributeOptions::STARTED];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::DEADLINE])) {
+            $data[FilterAttributeOptions::DEADLINE] = $filterDataArray[FilterAttributeOptions::DEADLINE];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::CLOSED])) {
+            $data[FilterAttributeOptions::CLOSED] = $filterDataArray[FilterAttributeOptions::CLOSED];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::ARCHIVED])) {
+            $data[FilterAttributeOptions::ARCHIVED] = $filterDataArray[FilterAttributeOptions::ARCHIVED];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::IMPORTANT])) {
+            $data[FilterAttributeOptions::IMPORTANT] = $filterDataArray[FilterAttributeOptions::IMPORTANT];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::ADDED_PARAMETERS])) {
+            $data[FilterAttributeOptions::ADDED_PARAMETERS] = $filterDataArray[FilterAttributeOptions::ADDED_PARAMETERS];
+        }
+
+        return $this->processFilterData($data);
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     * @throws \LogicException
+     */
+    private function processFilterData(array $data): array
+    {
+        // Ina-beznejsia moznost ako zadavat pole hodnot v URL adrese, ktora vracia priamo pole: index.php?id[]=1&id[]=2&id[]=3&name=john
+        // na zakodovanie dat do URL je mozne pouzit encodeURIComponent
+
         $inFilter = [];
         $dateFilter = [];
         $equalFilter = [];
@@ -1565,16 +1505,16 @@ class TaskController extends ApiBaseController implements ControllerInterface
 
         $filterForUrl = [];
 
-        if (isset($filterDataArray[FilterAttributeOptions::SEARCH])) {
-            $searchFilter = $filterDataArray[FilterAttributeOptions::SEARCH];
-            $filterForUrl['search'] = '&search=' . $filterDataArray[FilterAttributeOptions::SEARCH];
+        if (isset($data[FilterAttributeOptions::SEARCH])) {
+            $searchFilter = $data[FilterAttributeOptions::SEARCH];
+            $filterForUrl['search'] = '&search=' . $data['search'];
         }
-        if (isset($filterDataArray[FilterAttributeOptions::STATUS])) {
-            $inFilter['status.id'] = explode(",", $filterDataArray[FilterAttributeOptions::STATUS]);
-            $filterForUrl['status'] = '&status=' . $filterDataArray[FilterAttributeOptions::STATUS];
+        if (isset($data[FilterAttributeOptions::STATUS])) {
+            $inFilter['status.id'] = explode(",", $data[FilterAttributeOptions::STATUS]);
+            $filterForUrl['status'] = '&status=' . $data[FilterAttributeOptions::STATUS];
         }
-        if (isset($filterDataArray[FilterAttributeOptions::PROJECT])) {
-            $project = $filterDataArray[FilterAttributeOptions::PROJECT];
+        if (isset($data[FilterAttributeOptions::PROJECT])) {
+            $project = $data[FilterAttributeOptions::PROJECT];
             if ('not' === strtolower($project)) {
                 $isNullFilter[] = 'task.project';
             } elseif ('current-user' === strtolower($project)) {
@@ -1584,8 +1524,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
             }
             $filterForUrl['project'] = '&project=' . $project;
         }
-        if (isset($filterDataArray[FilterAttributeOptions::CREATOR])) {
-            $creator = $filterDataArray[FilterAttributeOptions::CREATOR];
+        if (isset($data[FilterAttributeOptions::CREATOR])) {
+            $creator = $data[FilterAttributeOptions::CREATOR];
             if ('current-user' === strtolower($creator)) {
                 $equalFilter['createdBy.id'] = $this->getUser()->getId();
             } else {
@@ -1593,8 +1533,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
             }
             $filterForUrl['createdBy'] = '&creator=' . $creator;
         }
-        if (isset($filterDataArray[FilterAttributeOptions::REQUESTER])) {
-            $requester = $filterDataArray[FilterAttributeOptions::REQUESTER];
+        if (isset($data[FilterAttributeOptions::REQUESTER])) {
+            $requester = $data[FilterAttributeOptions::REQUESTER];
             if ('current-user' === strtolower($requester)) {
                 $equalFilter['requestedBy.id'] = $this->getUser()->getId();
             } else {
@@ -1602,8 +1542,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
             }
             $filterForUrl['requestedBy'] = '&requester=' . $requester;
         }
-        if (isset($filterDataArray[FilterAttributeOptions::COMPANY])) {
-            $company = $filterDataArray[FilterAttributeOptions::COMPANY];
+        if (isset($data[FilterAttributeOptions::COMPANY])) {
+            $company = $data[FilterAttributeOptions::COMPANY];
             if ('current-user' === strtolower($company)) {
                 $equalFilter['company.id'] = $this->getUser()->getId();
             } else {
@@ -1611,8 +1551,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
             }
             $filterForUrl['company'] = '&company=' . $company;
         }
-        if (isset($filterDataArray[FilterAttributeOptions::ASSIGNED])) {
-            $assigned = $filterDataArray[FilterAttributeOptions::ASSIGNED];
+        if (isset($data[FilterAttributeOptions::ASSIGNED])) {
+            $assigned = $data[FilterAttributeOptions::ASSIGNED];
             $assignedArray = explode(",", $assigned);
 
             if (in_array('not', $assignedArray) && in_array('current-user', $assignedArray)) {
@@ -1633,13 +1573,13 @@ class TaskController extends ApiBaseController implements ControllerInterface
 
             $filterForUrl['assigned'] = '&assigned=' . $assigned;
         }
-        if (isset($filterDataArray[FilterAttributeOptions::TAG])) {
-            $tag = $filterDataArray[FilterAttributeOptions::TAG];
+        if (isset($data[FilterAttributeOptions::TAG])) {
+            $tag = $data[FilterAttributeOptions::TAG];
             $inFilter['tags.id'] = explode(",", $tag);
             $filterForUrl['tag'] = '&tag=' . $tag;
         }
-        if (isset($filterDataArray[FilterAttributeOptions::FOLLOWER])) {
-            $follower = $filterDataArray[FilterAttributeOptions::FOLLOWER];
+        if (isset($data[FilterAttributeOptions::FOLLOWER])) {
+            $follower = $data[FilterAttributeOptions::FOLLOWER];
             if ('current-user' === $follower) {
                 $equalFilter['followers.id'] = $this->getUser()->getId();
             } else {
@@ -1647,8 +1587,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
             }
             $filterForUrl['followers'] = '&follower=' . $follower;
         }
-        if (isset($filterDataArray[FilterAttributeOptions::CREATED])) {
-            $created = $filterDataArray[FilterAttributeOptions::CREATED];
+        if (isset($data[FilterAttributeOptions::CREATED])) {
+            $created = $data[FilterAttributeOptions::CREATED];
             $fromToData = $this->separateFromToDateData($created);
             $dateFilter['task.createdAt'] = [
                 'from' => $fromToData['from'],
@@ -1656,8 +1596,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
             ];
             $filterForUrl['created'] = '&createdTime=' . $created;
         }
-        if (isset($filterDataArray[FilterAttributeOptions::STARTED])) {
-            $started = $filterDataArray[FilterAttributeOptions::STARTED];
+        if (isset($data[FilterAttributeOptions::STARTED])) {
+            $started = $data[FilterAttributeOptions::STARTED];
             $fromToData = $this->separateFromToDateData($started);
             $dateFilter['task.startedAt'] = [
                 'from' => $fromToData['from'],
@@ -1665,8 +1605,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
             ];
             $filterForUrl['started'] = '&startedTime=' . $started;
         }
-        if (isset($filterDataArray[FilterAttributeOptions::DEADLINE])) {
-            $deadline = $filterDataArray[FilterAttributeOptions::DEADLINE];
+        if (isset($data[FilterAttributeOptions::DEADLINE])) {
+            $deadline = $data[FilterAttributeOptions::DEADLINE];
             $fromToData = $this->separateFromToDateData($deadline);
             $dateFilter['task.deadline'] = [
                 'from' => $fromToData['from'],
@@ -1674,8 +1614,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
             ];
             $filterForUrl['deadline'] = '&deadlineTime=' . $deadline;
         }
-        if (isset($filterDataArray[FilterAttributeOptions::CLOSED])) {
-            $closed = $filterDataArray[FilterAttributeOptions::CLOSED];
+        if (isset($data[FilterAttributeOptions::CLOSED])) {
+            $closed = $data[FilterAttributeOptions::CLOSED];
             $fromToData = $this->separateFromToDateData($closed);
             $dateFilter['task.closedAt'] = [
                 'from' => $fromToData['from'],
@@ -1683,20 +1623,20 @@ class TaskController extends ApiBaseController implements ControllerInterface
             ];
             $filterForUrl['closed'] = '&closedTime=' . $closed;
         }
-        if (isset($filterDataArray[FilterAttributeOptions::ARCHIVED])) {
-            if ('true' === strtolower($filterDataArray[FilterAttributeOptions::ARCHIVED])) {
+        if (isset($data[FilterAttributeOptions::ARCHIVED])) {
+            if ('true' === strtolower($data[FilterAttributeOptions::ARCHIVED])) {
                 $equalFilter['project.is_active'] = 0;
                 $filterForUrl['archived'] = '&archived=TRUE';
             }
         }
-        if (isset($filterDataArray[FilterAttributeOptions::IMPORTANT])) {
-            if ('true' === strtolower($filterDataArray[FilterAttributeOptions::IMPORTANT])) {
+        if (isset($data[FilterAttributeOptions::IMPORTANT])) {
+            if ('true' === strtolower($data[FilterAttributeOptions::IMPORTANT])) {
                 $equalFilter['task.important'] = 1;
                 $filterForUrl['important'] = '&important=TRUE';
             }
         }
-        if (isset($filterDataArray[FilterAttributeOptions::ADDED_PARAMETERS])) {
-            $addedParameters = $filterDataArray[FilterAttributeOptions::ADDED_PARAMETERS];
+        if (isset($data[FilterAttributeOptions::ADDED_PARAMETERS])) {
+            $addedParameters = $data[FilterAttributeOptions::ADDED_PARAMETERS];
             $arrayOfAddedParameters = explode("&", $addedParameters);
 
             if (!empty($arrayOfAddedParameters[0])) {
@@ -1748,7 +1688,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
      * @param string $created
      * @return array
      */
-    private function separateFromToDateData(string $created):array
+    private function separateFromToDateData(string $created): array
     {
         $fromPosition = strpos($created, "FROM=");
         $toPosition = strpos($created, "TO=");

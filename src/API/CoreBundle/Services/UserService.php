@@ -67,15 +67,16 @@ class UserService
     /**
      * Return User Response which includes all data about User Entity and Links to update/partialUpdate/delete
      *
-     * @param User $user
-     *
+     * @param int $userId
      * @return array
      */
-    public function getUserResponse(User $user)
+    public function getUserResponse(int $userId)
     {
+        $user = $this->em->getRepository('APICoreBundle:User')->getUserResponse($userId);
+
         return [
-            'data' => $user,
-            '_links' => $this->getUserLinks($user->getId()),
+            'data' => $user[0],
+            '_links' => $this->getUserLinks($userId),
         ];
     }
 

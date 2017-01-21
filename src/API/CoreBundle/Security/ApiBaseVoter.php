@@ -51,11 +51,11 @@ class ApiBaseVoter
             throw new \InvalidArgumentException('Action ins not valid, please list your action in the options list');
         }
 
-        $acl = $user->getAcl();
+//        $acl = $user->getAcl();
 
-        if (in_array($action, $acl, true)) {
-            return true;
-        }
+//        if (in_array($action, $acl, true)) {
+//            return true;
+//        }
 
         return false;
     }

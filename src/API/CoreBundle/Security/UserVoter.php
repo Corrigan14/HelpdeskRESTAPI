@@ -37,8 +37,6 @@ class UserVoter extends ApiBaseVoter implements VoterInterface
         switch ($action) {
             case VoteOptions::CREATE_USER:
                 return $this->canCreate();
-            case VoteOptions::SHOW_USER:
-                return $this->canRead($targetUserId);
             case VoteOptions::UPDATE_USER:
                 return $this->canUpdate($targetUserId);
             case VoteOptions::DELETE_USER:
@@ -61,23 +59,6 @@ class UserVoter extends ApiBaseVoter implements VoterInterface
         return $this->hasAclRights(VoteOptions::CREATE_USER, $this->user);
     }
 
-    /**
-     * @param int $user
-     *
-     * @return bool
-     * @throws \InvalidArgumentException*
-     */
-    private function canRead(int $user): bool
-    {
-        if ($this->decisionManager->decide($this->token , ['ROLE_ADMIN'])) {
-            return true;
-        }
-        if ($user === $this->user->getId()) {
-            return true;
-        }
-
-        return $this->hasAclRights(VoteOptions::SHOW_USER, $this->user);
-    }
 
     /**
      * @param int $user

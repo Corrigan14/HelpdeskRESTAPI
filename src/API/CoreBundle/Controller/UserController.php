@@ -33,18 +33,19 @@ class UserController extends ApiBaseController implements ControllerInterface
      *            "username": "admin",
      *            "roles": "[\"ROLE_ADMIN\"]",
      *            "is_active": true,
+     *            "detailData": null,
      *            "user_role":
      *            {
-     *                "id": 2,
-     *                "title": "MANAGER",
-     *                "description": null,
-     *                "homepage": "/",
-     *                "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                "is_active": true
-     *                "order": 2
+     *               "id": 2,
+     *               "title": "MANAGER",
+     *               "description": null,
+     *               "homepage": "/",
+     *               "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *               "is_active": true
+     *               "order": 2
      *            }
      *          },
-     *         {
+     *          {
      *            "id": 69,
      *            "username": "manager",
      *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
@@ -74,24 +75,22 @@ class UserController extends ApiBaseController implements ControllerInterface
      *              "zip": "021478",
      *              "country": "Slovenska Republika",
      *              "is_active": true,
-     *              "company_data": {
-     *              "0":
+     *              "companyData": {
      *              {
      *                 "id": 44,
      *                 "value": "data val",
-     *                 "company_attribute":
+     *                 "companyAttribute":
+     *                 {
+     *                    "id": 1,
+     *                    "title": "input company additional attribute",
+     *                    "type": "input",
+     *                    "is_active": true
+     *                  }
+     *              },
      *              {
-     *                 "id": 1,
-     *                 "title": "input company additional attribute",
-     *                 "type": "input",
-     *                 "is_active": true
-     *               }
-     *             },
-     *             "1":
-     *             {
      *                "id": 45,
      *                "value": "data valluesgyda gfg",
-     *                "company_attribute":
+     *                "companyAttribute":
      *                {
      *                  "id": 2,
      *                  "title": "select company additional attribute",
@@ -99,11 +98,10 @@ class UserController extends ApiBaseController implements ControllerInterface
      *                  "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
      *                  "is_active": true
      *                }
-     *             }
-     *        },
+     *              }
      *            }
-     *          },
-     *       ],
+     *         }
+     *       ]
      *       "_links":
      *       {
      *           "self": "/api/v1/core-bundle/users?page=1&fields=id,email,username",
@@ -178,30 +176,16 @@ class UserController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": 46,
-     *           "username": "admin",
-     *           "email": "admin@admin.sk",
-     *           "roles": "[\"ROLE_ADMIN\"]",
-     *           "is_active": true,
-     *           "acl": "[]"
-     *           "detail_data":
-     *           {
-     *              "name": "Martina",
-     *              "surname": "Kollar",
-     *              "title_before": Mgr,
-     *              "title_after": PhD,
-     *              "function": "developer",
-     *              "mobile": "00421 0987 544",
-     *              "tel": 00421 0987 544,
-     *              "fax": 00421 0987 544,
-     *              "signature": "Martina Kollar, Web-Solutions",
-     *              "street": "Nova 487",
-     *              "city": "Bratislava",
-     *              "zip": "025874",
-     *              "country": "SR"
-     *           },
-     *           "user_role":
-     *           {
+     *            "id": 69,
+     *            "username": "manager",
+     *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
+     *            "email": "manager@manager.sk",
+     *            "roles": "[\"ROLE_USER\"]",
+     *            "is_active": true,
+     *            "image": null,
+     *            "detailData": null,
+     *            "user_role":
+     *            {
      *              "id": 26,
      *              "title": "MANAGER",
      *              "description": null,
@@ -209,9 +193,9 @@ class UserController extends ApiBaseController implements ControllerInterface
      *              "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
      *              "is_active": true,
      *              "order": 2
-     *           },
-     *          "company":
-     *           {
+     *            },
+     *            "company":
+     *            {
      *              "id": 1,
      *              "title": "Web-Solutions",
      *              "ico": "1102587",
@@ -220,9 +204,33 @@ class UserController extends ApiBaseController implements ControllerInterface
      *              "city": "Bratislava",
      *              "zip": "021478",
      *              "country": "Slovenska Republika",
-     *              "is_active": true
-     *           }
-     *        },
+     *              "is_active": true,
+     *              "companyData": {
+     *              {
+     *                 "id": 44,
+     *                 "value": "data val",
+     *                 "companyAttribute":
+     *                 {
+     *                    "id": 1,
+     *                    "title": "input company additional attribute",
+     *                    "type": "input",
+     *                    "is_active": true
+     *                  }
+     *              },
+     *              {
+     *                "id": 45,
+     *                "value": "data valluesgyda gfg",
+     *                "companyAttribute":
+     *                {
+     *                  "id": 2,
+     *                  "title": "select company additional attribute",
+     *                  "type": "simple_select",
+     *                  "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *                  "is_active": true
+     *                }
+     *              }
+     *            }
+     *         },
      *        "_links":
      *        {
      *           "put": "/api/v1/core-bundle/users/46",
@@ -266,19 +274,22 @@ class UserController extends ApiBaseController implements ControllerInterface
      */
     public function getAction(int $id)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::SHOW_USER, $id)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::USER_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
-        if (null === $user) {
-
+        if (!$user instanceof User) {
             return $this->notFoundResponse();
-
         }
 
-        return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user), StatusCodesHelper::SUCCESSFUL_CODE);
-
+        $userArray = $this->get('api_user.service')->getUserResponse($id);
+        return $this->json($userArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

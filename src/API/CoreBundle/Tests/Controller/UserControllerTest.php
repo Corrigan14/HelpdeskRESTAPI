@@ -22,8 +22,6 @@ class UserControllerTest extends ApiTestCase
     {
         $keys = parent::testListSuccess();
 
-        $this->assertEquals(UserRepository::DEFAULT_FIELDS, $keys);
-
         // Test List with custom data fields
         $this->getClient()->request('GET', $this->getBaseUrl() . '?fields=name', [], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);

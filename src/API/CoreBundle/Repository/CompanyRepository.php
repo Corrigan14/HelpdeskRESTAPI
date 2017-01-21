@@ -29,6 +29,9 @@ class CompanyRepository extends EntityRepository implements RepositoryInterface
     public function getAllEntities(int $page, array $options = [])
     {
         $query = $this->createQueryBuilder('c')
+            ->select('c,companyData, companyAttribute')
+            ->leftJoin('c.companyData', 'companyData')
+            ->leftJoin('companyData.companyAttribute', 'companyAttribute')
             ->getQuery();
 
         $query->setMaxResults(self::LIMIT);
@@ -44,11 +47,31 @@ class CompanyRepository extends EntityRepository implements RepositoryInterface
     }
 
     /**
+     * Return one full entity
+     *
+     * @return mixed
+     */
+    public function getEntity(int $id)
+    {
+        $query = $this->createQueryBuilder('c')
+            ->select('c,companyData, companyAttribute')
+            ->leftJoin('c.companyData', 'companyData')
+            ->leftJoin('companyData.companyAttribute', 'companyAttribute')
+            ->where('c.id = :companyId')
+            ->setParameter('companyId', $id)
+            ->getQuery();
+
+        return $query->getArrayResult();
+    }
+
+    /**
      * Return count of all Entities
      *
      * @param mixed $options
      *
      * @return int
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function countEntities(array $options = [])
     {

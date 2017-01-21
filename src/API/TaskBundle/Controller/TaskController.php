@@ -181,7 +181,17 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *                     "email": "user@user.sk",
      *                     "roles": "[\"ROLE_USER\"]",
      *                     "is_active": true,
-     *                     "image": null
+     *                     "image": null,
+     *                     "user_role":
+     *                      {
+     *                          "id": 2,
+     *                          "title": "MANAGER",
+     *                          "description": null,
+     *                          "homepage": "/",
+     *                          "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                          "is_active": true
+     *                          "order": 2
+     *                      }
      *                  }
      *                }
      *             ]
@@ -512,7 +522,17 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *                     "email": "user@user.sk",
      *                     "roles": "[\"ROLE_USER\"]",
      *                     "is_active": true,
-     *                     "image": null
+     *                     "image": null,
+     *                     "user_role":
+     *                     {
+     *                        "id": 2,
+     *                        "title": "MANAGER",
+     *                        "description": null,
+     *                        "homepage": "/",
+     *                        "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                        "is_active": true
+     *                        "order": 2
+     *                     }
      *                  }
      *                }
      *             ]
@@ -566,6 +586,10 @@ class TaskController extends ApiBaseController implements ControllerInterface
      * @param Request $request
      * @param int $filterId
      * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function listSavedFilterAction(Request $request, int $filterId)
     {
@@ -700,6 +724,16 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *                   "zip": "021478",
      *                   "country": "Slovenska Republika",
      *                   "is_active": true
+     *                 },
+     *                 "user_role":
+     *                 {
+     *                   "id": 2,
+     *                   "title": "MANAGER",
+     *                   "description": null,
+     *                   "homepage": "/",
+     *                   "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                   "is_active": true
+     *                   "order": 2
      *                 }
      *             },
      *             "requestedBy":
@@ -738,6 +772,16 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *                   "zip": "021478",
      *                   "country": "Slovenska Republika",
      *                   "is_active": true
+     *                 },
+     *                 "user_role":
+     *                 {
+     *                   "id": 2,
+     *                   "title": "MANAGER",
+     *                   "description": null,
+     *                   "homepage": "/",
+     *                   "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                   "is_active": true
+     *                   "order": 2
      *                 }
      *              },
      *              "taskHasAssignedUsers":
@@ -761,7 +805,17 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *                        "email": "user@user.sk",
      *                        "roles": "[\"ROLE_USER\"]",
      *                        "is_active": true,
-     *                        "acl": "[]"
+     *                        "acl": "[]",
+     *                        "user_role":
+     *                        {
+     *                           "id": 2,
+     *                           "title": "MANAGER",
+     *                           "description": null,
+     *                           "homepage": "/",
+     *                           "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                           "is_active": true
+     *                           "order": 2
+     *                         }
      *                      }
      *                   }
      *                 }
@@ -1510,7 +1564,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
             $filterForUrl['search'] = '&search=' . $data['search'];
         }
         if (isset($data[FilterAttributeOptions::STATUS])) {
-            $inFilter['status.id'] = explode(",", $data[FilterAttributeOptions::STATUS]);
+            $inFilter['status.id'] = explode(',', $data[FilterAttributeOptions::STATUS]);
             $filterForUrl['status'] = '&status=' . $data[FilterAttributeOptions::STATUS];
         }
         if (isset($data[FilterAttributeOptions::PROJECT])) {
@@ -1520,7 +1574,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
             } elseif ('current-user' === strtolower($project)) {
                 $equalFilter['projectCreator.id'] = $this->getUser()->getId();
             } else {
-                $inFilter['project.id'] = explode(",", $project);
+                $inFilter['project.id'] = explode(',', $project);
             }
             $filterForUrl['project'] = '&project=' . $project;
         }
@@ -1529,7 +1583,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
             if ('current-user' === strtolower($creator)) {
                 $equalFilter['createdBy.id'] = $this->getUser()->getId();
             } else {
-                $inFilter['createdBy.id'] = explode(",", $creator);
+                $inFilter['createdBy.id'] = explode(',', $creator);
             }
             $filterForUrl['createdBy'] = '&creator=' . $creator;
         }
@@ -1538,7 +1592,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
             if ('current-user' === strtolower($requester)) {
                 $equalFilter['requestedBy.id'] = $this->getUser()->getId();
             } else {
-                $inFilter['requestedBy.id'] = explode(",", $requester);
+                $inFilter['requestedBy.id'] = explode(',', $requester);
             }
             $filterForUrl['requestedBy'] = '&requester=' . $requester;
         }
@@ -1547,15 +1601,15 @@ class TaskController extends ApiBaseController implements ControllerInterface
             if ('current-user' === strtolower($company)) {
                 $equalFilter['company.id'] = $this->getUser()->getId();
             } else {
-                $inFilter['company.id'] = explode(",", $company);
+                $inFilter['company.id'] = explode(',', $company);
             }
             $filterForUrl['company'] = '&company=' . $company;
         }
         if (isset($data[FilterAttributeOptions::ASSIGNED])) {
             $assigned = $data[FilterAttributeOptions::ASSIGNED];
-            $assignedArray = explode(",", $assigned);
+            $assignedArray = explode(',', $assigned);
 
-            if (in_array('not', $assignedArray) && in_array('current-user', $assignedArray)) {
+            if (in_array('not', $assignedArray, true) && in_array('current-user', $assignedArray, true)) {
                 $notAndCurrentFilter[] = [
                     'not' => 'thau.user',
                     'equal' => [
@@ -1568,14 +1622,14 @@ class TaskController extends ApiBaseController implements ControllerInterface
             } elseif ('current-user' === strtolower($assigned)) {
                 $equalFilter['assignedUser.id'] = $this->getUser()->getId();
             } else {
-                $inFilter['assignedUser.id'] = explode(",", $assigned);
+                $inFilter['assignedUser.id'] = explode(',', $assigned);
             }
 
             $filterForUrl['assigned'] = '&assigned=' . $assigned;
         }
         if (isset($data[FilterAttributeOptions::TAG])) {
             $tag = $data[FilterAttributeOptions::TAG];
-            $inFilter['tags.id'] = explode(",", $tag);
+            $inFilter['tags.id'] = explode(',', $tag);
             $filterForUrl['tag'] = '&tag=' . $tag;
         }
         if (isset($data[FilterAttributeOptions::FOLLOWER])) {
@@ -1583,7 +1637,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
             if ('current-user' === $follower) {
                 $equalFilter['followers.id'] = $this->getUser()->getId();
             } else {
-                $inFilter['followers.id'] = explode(",", $follower);
+                $inFilter['followers.id'] = explode(',', $follower);
             }
             $filterForUrl['followers'] = '&follower=' . $follower;
         }
@@ -1637,7 +1691,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
         }
         if (isset($data[FilterAttributeOptions::ADDED_PARAMETERS])) {
             $addedParameters = $data[FilterAttributeOptions::ADDED_PARAMETERS];
-            $arrayOfAddedParameters = explode("&", $addedParameters);
+            $arrayOfAddedParameters = explode('&', $addedParameters);
 
             if (!empty($arrayOfAddedParameters[0])) {
                 $filterForUrl['addedParameters'] = '&addedParameters=' . $addedParameters;
@@ -1650,7 +1704,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
                     $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($attributeId);
                     if ($taskAttribute instanceof TaskAttribute) {
                         $typeOfTaskAttribute = $taskAttribute->getType();
-                        $attributeValues = explode(",", $strpos[1]);
+                        $attributeValues = explode(',', $strpos[1]);
 
                         if ('checkbox' === $typeOfTaskAttribute) {
                             if ('true' === strtolower($strpos[1])) {
@@ -1690,8 +1744,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
      */
     private function separateFromToDateData(string $created): array
     {
-        $fromPosition = strpos($created, "FROM=");
-        $toPosition = strpos($created, "TO=");
+        $fromPosition = strpos($created, 'FROM=');
+        $toPosition = strpos($created, 'TO=');
 
         $toData = null;
         $fromData = null;

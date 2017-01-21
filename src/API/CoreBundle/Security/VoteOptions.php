@@ -16,13 +16,6 @@ class VoteOptions
     const DELETE_USER = 'delete_user';
     const LIST_USERS = 'list_users';
 
-    //COMPANY CRUD
-    const CREATE_COMPANY = 'create_company';
-    const SHOW_COMPANY = 'read_company';
-    const UPDATE_COMPANY = 'update_company';
-    const DELETE_COMPANY = 'delete_company';
-    const LIST_COMPANIES = 'list_companies';
-
     /**
      * @return array
      */

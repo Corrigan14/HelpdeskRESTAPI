@@ -53,7 +53,7 @@ class ApiBaseService
             self::PAGINATION_LIMIT
         );
 
-        return array_merge($response,$pagination);
+        return array_merge($response, $pagination);
     }
 
     /**
@@ -73,6 +73,24 @@ class ApiBaseService
     }
 
     /**
+     * Return Entity Response which includes all data about Entity and Links to update/partialUpdate/delete
+     *
+     * @param RepositoryInterface $entityRepository
+     * @param $entityId
+     * @param string $entityName
+     * @return array
+     */
+    public function getFullEntityResponse(RepositoryInterface $entityRepository, $entityId, string $entityName)
+    {
+        $entity = $entityRepository->getEntity($entityId);
+
+        return [
+            'data' => $entity[0],
+            '_links' => $this->getEntityLinks($entityId, $entityName),
+        ];
+    }
+
+    /**
      * @param int $id
      *
      * @param string $entityName
@@ -81,9 +99,9 @@ class ApiBaseService
     private function getEntityLinks(int $id, string $entityName)
     {
         return [
-            'put' => $this->router->generate($entityName.'_update', ['id' => $id]),
-            'patch' => $this->router->generate($entityName.'_partial_update', ['id' => $id]),
-            'delete' => $this->router->generate($entityName.'_delete', ['id' => $id]),
+            'put' => $this->router->generate($entityName . '_update', ['id' => $id]),
+            'patch' => $this->router->generate($entityName . '_partial_update', ['id' => $id]),
+            'delete' => $this->router->generate($entityName . '_delete', ['id' => $id]),
         ];
     }
 

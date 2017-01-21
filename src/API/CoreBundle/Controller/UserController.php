@@ -110,7 +110,7 @@ class UserController extends ApiBaseController implements ControllerInterface
      *           "first": "/api/v1/core-bundle/users?page=1&fields=id,email,username",
      *           "prev": false,
      *           "next": "/api/v1/core-bundle/users?page=2&fields=id,email,username",
-     *            "last": "/api/v1/core-bundle/users?page=3&fields=id,email,username"
+     *           "last": "/api/v1/core-bundle/users?page=3&fields=id,email,username"
      *       },
      *       "total": 22,
      *       "page": 1,

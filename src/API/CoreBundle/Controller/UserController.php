@@ -468,14 +468,6 @@ class UserController extends ApiBaseController
      */
     public function createAction(Request $request, int $userRoleId, $companyId = false)
     {
-        $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($userRoleId);
-
-        if (!$userRole instanceof UserRole) {
-            return $this->createApiResponse([
-                'message' => 'User role with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
-        }
-
         // Check if user has permission to CRUD User entity
         $aclOptions = [
             'acl' => UserRoleAclOptions::USER_SETTINGS,
@@ -485,32 +477,24 @@ class UserController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
-        // Check if user can create User entity with requested User Role
-        $voteOptions = [
-            'userRole' => $userRole
-        ];
-        if (!$this->get('user_voter')->isGranted(VoteOptions::CREATE_USER_WITH_USER_ROLE, $voteOptions)) {
-            return $this->createApiResponse([
-                'message' => 'You can not create user with selected User Role!',
-            ], StatusCodesHelper::ACCESS_DENIED_CODE);
-        }
-
         $requestData = $request->request->all();
 
         $user = new User();
-        $user->setUserRole($userRole);
         $user->setIsActive(true);
-        if ($userRole->getTitle() === 'ADMIN') {
-            $user->setRoles(['ROLE_ADMIN']);
-        } else {
-            $user->setRoles(['ROLE_USER']);
-        }
 
         // Upload and save avatar
         $file = $request->files->get('image');
         if (null !== $file) {
             $imageSlug = $this->get('upload_helper')->uploadFile($file, true);
             $user->setImage($imageSlug);
+        }
+
+        if ($userRoleId) {
+            try {
+                $this->setUserRoleToUser($user, $userRoleId);
+            } catch (\InvalidArgumentException $e) {
+                return $this->notFoundResponse();
+            }
         }
 
         if ($companyId) {
@@ -673,22 +657,11 @@ class UserController extends ApiBaseController
         }
 
         if ($userRoleId) {
-            $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($userRoleId);
-            if (!$userRole instanceof UserRole) {
-                return $this->createApiResponse([
-                    'message' => 'User role with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
+            try {
+                $this->setUserRoleToUser($user, $userRoleId);
+            } catch (\InvalidArgumentException $e) {
+                return $this->notFoundResponse();
             }
-            // Check if user can create User entity with requested User Role
-            $voteOptions = [
-                'userRole' => $userRole
-            ];
-            if (!$this->get('user_voter')->isGranted(VoteOptions::CREATE_USER_WITH_USER_ROLE, $voteOptions)) {
-                return $this->createApiResponse([
-                    'message' => 'You can not create user with selected User Role!',
-                ], StatusCodesHelper::ACCESS_DENIED_CODE);
-            }
-            $user->setUserRole($userRole);
         }
 
         if ($companyId) {
@@ -830,17 +803,17 @@ class UserController extends ApiBaseController
      *  })
      *
      * @param int $id
-     * @param int|bool $companyId
      * @param Request $request
      *
-     * @return Response|JsonResponse
+     * @param bool $userRoleId
+     * @param int|bool $companyId
+     * @return JsonResponse|Response
+     * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
-     * @throws \InvalidArgumentException
      */
-
-    public function updatePartialAction(int $id, Request $request, $companyId = false)
+    public function updatePartialAction(int $id, Request $request, $userRoleId = false, $companyId = false)
     {
         // Check if user has permission to CRUD User entity
         $aclOptions = [
@@ -852,11 +825,21 @@ class UserController extends ApiBaseController
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
+        if (!$user instanceof User) {
+            return $this->createApiResponse([
+                'message' => 'User with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
 
-        $requestData = $request->request->all();
+        if ($userRoleId) {
+            try {
+                $this->setUserRoleToUser($user, $userRoleId);
+            } catch (\InvalidArgumentException $e) {
+                return $this->notFoundResponse();
+            }
+        }
 
-
-        if ($user instanceof User && $companyId) {
+        if ($companyId) {
             try {
                 $this->setCompanyToUser($user, $companyId);
             } catch (\InvalidArgumentException $e) {
@@ -864,8 +847,16 @@ class UserController extends ApiBaseController
             }
         }
 
-        return $this->updateUser($user, $requestData);
+        // Upload and save avatar
+        $file = $request->files->get('image');
+        if (null !== $file) {
+            $imageSlug = $this->get('upload_helper')->uploadFile($file, true);
+            $user->setImage($imageSlug);
+        }
 
+        $requestData = $request->request->all();
+
+        return $this->updateUser($user, $requestData);
     }
 
     /**
@@ -901,7 +892,12 @@ class UserController extends ApiBaseController
      */
     public function deleteAction(int $id)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::DELETE_USER, $id)) {
+        // Check if user has permission to CRUD User entity
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::USER_SETTINGS,
+            'user' => $this->getUser()
+        ];
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -1045,7 +1041,12 @@ class UserController extends ApiBaseController
      */
     public function restoreAction(int $id)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::DELETE_USER, $id)) {
+        // Check if user has permission to CRUD User entity
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::USER_SETTINGS,
+            'user' => $this->getUser()
+        ];
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -1156,5 +1157,39 @@ class UserController extends ApiBaseController
             ], StatusCodesHelper::NOT_FOUND_CODE);
         }
         $user->setCompany($company);
+    }
+
+    /**
+     * @param User $user
+     * @param int $userRoleId
+     *
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     * @return Response
+     */
+    private function setUserRoleToUser(User $user, int $userRoleId)
+    {
+        $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($userRoleId);
+        if (!$userRole instanceof UserRole) {
+            return $this->createApiResponse([
+                'message' => 'User role with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+        // Check if user can create User entity with requested User Role
+        $voteOptions = [
+            'userRole' => $userRole
+        ];
+        if (!$this->get('user_voter')->isGranted(VoteOptions::CREATE_USER_WITH_USER_ROLE, $voteOptions)) {
+            return $this->createApiResponse([
+                'message' => 'You can not create user with selected User Role!',
+            ], StatusCodesHelper::ACCESS_DENIED_CODE);
+        }
+        $user->setUserRole($userRole);
+
+        if ($userRole->getTitle() === 'ADMIN') {
+            $user->setRoles(['ROLE_ADMIN']);
+        } else {
+            $user->setRoles(['ROLE_USER']);
+        }
     }
 }

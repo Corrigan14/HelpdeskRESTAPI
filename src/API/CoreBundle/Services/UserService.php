@@ -42,6 +42,8 @@ class UserService
      *
      * @param string $isActive
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getUsersResponse(array $fields, int $page, $isActive)
     {
@@ -67,30 +69,50 @@ class UserService
     /**
      * Return User Response which includes all data about User Entity and Links to update/partialUpdate/delete
      *
-     * @param int $userId
+     * @param array $ids
      * @return array
      */
-    public function getUserResponse(int $userId)
+    public function getUserResponse(array $ids)
     {
+        $userId = $ids['userId'];
         $user = $this->em->getRepository('APICoreBundle:User')->getUserResponse($userId);
 
         return [
             'data' => $user[0],
-            '_links' => $this->getUserLinks($userId),
+            '_links' => $this->getUserLinks($ids),
         ];
     }
 
     /**
-     * @param int $id
-     *
+     * @param array $ids
      * @return array
      */
-    private function getUserLinks(int $id)
+    private function getUserLinks(array $ids)
     {
-        return [
-            'put' => $this->router->generate('user_update', ['id' => $id]),
-            'patch' => $this->router->generate('user_partial_update', ['id' => $id]),
-            'delete' => $this->router->generate('user_delete', ['id' => $id]),
+        $userId = $ids['userId'];
+        $userRoleId = $ids['userRoleId'];
+        $userCompanyId = $ids['userCompanyId'];
+
+        if ($userCompanyId) {
+            $linksForCompany = [
+                'put: company' => $this->router->generate('user_update_with_company', ['id' => $userId, 'companyId' => $userCompanyId]),
+                'put: user-role & company' => $this->router->generate('user_update_with_company_and_user_role', ['id' => $userId, 'userRoleId' => $userRoleId, 'companyId' => $userCompanyId]),
+                'patch: company' => $this->router->generate('user_partial_update_with_company', ['id' => $userId, 'companyId' => $userCompanyId]),
+                'patch: user-role & company' => $this->router->generate('user_partial_update_with_company_and_user_role', ['id' => $userId, 'userRoleId' => $userRoleId, 'companyId' => $userCompanyId]),
+            ];
+        } else {
+            $linksForCompany = [];
+        }
+
+        $otherLinks = [
+            'put' => $this->router->generate('user_update', ['id' => $userId]),
+            'put: user-role' => $this->router->generate('user_update_with_user_role', ['id' => $userId, 'userRoleId' => $userRoleId]),
+            'patch' => $this->router->generate('user_partial_update', ['id' => $userId]),
+            'patch: user-role' => $this->router->generate('user_partial_update_with_user_role', ['id' => $userId, 'userRoleId' => $userRoleId]),
+            'delete' => $this->router->generate('user_delete', ['id' => $userId]),
+            'restore' => $this->router->generate('user_restore', ['id' => $userId]),
         ];
+
+        return array_merge($otherLinks, $linksForCompany);
     }
 }

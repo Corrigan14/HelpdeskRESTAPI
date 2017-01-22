@@ -5,10 +5,10 @@ namespace API\CoreBundle\Controller;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
 use API\CoreBundle\Security\VoteOptions;
+use API\TaskBundle\Entity\UserRole;
 use API\TaskBundle\Security\UserRoleAclOptions;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Controller\ApiBaseController;
-use Igsem\APIBundle\Controller\ControllerInterface;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,7 +20,7 @@ use API\CoreBundle\Entity\Company;
  *
  * @package API\CoreBundle\Controller
  */
-class UserController extends ApiBaseController implements ControllerInterface
+class UserController extends ApiBaseController
 {
     /**
      * ### Response ###
@@ -33,7 +33,23 @@ class UserController extends ApiBaseController implements ControllerInterface
      *            "username": "admin",
      *            "roles": "[\"ROLE_ADMIN\"]",
      *            "is_active": true,
-     *            "detailData": null,
+     *            "detailData":
+     *            {
+     *               "id": 4,
+     *               "name": "Martinka",
+     *               "surname": "Babinska",
+     *               "title_before": null,
+     *               "title_after": null,
+     *               "function": null,
+     *               "mobile": null,
+     *               "tel": null,
+     *               "fax": null,
+     *               "signature": null,
+     *               "street": null,
+     *               "city": null,
+     *               "zip": null,
+     *               "country": null
+     *            },
      *            "user_role":
      *            {
      *               "id": 2,
@@ -149,6 +165,8 @@ class UserController extends ApiBaseController implements ControllerInterface
      * @param Request $request
      *
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
@@ -183,7 +201,23 @@ class UserController extends ApiBaseController implements ControllerInterface
      *            "roles": "[\"ROLE_USER\"]",
      *            "is_active": true,
      *            "image": null,
-     *            "detailData": null,
+     *            "detailData":
+     *            {
+     *               "id": 4,
+     *               "name": "Martinka",
+     *               "surname": "Babinska",
+     *               "title_before": null,
+     *               "title_after": null,
+     *               "function": null,
+     *               "mobile": null,
+     *               "tel": null,
+     *               "fax": null,
+     *               "signature": null,
+     *               "street": null,
+     *               "city": null,
+     *               "zip": null,
+     *               "country": null
+     *            },
      *            "user_role":
      *            {
      *              "id": 26,
@@ -230,13 +264,20 @@ class UserController extends ApiBaseController implements ControllerInterface
      *                }
      *              }
      *            }
-     *         },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/core-bundle/users/46",
-     *           "patch": "/api/v1/core-bundle/users/46",
-     *           "delete": "/api/v1/core-bundle/users/46"
-     *        }
+     *        },
+     *        "_links": ▿
+     *         {
+     *           "put": "/api/v1/core-bundle/users/85",
+     *           "put: user-role": "/api/v1/core-bundle/users/85/user-role/32",
+     *           "patch": "/api/v1/core-bundle/users/85",
+     *           "patch: user-role": "/api/v1/core-bundle/users/85/user-role/32",
+     *           "delete": "/api/v1/core-bundle/users/85",
+     *           "restore": "/api/v1/core-bundle/users/85/restore",
+     *           "put: company": "/api/v1/core-bundle/users/85/company/41",
+     *           "put: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41",
+     *           "patch: company": "/api/v1/core-bundle/users/85/company/41",
+     *           "patch: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41"
+     *         }
      *      }
      *
      * @ApiDoc(
@@ -288,7 +329,19 @@ class UserController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
-        $userArray = $this->get('api_user.service')->getUserResponse($id);
+        $userCompany = $user->getCompany();
+        if ($userCompany instanceof Company) {
+            $userCompanyId = $userCompany->getId();
+        } else {
+            $userCompanyId = false;
+        }
+        $ids = [
+            'userId' => $user->getId(),
+            'userRoleId' => $user->getUserRole()->getId(),
+            'userCompanyId' => $userCompanyId
+        ];
+
+        $userArray = $this->get('api_user.service')->getUserResponse($ids);
         return $this->json($userArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
@@ -297,30 +350,42 @@ class UserController extends ApiBaseController implements ControllerInterface
      *      ▿{
      *         "data": ▿
      *         {
-     *           "id": 12,
-     *           "username": "admin",
-     *           "email": "admin@admin.sk",
-     *           "roles": "[\"ROLE_ADMIN\"]",
-     *           "is_active": true,
-     *           "acl": "[]"
-     *           "detail_data":
-     *           {
-     *              "name": "Martina",
-     *              "surname": "Kollar",
-     *              "title_before": null,
-     *              "title_after": null,
-     *              "function": "developer",
-     *              "mobile": "00421 0987 544",
-     *              "tel": null,
-     *              "fax": null,
-     *              "signature": "Martina Kollar, Web-Solutions",
-     *              "street": "Nova 487",
-     *              "city": "Bratislava",
-     *              "zip": "025874",
-     *              "country": "SR"
-     *           },
-     *          "company":
-     *           {
+     *          "id": 69,
+     *            "username": "manager",
+     *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
+     *            "email": "manager@manager.sk",
+     *            "roles": "[\"ROLE_USER\"]",
+     *            "is_active": true,
+     *            "image": null,
+     *            "detailData":
+     *            {
+     *               "id": 4,
+     *               "name": "Martinka",
+     *               "surname": "Babinska",
+     *               "title_before": null,
+     *               "title_after": null,
+     *               "function": null,
+     *               "mobile": null,
+     *               "tel": null,
+     *               "fax": null,
+     *               "signature": null,
+     *               "street": null,
+     *               "city": null,
+     *               "zip": null,
+     *               "country": null
+     *            },
+     *            "user_role":
+     *            {
+     *              "id": 26,
+     *              "title": "MANAGER",
+     *              "description": null,
+     *              "homepage": "/",
+     *              "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *              "is_active": true,
+     *              "order": 2
+     *            },
+     *            "company":
+     *            {
      *              "id": 1,
      *              "title": "Web-Solutions",
      *              "ico": "1102587",
@@ -329,14 +394,45 @@ class UserController extends ApiBaseController implements ControllerInterface
      *              "city": "Bratislava",
      *              "zip": "021478",
      *              "country": "Slovenska Republika",
-     *              "is_active": true
-     *           }
+     *              "is_active": true,
+     *              "companyData": {
+     *              {
+     *                 "id": 44,
+     *                 "value": "data val",
+     *                 "companyAttribute":
+     *                 {
+     *                    "id": 1,
+     *                    "title": "input company additional attribute",
+     *                    "type": "input",
+     *                    "is_active": true
+     *                  }
+     *              },
+     *              {
+     *                "id": 45,
+     *                "value": "data valluesgyda gfg",
+     *                "companyAttribute":
+     *                {
+     *                  "id": 2,
+     *                  "title": "select company additional attribute",
+     *                  "type": "simple_select",
+     *                  "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *                  "is_active": true
+     *                }
+     *              }
+     *            }
      *         },
-     *         "_links": ▿
+     *        "_links": ▿
      *         {
-     *            "put": "/api/v1/core-bundle/users/12",
-     *            "patch": "/api/v1/core-bundle/users/12",
-     *            "delete": "/api/v1/core-bundle/users/12"
+     *           "put": "/api/v1/core-bundle/users/85",
+     *           "put: user-role": "/api/v1/core-bundle/users/85/user-role/32",
+     *           "patch": "/api/v1/core-bundle/users/85",
+     *           "patch: user-role": "/api/v1/core-bundle/users/85/user-role/32",
+     *           "delete": "/api/v1/core-bundle/users/85",
+     *           "restore": "/api/v1/core-bundle/users/85/restore",
+     *           "put: company": "/api/v1/core-bundle/users/85/company/41",
+     *           "put: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41",
+     *           "patch: company": "/api/v1/core-bundle/users/85/company/41",
+     *           "patch: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41"
      *         }
      *      }
      *
@@ -362,15 +458,15 @@ class UserController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      *
+     * @param int $userRoleId
      * @param bool|int $companyId
-     *
      * @return JsonResponse|Response
+     * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
-     * @throws \InvalidArgumentException
      */
-    public function createAction(Request $request, $companyId = false)
+    public function createAction(Request $request, int $userRoleId, $companyId = false)
     {
         $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($userRoleId);
 
@@ -393,7 +489,7 @@ class UserController extends ApiBaseController implements ControllerInterface
         $voteOptions = [
             'userRole' => $userRole
         ];
-        if (!$this->get('user_custom_voter')->isGranted(\API\TaskBundle\Security\VoteOptions::CREATE_USER_WITH_USER_ROLE, $voteOptions)) {
+        if (!$this->get('user_voter')->isGranted(VoteOptions::CREATE_USER_WITH_USER_ROLE, $voteOptions)) {
             return $this->createApiResponse([
                 'message' => 'You can not create user with selected User Role!',
             ], StatusCodesHelper::ACCESS_DENIED_CODE);
@@ -433,30 +529,42 @@ class UserController extends ApiBaseController implements ControllerInterface
      *      ▿{
      *         "data": ▿
      *         {
-     *           "id": 12,
-     *           "username": "admin",
-     *           "email": "admin@admin.sk",
-     *           "roles": "[\"ROLE_ADMIN\"]",
-     *           "is_active": true,
-     *           "acl": "[]"
-     *           "detail_data":
-     *           {
-     *              "name": "Martina",
-     *              "surname": "Kollar",
-     *              "title_before": null,
-     *              "title_after": null,
-     *              "function": "developer",
-     *              "mobile": "00421 0987 544",
-     *              "tel": null,
-     *              "fax": null,
-     *              "signature": "Martina Kollar, Web-Solutions",
-     *              "street": "Nova 487",
-     *              "city": "Bratislava",
-     *              "zip": "025874",
-     *              "country": "SR"
-     *           },
-     *          "company":
-     *           {
+     *           "id": 69,
+     *            "username": "manager",
+     *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
+     *            "email": "manager@manager.sk",
+     *            "roles": "[\"ROLE_USER\"]",
+     *            "is_active": true,
+     *            "image": null,
+     *            "detailData":
+     *            {
+     *               "id": 4,
+     *               "name": "Martinka",
+     *               "surname": "Babinska",
+     *               "title_before": null,
+     *               "title_after": null,
+     *               "function": null,
+     *               "mobile": null,
+     *               "tel": null,
+     *               "fax": null,
+     *               "signature": null,
+     *               "street": null,
+     *               "city": null,
+     *               "zip": null,
+     *               "country": null
+     *            },
+     *            "user_role":
+     *            {
+     *              "id": 26,
+     *              "title": "MANAGER",
+     *              "description": null,
+     *              "homepage": "/",
+     *              "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *              "is_active": true,
+     *              "order": 2
+     *            },
+     *            "company":
+     *            {
      *              "id": 1,
      *              "title": "Web-Solutions",
      *              "ico": "1102587",
@@ -465,14 +573,45 @@ class UserController extends ApiBaseController implements ControllerInterface
      *              "city": "Bratislava",
      *              "zip": "021478",
      *              "country": "Slovenska Republika",
-     *              "is_active": true
-     *           }
+     *              "is_active": true,
+     *              "companyData": {
+     *              {
+     *                 "id": 44,
+     *                 "value": "data val",
+     *                 "companyAttribute":
+     *                 {
+     *                    "id": 1,
+     *                    "title": "input company additional attribute",
+     *                    "type": "input",
+     *                    "is_active": true
+     *                  }
+     *              },
+     *              {
+     *                "id": 45,
+     *                "value": "data valluesgyda gfg",
+     *                "companyAttribute":
+     *                {
+     *                  "id": 2,
+     *                  "title": "select company additional attribute",
+     *                  "type": "simple_select",
+     *                  "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *                  "is_active": true
+     *                }
+     *              }
+     *            }
      *         },
-     *         "_links": ▿
+     *        "_links": ▿
      *         {
-     *            "put": "/api/v1/core-bundle/users/12",
-     *            "patch": "/api/v1/core-bundle/users/12",
-     *            "delete": "/api/v1/core-bundle/users/12"
+     *           "put": "/api/v1/core-bundle/users/85",
+     *           "put: user-role": "/api/v1/core-bundle/users/85/user-role/32",
+     *           "patch": "/api/v1/core-bundle/users/85",
+     *           "patch: user-role": "/api/v1/core-bundle/users/85/user-role/32",
+     *           "delete": "/api/v1/core-bundle/users/85",
+     *           "restore": "/api/v1/core-bundle/users/85/restore",
+     *           "put: company": "/api/v1/core-bundle/users/85/company/41",
+     *           "put: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41",
+     *           "patch: company": "/api/v1/core-bundle/users/85/company/41",
+     *           "patch: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41"
      *         }
      *      }
      *
@@ -504,27 +643,55 @@ class UserController extends ApiBaseController implements ControllerInterface
      *  })
      *
      * @param int $id
-     * @param int|bool $companyId
      * @param Request $request
      *
-     * @return Response|JsonResponse
+     * @param bool $userRoleId
+     * @param int|bool $companyId
+     * @return JsonResponse|Response
      * @throws \InvalidArgumentException
-     * @throws \LogicException
-     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
      */
 
-    public function updateAction(int $id, Request $request, $companyId = false)
+    public function updateAction(int $id, Request $request, $userRoleId = false, $companyId = false)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER, $id)) {
+        // Check if user has permission to CRUD User entity
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::USER_SETTINGS,
+            'user' => $this->getUser()
+        ];
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
-        $requestData = $request->request->all();
+        if (!$user instanceof User) {
+            return $this->createApiResponse([
+                'message' => 'User with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
 
+        if ($userRoleId) {
+            $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($userRoleId);
+            if (!$userRole instanceof UserRole) {
+                return $this->createApiResponse([
+                    'message' => 'User role with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+            // Check if user can create User entity with requested User Role
+            $voteOptions = [
+                'userRole' => $userRole
+            ];
+            if (!$this->get('user_voter')->isGranted(VoteOptions::CREATE_USER_WITH_USER_ROLE, $voteOptions)) {
+                return $this->createApiResponse([
+                    'message' => 'You can not create user with selected User Role!',
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            }
+            $user->setUserRole($userRole);
+        }
 
-        if ($user instanceof User && $companyId) {
+        if ($companyId) {
             try {
                 $this->setCompanyToUser($user, $companyId);
             } catch (\InvalidArgumentException $e) {
@@ -532,8 +699,16 @@ class UserController extends ApiBaseController implements ControllerInterface
             }
         }
 
-        return $this->updateUser($user, $requestData);
+        // Upload and save avatar
+        $file = $request->files->get('image');
+        if (null !== $file) {
+            $imageSlug = $this->get('upload_helper')->uploadFile($file, true);
+            $user->setImage($imageSlug);
+        }
 
+        $requestData = $request->request->all();
+
+        return $this->updateUser($user, $requestData);
     }
 
     /**
@@ -541,30 +716,42 @@ class UserController extends ApiBaseController implements ControllerInterface
      *      ▿{
      *         "data": ▿
      *         {
-     *           "id": 12,
-     *           "username": "admin",
-     *           "email": "admin@admin.sk",
-     *           "roles": "[\"ROLE_ADMIN\"]",
-     *           "is_active": true,
-     *           "acl": "[]"
-     *           "detail_data":
-     *           {
-     *              "name": "Martina",
-     *              "surname": "Kollar",
-     *              "title_before": null,
-     *              "title_after": null,
-     *              "function": "developer",
-     *              "mobile": "00421 0987 544",
-     *              "tel": null,
-     *              "fax": null,
-     *              "signature": "Martina Kollar, Web-Solutions",
-     *              "street": "Nova 487",
-     *              "city": "Bratislava",
-     *              "zip": "025874",
-     *              "country": "SR"
-     *           },
-     *          "company":
-     *           {
+     *           "id": 69,
+     *            "username": "manager",
+     *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
+     *            "email": "manager@manager.sk",
+     *            "roles": "[\"ROLE_USER\"]",
+     *            "is_active": true,
+     *            "image": null,
+     *            "detailData":
+     *            {
+     *               "id": 4,
+     *               "name": "Martinka",
+     *               "surname": "Babinska",
+     *               "title_before": null,
+     *               "title_after": null,
+     *               "function": null,
+     *               "mobile": null,
+     *               "tel": null,
+     *               "fax": null,
+     *               "signature": null,
+     *               "street": null,
+     *               "city": null,
+     *               "zip": null,
+     *               "country": null
+     *            },
+     *            "user_role":
+     *            {
+     *              "id": 26,
+     *              "title": "MANAGER",
+     *              "description": null,
+     *              "homepage": "/",
+     *              "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *              "is_active": true,
+     *              "order": 2
+     *            },
+     *            "company":
+     *            {
      *              "id": 1,
      *              "title": "Web-Solutions",
      *              "ico": "1102587",
@@ -573,14 +760,45 @@ class UserController extends ApiBaseController implements ControllerInterface
      *              "city": "Bratislava",
      *              "zip": "021478",
      *              "country": "Slovenska Republika",
-     *              "is_active": true
-     *           }
+     *              "is_active": true,
+     *              "companyData": {
+     *              {
+     *                 "id": 44,
+     *                 "value": "data val",
+     *                 "companyAttribute":
+     *                 {
+     *                    "id": 1,
+     *                    "title": "input company additional attribute",
+     *                    "type": "input",
+     *                    "is_active": true
+     *                  }
+     *              },
+     *              {
+     *                "id": 45,
+     *                "value": "data valluesgyda gfg",
+     *                "companyAttribute":
+     *                {
+     *                  "id": 2,
+     *                  "title": "select company additional attribute",
+     *                  "type": "simple_select",
+     *                  "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *                  "is_active": true
+     *                }
+     *              }
+     *            }
      *         },
      *         "_links": ▿
      *         {
-     *            "put": "/api/v1/core-bundle/users/12",
-     *            "patch": "/api/v1/core-bundle/users/12",
-     *            "delete": "/api/v1/core-bundle/users/12"
+     *           "put": "/api/v1/core-bundle/users/85",
+     *           "put: user-role": "/api/v1/core-bundle/users/85/user-role/32",
+     *           "patch": "/api/v1/core-bundle/users/85",
+     *           "patch: user-role": "/api/v1/core-bundle/users/85/user-role/32",
+     *           "delete": "/api/v1/core-bundle/users/85",
+     *           "restore": "/api/v1/core-bundle/users/85/restore",
+     *           "put: company": "/api/v1/core-bundle/users/85/company/41",
+     *           "put: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41",
+     *           "patch: company": "/api/v1/core-bundle/users/85/company/41",
+     *           "patch: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41"
      *         }
      *      }
      *
@@ -624,9 +842,13 @@ class UserController extends ApiBaseController implements ControllerInterface
 
     public function updatePartialAction(int $id, Request $request, $companyId = false)
     {
-        if (!$this->get('user_voter')->isGranted(VoteOptions::UPDATE_USER, $id)) {
+        // Check if user has permission to CRUD User entity
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::USER_SETTINGS,
+            'user' => $this->getUser()
+        ];
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
-
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
@@ -704,30 +926,42 @@ class UserController extends ApiBaseController implements ControllerInterface
      *      ▿{
      *         "data": ▿
      *         {
-     *           "id": 12,
-     *           "username": "admin",
-     *           "email": "admin@admin.sk",
-     *           "roles": "[\"ROLE_ADMIN\"]",
-     *           "is_active": true,
-     *           "acl": "[]"
-     *           "detail_data":
-     *           {
-     *              "name": "Martina",
-     *              "surname": "Kollar",
-     *              "title_before": null,
-     *              "title_after": null,
-     *              "function": "developer",
-     *              "mobile": "00421 0987 544",
-     *              "tel": null,
-     *              "fax": null,
-     *              "signature": "Martina Kollar, Web-Solutions",
-     *              "street": "Nova 487",
-     *              "city": "Bratislava",
-     *              "zip": "025874",
-     *              "country": "SR"
-     *           },
-     *          "company":
-     *           {
+     *           "id": 69,
+     *            "username": "manager",
+     *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
+     *            "email": "manager@manager.sk",
+     *            "roles": "[\"ROLE_USER\"]",
+     *            "is_active": true,
+     *            "image": null,
+     *            "detailData":
+     *            {
+     *               "id": 4,
+     *               "name": "Martinka",
+     *               "surname": "Babinska",
+     *               "title_before": null,
+     *               "title_after": null,
+     *               "function": null,
+     *               "mobile": null,
+     *               "tel": null,
+     *               "fax": null,
+     *               "signature": null,
+     *               "street": null,
+     *               "city": null,
+     *               "zip": null,
+     *               "country": null
+     *            },
+     *            "user_role":
+     *            {
+     *              "id": 26,
+     *              "title": "MANAGER",
+     *              "description": null,
+     *              "homepage": "/",
+     *              "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *              "is_active": true,
+     *              "order": 2
+     *            },
+     *            "company":
+     *            {
      *              "id": 1,
      *              "title": "Web-Solutions",
      *              "ico": "1102587",
@@ -736,14 +970,45 @@ class UserController extends ApiBaseController implements ControllerInterface
      *              "city": "Bratislava",
      *              "zip": "021478",
      *              "country": "Slovenska Republika",
-     *              "is_active": true
-     *           }
+     *              "is_active": true,
+     *              "companyData": {
+     *              {
+     *                 "id": 44,
+     *                 "value": "data val",
+     *                 "companyAttribute":
+     *                 {
+     *                    "id": 1,
+     *                    "title": "input company additional attribute",
+     *                    "type": "input",
+     *                    "is_active": true
+     *                  }
+     *              },
+     *              {
+     *                "id": 45,
+     *                "value": "data valluesgyda gfg",
+     *                "companyAttribute":
+     *                {
+     *                  "id": 2,
+     *                  "title": "select company additional attribute",
+     *                  "type": "simple_select",
+     *                  "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *                  "is_active": true
+     *                }
+     *              }
+     *            }
      *         },
      *         "_links": ▿
      *         {
-     *            "put": "/api/v1/core-bundle/users/12",
-     *            "patch": "/api/v1/core-bundle/users/12",
-     *            "delete": "/api/v1/core-bundle/users/12"
+     *           "put": "/api/v1/core-bundle/users/85",
+     *           "put: user-role": "/api/v1/core-bundle/users/85/user-role/32",
+     *           "patch": "/api/v1/core-bundle/users/85",
+     *           "patch: user-role": "/api/v1/core-bundle/users/85/user-role/32",
+     *           "delete": "/api/v1/core-bundle/users/85",
+     *           "restore": "/api/v1/core-bundle/users/85/restore",
+     *           "put: company": "/api/v1/core-bundle/users/85/company/41",
+     *           "put: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41",
+     *           "patch: company": "/api/v1/core-bundle/users/85/company/41",
+     *           "patch: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41"
      *         }
      *      }
      *
@@ -828,12 +1093,20 @@ class UserController extends ApiBaseController implements ControllerInterface
             $this->getDoctrine()->getManager()->persist($user);
             $this->getDoctrine()->getManager()->flush();
 
-
-            //var_dump($requestData);
+            $userCompany = $user->getCompany();
+            if ($userCompany instanceof Company) {
+                $userCompanyId = $userCompany->getId();
+            } else {
+                $userCompanyId = false;
+            }
+            $ids = [
+                'userId' => $user->getId(),
+                'userRoleId' => $user->getUserRole()->getId(),
+                'userCompanyId' => $userCompanyId
+            ];
             //upload avatar
-            //$image = $this->get('upload_helper')->uploadFile($editForm->get('image')->getData());
-            //$user->setImage($image);
-
+//            $image = $this->get('upload_helper')->uploadFile($editForm->get('image')->getData());
+//            $user->setImage($image);
 
             /**
              * Fill UserData Entity if some its parameters were sent
@@ -853,15 +1126,16 @@ class UserController extends ApiBaseController implements ControllerInterface
                     $this->getDoctrine()->getManager()->persist($userData);
                     $this->getDoctrine()->getManager()->flush();
 
-                    return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user), $statusCode);
+                    $userArray = $this->get('api_user.service')->getUserResponse($ids);
+                    return $this->json($userArray, $statusCode);
                 }
             } else {
-                return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user), $statusCode);
+                $userArray = $this->get('api_user.service')->getUserResponse($ids);
+                return $this->json($userArray, $statusCode);
             }
         }
 
-        return $this->invalidParametersResponse();
-
+        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 
     /**
@@ -870,16 +1144,17 @@ class UserController extends ApiBaseController implements ControllerInterface
      *
      * @throws \LogicException
      * @throws \InvalidArgumentException
+     * @return Response
      */
     private function setCompanyToUser(User $user, int $companyId)
     {
-
         $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
 
         if (!$company instanceof Company) {
-            throw new \InvalidArgumentException('Company is not type of Company');
+            return $this->createApiResponse([
+                'message' => 'Company with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
         }
         $user->setCompany($company);
-
     }
 }

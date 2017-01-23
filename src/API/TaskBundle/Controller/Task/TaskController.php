@@ -1,6 +1,6 @@
 <?php
 
-namespace API\TaskBundle\Controller;
+namespace API\TaskBundle\Controller\Task;
 
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Filter;
@@ -21,7 +21,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Class TaskController
  *
- * @package API\TaskBundle\Controller
+ * @package API\TaskBundle\Controller\Task
  */
 class TaskController extends ApiBaseController implements ControllerInterface
 {

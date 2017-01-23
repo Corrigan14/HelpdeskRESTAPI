@@ -606,6 +606,108 @@ class CompanyController extends ApiBaseController implements ControllerInterface
     }
 
     /**
+     * ### Response ###
+     *      {
+     *        "data":
+     *        {
+     *            "id": "1",
+     *            "title": "Web-Solutions"
+     *            "ico": "1102587"
+     *            "dic": "12587459644"
+     *            "ic_dph": "12587459644"
+     *            "street": "Cesta 125"
+     *            "city": "Bratislava"
+     *            "zip": "02587"
+     *            "country": "SR",
+     *            "companyData":
+     *            {
+     *             {
+     *               "id": 44,
+     *               "value": "data val",
+     *               "companyAttribute":
+     *               {
+     *                 "id": 1,
+     *                 "title": "input company additional attribute",
+     *                 "type": "input",
+     *                 "is_active": true
+     *               }
+     *             },
+     *             {
+     *               "id": 45,
+     *               "value": "data valluesgyda gfg",
+     *               "companyAttribute":
+     *               {
+     *                 "id": 2,
+     *                 "title": "select company additional attribute",
+     *                 "type": "simple_select",
+     *                 "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *                 "is_active": true
+     *               }
+     *           }
+     *        },
+     *        "_links":
+     *        {
+     *           "put": "/api/v1/core-bundle/companies/2",
+     *           "patch": "/api/v1/core-bundle/companies/2",
+     *           "delete": "/api/v1/core-bundle/companies/2"
+     *         }
+     *      }
+     *
+     * @ApiDoc(
+     *  description="Restore Company Entity",
+     *  requirements={
+     *     {
+     *       "name"="id",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of processed object"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="is_active param of Entity was successfully changed to active: 1",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found user",
+     *  })
+     *
+     * @param int $id
+     *
+     * @return Response|JsonResponse
+     * @throws \LogicException
+     */
+    public function restoreAction(int $id)
+    {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
+
+        if (!$company instanceof Company) {
+            return $this->notFoundResponse();
+        }
+
+        $company->setIsActive(true);
+        $this->getDoctrine()->getManager()->persist($company);
+        $this->getDoctrine()->getManager()->flush();
+
+        $companyArray = $this->get('api_company.service')->getCompanyResponse($company->getId());
+        return $this->json($companyArray, StatusCodesHelper::SUCCESSFUL_CODE);
+    }
+
+    /**
      * @param mixed $company
      * @param array $requestData
      * @param bool $create

@@ -35,3 +35,10 @@ company_delete:
     methods: [DELETE]
     requirements:
         id: '\d+'
+
+company_restore:
+    path:     companies/restore/{id}
+    defaults: { _controller: APICoreBundle:Company:restore }
+    methods: [PATCH]
+    requirements:
+        id: '\d+'

@@ -1093,7 +1093,11 @@ class UserController extends ApiBaseController
         $this->getDoctrine()->getManager()->persist($user);
         $this->getDoctrine()->getManager()->flush();
 
-        return $this->createApiResponse($this->get('api_user.service')->getUserResponse($user), StatusCodesHelper::SUCCESSFUL_CODE);
+        $ids = [
+            'userId' => $id
+        ];
+        $userArray = $this->get('api_user.service')->getUserResponse($ids);
+        return $this->json($userArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

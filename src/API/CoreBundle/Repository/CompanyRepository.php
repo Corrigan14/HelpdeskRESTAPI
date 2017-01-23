@@ -28,11 +28,28 @@ class CompanyRepository extends EntityRepository implements RepositoryInterface
      */
     public function getAllEntities(int $page, array $options = [])
     {
-        $query = $this->createQueryBuilder('c')
-            ->select('c,companyData, companyAttribute')
-            ->leftJoin('c.companyData', 'companyData')
-            ->leftJoin('companyData.companyAttribute', 'companyAttribute')
-            ->getQuery();
+        $isActive = $options['isActive'];
+
+        if ('true' === $isActive || 'false' === $isActive) {
+            if ($isActive === 'true') {
+                $isActiveParam = 1;
+            } else {
+                $isActiveParam = 0;
+            }
+            $query = $this->createQueryBuilder('c')
+                ->select('c,companyData, companyAttribute')
+                ->leftJoin('c.companyData', 'companyData')
+                ->leftJoin('companyData.companyAttribute', 'companyAttribute')
+                ->where('c.is_active = :isActiveParam')
+                ->setParameter('isActiveParam', $isActiveParam)
+                ->getQuery();
+        } else {
+            $query = $this->createQueryBuilder('c')
+                ->select('c,companyData, companyAttribute')
+                ->leftJoin('c.companyData', 'companyData')
+                ->leftJoin('companyData.companyAttribute', 'companyAttribute')
+                ->getQuery();
+        }
 
         $query->setMaxResults(self::LIMIT);
 
@@ -75,11 +92,28 @@ class CompanyRepository extends EntityRepository implements RepositoryInterface
      */
     public function countEntities(array $options = [])
     {
-        $query = $this->createQueryBuilder('c')
-            ->select('COUNT(c.id)')
-            ->getQuery()
-            ->getSingleScalarResult();
+        $isActive = $options['isActive'];
+        if ('true' === $isActive || 'false' === $isActive) {
+            if ($isActive === 'true') {
+                $isActiveParam = 1;
+            } else {
+                $isActiveParam = 0;
+            }
+            $query = $this->createQueryBuilder('c')
+                ->select('COUNT(c.id)')
+                ->leftJoin('c.companyData', 'companyData')
+                ->leftJoin('companyData.companyAttribute', 'companyAttribute')
+                ->where('c.is_active = :isActiveParam')
+                ->setParameter('isActiveParam', $isActiveParam)
+                ->getQuery();
+        } else {
+            $query = $this->createQueryBuilder('c')
+                ->select('COUNT(c.id)')
+                ->leftJoin('c.companyData', 'companyData')
+                ->leftJoin('companyData.companyAttribute', 'companyAttribute')
+                ->getQuery();
+        }
 
-        return $query;
+        return $query->getSingleScalarResult();
     }
 }

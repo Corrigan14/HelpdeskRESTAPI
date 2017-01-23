@@ -35,3 +35,10 @@ company_attribute_delete:
     methods: [DELETE]
     requirements:
             id: '\d+'
+
+company_attribute_restore:
+    path:     /company-attributes/restore/{id}
+    defaults: { _controller: APITaskBundle:CompanyAttribute:restore }
+    methods: [PATCH]
+    requirements:
+            id: '\d+'

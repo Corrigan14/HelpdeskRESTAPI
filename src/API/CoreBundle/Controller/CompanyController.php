@@ -96,7 +96,11 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *     {
      *       "name"="page",
      *       "description"="Pagination, limit is set to 10 records"
-     *     }
+     *     },
+     *     {
+     *       "name"="isActive",
+     *       "description"="Return's only ACTIVE users if this param is TRUE, only INACTIVE users if param is FALSE"
+     *     },
      *  },
      *  headers={
      *     {
@@ -119,9 +123,20 @@ class CompanyController extends ApiBaseController implements ControllerInterface
     public function listAction(Request $request)
     {
         $page = $request->get('page') ?: 1;
+        $isActive = $request->get('isActive');
 
-        $companyRep = $this->getDoctrine()->getRepository('APICoreBundle:Company');
-        return $this->json($this->get('api_base.service')->getEntitiesResponse($companyRep, $page, 'company_list'), StatusCodesHelper::SUCCESSFUL_CODE);
+        $filtersForUrl = [];
+        if (null !== $isActive) {
+            $filtersForUrl['isActive'] = '&isActive=' . $isActive;
+        }
+
+        $options = [
+            'loggedUserId' => $this->getUser()->getId(),
+            'isActive' => strtolower($isActive),
+            'filtersForUrl' => $filtersForUrl
+        ];
+
+        return $this->json($this->get('api_company.service')->getCompaniesResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -219,9 +234,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
-        $companyRep = $this->getDoctrine()->getRepository('APICoreBundle:Company');
-        $companyArray = $this->get('api_base.service')->getFullEntityResponse($companyRep, $id, 'company');
-
+        $companyArray = $this->get('api_company.service')->getCompanyResponse($id);
         return $this->json($companyArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
@@ -657,8 +670,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
                 }
             }
 
-            $companyRep = $this->getDoctrine()->getRepository('APICoreBundle:Company');
-            $companyArray = $this->get('api_base.service')->getFullEntityResponse($companyRep, $company->getId(), 'company');
+            $companyArray = $this->get('api_company.service')->getCompanyResponse($company->getId());
             return $this->json($companyArray, $statusCode);
         }
 

@@ -24,8 +24,22 @@ class CompanyAttributeRepository extends EntityRepository implements RepositoryI
      */
     public function getAllEntities(int $page, array $options = [])
     {
-        $query = $this->createQueryBuilder('ca')
-            ->getQuery();
+        $isActive = $options['isActive'];
+
+        if ('true' === $isActive || 'false' === $isActive) {
+            if ($isActive === 'true') {
+                $isActiveParam = 1;
+            } else {
+                $isActiveParam = 0;
+            }
+            $query = $this->createQueryBuilder('ca')
+                ->where('ca.is_active = :isActiveParam')
+                ->setParameter('isActiveParam', $isActiveParam)
+                ->getQuery();
+        } else {
+            $query = $this->createQueryBuilder('ca')
+                ->getQuery();
+        }
 
         $query->setMaxResults(self::LIMIT);
 
@@ -48,11 +62,42 @@ class CompanyAttributeRepository extends EntityRepository implements RepositoryI
      */
     public function countEntities(array $options = [])
     {
-        $query = $this->createQueryBuilder('ca')
-            ->select('COUNT(ca.id)')
-            ->getQuery()
-            ->getSingleScalarResult();
+        $isActive = $options['isActive'];
+
+        if ('true' === $isActive || 'false' === $isActive) {
+            if ($isActive === 'true') {
+                $isActiveParam = 1;
+            } else {
+                $isActiveParam = 0;
+            }
+            $query = $this->createQueryBuilder('ca')
+                ->select('COUNT(ca.id)')
+                ->where('ca.is_active = :isActiveParam')
+                ->setParameter('isActiveParam', $isActiveParam)
+                ->getQuery()
+                ->getSingleScalarResult();
+        }else{
+            $query = $this->createQueryBuilder('ca')
+                ->select('COUNT(ca.id)')
+                ->getQuery()
+                ->getSingleScalarResult();
+        }
 
         return $query;
+    }
+
+    /**
+     * @param int $id
+     * @return array
+     */
+    public function getEntity(int $id)
+    {
+        $query = $this->createQueryBuilder('ca')
+            ->select()
+            ->where('ca.id = :caId')
+            ->setParameter('caId', $id)
+            ->getQuery();
+
+        return $query->getArrayResult();
     }
 }

@@ -34,3 +34,6 @@ services:
     user_role_service:
           class: API\TaskBundle\Services\UserRoleService
           arguments: ["@doctrine.orm.entity_manager", "@router"]
+    company_attribute_service:
+            class: API\TaskBundle\Services\CompanyAttributeService
+            arguments: ["@doctrine.orm.entity_manager", "@router"]

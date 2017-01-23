@@ -48,11 +48,15 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *
      *
      * @ApiDoc(
-     *  description="Returns a list of Entities (GET)",
+     *  description="Returns a list of Company attributes Entities",
      *  filters={
      *     {
      *       "name"="page",
      *       "description"="Pagination, limit is set to 10 records"
+     *     },
+     *     {
+     *       "name"="isActive",
+     *       "description"="Return's only ACTIVE company attributes if this param is TRUE, only INACTIVE company attributes if param is FALSE"
      *     }
      *  },
      *  headers={
@@ -86,10 +90,20 @@ class CompanyAttributeController extends ApiBaseController implements Controller
         }
 
         $page = $request->get('page') ?: 1;
+        $isActive = $request->get('isActive');
 
-        $companyAttributeRepository = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute');
+        $filtersForUrl = [];
+        if (null !== $isActive) {
+            $filtersForUrl['isActive'] = '&isActive=' . $isActive;
+        }
 
-        return $this->json($this->get('api_base.service')->getEntitiesResponse($companyAttributeRepository, $page, 'company_attribute_list'), StatusCodesHelper::SUCCESSFUL_CODE);
+        $options = [
+            'loggedUserId' => $this->getUser()->getId(),
+            'isActive' => strtolower($isActive),
+            'filtersForUrl' => $filtersForUrl
+        ];
+
+        return $this->json($this->get('company_attribute_service')->getAttributesResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -112,7 +126,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *      }
      *
      * @ApiDoc(
-     *  description="Returns an Entity (GET)",
+     *  description="Returns a Company attribute Entity",
      *  requirements={
      *     {
      *       "name"="id",
@@ -143,12 +157,6 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      */
     public function getAction(int $id)
     {
-        $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($id);
-
-        if (!$companyAttribute instanceof CompanyAttribute) {
-            return $this->notFoundResponse();
-        }
-
         $aclOptions = [
             'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
             'user' => $this->getUser()
@@ -158,9 +166,14 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             return $this->accessDeniedResponse();
         }
 
-        $companyAttributeArray = $this->get('api_base.service')->getEntityResponse($companyAttribute, 'company_attribute');
+        $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($id);
 
-        return $this->createApiResponse($companyAttributeArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        if (!$companyAttribute instanceof CompanyAttribute) {
+            return $this->notFoundResponse();
+        }
+
+        $companyAttributeArray = $this->get('company_attribute_service')->getAttributeResponse($id);
+        return $this->json($companyAttributeArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -284,12 +297,6 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      */
     public function updateAction(int $id, Request $request)
     {
-        $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($id);
-
-        if (!$companyAttribute instanceof CompanyAttribute) {
-            return $this->notFoundResponse();
-        }
-
         $aclOptions = [
             'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
             'user' => $this->getUser()
@@ -297,6 +304,12 @@ class CompanyAttributeController extends ApiBaseController implements Controller
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
+        }
+
+        $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($id);
+
+        if (!$companyAttribute instanceof CompanyAttribute) {
+            return $this->notFoundResponse();
         }
 
         $requestData = $request->request->all();
@@ -361,12 +374,6 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      */
     public function updatePartialAction(int $id, Request $request)
     {
-        $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($id);
-
-        if (!$companyAttribute instanceof CompanyAttribute) {
-            return $this->notFoundResponse();
-        }
-
         $aclOptions = [
             'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
             'user' => $this->getUser()
@@ -376,6 +383,12 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             return $this->accessDeniedResponse();
         }
 
+        $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($id);
+
+        if (!$companyAttribute instanceof CompanyAttribute) {
+            return $this->notFoundResponse();
+        }
+
         $requestData = $request->request->all();
 
         return $this->updateCompanyAttribute($companyAttribute, $requestData);
@@ -383,7 +396,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
 
     /**
      * @ApiDoc(
-     *  description="Delete Entity (DELETE)",
+     *  description="Delete Company attribute Entity",
      *  requirements={
      *     {
      *       "name"="id",
@@ -413,12 +426,6 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      */
     public function deleteAction(int $id)
     {
-        $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($id);
-
-        if (!$companyAttribute instanceof CompanyAttribute) {
-            return $this->notFoundResponse();
-        }
-
         $aclOptions = [
             'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
             'user' => $this->getUser()
@@ -426,6 +433,12 @@ class CompanyAttributeController extends ApiBaseController implements Controller
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
+        }
+
+        $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($id);
+
+        if (!$companyAttribute instanceof CompanyAttribute) {
+            return $this->notFoundResponse();
         }
 
         $companyAttribute->setIsActive(false);
@@ -437,6 +450,80 @@ class CompanyAttributeController extends ApiBaseController implements Controller
         ], StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
+    /**
+     * ### Response ###
+     *      {
+     *        "data":
+     *        {
+     *           "id": "2",
+     *           "title": "Input company additional attribute",
+     *           "type": "input"
+     *           "options": null
+     *           "is_active": true
+     *        },
+     *        "_links":
+     *        {
+     *           "put": "/api/v1/task-bundle/company-attributes/id",
+     *           "patch": "/api/v1/task-bundle/company-attributes/id",
+     *           "delete": "/api/v1/task-bundle/company-attributes/id"
+     *         }
+     *      }
+     *
+     * @ApiDoc(
+     *  description="Restore Company attribute Entity",
+     *  requirements={
+     *     {
+     *       "name"="id",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of processed object"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  output={"class"="API\TaskBundle\Entity\CompanyAttribute"},
+     *  statusCodes={
+     *      200 ="is_active param of Entity was successfully changed to active: 1",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found user",
+     *  })
+     *
+     * @param int $id
+     *
+     * @return Response|JsonResponse
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     */
+    public function restoreAction(int $id)
+    {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($id);
+
+        if (!$companyAttribute instanceof CompanyAttribute) {
+            return $this->notFoundResponse();
+        }
+
+        $companyAttribute->setIsActive(true);
+        $this->getDoctrine()->getManager()->persist($companyAttribute);
+        $this->getDoctrine()->getManager()->flush();
+
+        $companyAttributeArray = $this->get('company_attribute_service')->getAttributeResponse($id);
+        return $this->json($companyAttributeArray, StatusCodesHelper::SUCCESSFUL_CODE);
+    }
 
     /**
      * @param $companyAttribute
@@ -470,8 +557,8 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             $this->getDoctrine()->getManager()->persist($companyAttribute);
             $this->getDoctrine()->getManager()->flush();
 
-            $companyAttributeArray = $this->get('api_base.service')->getEntityResponse($companyAttribute, 'company_attribute');
-            return $this->createApiResponse($companyAttributeArray, $statusCode);
+            $companyAttributeArray = $this->get('company_attribute_service')->getAttributeResponse($companyAttribute->getId());
+            return $this->json($companyAttributeArray, $statusCode);
         }
 
         return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);

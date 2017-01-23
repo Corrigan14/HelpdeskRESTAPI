@@ -93,12 +93,12 @@ class UserRepository extends EntityRepository
                 }
                 return $this->createQueryBuilder('u')
                     ->select('u,d,userRole,company,companyData,companyAttribute')
-                    ->where('u.is_active = :isActive')
                     ->leftJoin('u.detailData', 'd')
                     ->leftJoin('u.user_role', 'userRole')
                     ->leftJoin('u.company', 'company')
                     ->leftJoin('company.companyData', 'companyData')
                     ->leftJoin('companyData.companyAttribute', 'companyAttribute')
+                    ->where('u.is_active = :isActive')
                     ->setParameter('isActive', $isActiveParam)
                     ->getQuery();
             } else {

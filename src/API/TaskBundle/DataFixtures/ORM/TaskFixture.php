@@ -3,6 +3,8 @@
 namespace API\TaskBundle\DataFixtures\ORM;
 
 use API\CoreBundle\Entity\User;
+use API\TaskBundle\Entity\Project;
+use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
@@ -61,36 +63,72 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
 
         if ($userUser instanceof User && $adminUser instanceof User) {
             $task = new Task();
-            $task->setTitle('Task 1 - user is creator, user is requested');
+            $task->setTitle('Task 1');
             $task->setDescription('Description of Task 1');
             $task->setImportant(false);
             $task->setCreatedBy($userUser);
             $task->setRequestedBy($userUser);
-            $task->setProject($userProject);
-            $task->addTag($tagWork);
-            $task->addTag($tagHome);
-            $task->addTag($tagFreeTime);
+            if ($userProject instanceof Project) {
+                $task->setProject($userProject);
+            }
+            if ($tagHome instanceof Tag) {
+                $task->addTag($tagHome);
+            }
+            if ($tagWork instanceof Tag) {
+                $task->addTag($tagWork);
+            }
             $task->addFollower($adminUser);
             $manager->persist($task);
 
             $task = new Task();
-            $task->setTitle('Task 2 - user is creator, admin is requested');
+            $task->setTitle('Task 2');
             $task->setDescription('Description of Task 2');
             $task->setImportant(false);
             $task->setCreatedBy($userUser);
             $task->setRequestedBy($adminUser);
-            $task->setProject($userProject);
-            $task->addTag($tagHome);
-            $task->addTag($tagFreeTime);
+            if ($userProject instanceof Project) {
+                $task->setProject($userProject);
+            }
+            if ($tagHome instanceof Tag) {
+                $task->addTag($tagHome);
+            }
+            if ($tagFreeTime instanceof Tag) {
+                $task->addTag($tagFreeTime);
+            }
             $manager->persist($task);
 
-            $task = new Task();
-            $task->setTitle('Task 3 - admin is creator, admin is requested');
-            $task->setDescription('Description of Task 3');
-            $task->setImportant(true);
-            $task->setCreatedBy($adminUser);
-            $task->setRequestedBy($adminUser);
-            $manager->persist($task);
+            for ($numberOfTasks = 4; $numberOfTasks < 1000; $numberOfTasks++) {
+                $task = new Task();
+                $task->setTitle('Task ' . $numberOfTasks);
+                $task->setDescription('Description of Admins Task ' . $numberOfTasks);
+                $task->setImportant(true);
+                $task->setCreatedBy($adminUser);
+                $task->setRequestedBy($adminUser);
+                $manager->persist($task);
+            }
+
+            for ($numberOfTasks = 4; $numberOfTasks < 1000; $numberOfTasks++) {
+                $task = new Task();
+                $task->setTitle('Task ' . $numberOfTasks);
+                $task->setDescription('Description of Users Task ' . $numberOfTasks);
+                $task->setImportant(true);
+                $task->setCreatedBy($userUser);
+                $task->setRequestedBy($userUser);
+                $manager->persist($task);
+            }
+
+            if ($userProject instanceof Project) {
+                for ($numberOfTasks = 4; $numberOfTasks < 1000; $numberOfTasks++) {
+                    $task = new Task();
+                    $task->setTitle('Task ' . $numberOfTasks);
+                    $task->setDescription('Description of Users Task ' . $numberOfTasks);
+                    $task->setImportant(true);
+                    $task->setCreatedBy($userUser);
+                    $task->setRequestedBy($userUser);
+                    $task->setProject($userProject);
+                    $manager->persist($task);
+                }
+            }
 
             $manager->flush();
         }

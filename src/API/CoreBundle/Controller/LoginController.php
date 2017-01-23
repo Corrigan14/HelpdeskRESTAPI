@@ -20,16 +20,29 @@ class LoginController extends Controller
      * ### Response ###
      *
      *     {
-     *       "token": "generated JWT Token"
+     *        "token": "generated JWT Token"
+     *        "id": 1,
+     *        "username": "admin",
+     *        "email": "admin@admin.sk",
+     *        "language": "AJ",
+     *        "isActive": "true",
+     *        "profileImage": "image link",
+     *        "name": "Admin",
+     *        "surname": "Adminovic",
+     *        "function": "Admin of project",
+     *        "signature": null,
+     *        "phone": "0904 444 085",
+     *        "facebook": "www.facebook.com",
+     *        "twitter": null,
+     *        "linkdin": null,
+     *        "google": null
      *     }
      *
      * @ApiDoc(
      *  description="Returns a JWT Token for authentication",
      *  parameters={
-     *      {"name"="username", "dataType"="string", "required"=true, "format"="POST", "description"="username for
-     *      login purposes"},
-     *      {"name"="password", "dataType"="string", "required"=true, "format"="POST", "description"="password for
-     *      login purposes"}
+     *      {"name"="username", "dataType"="string", "required"=true, "format"="POST", "description"="username for login purposes"},
+     *      {"name"="password", "dataType"="string", "required"=true, "format"="POST", "description"="password for login purposes"}
      *  },
      *  statusCodes={
      *      200="The request has succeeded",
@@ -79,6 +92,7 @@ class LoginController extends Controller
             'id' => $user->getId(),
             'username' => $user->getUsername(),
             'email' => $user->getEmail(),
+            'language' => $user->getLanguage(),
             'isActive' => $user->getIsActive(),
             'profileImage' => $imageLink,
         ];
@@ -87,7 +101,14 @@ class LoginController extends Controller
         if ($user->getDetailData()) {
             $detailData = [
                 'name' => $user->getDetailData()->getName(),
-                'surname' => $user->getDetailData()->getSurname()
+                'surname' => $user->getDetailData()->getSurname(),
+                'function' => $user->getDetailData()->getFunction(),
+                'signature' => $user->getDetailData()->getSignature(),
+                'phone' => $user->getDetailData()->getMobile(),
+                'facebook' => $user->getDetailData()->getFacebook(),
+                'twitter' => $user->getDetailData()->getTwitter(),
+                'linkdin' => $user->getDetailData()->getLinkdin(),
+                'google' => $user->getDetailData()->getGoogle(),
             ];
         }
 

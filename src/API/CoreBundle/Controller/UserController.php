@@ -29,10 +29,13 @@ class UserController extends ApiBaseController
      *       [
      *          {
      *            "id": "1",
-     *            "email": "admin@admin.sk",
      *            "username": "admin",
+     *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
+     *            "email": "admin@admin.sk",
      *            "roles": "[\"ROLE_ADMIN\"]",
+     *            "language": "AJ",
      *            "is_active": true,
+     *            "image": null,
      *            "detailData":
      *            {
      *               "id": 4,
@@ -48,12 +51,16 @@ class UserController extends ApiBaseController
      *               "street": null,
      *               "city": null,
      *               "zip": null,
-     *               "country": null
+     *               "country": null,
+     *               "facebook": "facebook.sk",
+     *               "twitter": "twitter.sk",
+     *               "linkdin": "linkdin.sk",
+     *               "google": "google.sk"
      *            },
      *            "user_role":
      *            {
      *               "id": 2,
-     *               "title": "MANAGER",
+     *               "title": "ADMIN",
      *               "description": null,
      *               "homepage": "/",
      *               "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
@@ -67,6 +74,7 @@ class UserController extends ApiBaseController
      *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
      *            "email": "manager@manager.sk",
      *            "roles": "[\"ROLE_USER\"]",
+     *            "language": "AJ",
      *            "is_active": true,
      *            "image": null,
      *            "detailData": null,
@@ -199,6 +207,7 @@ class UserController extends ApiBaseController
      *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
      *            "email": "manager@manager.sk",
      *            "roles": "[\"ROLE_USER\"]",
+     *            "language": "AJ",
      *            "is_active": true,
      *            "image": null,
      *            "detailData":
@@ -216,7 +225,11 @@ class UserController extends ApiBaseController
      *               "street": null,
      *               "city": null,
      *               "zip": null,
-     *               "country": null
+     *               "country": null,
+     *               "facebook": "facebook.sk",
+     *               "twitter": "twitter.sk",
+     *               "linkdin": "linkdin.sk",
+     *               "google": "google.sk"
      *            },
      *            "user_role":
      *            {
@@ -355,6 +368,7 @@ class UserController extends ApiBaseController
      *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
      *            "email": "manager@manager.sk",
      *            "roles": "[\"ROLE_USER\"]",
+     *            "language": "AJ",
      *            "is_active": true,
      *            "image": null,
      *            "detailData":
@@ -372,7 +386,11 @@ class UserController extends ApiBaseController
      *               "street": null,
      *               "city": null,
      *               "zip": null,
-     *               "country": null
+     *               "country": null,
+     *               "facebook": "facebook.sk",
+     *               "twitter": "twitter.sk",
+     *               "linkdin": "linkdin.sk",
+     *               "google": "google.sk"
      *            },
      *            "user_role":
      *            {
@@ -518,6 +536,7 @@ class UserController extends ApiBaseController
      *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
      *            "email": "manager@manager.sk",
      *            "roles": "[\"ROLE_USER\"]",
+     *            "language": "AJ",
      *            "is_active": true,
      *            "image": null,
      *            "detailData":
@@ -535,7 +554,11 @@ class UserController extends ApiBaseController
      *               "street": null,
      *               "city": null,
      *               "zip": null,
-     *               "country": null
+     *               "country": null,
+     *               "facebook": "facebook.sk",
+     *               "twitter": "twitter.sk",
+     *               "linkdin": "linkdin.sk",
+     *               "google": "google.sk"
      *            },
      *            "user_role":
      *            {
@@ -694,6 +717,7 @@ class UserController extends ApiBaseController
      *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
      *            "email": "manager@manager.sk",
      *            "roles": "[\"ROLE_USER\"]",
+     *            "language": "AJ",
      *            "is_active": true,
      *            "image": null,
      *            "detailData":
@@ -711,7 +735,11 @@ class UserController extends ApiBaseController
      *               "street": null,
      *               "city": null,
      *               "zip": null,
-     *               "country": null
+     *               "country": null,
+     *               "facebook": "facebook.sk",
+     *               "twitter": "twitter.sk",
+     *               "linkdin": "linkdin.sk",
+     *               "google": "google.sk"
      *            },
      *            "user_role":
      *            {
@@ -927,6 +955,7 @@ class UserController extends ApiBaseController
      *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
      *            "email": "manager@manager.sk",
      *            "roles": "[\"ROLE_USER\"]",
+     *            "language": "AJ",
      *            "is_active": true,
      *            "image": null,
      *            "detailData":
@@ -944,7 +973,11 @@ class UserController extends ApiBaseController
      *               "street": null,
      *               "city": null,
      *               "zip": null,
-     *               "country": null
+     *               "country": null,
+     *               "facebook": "facebook.sk",
+     *               "twitter": "twitter.sk",
+     *               "linkdin": "linkdin.sk",
+     *               "google": "google.sk"
      *            },
      *            "user_role":
      *            {

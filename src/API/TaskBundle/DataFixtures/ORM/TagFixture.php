@@ -53,7 +53,7 @@ class TagFixture implements FixtureInterface , ContainerAwareInterface , Ordered
             'username' => 'user',
         ]);
 
-        if($user){
+        if($user instanceof User && $admin instanceof User){
             /** @var \API\TaskBundle\Entity\Tag $tag1 */
             $tag1 = new Tag();
             $tag1->setTitle('Free Time');

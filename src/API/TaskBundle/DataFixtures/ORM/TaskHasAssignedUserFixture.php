@@ -2,6 +2,9 @@
 
 namespace API\TaskBundle\DataFixtures\ORM;
 
+use API\CoreBundle\Entity\User;
+use API\TaskBundle\Entity\Status;
+use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
@@ -39,19 +42,21 @@ class TaskHasAssignedUserFixture implements FixtureInterface, ContainerAwareInte
         ]);
 
         $task = $manager->getRepository('APITaskBundle:Task')->findOneBy([
-            'title' => 'Task 1 - user is creator, user is requested'
+            'title' => 'Task 1'
         ]);
 
         $status = $manager->getRepository('APITaskBundle:Status')->findOneBy([
             'title' => 'Completed'
         ]);
 
-        $taskHasAssignedUser = new TaskHasAssignedUser();
-        $taskHasAssignedUser->setTask($task);
-        $taskHasAssignedUser->setStatus($status);
-        $taskHasAssignedUser->setUser($userUser);
-        $manager->persist($taskHasAssignedUser);
-        $manager->flush();
+        if ($userUser instanceof User && $task instanceof Task && $status instanceof Status) {
+            $taskHasAssignedUser = new TaskHasAssignedUser();
+            $taskHasAssignedUser->setTask($task);
+            $taskHasAssignedUser->setStatus($status);
+            $taskHasAssignedUser->setUser($userUser);
+            $manager->persist($taskHasAssignedUser);
+            $manager->flush();
+        }
     }
 
     /**

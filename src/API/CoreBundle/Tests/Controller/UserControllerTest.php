@@ -20,7 +20,7 @@ class UserControllerTest extends ApiTestCase
      */
     public function testListSuccess()
     {
-        $keys = parent::testListSuccess();
+        parent::testListSuccess();
 
         // Test List with custom data fields
         $this->getClient()->request('GET', $this->getBaseUrl() . '?fields=name', [], [],

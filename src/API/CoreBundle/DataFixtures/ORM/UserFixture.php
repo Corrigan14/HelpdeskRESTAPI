@@ -3,6 +3,7 @@
 namespace API\CoreBundle\DataFixtures\ORM;
 
 use API\CoreBundle\Entity\User;
+use API\TaskBundle\Security\LanguageOptions;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -66,6 +67,8 @@ class UserFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             'title' => 'CUSTOMER'
         ]);
 
+        $language = LanguageOptions::ENGLISH;
+
         $user = new User();
         $user->setEmail('admin@admin.sk')
             ->setUsername('admin')
@@ -74,6 +77,7 @@ class UserFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
         $encoder = $this->container->get('security.password_encoder');
         $encoded = $encoder->encodePassword($user, $plainPassword);
         $user->setPassword($encoded);
+        $user->setLanguage($language);
         $user->setCompany($companyWS);
         $user->setUserRole($adminUserRole);
         $manager->persist($user);
@@ -87,6 +91,7 @@ class UserFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
         $encoder = $this->container->get('security.password_encoder');
         $encoded = $encoder->encodePassword($user, $plainPassword);
         $user->setPassword($encoded);
+        $user->setLanguage($language);
         $user->setCompany($companyLS);
         $user->setUserRole($managerUserRole);
         $manager->persist($user);
@@ -99,6 +104,7 @@ class UserFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
         $encoder = $this->container->get('security.password_encoder');
         $encoded = $encoder->encodePassword($user, $plainPassword);
         $user->setPassword($encoded);
+        $user->setLanguage($language);
         $user->setCompany($companyLS);
         $user->setUserRole($agentUserRole);
         $manager->persist($user);
@@ -111,6 +117,7 @@ class UserFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
         $encoder = $this->container->get('security.password_encoder');
         $encoded = $encoder->encodePassword($user, $plainPassword);
         $user->setPassword($encoded);
+        $user->setLanguage($language);
         $user->setCompany($companyLS);
         $user->setUserRole($customerUserRole);
         $manager->persist($user);
@@ -123,6 +130,7 @@ class UserFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
         $encoder = $this->container->get('security.password_encoder');
         $encoded = $encoder->encodePassword($user, $plainPassword);
         $user->setPassword($encoded);
+        $user->setLanguage($language);
         $user->setCompany($companyLS);
         $user->setUserRole($customerUserRole);
         $manager->persist($user);
@@ -135,6 +143,7 @@ class UserFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
         $encoder = $this->container->get('security.password_encoder');
         $encoded = $encoder->encodePassword($user, $plainPassword);
         $user->setPassword($encoded);
+        $user->setLanguage($language);
         $user->setCompany($companyLS);
         $user->setUserRole($customerUserRole);
         $manager->persist($user);

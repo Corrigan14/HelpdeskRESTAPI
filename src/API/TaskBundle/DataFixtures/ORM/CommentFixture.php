@@ -3,7 +3,9 @@
 namespace API\TaskBundle\DataFixtures\ORM;
 
 
+use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Comment;
+use API\TaskBundle\Entity\Task;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -36,54 +38,56 @@ class CommentFixture implements FixtureInterface, ContainerAwareInterface, Order
     public function load(ObjectManager $manager)
     {
         $adminsTask = $manager->getRepository('APITaskBundle:Task')->findOneBy([
-            'title' => 'Task 3 - admin is creator, admin is requested'
+            'title' => 'Task 3'
         ]);
 
         $adminUser = $manager->getRepository('APICoreBundle:User')->findOneBy([
             'username' => 'admin'
         ]);
 
-        $comment1 = new Comment();
-        $comment1->setTitle('Koment - public');
-        $comment1->setBody('Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ');
-        $comment1->setEmail(false);
-        $comment1->setInternal(false);
-        $comment1->setTask($adminsTask);
-        $comment1->setCreatedBy($adminUser);
-        $manager->persist($comment1);
-        $manager->flush();
+        if ($adminsTask instanceof Task && $adminUser instanceof User) {
+            $comment1 = new Comment();
+            $comment1->setTitle('Koment - public');
+            $comment1->setBody('Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ');
+            $comment1->setEmail(false);
+            $comment1->setInternal(false);
+            $comment1->setTask($adminsTask);
+            $comment1->setCreatedBy($adminUser);
+            $manager->persist($comment1);
+            $manager->flush();
 
-        $comment = new Comment();
-        $comment->setTitle('Koment - publik, podkomentar komentu');
-        $comment->setBody('Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ');
-        $comment->setEmail(false);
-        $comment->setInternal(true);
-        $comment->setTask($adminsTask);
-        $comment->setComment($comment1);
-        $comment->setCreatedBy($adminUser);
-        $manager->persist($comment);
+            $comment = new Comment();
+            $comment->setTitle('Koment - publik, podkomentar komentu');
+            $comment->setBody('Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ');
+            $comment->setEmail(false);
+            $comment->setInternal(true);
+            $comment->setTask($adminsTask);
+            $comment->setComment($comment1);
+            $comment->setCreatedBy($adminUser);
+            $manager->persist($comment);
 
-        $comment = new Comment();
-        $comment->setTitle('Koment - private');
-        $comment->setBody('Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ');
-        $comment->setEmail(false);
-        $comment->setInternal(true);
-        $comment->setTask($adminsTask);
-        $comment->setCreatedBy($adminUser);
-        $manager->persist($comment);
+            $comment = new Comment();
+            $comment->setTitle('Koment - private');
+            $comment->setBody('Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ');
+            $comment->setEmail(false);
+            $comment->setInternal(true);
+            $comment->setTask($adminsTask);
+            $comment->setCreatedBy($adminUser);
+            $manager->persist($comment);
 
-        $comment = new Comment();
-        $comment->setTitle('Email - public');
-        $comment->setBody('Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ');
-        $comment->setInternal(false);
-        $comment->setEmail(true);
-        $comment->setEmailTo(['email@email.com']);
-        $comment->setEmailCc(['email2@email.sk', 'email3@email.com']);
-        $comment->setTask($adminsTask);
-        $comment->setCreatedBy($adminUser);
-        $manager->persist($comment);
+            $comment = new Comment();
+            $comment->setTitle('Email - public');
+            $comment->setBody('Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ');
+            $comment->setInternal(false);
+            $comment->setEmail(true);
+            $comment->setEmailTo(['email@email.com']);
+            $comment->setEmailCc(['email2@email.sk', 'email3@email.com']);
+            $comment->setTask($adminsTask);
+            $comment->setCreatedBy($adminUser);
+            $manager->persist($comment);
 
-        $manager->flush();
+            $manager->flush();
+        }
     }
 
     /**

@@ -3,7 +3,9 @@
 namespace API\CoreBundle\Controller;
 
 use API\CoreBundle\Entity\Company;
-use API\CoreBundle\Security\VoteOptions;
+use API\TaskBundle\Entity\CompanyAttribute;
+use API\TaskBundle\Entity\CompanyData;
+use API\TaskBundle\Security\UserRoleAclOptions;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
@@ -33,8 +35,46 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *            "street": "Cesta 125"
      *            "city": "Bratislava"
      *            "zip": "02587"
-     *            "country": "SR"
-     *          }
+     *            "country": "SR",
+     *            "companyData":
+     *            {
+     *             {
+     *               "id": 44,
+     *               "value": "data val",
+     *               "companyAttribute":
+     *               {
+     *                 "id": 1,
+     *                 "title": "input company additional attribute",
+     *                 "type": "input",
+     *                 "is_active": true
+     *               }
+     *             },
+     *             {
+     *               "id": 45,
+     *               "value": "data valluesgyda gfg",
+     *               "companyAttribute":
+     *               {
+     *                 "id": 2,
+     *                 "title": "select company additional attribute",
+     *                 "type": "simple_select",
+     *                 "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *                 "is_active": true
+     *               }
+     *             }
+     *          },
+     *          {
+     *             "id": 42,
+     *             "title": "LanSystems",
+     *             "ico": "110258782",
+     *             "dic": "12587458996244",
+     *             "ic_dph": null,
+     *             "street": "Ina cesta 125",
+     *             "city": "Bratislava",
+     *             "zip": "021478",
+     *             "country": "Slovenska Republika",
+     *             "is_active": true,
+     *             "companyData": []
+     *           }
      *       ],
      *       "_links":
      *       {
@@ -42,7 +82,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *           "first": "api/v1/core-bundle/companies?page=1",
      *           "prev": false,
      *           "next": "api/v1/core-bundle/companies?page=2",
-     *            "last": "api/v1/core-bundle/companies?page=3"
+     *           "last": "api/v1/core-bundle/companies?page=3"
      *       },
      *       "total": 22,
      *       "page": 1,
@@ -51,7 +91,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *
      *
      * @ApiDoc(
-     *  description="Returns a list of Entities (GET)",
+     *  description="Returns a list of Company Entities",
      *  filters={
      *     {
      *       "name"="page",
@@ -73,17 +113,15 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
-     * @return Response|JsonResponse
+     * @return JsonResponse
+     * @throws \LogicException
      */
     public function listAction(Request $request)
     {
-        if (!$this->get('company_voter')->isGranted(VoteOptions::LIST_COMPANIES)) {
-            return $this->accessDeniedResponse();
-        }
-
         $page = $request->get('page') ?: 1;
 
-        return $this->json($this->get('api_base.service')->getEntitiesResponse($this->getDoctrine()->getRepository('APICoreBundle:Company'), $page, 'company_list'), StatusCodesHelper::SUCCESSFUL_CODE);
+        $companyRep = $this->getDoctrine()->getRepository('APICoreBundle:Company');
+        return $this->json($this->get('api_base.service')->getEntitiesResponse($companyRep, $page, 'company_list'), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -91,15 +129,40 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "2",
-     *           "title": "Web-Solutions"
-     *           "ico": "1102587"
-     *           "dic": "12587459644"
-     *           "ic_dph": "12587459644"
-     *           "street": "Cesta 125"
-     *           "city": "Bratislava"
-     *           "zip": "02587"
-     *           "country": "SR"
+     *            "id": "1",
+     *            "title": "Web-Solutions"
+     *            "ico": "1102587"
+     *            "dic": "12587459644"
+     *            "ic_dph": "12587459644"
+     *            "street": "Cesta 125"
+     *            "city": "Bratislava"
+     *            "zip": "02587"
+     *            "country": "SR",
+     *            "companyData":
+     *            {
+     *             {
+     *               "id": 44,
+     *               "value": "data val",
+     *               "companyAttribute":
+     *               {
+     *                 "id": 1,
+     *                 "title": "input company additional attribute",
+     *                 "type": "input",
+     *                 "is_active": true
+     *               }
+     *             },
+     *             {
+     *               "id": 45,
+     *               "value": "data valluesgyda gfg",
+     *               "companyAttribute":
+     *               {
+     *                 "id": 2,
+     *                 "title": "select company additional attribute",
+     *                 "type": "simple_select",
+     *                 "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *                 "is_active": true
+     *               }
+     *           }
      *        },
      *        "_links":
      *        {
@@ -110,7 +173,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *      }
      *
      * @ApiDoc(
-     *  description="Returns an Entity (GET)",
+     *  description="Returns a Company Entity",
      *  requirements={
      *     {
      *       "name"="id",
@@ -137,20 +200,29 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function getAction(int $id)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
 
         if (!$company instanceof Company) {
             return $this->notFoundResponse();
         }
 
-        if (!$this->get('company_voter')->isGranted(VoteOptions::SHOW_COMPANY, $company)) {
-            return $this->accessDeniedResponse();
-        }
+        $companyRep = $this->getDoctrine()->getRepository('APICoreBundle:Company');
+        $companyArray = $this->get('api_base.service')->getFullEntityResponse($companyRep, $id, 'company');
 
-        return $this->createApiResponse($this->get('api_base.service')->getEntityResponse($company, 'company'), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($companyArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -158,15 +230,40 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "2",
-     *           "title": "Web-Solutions"
-     *           "ico": "1102587"
-     *           "dic": "12587459644"
-     *           "ic_dph": "12587459644"
-     *           "street": "Cesta 125"
-     *           "city": "Bratislava"
-     *           "zip": "02587"
-     *           "country": "SR"
+     *            "id": "1",
+     *            "title": "Web-Solutions"
+     *            "ico": "1102587"
+     *            "dic": "12587459644"
+     *            "ic_dph": "12587459644"
+     *            "street": "Cesta 125"
+     *            "city": "Bratislava"
+     *            "zip": "02587"
+     *            "country": "SR",
+     *            "companyData":
+     *            {
+     *             {
+     *               "id": 44,
+     *               "value": "data val",
+     *               "companyAttribute":
+     *               {
+     *                 "id": 1,
+     *                 "title": "input company additional attribute",
+     *                 "type": "input",
+     *                 "is_active": true
+     *               }
+     *             },
+     *             {
+     *               "id": 45,
+     *               "value": "data valluesgyda gfg",
+     *               "companyAttribute":
+     *               {
+     *                 "id": 2,
+     *                 "title": "select company additional attribute",
+     *                 "type": "simple_select",
+     *                 "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *                 "is_active": true
+     *               }
+     *           }
      *        },
      *        "_links":
      *        {
@@ -178,7 +275,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *
      * @ApiDoc(
      *  resource = true,
-     *  description="Create a new Entity (POST)",
+     *  description="Create a new Company Entity with extra Company Data.
+     *  This can be added by attributes: company_data[company_attribute_id] = value,
+     *  attributes must be defined in the CompanyAttribute Entity",
      *  input={"class"="API\CoreBundle\Entity\Company"},
      *  headers={
      *     {
@@ -198,10 +297,19 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function createAction(Request $request)
     {
-        if (!$this->get('company_voter')->isGranted(VoteOptions::CREATE_COMPANY)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -217,15 +325,40 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "2",
-     *           "title": "Web-Solutions"
-     *           "ico": "1102587"
-     *           "dic": "12587459644"
-     *           "ic_dph": "12587459644"
-     *           "street": "Cesta 125"
-     *           "city": "Bratislava"
-     *           "zip": "02587"
-     *           "country": "SR"
+     *            "id": "1",
+     *            "title": "Web-Solutions"
+     *            "ico": "1102587"
+     *            "dic": "12587459644"
+     *            "ic_dph": "12587459644"
+     *            "street": "Cesta 125"
+     *            "city": "Bratislava"
+     *            "zip": "02587"
+     *            "country": "SR",
+     *            "companyData":
+     *            {
+     *             {
+     *               "id": 44,
+     *               "value": "data val",
+     *               "companyAttribute":
+     *               {
+     *                 "id": 1,
+     *                 "title": "input company additional attribute",
+     *                 "type": "input",
+     *                 "is_active": true
+     *               }
+     *             },
+     *             {
+     *               "id": 45,
+     *               "value": "data valluesgyda gfg",
+     *               "companyAttribute":
+     *               {
+     *                 "id": 2,
+     *                 "title": "select company additional attribute",
+     *                 "type": "simple_select",
+     *                 "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *                 "is_active": true
+     *               }
+     *           }
      *        },
      *        "_links":
      *        {
@@ -236,7 +369,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *      }
      *
      * @ApiDoc(
-     *  description="Update the Entity (PUT)",
+     *  description="Update a Company Entity with extra Company Data.
+     *  This can be edited by attributes: company_data[company_attribute_id] = value,
+     *  attributes must be defined in the CompanyAttribute Entity",
      *  requirements={
      *     {
      *       "name"="id",
@@ -266,17 +401,26 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function updateAction(int $id, Request $request)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
 
         if (!$company instanceof Company) {
             return $this->notFoundResponse();
-        }
-
-        if (!$this->get('company_voter')->isGranted(VoteOptions::UPDATE_COMPANY, $company)) {
-            return $this->accessDeniedResponse();
         }
 
         $requestData = $request->request->all();
@@ -289,15 +433,40 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "2",
-     *           "title": "Web-Solutions"
-     *           "ico": "1102587"
-     *           "dic": "12587459644"
-     *           "ic_dph": "12587459644"
-     *           "street": "Cesta 125"
-     *           "city": "Bratislava"
-     *           "zip": "02587"
-     *           "country": "SR"
+     *            "id": "1",
+     *            "title": "Web-Solutions"
+     *            "ico": "1102587"
+     *            "dic": "12587459644"
+     *            "ic_dph": "12587459644"
+     *            "street": "Cesta 125"
+     *            "city": "Bratislava"
+     *            "zip": "02587"
+     *            "country": "SR",
+     *            "companyData":
+     *            {
+     *             {
+     *               "id": 44,
+     *               "value": "data val",
+     *               "companyAttribute":
+     *               {
+     *                 "id": 1,
+     *                 "title": "input company additional attribute",
+     *                 "type": "input",
+     *                 "is_active": true
+     *               }
+     *             },
+     *             {
+     *               "id": 45,
+     *               "value": "data valluesgyda gfg",
+     *               "companyAttribute":
+     *               {
+     *                 "id": 2,
+     *                 "title": "select company additional attribute",
+     *                 "type": "simple_select",
+     *                 "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *                 "is_active": true
+     *               }
+     *           }
      *        },
      *        "_links":
      *        {
@@ -308,7 +477,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *      }
      *
      * @ApiDoc(
-     *  description="Partially update the Entity (PATCH)",
+     *  description="Partially update a Company Entity with extra Company Data.
+     *  This can be edited by attributes: company_data[company_attribute_id] = value,
+     *  attributes must be defined in the CompanyAttribute Entity",
      *  requirements={
      *     {
      *       "name"="id",
@@ -338,17 +509,26 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
      */
     public function updatePartialAction(int $id, Request $request)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
 
         if (!$company instanceof Company) {
             return $this->notFoundResponse();
-        }
-
-        if (!$this->get('company_voter')->isGranted(VoteOptions::UPDATE_COMPANY, $company)) {
-            return $this->accessDeniedResponse();
         }
 
         $requestData = $request->request->all();
@@ -358,7 +538,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
 
     /**
      * @ApiDoc(
-     *  description="Delete Entity (DELETE)",
+     *  description="Delete Company Entity",
      *  requirements={
      *     {
      *       "name"="id",
@@ -384,17 +564,23 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      * @param int $id
      *
      * @return Response|JsonResponse
+     * @throws \LogicException
      */
     public function deleteAction(int $id)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
 
         if (!$company instanceof Company) {
             return $this->notFoundResponse();
-        }
-
-        if (!$this->get('company_voter')->isGranted(VoteOptions::DELETE_COMPANY, $id)) {
-            return $this->accessDeniedResponse();
         }
 
         $company->setIsActive(false);
@@ -412,6 +598,10 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      * @param bool $create
      *
      * @return Response|JsonResponse
+     * @throws \LogicException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \InvalidArgumentException
      */
     private function updateCompany($company, array $requestData, $create = false)
     {
@@ -427,10 +617,51 @@ class CompanyController extends ApiBaseController implements ControllerInterface
             $this->getDoctrine()->getManager()->persist($company);
             $this->getDoctrine()->getManager()->flush();
 
-            $entityResponse = $this->get('api_base.service')->getEntityResponse($company, 'company');
-            return $this->createApiResponse($entityResponse, $statusCode);
+            /**
+             * Fill CompanyData Entity if some its parameters were sent
+             */
+            if (isset($requestData['company_data']) && count($requestData['company_data']) > 0) {
+                /** @var array $companyData */
+                $companyData = $requestData['company_data'];
+                foreach ($companyData as $key => $value) {
+                    $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($key);
+
+                    if ($companyAttribute instanceof CompanyAttribute) {
+                        $cd = $this->getDoctrine()->getRepository('APITaskBundle:CompanyData')->findOneBy([
+                            'companyAttribute' => $companyAttribute,
+                            'company' => $company,
+                        ]);
+
+                        if (!$cd instanceof CompanyData) {
+                            $cd = new CompanyData();
+                            $cd->setCompany($company);
+                            $cd->setCompanyAttribute($companyAttribute);
+                        }
+
+                        $cdErrors = $this->get('entity_processor')->processEntity($cd, ['value' => $value]);
+                        if (false === $cdErrors) {
+                            $company->addCompanyDatum($cd);
+                            $this->getDoctrine()->getManager()->persist($company);
+                            $this->getDoctrine()->getManager()->persist($cd);
+                            $this->getDoctrine()->getManager()->flush();
+                        } else {
+                            $this->createApiResponse([
+                                'message' => 'The value of company_data with key: ' . $key . ' is invalid',
+                            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        }
+                    } else {
+                        return $this->createApiResponse([
+                            'message' => 'The key: ' . $key . ' of Company Attribute is not valid (Company Attribute with this ID doesn\'t exist)',
+                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    }
+                }
+            }
+
+            $companyRep = $this->getDoctrine()->getRepository('APICoreBundle:Company');
+            $companyArray = $this->get('api_base.service')->getFullEntityResponse($companyRep, $company->getId(), 'company');
+            return $this->json($companyArray, $statusCode);
         }
 
-        return $this->invalidParametersResponse();
+        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

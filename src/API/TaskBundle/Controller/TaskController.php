@@ -3,11 +3,13 @@
 namespace API\TaskBundle\Controller;
 
 use API\CoreBundle\Entity\User;
+use API\TaskBundle\Entity\Filter;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskAttribute;
 use API\TaskBundle\Entity\TaskData;
 use API\TaskBundle\Security\VoteOptions;
+use API\TaskBundle\Services\FilterAttributeOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
 use Igsem\APIBundle\Services\StatusCodesHelper;
@@ -179,7 +181,17 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *                     "email": "user@user.sk",
      *                     "roles": "[\"ROLE_USER\"]",
      *                     "is_active": true,
-     *                     "image": null
+     *                     "image": null,
+     *                     "user_role":
+     *                      {
+     *                          "id": 2,
+     *                          "title": "MANAGER",
+     *                          "description": null,
+     *                          "homepage": "/",
+     *                          "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                          "is_active": true
+     *                          "order": 2
+     *                      }
      *                  }
      *                }
      *             ]
@@ -258,23 +270,35 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *     },
      *     {
      *       "name"="createdTime",
-     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30"
+     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30
+     *        Another option:
+     *          TO=NOW - just tasks created to NOW datetime are returned."
      *     },
      *     {
      *       "name"="startedTime",
-     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30"
+     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30
+     *        Another option:
+     *          TO=NOW - just tasks started to NOW datetime are returned."
      *     },
      *     {
      *       "name"="deadlineTime",
-     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30"
+     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30
+     *       Another option:
+     *          TO=NOW - just tasks with deadline to NOW datetime are returned."
      *     },
      *     {
      *       "name"="closedTime",
-     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30"
+     *       "description"="A coma separated dates in format FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30
+     *       Another option:
+     *          TO=NOW - just tasks closed to NOW datetime are returned."
      *     },
      *     {
      *       "name"="archived",
      *       "description"="If TRUE, just tasks from archived projects are returned"
+     *     },
+     *     {
+     *       "name"="important",
+     *       "description"="If TRUE, just IMPORTANT tasks are returned"
      *     },
      *     {
      *       "name"="addedParameters",
@@ -291,7 +315,6 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
-     *      403 ="Access denied",
      *      404 ="Not found entity"
      *  }
      * )
@@ -316,16 +339,290 @@ class TaskController extends ApiBaseController implements ControllerInterface
             'isNullFilter' => $filterData['isNullFilter'],
             'dateFilter' => $filterData['dateFilter'],
             'searchFilter' => $filterData['searchFilter'],
+            'notAndCurrentFilter' => $filterData['notAndCurrentFilter'],
             'inFilterAddedParams' => $filterData['inFilterAddedParams'],
             'equalFilterAddedParams' => $filterData['equalFilterAddedParams'],
             'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
             'filtersForUrl' => $filterData['filterForUrl']
         ];
 
-        // Check if logged user has access to show requested data
-        if (!$this->get('task_voter')->isGranted(VoteOptions::LIST_TASKS, $options)) {
+        $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);
+        return $this->json($tasksArray, StatusCodesHelper::SUCCESSFUL_CODE);
+    }
+
+    /**
+     *  ### Response ###
+     *     {
+     *       "data":
+     *       [
+     *          {
+     *             "id": 59,
+     *             "title": "Task 1 - user is creator, user is requested",
+     *             "description": "Description of Task 1",
+     *             "deadline": null,
+     *             "startedAt": null,
+     *             "closedAt": null,
+     *             "important": false,
+     *             "createdAt":
+     *             {
+     *               "date": "2017-01-03 22:16:51.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "updatedAt":
+     *             {
+     *               "date": "2017-01-03 14:16:51.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "taskData":
+     *             [
+     *               {
+     *                  "id": 39,
+     *                  "value": "some input",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 52,
+     *                     "title": "input task additional attribute",
+     *                     "type": "input",
+     *                     "options": null,
+     *                     "is_active": true
+     *                  }
+     *               },
+     *               {
+     *                 "id": 40,
+     *                 "value": "select1",
+     *                 "taskAttribute":
+     *                 {
+     *                    "id": 53,
+     *                    "title": "select task additional attribute",
+     *                    "type": "simple_select",
+     *                    "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *                    "is_active": true
+     *                 }
+     *               }
+     *             ],
+     *             "project":
+     *             {
+     *                "id": 86,
+     *                "title": "Project of user 1",
+     *                "description": "Description of project 1.",
+     *                "is_active": false,
+     *                "createdAt":
+     *                {
+     *                   "date": "2017-01-03 14:16:51.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                },
+     *                "updatedAt":
+     *                {
+     *                   "date": "2017-01-03 14:16:51.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                }
+     *             },
+     *             "createdBy":
+     *             {
+     *                "id": 65,
+     *                "username": "user",
+     *                "password": "$2y$13$upBgDlLWe7MhoAzma.kvoufabj4cNAZQ9BgG412hU7KohSLxxZ4NW",
+     *                "email": "user@user.sk",
+     *                "roles": "[\"ROLE_USER\"]",
+     *                "is_active": true,
+     *                "image": null,
+     *                "detailData":
+     *                {
+     *                  "name": "Martina",
+     *                  "surname": "Kollar",
+     *                  "title_before": null,
+     *                  "title_after": null,
+     *                  "function": "developer",
+     *                  "mobile": "00421 0987 544",
+     *                  "tel": null,
+     *                  "fax": null,
+     *                  "signature": "Martina Kollar, Web-Solutions",
+     *                  "street": "Nova 487",
+     *                  "city": "Bratislava",
+     *                  "zip": "025874",
+     *                  "country": "SR"
+     *                },
+     *                "company":
+     *                {
+     *                   "id": 65,
+     *                   "title": "LanSystems",
+     *                   "ico": "110258782",
+     *                   "dic": "12587458996244",
+     *                   "ic_dph": null,
+     *                   "street": "Ina cesta 125",
+     *                   "city": "Bratislava",
+     *                   "zip": "021478",
+     *                   "country": "Slovenska Republika",
+     *                   "is_active": true
+     *                 },
+     *                 "user_role":
+     *                 {
+     *                   "id": 2,
+     *                   "title": "MANAGER",
+     *                   "description": null,
+     *                   "homepage": "/",
+     *                   "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                   "is_active": true
+     *                   "order": 2
+     *                 }
+     *             },
+     *             "requestedBy":
+     *             {
+     *                "id": 65,
+     *                "username": "user",
+     *                "password": "$2y$13$upBgDlLWe7MhoAzma.kvoufabj4cNAZQ9BgG412hU7KohSLxxZ4NW",
+     *                "email": "user@user.sk",
+     *                "roles": "[\"ROLE_USER\"]",
+     *                "is_active": true,
+     *                "image": null,
+     *                "user_role":
+     *                 {
+     *                   "id": 2,
+     *                   "title": "MANAGER",
+     *                   "description": null,
+     *                   "homepage": "/",
+     *                   "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                   "is_active": true
+     *                   "order": 2
+     *                 }
+     *             },
+     *             "taskHasAssignedUsers":
+     *             [
+     *                {
+     *                   "id": 28,
+     *                   "status_date": null,
+     *                   "time_spent": null,
+     *                   "createdAt":
+     *                   {
+     *                      "date": "2017-01-03 14:16:51.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                   },
+     *                   "updatedAt":
+     *                   {
+     *                      "date": "2017-01-03 14:16:51.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                   },
+     *                  "status":
+     *                  {
+     *                     "id": 84,
+     *                     "title": "Completed",
+     *                     "is_active": true
+     *                  },
+     *                 "user":
+     *                 {
+     *                     "id": 65,
+     *                     "username": "user",
+     *                     "password": "$2y$13$upBgDlLWe7MhoAzma.kvoufabj4cNAZQ9BgG412hU7KohSLxxZ4NW",
+     *                     "email": "user@user.sk",
+     *                     "roles": "[\"ROLE_USER\"]",
+     *                     "is_active": true,
+     *                     "image": null,
+     *                     "user_role":
+     *                     {
+     *                        "id": 2,
+     *                        "title": "MANAGER",
+     *                        "description": null,
+     *                        "homepage": "/",
+     *                        "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                        "is_active": true
+     *                        "order": 2
+     *                     }
+     *                  }
+     *                }
+     *             ]
+     *          }
+     *       ],
+     *       "_links":
+     *       {
+     *           "self": "/api/v1/task-bundle/task?page=1&filterId=145",
+     *           "first": "/api/v1/task-bundle/task?page=1&filterId=145",
+     *           "prev": false,
+     *           "next": "/api/v1/task-bundle/task?page=2&filterId=145",
+     *           "last": "/api/v1/task-bundle/task?page=3&filterId=145"
+     *       },
+     *       "total": 22,
+     *       "page": 1,
+     *       "numberOfPages": 3
+     *     }
+     *
+     *
+     * @ApiDoc(
+     *  description="Returns a list of full Task Entities selected by rules of requested Filter",
+     *  requirements={
+     *     {
+     *       "name"="filterId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of filter"
+     *     }
+     *  },
+     *  filters={
+     *     {
+     *       "name"="page",
+     *       "description"="Pagination, limit is set to 10 records"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found entity"
+     *  }
+     * )
+     *
+     * @param Request $request
+     * @param int $filterId
+     * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     */
+    public function listSavedFilterAction(Request $request, int $filterId)
+    {
+        $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($filterId);
+
+        if (!$filter instanceof Filter) {
+            return $this->createApiResponse([
+                'message' => 'Filter with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        // Check if logged user has permission to see requested filter
+        if (!$this->get('filter_voter')->isGranted(VoteOptions::SHOW_FILTER, $filter)) {
             return $this->accessDeniedResponse();
         }
+
+        $page = $request->get('page') ?: 1;
+        $filterDataArray = $filter->getFilter();
+        $filterData = $this->getFilterDataFromSavedFilterArray($filterDataArray);
+        $options = [
+            'loggedUser' => $this->getUser(),
+            'isAdmin' => $this->get('task_voter')->isAdmin(),
+            'inFilter' => $filterData['inFilter'],
+            'equalFilter' => $filterData['equalFilter'],
+            'isNullFilter' => $filterData['isNullFilter'],
+            'dateFilter' => $filterData['dateFilter'],
+            'searchFilter' => $filterData['searchFilter'],
+            'notAndCurrentFilter' => $filterData['notAndCurrentFilter'],
+            'inFilterAddedParams' => $filterData['inFilterAddedParams'],
+            'equalFilterAddedParams' => $filterData['equalFilterAddedParams'],
+            'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
+            'filtersForUrl' => $filterData['filterForUrl']
+        ];
 
         $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);
         return $this->json($tasksArray, StatusCodesHelper::SUCCESSFUL_CODE);
@@ -336,31 +633,195 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *          "id": 1,
-     *          "title": "Task 1 - user is creator, user is requested",
-     *          "description": "Description of Task 1",
-     *          "important": false,
-     *          "created_by":⊕{...},
-     *          "requested_by": ⊕{...},
-     *          "project": ⊕{...},
-     *          "task_data":
+     *          "0":
      *          {
-     *             "0":
+     *             "id": 92,
+     *             "title": "Task 1 - user is creator, user is requested",
+     *             "description": "Description of Task 1",
+     *             "important": false,
+     *             "createdAt":
      *             {
-     *               "id": 1,
-     *               "value": "some input"
+     *                "date": "2017-01-03 14:16:51.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
      *             },
-     *            "1":
-     *            {
-     *              "id": 2,
-     *              "value": "select1"
-     *            }
+     *             "updatedAt":
+     *             {
+     *                "date": "2017-01-03 14:16:51.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
+     *             },
+     *             "taskData":
+     *             {
+     *               "0":
+     *               {
+     *                  "id": 61,
+     *                  "value": "some input",
+     *                  "taskAttribute":
+     *                   {
+     *                       "id": 85,
+     *                       "title": "input task additional attribute",
+     *                       "type": "input",
+     *                       "is_active": true
+     *                   }
+     *               },
+     *               "1":
+     *               {
+     *                  "id": 62,
+     *                  "value": "select1",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 86,
+     *                     "title": "select task additional attribute",
+     *                     "type": "simple_select",
+     *                     "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *                     "is_active": true
+     *                   }
+     *                }
+     *             },
+     *             "project":
+     *             {
+     *                "id": 141,
+     *                "title": "Project of user 1",
+     *                "description": "Description of project 1.",
+     *                "is_active": false,
+     *                "createdAt": "2017-01-19T17:47:22+0100",
+     *                "updatedAt": "2017-01-19T17:47:22+0100"
+     *             },
+     *             "createdBy":
+     *             {
+     *                "id": 116,
+     *                "username": "user",
+     *                "password": "$2y$13$uMaX2SHUoFErPHs2ojwe6.JCZrvCJlHKJ3D2O1BPBRWl/.TtZPzhK",
+     *                "email": "user@user.sk",
+     *                "roles": "[\"ROLE_USER\"]",
+     *                "is_active": true,
+     *                "acl": "[]",
+     *                "detailData":
+     *                {
+     *                  "name": "Martina",
+     *                  "surname": "Kollar",
+     *                  "title_before": null,
+     *                  "title_after": null,
+     *                  "function": "developer",
+     *                  "mobile": "00421 0987 544",
+     *                  "tel": null,
+     *                  "fax": null,
+     *                  "signature": "Martina Kollar, Web-Solutions",
+     *                  "street": "Nova 487",
+     *                  "city": "Bratislava",
+     *                  "zip": "025874",
+     *                  "country": "SR"
+     *                },
+     *                "company":
+     *                {
+     *                   "id": 87,
+     *                   "title": "LanSystems",
+     *                   "ico": "110258782",
+     *                   "dic": "12587458996244",
+     *                   "street": "Ina cesta 125",
+     *                   "city": "Bratislava",
+     *                   "zip": "021478",
+     *                   "country": "Slovenska Republika",
+     *                   "is_active": true
+     *                 },
+     *                 "user_role":
+     *                 {
+     *                   "id": 2,
+     *                   "title": "MANAGER",
+     *                   "description": null,
+     *                   "homepage": "/",
+     *                   "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                   "is_active": true
+     *                   "order": 2
+     *                 }
+     *             },
+     *             "requestedBy":
+     *             {
+     *                "id": 116,
+     *                "username": "user",
+     *                "password": "$2y$13$uMaX2SHUoFErPHs2ojwe6.JCZrvCJlHKJ3D2O1BPBRWl/.TtZPzhK",
+     *                "email": "user@user.sk",
+     *                "roles": "[\"ROLE_USER\"]",
+     *                "is_active": true,
+     *                "acl": "[]",
+     *                "detailData":
+     *                {
+     *                  "name": "Martina",
+     *                  "surname": "Kollar",
+     *                  "title_before": null,
+     *                  "title_after": null,
+     *                  "function": "developer",
+     *                  "mobile": "00421 0987 544",
+     *                  "tel": null,
+     *                  "fax": null,
+     *                  "signature": "Martina Kollar, Web-Solutions",
+     *                  "street": "Nova 487",
+     *                  "city": "Bratislava",
+     *                  "zip": "025874",
+     *                  "country": "SR"
+     *                },
+     *                "company":
+     *                {
+     *                   "id": 87,
+     *                   "title": "LanSystems",
+     *                   "ico": "110258782",
+     *                   "dic": "12587458996244",
+     *                   "street": "Ina cesta 125",
+     *                   "city": "Bratislava",
+     *                   "zip": "021478",
+     *                   "country": "Slovenska Republika",
+     *                   "is_active": true
+     *                 },
+     *                 "user_role":
+     *                 {
+     *                   "id": 2,
+     *                   "title": "MANAGER",
+     *                   "description": null,
+     *                   "homepage": "/",
+     *                   "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                   "is_active": true
+     *                   "order": 2
+     *                 }
+     *              },
+     *              "taskHasAssignedUsers":
+     *              {
+     *                 "0":
+     *                 {
+     *                    "id": 42,
+     *                    "createdAt": "2017-01-19T17:47:22+0100",
+     *                    "updatedAt": "2017-01-19T17:47:22+0100",
+     *                    "status":
+     *                    {
+     *                       "id": 126,
+     *                       "title": "new",
+     *                       "is_active": true
+     *                     },
+     *                     "user":
+     *                     {
+     *                        "id": 116,
+     *                        "username": "user",
+     *                        "password": "$2y$13$uMaX2SHUoFErPHs2ojwe6.JCZrvCJlHKJ3D2O1BPBRWl/.TtZPzhK",
+     *                        "email": "user@user.sk",
+     *                        "roles": "[\"ROLE_USER\"]",
+     *                        "is_active": true,
+     *                        "acl": "[]",
+     *                        "user_role":
+     *                        {
+     *                           "id": 2,
+     *                           "title": "MANAGER",
+     *                           "description": null,
+     *                           "homepage": "/",
+     *                           "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                           "is_active": true
+     *                           "order": 2
+     *                         }
+     *                      }
+     *                   }
+     *                 }
+     *              }
      *          }
-     *          "followers": ⊕{...}
-     *          "tags": ⊕{...}
-     *          "created_at": "2016-12-09T07:39:52+0100",
-     *          "updated_at": "2016-12-09T07:39:52+0100"
-     *      },
+     *        },
      *       "_links":
      *       {
      *         "put": "/api/v1/task-bundle/tasks/1/project/all/user/all",
@@ -411,8 +872,9 @@ class TaskController extends ApiBaseController implements ControllerInterface
         }
 
         $response = $this->get('task_service')->getTaskResponse($task);
-
-        return $this->createApiResponse($response, StatusCodesHelper::SUCCESSFUL_CODE);
+        $responseData['data'] = $response['data'][0];
+        $responseLinks['_links'] = $response['_links'];
+        return $this->json(array_merge($responseData, $responseLinks), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -942,20 +1404,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
      */
     private function getFilterData(Request $request): array
     {
-        // Ina-beznejsia moznost ako zadavat pole hodnot v URL adrese, ktora vracia priamo pole: index.php?id[]=1&id[]=2&id[]=3&name=john
-        // na zakodovanie dat do URL je mozne pouzit encodeURIComponent
-
-        $inFilter = [];
-        $dateFilter = [];
-        $equalFilter = [];
-        $isNullFilter = [];
-        $searchFilter = null;
-
-        $inFilterAddedParams = [];
-        $dateFilterAddedParams = [];
-        $equalFilterAddedParams = [];
-
-        $filterForUrl = [];
+        $data = [];
 
         $search = $request->get('search');
         $status = $request->get('status');
@@ -971,73 +1420,229 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $deadline = $request->get('deadlineTime');
         $closed = $request->get('closedTime');
         $archived = $request->get('archived');
+        $important = $request->get('important');
         $addedParameters = $request->get('addedParameters');
 
         if (null !== $search) {
-            $searchFilter = $search;
-            $filterForUrl['search'] = '&search=' . $search;
+            $data[FilterAttributeOptions::SEARCH] = $search;
         }
         if (null !== $status) {
-            $inFilter['status.id'] = explode(",", $status);
-            $filterForUrl['status'] = '&status=' . $status;
+            $data[FilterAttributeOptions::STATUS] = $status;
         }
         if (null !== $project) {
+            $data[FilterAttributeOptions::PROJECT] = $project;
+        }
+        if (null !== $creator) {
+            $data[FilterAttributeOptions::CREATOR] = $creator;
+        }
+        if (null !== $requester) {
+            $data[FilterAttributeOptions::REQUESTER] = $requester;
+        }
+        if (null !== $company) {
+            $data[FilterAttributeOptions::COMPANY] = $company;
+        }
+        if (null !== $assigned) {
+            $data[FilterAttributeOptions::ASSIGNED] = $assigned;
+        }
+        if (null !== $tag) {
+            $data[FilterAttributeOptions::TAG] = $tag;
+        }
+        if (null !== $follower) {
+            $data[FilterAttributeOptions::FOLLOWER] = $follower;
+        }
+        if (null !== $created) {
+            $data[FilterAttributeOptions::CREATED] = $created;
+        }
+        if (null !== $started) {
+            $data[FilterAttributeOptions::STARTED] = $started;
+        }
+        if (null !== $deadline) {
+            $data[FilterAttributeOptions::DEADLINE] = $deadline;
+        }
+        if (null !== $closed) {
+            $data[FilterAttributeOptions::CLOSED] = $closed;
+        }
+        if ('true' === strtolower($archived)) {
+            $data[FilterAttributeOptions::ARCHIVED] = $archived;
+        }
+        if ('true' === strtolower($important)) {
+            $data[FilterAttributeOptions::IMPORTANT] = $important;
+        }
+        if (null !== $addedParameters) {
+            $data[FilterAttributeOptions::ADDED_PARAMETERS] = $addedParameters;
+        }
+
+        return $this->processFilterData($data);
+    }
+
+    /**
+     * @param array $filterDataArray
+     * @return array
+     * @throws \LogicException
+     */
+    private function getFilterDataFromSavedFilterArray(array $filterDataArray): array
+    {
+        $data = [];
+
+        if (isset($filterDataArray[FilterAttributeOptions::SEARCH])) {
+            $data[FilterAttributeOptions::SEARCH] = $filterDataArray[FilterAttributeOptions::SEARCH];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::STATUS])) {
+            $data[FilterAttributeOptions::STATUS] = $filterDataArray[FilterAttributeOptions::STATUS];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::PROJECT])) {
+            $data[FilterAttributeOptions::PROJECT] = $filterDataArray[FilterAttributeOptions::PROJECT];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::CREATOR])) {
+            $data[FilterAttributeOptions::CREATOR] = $filterDataArray[FilterAttributeOptions::CREATOR];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::REQUESTER])) {
+            $data[FilterAttributeOptions::REQUESTER] = $filterDataArray[FilterAttributeOptions::REQUESTER];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::COMPANY])) {
+            $data[FilterAttributeOptions::COMPANY] = $filterDataArray[FilterAttributeOptions::COMPANY];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::ASSIGNED])) {
+            $data[FilterAttributeOptions::ASSIGNED] = $filterDataArray[FilterAttributeOptions::ASSIGNED];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::TAG])) {
+            $data[FilterAttributeOptions::TAG] = $filterDataArray[FilterAttributeOptions::TAG];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::FOLLOWER])) {
+            $data[FilterAttributeOptions::FOLLOWER] = $filterDataArray[FilterAttributeOptions::FOLLOWER];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::CREATED])) {
+            $data[FilterAttributeOptions::CREATED] = $filterDataArray[FilterAttributeOptions::CREATED];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::STARTED])) {
+            $data[FilterAttributeOptions::STARTED] = $filterDataArray[FilterAttributeOptions::STARTED];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::DEADLINE])) {
+            $data[FilterAttributeOptions::DEADLINE] = $filterDataArray[FilterAttributeOptions::DEADLINE];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::CLOSED])) {
+            $data[FilterAttributeOptions::CLOSED] = $filterDataArray[FilterAttributeOptions::CLOSED];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::ARCHIVED])) {
+            $data[FilterAttributeOptions::ARCHIVED] = $filterDataArray[FilterAttributeOptions::ARCHIVED];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::IMPORTANT])) {
+            $data[FilterAttributeOptions::IMPORTANT] = $filterDataArray[FilterAttributeOptions::IMPORTANT];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::ADDED_PARAMETERS])) {
+            $data[FilterAttributeOptions::ADDED_PARAMETERS] = $filterDataArray[FilterAttributeOptions::ADDED_PARAMETERS];
+        }
+
+        return $this->processFilterData($data);
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     * @throws \LogicException
+     */
+    private function processFilterData(array $data): array
+    {
+        // Ina-beznejsia moznost ako zadavat pole hodnot v URL adrese, ktora vracia priamo pole: index.php?id[]=1&id[]=2&id[]=3&name=john
+        // na zakodovanie dat do URL je mozne pouzit encodeURIComponent
+
+        $inFilter = [];
+        $dateFilter = [];
+        $equalFilter = [];
+        $isNullFilter = [];
+        $notAndCurrentFilter = [];
+        $searchFilter = null;
+
+        $inFilterAddedParams = [];
+        $dateFilterAddedParams = [];
+        $equalFilterAddedParams = [];
+
+        $filterForUrl = [];
+
+        if (isset($data[FilterAttributeOptions::SEARCH])) {
+            $searchFilter = $data[FilterAttributeOptions::SEARCH];
+            $filterForUrl['search'] = '&search=' . $data['search'];
+        }
+        if (isset($data[FilterAttributeOptions::STATUS])) {
+            $inFilter['status.id'] = explode(',', $data[FilterAttributeOptions::STATUS]);
+            $filterForUrl['status'] = '&status=' . $data[FilterAttributeOptions::STATUS];
+        }
+        if (isset($data[FilterAttributeOptions::PROJECT])) {
+            $project = $data[FilterAttributeOptions::PROJECT];
             if ('not' === strtolower($project)) {
                 $isNullFilter[] = 'task.project';
             } elseif ('current-user' === strtolower($project)) {
                 $equalFilter['projectCreator.id'] = $this->getUser()->getId();
             } else {
-                $inFilter['project.id'] = explode(",", $project);
+                $inFilter['project.id'] = explode(',', $project);
             }
             $filterForUrl['project'] = '&project=' . $project;
         }
-        if (null !== $creator) {
+        if (isset($data[FilterAttributeOptions::CREATOR])) {
+            $creator = $data[FilterAttributeOptions::CREATOR];
             if ('current-user' === strtolower($creator)) {
                 $equalFilter['createdBy.id'] = $this->getUser()->getId();
             } else {
-                $inFilter['createdBy.id'] = explode(",", $creator);
+                $inFilter['createdBy.id'] = explode(',', $creator);
             }
             $filterForUrl['createdBy'] = '&creator=' . $creator;
         }
-        if (null !== $requester) {
+        if (isset($data[FilterAttributeOptions::REQUESTER])) {
+            $requester = $data[FilterAttributeOptions::REQUESTER];
             if ('current-user' === strtolower($requester)) {
                 $equalFilter['requestedBy.id'] = $this->getUser()->getId();
             } else {
-                $inFilter['requestedBy.id'] = explode(",", $requester);
+                $inFilter['requestedBy.id'] = explode(',', $requester);
             }
             $filterForUrl['requestedBy'] = '&requester=' . $requester;
         }
-        if (null !== $company) {
+        if (isset($data[FilterAttributeOptions::COMPANY])) {
+            $company = $data[FilterAttributeOptions::COMPANY];
             if ('current-user' === strtolower($company)) {
                 $equalFilter['company.id'] = $this->getUser()->getId();
             } else {
-                $inFilter['company.id'] = explode(",", $company);
+                $inFilter['company.id'] = explode(',', $company);
             }
             $filterForUrl['company'] = '&company=' . $company;
         }
-        if (null !== $assigned) {
-            if ('not' === strtolower($assigned)) {
+        if (isset($data[FilterAttributeOptions::ASSIGNED])) {
+            $assigned = $data[FilterAttributeOptions::ASSIGNED];
+            $assignedArray = explode(',', $assigned);
+
+            if (in_array('not', $assignedArray, true) && in_array('current-user', $assignedArray, true)) {
+                $notAndCurrentFilter[] = [
+                    'not' => 'thau.user',
+                    'equal' => [
+                        'key' => 'assignedUser.id',
+                        'value' => $this->getUser()->getId()
+                    ],
+                ];
+            } elseif ('not' === strtolower($assigned)) {
                 $isNullFilter[] = 'thau.user';
             } elseif ('current-user' === strtolower($assigned)) {
                 $equalFilter['assignedUser.id'] = $this->getUser()->getId();
             } else {
-                $inFilter['assignedUser.id'] = explode(",", $assigned);
+                $inFilter['assignedUser.id'] = explode(',', $assigned);
             }
+
             $filterForUrl['assigned'] = '&assigned=' . $assigned;
         }
-        if (null !== $tag) {
-            $inFilter['tags.id'] = explode(",", $tag);
+        if (isset($data[FilterAttributeOptions::TAG])) {
+            $tag = $data[FilterAttributeOptions::TAG];
+            $inFilter['tags.id'] = explode(',', $tag);
             $filterForUrl['tag'] = '&tag=' . $tag;
         }
-        if (null !== $follower) {
+        if (isset($data[FilterAttributeOptions::FOLLOWER])) {
+            $follower = $data[FilterAttributeOptions::FOLLOWER];
             if ('current-user' === $follower) {
                 $equalFilter['followers.id'] = $this->getUser()->getId();
             } else {
-                $inFilter['followers.id'] = explode(",", $follower);
+                $inFilter['followers.id'] = explode(',', $follower);
             }
             $filterForUrl['followers'] = '&follower=' . $follower;
         }
-        if (null !== $created) {
+        if (isset($data[FilterAttributeOptions::CREATED])) {
+            $created = $data[FilterAttributeOptions::CREATED];
             $fromToData = $this->separateFromToDateData($created);
             $dateFilter['task.createdAt'] = [
                 'from' => $fromToData['from'],
@@ -1045,7 +1650,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
             ];
             $filterForUrl['created'] = '&createdTime=' . $created;
         }
-        if (null !== $started) {
+        if (isset($data[FilterAttributeOptions::STARTED])) {
+            $started = $data[FilterAttributeOptions::STARTED];
             $fromToData = $this->separateFromToDateData($started);
             $dateFilter['task.startedAt'] = [
                 'from' => $fromToData['from'],
@@ -1053,7 +1659,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
             ];
             $filterForUrl['started'] = '&startedTime=' . $started;
         }
-        if (null !== $deadline) {
+        if (isset($data[FilterAttributeOptions::DEADLINE])) {
+            $deadline = $data[FilterAttributeOptions::DEADLINE];
             $fromToData = $this->separateFromToDateData($deadline);
             $dateFilter['task.deadline'] = [
                 'from' => $fromToData['from'],
@@ -1061,7 +1668,8 @@ class TaskController extends ApiBaseController implements ControllerInterface
             ];
             $filterForUrl['deadline'] = '&deadlineTime=' . $deadline;
         }
-        if (null !== $closed) {
+        if (isset($data[FilterAttributeOptions::CLOSED])) {
+            $closed = $data[FilterAttributeOptions::CLOSED];
             $fromToData = $this->separateFromToDateData($closed);
             $dateFilter['task.closedAt'] = [
                 'from' => $fromToData['from'],
@@ -1069,12 +1677,21 @@ class TaskController extends ApiBaseController implements ControllerInterface
             ];
             $filterForUrl['closed'] = '&closedTime=' . $closed;
         }
-        if ('true' === strtolower($archived)) {
-            $equalFilter['project.is_active'] = 0;
-            $filterForUrl['archived'] = '&archived=TRUE';
+        if (isset($data[FilterAttributeOptions::ARCHIVED])) {
+            if ('true' === strtolower($data[FilterAttributeOptions::ARCHIVED])) {
+                $equalFilter['project.is_active'] = 0;
+                $filterForUrl['archived'] = '&archived=TRUE';
+            }
         }
-        if (null !== $addedParameters) {
-            $arrayOfAddedParameters = explode("&", $addedParameters);
+        if (isset($data[FilterAttributeOptions::IMPORTANT])) {
+            if ('true' === strtolower($data[FilterAttributeOptions::IMPORTANT])) {
+                $equalFilter['task.important'] = 1;
+                $filterForUrl['important'] = '&important=TRUE';
+            }
+        }
+        if (isset($data[FilterAttributeOptions::ADDED_PARAMETERS])) {
+            $addedParameters = $data[FilterAttributeOptions::ADDED_PARAMETERS];
+            $arrayOfAddedParameters = explode('&', $addedParameters);
 
             if (!empty($arrayOfAddedParameters[0])) {
                 $filterForUrl['addedParameters'] = '&addedParameters=' . $addedParameters;
@@ -1087,7 +1704,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
                     $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($attributeId);
                     if ($taskAttribute instanceof TaskAttribute) {
                         $typeOfTaskAttribute = $taskAttribute->getType();
-                        $attributeValues = explode(",", $strpos[1]);
+                        $attributeValues = explode(',', $strpos[1]);
 
                         if ('checkbox' === $typeOfTaskAttribute) {
                             if ('true' === strtolower($strpos[1])) {
@@ -1113,6 +1730,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
             'dateFilter' => $dateFilter,
             'isNullFilter' => $isNullFilter,
             'searchFilter' => $searchFilter,
+            'notAndCurrentFilter' => $notAndCurrentFilter,
             'inFilterAddedParams' => $inFilterAddedParams,
             'equalFilterAddedParams' => $equalFilterAddedParams,
             'dateFilterAddedParams' => $dateFilterAddedParams,
@@ -1124,10 +1742,10 @@ class TaskController extends ApiBaseController implements ControllerInterface
      * @param string $created
      * @return array
      */
-    private function separateFromToDateData(string $created):array
+    private function separateFromToDateData(string $created): array
     {
-        $fromPosition = strpos($created, "FROM=");
-        $toPosition = strpos($created, "TO=");
+        $fromPosition = strpos($created, 'FROM=');
+        $toPosition = strpos($created, 'TO=');
 
         $toData = null;
         $fromData = null;

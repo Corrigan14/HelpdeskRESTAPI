@@ -129,7 +129,7 @@ class UserFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
 
         $user = new User();
         $user->setEmail('testuser2@user.sk')
-            ->setUsername('testuser22')
+            ->setUsername('testuser2')
             ->setRoles(['ROLE_USER']);
         $plainPassword = 'testuser';
         $encoder = $this->container->get('security.password_encoder');

@@ -22,7 +22,7 @@ use Traits\UserTrait;
  * @UniqueEntity("username")
  * @ExclusionPolicy("none")
  */
-class User implements AdvancedUserInterface , \Serializable
+class User implements AdvancedUserInterface, \Serializable
 {
     use FeaturedImageEntity;
     use UserTrait;
@@ -72,7 +72,7 @@ class User implements AdvancedUserInterface , \Serializable
 
     /**
      * @ORM\Column(type="string")
-     *
+     * @ReadOnly()
      * @var string
      */
     private $roles;
@@ -259,9 +259,9 @@ class User implements AdvancedUserInterface , \Serializable
     public function serialize()
     {
         return serialize([
-            $this->id ,
-            $this->username ,
-            $this->password ,
+            $this->id,
+            $this->username,
+            $this->password,
             // see section on salt below
             // $this->salt,
         ]);
@@ -273,9 +273,9 @@ class User implements AdvancedUserInterface , \Serializable
     public function unserialize($serialized)
     {
         list (
-            $this->id ,
-            $this->username ,
-            $this->password ,
+            $this->id,
+            $this->username,
+            $this->password,
             // see section on salt below
             // $this->salt
             ) = unserialize($serialized);

@@ -17,7 +17,4 @@ services:
     upload_helper:
         class: API\CoreBundle\Services\UploadHelper
         arguments: ["%upload_dir%","@doctrine.orm.entity_manager"]
-    company_voter:
-        class: API\CoreBundle\Security\CompanyVoter
-        arguments: ["@security.access.decision_manager","@security.token_storage"]
 

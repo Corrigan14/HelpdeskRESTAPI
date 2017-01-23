@@ -3,6 +3,7 @@
 namespace API\CoreBundle\Security;
 
 use API\CoreBundle\Entity\User;
+use API\TaskBundle\Entity\UserRole;
 
 /**
  * Class UserVoter
@@ -18,14 +19,14 @@ class UserVoter extends ApiBaseVoter implements VoterInterface
      * Perform a single access check operation on a given attribute, subject and token.
      * It is safe to assume that $attribute and $subject already passed the "supports()" method check.
      *
-     * @param string   $action
+     * @param string $action
      *
-     * @param bool|int $targetUserId
+     * @param $options
      *
      * @return bool
      * @throws \InvalidArgumentException
      */
-    public function isGranted($action , $targetUserId = false)
+    public function isGranted($action, $options)
     {
         $this->user = $this->token->getUser();
 
@@ -35,82 +36,35 @@ class UserVoter extends ApiBaseVoter implements VoterInterface
         }
 
         switch ($action) {
-            case VoteOptions::CREATE_USER:
-                return $this->canCreate();
-            case VoteOptions::SHOW_USER:
-                return $this->canRead($targetUserId);
-            case VoteOptions::UPDATE_USER:
-                return $this->canUpdate($targetUserId);
-            case VoteOptions::DELETE_USER:
-                return $this->canDelete($targetUserId);
+            case VoteOptions::CREATE_USER_WITH_USER_ROLE:
+                return $this->canCreateUserWithSelectedUserRole($options);
             default:
                 return false;
         }
     }
 
     /**
+     * @param array $options
      * @return bool
-     * @throws \InvalidArgumentException
      */
-    private function canCreate(): bool
+    private function canCreateUserWithSelectedUserRole(array $options): bool
     {
-        if ($this->decisionManager->decide($this->token , ['ROLE_ADMIN'])) {
+        // Admin can create user with any User Role
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
         }
 
-        return $this->hasAclRights(VoteOptions::CREATE_USER, $this->user);
-    }
+        // User can create just user with role, which order is higher like his role order
+        /** @var UserRole $userRole */
+        $requestedUserRole = $options['userRole'];
+        /** @var UserRole $loggedUserUserRole */
+        $loggedUserUserRole = $this->user->getUserRole();
 
-    /**
-     * @param int $user
-     *
-     * @return bool
-     * @throws \InvalidArgumentException*
-     */
-    private function canRead(int $user): bool
-    {
-        if ($this->decisionManager->decide($this->token , ['ROLE_ADMIN'])) {
-            return true;
-        }
-        if ($user === $this->user->getId()) {
+        if ($loggedUserUserRole->getOrder() < $requestedUserRole->getOrder()) {
             return true;
         }
 
-        return $this->hasAclRights(VoteOptions::SHOW_USER, $this->user);
-    }
-
-    /**
-     * @param int $user
-     *
-     * @return bool
-     * @throws \InvalidArgumentException
-     */
-    private function canUpdate(int $user): bool
-    {
-        if ($this->decisionManager->decide($this->token , ['ROLE_ADMIN'])) {
-            return true;
-        }
-        if ($user === $this->user->getId()) {
-            return true;
-        }
-
-        return $this->hasAclRights(VoteOptions::UPDATE_USER, $this->user);
-    }
-
-    /**
-     * @param int $user
-     *
-     * @return bool
-     * @throws \InvalidArgumentException
-     */
-    private function canDelete(int $user): bool
-    {
-        // Only ADMIN can delete user, he can't delete himselves
-        if ($this->decisionManager->decide($this->token , ['ROLE_ADMIN']) && $user !== $this->user->getId()) {
-            return true;
-        }
-
-        return $this->hasAclRights(VoteOptions::DELETE_USER, $this->user);
+        return false;
     }
 
 }

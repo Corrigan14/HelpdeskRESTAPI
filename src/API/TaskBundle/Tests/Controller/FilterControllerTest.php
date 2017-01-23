@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Tests\Controller;
 
 use API\TaskBundle\Entity\Filter;
+use API\TaskBundle\Services\FilterAttributeOptions;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 
@@ -282,9 +283,14 @@ class FixtureControllerTest extends ApiTestCase
             'username' => 'admin'
         ]);
 
+        $filter = [
+            FilterAttributeOptions::STATUS => $status->getId(),
+            FilterAttributeOptions::CREATOR => $user->getId() . ',' . $admin->getId()
+        ];
+
         return [
             'title' => 'Post test filter',
-            'filter' => 'status=' . $status->getId() . '&creator=' . $user->getId() . ',' . $admin->getId(),
+            'filter' => $filter,
             'public' => false,
             'report' => false,
             'default' => false
@@ -310,9 +316,14 @@ class FixtureControllerTest extends ApiTestCase
             'username' => 'admin'
         ]);
 
+        $filter = [
+            FilterAttributeOptions::STATUS => $status->getId(),
+            FilterAttributeOptions::CREATOR => $user->getId() . ',' . $admin->getId()
+        ];
+
         return [
             'title' => 'Post test filter',
-            'filter' => 'status=' . $status->getId() . '&creator=' . $user->getId() . ',' . $admin->getId(),
+            'filter' => $filter,
             'public' => true,
             'report' => false,
             'default' => false
@@ -338,9 +349,14 @@ class FixtureControllerTest extends ApiTestCase
             'username' => 'admin'
         ]);
 
+        $filter = [
+            FilterAttributeOptions::STATUS => $status->getId(),
+            FilterAttributeOptions::CREATOR => $user->getId() . ',' . $admin->getId()
+        ];
+
         return [
             'title' => 'Post PROJECT test filter',
-            'filter' => 'status=' . $status->getId() . '&creator=' . $user->getId() . ',' . $admin->getId(),
+            'filter' => $filter,
             'public' => false,
             'report' => false,
             'default' => false
@@ -367,9 +383,15 @@ class FixtureControllerTest extends ApiTestCase
             'username' => 'admin'
         ]);
 
+        $filter = [
+            FilterAttributeOptions::STATUS => $status->getId(),
+            FilterAttributeOptions::CREATOR => $user->getId() . ',' . $admin->getId(),
+            'test' => 'test'
+        ];
+
         return [
             'title' => 'Post test filter',
-            'filter' => 'status=' . $status->getId() . '&creator=' . $user->getId() . ',' . $admin->getId() . '&gagaha=125',
+            'filter' => $filter,
             'public' => false,
             'report' => false,
             'default' => false

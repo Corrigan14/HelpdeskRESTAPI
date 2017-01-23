@@ -75,7 +75,7 @@ class TaskService
     public function getTaskResponse(Task $task)
     {
         return [
-            'data' => $task,
+            'data' => $this->em->getRepository('APITaskBundle:Task')->getTask($task->getId()),
             '_links' => $this->getTaskLinks($task->getId()),
         ];
     }

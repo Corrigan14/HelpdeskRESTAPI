@@ -110,7 +110,7 @@ class UserRepository extends EntityRepository
                     ->leftJoin('company.companyData', 'companyData')
                     ->leftJoin('companyData.companyAttribute', 'companyAttribute')
                     ->getQuery();
-            };
+            }
         }
 
         $values = [];
@@ -150,6 +150,26 @@ class UserRepository extends EntityRepository
                 ->leftJoin('u.detailData', 'd')
                 ->leftJoin('u.user_role', 'userRole')
                 ->getQuery();
-        };
+        }
+    }
+
+    /**
+     * @param int $userId
+     * @return array
+     */
+    public function getUserResponse(int $userId): array
+    {
+        $query = $this->createQueryBuilder('u')
+            ->select('u,d,userRole,company,companyData,companyAttribute')
+            ->leftJoin('u.detailData', 'd')
+            ->leftJoin('u.user_role', 'userRole')
+            ->leftJoin('u.company', 'company')
+            ->leftJoin('company.companyData', 'companyData')
+            ->leftJoin('companyData.companyAttribute', 'companyAttribute')
+            ->where('u.id = :userId')
+            ->setParameter('userId', $userId)
+            ->getQuery();
+
+        return $query->getArrayResult();
     }
 }

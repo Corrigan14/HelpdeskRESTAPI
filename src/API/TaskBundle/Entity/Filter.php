@@ -42,7 +42,7 @@ class Filter
     private $public;
 
     /**
-     * Serialized array of task filters
+     * Array of task filters
      *
      * @var string
      *
@@ -61,7 +61,7 @@ class Filter
     /**
      * @var bool
      *
-     * @ORM\Column(name="is_active", type="boolean", options={"default":1})
+     * @ORM\Column(name="is_active", type="boolean", options={"default":1}, nullable=true)
      * @Serializer\ReadOnly()
      */
     private $is_active;
@@ -161,13 +161,13 @@ class Filter
     /**
      * Set filter
      *
-     * @param string $filter
+     * @param array $filter
      *
      * @return Filter
      */
-    public function setFilter($filter)
+    public function setFilter(array $filter)
     {
-        $this->filter = $filter;
+        $this->filter = json_encode($filter);
 
         return $this;
     }
@@ -175,11 +175,11 @@ class Filter
     /**
      * Get filter
      *
-     * @return string
+     * @return array
      */
     public function getFilter()
     {
-        return $this->filter;
+        return json_decode($this->filter, true);
     }
 
     /**

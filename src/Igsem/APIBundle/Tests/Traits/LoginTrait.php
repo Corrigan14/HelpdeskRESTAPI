@@ -20,7 +20,6 @@ trait LoginTrait
      */
     public function loginUserGetToken($username, $password, Client $client)
     {
-
         $client->request('POST', 'api/v1/token-authentication', ['username' => $username, 'password' => $password]);
         $content = json_decode($client->getResponse()->getContent(), true);
         if ($client->getResponse()->getStatusCode() === 200 && array_key_exists('token', $content)) {

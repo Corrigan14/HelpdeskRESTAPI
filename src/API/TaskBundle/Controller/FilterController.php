@@ -462,7 +462,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @ApiDoc(
      *  resource = true,
      *  description="Create a new Filter Entity.
-     *  Filter field is expected & separated string like: status=53&project61&creator=41,42&requester=42
+     *  Filter field is expected an array with key = filter option, value = requested data id/val/... (look at task list filters)
      *  Allowed filter options are saved in FilterAttributeOptions file.",
      *  input={"class"="API\TaskBundle\Entity\Filter"},
      *  headers={
@@ -1315,13 +1315,12 @@ class FilterController extends ApiBaseController implements ControllerInterface
 
         // Check if every key sent in filter array is allowed in FilterOptions
         if (isset($data['filter'])) {
-            $filters = explode('&', $data['filter']);
+            $filters = $data['filter'];
 
             foreach ($filters as $key => $value) {
-                $filterAttribute = explode('=', $value);
-                if (!in_array($filterAttribute[0], FilterAttributeOptions::getConstants(), true)) {
+                if (!in_array($key, FilterAttributeOptions::getConstants(), true)) {
                     return $this->createApiResponse([
-                        'message' => 'Requested filter parameter ' . $filterAttribute[0] . ' is not allowed!',
+                        'message' => 'Requested filter parameter ' . $key . ' is not allowed!',
                     ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 }
             }

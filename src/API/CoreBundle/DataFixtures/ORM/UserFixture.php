@@ -166,11 +166,11 @@ class UserFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             $detailData->setName('Customer'.$numberOfUsers);
             $detailData->setSurname('Customerovic'.$numberOfUsers);
 
-            $manager->persist($detailData);
-            $manager->flush();
-
-            $user->setDetailData($detailData);
             $manager->persist($user);
+            $manager->flush();
+            $detailData->setUser($user);
+
+            $manager->persist($detailData);
         }
 
         $manager->flush();

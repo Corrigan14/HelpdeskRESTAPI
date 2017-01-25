@@ -28,14 +28,15 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *       [
      *          {
      *            "id": "1",
-     *            "title": "Web-Solutions"
-     *            "ico": "1102587"
-     *            "dic": "12587459644"
-     *            "ic_dph": "12587459644"
-     *            "street": "Cesta 125"
-     *            "city": "Bratislava"
-     *            "zip": "02587"
+     *            "title": "Web-Solutions",
+     *            "ico": "1102587",
+     *            "dic": "12587459644",
+     *            "ic_dph": "12587459644",
+     *            "street": "Cesta 125",
+     *            "city": "Bratislava",
+     *            "zip": "02587",
      *            "country": "SR",
+     *            "is_active": true,
      *            "companyData":
      *            {
      *             {
@@ -145,14 +146,15 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *        "data":
      *        {
      *            "id": "1",
-     *            "title": "Web-Solutions"
-     *            "ico": "1102587"
-     *            "dic": "12587459644"
-     *            "ic_dph": "12587459644"
-     *            "street": "Cesta 125"
-     *            "city": "Bratislava"
-     *            "zip": "02587"
+     *            "title": "Web-Solutions",
+     *            "ico": "1102587",
+     *            "dic": "12587459644",
+     *            "ic_dph": "12587459644",
+     *            "street": "Cesta 125",
+     *            "city": "Bratislava",
+     *            "zip": "02587",
      *            "country": "SR",
+     *            "is_active": true,
      *            "companyData":
      *            {
      *             {
@@ -244,14 +246,15 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *        "data":
      *        {
      *            "id": "1",
-     *            "title": "Web-Solutions"
-     *            "ico": "1102587"
-     *            "dic": "12587459644"
-     *            "ic_dph": "12587459644"
-     *            "street": "Cesta 125"
-     *            "city": "Bratislava"
-     *            "zip": "02587"
+     *            "title": "Web-Solutions",
+     *            "ico": "1102587",
+     *            "dic": "12587459644",
+     *            "ic_dph": "12587459644",
+     *            "street": "Cesta 125",
+     *            "city": "Bratislava",
+     *            "zip": "02587",
      *            "country": "SR",
+     *            "is_active": true,
      *            "companyData":
      *            {
      *             {
@@ -339,14 +342,15 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *        "data":
      *        {
      *            "id": "1",
-     *            "title": "Web-Solutions"
-     *            "ico": "1102587"
-     *            "dic": "12587459644"
-     *            "ic_dph": "12587459644"
-     *            "street": "Cesta 125"
-     *            "city": "Bratislava"
-     *            "zip": "02587"
+     *            "title": "Web-Solutions",
+     *            "ico": "1102587",
+     *            "dic": "12587459644",
+     *            "ic_dph": "12587459644",
+     *            "street": "Cesta 125",
+     *            "city": "Bratislava",
+     *            "zip": "02587",
      *            "country": "SR",
+     *            "is_active": true,
      *            "companyData":
      *            {
      *             {
@@ -447,14 +451,15 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *        "data":
      *        {
      *            "id": "1",
-     *            "title": "Web-Solutions"
-     *            "ico": "1102587"
-     *            "dic": "12587459644"
-     *            "ic_dph": "12587459644"
-     *            "street": "Cesta 125"
-     *            "city": "Bratislava"
-     *            "zip": "02587"
+     *            "title": "Web-Solutions",
+     *            "ico": "1102587",
+     *            "dic": "12587459644",
+     *            "ic_dph": "12587459644",
+     *            "street": "Cesta 125",
+     *            "city": "Bratislava",
+     *            "zip": "02587",
      *            "country": "SR",
+     *            "is_active": true,
      *            "companyData":
      *            {
      *             {
@@ -611,14 +616,15 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *        "data":
      *        {
      *            "id": "1",
-     *            "title": "Web-Solutions"
-     *            "ico": "1102587"
-     *            "dic": "12587459644"
-     *            "ic_dph": "12587459644"
-     *            "street": "Cesta 125"
-     *            "city": "Bratislava"
-     *            "zip": "02587"
+     *            "title": "Web-Solutions",
+     *            "ico": "1102587",
+     *            "dic": "12587459644",
+     *            "ic_dph": "12587459644",
+     *            "street": "Cesta 125",
+     *            "city": "Bratislava",
+     *            "zip": "02587",
      *            "country": "SR",
+     *            "is_active": true,
      *            "companyData":
      *            {
      *             {

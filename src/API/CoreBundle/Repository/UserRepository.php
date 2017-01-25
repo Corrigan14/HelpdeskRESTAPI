@@ -5,6 +5,7 @@ namespace API\CoreBundle\Repository;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Traits\UserRepositoryTrait;
 
 /**
@@ -38,11 +39,12 @@ class UserRepository extends EntityRepository
         /**
          * Pagination calculating offset
          */
-        if (1 < $page) {
-            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
-        }
+        $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
 
-        return $query->getArrayResult();
+
+        $response = new Paginator($query, true);
+        dump($response);
+        return $response;
     }
 
     /**

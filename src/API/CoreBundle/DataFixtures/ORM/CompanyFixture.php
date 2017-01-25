@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @package API\CoreBundle\DataFixtures\ORM
  */
-class CompanyFixture implements FixtureInterface , ContainerAwareInterface , OrderedFixtureInterface
+class CompanyFixture implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
 {
 
     /**
@@ -53,6 +53,18 @@ class CompanyFixture implements FixtureInterface , ContainerAwareInterface , Ord
             ->setCity('Bratislava')
             ->setCountry('Slovenska Republika');
         $manager->persist($company);
+
+        for ($numberOfCompanies = 3; $numberOfCompanies < 100; $numberOfCompanies++) {
+            $company = new Company();
+            $company->setTitle('Company' . $numberOfCompanies)
+                ->setIco('110258782' . $numberOfCompanies)
+                ->setDic('12587458996244' . $numberOfCompanies)
+                ->setStreet('Cesta' . $numberOfCompanies)
+                ->setZip('021478' . $numberOfCompanies)
+                ->setCity('Bratislava')
+                ->setCountry('Slovenska Republika');
+            $manager->persist($company);
+        }
 
         $manager->flush();
     }

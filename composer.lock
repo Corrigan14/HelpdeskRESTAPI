@@ -327,16 +327,16 @@
         },
         {
             "name": "doctrine/dbal",
-            "version": "v2.5.9",
+            "version": "v2.5.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal.git",
-                "reference": "0d2f8187d4b4c7b72d8e2acba359e25c36feaf5e"
+                "reference": "fc376f7a61498e18520cd6fa083752a4ca08072b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/dbal/zipball/0d2f8187d4b4c7b72d8e2acba359e25c36feaf5e",
-                "reference": "0d2f8187d4b4c7b72d8e2acba359e25c36feaf5e",
+                "url": "https://api.github.com/repos/doctrine/dbal/zipball/fc376f7a61498e18520cd6fa083752a4ca08072b",
+                "reference": "fc376f7a61498e18520cd6fa083752a4ca08072b",
                 "shasum": ""
             },
             "require": {
@@ -394,7 +394,7 @@
                 "persistence",
                 "queryobject"
             ],
-            "time": "2017-01-19 13:27:33"
+            "time": "2017-01-23 23:17:10"
         },
         {
             "name": "doctrine/doctrine-bundle",
@@ -1229,16 +1229,16 @@
         },
         {
             "name": "lexik/jwt-authentication-bundle",
-            "version": "v2.1.0",
+            "version": "v2.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lexik/LexikJWTAuthenticationBundle.git",
-                "reference": "5d7f69577d4b5a1abcad5613daa551d1b64e04fa"
+                "reference": "b0f60028fdd3e06411ec9b7e196b5bbf925eba76"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lexik/LexikJWTAuthenticationBundle/zipball/5d7f69577d4b5a1abcad5613daa551d1b64e04fa",
-                "reference": "5d7f69577d4b5a1abcad5613daa551d1b64e04fa",
+                "url": "https://api.github.com/repos/lexik/LexikJWTAuthenticationBundle/zipball/b0f60028fdd3e06411ec9b7e196b5bbf925eba76",
+                "reference": "b0f60028fdd3e06411ec9b7e196b5bbf925eba76",
                 "shasum": ""
             },
             "require": {
@@ -1322,7 +1322,7 @@
                 "rest",
                 "symfony"
             ],
-            "time": "2016-12-30 13:57:58"
+            "time": "2017-01-20 22:50:02"
         },
         {
             "name": "michelf/php-markdown",

@@ -3,6 +3,7 @@
 namespace API\CoreBundle\Controller;
 
 use API\CoreBundle\Entity\User;
+use API\TaskBundle\Entity\UserRole;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -35,7 +36,12 @@ class LoginController extends Controller
      *        "facebook": "www.facebook.com",
      *        "twitter": null,
      *        "linkdin": null,
-     *        "google": null
+     *        "google": null,
+     *        "userRoleTitle": "ADMIN",
+     *        "userRoleDescription": null,
+     *        "userRoleHomepage": "/",
+     *        "userRoleAcl": "[\"login_to_system\",\"share_filters\",\"project_shared_filters\",\"report_filters\",\"share_tags\",\"create_projects\",\"sent_emails_from_comments\",\"create_tasks\",\"create_tasks_in_all_projects\",\"update_all_tasks\",\"user_settings\",\"user_role_settings\",\"company_attribute_settings\",\"company_settings\",\"status_settings\",\"task_attribute_settings\",\"unit_settings\",\"system_settings\",\"smtp_settings\",\"imap_settings\"]",
+     *        "userRoleOrder": 1,
      *     }
      *
      * @ApiDoc(
@@ -97,6 +103,19 @@ class LoginController extends Controller
             'profileImage' => $imageLink,
         ];
 
+        $userRole = [];
+        /** @var UserRole $ur */
+        $ur = $user->getUserRole();
+        if ($ur) {
+            $userRole = [
+                'userRoleTitle' => $ur->getTitle(),
+                'userRoleDescription' => $ur->getDescription(),
+                'userRoleHomepage' => $ur->getHomepage(),
+                'userRoleAcl' => $ur->getAcl(),
+                'userRoleOrder' => $ur->getOrder()
+            ];
+        }
+
         $detailData = [];
         if ($user->getDetailData()) {
             $detailData = [
@@ -112,13 +131,13 @@ class LoginController extends Controller
             ];
         }
 
-        $allDetailsAbotUser = array_merge($userBaseArray, $detailData);
+        $allDetailsAboutUser = array_merge($userBaseArray, $detailData, $userRole);
 
         // Use LexikJWTAuthenticationBundle to create JWT token that hold only information about user name
         $token = $this->get('lexik_jwt_authentication.encoder.default')
-            ->encode($allDetailsAbotUser);
+            ->encode($allDetailsAboutUser);
 
-        // Return genereted tocken
+        // Return genereted token
         return $this->json(['token' => $token], StatusCodesHelper::SUCCESSFUL_CODE);
     }
 }

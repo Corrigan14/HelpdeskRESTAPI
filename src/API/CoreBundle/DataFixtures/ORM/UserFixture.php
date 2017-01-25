@@ -3,6 +3,7 @@
 namespace API\CoreBundle\DataFixtures\ORM;
 
 use API\CoreBundle\Entity\User;
+use API\CoreBundle\Entity\UserData;
 use API\TaskBundle\Security\LanguageOptions;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
@@ -147,6 +148,30 @@ class UserFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
         $user->setCompany($companyLS);
         $user->setUserRole($customerUserRole);
         $manager->persist($user);
+
+        for ($numberOfUsers = 2; $numberOfUsers < 100; $numberOfUsers++) {
+            $user = new User();
+            $user->setEmail('customer@customer' . $numberOfUsers . '.sk')
+                ->setUsername('customer'.$numberOfUsers)
+                ->setRoles(['ROLE_USER']);
+            $plainPassword = 'customer'.$numberOfUsers;
+            $encoder = $this->container->get('security.password_encoder');
+            $encoded = $encoder->encodePassword($user, $plainPassword);
+            $user->setPassword($encoded);
+            $user->setLanguage($language);
+            $user->setCompany($companyWS);
+            $user->setUserRole($customerUserRole);
+
+            $detailData = new UserData();
+            $detailData->setName('Customer'.$numberOfUsers);
+            $detailData->setSurname('Customerovic'.$numberOfUsers);
+
+            $manager->persist($detailData);
+            $manager->flush();
+
+            $user->setDetailData($detailData);
+            $manager->persist($user);
+        }
 
         $manager->flush();
     }

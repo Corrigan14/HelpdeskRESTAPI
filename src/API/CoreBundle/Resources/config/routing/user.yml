@@ -1,0 +1,104 @@
+users_list:
+    path:     /users
+    defaults: { _controller: APICoreBundle:User:list }
+    methods: [GET]
+
+user:
+    path:     /users/{id}
+    defaults: { _controller: APICoreBundle:User:get }
+    methods: [GET]
+    requirements:
+        id: '\d+'
+
+user_create:
+   path:     /users/user-role/{userRoleId}
+   defaults: { _controller: APICoreBundle:User:create }
+   methods: [POST]
+   requirements:
+        userRoleId: '\d+'
+
+user_create_with_company:
+    path:     /users/user-role/{userRoleId}/company/{companyId}
+    defaults: { _controller: APICoreBundle:User:create }
+    methods: [POST]
+    requirements:
+        companyId: '\d+'
+        userRoleId: '\d+'
+
+user_update:
+    path:     /users/{id}
+    defaults: { _controller: APICoreBundle:User:update }
+    methods: [PUT]
+    requirements:
+        id: '\d+'
+
+user_update_with_user_role:
+    path:     /users/{id}/user-role/{userRoleId}
+    defaults: { _controller: APICoreBundle:User:update }
+    methods: [PUT]
+    requirements:
+        id: '\d+'
+        userRoleId: '\d+'
+
+user_update_with_company:
+    path:     /users/{id}/company/{companyId}
+    defaults: { _controller: APICoreBundle:User:update }
+    methods: [PUT]
+    requirements:
+        id: '\d+'
+        companyId: '\d+'
+
+user_update_with_company_and_user_role:
+    path:     /users/{id}/user-role/{userRoleId}/company/{companyId}
+    defaults: { _controller: APICoreBundle:User:update }
+    methods: [PUT]
+    requirements:
+        id: '\d+'
+        companyId: '\d+'
+        userRoleId: '\d+'
+
+user_partial_update:
+    path:     /users/{id}
+    defaults: { _controller: APICoreBundle:User:updatePartial }
+    methods: [PATCH]
+    requirements:
+        id: '\d+'
+
+user_partial_update_with_user_role:
+    path:     /users/{id}/user-role/{userRoleId}
+    defaults: { _controller: APICoreBundle:User:updatePartial }
+    methods: [PATCH]
+    requirements:
+        id: '\d+'
+        userRoleId: '\d+'
+
+user_partial_update_with_company:
+    path:     /users/{id}/company/{companyId}
+    defaults: { _controller: APICoreBundle:User:updatePartial }
+    methods: [PATCH]
+    requirements:
+        id: '\d+'
+        companyId: '\d+'
+
+user_partial_update_with_company_and_user_role:
+    path:     /users/{id}/user-role/{userRoleId}/company/{companyId}
+    defaults: { _controller: APICoreBundle:User:updatePartial }
+    methods: [PATCH]
+    requirements:
+        id: '\d+'
+        companyId: '\d+'
+        userRoleId: '\d+'
+
+user_delete:
+    path:     /users/{id}
+    defaults: { _controller: APICoreBundle:User:delete }
+    methods: [DELETE]
+    requirements:
+        id: '\d+'
+
+user_restore:
+    path:     /users/{id}/restore
+    defaults: { _controller: APICoreBundle:User:restore }
+    methods: [PATCH]
+    requirements:
+        id: '\d+'

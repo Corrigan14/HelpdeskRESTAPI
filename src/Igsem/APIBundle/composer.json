@@ -1,0 +1,30 @@
+{
+  "name": "igsem/api-bundle",
+  "description": "A simple bundle to help Symfony API development. Provides a BaseController, BaseTest and a StatusCode helper",
+  "type": "symfony-bundle",
+  "homepage": "https://github.com/JuliusKoronci/IgsemAPIBundle",
+  "require": {
+    "php": ">=7.0.1",
+    "symfony/framework-bundle": "~2.3|~3.0",
+    "jms/serializer-bundle": "^1.1",
+    "nelmio/api-doc-bundle": "^2.13"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^5.6"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Julius Koronci",
+      "email": "jk@web-solutions.sk"
+    }
+  ],
+  "autoload": {
+    "psr-0": {
+      "Igsem\\APIBundle": ""
+    }
+  },
+  "target-dir": "Igsem/APIBundle",
+  "prefer-stable": true,
+  "minimum-stability": "stable"
+}

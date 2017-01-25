@@ -1,15 +1,36 @@
 services:
     variable_helper:
         class: API\TaskBundle\Services\VariableHelper
+    acl_helper:
+        class: API\TaskBundle\Services\AclHelper
+        arguments: ["@doctrine.orm.entity_manager","@security.access.decision_manager","@security.token_storage"]
     tag_voter:
         class: API\TaskBundle\Security\TagVoter
+        arguments: ["@security.access.decision_manager","@security.token_storage"]
+    project_voter:
+        class: API\TaskBundle\Security\ProjectVoter
+        arguments: ["@security.access.decision_manager","@security.token_storage"]
+    filter_voter:
+        class: API\TaskBundle\Security\FilterVoter
         arguments: ["@security.access.decision_manager","@security.token_storage", "@doctrine.orm.entity_manager"]
-    status_voter:
-        class: API\TaskBundle\Security\StatusVoter
-        arguments: ["@security.access.decision_manager","@security.token_storage", "@doctrine.orm.entity_manager"]
-    company_attribute_voter:
-        class: API\TaskBundle\Security\CompanyAttributeVoter
-        arguments: ["@security.access.decision_manager","@security.token_storage", "@doctrine.orm.entity_manager"]
-    company_service:
-          class: API\TaskBundle\Services\CompanyService
+    project_service:
+          class: API\TaskBundle\Services\ProjectService
+          arguments: ["@doctrine.orm.entity_manager", "@router"]
+    task_attribute_service:
+          class: API\TaskBundle\Services\TaskAttributeService
+          arguments: ["@doctrine.orm.entity_manager", "@router"]
+    task_voter:
+          class: API\TaskBundle\Security\TaskVoter
+          arguments: ["@security.access.decision_manager","@security.token_storage", "@doctrine.orm.entity_manager"]
+    task_service:
+          class: API\TaskBundle\Services\TaskService
+          arguments: ["@doctrine.orm.entity_manager", "@router"]
+    task_additional_service:
+          class: API\TaskBundle\Services\TaskAdditionalService
+          arguments: ["@doctrine.orm.entity_manager", "@router"]
+    filter_service:
+          class: API\TaskBundle\Services\FilterService
+          arguments: ["@doctrine.orm.entity_manager", "@router"]
+    user_role_service:
+          class: API\TaskBundle\Services\UserRoleService
           arguments: ["@doctrine.orm.entity_manager", "@router"]

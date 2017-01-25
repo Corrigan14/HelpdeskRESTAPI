@@ -1,0 +1,68 @@
+projects_list:
+    path:     /projects
+    defaults: { _controller: APITaskBundle:Project:list }
+    methods: [GET]
+
+project:
+    path:     /projects/{id}
+    defaults: { _controller: APITaskBundle:Project:get }
+    methods: [GET]
+    requirements:
+        id: '\d+'
+
+projects_create:
+    path:     /projects
+    defaults: { _controller: APITaskBundle:Project:create }
+    methods: [POST]
+
+projects_update:
+    path:     /projects/{id}
+    defaults: { _controller: APITaskBundle:Project:update }
+    methods: [PUT]
+    requirements:
+            id: '\d+'
+
+projects_partial_update:
+    path:     /projects/{id}
+    defaults: { _controller: APITaskBundle:Project:updatePartial }
+    methods: [PATCH]
+    requirements:
+            id: '\d+'
+
+projects_delete:
+    path:     /projects/{id}
+    defaults: { _controller: APITaskBundle:Project:delete }
+    methods: [DELETE]
+    requirements:
+            id: '\d+'
+
+projects_restore:
+    path:     /projects/{id}/restore
+    defaults: { _controller: APITaskBundle:Project:restore }
+    methods: [PATCH]
+    requirements:
+            id: '\d+'
+
+project_add_to_user:
+    path:     /project/{projectId}/user/{userId}
+    defaults: { _controller: APITaskBundle:Project:addUserToProject }
+    methods: [POST]
+    requirements:
+            projectId: '\d+'
+            userId: '\d+'
+
+project_update_user_acl:
+    path:     /project/{projectId}/user/{userId}
+    defaults: { _controller: APITaskBundle:Project:updateUserProjectAcl }
+    methods: [PUT]
+    requirements:
+            projectId: '\d+'
+            userId: '\d+'
+
+project_remove_from_user:
+    path:     /project/{projectId}/user/{userId}
+    defaults: { _controller: APITaskBundle:Project:removeUserFromProject }
+    methods: [DELETE]
+    requirements:
+            projectId: '\d+'
+            userId: '\d+'

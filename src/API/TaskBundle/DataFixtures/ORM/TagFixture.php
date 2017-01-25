@@ -53,7 +53,7 @@ class TagFixture implements FixtureInterface , ContainerAwareInterface , Ordered
             'username' => 'user',
         ]);
 
-        if($user){
+        if($user instanceof User && $admin instanceof User){
             /** @var \API\TaskBundle\Entity\Tag $tag1 */
             $tag1 = new Tag();
             $tag1->setTitle('Free Time');
@@ -73,9 +73,16 @@ class TagFixture implements FixtureInterface , ContainerAwareInterface , Ordered
             $tag3->setPublic(false);
             $tag3->setCreatedBy($user);
 
+            $tag4 = new Tag();
+            $tag4->setTitle('Another Admin Public Tag');
+            $tag4->setColor('DFD115');
+            $tag4->setPublic(false);
+            $tag4->setCreatedBy($admin);
+
             $manager->persist($tag1);
             $manager->persist($tag2);
             $manager->persist($tag3);
+            $manager->persist($tag4);
             $manager->flush();
         }
     }

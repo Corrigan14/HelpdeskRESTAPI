@@ -5,6 +5,7 @@ namespace Traits;
 use API\CoreBundle\Entity\Company;
 use API\TaskBundle\Entity\CompanyData;
 use Doctrine\Common\Collections\Collection;
+use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\Exclude;
 
 /**
@@ -18,6 +19,7 @@ trait CompanyTrait
      * @var CompanyData
      *
      * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\CompanyData", mappedBy="company")
+     * @Serializer\ReadOnly()
      */
     private $companyData;
 

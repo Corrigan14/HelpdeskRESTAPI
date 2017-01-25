@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Controller;
 
+use API\TaskBundle\Security\UserRoleAclOptions;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
@@ -96,7 +97,16 @@ class TagController extends ApiBaseController implements ControllerInterface
      *              "email": "user@user.sk",
      *              "roles": "[\"ROLE_USER\"]",
      *              "is_active": true,
-     *              "acl": "[]"
+     *              "user_role":
+     *              {
+     *                  "id": 2,
+     *                  "title": "MANAGER",
+     *                  "description": null,
+     *                  "homepage": "/",
+     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                  "is_active": true
+     *                  "order": 2
+     *              }
      *          }
      *        },
      *        "_links":
@@ -108,7 +118,7 @@ class TagController extends ApiBaseController implements ControllerInterface
      *      }
      *
      * @ApiDoc(
-     *  description="Returns a Tag (tag has to be logged User's tag)",
+     *  description="Returns a Tag (tag has to be public or logged User's tag)",
      *  requirements={
      *     {
      *       "name"="id",
@@ -173,7 +183,17 @@ class TagController extends ApiBaseController implements ControllerInterface
      *              "email": "user@user.sk",
      *              "roles": "[\"ROLE_USER\"]",
      *              "is_active": true,
-     *              "acl": "[]"
+     *              "acl": "[]",
+     *              "user_role":
+     *              {
+     *                  "id": 2,
+     *                  "title": "MANAGER",
+     *                  "description": null,
+     *                  "homepage": "/",
+     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                  "is_active": true
+     *                  "order": 2
+     *              }
      *          }
      *        },
      *        "_links":
@@ -207,6 +227,9 @@ class TagController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
     public function createAction(Request $request)
@@ -235,7 +258,17 @@ class TagController extends ApiBaseController implements ControllerInterface
      *              "email": "user@user.sk",
      *              "roles": "[\"ROLE_USER\"]",
      *              "is_active": true,
-     *              "acl": "[]"
+     *              "acl": "[]",
+     *              "user_role":
+     *              {
+     *                  "id": 2,
+     *                  "title": "MANAGER",
+     *                  "description": null,
+     *                  "homepage": "/",
+     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                  "is_active": true
+     *                  "order": 2
+     *              }
      *          }
      *        },
      *        "_links":
@@ -278,6 +311,9 @@ class TagController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
     public function updateAction(int $id, Request $request)
@@ -290,6 +326,7 @@ class TagController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
+        // User can update just it's own tags
         if (!$this->get('tag_voter')->isGranted(VoteOptions::UPDATE_TAG, $tag)) {
             return $this->accessDeniedResponse();
         }
@@ -315,7 +352,17 @@ class TagController extends ApiBaseController implements ControllerInterface
      *              "email": "user@user.sk",
      *              "roles": "[\"ROLE_USER\"]",
      *              "is_active": true,
-     *              "acl": "[]"
+     *              "acl": "[]",
+     *              "user_role":
+     *              {
+     *                  "id": 2,
+     *                  "title": "MANAGER",
+     *                  "description": null,
+     *                  "homepage": "/",
+     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                  "is_active": true
+     *                  "order": 2
+     *              }
      *          }
      *        },
      *        "_links":
@@ -358,6 +405,9 @@ class TagController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
     public function updatePartialAction(int $id, Request $request)
@@ -368,6 +418,7 @@ class TagController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
+        // User can update just it's own tags
         if (!$this->get('tag_voter')->isGranted(VoteOptions::UPDATE_TAG, $tag)) {
             return $this->accessDeniedResponse();
         }
@@ -398,6 +449,7 @@ class TagController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      204 ="The Tag was successfully deleted",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found Tag",
      *  })
      *
@@ -414,6 +466,7 @@ class TagController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
+        // User can delete just it's own tags
         if (!$this->get('tag_voter')->isGranted(VoteOptions::DELETE_TAG, $tag)) {
             return $this->accessDeniedResponse();
         }
@@ -430,6 +483,8 @@ class TagController extends ApiBaseController implements ControllerInterface
      * @param $tag
      * @param $requestData
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -447,6 +502,8 @@ class TagController extends ApiBaseController implements ControllerInterface
      * @param array $requestData
      * @param bool $create
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -455,11 +512,18 @@ class TagController extends ApiBaseController implements ControllerInterface
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         if (isset($requestData['public']) && $requestData['public']) {
-            if (!$this->get('tag_voter')->isGranted(VoteOptions::CREATE_PUBLIC_TAG)) {
+            $aclOptions = [
+                'acl' => UserRoleAclOptions::SHARE_TAGS,
+                'user' => $this->getUser()
+            ];
+
+            if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+                $tag->setPublic(false);
                 return $this->accessDeniedResponse();
             } else {
                 $tag->setPublic(true);
             }
+            unset($requestData['public']);
         } else {
             $tag->setPublic(false);
         }
@@ -473,6 +537,6 @@ class TagController extends ApiBaseController implements ControllerInterface
             return $this->createApiResponse($this->get('api_base.service')->getEntityResponse($tag, 'tag'), $statusCode);
         }
 
-        return $this->invalidParametersResponse();
+        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

@@ -30,12 +30,9 @@
     "incenteev/composer-parameter-handler": "^2.0",
     "nelmio/api-doc-bundle": "^2.13",
     "lexik/jwt-authentication-bundle": "^2.0",
-    "lexik/framework-accelerator-bundle": "dev-master",
     "jms/serializer-bundle": "^1.1",
     "nelmio/cors-bundle": "^1.4",
-    "stof/doctrine-extensions-bundle": "^1.2",
-    "igsem/api-bundle": "1.*",
-    "igsem/api-core-bundle": "^1.0.0"
+    "stof/doctrine-extensions-bundle": "^1.2"
 
   },
   "require-dev": {

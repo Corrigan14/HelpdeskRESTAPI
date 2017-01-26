@@ -24,6 +24,14 @@ class VoteOptions
     const UPDATE_PROJECT_FILTER = 'update_project_filter';
     const DELETE_FILTER = 'delete_filter';
 
+    // TASK VOTE OPTIONS
+    const LIST_TASKS = 'list_tasks';
+    const SHOW_TASK = 'read_task';
+    const CREATE_TASK_IN_PROJECT = 'create_task';
+    const UPDATE_TASK = 'update_task';
+    const DELETE_TASK = 'delete_task';
+    const SOLVE_TASK = 'solve_task';
+
 
 
     // PROJECT CRUD
@@ -38,7 +46,6 @@ class VoteOptions
     const UPDATE_PROJECT = 'update_project';
     const DELETE_PROJECT = 'delete_project';
 
-    const CREATE_TASK_IN_PROJECT = 'create_task_in_project';
     const UPDATE_ALL_TASKS_IN_PROJECT = 'update_all_tasks_in_project';
     const UPDATE_COMPANY_TASKS_IN_PROJECT = 'update_company_tasks_in_project';
     const UPDATE_USER_TASKS_IN_PROJECT = 'update_user_tasks_in_project';
@@ -49,13 +56,7 @@ class VoteOptions
     const SOLVE_COMPANY_TASKS_IN_PROJECT = 'solve_company_tasks_in_project';
     const SOLVE_USER_TASKS_IN_PROJECT = 'solve_user_tasks_in_project';
 
-    // TASK CRUD
-    const LIST_TASKS = 'list_tasks';
-    const SHOW_TASK = 'read_task';
-    const CREATE_TASK = 'create_task';
-    const UPDATE_TASK = 'update_task';
-    const DELETE_TASK = 'delete_task';
-    const SOLVE_TASK = 'solve_task';
+
 
     // OTHER WITH TASK
     const ADD_TASK_FOLLOWER = 'add_task_follower';

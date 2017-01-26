@@ -9,7 +9,15 @@ namespace API\TaskBundle\Security;
  */
 class ProjectAclOptions
 {
-    const CREATE_TASK_IN_PROJECT = 'create_task_in_project';
+    const VIEW_OWN_TASKS = 'view_own_tasks';
+    const VIEW_TASKS_FROM_USERS_COMPANY = 'vies_tasks_from_users_company';
+    const VIEW_ALL_TASKS = 'view_all_tasks';
+    const CREATE_TASK = 'create_task';
+    const RESOLVE_TASK = 'resolve_task';
+    const DELETE_TASK = 'delete_task';
+    const VIEW_INTERNAL_NOTE = 'view_internal_note';
+    const EDIT_INTERNAL_NOTE = 'edit_internal_note';
+    const EDIT_PROJECT_PERMISSION = 'edit_project_permission';
 
     /**
      * @return array

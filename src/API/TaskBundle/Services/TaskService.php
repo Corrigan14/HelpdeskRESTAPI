@@ -69,29 +69,61 @@ class TaskService
     }
 
     /**
-     * @param Task $task
+     * @param array $ids
      * @return array
      */
-    public function getTaskResponse(Task $task)
+    public function getTaskResponse(array $ids)
     {
+        $id = $ids['id'];
+
         return [
-            'data' => $this->em->getRepository('APITaskBundle:Task')->getTask($task->getId()),
-            '_links' => $this->getTaskLinks($task->getId()),
+            'data' => $this->em->getRepository('APITaskBundle:Task')->getTask($id),
+            '_links' => $this->getTaskLinks($ids)
         ];
     }
 
     /**
-     * @param int $id
      *
+     * @param array $ids
      * @return array
      */
-    private function getTaskLinks(int $id)
+    private function getTaskLinks(array $ids)
     {
-        return [
-            'put' => $this->router->generate('tasks_update', ['id' => $id, 'projectId' => 'all', 'requestedUserId' => 'all']),
-            'patch' => $this->router->generate('tasks_partial_update', ['id' => $id, 'projectId' => 'all', 'requestedUserId' => 'all']),
+        $id = $ids['id'];
+        $projectId = $ids['projectId'];
+        $requesterId = $ids['requesterId'];
+
+        $baseUrl = [
+            'put: task' => $this->router->generate('tasks_update', ['id' => $id]),
+            'patch: task' => $this->router->generate('tasks_partial_update', ['id' => $id]),
             'delete' => $this->router->generate('tasks_delete', ['id' => $id]),
         ];
+
+        $projectUrl = [];
+        if ($projectId) {
+            $projectUrl = [
+                'put: tasks project' => $this->router->generate('tasks_update_project', ['id' => $id, 'projectId' => $projectId]),
+                'patch: tasks project' => $this->router->generate('tasks_partial_update_project', ['id' => $id, 'projectId' => $projectId]),
+            ];
+        }
+
+        $requesterUrl = [];
+        if ($requesterId) {
+            $requesterUrl = [
+                'put: tasks requester' => $this->router->generate('tasks_update_requester', ['id' => $id, 'requestedUserId' => $requesterId]),
+                'patch: tasks requester' => $this->router->generate('tasks_partial_update_requester', ['id' => $id, 'requestedUserId' => $requesterId]),
+            ];
+        }
+
+        $reqProjUrl = [];
+        if ($requesterId && $projectId) {
+            $reqProjUrl = [
+                'put: tasks project and requester' => $this->router->generate('tasks_update_project_and_requester', ['id' => $id, 'projectId' => $projectId, 'requestedUserId' => $requesterId]),
+                'patch: tasks project and requester' => $this->router->generate('tasks_partial_update_project_and_requester', ['id' => $id, 'projectId' => $projectId, 'requestedUserId' => $requesterId]),
+            ];
+        }
+
+        return array_merge($baseUrl, $requesterUrl, $projectUrl, $reqProjUrl);
     }
 
     /**

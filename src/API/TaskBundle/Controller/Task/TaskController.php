@@ -8,6 +8,7 @@ use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskAttribute;
 use API\TaskBundle\Entity\TaskData;
+use API\TaskBundle\Security\UserRoleAclOptions;
 use API\TaskBundle\Security\VoteOptions;
 use API\TaskBundle\Services\FilterAttributeOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
@@ -23,7 +24,7 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * @package API\TaskBundle\Controller\Task
  */
-class TaskController extends ApiBaseController implements ControllerInterface
+class TaskController extends ApiBaseController
 {
     /**
      *  ### Response ###
@@ -633,194 +634,121 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *          "0":
-     *          {
-     *             "id": 92,
-     *             "title": "Task 1 - user is creator, user is requested",
-     *             "description": "Description of Task 1",
-     *             "important": false,
-     *             "createdAt":
-     *             {
-     *                "date": "2017-01-03 14:16:51.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *                "date": "2017-01-03 14:16:51.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
-     *             "taskData":
-     *             {
-     *               "0":
-     *               {
-     *                  "id": 61,
-     *                  "value": "some input",
-     *                  "taskAttribute":
-     *                   {
-     *                       "id": 85,
-     *                       "title": "input task additional attribute",
-     *                       "type": "input",
-     *                       "is_active": true
-     *                   }
-     *               },
-     *               "1":
-     *               {
-     *                  "id": 62,
-     *                  "value": "select1",
-     *                  "taskAttribute":
-     *                  {
-     *                     "id": 86,
-     *                     "title": "select task additional attribute",
-     *                     "type": "simple_select",
-     *                     "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
-     *                     "is_active": true
-     *                   }
-     *                }
-     *             },
-     *             "project":
-     *             {
-     *                "id": 141,
-     *                "title": "Project of user 1",
-     *                "description": "Description of project 1.",
-     *                "is_active": false,
-     *                "createdAt": "2017-01-19T17:47:22+0100",
-     *                "updatedAt": "2017-01-19T17:47:22+0100"
-     *             },
-     *             "createdBy":
-     *             {
-     *                "id": 116,
-     *                "username": "user",
-     *                "password": "$2y$13$uMaX2SHUoFErPHs2ojwe6.JCZrvCJlHKJ3D2O1BPBRWl/.TtZPzhK",
-     *                "email": "user@user.sk",
-     *                "roles": "[\"ROLE_USER\"]",
-     *                "is_active": true,
-     *                "acl": "[]",
-     *                "detailData":
-     *                {
-     *                  "name": "Martina",
-     *                  "surname": "Kollar",
-     *                  "title_before": null,
-     *                  "title_after": null,
-     *                  "function": "developer",
-     *                  "mobile": "00421 0987 544",
-     *                  "tel": null,
-     *                  "fax": null,
-     *                  "signature": "Martina Kollar, Web-Solutions",
-     *                  "street": "Nova 487",
-     *                  "city": "Bratislava",
-     *                  "zip": "025874",
-     *                  "country": "SR"
-     *                },
-     *                "company":
-     *                {
-     *                   "id": 87,
-     *                   "title": "LanSystems",
-     *                   "ico": "110258782",
-     *                   "dic": "12587458996244",
-     *                   "street": "Ina cesta 125",
-     *                   "city": "Bratislava",
-     *                   "zip": "021478",
-     *                   "country": "Slovenska Republika",
-     *                   "is_active": true
-     *                 },
-     *                 "user_role":
-     *                 {
-     *                   "id": 2,
-     *                   "title": "MANAGER",
-     *                   "description": null,
-     *                   "homepage": "/",
-     *                   "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                   "is_active": true
-     *                   "order": 2
-     *                 }
-     *             },
-     *             "requestedBy":
-     *             {
-     *                "id": 116,
-     *                "username": "user",
-     *                "password": "$2y$13$uMaX2SHUoFErPHs2ojwe6.JCZrvCJlHKJ3D2O1BPBRWl/.TtZPzhK",
-     *                "email": "user@user.sk",
-     *                "roles": "[\"ROLE_USER\"]",
-     *                "is_active": true,
-     *                "acl": "[]",
-     *                "detailData":
-     *                {
-     *                  "name": "Martina",
-     *                  "surname": "Kollar",
-     *                  "title_before": null,
-     *                  "title_after": null,
-     *                  "function": "developer",
-     *                  "mobile": "00421 0987 544",
-     *                  "tel": null,
-     *                  "fax": null,
-     *                  "signature": "Martina Kollar, Web-Solutions",
-     *                  "street": "Nova 487",
-     *                  "city": "Bratislava",
-     *                  "zip": "025874",
-     *                  "country": "SR"
-     *                },
-     *                "company":
-     *                {
-     *                   "id": 87,
-     *                   "title": "LanSystems",
-     *                   "ico": "110258782",
-     *                   "dic": "12587458996244",
-     *                   "street": "Ina cesta 125",
-     *                   "city": "Bratislava",
-     *                   "zip": "021478",
-     *                   "country": "Slovenska Republika",
-     *                   "is_active": true
-     *                 },
-     *                 "user_role":
-     *                 {
-     *                   "id": 2,
-     *                   "title": "MANAGER",
-     *                   "description": null,
-     *                   "homepage": "/",
-     *                   "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                   "is_active": true
-     *                   "order": 2
-     *                 }
-     *              },
-     *              "taskHasAssignedUsers":
+     *           "id": 2991,
+     *           "title": "test 258",
+     *           "description": "Description of Task 1",
+     *           "deadline": null,
+     *           "startedAt": null,
+     *           "closedAt": null,
+     *           "important": false,
+     *           "createdAt":
+     *           {
+     *               "date": "2017-01-26 12:21:59.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *           },
+     *           "updatedAt":
+     *           {
+     *               "date": "2017-01-26 14:34:48.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *           "taskData": [],
+     *           "project":
+     *           {
+     *              "id": 6,
+     *              "title": "Project of user 1",
+     *              "description": "Description of project 1.",
+     *              "is_active": false,
+     *              "createdAt":
      *              {
-     *                 "0":
-     *                 {
-     *                    "id": 42,
-     *                    "createdAt": "2017-01-19T17:47:22+0100",
-     *                    "updatedAt": "2017-01-19T17:47:22+0100",
-     *                    "status":
-     *                    {
-     *                       "id": 126,
-     *                       "title": "new",
-     *                       "is_active": true
-     *                     },
-     *                     "user":
-     *                     {
-     *                        "id": 116,
-     *                        "username": "user",
-     *                        "password": "$2y$13$uMaX2SHUoFErPHs2ojwe6.JCZrvCJlHKJ3D2O1BPBRWl/.TtZPzhK",
-     *                        "email": "user@user.sk",
-     *                        "roles": "[\"ROLE_USER\"]",
-     *                        "is_active": true,
-     *                        "acl": "[]",
-     *                        "user_role":
-     *                        {
-     *                           "id": 2,
-     *                           "title": "MANAGER",
-     *                           "description": null,
-     *                           "homepage": "/",
-     *                           "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                           "is_active": true
-     *                           "order": 2
-     *                         }
-     *                      }
-     *                   }
-     *                 }
+     *                 "date": "2017-01-26 12:21:59.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                  "date": "2017-01-26 12:21:59.000000",
+     *                  "timezone_type": 3,
+     *                  "timezone": "Europe/Berlin"
+     *               }
+     *           },
+     *           "createdBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null,
+     *              "company":
+     *              {
+     *                 "id": 4,
+     *                 "title": "LanSystems",
+     *                 "ico": "110258782",
+     *                 "dic": "12587458996244",
+     *                 "ic_dph": null,
+     *                 "street": "Ina cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true
      *              }
-     *          }
+     *           },
+     *           "requestedBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null
+     *           },
+     *           "taskHasAssignedUsers":
+     *           [
+     *              {
+     *                  "id": 2,
+     *                  "status_date": null,
+     *                  "time_spent": null,
+     *                  "createdAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "status":
+     *                  {
+     *                     "id": 7,
+     *                     "title": "Completed",
+     *                     "description": "Completed task",
+     *                     "color": "#FF4500",
+     *                     "is_active": true
+     *                  },
+     *                  "user":
+     *                  {
+     *                     "id": 109,
+     *                     "username": "user",
+     *                     "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *                     "email": "user@user.sk",
+     *                     "roles": "[\"ROLE_USER\"]",
+     *                     "is_active": true,
+     *                     "language": "AJ",
+     *                     "image": null
+     *                  }
+     *              }
+     *           ]
      *        },
      *       "_links":
      *       {
@@ -828,6 +756,7 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *         "patch": "/api/v1/task-bundle/tasks/1/project/all/user/all",
      *         "delete": "/api/v1/task-bundle/tasks/1"
      *       }
+     *    }
      *
      * @ApiDoc(
      *  description="Returns full Task Entity including extended about Task Data",
@@ -879,48 +808,138 @@ class TaskController extends ApiBaseController implements ControllerInterface
 
     /**
      * ### Response ###
-     *      {
+     *       *      {
      *        "data":
      *        {
-     *          "id": 1,
-     *          "title": "Task 1 - user is creator, user is requested",
-     *          "description": "Description of Task 1",
-     *          "important": false,
-     *          "created_by":⊕{...},
-     *          "requested_by": ⊕{...},
-     *          "project": ⊕{...},
-     *          "task_data":
-     *          {
-     *             "0":
-     *             {
-     *               "id": 1,
-     *               "value": "some input"
-     *             },
-     *            "1":
-     *            {
-     *              "id": 2,
-     *              "value": "select1"
-     *            }
-     *          }
-     *          "followers": ⊕{...}
-     *          "tags": ⊕{...}
-     *          "created_at": "2016-12-09T07:39:52+0100",
-     *          "updated_at": "2016-12-09T07:39:52+0100"
+     *           "id": 2991,
+     *           "title": "test 258",
+     *           "description": "Description of Task 1",
+     *           "deadline": null,
+     *           "startedAt": null,
+     *           "closedAt": null,
+     *           "important": false,
+     *           "createdAt":
+     *           {
+     *               "date": "2017-01-26 12:21:59.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *           },
+     *           "updatedAt":
+     *           {
+     *               "date": "2017-01-26 14:34:48.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *           "taskData": [],
+     *           "project":
+     *           {
+     *              "id": 6,
+     *              "title": "Project of user 1",
+     *              "description": "Description of project 1.",
+     *              "is_active": false,
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-01-26 12:21:59.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                  "date": "2017-01-26 12:21:59.000000",
+     *                  "timezone_type": 3,
+     *                  "timezone": "Europe/Berlin"
+     *               }
+     *           },
+     *           "createdBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null,
+     *              "company":
+     *              {
+     *                 "id": 4,
+     *                 "title": "LanSystems",
+     *                 "ico": "110258782",
+     *                 "dic": "12587458996244",
+     *                 "ic_dph": null,
+     *                 "street": "Ina cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true
+     *              }
+     *           },
+     *           "requestedBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null
+     *           },
+     *           "taskHasAssignedUsers":
+     *           [
+     *              {
+     *                  "id": 2,
+     *                  "status_date": null,
+     *                  "time_spent": null,
+     *                  "createdAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "status":
+     *                  {
+     *                     "id": 7,
+     *                     "title": "Completed",
+     *                     "description": "Completed task",
+     *                     "color": "#FF4500",
+     *                     "is_active": true
+     *                  },
+     *                  "user":
+     *                  {
+     *                     "id": 109,
+     *                     "username": "user",
+     *                     "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *                     "email": "user@user.sk",
+     *                     "roles": "[\"ROLE_USER\"]",
+     *                     "is_active": true,
+     *                     "language": "AJ",
+     *                     "image": null
+     *                  }
+     *              }
+     *           ]
      *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/task/2",
-     *           "patch": "/api/v1/task-bundle/task/2",
-     *           "delete": "/api/v1/task-bundle/task/2"
-     *         }
-     *      }
+     *       "_links":
+     *       {
+     *         "put": "/api/v1/task-bundle/tasks/1/project/all/user/all",
+     *         "patch": "/api/v1/task-bundle/tasks/1/project/all/user/all",
+     *         "delete": "/api/v1/task-bundle/tasks/1"
+     *       }
+     *    }
      *
      * @ApiDoc(
      *  resource = true,
      *  description="Create a new Task Entity with extra Task Data.
      *  This can be added by attributes: task_data[task_attribute_id] = value,
-     *  attributes must be defined in the TaskAttribute Entity.
-     *  Project and/or Requested User can be added to this Task",
+     *  attributes must be defined in the TaskAttribute Entity.",
      *  requirements={
      *     {
      *       "name"="projectId",
@@ -954,35 +973,46 @@ class TaskController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
-     * @param int|string $projectId
-     * @param int|string $requestedUserId
+     * @param bool|int $projectId
+     * @param bool|int $requestedUserId
      * @return JsonResponse|Response
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function createAction(Request $request, $projectId = 'all', $requestedUserId = 'all')
+    public function createAction(Request $request, $projectId = false, $requestedUserId = false)
     {
+        // Check if logged user has ACL to create task
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::CREATE_TASKS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $task = new Task();
 
-        // Check if project and requested user exists
-        if ('all' !== $projectId && '{projectId}' !== $projectId) {
+        if ($projectId) {
             $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
-
             if (!$project instanceof Project) {
                 return $this->createApiResponse([
                     'message' => 'Project with requested Id does not exist!',
                 ], StatusCodesHelper::NOT_FOUND_CODE);
             }
 
+            // Check if user can create task in selected project
+            if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT, $project)) {
+                return $this->createApiResponse([
+                    'message' => 'Permission denied! Can not create task in selected project!',
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            }
             $task->setProject($project);
-
-        } else {
-            $project = null;
         }
 
-        if ('all' !== $requestedUserId && '{requestedUserId}' !== $requestedUserId) {
+        if ($requestedUserId) {
             $requestedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requestedUserId);
 
             if (!$requestedUser instanceof User) {
@@ -990,17 +1020,11 @@ class TaskController extends ApiBaseController implements ControllerInterface
                     'message' => 'Requested user with requested Id does not exist!',
                 ], StatusCodesHelper::NOT_FOUND_CODE);
             }
-
             $task->setRequestedBy($requestedUser);
-
+            $requesterTaskId = $requestedUserId;
         } else {
-            $requestedUser = null;
             $task->setRequestedBy($this->getUser());
-        }
-
-        // Check if user can create task in selected project
-        if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK, $project)) {
-            return $this->accessDeniedResponse();
+            $requesterTaskId = $this->getUser()->getId();
         }
 
         $requestData = $request->request->all();
@@ -1008,7 +1032,12 @@ class TaskController extends ApiBaseController implements ControllerInterface
         $task->setCreatedBy($this->getUser());
         $task->setImportant(false);
 
-        return $this->updateTaskEntity($task, $requestData, true);
+        $ids = [
+            'id' => $task->getId(),
+            'projectId' => $projectId,
+            'requesterId' => $requesterTaskId
+        ];
+        return $this->updateTaskEntity($task, $requestData, false, $ids);
     }
 
     /**
@@ -1016,38 +1045,129 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *          "id": 1,
-     *          "title": "Task 1 - user is creator, user is requested",
-     *          "description": "Description of Task 1",
-     *          "important": false,
-     *          "created_by":⊕{...},
-     *          "requested_by": ⊕{...},
-     *          "project": ⊕{...},
-     *          "task_data":
-     *          {
-     *             "0":
-     *             {
-     *               "id": 1,
-     *               "value": "some input"
-     *             },
-     *            "1":
-     *            {
-     *              "id": 2,
-     *              "value": "select1"
-     *            }
-     *          }
-     *          "followers": ⊕{...}
-     *          "tags": ⊕{...}
-     *          "created_at": "2016-12-09T07:39:52+0100",
-     *          "updated_at": "2016-12-09T07:39:52+0100"
+     *           "id": 2991,
+     *           "title": "test 258",
+     *           "description": "Description of Task 1",
+     *           "deadline": null,
+     *           "startedAt": null,
+     *           "closedAt": null,
+     *           "important": false,
+     *           "createdAt":
+     *           {
+     *               "date": "2017-01-26 12:21:59.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *           },
+     *           "updatedAt":
+     *           {
+     *               "date": "2017-01-26 14:34:48.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *           "taskData": [],
+     *           "project":
+     *           {
+     *              "id": 6,
+     *              "title": "Project of user 1",
+     *              "description": "Description of project 1.",
+     *              "is_active": false,
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-01-26 12:21:59.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                  "date": "2017-01-26 12:21:59.000000",
+     *                  "timezone_type": 3,
+     *                  "timezone": "Europe/Berlin"
+     *               }
+     *           },
+     *           "createdBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null,
+     *              "company":
+     *              {
+     *                 "id": 4,
+     *                 "title": "LanSystems",
+     *                 "ico": "110258782",
+     *                 "dic": "12587458996244",
+     *                 "ic_dph": null,
+     *                 "street": "Ina cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true
+     *              }
+     *           },
+     *           "requestedBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null
+     *           },
+     *           "taskHasAssignedUsers":
+     *           [
+     *              {
+     *                  "id": 2,
+     *                  "status_date": null,
+     *                  "time_spent": null,
+     *                  "createdAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "status":
+     *                  {
+     *                     "id": 7,
+     *                     "title": "Completed",
+     *                     "description": "Completed task",
+     *                     "color": "#FF4500",
+     *                     "is_active": true
+     *                  },
+     *                  "user":
+     *                  {
+     *                     "id": 109,
+     *                     "username": "user",
+     *                     "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *                     "email": "user@user.sk",
+     *                     "roles": "[\"ROLE_USER\"]",
+     *                     "is_active": true,
+     *                     "language": "AJ",
+     *                     "image": null
+     *                  }
+     *              }
+     *           ]
      *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/task/2",
-     *           "patch": "/api/v1/task-bundle/task/2",
-     *           "delete": "/api/v1/task-bundle/task/2"
-     *         }
-     *      }
+     *       "_links":
+     *       {
+     *         "put": "/api/v1/task-bundle/tasks/1/project/all/user/all",
+     *         "patch": "/api/v1/task-bundle/tasks/1/project/all/user/all",
+     *         "delete": "/api/v1/task-bundle/tasks/1"
+     *       }
+     *    }
      *
      * @ApiDoc(
      *  description="Update the Task Entity with extra Task Data.
@@ -1094,15 +1214,15 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @param Request $request
-     * @param bool|string $projectId
-     * @param bool|string $requestedUserId
+     * @param bool|int $projectId
+     * @param bool|int $requestedUserId
      * @return JsonResponse|Response
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function updateAction(int $id, Request $request, $projectId = 'all', $requestedUserId = 'all')
+    public function updateAction(int $id, Request $request, $projectId = false, $requestedUserId = false)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
 
@@ -1110,20 +1230,35 @@ class TaskController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
-        // Check if project and requested user exists
-        if ('all' !== $projectId && '{projectId}' !== $projectId) {
-            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
+        // Check if user can update selected task
+        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+            return $this->accessDeniedResponse();
+        }
 
+        // Check if project and requested user exists
+        if ($projectId) {
+            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
             if (!$project instanceof Project) {
                 return $this->createApiResponse([
                     'message' => 'Project with requested Id does not exist!',
                 ], StatusCodesHelper::NOT_FOUND_CODE);
             }
 
+            // Check if user can create task in selected project
+            if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT, $project)) {
+                return $this->createApiResponse([
+                    'message' => 'Permission denied! Can not create task in selected project!',
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            }
             $task->setProject($project);
+            $taskProjectId = $projectId;
+        } elseif ($task->getProject()) {
+            $taskProjectId = $task->getProject()->getId();
+        } else {
+            $taskProjectId = false;
         }
 
-        if ('all' !== $requestedUserId && '{requestedUserId}' !== $requestedUserId) {
+        if ($requestedUserId) {
             $requestedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requestedUserId);
 
             if (!$requestedUser instanceof User) {
@@ -1133,55 +1268,148 @@ class TaskController extends ApiBaseController implements ControllerInterface
             }
 
             $task->setRequestedBy($requestedUser);
-        }
-
-        // Check if user can update selected task
-        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
-            return $this->accessDeniedResponse();
+            $requesterTaskId = $requestedUserId;
+        } else {
+            $requesterTaskId = $task->getRequestedBy()->getId();
         }
 
         $requestData = $request->request->all();
-
-        return $this->updateTaskEntity($task, $requestData);
+        $ids = [
+            'id' => $task->getId(),
+            'projectId' => $taskProjectId,
+            'requesterId' => $requesterTaskId
+        ];
+        return $this->updateTaskEntity($task, $requestData, false, $ids);
     }
 
     /**
      * ### Response ###
-     *      {
+     *       *      {
      *        "data":
      *        {
-     *          "id": 1,
-     *          "title": "Task 1 - user is creator, user is requested",
-     *          "description": "Description of Task 1",
-     *          "important": false,
-     *          "created_by":⊕{...},
-     *          "requested_by": ⊕{...},
-     *          "project": ⊕{...},
-     *          "task_data":
-     *          {
-     *             "0":
-     *             {
-     *               "id": 1,
-     *               "value": "some input"
-     *             },
-     *            "1":
-     *            {
-     *              "id": 2,
-     *              "value": "select1"
-     *            }
-     *          }
-     *          "followers": ⊕{...}
-     *          "tags": ⊕{...}
-     *          "created_at": "2016-12-09T07:39:52+0100",
-     *          "updated_at": "2016-12-09T07:39:52+0100"
+     *           "id": 2991,
+     *           "title": "test 258",
+     *           "description": "Description of Task 1",
+     *           "deadline": null,
+     *           "startedAt": null,
+     *           "closedAt": null,
+     *           "important": false,
+     *           "createdAt":
+     *           {
+     *               "date": "2017-01-26 12:21:59.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *           },
+     *           "updatedAt":
+     *           {
+     *               "date": "2017-01-26 14:34:48.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *           "taskData": [],
+     *           "project":
+     *           {
+     *              "id": 6,
+     *              "title": "Project of user 1",
+     *              "description": "Description of project 1.",
+     *              "is_active": false,
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-01-26 12:21:59.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                  "date": "2017-01-26 12:21:59.000000",
+     *                  "timezone_type": 3,
+     *                  "timezone": "Europe/Berlin"
+     *               }
+     *           },
+     *           "createdBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null,
+     *              "company":
+     *              {
+     *                 "id": 4,
+     *                 "title": "LanSystems",
+     *                 "ico": "110258782",
+     *                 "dic": "12587458996244",
+     *                 "ic_dph": null,
+     *                 "street": "Ina cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true
+     *              }
+     *           },
+     *           "requestedBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null
+     *           },
+     *           "taskHasAssignedUsers":
+     *           [
+     *              {
+     *                  "id": 2,
+     *                  "status_date": null,
+     *                  "time_spent": null,
+     *                  "createdAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "status":
+     *                  {
+     *                     "id": 7,
+     *                     "title": "Completed",
+     *                     "description": "Completed task",
+     *                     "color": "#FF4500",
+     *                     "is_active": true
+     *                  },
+     *                  "user":
+     *                  {
+     *                     "id": 109,
+     *                     "username": "user",
+     *                     "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *                     "email": "user@user.sk",
+     *                     "roles": "[\"ROLE_USER\"]",
+     *                     "is_active": true,
+     *                     "language": "AJ",
+     *                     "image": null
+     *                  }
+     *              }
+     *           ]
      *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/task/2",
-     *           "patch": "/api/v1/task-bundle/task/2",
-     *           "delete": "/api/v1/task-bundle/task/2"
-     *         }
-     *      }
+     *       "_links":
+     *       {
+     *         "put": "/api/v1/task-bundle/tasks/1/project/all/user/all",
+     *         "patch": "/api/v1/task-bundle/tasks/1/project/all/user/all",
+     *         "delete": "/api/v1/task-bundle/tasks/1"
+     *       }
+     *    }
      *
      * @ApiDoc(
      *  description="Partially update the Task Entity with extra Task Data.
@@ -1228,15 +1456,15 @@ class TaskController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @param Request $request
-     * @param bool|string $projectId
-     * @param bool|string $requestedUserId
+     * @param bool|int $projectId
+     * @param bool|int $requestedUserId
      * @return JsonResponse|Response
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function updatePartialAction(int $id, Request $request, $projectId = 'all', $requestedUserId = 'all')
+    public function updatePartialAction(int $id, Request $request, $projectId = false, $requestedUserId = false)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
 
@@ -1244,20 +1472,35 @@ class TaskController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
-        // Check if project and requested user exists
-        if ('all' !== $projectId && '{projectId}' !== $projectId) {
-            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
+        // Check if user can update selected task
+        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+            return $this->accessDeniedResponse();
+        }
 
+        // Check if project and requested user exists
+        if ($projectId) {
+            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
             if (!$project instanceof Project) {
                 return $this->createApiResponse([
                     'message' => 'Project with requested Id does not exist!',
                 ], StatusCodesHelper::NOT_FOUND_CODE);
             }
 
+            // Check if user can create task in selected project
+            if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT, $project)) {
+                return $this->createApiResponse([
+                    'message' => 'Permission denied! Can not create task in selected project!',
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            }
             $task->setProject($project);
+            $taskProjectId = $projectId;
+        } elseif ($task->getProject()) {
+            $taskProjectId = $task->getProject()->getId();
+        } else {
+            $taskProjectId = false;
         }
 
-        if ('all' !== $requestedUserId && '{requestedUserId}' !== $requestedUserId) {
+        if ($requestedUserId) {
             $requestedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requestedUserId);
 
             if (!$requestedUser instanceof User) {
@@ -1267,16 +1510,18 @@ class TaskController extends ApiBaseController implements ControllerInterface
             }
 
             $task->setRequestedBy($requestedUser);
-        }
-
-        // Check if user can update selected task
-        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
-            return $this->accessDeniedResponse();
+            $requesterTaskId = $requestedUserId;
+        } else {
+            $requesterTaskId = $task->getRequestedBy()->getId();
         }
 
         $requestData = $request->request->all();
-
-        return $this->updateTaskEntity($task, $requestData);
+        $ids = [
+            'id' => $task->getId(),
+            'projectId' => $taskProjectId,
+            'requesterId' => $requesterTaskId
+        ];
+        return $this->updateTaskEntity($task, $requestData, false, $ids);
     }
 
 
@@ -1335,13 +1580,14 @@ class TaskController extends ApiBaseController implements ControllerInterface
      * @param array $requestData
      * @param bool $create
      *
+     * @param array $ids
      * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
-    private function updateTaskEntity(Task $task, array $requestData, $create = false)
+    private function updateTaskEntity(Task $task, array $requestData, $create, array $ids)
     {
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
@@ -1390,8 +1636,10 @@ class TaskController extends ApiBaseController implements ControllerInterface
                 }
             }
 
-            $response = $this->get('task_service')->getTaskResponse($task);
-            return $this->createApiResponse($response, $statusCode);
+            $response = $this->get('task_service')->getTaskResponse($ids);
+            $responseData['data'] = $response['data'][0];
+            $responseLinks['_links'] = $response['_links'];
+            return $this->json(array_merge($responseData, $responseLinks), $statusCode);
         }
 
         return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);

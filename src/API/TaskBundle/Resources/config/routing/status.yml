@@ -35,3 +35,10 @@ status_delete:
     methods: [DELETE]
     requirements:
             id: '\d+'
+
+status_restore:
+    path:     /status/restore/{id}
+    defaults: { _controller: APITaskBundle:Status:restore }
+    methods: [PATCH]
+    requirements:
+            id: '\d+'

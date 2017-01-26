@@ -28,8 +28,8 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *          {
      *            "id": "1",
      *            "title": "Input company additional attribute",
-     *            "type": "input"
-     *            "options": null
+     *            "type": "input",
+     *            "options": null,
      *            "is_active": true
      *          }
      *       ],
@@ -75,6 +75,8 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */

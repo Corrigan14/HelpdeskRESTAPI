@@ -39,6 +39,22 @@ class Status
     private $title;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="description", type="text", nullable=true)
+     */
+    private $description;
+
+    /**
+     * @ORM\Column(name="color", type="string", length=45)
+     * @Assert\NotBlank(message="Color is required")
+     * @Assert\Type("string")
+     *
+     * @var string
+     */
+    private $color;
+
+    /**
      * @ORM\Column(name="is_active", type="boolean", options={"default":1})
      * @ReadOnly()
      *
@@ -152,5 +168,53 @@ class Status
     public function getTaskHasAssignedUsers()
     {
         return $this->taskHasAssignedUsers;
+    }
+
+    /**
+     * Set description
+     *
+     * @param string $description
+     *
+     * @return Status
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Set color
+     *
+     * @param string $color
+     *
+     * @return Status
+     */
+    public function setColor($color)
+    {
+        $this->color = $color;
+
+        return $this;
+    }
+
+    /**
+     * Get color
+     *
+     * @return string
+     */
+    public function getColor()
+    {
+        return $this->color;
     }
 }

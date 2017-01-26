@@ -24,8 +24,22 @@ class StatusRepository extends EntityRepository implements RepositoryInterface
      */
     public function getAllEntities(int $page, array $options = [])
     {
-        $query = $this->createQueryBuilder('s')
-            ->getQuery();
+        $isActive = $options['isActive'];
+
+        if ('true' === $isActive || 'false' === $isActive) {
+            if ($isActive === 'true') {
+                $isActiveParam = 1;
+            } else {
+                $isActiveParam = 0;
+            }
+            $query = $this->createQueryBuilder('s')
+                ->where('s.is_active = :isActiveParam')
+                ->setParameter('isActiveParam', $isActiveParam)
+                ->getQuery();
+        } else {
+            $query = $this->createQueryBuilder('s')
+                ->getQuery();
+        }
 
         $query->setMaxResults(self::LIMIT);
 
@@ -54,5 +68,20 @@ class StatusRepository extends EntityRepository implements RepositoryInterface
             ->getSingleScalarResult();
 
         return $query;
+    }
+
+    /**
+     * @param int $id
+     * @return array
+     */
+    public function getEntity(int $id): array
+    {
+        $query = $this->createQueryBuilder('s')
+            ->select()
+            ->where('s.id = :sId')
+            ->setParameter('sId', $id)
+            ->getQuery();
+
+        return $query->getArrayResult();
     }
 }

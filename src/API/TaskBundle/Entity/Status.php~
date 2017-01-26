@@ -39,6 +39,22 @@ class Status
     private $title;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="description", type="text", nullable=true)
+     */
+    private $description;
+
+    /**
+     * @ORM\Column(name="color", type="string", length=45)
+     * @Assert\NotBlank(message="Color is required")
+     * @Assert\Type("string")
+     *
+     * @var string
+     */
+    private $color;
+
+    /**
      * @ORM\Column(name="is_active", type="boolean", options={"default":1})
      * @ReadOnly()
      *

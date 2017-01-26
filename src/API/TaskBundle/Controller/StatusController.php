@@ -27,6 +27,15 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *          {
      *            "id": "1",
      *            "title": "New",
+     *            "description": "New task",
+     *            "color": "#1E90FF",
+     *            "is_active": true
+     *          },
+     *          {
+     *            "id": 6,
+     *            "title": "In Progress",
+     *            "description": "In progress task",
+     *            "color": "#32CD32",
      *            "is_active": true
      *          }
      *       ],
@@ -50,6 +59,10 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *     {
      *       "name"="page",
      *       "description"="Pagination, limit is set to 10 records"
+     *     },
+     *     {
+     *       "name"="isActive",
+     *       "description"="Return's only ACTIVE statuses if this param is TRUE, only INACTIVE statuses if param is FALSE"
      *     }
      *  },
      *  headers={
@@ -68,6 +81,8 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -83,10 +98,19 @@ class StatusController extends ApiBaseController implements ControllerInterface
         }
 
         $page = $request->get('page') ?: 1;
+        $isActive = $request->get('isActive');
+        $filtersForUrl = [];
+        if (null !== $isActive) {
+            $filtersForUrl['isActive'] = '&isActive=' . $isActive;
+        }
 
-        $statusRepository = $this->getDoctrine()->getRepository('APITaskBundle:Status');
+        $options = [
+            'loggedUserId' => $this->getUser()->getId(),
+            'isActive' => strtolower($isActive),
+            'filtersForUrl' => $filtersForUrl
+        ];
 
-        return $this->json($this->get('api_base.service')->getEntitiesResponse($statusRepository, $page, 'status_list'), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($this->get('status_service')->getAttributesResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -94,9 +118,11 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "2",
-     *           "title": "New",
-     *           "is_active": true
+     *            "id": "1",
+     *            "title": "New",
+     *            "description": "New task",
+     *            "color": "#1E90FF",
+     *            "is_active": true
      *        },
      *        "_links":
      *        {
@@ -153,9 +179,8 @@ class StatusController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
-        $statusArray = $this->get('api_base.service')->getEntityResponse($status, 'status');
-
-        return $this->createApiResponse($statusArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $statusArray = $this->get('status_service')->getAttributeResponse($id);
+        return $this->json($statusArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -163,9 +188,11 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "2",
-     *           "title": "New",
-     *           "is_active": true
+     *            "id": "1",
+     *            "title": "New",
+     *            "description": "New task",
+     *            "color": "#1E90FF",
+     *            "is_active": true
      *        },
      *        "_links":
      *        {
@@ -225,9 +252,11 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "2",
-     *           "title": "New",
-     *           "is_active": true
+     *            "id": "1",
+     *            "title": "New",
+     *            "description": "New task",
+     *            "color": "#1E90FF",
+     *            "is_active": true
      *        },
      *        "_links":
      *        {
@@ -300,9 +329,11 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "2",
-     *           "title": "New",
-     *           "is_active": true
+     *            "id": "1",
+     *            "title": "New",
+     *            "description": "New task",
+     *            "color": "#1E90FF",
+     *            "is_active": true
      *        },
      *        "_links":
      *        {
@@ -427,6 +458,84 @@ class StatusController extends ApiBaseController implements ControllerInterface
     }
 
     /**
+     * ### Response ###
+     *      {
+     *        "data":
+     *        {
+     *            "id": "1",
+     *            "title": "New",
+     *            "description": "New task",
+     *            "color": "#1E90FF",
+     *            "is_active": true
+     *        },
+     *        "_links":
+     *        {
+     *           "put": "/api/v1/task-bundle/status/id",
+     *           "patch": "/api/v1/task-bundle/status/id",
+     *           "delete": "/api/v1/task-bundle/status/id"
+     *         }
+     *      }
+     *
+     * @ApiDoc(
+     *  description="Restore Status Entity: set is_active param to 1",
+     *  requirements={
+     *     {
+     *       "name"="id",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of processed object"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  output={"class"="API\TaskBundle\Entity\Status"},
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity",
+     *      409 ="Invalid parameters",
+     *  }
+     * )
+     *
+     * @param int $id
+     * @return Response|JsonResponse
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     */
+    public function restoreAction(int $id)
+    {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::STATUS_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($id);
+
+        if (!$status instanceof Status) {
+            return $this->notFoundResponse();
+        }
+
+        $status->setIsActive(true);
+        $this->getDoctrine()->getManager()->persist($status);
+        $this->getDoctrine()->getManager()->flush();
+
+        $statusArray = $this->get('status_service')->getAttributeResponse($status->getId());
+        return $this->json($statusArray, StatusCodesHelper::SUCCESSFUL_CODE);
+    }
+
+    /**
      * @param Status $status
      * @param array $requestData
      * @param bool $create
@@ -447,7 +556,8 @@ class StatusController extends ApiBaseController implements ControllerInterface
             $this->getDoctrine()->getManager()->persist($status);
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->createApiResponse($this->get('api_base.service')->getEntityResponse($status, 'status'), $statusCode);
+            $statusArray = $this->get('status_service')->getAttributeResponse($status->getId());
+            return $this->json($statusArray, $statusCode);
         }
 
         return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);

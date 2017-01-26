@@ -38,18 +38,26 @@ class StatusFixture implements FixtureInterface, ContainerAwareInterface, Ordere
     {
         $status = new Status();
         $status->setTitle(StatusOptions::NEW);
+        $status->setDescription('New task');
+        $status->setColor('#1E90FF');
         $manager->persist($status);
 
         $status = new Status();
         $status->setTitle(StatusOptions::IN_PROGRESS);
+        $status->setDescription('In progress task');
+        $status->setColor('#32CD32');
         $manager->persist($status);
 
         $status = new Status();
         $status->setTitle(StatusOptions::COMPLETED);
+        $status->setDescription('Completed task');
+        $status->setColor('#FF4500');
         $manager->persist($status);
 
         $status = new Status();
         $status->setTitle(StatusOptions::CLOSED);
+        $status->setDescription('Closed task');
+        $status->setColor('#A9A9A9');
         $manager->persist($status);
 
         $manager->flush();

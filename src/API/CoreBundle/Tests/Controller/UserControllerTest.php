@@ -2,7 +2,9 @@
 
 namespace API\CoreBundle\Tests\Controller;
 
+use API\CoreBundle\Entity\User;
 use API\CoreBundle\Repository\UserRepository;
+use API\TaskBundle\Entity\UserRole;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 
@@ -29,7 +31,6 @@ class UserControllerTest extends ApiTestCase
 
         // We expect at least one user and if we get a response based on custom fields e.g. only name
         $response = json_decode($this->getClient()->getResponse()->getContent(), true);
-        dump($response);
         $keys = array_keys($response['data'][0]);
         $this->assertTrue(array_key_exists('_links', $response));
         $this->assertEquals(['name', 'id'], $keys);
@@ -280,9 +281,8 @@ class UserControllerTest extends ApiTestCase
             [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
-
-        $this->assertEquals(true , $response['data']['is_active']);
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertEquals(true, $response['data']['is_active']);
     }
 
 
@@ -303,15 +303,14 @@ class UserControllerTest extends ApiTestCase
     {
         $u = $this->em->getRepository('APICoreBundle:User')->findOneBy([
             'username' => 'tuser',
+            'email' => 'tuser@user.sk'
         ]);
 
-        if (null !== $u) {
+        if ($u instanceof User) {
             return $u;
         }
 
-        $userArray = $this->createEntity();
-
-        return $this->em->getRepository('APICoreBundle:User')->find($userArray['id']);
+        return $this->createEntity();
     }
 
     /**
@@ -321,18 +320,24 @@ class UserControllerTest extends ApiTestCase
      */
     public function createEntity()
     {
-        $this->getClient(true)->request('POST', $this->getBaseUrl(), [
-            'username' => 'tuser', 'password' => 'userTest22', 'email' => 'tuser@user.sk',
-            'detail_data' => ['name' => 'name of user', 'surname' => 'surname of user', 'tel' => '1234 25879'],
-        ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(201, $this->getClient()->getResponse()->getStatusCode());
+        $adminRole = $this->em->getRepository('APITaskBundle:UserRole')->findOneBy([
+            'title' => 'admin'
+        ]);
 
-        // Check if Entity was created
-        $createdUser = json_decode($this->getClient()->getResponse()->getContent(), true);
-        $createdUser = $createdUser['data'];
-        $this->assertTrue(array_key_exists('id', $createdUser));
+        if ($adminRole instanceof UserRole) {
+            $user = new User();
+            $user->setUsername('tuser');
+            $user->setEmail('tuser@user.sk');
+            $user->setPassword('tuser@userjjkkj');
+            $user->setRoles(['ROLE_USER']);
+            $user->setUserRole($adminRole);
+            $user->setIsActive(true);
 
-        return $createdUser;
+            $this->em->persist($user);
+            $this->em->flush();
+
+            return $user;
+        }
     }
 
 

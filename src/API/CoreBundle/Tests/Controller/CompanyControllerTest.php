@@ -15,34 +15,6 @@ class CompanyControllerTest extends ApiTestCase
     const BASE_URL = '/api/v1/core-bundle/companies';
 
     /**
-     * GET LIST - errors
-     */
-    public function testListErrors()
-    {
-        parent::testListErrors();
-
-        // Try to load a list of companies with USER_ROLE without ACL permission to see companies
-        $this->getClient(true)->request('GET', $this->getBaseUrl(), [], [],
-            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
-        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
-    }
-
-    /**
-     * GET SINGLE - errors
-     */
-    public function testGetSingleErrors()
-    {
-        parent::testGetSingleErrors();
-
-        $company = $this->findOneEntity();
-
-        // Try to load a company with USER_ROLE without ACL permission to see this company
-        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $company->getId(), [], [],
-            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
-        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
-    }
-
-    /**
      *  POST SINGLE - errors
      */
     public function testPostSingleErrors()
@@ -115,10 +87,6 @@ class CompanyControllerTest extends ApiTestCase
         $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
             [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        // Check if is_active param is 0
-        $isActiveParam = $entity->getIsActive();
-//        $this->assertEquals(false,$isActiveParam);
     }
 
     /**
@@ -132,6 +100,46 @@ class CompanyControllerTest extends ApiTestCase
 
         // Try to delete a company with USER_ROLE without ACL permission to delete companies
         $this->getClient()->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * RESTORE SINGLE - success
+     *
+     * We are not using Base test because User Entity is not removed, just is_active param is set to 0
+     */
+    public function testRestoreSingleSuccess()
+    {
+        $entity = $this->findOneEntity();
+
+        // Restore Entity
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . 'restore/' . $entity->getId(),
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
+        $this->assertEquals(true , $response['data']['is_active']);
+    }
+
+    /**
+     * RESTORE SINGLE - errors
+     */
+    public function testRestoreSingleErrors()
+    {
+        $entity = $this->findOneEntity();
+
+        // Try to restore Entity without authorization header
+        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . 'restore/' . $entity->getId(), [], [], []);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to restore Entity with not existed ID (as Admin)
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . 'restore/12548700',
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to restore a company with USER_ROLE without ACL permission to restore companies
+        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . 'restore/' . $entity->getId(), [], [],
             ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
     }

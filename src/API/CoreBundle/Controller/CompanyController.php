@@ -112,13 +112,14 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *  },
      *  statusCodes={
      *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied"
+     *      401 ="Unauthorized request"
      *  }
      * )
      *
      * @param Request $request
      * @return JsonResponse
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
     public function listAction(Request $request)
@@ -210,8 +211,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
+     *      404 ="Not found Entity"
      *  }
      * )
      *
@@ -221,15 +221,6 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      */
     public function getAction(int $id)
     {
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
-            'user' => $this->getUser()
-        ];
-
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
-        }
-
         $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
 
         if (!$company instanceof Company) {
@@ -576,7 +567,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *      200 ="The is_active Status of Entity was successfully changed to inactive",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
-     *      404 ="Not found Entity",
+     *      404 ="Not found Company",
      *  })
      *
      * @param int $id
@@ -680,7 +671,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *      200 ="is_active param of Entity was successfully changed to active: 1",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
-     *      404 ="Not found user",
+     *      404 ="Not found company",
      *  })
      *
      * @param int $id

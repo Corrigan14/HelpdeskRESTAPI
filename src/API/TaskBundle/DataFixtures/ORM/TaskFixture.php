@@ -97,6 +97,23 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             }
             $manager->persist($task);
 
+            $task = new Task();
+            $task->setTitle('Task 3 - admin is creator, admin is requested');
+            $task->setDescription('Description of Task 3');
+            $task->setImportant(false);
+            $task->setCreatedBy($adminUser);
+            $task->setRequestedBy($adminUser);
+            if ($userProject instanceof Project) {
+                $task->setProject($userProject);
+            }
+            if ($tagHome instanceof Tag) {
+                $task->addTag($tagHome);
+            }
+            if ($tagFreeTime instanceof Tag) {
+                $task->addTag($tagFreeTime);
+            }
+            $manager->persist($task);
+
             for ($numberOfTasks = 4; $numberOfTasks < 1000; $numberOfTasks++) {
                 $task = new Task();
                 $task->setTitle('Task ' . $numberOfTasks);
@@ -107,7 +124,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                 $manager->persist($task);
             }
 
-            for ($numberOfTasks = 4; $numberOfTasks < 1000; $numberOfTasks++) {
+            for ($numberOfTasks = 2001; $numberOfTasks < 3000; $numberOfTasks++) {
                 $task = new Task();
                 $task->setTitle('Task ' . $numberOfTasks);
                 $task->setDescription('Description of Users Task ' . $numberOfTasks);
@@ -118,7 +135,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             }
 
             if ($userProject instanceof Project) {
-                for ($numberOfTasks = 4; $numberOfTasks < 1000; $numberOfTasks++) {
+                for ($numberOfTasks = 1001; $numberOfTasks < 2000; $numberOfTasks++) {
                     $task = new Task();
                     $task->setTitle('Task ' . $numberOfTasks);
                     $task->setDescription('Description of Users Task ' . $numberOfTasks);

@@ -800,7 +800,19 @@ class TaskController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
-        $response = $this->get('task_service')->getTaskResponse($task);
+        if ($task->getProject() instanceof Project) {
+            $projectId = $task->getProject()->getId();
+        } else {
+            $projectId = false;
+        }
+
+        $ids = [
+            'id' => $task->getId(),
+            'projectId' => $projectId,
+            'requesterId' => $task->getRequestedBy()->getId()
+        ];
+
+        $response = $this->get('task_service')->getTaskResponse($ids);
         $responseData['data'] = $response['data'][0];
         $responseLinks['_links'] = $response['_links'];
         return $this->json(array_merge($responseData, $responseLinks), StatusCodesHelper::SUCCESSFUL_CODE);

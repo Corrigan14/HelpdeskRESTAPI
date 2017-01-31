@@ -66,6 +66,11 @@ class TagControllerTest extends TaskTestCase
             'title' => 'Another Admin Public Tag'
         ]);
 
+        //Remove tag from task if it was added before
+        if ($tag instanceof Tag) {
+            $this->removeTagFromTask($task, $tag);
+        }
+
         $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/tag/' . $tag->getId(), [], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
@@ -83,6 +88,11 @@ class TagControllerTest extends TaskTestCase
         $tag = $this->em->getRepository('APITaskBundle:Tag')->findOneBy([
             'title' => 'Another Admin Public Tag'
         ]);
+
+        //Remove tag from task if it was added before
+        if ($tag instanceof Tag) {
+            $this->removeTagFromTask($task, $tag);
+        }
 
         // Try to add Tag without authorization header
         $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . $task->getId() . '/tag/' . $tag->getId());
@@ -112,7 +122,9 @@ class TagControllerTest extends TaskTestCase
         $tag = $this->em->getRepository('APITaskBundle:Tag')->findOneBy([
             'title' => 'Another Admin Public Tag'
         ]);
-        $this->addTagToTask($task, $tag);
+        if ($tag instanceof Tag) {
+            $this->addTagToTask($task, $tag);
+        }
 
         $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $task->getId() . '/tag/' . $tag->getId(), [], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
@@ -131,7 +143,10 @@ class TagControllerTest extends TaskTestCase
         $tag = $this->em->getRepository('APITaskBundle:Tag')->findOneBy([
             'title' => 'Another Admin Public Tag'
         ]);
-        $this->addTagToTask($task, $tag);
+
+        if ($tag instanceof Tag) {
+            $this->addTagToTask($task, $tag);
+        }
 
         // Try to remove Tag without authorization header
         $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $task->getId() . '/tag/' . $tag->getId());
@@ -162,6 +177,26 @@ class TagControllerTest extends TaskTestCase
         }
 
         $task->addTag($tag);
+        $this->em->persist($task);
+        $this->em->flush();
+
+        return true;
+    }
+
+    /**
+     * @param Task $task
+     * @param Tag $tag
+     * @return bool
+     */
+    private function removeTagFromTask(Task $task, Tag $tag): bool
+    {
+        $tags = $task->getTags();
+
+        if (!in_array($tag, $tags->toArray())) {
+            return true;
+        }
+
+        $task->removeTag($tag);
         $this->em->persist($task);
         $this->em->flush();
 

@@ -20,15 +20,16 @@ class UserControllerTest extends ApiTestCase
      */
     public function testListSuccess()
     {
-        parent::testListSuccess();
+//        parent::testListSuccess();
 
         // Test List with custom data fields
-        $this->getClient()->request('GET', $this->getBaseUrl() . '?fields=name', [], [],
+        $this->getClient()->request('GET', $this->getBaseUrl(), [], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // We expect at least one user and if we get a response based on custom fields e.g. only name
         $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        dump($response);
         $keys = array_keys($response['data'][0]);
         $this->assertTrue(array_key_exists('_links', $response));
         $this->assertEquals(['name', 'id'], $keys);

@@ -71,10 +71,8 @@ class TaskVoter implements VoterInterface
         }
 
         switch ($action) {
-            case VoteOptions::LIST_TASKS:
-                return $this->canList($options);
             case VoteOptions::SHOW_TASK:
-                return $this->canRead($options);
+                return $this->canRead($options, $this->user);
             case VoteOptions::CREATE_TASK_IN_PROJECT:
                 return $this->canCreateTaskInProject($options);
             case VoteOptions::UPDATE_TASK:
@@ -138,60 +136,49 @@ class TaskVoter implements VoterInterface
     }
 
     /**
-     * User can see a list of tasks
-     *
-     * @param array $options
-     * @return bool
-     * @throws \InvalidArgumentException
-     */
-    private function canList(array $options): bool
-    {
-
-    }
-
-    /**
      * User can view a task
      *
-     * @param  $task
+     * @param Task $task
+     * @param User $user
      * @return bool
-     * @throws \InvalidArgumentException
      */
-    private function canRead(Task $task): bool
+    private function canRead(Task $task, User $user): bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
         }
 
-        // User can view a task if he created it or task is requested by him
+        // User can view a task if he created it or task is requested by him or task is assigned to him
         // and this task isn't in any Project
-        if (null === $task->getProject() && ($task->getCreatedBy()->getId() === $this->user->getId() || $task->getRequestedBy()->getId() === $this->user->getId())) {
+        $taskIsAssignedToUser = $this->taskIsAssignedToUser($task, $user);
+        if (null === $task->getProject() && ($taskIsAssignedToUser || $task->getCreatedBy()->getId() === $user->getId() || $task->getRequestedBy()->getId() === $user->getId())) {
             return true;
         }
 
         $taskProject = $task->getProject();
         if ($taskProject instanceof Project) {
             $userHasProject = $this->em->getRepository('APITaskBundle:UserHasProject')->findOneBy([
-                'user' => $this->user,
+                'user' => $user,
                 'project' => $taskProject
             ]);
             if ($userHasProject instanceof UserHasProject) {
                 $acl = $userHasProject->getAcl();
                 if (null !== $acl) {
-                    // User can view a task if this task is from project where user has access: VIEW_ALL_TASKS_IN_PROJECT
-                    if (in_array(VoteOptions::VIEW_ALL_TASKS_IN_PROJECT, $acl, true)) {
+                    // User can view a task if this task is from project where user has access: VIEW_ALL_TASKS
+                    if (in_array(ProjectAclOptions::VIEW_ALL_TASKS, $acl, true)) {
                         return true;
-                    } elseif (in_array(VoteOptions::VIEW_COMPANY_TASKS_IN_PROJECT, $acl, true)) {
-                        // User can view a task if this task is from project where user has access: VIEW_COMPANY_TASKS_IN_PROJECT
+                    } elseif (in_array(ProjectAclOptions::VIEW_TASKS_FROM_USERS_COMPANY, $acl, true)) {
+                        // User can view a task if this task is from project where user has access: VIEW_TASKS_FROM_USERS_COMPANY
                         // and user is from the same company like creator of task
-                        $usersCompany = $this->user->getCompany();
+                        $usersCompany = $user->getCompany();
                         $companyU = ($usersCompany instanceof Company ? $usersCompany : false);
 
                         $taskCreatorCompany = $task->getCreatedBy()->getCompany();
                         $companyT = ($taskCreatorCompany instanceof Company ? $taskCreatorCompany : false);
 
                         return $companyU && $companyT && $companyU->getId() === $companyT->getId();
-                    } elseif (in_array(VoteOptions::VIEW_USER_TASKS_IN_PROJECT, $acl, true) && ($task->getCreatedBy()->getId() === $this->user->getId() || $task->getRequestedBy()->getId() === $this->user->getId())) {
-                        // User can view a task if this task is from project where user has access: VIEW_USERS_TASKS_IN_PROJECT
+                    } elseif (in_array(ProjectAclOptions::VIEW_OWN_TASKS, $acl, true) && ($task->getCreatedBy()->getId() === $user->getId() || $task->getRequestedBy()->getId() === $user->getId())) {
+                        // User can view a task if this task is from project where user has access: VIEW_OWN_TASKS
                         // and user created or requested this task
                         return true;
                     }
@@ -244,7 +231,7 @@ class TaskVoter implements VoterInterface
             return true;
         }
 
-        // User can update task if his rle has UPDATE_ALL_TASKS ACL
+        // User can update task if his role has UPDATE_ALL_TASKS ACL
         $acl = UserRoleAclOptions::UPDATE_ALL_TASKS;
         /** @var User $user */
         $user = $this->user;
@@ -260,9 +247,10 @@ class TaskVoter implements VoterInterface
         if ($project instanceof Project) {
             // User can update task if he has RESOLVE_TASK access in projects ACL
             return $this->hasProjectAclRight(ProjectAclOptions::RESOLVE_TASK, $project->getId());
+        } else {
+            // User can update task without project if he created ar requested this task
+            return ($this->user->getId() === $task->getRequestedBy()->getId() || $this->user->getId() === $task->getCreatedBy()->getId());
         }
-
-        return false;
     }
 
     /**
@@ -303,7 +291,7 @@ class TaskVoter implements VoterInterface
 
         // Check if selected Follower can follow selected Task
         if (true === $canUpdate) {
-            return $this->userCanFollowTask($follower, $task);
+            return $this->userCanFollowTask($task, $follower);
         }
 
         return false;
@@ -330,7 +318,7 @@ class TaskVoter implements VoterInterface
     public function canShowListOfTaskFollowers(Task $task): bool
     {
         // User Can View Task Followers if he CAN READ this task
-        return $this->canRead($task);
+        return $this->canRead($task, $this->user);
     }
 
     /**
@@ -349,9 +337,9 @@ class TaskVoter implements VoterInterface
         $canUpdate = $this->canUpdate($task);
 
         // User can add tag if it's public or it's his tag (he created it)
-        $canTag = ($tag->getCreatedBy()->getId() === $this->user->getId() || $tag->getPublic()) ? true : false;
+        $canTag = ($tag->getCreatedBy()->getId() === $this->user->getId() || $tag->getPublic());
 
-        return ($canUpdate && $canTag) ? true : false;
+        return ($canUpdate && $canTag);
     }
 
     /**
@@ -361,8 +349,8 @@ class TaskVoter implements VoterInterface
      */
     public function canRemoveTagFromTask(array $options): bool
     {
-        // User can remove tag from task if he can add it
-        return $this->canAddTagToTask($options);
+        // User Can remove Tag from the Task if he can UPDATE_TASK
+        return $this->canUpdate($options['task']);
     }
 
     /**
@@ -374,7 +362,7 @@ class TaskVoter implements VoterInterface
     public function canShowListOfTasksTags(Task $task): bool
     {
         // User Can View Tags of Task if he CAN READ this task
-        return $this->canRead($task);
+        return $this->canRead($task, $this->user);
     }
 
     /**
@@ -398,42 +386,21 @@ class TaskVoter implements VoterInterface
         // User Can assign User to the Task if he can UPDATE_TASK
         $canUpdate = $this->canUpdate($task);
 
-        // User can be assigned to the task, if he created or requested this task and if he has SOLVE_TASK access in it's ACL
-        if ($this->hasAclRights(VoteOptions::SOLVE_TASK, $user) && ($task->getCreatedBy()->getId() === $user->getId() || $task->getRequestedBy()->getId() === $user->getId())) {
-            $canUser = true;
-            return ($canUpdate && $canUser) ? true : false;
-        }
-
         $project = $task->getProject();
 
-        if ($project instanceof Project) {
-            // User can solve all tasks in it's own project if he has SOLVE_TASK access in it's ACL
-            if ($this->hasAclRights(VoteOptions::SOLVE_TASK, $user) && ($project->getCreatedBy()->getId() === $user->getId())) {
+        if (null === $project) {
+            // User can be assigned to the task without project, if he created or requested this task
+            if ($task->getCreatedBy()->getId() === $user->getId() || $task->getRequestedBy()->getId() === $user->getId()) {
                 $canUser = true;
-                return ($canUpdate && $canUser) ? true : false;
-            }
-
-            // User can solve task if he has SOLVE_ALL_TASKS_IN_PROJECT access in projects ACL
-            $actions [] = VoteOptions::SOLVE_ALL_TASKS_IN_PROJECT;
-            if ($this->hasAclProjectRights($actions, $project->getId())) {
-                $canUser = true;
-                return ($canUpdate && $canUser) ? true : false;
-            }
-
-            // User can solve task if he has SOLVE_COMPANY_TASKS_IN_PROJECT access in projects ACL and
-            // His company is the same like company of creator of the task
-            $actions [] = VoteOptions::SOLVE_COMPANY_TASKS_IN_PROJECT;
-            $hasAcl = $this->hasAclProjectRights($actions, $project->getId());
-            $usersCompany = $user->getCompany();
-            $tasksCompany = $task->getCreatedBy()->getCompany();
-
-            if ($hasAcl && ($usersCompany instanceof Company && $tasksCompany instanceof Company && ($usersCompany->getId() === $tasksCompany->getId()))) {
-                $canUser = true;
-                return ($canUpdate && $canUser) ? true : false;
             }
         }
 
-        return ($canUpdate && $canUser) ? true : false;
+        if ($project instanceof Project) {
+            // User be assigned to the task if he has RESOLVE_TASK access in projects ACL
+            $canUser = $this->hasProjectAclRight(ProjectAclOptions::RESOLVE_TASK, $project->getId());
+        }
+
+        return ($canUpdate && $canUser);
     }
 
     /**
@@ -447,7 +414,7 @@ class TaskVoter implements VoterInterface
         }
 
         // Only admin or user assigned to task can update this entity
-        return ($taskHasAssignedUser->getUser()->getId() === $this->user->getId()) ? true : false;
+        return $taskHasAssignedUser->getUser()->getId() === $this->user->getId();
     }
 
     /**
@@ -469,7 +436,7 @@ class TaskVoter implements VoterInterface
     public function canShowListOfUsersAssignedToTask(Task $task): bool
     {
         // User Can view a list of users assigned to Task if he can READ_TASK
-        return $this->canRead($task);
+        return $this->canRead($task, $this->user);
     }
 
     /**
@@ -502,7 +469,7 @@ class TaskVoter implements VoterInterface
     public function canShowListOfTaskAttachments(Task $task): bool
     {
         // User Can View Attachments of Task if he CAN READ this task
-        return $this->canRead($task);
+        return $this->canRead($task, $this->user);
     }
 
     /**
@@ -513,7 +480,7 @@ class TaskVoter implements VoterInterface
     public function canShowListOfTasksComments(Task $task): bool
     {
         // User can view a list of tasks comment if he can READ_TASK
-        return $this->canRead($task);
+        return $this->canRead($task, $this->user);
     }
 
     /**
@@ -524,7 +491,7 @@ class TaskVoter implements VoterInterface
     public function canShowTasksComment(Task $task): bool
     {
         // User can view a tasks comment if he can READ_TASK
-        return $this->canRead($task);
+        return $this->canRead($task, $this->user);
     }
 
     /**
@@ -534,21 +501,6 @@ class TaskVoter implements VoterInterface
      */
     public function canAddCommentToTask(Task $task): bool
     {
-        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
-            return true;
-        }
-
-        // User Can Add Comment to Task if he created or requested this task
-        if ($task->getCreatedBy()->getId() === $this->user->getId() || $task->getRequestedBy()->getId() === $this->user->getId()) {
-            return true;
-        }
-
-        // User Can Add Comment to Task if he is assigned to this Task
-        $assignedUsersIds = $this->getAssignedUsersIds($task);
-        if (in_array($this->user->getId(), $assignedUsersIds, true)) {
-            return true;
-        }
-
         // User Can Add Comment to Task if he can UPDATE this task
         return $this->canUpdate($task);
     }
@@ -609,85 +561,16 @@ class TaskVoter implements VoterInterface
     }
 
     /**
-     * User can see a task
+     * User can follow a task
      *
-     * @param User $user
      * @param Task $task
+     * @param User $follower
      * @return bool
      */
-    private function userCanFollowTask(User $user, Task $task): bool
+    private function userCanFollowTask(Task $task, User $follower): bool
     {
-        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
-            return true;
-        }
-
-        // User can follow a task if he created it or task is requested by him
-        if ($task->getCreatedBy()->getId() === $user->getId() || $task->getRequestedBy()->getId() === $user->getId()) {
-            return true;
-        }
-
-        $taskProject = $task->getProject();
-        if ($taskProject instanceof Project) {
-            $userHasProject = $this->em->getRepository('APITaskBundle:UserHasProject')->findOneBy([
-                'user' => $user,
-                'project' => $taskProject
-            ]);
-            if ($userHasProject instanceof UserHasProject) {
-                $acl = $userHasProject->getAcl();
-                if (null !== $acl) {
-                    // User can view a task if this task is from project where user has access: VIEW_ALL_TASKS_IN_PROJECT
-                    if (in_array(VoteOptions::VIEW_ALL_TASKS_IN_PROJECT, $acl, true)) {
-                        return true;
-                    } elseif (in_array(VoteOptions::VIEW_COMPANY_TASKS_IN_PROJECT, $acl, true)) {
-                        // User can view a task if this task is from project where user has access: VIEW_COMPANY_TASKS_IN_PROJECT
-                        // and user is from the same company like creator of task
-                        $usersCompany = $user->getCompany();
-                        $companyU = ($usersCompany instanceof Company ? $usersCompany : false);
-
-                        $taskCreatorCompany = $task->getCreatedBy()->getCompany();
-                        $companyT = ($taskCreatorCompany instanceof Company ? $taskCreatorCompany : false);
-
-                        return $companyU && $companyT && $companyU->getId() === $companyT->getId();
-                    }
-                }
-                return false;
-            }
-            return false;
-        }
-        return false;
-    }
-
-    /**
-     * User can have a custom array of access rights to selected project
-     *
-     * @param array $actions
-     * @param int $projectId
-     * @return bool
-     * @throws \InvalidArgumentException
-     * @internal param string $action
-     *
-     */
-    private function hasAclProjectRights(array $actions, int $projectId): bool
-    {
-        $userHasProject = $this->em->getRepository('APITaskBundle:UserHasProject')->findOneBy([
-            'project' => $projectId,
-            'user' => $this->user,
-        ]);
-
-        if (count($userHasProject) > 0) {
-            foreach ($actions as $action) {
-                if (!in_array($action, VoteOptions::getConstants(), true)) {
-                    throw new \InvalidArgumentException('Action is not valid, please list your action in the options list');
-                }
-
-                $acl = $userHasProject->getAcl();
-                if (in_array($action, $acl, true)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        // User can follow a task if he can view this task
+        return $this->canRead($task, $follower);
     }
 
     /**
@@ -704,32 +587,27 @@ class TaskVoter implements VoterInterface
             'user' => $this->user,
         ]);
 
-        $usersProjectAcl = $userHasProject->getAcl();
+        if ($userHasProject instanceof UserHasProject) {
+            $usersProjectAcl = $userHasProject->getAcl();
 
-        if (in_array($action, $usersProjectAcl, true)) {
-            return true;
+            if (in_array($action, $usersProjectAcl, true)) {
+                return true;
+            }
         }
 
         return false;
     }
 
     /**
-     * Every User has a custom array of access rights
-     *
-     * @param string $action
+     * @param Task $task
      * @param User $user
      * @return bool
-     * @throws \InvalidArgumentException
      */
-    private function hasAclRights($action, User $user): bool
+    private function taskIsAssignedToUser(Task $task, User $user): bool
     {
-        if (!in_array($action, VoteOptions::getConstants(), true)) {
-            throw new \InvalidArgumentException('Action ins not valid, please list your action in the options list');
-        }
+        $assignedUsers = $this->getAssignedUsersIds($task);
 
-        $acl = $user->getAcl();
-
-        if (null !== $acl && in_array($action, $acl, true)) {
+        if (in_array($user->getId(), $assignedUsers, true)) {
             return true;
         }
 

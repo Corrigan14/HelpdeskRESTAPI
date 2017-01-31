@@ -41,10 +41,7 @@ class UserRepository extends EntityRepository
          */
         $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
 
-
-        $response = new Paginator($query, true);
-        dump($response);
-        return $response;
+        return $query->getArrayResult();
     }
 
     /**

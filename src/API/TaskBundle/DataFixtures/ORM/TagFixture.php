@@ -94,6 +94,6 @@ class TagFixture implements FixtureInterface , ContainerAwareInterface , Ordered
      */
     public function getOrder()
     {
-        return 2;
+        return 3;
     }
 }

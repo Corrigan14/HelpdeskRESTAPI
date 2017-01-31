@@ -8,11 +8,11 @@ use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 
 /**
- * Class FixtureControllerTest
+ * Class FilterControllerTest
  *
  * @package API\TaskBundle\Tests\Controller
  */
-class FixtureControllerTest extends ApiTestCase
+class FilterControllerTest extends ApiTestCase
 {
     const  BASE_URL = '/api/v1/task-bundle/filters';
 
@@ -235,7 +235,9 @@ class FixtureControllerTest extends ApiTestCase
             'title' => 'Project of user 1'
         ]);
 
-        $filterData = 'status=53&project61&creator=41,42&requester=42';
+        $filterData = [
+            FilterAttributeOptions::CREATOR => 'current-user'
+        ];
 
         $filter = new Filter();
         $filter->setTitle('Admins PRIVATE Filter for TEST');
@@ -246,6 +248,7 @@ class FixtureControllerTest extends ApiTestCase
         $filter->setReport(false);
         $filter->setDefault(false);
         $filter->setProject($project);
+        $filter->setIconClass('&#xE858;');
 
         $this->em->persist($filter);
         $this->em->flush();
@@ -293,7 +296,8 @@ class FixtureControllerTest extends ApiTestCase
             'filter' => $filter,
             'public' => false,
             'report' => false,
-            'default' => false
+            'default' => false,
+            'icon_class' => '&#xE858;'
         ];
     }
 
@@ -326,7 +330,8 @@ class FixtureControllerTest extends ApiTestCase
             'filter' => $filter,
             'public' => true,
             'report' => false,
-            'default' => false
+            'default' => false,
+            'icon_class' => '&#xE858;'
         ];
     }
 
@@ -359,7 +364,8 @@ class FixtureControllerTest extends ApiTestCase
             'filter' => $filter,
             'public' => false,
             'report' => false,
-            'default' => false
+            'default' => false,
+            'icon_class' => '&#xE858;'
         ];
     }
 
@@ -394,7 +400,8 @@ class FixtureControllerTest extends ApiTestCase
             'filter' => $filter,
             'public' => false,
             'report' => false,
-            'default' => false
+            'default' => false,
+            'icon_class' => '&#xE858;'
         ];
     }
 

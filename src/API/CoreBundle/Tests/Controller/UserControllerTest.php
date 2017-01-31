@@ -3,7 +3,6 @@
 namespace API\CoreBundle\Tests\Controller;
 
 use API\CoreBundle\Entity\User;
-use API\CoreBundle\Repository\UserRepository;
 use API\TaskBundle\Entity\UserRole;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Tests\Controller\ApiTestCase;
@@ -22,7 +21,7 @@ class UserControllerTest extends ApiTestCase
      */
     public function testListSuccess()
     {
-//        parent::testListSuccess();
+        parent::testListSuccess();
 
         // Test List with custom data fields
         $this->getClient()->request('GET', $this->getBaseUrl(), [], [],
@@ -31,9 +30,7 @@ class UserControllerTest extends ApiTestCase
 
         // We expect at least one user and if we get a response based on custom fields e.g. only name
         $response = json_decode($this->getClient()->getResponse()->getContent(), true);
-        $keys = array_keys($response['data'][0]);
         $this->assertTrue(array_key_exists('_links', $response));
-        $this->assertEquals(['name', 'id'], $keys);
 
         // Test List with only inActive users
         $this->getClient()->request('GET', $this->getBaseUrl() . '?isActive=false', [], [],
@@ -81,8 +78,6 @@ class UserControllerTest extends ApiTestCase
      */
     public function testPostSingleSuccess()
     {
-        parent::testPostSingleSuccess();
-
         $data = $this->returnPostTestData();
 
         // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
@@ -93,8 +88,21 @@ class UserControllerTest extends ApiTestCase
             'title' => 'Web-Solutions'
         ]);
 
-        // Create Entity and add Company to this User(as admin)
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/company/' . $company->getId(), $data, [],
+        $customerRole = $this->em->getRepository('APITaskBundle:UserRole')->findOneBy([
+            'title' => 'customer'
+        ]);
+
+        // Create Entity and add UserRole to this User
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . 'user-role/' . $customerRole->getId(),
+            $data, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        $this->removeTestEntity();
+
+        // Create Entity and add Company to this User
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . 'user-role/' . $customerRole->getId() . '/'.'company/' . $company->getId(),
+            $data, [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
@@ -111,48 +119,60 @@ class UserControllerTest extends ApiTestCase
      */
     public function testPostSingleErrors()
     {
-        parent::testPostSingleErrors();
+        $customerRole = $this->em->getRepository('APITaskBundle:UserRole')->findOneBy([
+            'title' => 'customer'
+        ]);
+
+        $adminRole = $this->em->getRepository('APITaskBundle:UserRole')->findOneBy([
+            'title' => 'admin'
+        ]);
+
+        // Try to create test user without authorization header
+        $this->getClient()->request('POST', $this->getBaseUrl().'/'.'user-role/'.$customerRole->getId(),
+            ['username' => 'testuser', 'password' => 'password', 'email' => 'testuser@testuser.com'],
+            [], []);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to create test user with ROLE_USER if user doesn't have permission
-        $this->getClient()->request('POST', $this->getBaseUrl(), [
-            'username' => 'testuser', 'password' => 'password', 'email' => 'testuser@testuser.com',
-        ], [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->getClient()->request('POST', $this->getBaseUrl().'/'.'user-role/'.$adminRole->getId(),
+            ['username' => 'testuser', 'password' => 'password', 'email' => 'testuser@testuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to create user as admin, invalid email
-        $this->getClient()->request('POST', $this->getBaseUrl(), [
-            'username' => 'testuser', 'password' => 'password', 'email' => 'testuser.testuser.com',
-        ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->getClient()->request('POST', $this->getBaseUrl().'/'.'user-role/'.$customerRole->getId(),
+            ['username' => 'testuser', 'password' => 'password', 'email' => 'testuser.testuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to create user as admin, invalid password
-        $this->getClient()->request('POST', $this->getBaseUrl(), [
-            'username' => 'testuser', 'password' => 'short', 'email' => 'testuser.testuser.com',
-        ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->getClient()->request('POST', $this->getBaseUrl().'/'.'user-role/'.$customerRole->getId(),
+            ['username' => 'testuser', 'password' => 'short', 'email' => 'testuser.testuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to create user as admin, no password
-        $this->getClient()->request('POST', $this->getBaseUrl(), [
-            'username' => 'testuser', 'email' => 'testuser.testuser.com',
-        ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->getClient()->request('POST', $this->getBaseUrl().'/'.'user-role/'.$customerRole->getId(),
+            ['username' => 'testuser', 'email' => 'testuser.testuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to create user as admin, blank username
-        $this->getClient()->request('POST', $this->getBaseUrl(), [
-            'username' => '', 'email' => 'testuser.testuser.com', 'password' => 'password',
-        ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->getClient()->request('POST', $this->getBaseUrl().'/'.'user-role/'.$customerRole->getId(),
+            ['username' => '', 'email' => 'testuser.testuser.com', 'password' => 'password'],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to create user as admin, no username
-        $this->getClient()->request('POST', $this->getBaseUrl(), [
-            'email' => 'testuser.testuser.com', 'password' => 'password',
-        ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->getClient()->request('POST', $this->getBaseUrl().'/'.'user-role/'.$customerRole->getId(),
+            ['email' => 'testuser.testuser.com', 'password' => 'password'],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to create user as admin, with non-existent parameter
-        $this->getClient()->request('POST', $this->getBaseUrl(), [
-            'email' => 'testuser.testuser.com', 'username' => 'testuser', 'password' => 'password', 'bulls' => 'hit',
-        ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->getClient()->request('POST', $this->getBaseUrl().'/'.'user-role/'.$customerRole->getId(),
+            ['email' => 'testuser.testuser.com', 'username' => 'testuser', 'password' => 'password', 'bulls' => 'hit'],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
@@ -385,7 +405,6 @@ class UserControllerTest extends ApiTestCase
         $this->removeTestEntity();
 
         $entity = $this->findOneEntity();
-
         $company = $this->em->getRepository('APICoreBundle:Company')->findOneBy([
             'title' => 'LanSystems'
         ]);

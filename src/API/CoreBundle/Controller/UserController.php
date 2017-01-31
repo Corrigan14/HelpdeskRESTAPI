@@ -508,19 +508,11 @@ class UserController extends ApiBaseController
         }
 
         if ($userRoleId) {
-            try {
-                $this->setUserRoleToUser($user, $userRoleId);
-            } catch (\InvalidArgumentException $e) {
-                return $this->notFoundResponse();
-            }
+            $this->setUserRoleToUser($user, $userRoleId);
         }
 
         if ($companyId) {
-            try {
-                $this->setCompanyToUser($user, $companyId);
-            } catch (\InvalidArgumentException $e) {
-                return $this->notFoundResponse();
-            }
+            $this->setCompanyToUser($user, $companyId);
         }
 
         return $this->updateUser($user, $requestData, true);
@@ -680,19 +672,13 @@ class UserController extends ApiBaseController
         }
 
         if ($userRoleId) {
-            try {
-                $this->setUserRoleToUser($user, $userRoleId);
-            } catch (\InvalidArgumentException $e) {
-                return $this->notFoundResponse();
-            }
+            $this->setUserRoleToUser($user, $userRoleId);
+            return $this->notFoundResponse();
         }
 
         if ($companyId) {
-            try {
-                $this->setCompanyToUser($user, $companyId);
-            } catch (\InvalidArgumentException $e) {
-                return $this->notFoundResponse();
-            }
+            $this->setCompanyToUser($user, $companyId);
+            return $this->notFoundResponse();
         }
 
         // Upload and save avatar
@@ -860,19 +846,13 @@ class UserController extends ApiBaseController
         }
 
         if ($userRoleId) {
-            try {
-                $this->setUserRoleToUser($user, $userRoleId);
-            } catch (\InvalidArgumentException $e) {
-                return $this->notFoundResponse();
-            }
+            $this->setUserRoleToUser($user, $userRoleId);
+            return $this->notFoundResponse();
         }
 
         if ($companyId) {
-            try {
-                $this->setCompanyToUser($user, $companyId);
-            } catch (\InvalidArgumentException $e) {
-                return $this->notFoundResponse();
-            }
+            $this->setCompanyToUser($user, $companyId);
+            return $this->notFoundResponse();
         }
 
         // Upload and save avatar
@@ -1093,8 +1073,16 @@ class UserController extends ApiBaseController
         $this->getDoctrine()->getManager()->persist($user);
         $this->getDoctrine()->getManager()->flush();
 
+        $userCompany = $user->getCompany();
+        if ($userCompany instanceof Company) {
+            $userCompanyId = $userCompany->getId();
+        } else {
+            $userCompanyId = false;
+        }
         $ids = [
-            'userId' => $id
+            'userId' => $user->getId(),
+            'userRoleId' => $user->getUserRole()->getId(),
+            'userCompanyId' => $userCompanyId
         ];
         $userArray = $this->get('api_user.service')->getUserResponse($ids);
         return $this->json($userArray, StatusCodesHelper::SUCCESSFUL_CODE);
@@ -1122,7 +1110,14 @@ class UserController extends ApiBaseController
             return $this->notFoundResponse();
         }
 
+        $requestDetailData = false;
+        if (isset($requestData['detail_data']) && count($requestData['detail_data']) > 0) {
+            $requestDetailData = $requestData['detail_data'];
+            unset($requestData['detail_data']);
+        }
+
         $errors = $this->get('entity_processor')->processEntity($user, $requestData);
+
         if (false === $errors) {
             if (isset($requestData['password'])) {
                 $user->setPassword($this->get('security.password_encoder')->encodePassword($user, $requestData['password']));
@@ -1149,17 +1144,14 @@ class UserController extends ApiBaseController
             /**
              * Fill UserData Entity if some its parameters were sent
              */
-            if (isset($requestData['detail_data']) && count($requestData['detail_data']) > 0) {
-
+            if ($requestDetailData) {
                 $userData = $user->getDetailData();
                 if (null === $userData) {
                     $userData = new UserData();
                     $userData->setUser($user);
                     $user->setDetailData($userData);
                 }
-
-                $errorsUserData = $this->get('entity_processor')->processEntity($userData, $requestData['detail_data']);
-
+                $errorsUserData = $this->get('entity_processor')->processEntity($userData, $requestDetailData);
                 if (false === $errorsUserData) {
                     $this->getDoctrine()->getManager()->persist($userData);
                     $this->getDoctrine()->getManager()->flush();

@@ -10,6 +10,7 @@ namespace API\CoreBundle\Services;
 
 
 use Doctrine\ORM\EntityManager;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -21,7 +22,7 @@ class ProcessEntity
     /** @var ValidatorInterface */
     private $validator;
 
-    public function __construct(EntityManager $em , ValidatorInterface $validator)
+    public function __construct(EntityManager $em, ValidatorInterface $validator)
     {
         $this->em = $em;
         $this->validator = $validator;
@@ -33,13 +34,17 @@ class ProcessEntity
      * @param       $entity
      * @param array $data
      *
-     * @return array|bool Returns false if entity persisted errors if validation failed
+     * @return Response|array|bool
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
-    public function processEntity($entity , array $data = [])
+    public function processEntity($entity, array $data = [])
     {
-        $this->fillEntity(get_class($entity) , $entity , $data);
+        $message = $this->fillEntity(get_class($entity), $entity, $data);
+
+        if (count($message) > 0) {
+            return $message;
+        }
 
         /** @var ConstraintViolationList $errors */
         $errors = $this->validator->validate($entity);
@@ -56,17 +61,23 @@ class ProcessEntity
      *
      * @param \stdClass $class
      * @param           $entity
-     * @param array     $data
+     * @param array $data
+     * @return array
      */
-    public function fillEntity($class , $entity , array $data)
+    public function fillEntity($class, $entity, array $data)
     {
+        $message = [];
         foreach ($data as $method => $value) {
-            if (property_exists($class , $method)) {
-                $method = str_replace('_','',$method);
+            if (property_exists($class, $method)) {
+                $method = str_replace('_', '', $method);
                 $m = 'set' . $method;
                 $entity->$m($value);
+            } elseif ("_format" !== $method) {
+                $message[] = $method . ' is not a valid parameter!';
             }
         }
+
+        return $message;
     }
 
     /**
@@ -80,9 +91,9 @@ class ProcessEntity
 
         foreach ($errors as $error) {
             $return[] = [
-                'field'   => $error->getPropertyPath() ,
-                'message' => $error->getMessage() ,
-                'value'   => $error->getInvalidValue() ,
+                'field' => $error->getPropertyPath(),
+                'message' => $error->getMessage(),
+                'value' => $error->getInvalidValue(),
             ];
         }
 

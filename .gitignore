@@ -18,3 +18,4 @@
 /app/config/parameters_test.yml
 !app/uploads/.gitkeep
 /app/uploads/
+/composer.lock

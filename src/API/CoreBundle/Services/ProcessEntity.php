@@ -68,6 +68,9 @@ class ProcessEntity
     {
         $message = [];
         foreach ($data as $method => $value) {
+            if('id' === $method){
+                $message[] = 'You can not change ID of entity!';
+            }
             if (property_exists($class, $method)) {
                 $method = str_replace('_', '', $method);
                 $m = 'set' . $method;

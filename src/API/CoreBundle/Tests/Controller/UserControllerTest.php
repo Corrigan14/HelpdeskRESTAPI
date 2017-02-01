@@ -101,7 +101,7 @@ class UserControllerTest extends ApiTestCase
         $this->removeTestEntity();
 
         // Create Entity and add Company to this User
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . 'user-role/' . $customerRole->getId() . '/'.'company/' . $company->getId(),
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/' . 'user-role/' . $customerRole->getId() . '/' . 'company/' . $company->getId(),
             $data, [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
@@ -128,64 +128,170 @@ class UserControllerTest extends ApiTestCase
         ]);
 
         // Try to create test user without authorization header
-        $this->getClient()->request('POST', $this->getBaseUrl().'/'.'user-role/'.$customerRole->getId(),
+        $this->getClient()->request('POST', $this->getBaseUrl() . '/' . 'user-role/' . $customerRole->getId(),
             ['username' => 'testuser', 'password' => 'password', 'email' => 'testuser@testuser.com'],
             [], []);
         $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to create test user with ROLE_USER if user doesn't have permission
-        $this->getClient()->request('POST', $this->getBaseUrl().'/'.'user-role/'.$adminRole->getId(),
+        $this->getClient()->request('POST', $this->getBaseUrl() . '/' . 'user-role/' . $adminRole->getId(),
             ['username' => 'testuser', 'password' => 'password', 'email' => 'testuser@testuser.com'],
             [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to create user as admin, invalid email
-        $this->getClient()->request('POST', $this->getBaseUrl().'/'.'user-role/'.$customerRole->getId(),
+        $this->getClient()->request('POST', $this->getBaseUrl() . '/' . 'user-role/' . $customerRole->getId(),
             ['username' => 'testuser', 'password' => 'password', 'email' => 'testuser.testuser.com'],
             [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to create user as admin, invalid password
-        $this->getClient()->request('POST', $this->getBaseUrl().'/'.'user-role/'.$customerRole->getId(),
+        $this->getClient()->request('POST', $this->getBaseUrl() . '/' . 'user-role/' . $customerRole->getId(),
             ['username' => 'testuser', 'password' => 'short', 'email' => 'testuser.testuser.com'],
             [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to create user as admin, no password
-        $this->getClient()->request('POST', $this->getBaseUrl().'/'.'user-role/'.$customerRole->getId(),
+        $this->getClient()->request('POST', $this->getBaseUrl() . '/' . 'user-role/' . $customerRole->getId(),
             ['username' => 'testuser', 'email' => 'testuser.testuser.com'],
             [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to create user as admin, blank username
-        $this->getClient()->request('POST', $this->getBaseUrl().'/'.'user-role/'.$customerRole->getId(),
+        $this->getClient()->request('POST', $this->getBaseUrl() . '/' . 'user-role/' . $customerRole->getId(),
             ['username' => '', 'email' => 'testuser.testuser.com', 'password' => 'password'],
             [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to create user as admin, no username
-        $this->getClient()->request('POST', $this->getBaseUrl().'/'.'user-role/'.$customerRole->getId(),
+        $this->getClient()->request('POST', $this->getBaseUrl() . '/' . 'user-role/' . $customerRole->getId(),
             ['email' => 'testuser.testuser.com', 'password' => 'password'],
             [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to create user as admin, with non-existent parameter
-        $this->getClient()->request('POST', $this->getBaseUrl().'/'.'user-role/'.$customerRole->getId(),
+        $this->getClient()->request('POST', $this->getBaseUrl() . '/' . 'user-role/' . $customerRole->getId(),
             ['email' => 'testuser.testuser.com', 'username' => 'testuser', 'password' => 'password', 'bulls' => 'hit'],
             [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
     /**
-     * UPDATE SINGLE - success
+     * Update the company of user Entity
      */
-    public function testUpdateSingleSuccess()
+    public function testPutUserWithCompanySuccess()
     {
-        parent::testUpdateSingleSuccess();
+        $data = $this->returnUpdateTestData();
 
-        $this->testPutUserWithCompany();
-        $this->testPatchUserWithCompany();
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
 
+        $entity = $this->findOneEntity();
+        $company = $this->em->getRepository('APICoreBundle:Company')->findOneBy([
+            'title' => 'LanSystems'
+        ]);
+
+        // Update Company of User: PUT method (as admin)
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/company/' . $company->getId(),
+            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect Entity, response has to include array with data and _links and data include's company param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $data = $response['data'];
+
+        $this->assertTrue(array_key_exists('data', $response));
+        $this->assertTrue(array_key_exists('_links', $response));
+        $this->assertTrue(array_key_exists('company', $data));
+    }
+
+    /**
+     * Update the company of user Entity
+     */
+    public function testPatchUserWithCompanySuccess()
+    {
+        $data = $this->returnUpdateTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        $entity = $this->findOneEntity();
+
+        $company = $this->em->getRepository('APICoreBundle:Company')->findOneBy([
+            'title' => 'LanSystems'
+        ]);
+        // Update Company of User: PATCH method (as admin)
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/company/' . $company->getId(),
+            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect Entity, response has to include array with data and _links and data include's company param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $data = $response['data'];
+
+        $this->assertTrue(array_key_exists('data', $response));
+        $this->assertTrue(array_key_exists('_links', $response));
+        $this->assertTrue(array_key_exists('company', $data));
+    }
+
+    /**
+     * Update the company of user Entity
+     */
+    public function testPutUserWithUserRoleSuccess()
+    {
+        $data = $this->returnUpdateTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        $entity = $this->findOneEntity();
+        $userRole = $this->em->getRepository('APITaskBundle:UserRole')->findOneBy([
+            'title' => 'customer'
+        ]);
+
+        // Update Company of User: PUT method (as admin)
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/user-role/' . $userRole->getId(),
+            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect Entity, response has to include array with data and _links and data include's company param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $data = $response['data'];
+        $this->assertTrue(array_key_exists('data', $response));
+        $this->assertTrue(array_key_exists('_links', $response));
+        $this->assertTrue(array_key_exists('company', $data));
+    }
+
+    /**
+     * Update the company of user Entity
+     */
+    public function testPatchUserWithUserRoleSuccess()
+    {
+        $data = $this->returnUpdateTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        $entity = $this->findOneEntity();
+        $userRole = $this->em->getRepository('APITaskBundle:UserRole')->findOneBy([
+            'title' => 'customer'
+        ]);
+
+        // Update Company of User: PUT method (as admin)
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/user-role/' . $userRole->getId(),
+            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect Entity, response has to include array with data and _links and data include's company param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $data = $response['data'];
+        $this->assertTrue(array_key_exists('data', $response));
+        $this->assertTrue(array_key_exists('_links', $response));
+        $this->assertTrue(array_key_exists('company', $data));
     }
 
     /**
@@ -243,6 +349,175 @@ class UserControllerTest extends ApiTestCase
         $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(), [
             'username' => 'user', 'password' => 'password', 'email' => 'testuser@tes22tuser.com',
         ], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     *  UPDATE USER'S COMPANY SINGLE - errors
+     */
+    public function testPutUserWithCompanyErrors()
+    {
+        $this->removeTestUser('testuserchanged');
+
+        $entity = $this->findOneEntity();
+        $company = $this->em->getRepository('APICoreBundle:Company')->findOneBy([
+            'title' => 'Web-Solutions'
+        ]);
+
+        // Try to update test user with ROLE_USER if user doesn't have permission : method PUT
+        $this->getClient()->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/company/' . $company->getId(),
+            ['username' => 'testuser225', 'password' => 'password', 'email' => 'testuser@testuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to Update user as admin, invalid email
+        $this->getClient()->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/company/' . $company->getId(),
+            ['username' => 'testuser225', 'password' => 'password', 'email' => 'testuser.testuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to Update user's company to not-existed company
+        $this->getClient()->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/company/12547',
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update user as admin, invalid password
+        $this->getClient()->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/company/' . $company->getId(),
+            ['username' => 'testuser226', 'password' => 'pas', 'email' => 'testuser@testuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Update user as admin, not uniqe username: method PUT
+        $this->getClient()->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/company/' . $company->getId(),
+            ['username' => 'user', 'password' => 'password', 'email' => 'testuser@tes22tuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     *  UPDATE USER'S COMPANY SINGLE - errors
+     */
+    public function testPatchUserWithCompanyErrors()
+    {
+        $this->removeTestUser('testuserchanged');
+
+        $entity = $this->findOneEntity();
+        $company = $this->em->getRepository('APICoreBundle:Company')->findOneBy([
+            'title' => 'Web-Solutions'
+        ]);
+
+        // Try to update test user with ROLE_USER if user doesn't have permission : method PUT
+        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/company/' . $company->getId(),
+            ['username' => 'testuser225', 'password' => 'password', 'email' => 'testuser@testuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to Update user as admin, invalid email
+        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/company/' . $company->getId(),
+            ['username' => 'testuser225', 'password' => 'password', 'email' => 'testuser.testuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to Update user's company to not-existed company
+        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/company/12547',
+            [],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update user as admin, invalid password
+        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/company/' . $company->getId(),
+            ['username' => 'testuser226', 'password' => 'pas', 'email' => 'testuser@testuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Update user as admin, not uniqe username: method PUT
+        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/company/' . $company->getId(),
+            ['username' => 'user', 'password' => 'password', 'email' => 'testuser@tes22tuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     *  UPDATE USER'S USER ROLE SINGLE - errors
+     */
+    public function testPutUserWithUserRoleErrors()
+    {
+        $this->removeTestUser('testuserchanged');
+
+        $entity = $this->findOneEntity();
+        $customerRole = $this->em->getRepository('APITaskBundle:UserRole')->findOneBy([
+            'title' => 'customer'
+        ]);
+
+        // Try to update test user with ROLE_USER if user doesn't have permission : method PUT
+        $this->getClient()->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/user-role/' . $customerRole->getId(),
+            ['username' => 'testuser225', 'password' => 'password', 'email' => 'testuser@testuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to Update user as admin, invalid email
+        $this->getClient()->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/user-role/' . $customerRole->getId(),
+            ['username' => 'testuser225', 'password' => 'password', 'email' => 'testuser.testuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to Update user's company to not-existed company
+        $this->getClient()->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/user-role/12547',
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update user as admin, invalid password
+        $this->getClient()->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/user-role/' . $customerRole->getId(),
+            ['username' => 'testuser226', 'password' => 'pas', 'email' => 'testuser@testuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Update user as admin, not uniqe username: method PUT
+        $this->getClient()->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/user-role/' . $customerRole->getId(),
+            ['username' => 'user', 'password' => 'password', 'email' => 'testuser@tes22tuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     *  UPDATE USER'S USER ROLE SINGLE - errors
+     */
+    public function testPatchUserWithUserRoleErrors()
+    {
+        $this->removeTestUser('testuserchanged');
+
+        $entity = $this->findOneEntity();
+        $customerRole = $this->em->getRepository('APITaskBundle:UserRole')->findOneBy([
+            'title' => 'customer'
+        ]);
+
+        // Try to update test user with ROLE_USER if user doesn't have permission : method PUT
+        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/user-role/' . $customerRole->getId(),
+            ['username' => 'testuser225', 'password' => 'password', 'email' => 'testuser@testuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to Update user as admin, invalid email
+        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/user-role/' . $customerRole->getId(),
+            ['username' => 'testuser225', 'password' => 'password', 'email' => 'testuser.testuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to Update user's company to not-existed company
+        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/user-role/12547',
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update user as admin, invalid password
+        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/user-role/' . $customerRole->getId(),
+            ['username' => 'testuser226', 'password' => 'pas', 'email' => 'testuser@testuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Update user as admin, not uniqe username: method PUT
+        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/user-role/' . $customerRole->getId(),
+            ['username' => 'user', 'password' => 'password', 'email' => 'testuser@tes22tuser.com'],
+            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
@@ -395,60 +670,6 @@ class UserControllerTest extends ApiTestCase
             'detail_data' => ['name' => 'patch name', 'surname' => 'patch surname'],
         ];
     }
-
-    public function testPutUserWithCompany()
-    {
-        $data = $this->returnUpdateTestData();
-
-        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
-        // entity corresponding to the post data
-        $this->removeTestEntity();
-
-        $entity = $this->findOneEntity();
-        $company = $this->em->getRepository('APICoreBundle:Company')->findOneBy([
-            'title' => 'LanSystems'
-        ]);
-        // Update Company of User: PUT method (as admin)
-        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/company/' . $company->getId(),
-            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        // We expect Entity, response has to include array with data and _links and data include's company param
-        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
-        $data = $response['data'];
-
-        $this->assertTrue(array_key_exists('data', $response));
-        $this->assertTrue(array_key_exists('_links', $response));
-        $this->assertTrue(array_key_exists('company', $data));
-    }
-
-    public function testPatchUserWithCompany()
-    {
-        $data = $this->returnUpdateTestData();
-
-        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
-        // entity corresponding to the post data
-        $this->removeTestEntity();
-
-        $entity = $this->findOneEntity();
-
-        $company = $this->em->getRepository('APICoreBundle:Company')->findOneBy([
-            'title' => 'LanSystems'
-        ]);
-        // Update Company of User: PATCH method (as admin)
-        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/company/' . $company->getId(),
-            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        // We expect Entity, response has to include array with data and _links and data include's company param
-        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
-        $data = $response['data'];
-
-        $this->assertTrue(array_key_exists('data', $response));
-        $this->assertTrue(array_key_exists('_links', $response));
-        $this->assertTrue(array_key_exists('company', $data));
-    }
-
 
     /**
      * @param string $username

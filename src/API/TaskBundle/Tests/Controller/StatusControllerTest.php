@@ -113,9 +113,9 @@ class StatusControllerTest extends ApiTestCase
         $entity = $this->findOneEntity();
 
         // Delete Entity
-        $this->getClient(true)->request('DELETE' , $this->getBaseUrl() . '/' . $entity->getId() ,
-            [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE , $this->getClient()->getResponse()->getStatusCode());
+        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
+            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
     /**
@@ -170,7 +170,7 @@ class StatusControllerTest extends ApiTestCase
      */
     public function createEntity()
     {
-        $this->getClient(true)->request('POST', $this->getBaseUrl(), ['title' => 'Created Status'], [],
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), ['title' => 'Created Status', 'color' => '#1E90FF'], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(201, $this->getClient()->getResponse()->getStatusCode());
 
@@ -199,7 +199,8 @@ class StatusControllerTest extends ApiTestCase
     public function returnPostTestData()
     {
         return [
-            'title' => 'Created Status'
+            'title' => 'Created Status',
+            'color' => '#1E90FF'
         ];
     }
 
@@ -211,7 +212,8 @@ class StatusControllerTest extends ApiTestCase
     public function returnUpdateTestData()
     {
         return [
-            'title' => 'Updated Status'
+            'title' => 'Updated Status',
+            'color' => '#1E90FF'
         ];
     }
 

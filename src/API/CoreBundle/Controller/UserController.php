@@ -508,11 +508,39 @@ class UserController extends ApiBaseController
         }
 
         if ($userRoleId) {
-            $this->setUserRoleToUser($user, $userRoleId);
+            $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($userRoleId);
+            if (!$userRole instanceof UserRole) {
+                return $this->createApiResponse([
+                    'message' => 'User role with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+            // Check if user can create User entity with requested User Role
+            $voteOptions = [
+                'userRole' => $userRole
+            ];
+            if (!$this->get('user_voter')->isGranted(VoteOptions::CREATE_USER_WITH_USER_ROLE, $voteOptions)) {
+                return $this->createApiResponse([
+                    'message' => 'You can not create user with selected User Role!',
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            }
+            $user->setUserRole($userRole);
+
+            if ($userRole->getTitle() === 'ADMIN') {
+                $user->setRoles(['ROLE_ADMIN']);
+            } else {
+                $user->setRoles(['ROLE_USER']);
+            }
         }
 
         if ($companyId) {
-            $this->setCompanyToUser($user, $companyId);
+            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
+
+            if (!$company instanceof Company) {
+                return $this->createApiResponse([
+                    'message' => 'Company with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+            $user->setCompany($company);
         }
 
         return $this->updateUser($user, $requestData, true);
@@ -637,7 +665,7 @@ class UserController extends ApiBaseController
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
-     *      404 ="Not found user",
+     *      404 ="Not found entity",
      *      409 ="Invalid parameters",
      *  })
      *
@@ -672,13 +700,39 @@ class UserController extends ApiBaseController
         }
 
         if ($userRoleId) {
-            $this->setUserRoleToUser($user, $userRoleId);
-            return $this->notFoundResponse();
+            $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($userRoleId);
+            if (!$userRole instanceof UserRole) {
+                return $this->createApiResponse([
+                    'message' => 'User role with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+            // Check if user can create User entity with requested User Role
+            $voteOptions = [
+                'userRole' => $userRole
+            ];
+            if (!$this->get('user_voter')->isGranted(VoteOptions::CREATE_USER_WITH_USER_ROLE, $voteOptions)) {
+                return $this->createApiResponse([
+                    'message' => 'You can not create user with selected User Role!',
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            }
+            $user->setUserRole($userRole);
+
+            if ($userRole->getTitle() === 'ADMIN') {
+                $user->setRoles(['ROLE_ADMIN']);
+            } else {
+                $user->setRoles(['ROLE_USER']);
+            }
         }
 
         if ($companyId) {
-            $this->setCompanyToUser($user, $companyId);
-            return $this->notFoundResponse();
+            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
+
+            if (!$company instanceof Company) {
+                return $this->createApiResponse([
+                    'message' => 'Company with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+            $user->setCompany($company);
         }
 
         // Upload and save avatar
@@ -812,7 +866,7 @@ class UserController extends ApiBaseController
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
-     *      404 ="Not found user",
+     *      404 ="Not found entity",
      *      409 ="Invalid parameters",
      *  })
      *
@@ -846,13 +900,39 @@ class UserController extends ApiBaseController
         }
 
         if ($userRoleId) {
-            $this->setUserRoleToUser($user, $userRoleId);
-            return $this->notFoundResponse();
+            $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($userRoleId);
+            if (!$userRole instanceof UserRole) {
+                return $this->createApiResponse([
+                    'message' => 'User role with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+            // Check if user can create User entity with requested User Role
+            $voteOptions = [
+                'userRole' => $userRole
+            ];
+            if (!$this->get('user_voter')->isGranted(VoteOptions::CREATE_USER_WITH_USER_ROLE, $voteOptions)) {
+                return $this->createApiResponse([
+                    'message' => 'You can not create user with selected User Role!',
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            }
+            $user->setUserRole($userRole);
+
+            if ($userRole->getTitle() === 'ADMIN') {
+                $user->setRoles(['ROLE_ADMIN']);
+            } else {
+                $user->setRoles(['ROLE_USER']);
+            }
         }
 
         if ($companyId) {
-            $this->setCompanyToUser($user, $companyId);
-            return $this->notFoundResponse();
+            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
+
+            if (!$company instanceof Company) {
+                return $this->createApiResponse([
+                    'message' => 'Company with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+            $user->setCompany($company);
         }
 
         // Upload and save avatar
@@ -1166,59 +1246,5 @@ class UserController extends ApiBaseController
         }
 
         return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
-    }
-
-    /**
-     * @param User $user
-     * @param int $companyId
-     *
-     * @throws \LogicException
-     * @throws \InvalidArgumentException
-     * @return Response
-     */
-    private function setCompanyToUser(User $user, int $companyId)
-    {
-        $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
-
-        if (!$company instanceof Company) {
-            return $this->createApiResponse([
-                'message' => 'Company with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
-        }
-        $user->setCompany($company);
-    }
-
-    /**
-     * @param User $user
-     * @param int $userRoleId
-     *
-     * @throws \LogicException
-     * @throws \InvalidArgumentException
-     * @return Response
-     */
-    private function setUserRoleToUser(User $user, int $userRoleId)
-    {
-        $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($userRoleId);
-        if (!$userRole instanceof UserRole) {
-            return $this->createApiResponse([
-                'message' => 'User role with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
-        }
-        // Check if user can create User entity with requested User Role
-        $voteOptions = [
-            'userRole' => $userRole
-        ];
-        if (!$this->get('user_voter')->isGranted(VoteOptions::CREATE_USER_WITH_USER_ROLE, $voteOptions)) {
-            return $this->createApiResponse([
-                'message' => 'You can not create user with selected User Role!',
-            ], StatusCodesHelper::ACCESS_DENIED_CODE);
-        }
-        $user->setUserRole($userRole);
-
-        if ($userRole->getTitle() === 'ADMIN') {
-            $user->setRoles(['ROLE_ADMIN']);
-        } else {
-            $user->setRoles(['ROLE_USER']);
-        }
     }
 }

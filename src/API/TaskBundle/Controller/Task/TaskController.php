@@ -315,8 +315,7 @@ class TaskController extends ApiBaseController
      *  },
      *  statusCodes={
      *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      404 ="Not found entity"
+     *      401 ="Unauthorized request"
      *  }
      * )
      *
@@ -752,9 +751,15 @@ class TaskController extends ApiBaseController
      *        },
      *       "_links":
      *       {
-     *         "put": "/api/v1/task-bundle/tasks/1/project/all/user/all",
-     *         "patch": "/api/v1/task-bundle/tasks/1/project/all/user/all",
-     *         "delete": "/api/v1/task-bundle/tasks/1"
+     *         "put: task": "/api/v1/task-bundle/tasks/11970",
+     *         "patch: task": "/api/v1/task-bundle/tasks/11970",
+     *         "delete": "/api/v1/task-bundle/tasks/11970",
+     *         "put: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "patch: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "put: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "patch: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "put: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313",
+     *         "patch: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313"
      *       }
      *    }
      *
@@ -941,9 +946,15 @@ class TaskController extends ApiBaseController
      *        },
      *       "_links":
      *       {
-     *         "put": "/api/v1/task-bundle/tasks/1/project/all/user/all",
-     *         "patch": "/api/v1/task-bundle/tasks/1/project/all/user/all",
-     *         "delete": "/api/v1/task-bundle/tasks/1"
+     *         "put: task": "/api/v1/task-bundle/tasks/11970",
+     *         "patch: task": "/api/v1/task-bundle/tasks/11970",
+     *         "delete": "/api/v1/task-bundle/tasks/11970",
+     *         "put: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "patch: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "put: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "patch: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "put: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313",
+     *         "patch: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313"
      *       }
      *    }
      *
@@ -1006,6 +1017,7 @@ class TaskController extends ApiBaseController
         }
 
         $task = new Task();
+        $requestData = $request->request->all();
 
         if ($projectId) {
             $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
@@ -1022,6 +1034,7 @@ class TaskController extends ApiBaseController
                 ], StatusCodesHelper::ACCESS_DENIED_CODE);
             }
             $task->setProject($project);
+            unset($requestData['projectId']);
         }
 
         if ($requestedUserId) {
@@ -1034,22 +1047,21 @@ class TaskController extends ApiBaseController
             }
             $task->setRequestedBy($requestedUser);
             $requesterTaskId = $requestedUserId;
+            unset($requestData['requestedUserId']);
         } else {
             $task->setRequestedBy($this->getUser());
             $requesterTaskId = $this->getUser()->getId();
         }
 
-        $requestData = $request->request->all();
-
         $task->setCreatedBy($this->getUser());
         $task->setImportant(false);
 
         $ids = [
-            'id' => $task->getId(),
+            'id' => false,
             'projectId' => $projectId,
             'requesterId' => $requesterTaskId
         ];
-        return $this->updateTaskEntity($task, $requestData, false, $ids);
+        return $this->updateTaskEntity($task, $requestData, true, $ids);
     }
 
     /**
@@ -1175,9 +1187,15 @@ class TaskController extends ApiBaseController
      *        },
      *       "_links":
      *       {
-     *         "put": "/api/v1/task-bundle/tasks/1/project/all/user/all",
-     *         "patch": "/api/v1/task-bundle/tasks/1/project/all/user/all",
-     *         "delete": "/api/v1/task-bundle/tasks/1"
+     *         "put: task": "/api/v1/task-bundle/tasks/11970",
+     *         "patch: task": "/api/v1/task-bundle/tasks/11970",
+     *         "delete": "/api/v1/task-bundle/tasks/11970",
+     *         "put: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "patch: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "put: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "patch: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "put: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313",
+     *         "patch: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313"
      *       }
      *    }
      *
@@ -1247,6 +1265,8 @@ class TaskController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
+        $requestData = $request->request->all();
+
         // Check if project and requested user exists
         if ($projectId) {
             $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
@@ -1264,6 +1284,7 @@ class TaskController extends ApiBaseController
             }
             $task->setProject($project);
             $taskProjectId = $projectId;
+            unset($requestData['projectId']);
         } elseif ($task->getProject()) {
             $taskProjectId = $task->getProject()->getId();
         } else {
@@ -1281,13 +1302,13 @@ class TaskController extends ApiBaseController
 
             $task->setRequestedBy($requestedUser);
             $requesterTaskId = $requestedUserId;
+            unset($requestData['requestedUserId']);
         } else {
             $requesterTaskId = $task->getRequestedBy()->getId();
         }
 
-        $requestData = $request->request->all();
         $ids = [
-            'id' => $task->getId(),
+            'id' => $id,
             'projectId' => $taskProjectId,
             'requesterId' => $requesterTaskId
         ];
@@ -1417,9 +1438,15 @@ class TaskController extends ApiBaseController
      *        },
      *       "_links":
      *       {
-     *         "put": "/api/v1/task-bundle/tasks/1/project/all/user/all",
-     *         "patch": "/api/v1/task-bundle/tasks/1/project/all/user/all",
-     *         "delete": "/api/v1/task-bundle/tasks/1"
+     *         "put: task": "/api/v1/task-bundle/tasks/11970",
+     *         "patch: task": "/api/v1/task-bundle/tasks/11970",
+     *         "delete": "/api/v1/task-bundle/tasks/11970",
+     *         "put: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "patch: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "put: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "patch: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "put: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313",
+     *         "patch: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313"
      *       }
      *    }
      *
@@ -1489,6 +1516,8 @@ class TaskController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
+        $requestData = $request->request->all();
+
         // Check if project and requested user exists
         if ($projectId) {
             $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
@@ -1506,6 +1535,7 @@ class TaskController extends ApiBaseController
             }
             $task->setProject($project);
             $taskProjectId = $projectId;
+            unset($requestData['projectId']);
         } elseif ($task->getProject()) {
             $taskProjectId = $task->getProject()->getId();
         } else {
@@ -1514,22 +1544,20 @@ class TaskController extends ApiBaseController
 
         if ($requestedUserId) {
             $requestedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requestedUserId);
-
             if (!$requestedUser instanceof User) {
                 return $this->createApiResponse([
                     'message' => 'Requested user with requested Id does not exist!',
                 ], StatusCodesHelper::NOT_FOUND_CODE);
             }
-
             $task->setRequestedBy($requestedUser);
             $requesterTaskId = $requestedUserId;
+            unset($requestData['requestedUserId']);
         } else {
             $requesterTaskId = $task->getRequestedBy()->getId();
         }
 
-        $requestData = $request->request->all();
         $ids = [
-            'id' => $task->getId(),
+            'id' => $id,
             'projectId' => $taskProjectId,
             'requesterId' => $requesterTaskId
         ];
@@ -1603,18 +1631,28 @@ class TaskController extends ApiBaseController
     {
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
+        $requestDetailData = false;
+        if (isset($requestData['task_data']) && count($requestData['task_data']) > 0) {
+            $requestDetailData = $requestData['task_data'];
+            unset($requestData['task_data']);
+        }
+
         $errors = $this->get('entity_processor')->processEntity($task, $requestData);
 
         if (false === $errors) {
             $this->getDoctrine()->getManager()->persist($task);
             $this->getDoctrine()->getManager()->flush();
 
+            if (!$ids['id']) {
+                $ids['id'] = $task->getId();
+            }
+
             /**
              * Fill TaskData Entity if some of its parameters were sent
              */
-            if (isset($requestData['task_data']) && count($requestData['task_data']) > 0) {
+            if ($requestDetailData) {
                 /** @var array $taskData */
-                $taskData = $requestData['task_data'];
+                $taskData = $requestDetailData;
                 foreach ($taskData as $key => $value) {
                     $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($key);
                     if ($taskAttribute instanceof TaskAttribute) {

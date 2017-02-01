@@ -16,7 +16,7 @@ class TaskControllerTest extends ApiTestCase
     const BASE_URL = '/api/v1/task-bundle/tasks';
 
     /**
-     * GET LIST - success with filters: PROJECT, CREATOR, REQUESTED
+     * GET LIST - success
      *
      * @return array
      */
@@ -26,10 +26,6 @@ class TaskControllerTest extends ApiTestCase
 
         $userUser = $this->em->getRepository('APICoreBundle:User')->findOneBy([
             'username' => 'user'
-        ]);
-
-        $task = $this->em->getRepository('APITaskBundle:Task')->findOneBy([
-            'title' => 'Task 1 - user is creator, user is requested'
         ]);
 
         $status = $this->em->getRepository('APITaskBundle:Status')->findOneBy([
@@ -111,20 +107,55 @@ class TaskControllerTest extends ApiTestCase
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Load list of data of Task Entity as Admin with filter: addedAttribute
-        $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1addedParameters=32=select1',
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '?page=1&addedParameters=32=select1',
+            [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     * GET LIST OF TASKS BASED ON EXISTED FILTER - success
+     *
+     * @return array
+     */
+    public function testListSavedFilterSuccess()
+    {
+        $filter = $this->em->getRepository('APITaskBundle:Filter')->findOneBy([
+            'title' => 'DO IT'
+        ]);
+
+        // Load list of data of Task Entity as Admin
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/filter/' . $filter->getId(),
             [], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-
+        // We expect at least one Entity, response has to include array with data and _links param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertTrue(array_key_exists('data', $response));
     }
 
     /**
-     * GET LIST - errors
+     * GET LIST OF TASKS BASED ON EXISTED FILTER - errors
+     *
+     * @return array
      */
-    public function testListErrors()
+    public function testListSavedFilterErrors()
     {
+        $filter = $this->em->getRepository('APITaskBundle:Filter')->findOneBy([
+            'title' => 'DO IT'
+        ]);
 
+        // Try to Load list of data of Task Entity as Admin without authorization header
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/filter/' . $filter->getId(),
+            [], [], []);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to Load list of data of Task Entity based on not existed filter
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/filter/12547' . $filter->getId(),
+            [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
 
     /**
@@ -154,11 +185,11 @@ class TaskControllerTest extends ApiTestCase
         ]);
 
         $adminUser = $this->em->getRepository('APICoreBundle:User')->findOneBy([
-            'username' => 'user'
+            'username' => 'admin'
         ]);
 
         // Create Base Entity without setting of Project or Requested user
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/all/user/all', $data, [],
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), $data, [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
@@ -167,8 +198,30 @@ class TaskControllerTest extends ApiTestCase
         $this->assertTrue(array_key_exists('data', $response));
         $this->assertTrue(array_key_exists('_links', $response));
 
-        // Create Base Entity without setting of Project or Requested user
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminsProject->getId() . '/user/' . $adminUser->getId(),
+        // Create Base Entity with project
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminsProject->getId(),
+            $data, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect Entity, response has to include array with data and _links param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertTrue(array_key_exists('data', $response));
+        $this->assertTrue(array_key_exists('_links', $response));
+
+        // Create Base Entity with requester
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/requester/' . $adminUser->getId(),
+            $data, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect Entity, response has to include array with data and _links param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertTrue(array_key_exists('data', $response));
+        $this->assertTrue(array_key_exists('_links', $response));
+
+        // Create Base Entity with project and requester
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminsProject->getId() . '/requester/' . $adminUser->getId(),
             $data, [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
@@ -191,27 +244,26 @@ class TaskControllerTest extends ApiTestCase
         ]);
 
         // Try to create test Entity, without authorization header
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/all/user/all', $data);
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), $data);
         $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Try to create Entity with ROLE_USER which hasn't permission to this action
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/all/user/all', $data, [],
+        // Try to create Task with ROLE_USER in not allowed Project
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminProject->getId(), $data, [],
             ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Try to create Task in not existed Project, Requested to not existed user
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/125478/user/abds', $data, [],
+        // Try to create Task in not existed Project
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/125478', $data, [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Try to create Task with ROLE_USER in not allowed Project
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $adminProject->getId() . '/user/all',
-            $data, [],
-            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
-        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+        // Try to create Task in not existed Requester
+        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/requester/125478', $data, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to create Task with invalid parameter title (title is required)
-        $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/all/user/all', ['description' => 'desc'], [],
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), ['description' => 'desc'], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
@@ -233,18 +285,26 @@ class TaskControllerTest extends ApiTestCase
             'username' => 'testuser2'
         ]);
 
-        // Update Base Task Entity: POST method (as admin)
-        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/project/all/user/all',
-            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        // Update Base Task Entity: PUT method (as admin)
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(),
+            $data, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Update Project of Task Entity: POST method (as admin)
-        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/project/' . $adminProject->getId() . '/user/all',
-            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        // Update Project of Task Entity: PUT method (as admin)
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/project/' . $adminProject->getId(),
+            $data, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Update Requested user of Task Entity: POST method (as admin)
-        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/project/' . $adminProject->getId() . '/user/' . $userUser->getId(),
+        // Update Requester of Task Entity: PUT method (as admin)
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/requester/' . $userUser->getId(),
+            $data, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Update Requested user of Task Entity: PUT method (as admin)
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/project/' . $adminProject->getId() . '/requester/' . $userUser->getId(),
             $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
@@ -267,17 +327,25 @@ class TaskControllerTest extends ApiTestCase
         ]);
 
         // Update Base Task Entity: PATCH method (as admin)
-        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/project/all/user/all',
-            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(),
+            $data, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Update Project of Task Entity: POST method (as admin)
-        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/project/' . $adminProject->getId() . '/user/all',
-            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        // Update Project of Task Entity: PATCH method (as admin)
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/project/' . $adminProject->getId(),
+            $data, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Update Requested user of Task Entity: POST method (as admin)
-        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/project/' . $adminProject->getId() . '/user/' . $userUser->getId(),
+        // Update Requester of Task Entity: PATCH method (as admin)
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/requester/' . $userUser->getId(),
+            $data, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Update Requested user of Task Entity: PATCH method (as admin)
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/project/' . $adminProject->getId() . '/requester/' . $userUser->getId(),
             $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
@@ -293,26 +361,31 @@ class TaskControllerTest extends ApiTestCase
         $entity = $this->findOneAdminEntity();
 
         // Try to update test Entity without authorization header: method PUT
-        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/project/all/user/all', $data);
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(), $data);
         $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to update test Entity with not existed ID: method PUT (as admin)
-        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/1125874' . '/project/all/user/all',
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/1125874',
             $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to update test Entity with not existed ID of requested Project : method PUT (as admin)
-        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/project/125789/user/all',
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/project/125789',
+            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update test Entity with not existed ID of Requester : method PUT (as admin)
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/requester/125789',
             $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to update test Entity with ROLE_USER which hasn't permission to this action
-        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/project/all/user/all',
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(),
             $data, [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to update test Entity with invalid parameter task_data (not existed type of task attribute)
-        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId() . '/project/all/user/all',
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(),
             $data2, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
@@ -325,29 +398,34 @@ class TaskControllerTest extends ApiTestCase
         $data = $this->returnUpdateTestData();
         $data2 = $this->returnWrongTestData();
 
-        $entity = $this->findOneEntity();
+        $entity = $this->findOneAdminEntity();
 
-        // Try to update test Entity without authorization header: method PUT
-        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/project/all/user/all', $data);
+        // Try to update test Entity without authorization header: method PATCH
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(), $data);
         $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Try to update test Entity with not existed ID: method PUT (as admin)
-        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/1125874' . '/project/all/user/all',
-            [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        // Try to update test Entity with not existed ID: method PATCH (as admin)
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/1125874',
+            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Try to update test Entity with not existed ID of requested Project : method PUT (as admin)
-        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/project/125789/user/all',
+        // Try to update test Entity with not existed ID of requested Project : method PATCH (as admin)
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/project/125789',
+            $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to update test Entity with not existed ID of Requester : method PATCH (as admin)
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/requester/125789',
             $data, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to update test Entity with ROLE_USER which hasn't permission to this action
-        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/project/all/user/all',
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(),
             $data, [], ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to update test Entity with invalid parameter task_data (not existed type of task attribute)
-        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId() . '/project/all/user/all',
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(),
             $data2, [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
     }

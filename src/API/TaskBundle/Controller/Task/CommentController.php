@@ -491,6 +491,10 @@ class CommentController extends ApiBaseController
             return $this->createApiResponse($commentArray, StatusCodesHelper::CREATED_CODE);
         }
 
-        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        $data = [
+            'errors' => $errors,
+            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+        ];
+        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

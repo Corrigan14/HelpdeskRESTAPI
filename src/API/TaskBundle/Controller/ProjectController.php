@@ -943,7 +943,11 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             return $this->createApiResponse($response, $statusCode);
         }
 
-        return $this->invalidParametersResponse();
+        $data = [
+            'errors' => $errors,
+            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+        ];
+        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 
     /**
@@ -982,7 +986,6 @@ class ProjectController extends ApiBaseController implements ControllerInterface
         $errors = $this->get('entity_processor')->processEntity($userHasProject, $requestData);
 
         if (false === $errors) {
-
             $this->getDoctrine()->getManager()->persist($userHasProject);
             $this->getDoctrine()->getManager()->flush();
 
@@ -990,6 +993,10 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             return $this->createApiResponse($response, $statusCode);
         }
 
-        return $this->invalidParametersResponse();
+        $data = [
+            'errors' => $errors,
+            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+        ];
+        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

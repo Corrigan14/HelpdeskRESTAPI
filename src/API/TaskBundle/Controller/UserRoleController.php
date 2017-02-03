@@ -843,6 +843,10 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
             return $this->createApiResponse($this->get('user_role_service')->getUserRoleResponse($userRole), $statusCode);
         }
 
-        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        $data = [
+            'errors' => $errors,
+            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+        ];
+        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

@@ -1692,7 +1692,11 @@ class TaskController extends ApiBaseController
             return $this->json(array_merge($responseData, $responseLinks), $statusCode);
         }
 
-        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        $data = [
+            'errors' => $errors,
+            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+        ];
+        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 
     /**

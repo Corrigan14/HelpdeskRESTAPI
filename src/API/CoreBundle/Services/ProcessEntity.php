@@ -75,8 +75,6 @@ class ProcessEntity
                 $method = str_replace('_', '', $method);
                 $m = 'set' . $method;
                 $entity->$m($value);
-            } elseif ("_format" !== $method) {
-                $message[] = $method . ' is not a valid parameter!';
             }
         }
 

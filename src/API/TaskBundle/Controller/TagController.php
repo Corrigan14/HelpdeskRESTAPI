@@ -537,6 +537,10 @@ class TagController extends ApiBaseController implements ControllerInterface
             return $this->createApiResponse($this->get('api_base.service')->getEntityResponse($tag, 'tag'), $statusCode);
         }
 
-        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        $data = [
+            'errors' => $errors,
+            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+        ];
+        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

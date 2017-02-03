@@ -176,8 +176,18 @@ tasks_assign_user_to_task:
             taskId: '\d+'
             userId: '\d+'
 
+tasks_assign_user_to_task_with_specific_status:
+    path:     /tasks/{taskId}/assign-user/{userId}/status/{statusId}
+    defaults: { _controller: APITaskBundle:Task/Assign:createAssignUserToTask}
+    methods: [POST]
+    requirements:
+            taskId: '\d+'
+            userId: '\d+'
+            statusId: '\d+'
+
 tasks_update_assign_user_to_task:
     path:     /tasks/{taskId}/assign-user/{userId}/status/{statusId}
+    defaults: { _controller: APITaskBundle:Task/Assign:updateAssignUserToTask}
     defaults: { _controller: APITaskBundle:Task/Assign:updateAssignUserToTask}
     methods: [PATCH]
     requirements:

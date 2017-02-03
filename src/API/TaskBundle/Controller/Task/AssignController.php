@@ -123,33 +123,142 @@ class AssignController extends ApiBaseController
     /**
      * ### Response ###
      *      {
-     *         "0":
-     *         {
-     *           "id": 17,
-     *           "username": "user",
-     *           "email": "user@user.sk",
-     *           "roles": "[\"ROLE_USER\"]",
-     *           "is_active": true,
-     *           "acl": "[]",
-     *           "company": ⊕{...},
-     *           "followed_tasks": {}
-     *         },
-     *         "1":
-     *         {
-     *           "id": 18,
-     *           "username": "testuser2",
-     *           "email": "testuser2@user.sk",
-     *           "roles": "[\"ROLE_USER\"]",
-     *           "is_active": true,
-     *           "acl": "[]",
-     *           "company": ⊕{...},
-     *           "followed_tasks": {}
-     *         }
-     *      }
+     *        "data":
+     *        {
+     *           "id": 2991,
+     *           "title": "test 258",
+     *           "description": "Description of Task 1",
+     *           "deadline": null,
+     *           "startedAt": null,
+     *           "closedAt": null,
+     *           "important": false,
+     *           "createdAt":
+     *           {
+     *               "date": "2017-01-26 12:21:59.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *           },
+     *           "updatedAt":
+     *           {
+     *               "date": "2017-01-26 14:34:48.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *           "taskData": [],
+     *           "project":
+     *           {
+     *              "id": 6,
+     *              "title": "Project of user 1",
+     *              "description": "Description of project 1.",
+     *              "is_active": false,
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-01-26 12:21:59.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                  "date": "2017-01-26 12:21:59.000000",
+     *                  "timezone_type": 3,
+     *                  "timezone": "Europe/Berlin"
+     *               }
+     *           },
+     *           "createdBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null,
+     *              "company":
+     *              {
+     *                 "id": 4,
+     *                 "title": "LanSystems",
+     *                 "ico": "110258782",
+     *                 "dic": "12587458996244",
+     *                 "ic_dph": null,
+     *                 "street": "Ina cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true
+     *              }
+     *           },
+     *           "requestedBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null
+     *           },
+     *           "taskHasAssignedUsers":
+     *           [
+     *              {
+     *                  "id": 2,
+     *                  "status_date": null,
+     *                  "time_spent": null,
+     *                  "createdAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "status":
+     *                  {
+     *                     "id": 7,
+     *                     "title": "Completed",
+     *                     "description": "Completed task",
+     *                     "color": "#FF4500",
+     *                     "is_active": true
+     *                  },
+     *                  "user":
+     *                  {
+     *                     "id": 109,
+     *                     "username": "user",
+     *                     "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *                     "email": "user@user.sk",
+     *                     "roles": "[\"ROLE_USER\"]",
+     *                     "is_active": true,
+     *                     "language": "AJ",
+     *                     "image": null
+     *                  }
+     *              }
+     *           ]
+     *        },
+     *       "_links":
+     *       {
+     *         "put: task": "/api/v1/task-bundle/tasks/11970",
+     *         "patch: task": "/api/v1/task-bundle/tasks/11970",
+     *         "delete": "/api/v1/task-bundle/tasks/11970",
+     *         "put: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "patch: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "put: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "patch: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "put: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313",
+     *         "patch: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313"
+     *       }
+     *    }
      *
      * @ApiDoc(
-     *  description="Assign task to the user - create taskHasAssignedUser Entity. Status of this task is set to StatusOption: NEW.
-     *  Returns array of users assigned to task",
+     *  description="Assign task to the user - create taskHasAssignedUser Entity.
+     *  Status of this task is set to StatusOption: NEW or requested Status.
+     *  Returns processed task",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -185,13 +294,14 @@ class AssignController extends ApiBaseController
      * @param Request $request
      * @param int $taskId
      * @param int $userId
+     * @param int|bool $statusId
      * @return Response
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function createAssignUserToTaskAction(Request $request, int $taskId, int $userId)
+    public function createAssignUserToTaskAction(Request $request, int $taskId, int $userId, $statusId = false)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
@@ -218,22 +328,35 @@ class AssignController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
-        if ($this->canAssignUserToTask($task, $user)) {
+        if ($statusId) {
+            $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($statusId);
+
+            if (!$status instanceof Status) {
+                return $this->createApiResponse([
+                    'message' => 'Status with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+        } else {
             $newStatus = $this->getDoctrine()->getRepository('APITaskBundle:Status')->findOneBy([
                 'title' => StatusOptions::NEW,
             ]);
-            if ($newStatus instanceof Status) {
-                $taskHasAssignedUser = new TaskHasAssignedUser();
-                $taskHasAssignedUser->setTask($task);
-                $taskHasAssignedUser->setStatus($newStatus);
-                $taskHasAssignedUser->setUser($user);
-
-                $requestData = $request->request->all();
-                return $this->updateTaskHasAssignUserEntity($taskHasAssignedUser, $requestData, true);
+            if (!$newStatus instanceof Status) {
+                return $this->createApiResponse([
+                    'message' => 'New Status Entity does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }else{
+                $status = $newStatus;
             }
-            return $this->createApiResponse([
-                'message' => 'New Status Entity does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        if ($this->canAssignUserToTask($task, $user)) {
+            $taskHasAssignedUser = new TaskHasAssignedUser();
+            $taskHasAssignedUser->setTask($task);
+            $taskHasAssignedUser->setStatus($status);
+            $taskHasAssignedUser->setUser($user);
+
+            $requestData = $request->request->all();
+            return $this->updateTaskHasAssignUserEntity($taskHasAssignedUser, $requestData, true);
         }
 
         return $this->createApiResponse([
@@ -244,33 +367,142 @@ class AssignController extends ApiBaseController
     /**
      * ### Response ###
      *      {
-     *         "0":
-     *         {
-     *           "id": 17,
-     *           "username": "user",
-     *           "email": "user@user.sk",
-     *           "roles": "[\"ROLE_USER\"]",
-     *           "is_active": true,
-     *           "acl": "[]",
-     *           "company": ⊕{...},
-     *           "followed_tasks": {}
-     *         },
-     *         "1":
-     *         {
-     *           "id": 18,
-     *           "username": "testuser2",
-     *           "email": "testuser2@user.sk",
-     *           "roles": "[\"ROLE_USER\"]",
-     *           "is_active": true,
-     *           "acl": "[]",
-     *           "company": ⊕{...},
-     *           "followed_tasks": {}
-     *         }
-     *      }
+     *        "data":
+     *        {
+     *           "id": 2991,
+     *           "title": "test 258",
+     *           "description": "Description of Task 1",
+     *           "deadline": null,
+     *           "startedAt": null,
+     *           "closedAt": null,
+     *           "important": false,
+     *           "createdAt":
+     *           {
+     *               "date": "2017-01-26 12:21:59.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *           },
+     *           "updatedAt":
+     *           {
+     *               "date": "2017-01-26 14:34:48.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *           "taskData": [],
+     *           "project":
+     *           {
+     *              "id": 6,
+     *              "title": "Project of user 1",
+     *              "description": "Description of project 1.",
+     *              "is_active": false,
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-01-26 12:21:59.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                  "date": "2017-01-26 12:21:59.000000",
+     *                  "timezone_type": 3,
+     *                  "timezone": "Europe/Berlin"
+     *               }
+     *           },
+     *           "createdBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null,
+     *              "company":
+     *              {
+     *                 "id": 4,
+     *                 "title": "LanSystems",
+     *                 "ico": "110258782",
+     *                 "dic": "12587458996244",
+     *                 "ic_dph": null,
+     *                 "street": "Ina cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true
+     *              }
+     *           },
+     *           "requestedBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null
+     *           },
+     *           "taskHasAssignedUsers":
+     *           [
+     *              {
+     *                  "id": 2,
+     *                  "status_date": null,
+     *                  "time_spent": null,
+     *                  "createdAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "status":
+     *                  {
+     *                     "id": 7,
+     *                     "title": "Completed",
+     *                     "description": "Completed task",
+     *                     "color": "#FF4500",
+     *                     "is_active": true
+     *                  },
+     *                  "user":
+     *                  {
+     *                     "id": 109,
+     *                     "username": "user",
+     *                     "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *                     "email": "user@user.sk",
+     *                     "roles": "[\"ROLE_USER\"]",
+     *                     "is_active": true,
+     *                     "language": "AJ",
+     *                     "image": null
+     *                  }
+     *              }
+     *           ]
+     *        },
+     *       "_links":
+     *       {
+     *         "put: task": "/api/v1/task-bundle/tasks/11970",
+     *         "patch: task": "/api/v1/task-bundle/tasks/11970",
+     *         "delete": "/api/v1/task-bundle/tasks/11970",
+     *         "put: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "patch: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "put: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "patch: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "put: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313",
+     *         "patch: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313"
+     *       }
+     *    }
      *
      * @ApiDoc(
-     *  description="Update taskHasAssignedUser Entity. Just status, time spent and status date could be updated!
-     *  Returns array of users assigned to task",
+     *  description="Assign task to the user - create taskHasAssignedUser Entity.
+     *  Status of this task is set to StatusOption: NEW or requested Status.
+     *  Returns processed task",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -370,17 +602,33 @@ class AssignController extends ApiBaseController
             $this->getDoctrine()->getManager()->persist($status);
             $this->getDoctrine()->getManager()->flush();
 
-            $assignedUsersArray = $this->getArrayOfUsersAssignedToTask($task);
-            return $this->createApiResponse($assignedUsersArray, StatusCodesHelper::SUCCESSFUL_CODE);
+            if ($task->getProject()) {
+                $projectId = $task->getProject()->getId();
+            } else {
+                $projectId = false;
+            }
+            $ids = [
+                'id' => $taskId,
+                'projectId' => $projectId,
+                'requesterId' => $task->getRequestedBy()->getId(),
+            ];
+            $response = $this->get('task_service')->getTaskResponse($ids);
+            $responseData['data'] = $response['data'][0];
+            $responseLinks['_links'] = $response['_links'];
+
+            return $this->json(array_merge($responseData, $responseLinks), StatusCodesHelper::SUCCESSFUL_CODE);
         }
 
-        return $this->createApiResponse($errors, StatusCodesHelper::INVALID_PARAMETERS_CODE);
-
+        $data = [
+            'errors' => $errors,
+            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+        ];
+        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 
     /**
      * @ApiDoc(
-     *  description="Delete taskHasAssignedUser Entity.",
+     *  description="Delete taskHasAssignedUser Entity. Returns Task.",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -451,9 +699,21 @@ class AssignController extends ApiBaseController
         $this->getDoctrine()->getManager()->remove($taskHasAssignedEntity);
         $this->getDoctrine()->getManager()->flush();
 
+        if ($task->getProject()) {
+            $projectId = $task->getProject()->getId();
+        } else {
+            $projectId = false;
+        }
+        $ids = [
+            'id' => $taskId,
+            'projectId' => $projectId,
+            'requesterId' => $task->getRequestedBy()->getId(),
+        ];
+        $response = $this->get('task_service')->getTaskResponse($ids);
+        $responseData['data'] = $response['data'][0];
+        $responseLinks['_links'] = $response['_links'];
 
-        $assignedUsersArray = $this->getArrayOfUsersAssignedToTask($task);
-        return $this->createApiResponse($assignedUsersArray, StatusCodesHelper::DELETED_CODE);
+        return $this->json(array_merge($responseData, $responseLinks), StatusCodesHelper::DELETED_CODE);
     }
 
     /**
@@ -498,8 +758,21 @@ class AssignController extends ApiBaseController
             $this->getDoctrine()->getManager()->persist($user);
             $this->getDoctrine()->getManager()->flush();
 
-            $assignedUsersArray = $this->getArrayOfUsersAssignedToTask($task);
-            return $this->createApiResponse($assignedUsersArray, $statusCode);
+            if ($task->getProject()) {
+                $projectId = $task->getProject()->getId();
+            } else {
+                $projectId = false;
+            }
+            $ids = [
+                'id' => $task->getId(),
+                'projectId' => $projectId,
+                'requesterId' => $task->getRequestedBy()->getId(),
+            ];
+            $response = $this->get('task_service')->getTaskResponse($ids);
+            $responseData['data'] = $response['data'][0];
+            $responseLinks['_links'] = $response['_links'];
+
+            return $this->json(array_merge($responseData, $responseLinks), $statusCode);
         }
 
         $data = [

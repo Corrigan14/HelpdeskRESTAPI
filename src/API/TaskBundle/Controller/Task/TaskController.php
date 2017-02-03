@@ -1686,36 +1686,35 @@ class TaskController extends ApiBaseController
         // Control Date time objects: started_at, closed_at, deadline
         // Expected Date is in string format: Day/Month/Year Hours:Minutes:Seconds
         if (isset($requestData['started_at'])) {
-
             try {
                 $startedAtDateTimeObject = new \Datetime($requestData['started_at']);
                 $task->setStartedAt($startedAtDateTimeObject);
                 unset($requestData['started_at']);
             } catch (\Exception $e) {
                 return $this->createApiResponse([
-                    'message' => 'started_at parameter is not in a valid format! Expected format: Day/Month/Year Hours:Minutes:Seconds' ,
+                    'message' => 'started_at parameter is not in a valid format! Expected format: Unix' ,
                 ] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
             }
         }
         if (isset($requestData['closed_at'])) {
-            $startedAtDateTimeObject = \DateTime::createFromFormat('d/m/Y H:i:s' , $requestData['closed_at']);
-            if ($startedAtDateTimeObject instanceof \DateTime) {
-                $task->setStartedAt($startedAtDateTimeObject);
+            try {
+                $startedAtDateTimeObject = new \Datetime($requestData['closed_at']);
+                $task->setClosedAt($startedAtDateTimeObject);
                 unset($requestData['closed_at']);
-            } else {
+            } catch (\Exception $e) {
                 return $this->createApiResponse([
-                    'message' => 'closed_at parameter is not in a valid format! Expected format: Day/Month/Year Hours:Minutes:Seconds' ,
+                    'message' => 'closed_at parameter is not in a valid format! Expected format: Unix' ,
                 ] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
             }
         }
         if (isset($requestData['deadline'])) {
-            $startedAtDateTimeObject = \DateTime::createFromFormat('d/m/Y H:i:s' , $requestData['deadline']);
-            if ($startedAtDateTimeObject instanceof \DateTime) {
-                $task->setStartedAt($startedAtDateTimeObject);
+            try {
+                $startedAtDateTimeObject = new \Datetime($requestData['deadline']);
+                $task->setDeadline($startedAtDateTimeObject);
                 unset($requestData['deadline']);
-            } else {
+            } catch (\Exception $e) {
                 return $this->createApiResponse([
-                    'message' => 'deadline parameter is not in a valid format! Expected format: Day/Month/Year Hours:Minutes:Seconds' ,
+                    'message' => 'deadline parameter is not in a valid format! Expected format: Unix' ,
                 ] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
             }
         }

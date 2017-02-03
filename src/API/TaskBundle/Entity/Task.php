@@ -49,6 +49,7 @@ class Task
      * @var \DateTime
      *
      * @ORM\Column(name="deadline", type="datetime", nullable=true)
+     * @Assert\DateTime(message="Deadline has to be a correct Date Time object")
      */
     private $deadline;
 
@@ -56,6 +57,7 @@ class Task
      * @var \DateTime
      *
      * @ORM\Column(name="started_at", type="datetime", nullable=true)
+     * @Assert\DateTime(message="started_at has to be a correct Date Time object")
      */
     private $startedAt;
 
@@ -63,6 +65,7 @@ class Task
      * @var \DateTime
      *
      * @ORM\Column(name="closed_at", type="datetime", nullable=true)
+     * @Assert\DateTime(message="closed_at has to be a correct Date Time object")
      */
     private $closedAt;
 

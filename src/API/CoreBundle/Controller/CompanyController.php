@@ -717,6 +717,36 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      */
     private function updateCompany($company, array $requestData, $create = false)
     {
+        $allowedCompanyEntityParams = [
+            'title',
+            'ico',
+            'dic',
+            'ic_dph',
+            'street',
+            'city',
+            'zip',
+            'country'
+        ];
+
+        $requestDetailData = [];
+        if (isset($requestData['company_data']) && count($requestData['company_data']) > 0) {
+            $requestDetailData = $requestData['company_data'];
+            unset($requestData['company_data']);
+        }
+
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
+        }
+
+        foreach ($requestData as $key => $value) {
+            if (!in_array($key, $allowedCompanyEntityParams, true)) {
+                return $this->createApiResponse(
+                    ['message' => $key . ' is not allowed parameter for Company Entity!'],
+                    StatusCodesHelper::INVALID_PARAMETERS_CODE
+                );
+            }
+        }
+
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         if (null === $company || !$company instanceof Company) {
@@ -732,9 +762,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
             /**
              * Fill CompanyData Entity if some its parameters were sent
              */
-            if (isset($requestData['company_data']) && count($requestData['company_data']) > 0) {
+            if ($requestDetailData) {
                 /** @var array $companyData */
-                $companyData = $requestData['company_data'];
+                $companyData = $requestDetailData;
                 foreach ($companyData as $key => $value) {
                     $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($key);
 

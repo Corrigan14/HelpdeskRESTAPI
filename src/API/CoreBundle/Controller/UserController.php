@@ -1184,16 +1184,67 @@ class UserController extends ApiBaseController
      */
     private function updateUser($user, array $requestData, $create = false)
     {
+        $allowedUserEntityParams = [
+            'username',
+            'password',
+            'email',
+            'language',
+            'image'
+        ];
+
+        $alowedUserDetailDataParams = [
+            'name',
+            'surname',
+            'title_before',
+            'title_after',
+            'function',
+            'mobile',
+            'tel',
+            'fax',
+            'signature',
+            'street',
+            'city',
+            'zip',
+            'country',
+            'facebook',
+            'twitter',
+            'linkdin',
+            'google'
+        ];
+
+        $requestDetailData = [];
+        if (isset($requestData['detail_data']) && count($requestData['detail_data']) > 0) {
+            $requestDetailData = $requestData['detail_data'];
+            unset($requestData['detail_data']);
+        }
+
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
+        }
+
+        foreach ($requestData as $key => $value) {
+            if (!in_array($key, $allowedUserEntityParams, true)) {
+                return $this->createApiResponse(
+                    ['message' => $key . ' is not allowed parameter for User Entity!'],
+                    StatusCodesHelper::INVALID_PARAMETERS_CODE
+                );
+            }
+        }
+
+        foreach ($requestDetailData as $key => $value) {
+            if (!in_array($key, $alowedUserDetailDataParams, true)) {
+                return $this->createApiResponse(
+                    ['message' => $key . ' is not allowed parameter for Detail Data in User Entity!'],
+                    StatusCodesHelper::INVALID_PARAMETERS_CODE
+                );
+            }
+        }
+
+
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         if (null === $user || !$user instanceof User) {
             return $this->notFoundResponse();
-        }
-
-        $requestDetailData = false;
-        if (isset($requestData['detail_data']) && count($requestData['detail_data']) > 0) {
-            $requestDetailData = $requestData['detail_data'];
-            unset($requestData['detail_data']);
         }
 
         $errors = $this->get('entity_processor')->processEntity($user, $requestData);

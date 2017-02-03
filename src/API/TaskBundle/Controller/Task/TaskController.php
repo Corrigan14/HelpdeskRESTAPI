@@ -18,6 +18,7 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
  * Class TaskController
@@ -1629,13 +1630,72 @@ class TaskController extends ApiBaseController
      */
     private function updateTaskEntity(Task $task, array $requestData, $create, array $ids)
     {
-        $statusCode = $this->getCreateUpdateStatusCode($create);
+        $allowedUserEntityParams = [
+            'title',
+            'description',
+            'deadline',
+            'closed_at',
+            'important',
+            'started_at'
+        ];
 
         $requestDetailData = false;
         if (isset($requestData['task_data']) && count($requestData['task_data']) > 0) {
             $requestDetailData = $requestData['task_data'];
             unset($requestData['task_data']);
         }
+
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
+        }
+
+        foreach ($requestData as $key => $value) {
+            if (!in_array($key, $allowedUserEntityParams, true)) {
+                return $this->createApiResponse(
+                    ['message' => $key . ' is not allowed parameter for Task Entity!'],
+                    StatusCodesHelper::INVALID_PARAMETERS_CODE
+                );
+            }
+        }
+
+        // Control Date time objects: started_at, closed_at, deadline
+        // Expected Date is in string format: Day/Month/Year Hours:Minutes:Seconds
+        if (isset($requestData['started_at'])) {
+            $startedAtDateTimeObject = \DateTime::createFromFormat('d/m/Y H:i:s',$requestData['started_at']);
+            if ($startedAtDateTimeObject instanceof \DateTime) {
+                $task->setStartedAt($startedAtDateTimeObject);
+                unset($requestData['started_at']);
+            } else {
+                return $this->createApiResponse([
+                    'message' => 'started_at parameter is not in a valid format! Expected format: Day/Month/Year Hours:Minutes:Seconds',
+                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            }
+        }
+        if (isset($requestData['closed_at'])) {
+            $startedAtDateTimeObject = \DateTime::createFromFormat('d/m/Y H:i:s',$requestData['closed_at']);
+            if ($startedAtDateTimeObject instanceof \DateTime) {
+                $task->setStartedAt($startedAtDateTimeObject);
+                unset($requestData['closed_at']);
+            } else {
+                return $this->createApiResponse([
+                    'message' => 'closed_at parameter is not in a valid format! Expected format: Day/Month/Year Hours:Minutes:Seconds',
+                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            }
+        }
+        if (isset($requestData['deadline'])) {
+            $startedAtDateTimeObject = \DateTime::createFromFormat('d/m/Y H:i:s',$requestData['deadline']);
+            if ($startedAtDateTimeObject instanceof \DateTime) {
+                $task->setStartedAt($startedAtDateTimeObject);
+                unset($requestData['deadline']);
+            } else {
+                return $this->createApiResponse([
+                    'message' => 'deadline parameter is not in a valid format! Expected format: Day/Month/Year Hours:Minutes:Seconds',
+                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            }
+        }
+
+
+        $statusCode = $this->getCreateUpdateStatusCode($create);
 
         $errors = $this->get('entity_processor')->processEntity($task, $requestData);
 

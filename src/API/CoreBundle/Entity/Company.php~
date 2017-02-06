@@ -114,6 +114,14 @@ class Company implements \Serializable
      */
     private $users;
 
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Task", mappedBy="company")
+     * @Serializer\ReadOnly()
+     */
+    private $tasks;
+
 
     /**
      * Company constructor.
@@ -121,6 +129,7 @@ class Company implements \Serializable
     public function __construct()
     {
         $this->users = new ArrayCollection();
+        $this->tasks = new ArrayCollection();
     }
 
     /**

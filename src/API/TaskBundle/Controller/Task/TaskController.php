@@ -204,7 +204,20 @@ class TaskController extends ApiBaseController
      *                      }
      *                  }
      *                }
-     *             ]
+     *             ],
+     *             "company":
+     *             {
+     *                "id": 317,
+     *                "title": "Web-Solutions",
+     *                "ico": "1102587",
+     *                "dic": "12587459644",
+     *                "ic_dph": null,
+     *                "street": "Cesta 125",
+     *                "city": "Bratislava",
+     *                "zip": "021478",
+     *                "country": "Slovenska Republika",
+     *                "is_active": true
+     *             }
      *          }
      *       ],
      *       "_links":
@@ -768,7 +781,35 @@ class TaskController extends ApiBaseController
      *                     "image": null
      *                  }
      *              }
-     *           ]
+     *           ],
+     *           "tags":
+     *           [
+     *             {
+     *                "id": 5,
+     *                "title": "tag1",
+     *                "color": "FFFF66",
+     *                "public": false
+     *             },
+     *             {
+     *               "id": 6,
+     *               "title": "tag2",
+     *               "color": "FFFF66",
+     *               "public": false
+     *             }
+     *           ],
+     *           "company":
+     *           {
+     *              "id": 317,
+     *              "title": "Web-Solutions",
+     *              "ico": "1102587",
+     *              "dic": "12587459644",
+     *              "ic_dph": null,
+     *              "street": "Cesta 125",
+     *              "city": "Bratislava",
+     *              "zip": "021478",
+     *              "country": "Slovenska Republika",
+     *              "is_active": true
+     *           }
      *        },
      *       "_links":
      *       {
@@ -965,7 +1006,35 @@ class TaskController extends ApiBaseController
      *                     "image": null
      *                  }
      *              }
-     *           ]
+     *           ],
+     *           "tags":
+     *           [
+     *             {
+     *                "id": 5,
+     *                "title": "tag1",
+     *                "color": "FFFF66",
+     *                "public": false
+     *             },
+     *             {
+     *               "id": 6,
+     *               "title": "tag2",
+     *               "color": "FFFF66",
+     *               "public": false
+     *             }
+     *           ],
+     *           "company":
+     *           {
+     *              "id": 317,
+     *              "title": "Web-Solutions",
+     *              "ico": "1102587",
+     *              "dic": "12587459644",
+     *              "ic_dph": null,
+     *              "street": "Cesta 125",
+     *              "city": "Bratislava",
+     *              "zip": "021478",
+     *              "country": "Slovenska Republika",
+     *              "is_active": true
+     *           }
      *        },
      *       "_links":
      *       {
@@ -998,6 +1067,12 @@ class TaskController extends ApiBaseController
      *       "dataType"="integer",
      *       "requirement"="\d+",
      *       "description"="The id of user requested task"
+     *     },
+     *     {
+     *       "name"="companyId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of company"
      *     }
      *  },
      *  input={"class"="API\TaskBundle\Entity\Task"},
@@ -1021,6 +1096,7 @@ class TaskController extends ApiBaseController
      * @param Request $request
      * @param bool|int $projectId
      * @param bool|int $requestedUserId
+     * @param bool|int $company
      *
      * @return JsonResponse|Response
      * @throws \InvalidArgumentException
@@ -1028,7 +1104,7 @@ class TaskController extends ApiBaseController
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function createAction(Request $request, $projectId = false, $requestedUserId = false)
+    public function createAction(Request $request, $projectId = false, $requestedUserId = false, $company = false)
     {
         // Check if logged user has ACL to create task
         $aclOptions = [
@@ -1208,7 +1284,35 @@ class TaskController extends ApiBaseController
      *                     "image": null
      *                  }
      *              }
-     *           ]
+     *           ],
+     *           "tags":
+     *           [
+     *             {
+     *                "id": 5,
+     *                "title": "tag1",
+     *                "color": "FFFF66",
+     *                "public": false
+     *             },
+     *             {
+     *               "id": 6,
+     *               "title": "tag2",
+     *               "color": "FFFF66",
+     *               "public": false
+     *             }
+     *           ],
+     *           "company":
+     *           {
+     *              "id": 317,
+     *              "title": "Web-Solutions",
+     *              "ico": "1102587",
+     *              "dic": "12587459644",
+     *              "ic_dph": null,
+     *              "street": "Cesta 125",
+     *              "city": "Bratislava",
+     *              "zip": "021478",
+     *              "country": "Slovenska Republika",
+     *              "is_active": true
+     *           }
      *        },
      *       "_links":
      *       {
@@ -1461,7 +1565,35 @@ class TaskController extends ApiBaseController
      *                     "image": null
      *                  }
      *              }
-     *           ]
+     *           ],
+     *           "tags":
+     *           [
+     *             {
+     *                "id": 5,
+     *                "title": "tag1",
+     *                "color": "FFFF66",
+     *                "public": false
+     *             },
+     *             {
+     *               "id": 6,
+     *               "title": "tag2",
+     *               "color": "FFFF66",
+     *               "public": false
+     *             }
+     *           ],
+     *           "company":
+     *           {
+     *              "id": 317,
+     *              "title": "Web-Solutions",
+     *              "ico": "1102587",
+     *              "dic": "12587459644",
+     *              "ic_dph": null,
+     *              "street": "Cesta 125",
+     *              "city": "Bratislava",
+     *              "zip": "021478",
+     *              "country": "Slovenska Republika",
+     *              "is_active": true
+     *           }
      *        },
      *       "_links":
      *       {
@@ -1778,7 +1910,20 @@ class TaskController extends ApiBaseController
      *               "color": "FFFF66",
      *               "public": false
      *             }
-     *           ]
+     *           ],
+     *           "company":
+     *           {
+     *              "id": 317,
+     *              "title": "Web-Solutions",
+     *              "ico": "1102587",
+     *              "dic": "12587459644",
+     *              "ic_dph": null,
+     *              "street": "Cesta 125",
+     *              "city": "Bratislava",
+     *              "zip": "021478",
+     *              "country": "Slovenska Republika",
+     *              "is_active": true
+     *           }
      *        },
      *       "_links":
      *       {
@@ -1854,8 +1999,7 @@ class TaskController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
-        $requestData = json_decode($request->getContent(),true);
-        dump(($requestData));
+        $requestData = json_decode($request->getContent(), true);
 
         if (isset($requestData['project'])) {
             $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($requestData['project']);

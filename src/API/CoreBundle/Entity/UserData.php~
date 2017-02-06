@@ -167,15 +167,6 @@ class UserData
      */
     private $google;
 
-
-    /**
-     * @ORM\Column(name="language", type="text", nullable=true)
-     * @Assert\Type("string")
-     *
-     * @var string
-     */
-    private $language;
-
     /**
      * @ORM\OneToOne(targetEntity="User", inversedBy="detailData", fetch="EAGER")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="SET NULL")
@@ -527,5 +518,101 @@ class UserData
     public function getCountry()
     {
         return $this->country;
+    }
+
+    /**
+     * Set facebook
+     *
+     * @param string $facebook
+     *
+     * @return UserData
+     */
+    public function setFacebook($facebook)
+    {
+        $this->facebook = $facebook;
+
+        return $this;
+    }
+
+    /**
+     * Get facebook
+     *
+     * @return string
+     */
+    public function getFacebook()
+    {
+        return $this->facebook;
+    }
+
+    /**
+     * Set twitter
+     *
+     * @param string $twitter
+     *
+     * @return UserData
+     */
+    public function setTwitter($twitter)
+    {
+        $this->twitter = $twitter;
+
+        return $this;
+    }
+
+    /**
+     * Get twitter
+     *
+     * @return string
+     */
+    public function getTwitter()
+    {
+        return $this->twitter;
+    }
+
+    /**
+     * Set linkdin
+     *
+     * @param string $linkdin
+     *
+     * @return UserData
+     */
+    public function setLinkdin($linkdin)
+    {
+        $this->linkdin = $linkdin;
+
+        return $this;
+    }
+
+    /**
+     * Get linkdin
+     *
+     * @return string
+     */
+    public function getLinkdin()
+    {
+        return $this->linkdin;
+    }
+
+    /**
+     * Set google
+     *
+     * @param string $google
+     *
+     * @return UserData
+     */
+    public function setGoogle($google)
+    {
+        $this->google = $google;
+
+        return $this;
+    }
+
+    /**
+     * Get google
+     *
+     * @return string
+     */
+    public function getGoogle()
+    {
+        return $this->google;
     }
 }

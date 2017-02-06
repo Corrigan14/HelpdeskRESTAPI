@@ -61,6 +61,14 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             'title' => 'Home',
         ]);
 
+        $webSolCompany = $manager->getRepository('APICoreBundle:Company')->findOneBy([
+            'title' => 'Web-Solutions'
+        ]);
+
+        $lanCompany = $manager->getRepository('APICoreBundle:Company')->findOneBy([
+            'title' => 'LanSystems'
+        ]);
+
         if ($userUser instanceof User && $adminUser instanceof User) {
             $task = new Task();
             $task->setTitle('Task 1');
@@ -78,6 +86,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                 $task->addTag($tagWork);
             }
             $task->addFollower($adminUser);
+            $task->setCompany($webSolCompany);
             $manager->persist($task);
 
             $task = new Task();
@@ -95,6 +104,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             if ($tagFreeTime instanceof Tag) {
                 $task->addTag($tagFreeTime);
             }
+            $task->setCompany($webSolCompany);
             $manager->persist($task);
 
             $task = new Task();
@@ -112,6 +122,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             if ($tagFreeTime instanceof Tag) {
                 $task->addTag($tagFreeTime);
             }
+            $task->setCompany($webSolCompany);
             $manager->persist($task);
 
             for ($numberOfTasks = 4; $numberOfTasks < 1000; $numberOfTasks++) {
@@ -121,6 +132,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                 $task->setImportant(true);
                 $task->setCreatedBy($adminUser);
                 $task->setRequestedBy($adminUser);
+                $task->setCompany($webSolCompany);
                 $manager->persist($task);
             }
 
@@ -131,6 +143,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                 $task->setImportant(true);
                 $task->setCreatedBy($userUser);
                 $task->setRequestedBy($userUser);
+                $task->setCompany($lanCompany);
                 $manager->persist($task);
             }
 
@@ -143,6 +156,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                     $task->setCreatedBy($userUser);
                     $task->setRequestedBy($userUser);
                     $task->setProject($userProject);
+                    $task->setCompany($lanCompany);
                     $manager->persist($task);
                 }
             }

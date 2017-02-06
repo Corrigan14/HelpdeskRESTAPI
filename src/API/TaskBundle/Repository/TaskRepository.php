@@ -33,7 +33,7 @@ class TaskRepository extends EntityRepository
         $dateFilterAddedParams = $options['dateFilterAddedParams'];
 
         $query = $this->createQueryBuilder('task')
-            ->select('task, taskData, taskAttribute, project, createdBy, company, requestedBy, thau, status, assignedUser, creatorDetailData, requesterDetailData')
+            ->select('task, taskData, taskAttribute, project, createdBy, company, requestedBy, thau, status, assignedUser, creatorDetailData, requesterDetailData, tags, taskCompany')
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')
@@ -45,7 +45,9 @@ class TaskRepository extends EntityRepository
             ->leftJoin('requestedBy.detailData', 'requesterDetailData')
             ->leftJoin('task.taskHasAssignedUsers', 'thau')
             ->leftJoin('thau.status', 'status')
-            ->leftJoin('thau.user', 'assignedUser');
+            ->leftJoin('thau.user', 'assignedUser')
+            ->leftJoin('task.tags', 'tags')
+            ->leftJoin('task.company', 'taskCompany');
 
         if (array_key_exists('tags.id', $inFilter)) {
             $query->innerJoin('task.tags', 'tags');
@@ -462,7 +464,7 @@ class TaskRepository extends EntityRepository
     public function getTask(int $taskId)
     {
         $query = $this->createQueryBuilder('task')
-            ->select('task, taskData, taskAttribute, project, createdBy, company, requestedBy, thau, status, assignedUser, creatorDetailData, requesterDetailData, tags')
+            ->select('task, taskData, taskAttribute, project, createdBy, company, requestedBy, thau, status, assignedUser, creatorDetailData, requesterDetailData, tags, taskCompany')
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')
@@ -475,7 +477,8 @@ class TaskRepository extends EntityRepository
             ->leftJoin('task.taskHasAssignedUsers', 'thau')
             ->leftJoin('thau.status', 'status')
             ->leftJoin('thau.user', 'assignedUser')
-            ->leftJoin('task.tags','tags')
+            ->leftJoin('task.tags', 'tags')
+            ->leftJoin('task.company', 'taskCompany')
             ->where('task.id = :taskId')
             ->setParameter('taskId', $taskId);
 

@@ -2,6 +2,7 @@
 
 namespace API\CoreBundle\Entity;
 
+use API\TaskBundle\Entity\Task;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -114,6 +115,14 @@ class Company implements \Serializable
      */
     private $users;
 
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Task", mappedBy="company")
+     * @Serializer\ReadOnly()
+     */
+    private $tasks;
+
 
     /**
      * Company constructor.
@@ -121,6 +130,7 @@ class Company implements \Serializable
     public function __construct()
     {
         $this->users = new ArrayCollection();
+        $this->tasks = new ArrayCollection();
     }
 
     /**
@@ -160,13 +170,15 @@ class Company implements \Serializable
     /**
      * Set ico
      *
-     * @param string $ico
+     * @param  $ico
      *
      * @return Company
      */
     public function setIco($ico)
     {
-        $this->ico = $ico;
+        if ($ico) {
+            $this->ico = $ico;
+        }
 
         return $this;
     }
@@ -184,13 +196,15 @@ class Company implements \Serializable
     /**
      * Set dic
      *
-     * @param string $dic
+     * @param $dic
      *
      * @return Company
      */
     public function setDic($dic)
     {
-        $this->dic = $dic;
+        if ($dic) {
+            $this->dic = $dic;
+        }
 
         return $this;
     }
@@ -208,13 +222,15 @@ class Company implements \Serializable
     /**
      * Set icDph
      *
-     * @param string $icDph
+     * @param $icDph
      *
      * @return Company
      */
     public function setIcDph($icDph)
     {
-        $this->ic_dph = $icDph;
+        if ($icDph) {
+            $this->ic_dph = $icDph;
+        }
 
         return $this;
     }
@@ -410,5 +426,39 @@ class Company implements \Serializable
     public function getUsers()
     {
         return $this->users;
+    }
+
+    /**
+     * Add task
+     *
+     * @param Task $task
+     *
+     * @return Company
+     */
+    public function addTask(Task $task)
+    {
+        $this->tasks[] = $task;
+
+        return $this;
+    }
+
+    /**
+     * Remove task
+     *
+     * @param Task $task
+     */
+    public function removeTask(Task $task)
+    {
+        $this->tasks->removeElement($task);
+    }
+
+    /**
+     * Get tasks
+     *
+     * @return ArrayCollection
+     */
+    public function getTasks()
+    {
+        return $this->tasks;
     }
 }

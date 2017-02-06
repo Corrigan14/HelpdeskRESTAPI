@@ -44,6 +44,38 @@ tasks_create_in_project_with_requester:
         projectId: '\d+'
         requestedUserId: '\d+'
 
+tasks_create_with_company:
+    path:     /tasks/company/{companyId}
+    defaults: { _controller: APITaskBundle:Task/Task:create }
+    methods: [POST]
+    requirements:
+        companyId: '\d+'
+
+tasks_create_with_company_in_project:
+    path:     /tasks/project/{projectId}/company/{companyId}
+    defaults: { _controller: APITaskBundle:Task/Task:create }
+    methods: [POST]
+    requirements:
+        projectId: '\d+'
+        companyId: '\d+'
+
+tasks_create_with_company_and_requester:
+    path:     /tasks/requester/{requestedUserId}/company/{companyId}
+    defaults: { _controller: APITaskBundle:Task/Task:create }
+    methods: [POST]
+    requirements:
+        requestedUserId: '\d+'
+        companyId: '\d+'
+
+tasks_create_in_project_with_company_and_requester:
+    path:     /tasks/project/{projectId}/requester/{requestedUserId}/company/{companyId}
+    defaults: { _controller: APITaskBundle:Task/Task:create }
+    methods: [POST]
+    requirements:
+        projectId: '\d+'
+        requestedUserId: '\d+'
+        companyId: '\d+'
+
 tasks_update:
     path:     /tasks/{id}
     defaults: { _controller: APITaskBundle:Task/Task:update }

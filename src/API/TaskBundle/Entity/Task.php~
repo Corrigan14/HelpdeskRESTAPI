@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Entity;
 
+use API\CoreBundle\Entity\Company;
 use API\CoreBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
@@ -49,6 +50,7 @@ class Task
      * @var \DateTime
      *
      * @ORM\Column(name="deadline", type="datetime", nullable=true)
+     * @Assert\DateTime(message="Deadline has to be a correct Date Time object")
      */
     private $deadline;
 
@@ -56,6 +58,7 @@ class Task
      * @var \DateTime
      *
      * @ORM\Column(name="started_at", type="datetime", nullable=true)
+     * @Assert\DateTime(message="started_at has to be a correct Date Time object")
      */
     private $startedAt;
 
@@ -63,6 +66,7 @@ class Task
      * @var \DateTime
      *
      * @ORM\Column(name="closed_at", type="datetime", nullable=true)
+     * @Assert\DateTime(message="closed_at has to be a correct Date Time object")
      */
     private $closedAt;
 
@@ -72,6 +76,20 @@ class Task
      * @ORM\Column(name="important", type="boolean", options={"default":0})
      */
     private $important;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="work", type="text", nullable=true)
+     */
+    private $work;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="work_time", type="float", nullable=true)
+     */
+    private $workTime;
 
     /**
      * @var User
@@ -149,6 +167,15 @@ class Task
      * @Serializer\ReadOnly()
      */
     private $comments;
+
+    /**
+     * @var Company
+     *
+     * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\Company", inversedBy="tasks")
+     * @ORM\JoinColumn(name="company_id", referencedColumnName="id", nullable=true)
+     * @Serializer\ReadOnly()
+     */
+    private $company;
 
     /**
      * Task constructor.
@@ -591,5 +618,53 @@ class Task
     public function getClosedAt()
     {
         return $this->closedAt;
+    }
+
+    /**
+     * Set work
+     *
+     * @param string $work
+     *
+     * @return Task
+     */
+    public function setWork($work)
+    {
+        $this->work = $work;
+
+        return $this;
+    }
+
+    /**
+     * Get work
+     *
+     * @return string
+     */
+    public function getWork()
+    {
+        return $this->work;
+    }
+
+    /**
+     * Set workTime
+     *
+     * @param $workTime
+     *
+     * @return Task
+     */
+    public function setWorkTime($workTime)
+    {
+        $this->workTime = $workTime;
+
+        return $this;
+    }
+
+    /**
+     * Get workTime
+     *
+     * @return \double
+     */
+    public function getWorkTime()
+    {
+        return $this->workTime;
     }
 }

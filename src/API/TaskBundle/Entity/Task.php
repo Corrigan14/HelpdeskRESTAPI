@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Entity;
 
+use API\CoreBundle\Entity\Company;
 use API\CoreBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
@@ -75,6 +76,20 @@ class Task
      * @ORM\Column(name="important", type="boolean", options={"default":0})
      */
     private $important;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="work", type="text", nullable=true)
+     */
+    private $work;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="work_time", type="float", nullable=true)
+     */
+    private $workTime;
 
     /**
      * @var User
@@ -152,6 +167,15 @@ class Task
      * @Serializer\ReadOnly()
      */
     private $comments;
+
+    /**
+     * @var Company
+     *
+     * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\Company", inversedBy="tasks")
+     * @ORM\JoinColumn(name="company_id", referencedColumnName="id", nullable=false)
+     * @Serializer\ReadOnly()
+     */
+    private $company;
 
     /**
      * Task constructor.
@@ -594,5 +618,77 @@ class Task
     public function getClosedAt()
     {
         return $this->closedAt;
+    }
+
+    /**
+     * Set work
+     *
+     * @param string $work
+     *
+     * @return Task
+     */
+    public function setWork($work)
+    {
+        $this->work = $work;
+
+        return $this;
+    }
+
+    /**
+     * Get work
+     *
+     * @return string
+     */
+    public function getWork()
+    {
+        return $this->work;
+    }
+
+    /**
+     * Set workTime
+     *
+     * @param $workTime
+     *
+     * @return Task
+     */
+    public function setWorkTime($workTime)
+    {
+        $this->workTime = $workTime;
+
+        return $this;
+    }
+
+    /**
+     * Get workTime
+     *
+     * @return \double
+     */
+    public function getWorkTime()
+    {
+        return $this->workTime;
+    }
+
+    /**
+     * Set company
+     *
+     * @param Company $company
+     *
+     * @return Task
+     */
+    public function setCompany(Company $company = null)
+    {
+        $this->company = $company;
+
+        return $this;
+    }
+
+    /**
+     * Get company
+     *
+     * @return Company
+     */
+    public function getCompany()
+    {
+        return $this->company;
     }
 }

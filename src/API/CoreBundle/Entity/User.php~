@@ -86,6 +86,14 @@ class User implements AdvancedUserInterface, \Serializable
     private $is_active = true;
 
     /**
+     * @ORM\Column(name="language", type="string", length=45, nullable=true)
+     * @Assert\Type("string")
+     *
+     * @var string
+     */
+    private $language;
+
+    /**
      * @var UserData
      * @ORM\OneToOne(targetEntity="UserData", mappedBy="user", orphanRemoval=true)
      * @MaxDepth(1)
@@ -227,6 +235,30 @@ class User implements AdvancedUserInterface, \Serializable
     public function getIsActive()
     {
         return $this->is_active;
+    }
+
+    /**
+     * Set language
+     *
+     * @param string $language
+     *
+     * @return User
+     */
+    public function setLanguage($language)
+    {
+        $this->language = $language;
+
+        return $this;
+    }
+
+    /**
+     * Get language
+     *
+     * @return string
+     */
+    public function getLanguage()
+    {
+        return $this->language;
     }
 
     /**
@@ -379,5 +411,15 @@ class User implements AdvancedUserInterface, \Serializable
     public function getCompany()
     {
         return $this->company;
+    }
+
+    /**
+     * Get requestedTasks
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getRequestedTasks()
+    {
+        return $this->requestedTasks;
     }
 }

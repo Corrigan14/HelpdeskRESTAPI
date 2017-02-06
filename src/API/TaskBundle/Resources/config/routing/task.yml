@@ -51,6 +51,13 @@ tasks_update:
     requirements:
             id: '\d+'
 
+tasks_quick_update:
+    path:     /tasks/quick-update/{taskId}
+    defaults: { _controller: APITaskBundle:Task/Task:quickUpdateTask}
+    methods: [PATCH]
+    requirements:
+            taskId: '\d+'
+
 tasks_update_project:
     path:     /tasks/{id}/project/{projectId}
     defaults: { _controller: APITaskBundle:Task/Task:update }

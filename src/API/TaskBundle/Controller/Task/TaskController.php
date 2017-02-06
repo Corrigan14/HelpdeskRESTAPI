@@ -5,9 +5,12 @@ namespace API\TaskBundle\Controller\Task;
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Filter;
 use API\TaskBundle\Entity\Project;
+use API\TaskBundle\Entity\Status;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskAttribute;
 use API\TaskBundle\Entity\TaskData;
+use API\TaskBundle\Entity\TaskHasAssignedUser;
+use API\TaskBundle\Security\StatusOptions;
 use API\TaskBundle\Security\UserRoleAclOptions;
 use API\TaskBundle\Security\VoteOptions;
 use API\TaskBundle\Services\FilterAttributeOptions;
@@ -342,23 +345,23 @@ class TaskController extends ApiBaseController
         $filterData = $this->getFilterData($request);
 
         $options = [
-            'loggedUser'             => $this->getUser() ,
-            'isAdmin'                => $this->get('task_voter')->isAdmin() ,
-            'inFilter'               => $filterData['inFilter'] ,
-            'equalFilter'            => $filterData['equalFilter'] ,
-            'isNullFilter'           => $filterData['isNullFilter'] ,
-            'dateFilter'             => $filterData['dateFilter'] ,
-            'searchFilter'           => $filterData['searchFilter'] ,
-            'notAndCurrentFilter'    => $filterData['notAndCurrentFilter'] ,
-            'inFilterAddedParams'    => $filterData['inFilterAddedParams'] ,
-            'equalFilterAddedParams' => $filterData['equalFilterAddedParams'] ,
-            'dateFilterAddedParams'  => $filterData['dateFilterAddedParams'] ,
-            'filtersForUrl'          => $filterData['filterForUrl'],
+            'loggedUser' => $this->getUser(),
+            'isAdmin' => $this->get('task_voter')->isAdmin(),
+            'inFilter' => $filterData['inFilter'],
+            'equalFilter' => $filterData['equalFilter'],
+            'isNullFilter' => $filterData['isNullFilter'],
+            'dateFilter' => $filterData['dateFilter'],
+            'searchFilter' => $filterData['searchFilter'],
+            'notAndCurrentFilter' => $filterData['notAndCurrentFilter'],
+            'inFilterAddedParams' => $filterData['inFilterAddedParams'],
+            'equalFilterAddedParams' => $filterData['equalFilterAddedParams'],
+            'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
+            'filtersForUrl' => $filterData['filterForUrl'],
         ];
 
-        $tasksArray = $this->get('task_service')->getTasksResponse($page , $options);
+        $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);
 
-        return $this->json($tasksArray , StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($tasksArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -599,7 +602,7 @@ class TaskController extends ApiBaseController
      * )
      *
      * @param Request $request
-     * @param int     $filterId
+     * @param int $filterId
      *
      * @return JsonResponse|Response
      * @throws \Doctrine\ORM\NonUniqueResultException
@@ -607,18 +610,18 @@ class TaskController extends ApiBaseController
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function listSavedFilterAction(Request $request , int $filterId)
+    public function listSavedFilterAction(Request $request, int $filterId)
     {
         $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($filterId);
 
         if (!$filter instanceof Filter) {
             return $this->createApiResponse([
-                'message' => 'Filter with requested Id does not exist!' ,
-            ] , StatusCodesHelper::NOT_FOUND_CODE);
+                'message' => 'Filter with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
         }
 
         // Check if logged user has permission to see requested filter
-        if (!$this->get('filter_voter')->isGranted(VoteOptions::SHOW_FILTER , $filter)) {
+        if (!$this->get('filter_voter')->isGranted(VoteOptions::SHOW_FILTER, $filter)) {
             return $this->accessDeniedResponse();
         }
 
@@ -626,23 +629,23 @@ class TaskController extends ApiBaseController
         $filterDataArray = $filter->getFilter();
         $filterData = $this->getFilterDataFromSavedFilterArray($filterDataArray);
         $options = [
-            'loggedUser'             => $this->getUser() ,
-            'isAdmin'                => $this->get('task_voter')->isAdmin() ,
-            'inFilter'               => $filterData['inFilter'] ,
-            'equalFilter'            => $filterData['equalFilter'] ,
-            'isNullFilter'           => $filterData['isNullFilter'] ,
-            'dateFilter'             => $filterData['dateFilter'] ,
-            'searchFilter'           => $filterData['searchFilter'] ,
-            'notAndCurrentFilter'    => $filterData['notAndCurrentFilter'] ,
-            'inFilterAddedParams'    => $filterData['inFilterAddedParams'] ,
-            'equalFilterAddedParams' => $filterData['equalFilterAddedParams'] ,
-            'dateFilterAddedParams'  => $filterData['dateFilterAddedParams'] ,
-            'filtersForUrl'          => $filterData['filterForUrl'],
+            'loggedUser' => $this->getUser(),
+            'isAdmin' => $this->get('task_voter')->isAdmin(),
+            'inFilter' => $filterData['inFilter'],
+            'equalFilter' => $filterData['equalFilter'],
+            'isNullFilter' => $filterData['isNullFilter'],
+            'dateFilter' => $filterData['dateFilter'],
+            'searchFilter' => $filterData['searchFilter'],
+            'notAndCurrentFilter' => $filterData['notAndCurrentFilter'],
+            'inFilterAddedParams' => $filterData['inFilterAddedParams'],
+            'equalFilterAddedParams' => $filterData['equalFilterAddedParams'],
+            'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
+            'filtersForUrl' => $filterData['filterForUrl'],
         ];
 
-        $tasksArray = $this->get('task_service')->getTasksResponse($page , $options);
+        $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);
 
-        return $this->json($tasksArray , StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($tasksArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -819,7 +822,7 @@ class TaskController extends ApiBaseController
             return $this->notFoundResponse();
         }
 
-        if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_TASK , $task)) {
+        if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_TASK, $task)) {
             return $this->accessDeniedResponse();
         }
 
@@ -830,8 +833,8 @@ class TaskController extends ApiBaseController
         }
 
         $ids = [
-            'id'          => $task->getId() ,
-            'projectId'   => $projectId ,
+            'id' => $task->getId(),
+            'projectId' => $projectId,
             'requesterId' => $task->getRequestedBy()->getId(),
         ];
 
@@ -839,7 +842,7 @@ class TaskController extends ApiBaseController
         $responseData['data'] = $response['data'][0];
         $responseLinks['_links'] = $response['_links'];
 
-        return $this->json(array_merge($responseData , $responseLinks) , StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json(array_merge($responseData, $responseLinks), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -1014,7 +1017,7 @@ class TaskController extends ApiBaseController
      *  }
      * )
      *
-     * @param Request  $request
+     * @param Request $request
      * @param bool|int $projectId
      * @param bool|int $requestedUserId
      *
@@ -1024,11 +1027,11 @@ class TaskController extends ApiBaseController
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function createAction(Request $request , $projectId = false , $requestedUserId = false)
+    public function createAction(Request $request, $projectId = false, $requestedUserId = false)
     {
         // Check if logged user has ACL to create task
         $aclOptions = [
-            'acl'  => UserRoleAclOptions::CREATE_TASKS ,
+            'acl' => UserRoleAclOptions::CREATE_TASKS,
             'user' => $this->getUser(),
         ];
 
@@ -1043,15 +1046,15 @@ class TaskController extends ApiBaseController
             $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
             if (!$project instanceof Project) {
                 return $this->createApiResponse([
-                    'message' => 'Project with requested Id does not exist!' ,
-                ] , StatusCodesHelper::NOT_FOUND_CODE);
+                    'message' => 'Project with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
             }
 
             // Check if user can create task in selected project
-            if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT , $project)) {
+            if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT, $project)) {
                 return $this->createApiResponse([
-                    'message' => 'Permission denied! Can not create task in selected project!' ,
-                ] , StatusCodesHelper::ACCESS_DENIED_CODE);
+                    'message' => 'Permission denied! Can not create task in selected project!',
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
             }
             $task->setProject($project);
             unset($requestData['projectId']);
@@ -1062,8 +1065,8 @@ class TaskController extends ApiBaseController
 
             if (!$requestedUser instanceof User) {
                 return $this->createApiResponse([
-                    'message' => 'Requested user with requested Id does not exist!' ,
-                ] , StatusCodesHelper::NOT_FOUND_CODE);
+                    'message' => 'Requested user with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
             }
             $task->setRequestedBy($requestedUser);
             $requesterTaskId = $requestedUserId;
@@ -1077,12 +1080,12 @@ class TaskController extends ApiBaseController
         $task->setImportant(false);
 
         $ids = [
-            'id'          => false ,
-            'projectId'   => $projectId ,
+            'id' => false,
+            'projectId' => $projectId,
             'requesterId' => $requesterTaskId,
         ];
 
-        return $this->updateTaskEntity($task , $requestData , true , $ids);
+        return $this->updateTaskEntity($task, $requestData, true, $ids);
     }
 
     /**
@@ -1263,8 +1266,8 @@ class TaskController extends ApiBaseController
      *  }
      * )
      *
-     * @param int      $id
-     * @param Request  $request
+     * @param int $id
+     * @param Request $request
      * @param bool|int $projectId
      * @param bool|int $requestedUserId
      *
@@ -1274,7 +1277,7 @@ class TaskController extends ApiBaseController
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function updateAction(int $id , Request $request , $projectId = false , $requestedUserId = false)
+    public function updateAction(int $id, Request $request, $projectId = false, $requestedUserId = false)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
 
@@ -1283,7 +1286,7 @@ class TaskController extends ApiBaseController
         }
 
         // Check if user can update selected task
-        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK , $task)) {
+        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
             return $this->accessDeniedResponse();
         }
 
@@ -1294,15 +1297,15 @@ class TaskController extends ApiBaseController
             $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
             if (!$project instanceof Project) {
                 return $this->createApiResponse([
-                    'message' => 'Project with requested Id does not exist!' ,
-                ] , StatusCodesHelper::NOT_FOUND_CODE);
+                    'message' => 'Project with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
             }
 
             // Check if user can create task in selected project
-            if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT , $project)) {
+            if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT, $project)) {
                 return $this->createApiResponse([
-                    'message' => 'Permission denied! Can not create task in selected project!' ,
-                ] , StatusCodesHelper::ACCESS_DENIED_CODE);
+                    'message' => 'Permission denied! Can not create task in selected project!',
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
             }
             $task->setProject($project);
             $taskProjectId = $projectId;
@@ -1318,8 +1321,8 @@ class TaskController extends ApiBaseController
 
             if (!$requestedUser instanceof User) {
                 return $this->createApiResponse([
-                    'message' => 'Requested user with requested Id does not exist!' ,
-                ] , StatusCodesHelper::NOT_FOUND_CODE);
+                    'message' => 'Requested user with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
             }
 
             $task->setRequestedBy($requestedUser);
@@ -1330,12 +1333,12 @@ class TaskController extends ApiBaseController
         }
 
         $ids = [
-            'id'          => $id ,
-            'projectId'   => $taskProjectId ,
+            'id' => $id,
+            'projectId' => $taskProjectId,
             'requesterId' => $requesterTaskId,
         ];
 
-        return $this->updateTaskEntity($task , $requestData , false , $ids);
+        return $this->updateTaskEntity($task, $requestData, false, $ids);
     }
 
     /**
@@ -1516,8 +1519,8 @@ class TaskController extends ApiBaseController
      *  }
      * )
      *
-     * @param int      $id
-     * @param Request  $request
+     * @param int $id
+     * @param Request $request
      * @param bool|int $projectId
      * @param bool|int $requestedUserId
      *
@@ -1527,7 +1530,7 @@ class TaskController extends ApiBaseController
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function updatePartialAction(int $id , Request $request , $projectId = false , $requestedUserId = false)
+    public function updatePartialAction(int $id, Request $request, $projectId = false, $requestedUserId = false)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
 
@@ -1536,7 +1539,7 @@ class TaskController extends ApiBaseController
         }
 
         // Check if user can update selected task
-        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK , $task)) {
+        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
             return $this->accessDeniedResponse();
         }
 
@@ -1547,15 +1550,15 @@ class TaskController extends ApiBaseController
             $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
             if (!$project instanceof Project) {
                 return $this->createApiResponse([
-                    'message' => 'Project with requested Id does not exist!' ,
-                ] , StatusCodesHelper::NOT_FOUND_CODE);
+                    'message' => 'Project with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
             }
 
             // Check if user can create task in selected project
-            if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT , $project)) {
+            if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT, $project)) {
                 return $this->createApiResponse([
-                    'message' => 'Permission denied! Can not create task in selected project!' ,
-                ] , StatusCodesHelper::ACCESS_DENIED_CODE);
+                    'message' => 'Permission denied! Can not create task in selected project!',
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
             }
             $task->setProject($project);
             $taskProjectId = $projectId;
@@ -1570,8 +1573,8 @@ class TaskController extends ApiBaseController
             $requestedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requestedUserId);
             if (!$requestedUser instanceof User) {
                 return $this->createApiResponse([
-                    'message' => 'Requested user with requested Id does not exist!' ,
-                ] , StatusCodesHelper::NOT_FOUND_CODE);
+                    'message' => 'Requested user with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
             }
             $task->setRequestedBy($requestedUser);
             $requesterTaskId = $requestedUserId;
@@ -1581,12 +1584,12 @@ class TaskController extends ApiBaseController
         }
 
         $ids = [
-            'id'          => $id ,
-            'projectId'   => $taskProjectId ,
+            'id' => $id,
+            'projectId' => $taskProjectId,
             'requesterId' => $requesterTaskId,
         ];
 
-        return $this->updateTaskEntity($task , $requestData , false , $ids);
+        return $this->updateTaskEntity($task, $requestData, false, $ids);
     }
 
 
@@ -1628,7 +1631,7 @@ class TaskController extends ApiBaseController
             return $this->notFoundResponse();
         }
 
-        if (!$this->get('task_voter')->isGranted(VoteOptions::DELETE_TASK , $task)) {
+        if (!$this->get('task_voter')->isGranted(VoteOptions::DELETE_TASK, $task)) {
             return $this->accessDeniedResponse();
         }
 
@@ -1636,14 +1639,326 @@ class TaskController extends ApiBaseController
         $this->getDoctrine()->getManager()->flush();
 
         return $this->createApiResponse([
-            'message' => StatusCodesHelper::DELETED_MESSAGE ,
-        ] , StatusCodesHelper::DELETED_CODE);
+            'message' => StatusCodesHelper::DELETED_MESSAGE,
+        ], StatusCodesHelper::DELETED_CODE);
     }
 
     /**
-     * @param Task  $task
+     * ### Response ###
+     *       *      {
+     *        "data":
+     *        {
+     *           "id": 2991,
+     *           "title": "test 258",
+     *           "description": "Description of Task 1",
+     *           "deadline": null,
+     *           "startedAt": null,
+     *           "closedAt": null,
+     *           "important": false,
+     *           "createdAt":
+     *           {
+     *               "date": "2017-01-26 12:21:59.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *           },
+     *           "updatedAt":
+     *           {
+     *               "date": "2017-01-26 14:34:48.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *           "taskData": [],
+     *           "project":
+     *           {
+     *              "id": 6,
+     *              "title": "Project of user 1",
+     *              "description": "Description of project 1.",
+     *              "is_active": false,
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-01-26 12:21:59.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                  "date": "2017-01-26 12:21:59.000000",
+     *                  "timezone_type": 3,
+     *                  "timezone": "Europe/Berlin"
+     *               }
+     *           },
+     *           "createdBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null,
+     *              "company":
+     *              {
+     *                 "id": 4,
+     *                 "title": "LanSystems",
+     *                 "ico": "110258782",
+     *                 "dic": "12587458996244",
+     *                 "ic_dph": null,
+     *                 "street": "Ina cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true
+     *              }
+     *           },
+     *           "requestedBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null
+     *           },
+     *           "taskHasAssignedUsers":
+     *           [
+     *              {
+     *                  "id": 2,
+     *                  "status_date": null,
+     *                  "time_spent": null,
+     *                  "createdAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "status":
+     *                  {
+     *                     "id": 7,
+     *                     "title": "Completed",
+     *                     "description": "Completed task",
+     *                     "color": "#FF4500",
+     *                     "is_active": true
+     *                  },
+     *                  "user":
+     *                  {
+     *                     "id": 109,
+     *                     "username": "user",
+     *                     "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *                     "email": "user@user.sk",
+     *                     "roles": "[\"ROLE_USER\"]",
+     *                     "is_active": true,
+     *                     "language": "AJ",
+     *                     "image": null
+     *                  }
+     *              }
+     *           ]
+     *        },
+     *       "_links":
+     *       {
+     *         "put: task": "/api/v1/task-bundle/tasks/11970",
+     *         "patch: task": "/api/v1/task-bundle/tasks/11970",
+     *         "delete": "/api/v1/task-bundle/tasks/11970",
+     *         "put: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "patch: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "put: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "patch: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "put: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313",
+     *         "patch: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313"
+     *       }
+     *    }
+     *
+     * @ApiDoc(
+     *  description="Partially update the Task Entity with extra Task Data.
+     *  These could be updated by attributes: task_data[task_attribute_id] = value,
+     *  attributes must be defined in the TaskAttribute Entity.
+     *  Project and Requested User could be updated by Id-s in URL.",
+     *  requirements={
+     *     {
+     *       "name"="taskId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of processed object"
+     *     }
+     *  },
+     *  parameters={
+     *      {"name"="project", "dataType"="int", "required"=false, "description"="id of Project"},
+     *      {"name"="requester", "dataType"="int", "required"=false,  "description"="id of User"},
+     *      {"name"="company", "dataType"="int", "required"=false,  "description"="id of Company"},
+     *      {"name"="assigned", "dataType"="array", "required"=false,  "description"="array of Users assigned to task: [userId => 12, statusId => 5]"},
+     *      {"name"="startedAt", "dataType"="datetime", "required"=false,  "description"="the date of planned start"},
+     *      {"name"="deadline", "dataType"="datetime", "required"=false,  "description"="the date of deadline"},
+     *      {"name"="closedAt", "dataType"="datetime", "required"=false,  "description"="the date of closure"},
+     *      {"name"="tag", "dataType"="array", "required"=false,  "description"="array of Tag titles: [tag1, tag2]"}
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  output={"class"="API\TaskBundle\Entity\Task"},
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity",
+     *      409 ="Invalid parameters",
+     *  }
+     * )
+     *
+     * @param int $taskId
+     * @param Request $request
+     *
+     * @return JsonResponse|Response
+     */
+    public function quickUpdateTaskAction(int $taskId, Request $request)
+    {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        // Check if user can update selected task
+        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
+
+        if (isset($requestData['project'])) {
+            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($requestData['project']);
+            if (!$project instanceof Project) {
+                return $this->createApiResponse([
+                    'message' => 'Project with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+
+            // Check if user can create task in selected project
+            if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT, $project)) {
+                return $this->createApiResponse([
+                    'message' => 'Permission denied! Can not create task in selected project!',
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            }
+            $task->setProject($project);
+            $taskProjectId = $requestData['project'];
+        } elseif ($task->getProject()) {
+            $taskProjectId = $task->getProject()->getId();
+        } else {
+            $taskProjectId = false;
+        }
+
+        if (isset($requestData['project'])) {
+            $requestedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requestData['requester']);
+            if (!$requestedUser instanceof User) {
+                return $this->createApiResponse([
+                    'message' => 'Requested user with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+            $task->setRequestedBy($requestedUser);
+            $requesterTaskId = $requestData['requester'];
+        } else {
+            $requesterTaskId = $task->getRequestedBy()->getId();
+        }
+
+        if (isset($requestData['assigned'])) {
+            $assignedUsersArray = $requestData['assigned'];
+            foreach ($assignedUsersArray as $data) {
+                $assignedUserId = $data['userId'];
+                $statusId = $data['statusId'];
+
+                $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($assignedUserId);
+
+                if (!$user instanceof User) {
+                    return $this->createApiResponse([
+                        'message' => 'User with requested Id does not exist!',
+                    ], StatusCodesHelper::NOT_FOUND_CODE);
+                }
+
+                $userIsAssignedToTask = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy([
+                    'user' => $user,
+                    'task' => $task
+                ]);
+
+                // Check if user is already assigned to task
+                if (!$userIsAssignedToTask instanceof TaskHasAssignedUser) {
+                    // Check if user can be assigned to task
+                    $options = [
+                        'task' => $task,
+                        'user' => $user
+                    ];
+
+                    if (!$this->get('task_voter')->isGranted(VoteOptions::ASSIGN_USER_TO_TASK, $options)) {
+                        return $this->createApiResponse([
+                            'message' => 'User with id: ' . $assignedUserId . 'has not permission to be assigned to requested task!',
+                        ], StatusCodesHelper::NOT_FOUND_CODE);
+                    }
+
+                    $userIsAssignedToTask = new TaskHasAssignedUser();
+                }
+
+                if ($statusId) {
+                    $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($statusId);
+
+                    if (!$status instanceof Status) {
+                        return $this->createApiResponse([
+                            'message' => 'Status with requested Id does not exist!',
+                        ], StatusCodesHelper::NOT_FOUND_CODE);
+                    }
+                } else {
+                    $newStatus = $this->getDoctrine()->getRepository('APITaskBundle:Status')->findOneBy([
+                        'title' => StatusOptions::NEW,
+                    ]);
+                    if (!$newStatus instanceof Status) {
+                        return $this->createApiResponse([
+                            'message' => 'New Status Entity does not exist!',
+                        ], StatusCodesHelper::NOT_FOUND_CODE);
+                    } else {
+                        $status = $newStatus;
+                    }
+                }
+
+                $userIsAssignedToTask->setTask($task);
+                $userIsAssignedToTask->setStatus($status);
+                $userIsAssignedToTask->setUser($user);
+                $this->getDoctrine()->getManager()->persist($userIsAssignedToTask);
+            }
+        }
+
+        $this->getDoctrine()->getManager()->persist($task);
+        $this->getDoctrine()->getManager()->flush();
+
+        $ids = [
+            'id' => $taskId,
+            'projectId' => $taskProjectId,
+            'requesterId' => $requesterTaskId,
+        ];
+        $response = $this->get('task_service')->getTaskResponse($ids);
+        $responseData['data'] = $response['data'][0];
+        $responseLinks['_links'] = $response['_links'];
+        return $this->json(array_merge($responseData, $responseLinks), StatusCodesHelper::SUCCESSFUL_CODE);
+
+
+    }
+
+    /**
+     * @param Task $task
      * @param array $requestData
-     * @param bool  $create
+     * @param bool $create
      *
      * @param array $ids
      *
@@ -1653,14 +1968,14 @@ class TaskController extends ApiBaseController
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    private function updateTaskEntity(Task $task , array $requestData , $create , array $ids)
+    private function updateTaskEntity(Task $task, array $requestData, $create, array $ids)
     {
         $allowedUserEntityParams = [
-            'title' ,
-            'description' ,
-            'deadline' ,
-            'closed_at' ,
-            'important' ,
+            'title',
+            'description',
+            'deadline',
+            'closed_at',
+            'important',
             'started_at',
         ];
 
@@ -1670,14 +1985,14 @@ class TaskController extends ApiBaseController
             unset($requestData['task_data']);
         }
 
-        if (array_key_exists('_format' , $requestData)) {
+        if (array_key_exists('_format', $requestData)) {
             unset($requestData['_format']);
         }
 
         foreach ($requestData as $key => $value) {
-            if (!in_array($key , $allowedUserEntityParams , true)) {
+            if (!in_array($key, $allowedUserEntityParams, true)) {
                 return $this->createApiResponse(
-                    ['message' => $key . ' is not allowed parameter for Task Entity!'] ,
+                    ['message' => $key . ' is not allowed parameter for Task Entity!'],
                     StatusCodesHelper::INVALID_PARAMETERS_CODE
                 );
             }
@@ -1692,8 +2007,8 @@ class TaskController extends ApiBaseController
                 unset($requestData['started_at']);
             } catch (\Exception $e) {
                 return $this->createApiResponse([
-                    'message' => 'started_at parameter is not in a valid format! Expected format: Unix' ,
-                ] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    'message' => 'started_at parameter is not in a valid format! Expected format: Unix',
+                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
             }
         }
         if (isset($requestData['closed_at'])) {
@@ -1703,8 +2018,8 @@ class TaskController extends ApiBaseController
                 unset($requestData['closed_at']);
             } catch (\Exception $e) {
                 return $this->createApiResponse([
-                    'message' => 'closed_at parameter is not in a valid format! Expected format: Unix' ,
-                ] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    'message' => 'closed_at parameter is not in a valid format! Expected format: Unix',
+                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
             }
         }
         if (isset($requestData['deadline'])) {
@@ -1714,15 +2029,15 @@ class TaskController extends ApiBaseController
                 unset($requestData['deadline']);
             } catch (\Exception $e) {
                 return $this->createApiResponse([
-                    'message' => 'deadline parameter is not in a valid format! Expected format: Unix' ,
-                ] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    'message' => 'deadline parameter is not in a valid format! Expected format: Unix',
+                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
             }
         }
 
 
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
-        $errors = $this->get('entity_processor')->processEntity($task , $requestData);
+        $errors = $this->get('entity_processor')->processEntity($task, $requestData);
 
         if (false === $errors) {
             $this->getDoctrine()->getManager()->persist($task);
@@ -1742,8 +2057,8 @@ class TaskController extends ApiBaseController
                     $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($key);
                     if ($taskAttribute instanceof TaskAttribute) {
                         $cd = $this->getDoctrine()->getRepository('APITaskBundle:TaskData')->findOneBy([
-                            'taskAttribute' => $taskAttribute ,
-                            'task'          => $task ,
+                            'taskAttribute' => $taskAttribute,
+                            'task' => $task,
                         ]);
 
                         if (!$cd instanceof TaskData) {
@@ -1752,7 +2067,7 @@ class TaskController extends ApiBaseController
                             $cd->setTaskAttribute($taskAttribute);
                         }
 
-                        $cdErrors = $this->get('entity_processor')->processEntity($cd , ['value' => $value]);
+                        $cdErrors = $this->get('entity_processor')->processEntity($cd, ['value' => $value]);
                         if (false === $cdErrors) {
                             $task->addTaskDatum($cd);
                             $this->getDoctrine()->getManager()->persist($task);
@@ -1760,13 +2075,13 @@ class TaskController extends ApiBaseController
                             $this->getDoctrine()->getManager()->flush();
                         } else {
                             $this->createApiResponse([
-                                'message' => 'The value of task_data with key: ' . $key . ' is invalid' ,
-                            ] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                'message' => 'The value of task_data with key: ' . $key . ' is invalid',
+                            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
                         }
                     } else {
                         return $this->createApiResponse([
-                            'message' => 'The key: ' . $key . ' of Task Attribute is not valid (Task Attribute with this ID doesn\'t exist)' ,
-                        ] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                            'message' => 'The key: ' . $key . ' of Task Attribute is not valid (Task Attribute with this ID doesn\'t exist)',
+                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
                     }
                 }
             }
@@ -1775,15 +2090,15 @@ class TaskController extends ApiBaseController
             $responseData['data'] = $response['data'][0];
             $responseLinks['_links'] = $response['_links'];
 
-            return $this->json(array_merge($responseData , $responseLinks) , $statusCode);
+            return $this->json(array_merge($responseData, $responseLinks), $statusCode);
         }
 
         $data = [
-            'errors'  => $errors ,
+            'errors' => $errors,
             'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE,
         ];
 
-        return $this->createApiResponse($data , StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 
     /**
@@ -1956,7 +2271,7 @@ class TaskController extends ApiBaseController
             $filterForUrl['search'] = '&search=' . $data['search'];
         }
         if (isset($data[FilterAttributeOptions::STATUS])) {
-            $inFilter['status.id'] = explode(',' , $data[FilterAttributeOptions::STATUS]);
+            $inFilter['status.id'] = explode(',', $data[FilterAttributeOptions::STATUS]);
             $filterForUrl['status'] = '&status=' . $data[FilterAttributeOptions::STATUS];
         }
         if (isset($data[FilterAttributeOptions::PROJECT])) {
@@ -1966,7 +2281,7 @@ class TaskController extends ApiBaseController
             } elseif ('current-user' === strtolower($project)) {
                 $equalFilter['projectCreator.id'] = $this->getUser()->getId();
             } else {
-                $inFilter['project.id'] = explode(',' , $project);
+                $inFilter['project.id'] = explode(',', $project);
             }
             $filterForUrl['project'] = '&project=' . $project;
         }
@@ -1975,7 +2290,7 @@ class TaskController extends ApiBaseController
             if ('current-user' === strtolower($creator)) {
                 $equalFilter['createdBy.id'] = $this->getUser()->getId();
             } else {
-                $inFilter['createdBy.id'] = explode(',' , $creator);
+                $inFilter['createdBy.id'] = explode(',', $creator);
             }
             $filterForUrl['createdBy'] = '&creator=' . $creator;
         }
@@ -1984,7 +2299,7 @@ class TaskController extends ApiBaseController
             if ('current-user' === strtolower($requester)) {
                 $equalFilter['requestedBy.id'] = $this->getUser()->getId();
             } else {
-                $inFilter['requestedBy.id'] = explode(',' , $requester);
+                $inFilter['requestedBy.id'] = explode(',', $requester);
             }
             $filterForUrl['requestedBy'] = '&requester=' . $requester;
         }
@@ -1993,35 +2308,35 @@ class TaskController extends ApiBaseController
             if ('current-user' === strtolower($company)) {
                 $equalFilter['company.id'] = $this->getUser()->getId();
             } else {
-                $inFilter['company.id'] = explode(',' , $company);
+                $inFilter['company.id'] = explode(',', $company);
             }
             $filterForUrl['company'] = '&company=' . $company;
         }
         if (isset($data[FilterAttributeOptions::ASSIGNED])) {
             $assigned = $data[FilterAttributeOptions::ASSIGNED];
-            $assignedArray = explode(',' , $assigned);
+            $assignedArray = explode(',', $assigned);
 
-            if (in_array('not' , $assignedArray , true) && in_array('current-user' , $assignedArray , true)) {
+            if (in_array('not', $assignedArray, true) && in_array('current-user', $assignedArray, true)) {
                 $notAndCurrentFilter[] = [
-                    'not'   => 'thau.user' ,
+                    'not' => 'thau.user',
                     'equal' => [
-                        'key'   => 'assignedUser.id' ,
+                        'key' => 'assignedUser.id',
                         'value' => $this->getUser()->getId(),
-                    ] ,
+                    ],
                 ];
             } elseif ('not' === strtolower($assigned)) {
                 $isNullFilter[] = 'thau.user';
             } elseif ('current-user' === strtolower($assigned)) {
                 $equalFilter['assignedUser.id'] = $this->getUser()->getId();
             } else {
-                $inFilter['assignedUser.id'] = explode(',' , $assigned);
+                $inFilter['assignedUser.id'] = explode(',', $assigned);
             }
 
             $filterForUrl['assigned'] = '&assigned=' . $assigned;
         }
         if (isset($data[FilterAttributeOptions::TAG])) {
             $tag = $data[FilterAttributeOptions::TAG];
-            $inFilter['tags.id'] = explode(',' , $tag);
+            $inFilter['tags.id'] = explode(',', $tag);
             $filterForUrl['tag'] = '&tag=' . $tag;
         }
         if (isset($data[FilterAttributeOptions::FOLLOWER])) {
@@ -2029,7 +2344,7 @@ class TaskController extends ApiBaseController
             if ('current-user' === $follower) {
                 $equalFilter['followers.id'] = $this->getUser()->getId();
             } else {
-                $inFilter['followers.id'] = explode(',' , $follower);
+                $inFilter['followers.id'] = explode(',', $follower);
             }
             $filterForUrl['followers'] = '&follower=' . $follower;
         }
@@ -2037,8 +2352,8 @@ class TaskController extends ApiBaseController
             $created = $data[FilterAttributeOptions::CREATED];
             $fromToData = $this->separateFromToDateData($created);
             $dateFilter['task.createdAt'] = [
-                'from' => $fromToData['from'] ,
-                'to'   => $fromToData['to'],
+                'from' => $fromToData['from'],
+                'to' => $fromToData['to'],
             ];
             $filterForUrl['created'] = '&createdTime=' . $created;
         }
@@ -2046,8 +2361,8 @@ class TaskController extends ApiBaseController
             $started = $data[FilterAttributeOptions::STARTED];
             $fromToData = $this->separateFromToDateData($started);
             $dateFilter['task.startedAt'] = [
-                'from' => $fromToData['from'] ,
-                'to'   => $fromToData['to'],
+                'from' => $fromToData['from'],
+                'to' => $fromToData['to'],
             ];
             $filterForUrl['started'] = '&startedTime=' . $started;
         }
@@ -2055,8 +2370,8 @@ class TaskController extends ApiBaseController
             $deadline = $data[FilterAttributeOptions::DEADLINE];
             $fromToData = $this->separateFromToDateData($deadline);
             $dateFilter['task.deadline'] = [
-                'from' => $fromToData['from'] ,
-                'to'   => $fromToData['to'],
+                'from' => $fromToData['from'],
+                'to' => $fromToData['to'],
             ];
             $filterForUrl['deadline'] = '&deadlineTime=' . $deadline;
         }
@@ -2064,8 +2379,8 @@ class TaskController extends ApiBaseController
             $closed = $data[FilterAttributeOptions::CLOSED];
             $fromToData = $this->separateFromToDateData($closed);
             $dateFilter['task.closedAt'] = [
-                'from' => $fromToData['from'] ,
-                'to'   => $fromToData['to'],
+                'from' => $fromToData['from'],
+                'to' => $fromToData['to'],
             ];
             $filterForUrl['closed'] = '&closedTime=' . $closed;
         }
@@ -2083,20 +2398,20 @@ class TaskController extends ApiBaseController
         }
         if (isset($data[FilterAttributeOptions::ADDED_PARAMETERS])) {
             $addedParameters = $data[FilterAttributeOptions::ADDED_PARAMETERS];
-            $arrayOfAddedParameters = explode('&' , $addedParameters);
+            $arrayOfAddedParameters = explode('&', $addedParameters);
 
             if (!empty($arrayOfAddedParameters[0])) {
                 $filterForUrl['addedParameters'] = '&addedParameters=' . $addedParameters;
 
                 foreach ($arrayOfAddedParameters as $value) {
-                    $strpos = explode('=' , $value);
+                    $strpos = explode('=', $value);
                     $attributeId = $strpos[0];
 
                     // Check if TaskAttribute exists, select filter type based on it's TYPE
                     $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($attributeId);
                     if ($taskAttribute instanceof TaskAttribute) {
                         $typeOfTaskAttribute = $taskAttribute->getType();
-                        $attributeValues = explode(',' , $strpos[1]);
+                        $attributeValues = explode(',', $strpos[1]);
 
                         if ('checkbox' === $typeOfTaskAttribute) {
                             if ('true' === strtolower($strpos[1])) {
@@ -2117,16 +2432,16 @@ class TaskController extends ApiBaseController
         }
 
         return [
-            'inFilter'               => $inFilter ,
-            'equalFilter'            => $equalFilter ,
-            'dateFilter'             => $dateFilter ,
-            'isNullFilter'           => $isNullFilter ,
-            'searchFilter'           => $searchFilter ,
-            'notAndCurrentFilter'    => $notAndCurrentFilter ,
-            'inFilterAddedParams'    => $inFilterAddedParams ,
-            'equalFilterAddedParams' => $equalFilterAddedParams ,
-            'dateFilterAddedParams'  => $dateFilterAddedParams ,
-            'filterForUrl'           => $filterForUrl,
+            'inFilter' => $inFilter,
+            'equalFilter' => $equalFilter,
+            'dateFilter' => $dateFilter,
+            'isNullFilter' => $isNullFilter,
+            'searchFilter' => $searchFilter,
+            'notAndCurrentFilter' => $notAndCurrentFilter,
+            'inFilterAddedParams' => $inFilterAddedParams,
+            'equalFilterAddedParams' => $equalFilterAddedParams,
+            'dateFilterAddedParams' => $dateFilterAddedParams,
+            'filterForUrl' => $filterForUrl,
         ];
     }
 
@@ -2137,23 +2452,23 @@ class TaskController extends ApiBaseController
      */
     private function separateFromToDateData(string $created): array
     {
-        $fromPosition = strpos($created , 'FROM=');
-        $toPosition = strpos($created , 'TO=');
+        $fromPosition = strpos($created, 'FROM=');
+        $toPosition = strpos($created, 'TO=');
 
         $toData = null;
         $fromData = null;
         if (false !== $fromPosition && false !== $toPosition) {
-            $fromData = substr($created , $fromPosition + 5 , $toPosition - 6);
-            $toData = substr($created , $toPosition + 3);
+            $fromData = substr($created, $fromPosition + 5, $toPosition - 6);
+            $toData = substr($created, $toPosition + 3);
         } elseif (false !== $fromPosition && false === $toPosition) {
-            $fromData = substr($created , $fromPosition + 5);
+            $fromData = substr($created, $fromPosition + 5);
         } elseif (false !== $toPosition && false === $fromPosition) {
-            $toData = substr($created , $toPosition + 3);
+            $toData = substr($created, $toPosition + 3);
         }
 
         return [
-            'from' => $fromData ,
-            'to'   => $toData,
+            'from' => $fromData,
+            'to' => $toData,
         ];
     }
 }

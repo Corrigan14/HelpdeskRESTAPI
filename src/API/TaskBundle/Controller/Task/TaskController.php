@@ -1854,8 +1854,8 @@ class TaskController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
-        $requestData = $request->request->all();
-        dump(json_decode($requestData));
+        $requestData = json_decode($request->getContent(),true);
+        dump(($requestData));
 
         if (isset($requestData['project'])) {
             $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($requestData['project']);

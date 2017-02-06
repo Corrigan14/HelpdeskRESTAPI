@@ -1763,6 +1763,21 @@ class TaskController extends ApiBaseController
      *                     "image": null
      *                  }
      *              }
+     *           ],
+     *           "tags":
+     *           [
+     *             {
+     *                "id": 5,
+     *                "title": "tag1",
+     *                "color": "FFFF66",
+     *                "public": false
+     *             },
+     *             {
+     *               "id": 6,
+     *               "title": "tag2",
+     *               "color": "FFFF66",
+     *               "public": false
+     *             }
      *           ]
      *        },
      *       "_links":
@@ -1840,7 +1855,7 @@ class TaskController extends ApiBaseController
         }
 
         $requestData = $request->request->all();
-        dump($requestData);
+        dump(json_decode($requestData));
 
         if (isset($requestData['project'])) {
             $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($requestData['project']);
@@ -1993,19 +2008,31 @@ class TaskController extends ApiBaseController
                         ], StatusCodesHelper::NOT_FOUND_CODE);
                     }
 
-                }else{
-                    //Create new tag
+                    //Check if tag is already added to task
+                    $taskHasTags = $task->getTags();
+                    if (in_array($tag, $taskHasTags->toArray(), true)) {
+                        continue;
+                    }
+                } else {
+                    //Create a new tag
+                    $tag = new Tag();
+                    $tag->setTitle($data);
+                    $tag->setPublic(false);
+                    $tag->setColor('FFFF66');
+                    $tag->setCreatedBy($this->getUser());
 
-                    //Add tag to task
+                    $this->getDoctrine()->getManager()->persist($tag);
+                    $this->getDoctrine()->getManager()->flush();
                 }
+
+                //Add tag to task
+                $task->addTag($tag);
+                $this->getDoctrine()->getManager()->persist($task);
             }
         }
 
-
-
         $this->getDoctrine()->getManager()->persist($task);
         $this->getDoctrine()->getManager()->flush();
-
 
         $ids = [
             'id' => $taskId,

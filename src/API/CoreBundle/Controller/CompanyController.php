@@ -6,6 +6,7 @@ use API\CoreBundle\Entity\Company;
 use API\TaskBundle\Entity\CompanyAttribute;
 use API\TaskBundle\Entity\CompanyData;
 use API\TaskBundle\Security\UserRoleAclOptions;
+use Doctrine\Common\Util\ClassUtils;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
@@ -754,7 +755,8 @@ class CompanyController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
-        dump(get_class($company));
+        dump(ClassUtils::getClass($company));
+        dump(ClassUtils::getRealClass($company));
         $errors = $this->get('entity_processor')->processEntity($company, $requestData);
 
 

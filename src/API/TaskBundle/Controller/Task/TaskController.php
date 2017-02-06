@@ -2057,6 +2057,21 @@ class TaskController extends ApiBaseController
             $requesterTaskId = $task->getRequestedBy()->getId();
         }
 
+        if (isset($requestData['company'])) {
+            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($requestData['company']);
+            if (!$company instanceof Company) {
+                return $this->createApiResponse([
+                    'message' => 'Company with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+            $task->setCompany($company);
+            $companyTaskId = $requestData['company'];
+        } elseif ($task->getCompany()) {
+            $companyTaskId = $task->getCompany()->getId();
+        } else {
+            $companyTaskId = false;
+        }
+
         if (isset($requestData['assigned'])) {
             $assignedUsersArray = $requestData['assigned'];
             foreach ($assignedUsersArray as $data) {
@@ -2203,6 +2218,7 @@ class TaskController extends ApiBaseController
             'id' => $taskId,
             'projectId' => $taskProjectId,
             'requesterId' => $requesterTaskId,
+            'companyId' => $companyTaskId
         ];
         $response = $this->get('task_service')->getTaskResponse($ids);
         $responseData['data'] = $response['data'][0];
@@ -2234,6 +2250,8 @@ class TaskController extends ApiBaseController
             'closed_at',
             'important',
             'started_at',
+            'work',
+            'work_time'
         ];
 
         $requestDetailData = false;

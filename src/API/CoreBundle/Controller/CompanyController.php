@@ -753,12 +753,8 @@ class CompanyController extends ApiBaseController implements ControllerInterface
         if (null === $company || !$company instanceof Company) {
             return $this->notFoundResponse();
         }
-        dump($requestData);
-        dump($requestDetailData);
         $errors = $this->get('entity_processor')->processEntity($company, $requestData);
 
-        dump($errors);
-        dump($company);
 
         if (false === $errors) {
             $this->getDoctrine()->getManager()->persist($company);

@@ -66,12 +66,14 @@ class ProcessEntity
      */
     public function fillEntity($class, $entity, array $data)
     {
+        dump($class, $entity,$data);
         $message = [];
         foreach ($data as $method => $value) {
             if('id' === $method){
                 $message[] = 'You can not change ID of entity!';
             }
             if (property_exists($class, $method)) {
+                dump($class, $method);
                 $method = str_replace('_', '', $method);
                 $m = 'set' . $method;
                 $entity->$m($value);

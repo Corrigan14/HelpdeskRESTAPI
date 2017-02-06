@@ -1840,6 +1840,7 @@ class TaskController extends ApiBaseController
         }
 
         $requestData = $request->request->all();
+        dump($requestData);
 
         if (isset($requestData['project'])) {
             $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($requestData['project']);
@@ -2000,7 +2001,7 @@ class TaskController extends ApiBaseController
             }
         }
 
-        dump($requestData);
+
 
         $this->getDoctrine()->getManager()->persist($task);
         $this->getDoctrine()->getManager()->flush();

@@ -6,6 +6,7 @@ use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Filter;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Status;
+use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskAttribute;
 use API\TaskBundle\Entity\TaskData;
@@ -1889,12 +1890,12 @@ class TaskController extends ApiBaseController
                     ], StatusCodesHelper::NOT_FOUND_CODE);
                 }
 
+                // Check if user is already assigned to task
                 $userIsAssignedToTask = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy([
                     'user' => $user,
                     'task' => $task
                 ]);
 
-                // Check if user is already assigned to task
                 if (!$userIsAssignedToTask instanceof TaskHasAssignedUser) {
                     // Check if user can be assigned to task
                     $options = [
@@ -1907,7 +1908,6 @@ class TaskController extends ApiBaseController
                             'message' => 'User with id: ' . $assignedUserId . 'has not permission to be assigned to requested task!',
                         ], StatusCodesHelper::NOT_FOUND_CODE);
                     }
-
                     $userIsAssignedToTask = new TaskHasAssignedUser();
                 }
 
@@ -1939,8 +1939,70 @@ class TaskController extends ApiBaseController
             }
         }
 
+        if (isset($requestData['startedAt'])) {
+            try {
+                $startedAtDateTimeObject = new \Datetime($requestData['startedAt']);
+                $task->setStartedAt($startedAtDateTimeObject);
+            } catch (\Exception $e) {
+                return $this->createApiResponse([
+                    'message' => 'startedAt parameter is not in a valid format! Expected format: Unix',
+                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            }
+        }
+
+        if (isset($requestData['deadline'])) {
+            try {
+                $startedAtDateTimeObject = new \Datetime($requestData['deadline']);
+                $task->setDeadline($startedAtDateTimeObject);
+            } catch (\Exception $e) {
+                return $this->createApiResponse([
+                    'message' => 'deadline parameter is not in a valid format! Expected format: Unix',
+                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            }
+        }
+
+        if (isset($requestData['closedAt'])) {
+            try {
+                $startedAtDateTimeObject = new \Datetime($requestData['closedAt']);
+                $task->setClosedAt($startedAtDateTimeObject);
+            } catch (\Exception $e) {
+                return $this->createApiResponse([
+                    'message' => 'closedAt parameter is not in a valid format! Expected format: Unix',
+                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            }
+        }
+
+        if (isset($requestData['tag'])) {
+            $tagsArray = $requestData['tag'];
+            foreach ($tagsArray as $data) {
+                $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
+                    'title' => $data
+                ]);
+
+                if ($tag instanceof Tag) {
+                    //Check if user can add tag to requested Task
+                    $options = [
+                        'task' => $task,
+                        'tag' => $tag
+                    ];
+
+                    if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_TAG_TO_TASK, $options)) {
+                        return $this->accessDeniedResponse();
+                    }
+
+                }else{
+                    //Create new tag
+
+                    //Add tag to task
+                }
+            }
+        }
+
+        dump($requestData);
+
         $this->getDoctrine()->getManager()->persist($task);
         $this->getDoctrine()->getManager()->flush();
+
 
         $ids = [
             'id' => $taskId,

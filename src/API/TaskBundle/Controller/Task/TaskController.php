@@ -1987,7 +1987,9 @@ class TaskController extends ApiBaseController
                     ];
 
                     if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_TAG_TO_TASK, $options)) {
-                        return $this->accessDeniedResponse();
+                        return $this->createApiResponse([
+                            'message' => 'Tag with title: ' . $data . 'can not be added to requested task!',
+                        ], StatusCodesHelper::NOT_FOUND_CODE);
                     }
 
                 }else{

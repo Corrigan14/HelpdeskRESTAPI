@@ -757,6 +757,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
         dump($requestDetailData);
         $errors = $this->get('entity_processor')->processEntity($company, $requestData);
 
+        dump($errors);
+        dump($company);
+
         if (false === $errors) {
             $this->getDoctrine()->getManager()->persist($company);
             $this->getDoctrine()->getManager()->flush();

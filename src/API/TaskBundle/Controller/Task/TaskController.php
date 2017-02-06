@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Controller\Task;
 
+use API\CoreBundle\Entity\Company;
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Filter;
 use API\TaskBundle\Entity\Project;
@@ -1096,7 +1097,7 @@ class TaskController extends ApiBaseController
      * @param Request $request
      * @param bool|int $projectId
      * @param bool|int $requestedUserId
-     * @param bool|int $company
+     * @param bool|int $companyId
      *
      * @return JsonResponse|Response
      * @throws \InvalidArgumentException
@@ -1104,7 +1105,7 @@ class TaskController extends ApiBaseController
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function createAction(Request $request, $projectId = false, $requestedUserId = false, $company = false)
+    public function createAction(Request $request, $projectId = false, $requestedUserId = false, $companyId = false)
     {
         // Check if logged user has ACL to create task
         $aclOptions = [
@@ -1153,6 +1154,25 @@ class TaskController extends ApiBaseController
             $requesterTaskId = $this->getUser()->getId();
         }
 
+        if ($companyId) {
+            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
+
+            if (!$company instanceof Company) {
+                return $this->createApiResponse([
+                    'message' => 'Company with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+            $task->setCompany($company);
+            $companyTaskId = $companyId;
+            unset($requestData['companyId']);
+        } else {
+            $loggedUserCompany = $this->getUser()->getCompany();
+            if ($loggedUserCompany instanceof Company) {
+                $task->setCompany($loggedUserCompany);
+            }
+            $companyTaskId = $loggedUserCompany;
+        }
+
         $task->setCreatedBy($this->getUser());
         $task->setImportant(false);
 
@@ -1160,6 +1180,7 @@ class TaskController extends ApiBaseController
             'id' => false,
             'projectId' => $projectId,
             'requesterId' => $requesterTaskId,
+            'companyId' => $companyTaskId
         ];
 
         return $this->updateTaskEntity($task, $requestData, true, $ids);

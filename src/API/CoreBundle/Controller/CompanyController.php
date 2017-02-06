@@ -427,14 +427,12 @@ class CompanyController extends ApiBaseController implements ControllerInterface
 
         $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
 
-        dump($company);
 
         if (!$company instanceof Company) {
             return $this->notFoundResponse();
         }
 
         $requestData = $request->request->all();
-        dump($requestData);
 
         return $this->updateCompany($company, $requestData);
     }
@@ -755,7 +753,8 @@ class CompanyController extends ApiBaseController implements ControllerInterface
         if (null === $company || !$company instanceof Company) {
             return $this->notFoundResponse();
         }
-
+        dump($requestData);
+        dump($requestDetailData);
         $errors = $this->get('entity_processor')->processEntity($company, $requestData);
 
         if (false === $errors) {

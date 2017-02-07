@@ -21,7 +21,7 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 class CdnController extends ApiBaseController
 {
     /**
-     * @Route("/upload/task/{id}",name="upload_files_for_task")
+     * @Route("/upload/task/{id}", name="upload_files_for_task")
      * @ApiDoc(
      *  description="Returns full Task Entity including extended about Task Data",
      *  requirements={
@@ -86,7 +86,7 @@ class CdnController extends ApiBaseController
 
         return $this->json(array_merge($responseData , $responseLinks) , StatusCodesHelper::CREATED_CODE);
     }
-    
+
     /**
      * @Route("/upload")
      * @param Request $request

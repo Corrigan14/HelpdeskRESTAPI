@@ -21,7 +21,6 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 class CdnController extends ApiBaseController
 {
     /**
-     * @Route("/upload/task/{id}", name="upload_files_for_task")
      * @ApiDoc(
      *  description="Returns full Task Entity including extended about Task Data",
      *  requirements={
@@ -47,6 +46,12 @@ class CdnController extends ApiBaseController
      *      404 ="Not found Entity",
      *  }
      * )
+     * @param Request $request
+     * @param Task    $task
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function uploadFilesAction(Request $request , Task $task)
     {
@@ -88,7 +93,6 @@ class CdnController extends ApiBaseController
     }
 
     /**
-     * @Route("/upload")
      * @param Request $request
      *
      * @return Response

@@ -21,64 +21,7 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 class CdnController extends ApiBaseController
 {
     /**
-     * @Route("/upload")
-     * @param Request $request
-     *
-     * @return Response
-     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
-     * @throws \LogicException
-     * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
-     * @throws \InvalidArgumentException
-     * @ApiDoc(
-     *  resource = true,
-     *  description="Create a new Entity (POST)",
-     *  input={"class"="API\CoreBundle\Entity\...entityName"},
-     *     parameters={
-     *     {
-     *       "name"="file",
-     *       "dataType"="file",
-     *       "required"="true",
-     *       "description"="File to upload"
-     *     }
-     *  },
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\CoreBundle\Entity\...entityName"},
-     *  statusCodes={
-     *      201 ="The entity was successfully created",
-     *      401 ="Unauthorized request",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     */
-    public function uploadAction(Request $request)
-    {
-
-        $file = $this->getUploadedFile('file');
-
-        if (false === $file) {
-            return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE ,] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
-        }
-
-        $slug = $this->processFile($file , $request->get('public'));
-
-        return $this->createApiResponse(['slug' => $slug , 'message' => StatusCodesHelper::CREATED_MESSAGE ,] , StatusCodesHelper::CREATED_CODE);
-    }
-
-    /**
      * @Route("/upload/task/{id}",name="upload_files_for_task")
-     * @param Request $request
-     *
-     * @param Task    $task
-     *
-     * @return Response
-     * @throws \LogicException
-     * @throws \InvalidArgumentException
      * @ApiDoc(
      *  description="Returns full Task Entity including extended about Task Data",
      *  requirements={
@@ -143,6 +86,58 @@ class CdnController extends ApiBaseController
 
         return $this->json(array_merge($responseData , $responseLinks) , StatusCodesHelper::CREATED_CODE);
     }
+    
+    /**
+     * @Route("/upload")
+     * @param Request $request
+     *
+     * @return Response
+     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
+     * @throws \LogicException
+     * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
+     * @throws \InvalidArgumentException
+     *
+     * @ApiDoc(
+     *  resource = true,
+     *  description="Create a new Entity (POST)",
+     *  input={"class"="API\CoreBundle\Entity\...entityName"},
+     *     parameters={
+     *     {
+     *       "name"="file",
+     *       "dataType"="file",
+     *       "required"="true",
+     *       "description"="File to upload"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  output={"class"="API\CoreBundle\Entity\...entityName"},
+     *  statusCodes={
+     *      201 ="The entity was successfully created",
+     *      401 ="Unauthorized request",
+     *      409 ="Invalid parameters",
+     *  }
+     * )
+     */
+    public function uploadAction(Request $request)
+    {
+
+        $file = $this->getUploadedFile('file');
+
+        if (false === $file) {
+            return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE ,] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        }
+
+        $slug = $this->processFile($file , $request->get('public'));
+
+        return $this->createApiResponse(['slug' => $slug , 'message' => StatusCodesHelper::CREATED_MESSAGE ,] , StatusCodesHelper::CREATED_CODE);
+    }
+
 
     /**
      * @Route("/load/{slug}", name="cdn_load_file")

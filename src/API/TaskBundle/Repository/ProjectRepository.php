@@ -130,4 +130,17 @@ class ProjectRepository extends EntityRepository implements RepositoryInterface
 
         return $query->getSingleScalarResult();
     }
+
+    /**
+     * @return array
+     */
+    public function getAllProjectEntitiesWithIdAndTitle():array
+    {
+        $query = $this->createQueryBuilder('project')
+            ->select('project.id, project.title')
+            ->where('project.is_active = :isActive')
+            ->setParameter('isActive', true);
+
+        return $query->getQuery()->getArrayResult();
+    }
 }

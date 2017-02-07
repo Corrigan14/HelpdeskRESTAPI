@@ -464,7 +464,7 @@ class TaskRepository extends EntityRepository
     public function getTask(int $taskId)
     {
         $query = $this->createQueryBuilder('task')
-            ->select('task, taskData, taskAttribute, project, createdBy, company, requestedBy, thau, status, assignedUser, creatorDetailData, requesterDetailData, tags, taskCompany')
+            ->select('task, taskData, taskAttribute, project, createdBy, company, requestedBy, thau, status, assignedUser, creatorDetailData, requesterDetailData, tags, taskCompany, attachments')
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')
@@ -479,6 +479,7 @@ class TaskRepository extends EntityRepository
             ->leftJoin('thau.user', 'assignedUser')
             ->leftJoin('task.tags', 'tags')
             ->leftJoin('task.company', 'taskCompany')
+            ->leftJoin('task.taskHasAttachments','attachments')
             ->where('task.id = :taskId')
             ->setParameter('taskId', $taskId);
 

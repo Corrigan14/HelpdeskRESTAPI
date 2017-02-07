@@ -64,6 +64,14 @@ class StatusService
     }
 
     /**
+     * @return array
+     */
+    public function getListOfExistedStatuses():array
+    {
+        return $this->em->getRepository('APITaskBundle:Status')->getAllStatusEntitiesWithIdAndTitle();
+    }
+
+    /**
      * @param int $id
      * @return array
      */

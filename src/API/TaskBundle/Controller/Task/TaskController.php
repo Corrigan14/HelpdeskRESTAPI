@@ -12,6 +12,7 @@ use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskAttribute;
 use API\TaskBundle\Entity\TaskData;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
+use API\TaskBundle\Security\ProjectAclOptions;
 use API\TaskBundle\Security\StatusOptions;
 use API\TaskBundle\Security\UserRoleAclOptions;
 use API\TaskBundle\Security\VoteOptions;
@@ -808,7 +809,14 @@ class TaskController extends ApiBaseController
      *              "zip": "021478",
      *              "country": "Slovenska Republika",
      *              "is_active": true
-     *           }
+     *           },
+     *           "taskHasAttachments":
+     *           [
+     *             {
+     *                "id": 1,
+     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *           ]
      *        },
      *       "_links":
      *       {
@@ -1033,7 +1041,14 @@ class TaskController extends ApiBaseController
      *              "zip": "021478",
      *              "country": "Slovenska Republika",
      *              "is_active": true
-     *           }
+     *           },
+     *           "taskHasAttachments":
+     *           [
+     *             {
+     *                "id": 1,
+     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *           ]
      *        },
      *       "_links":
      *       {
@@ -1331,7 +1346,14 @@ class TaskController extends ApiBaseController
      *              "zip": "021478",
      *              "country": "Slovenska Republika",
      *              "is_active": true
-     *           }
+     *           },
+     *           "taskHasAttachments":
+     *           [
+     *             {
+     *                "id": 1,
+     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *           ]
      *        },
      *       "_links":
      *       {
@@ -1612,7 +1634,14 @@ class TaskController extends ApiBaseController
      *              "zip": "021478",
      *              "country": "Slovenska Republika",
      *              "is_active": true
-     *           }
+     *           },
+     *           "taskHasAttachments":
+     *           [
+     *             {
+     *                "id": 1,
+     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *           ]
      *        },
      *       "_links":
      *       {
@@ -1942,7 +1971,14 @@ class TaskController extends ApiBaseController
      *              "zip": "021478",
      *              "country": "Slovenska Republika",
      *              "is_active": true
-     *           }
+     *           },
+     *           "taskHasAttachments":
+     *           [
+     *             {
+     *                "id": 1,
+     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *           ]
      *        },
      *       "_links":
      *       {
@@ -2229,7 +2265,7 @@ class TaskController extends ApiBaseController
      *  description="Get all options for task: statuses, available projects, available requesters, available companies, available assigners, available tags",
      *  requirements={
      *     {
-     *       "name"="id",
+     *       "name"="taskId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
      *       "description"="The id of processed task"
@@ -2249,14 +2285,14 @@ class TaskController extends ApiBaseController
      *      404 ="Not found Entity"
      *  })
      *
-     * @param int $id
+     * @param int $taskId
      *
      * @return JsonResponse|Response
      * @throws \LogicException
      */
-    public function getTaskOptionsAction(int $id)
+    public function getTaskOptionsAction(int $taskId)
     {
-        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
             return $this->createApiResponse([
@@ -2270,7 +2306,26 @@ class TaskController extends ApiBaseController
         }
 
         // Return arrays of options
-        $statusesArray = [];
+        $statusesArray = $this->get('status_service')->getListOfExistedStatuses();
+
+        // Available projects are where logged user have CREATE_TASK ACL
+        // If task is moved to project where assigned user has not permission to RESOLVE_TASK, this assigned user will be removed
+        // Admin can use All existed projects
+        $isAdmin = $this->get('task_voter')->isAdmin();
+        $projectsArray = $this->get('project_service')->getListOfAvailableProjects($this->getUser(), $isAdmin, ProjectAclOptions::CREATE_TASK);
+        // Every user can be requester
+        $requesterArray = $this->get('api_user.service')->getListOfAllUsers();
+        // Every company is available
+        $companyArray = $this->get('api_company.service')->getListOfCompanies();
+
+
+        $response = [
+            'status' => $statusesArray,
+            'project' => $projectsArray,
+            'requester' => $requesterArray,
+            'company' => $companyArray
+        ];
+        return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

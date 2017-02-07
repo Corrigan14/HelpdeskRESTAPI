@@ -115,4 +115,12 @@ class UserService
 
         return array_merge($otherLinks, $linksForCompany);
     }
+
+    /**
+     * @return array
+     */
+    public function getListOfAllUsers():array
+    {
+        return $this->em->getRepository('APICoreBundle:User')->getAllUserEntitiesWithIdAndTitle();
+    }
 }

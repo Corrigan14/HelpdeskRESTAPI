@@ -92,6 +92,8 @@ class StatusRepository extends EntityRepository implements RepositoryInterface
     {
         $query = $this->createQueryBuilder('s')
             ->select('s.id,s.title')
+            ->where('s.is_active = :isActive')
+            ->setParameter('isActive', true)
             ->getQuery();
 
         return $query->getArrayResult();

@@ -171,4 +171,17 @@ class UserRepository extends EntityRepository
 
         return $query->getArrayResult();
     }
+
+    /**
+     * @return array
+     */
+    public function getAllUserEntitiesWithIdAndTitle():array
+    {
+        $query = $this->createQueryBuilder('user')
+            ->select('user.id, user.username')
+            ->where('user.is_active = :isActive')
+            ->setParameter('isActive', true);
+
+        return $query->getQuery()->getArrayResult();
+    }
 }

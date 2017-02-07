@@ -116,4 +116,17 @@ class CompanyRepository extends EntityRepository implements RepositoryInterface
 
         return $query->getSingleScalarResult();
     }
+
+    /**
+     * @return array
+     */
+    public function getAllCompanyEntitiesWithIdAndTitle()
+    {
+        $query = $this->createQueryBuilder('company')
+            ->select('company.id,  company.title')
+            ->where('company.is_active = :isActive')
+            ->setParameter('isActive', true);
+
+        return $query->getQuery()->getArrayResult();
+    }
 }

@@ -2278,10 +2278,17 @@ class TaskController extends ApiBaseController
         // Admin can use All existed projects
         $isAdmin = $this->get('task_voter')->isAdmin();
         $projectsArray = $this->get('project_service')->getListOfAvailableProjects($this->getUser(), $isAdmin, ProjectAclOptions::CREATE_TASK);
+        // Every user can be requester
+        $requesterArray = $this->get('api_user.service')->getListOfAllUsers();
+        // Every company is available
+        $companyArray = $this->get('api_company.service')->getListOfCompanies();
+
 
         $response = [
-            'statuses' => $statusesArray,
-            'projects' => $projectsArray
+            'status' => $statusesArray,
+            'project' => $projectsArray,
+            'requester' => $requesterArray,
+            'company' => $companyArray
         ];
         return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
     }

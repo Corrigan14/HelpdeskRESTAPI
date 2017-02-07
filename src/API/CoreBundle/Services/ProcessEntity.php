@@ -9,6 +9,7 @@
 namespace API\CoreBundle\Services;
 
 
+use Doctrine\Common\Util\ClassUtils;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\ConstraintViolationList;
@@ -40,7 +41,7 @@ class ProcessEntity
      */
     public function processEntity($entity, array $data = [])
     {
-        $message = $this->fillEntity(get_class($entity), $entity, $data);
+        $message = $this->fillEntity(ClassUtils::getClass($entity), $entity, $data);
 
         if (count($message) > 0) {
             return $message;
@@ -66,14 +67,12 @@ class ProcessEntity
      */
     public function fillEntity($class, $entity, array $data)
     {
-        dump($class, $entity,$data);
         $message = [];
         foreach ($data as $method => $value) {
             if('id' === $method){
                 $message[] = 'You can not change ID of entity!';
             }
             if (property_exists($class, $method)) {
-                dump($class, $method);
                 $method = str_replace('_', '', $method);
                 $m = 'set' . $method;
                 $entity->$m($value);

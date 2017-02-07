@@ -1,8 +1,6 @@
 <?php
 
-namespace API\CoreBundle\Controller;
 
-use API\CoreBundle\Security\VoteOptions;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskHasAttachment;
 use Igsem\APIBundle\Controller\ApiBaseController;
@@ -13,6 +11,7 @@ use API\CoreBundle\Entity\File;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use API\TaskBundle\Security\VoteOptions;
 
 /**
  * Class CdnController

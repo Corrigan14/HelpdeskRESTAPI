@@ -60,11 +60,11 @@ class CdnController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
-        $files = $request->files;
+        $files = $_FILES;
         $slugs = [];
 
         foreach ($files as $file) {
-            $slugs[] = $this->processFile($file);
+            $slugs[] = $this->processFile($this->createUploadedFile($file));
         }
         foreach ($slugs as $slug) {
             if ($this->canAddAttachmentToTask($task , $slug)) {
@@ -234,10 +234,21 @@ class CdnController extends ApiBaseController
         if (!empty($_FILES[$postName])) {
             $postFile = $_FILES[$postName];
 
-            return new UploadedFile($postFile['tmp_name'] , $postFile['name'] , $postFile['type'] , $postFile['size'] , $postFile['error']);
+            return $this->createUploadedFile($postFile);
         }
 
         return false;
+    }
+
+    /**
+     * @param $postFile
+     *
+     * @return UploadedFile
+     * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
+     */
+    private function createUploadedFile($postFile)
+    {
+        return new UploadedFile($postFile['tmp_name'] , $postFile['name'] , $postFile['type'] , $postFile['size'] , $postFile['error']);
     }
 
     /**

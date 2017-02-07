@@ -11,7 +11,6 @@ use API\CoreBundle\Entity\File;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
-use API\TaskBundle\Security\VoteOptions;
 
 /**
  * Class CdnController

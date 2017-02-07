@@ -2,6 +2,7 @@
 
 namespace API\CoreBundle\Controller;
 
+use API\CoreBundle\Security\VoteOptions;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskHasAttachment;
 use Igsem\APIBundle\Controller\ApiBaseController;

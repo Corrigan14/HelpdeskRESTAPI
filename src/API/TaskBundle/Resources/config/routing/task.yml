@@ -17,6 +17,13 @@ task:
     requirements:
         id: '\d+'
 
+task_options:
+    path:     /tasks/options/{taskId}
+    defaults: { _controller: APITaskBundle:Task/Task:getTaskOptions }
+    methods: [GET]
+    requirements:
+        taskId: '\d+'
+
 tasks_create:
     path:     /tasks
     defaults: { _controller: APITaskBundle:Task/Task:create }

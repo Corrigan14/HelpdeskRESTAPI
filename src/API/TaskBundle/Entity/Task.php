@@ -85,11 +85,11 @@ class Task
     private $work;
 
     /**
-     * @var float
+     * @var integer
      *
-     * @ORM\Column(name="work_time", type="float", nullable=true)
+     * @ORM\Column(name="work_time", type="decimal", nullable=true)
      */
-    private $workTime;
+    private $work_time;
 
     /**
      * @var User
@@ -653,7 +653,7 @@ class Task
      */
     public function setWorkTime($workTime)
     {
-        $this->workTime = $workTime;
+        $this->work_time = $workTime;
 
         return $this;
     }
@@ -665,7 +665,7 @@ class Task
      */
     public function getWorkTime()
     {
-        return $this->workTime;
+        return $this->work_time;
     }
 
     /**

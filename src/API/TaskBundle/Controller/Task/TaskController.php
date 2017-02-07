@@ -17,13 +17,11 @@ use API\TaskBundle\Security\UserRoleAclOptions;
 use API\TaskBundle\Security\VoteOptions;
 use API\TaskBundle\Services\FilterAttributeOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
-use Igsem\APIBundle\Controller\ControllerInterface;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
  * Class TaskController
@@ -2226,7 +2224,54 @@ class TaskController extends ApiBaseController
         return $this->json(array_merge($responseData, $responseLinks), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
+    /**
+     * @ApiDoc(
+     *  description="Get all options for task: statuses, available projects, available requesters, available companies, available assigners, available tags",
+     *  requirements={
+     *     {
+     *       "name"="id",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of processed task"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity"
+     *  })
+     *
+     * @param int $id
+     *
+     * @return JsonResponse|Response
+     * @throws \LogicException
+     */
+    public function getTaskOptionsAction(int $id)
+    {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
 
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        // Check if user can view requested Task
+        if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_TASK, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
+        // Return arrays of options
+        $statusesArray = [];
+    }
 
     /**
      * @param Task $task

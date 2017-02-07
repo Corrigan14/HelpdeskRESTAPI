@@ -32,7 +32,7 @@ class UploadedFile extends SymfonyUploadedFile
         try {
             $file->setType($this->getMimeType());
         } catch (\Exception $e) {
-            $file->setType($this->getClientMimeType());
+            $file->setType('');
         }
     }
 

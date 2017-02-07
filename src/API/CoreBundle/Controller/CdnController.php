@@ -50,7 +50,7 @@ class CdnController extends ApiBaseController
      * @param Request $request
      * @param Task    $task
      *
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     * @return \Symfony\Component\HttpFoundation\JsonResponse|Response
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -62,23 +62,27 @@ class CdnController extends ApiBaseController
 
         $files = $_FILES;
         $slugs = [];
-
-        foreach ($files as $file) {
-            $slugs[] = $this->processFile($this->createUploadedFile($file));
-        }
-        foreach ($slugs as $slug) {
-            if ($this->canAddAttachmentToTask($task , $slug)) {
-                $taskHasAttachment = new TaskHasAttachment();
-                $taskHasAttachment->setTask($task);
-                $taskHasAttachment->setSlug($slug);
-                $task->addTaskHasAttachment($taskHasAttachment);
-                $this->getDoctrine()->getManager()->persist($taskHasAttachment);
+        try {
+            foreach ($files as $file) {
+                $slugs[] = $this->processFile($this->createUploadedFile($file));
             }
+            foreach ($slugs as $slug) {
+                if ($this->canAddAttachmentToTask($task , $slug)) {
+                    $taskHasAttachment = new TaskHasAttachment();
+                    $taskHasAttachment->setTask($task);
+                    $taskHasAttachment->setSlug($slug);
+                    $task->addTaskHasAttachment($taskHasAttachment);
+                    $this->getDoctrine()->getManager()->persist($taskHasAttachment);
+                }
+            }
+
+            $this->getDoctrine()->getManager()->persist($task);
+            $this->getDoctrine()->getManager()->flush();
+        } catch (\Exception $e) {
+            return $this->createApiResponse([
+                'message' => $e->getMessage() ,
+            ] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
         }
-
-        $this->getDoctrine()->getManager()->persist($task);
-        $this->getDoctrine()->getManager()->flush();
-
 
         $ids = [
             'id'          => $task->getId() ,

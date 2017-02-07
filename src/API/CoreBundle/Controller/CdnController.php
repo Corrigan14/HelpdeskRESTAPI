@@ -1,6 +1,8 @@
 <?php
 
+namespace API\CoreBundle\Controller;
 
+use API\TaskBundle\Security\VoteOptions;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskHasAttachment;
 use Igsem\APIBundle\Controller\ApiBaseController;

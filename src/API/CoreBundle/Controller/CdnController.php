@@ -278,7 +278,7 @@ class CdnController extends ApiBaseController
      * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
      * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
      */
-    private function processFile($file , $public = false)
+    private function processFile(UploadedFile $file , $public = false)
     {
         $target = $this->getFolderDir();
         $file->setUploadDir($target['dir']);

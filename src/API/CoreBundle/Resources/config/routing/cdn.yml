@@ -2,7 +2,10 @@ file_upload:
     path:     /cdn/upload
     defaults: { _controller: APICoreBundle:Cdn:upload }
     methods: [POST]
-
+file_uploads:
+    path:     /cdn/upload/task/{id}
+    defaults: { _controller: APICoreBundle:Cdn:uploadFiles }
+    methods: [POST]
 file_load:
     path:     /cdn/load/{slug}
     defaults: { _controller: APICoreBundle:Cdn:load }

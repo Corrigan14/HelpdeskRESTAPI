@@ -29,6 +29,7 @@ security:
         ROLE_CUSTOMER: IS_AUTHENTICATED_ANONYMOUSLY
     access_control:
         - { path: ^/api/v[0-9]/token-authentication, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/v[0-9]/core-bundle/cdn/load, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api/v[0-9], roles: ROLE_USER }
         - { path: ^/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/(css|js), roles: IS_AUTHENTICATED_ANONYMOUSLY }

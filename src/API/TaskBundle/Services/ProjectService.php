@@ -71,6 +71,21 @@ class ProjectService
     }
 
     /**
+     * @param User $user
+     * @param bool $isAdmin
+     * @param string $rule
+     * @return array
+     */
+    public function getListOfAvailableProjects(User $user, bool $isAdmin, string $rule):array
+    {
+        if ($isAdmin) {
+            return $this->em->getRepository('APITaskBundle:Project')->getAllProjectEntitiesWithIdAndTitle();
+        } else {
+            return $this->em->getRepository('APITaskBundle:UserHasProject')->getAllProjectEntitiesWithIdAndTitle($user, $rule);
+        }
+    }
+
+    /**
      * Return Project Response which includes all data about Project Entity and Links to update/partialUpdate/delete
      * @param Project $project
      * @return array
@@ -97,6 +112,7 @@ class ProjectService
             '_links' => $this->getUserHasProjectLinks($projectId, $userId),
         ];
     }
+
 
     /**
      * @param int $projectId

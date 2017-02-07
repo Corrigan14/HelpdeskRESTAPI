@@ -84,4 +84,16 @@ class StatusRepository extends EntityRepository implements RepositoryInterface
 
         return $query->getArrayResult();
     }
+
+    /**
+     * @return array
+     */
+    public function getAllStatusEntitiesWithIdAndTitle()
+    {
+        $query = $this->createQueryBuilder('s')
+            ->select('s.id,s.title')
+            ->getQuery();
+
+        return $query->getArrayResult();
+    }
 }

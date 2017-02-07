@@ -85,9 +85,9 @@ class Task
     private $work;
 
     /**
-     * @var integer
+     * @var string
      *
-     * @ORM\Column(name="work_time", type="decimal", nullable=true)
+     * @ORM\Column(name="work_time", type="string", nullable=true)
      */
     private $work_time;
 
@@ -647,7 +647,7 @@ class Task
     /**
      * Set workTime
      *
-     * @param $workTime
+     * @param string $workTime
      *
      * @return Task
      */
@@ -661,7 +661,7 @@ class Task
     /**
      * Get workTime
      *
-     * @return \double
+     * @return string
      */
     public function getWorkTime()
     {

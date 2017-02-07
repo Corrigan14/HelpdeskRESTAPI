@@ -809,7 +809,14 @@ class TaskController extends ApiBaseController
      *              "zip": "021478",
      *              "country": "Slovenska Republika",
      *              "is_active": true
-     *           }
+     *           },
+     *           "taskHasAttachments":
+     *           [
+     *             {
+     *                "id": 1,
+     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *           ]
      *        },
      *       "_links":
      *       {
@@ -1034,7 +1041,14 @@ class TaskController extends ApiBaseController
      *              "zip": "021478",
      *              "country": "Slovenska Republika",
      *              "is_active": true
-     *           }
+     *           },
+     *           "taskHasAttachments":
+     *           [
+     *             {
+     *                "id": 1,
+     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *           ]
      *        },
      *       "_links":
      *       {
@@ -1332,7 +1346,14 @@ class TaskController extends ApiBaseController
      *              "zip": "021478",
      *              "country": "Slovenska Republika",
      *              "is_active": true
-     *           }
+     *           },
+     *           "taskHasAttachments":
+     *           [
+     *             {
+     *                "id": 1,
+     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *           ]
      *        },
      *       "_links":
      *       {
@@ -1613,7 +1634,14 @@ class TaskController extends ApiBaseController
      *              "zip": "021478",
      *              "country": "Slovenska Republika",
      *              "is_active": true
-     *           }
+     *           },
+     *           "taskHasAttachments":
+     *           [
+     *             {
+     *                "id": 1,
+     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *           ]
      *        },
      *       "_links":
      *       {
@@ -1943,7 +1971,14 @@ class TaskController extends ApiBaseController
      *              "zip": "021478",
      *              "country": "Slovenska Republika",
      *              "is_active": true
-     *           }
+     *           },
+     *           "taskHasAttachments":
+     *           [
+     *             {
+     *                "id": 1,
+     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *           ]
      *        },
      *       "_links":
      *       {

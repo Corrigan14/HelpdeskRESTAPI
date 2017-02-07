@@ -29,7 +29,11 @@ class UploadedFile extends SymfonyUploadedFile
         $file->setName($this->getClientOriginalName());
         $file->setSize($this->getClientSize());
         $file->setTempName($this->getFilename());
-        $file->setType($this->getMimeType());
+        try {
+            $file->setType($this->getMimeType());
+        } catch (\Exception $e) {
+            $file->setType($this->getClientMimeType());
+        }
     }
 
 

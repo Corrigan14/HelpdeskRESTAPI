@@ -12,6 +12,7 @@ use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskAttribute;
 use API\TaskBundle\Entity\TaskData;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
+use API\TaskBundle\Entity\UserHasProject;
 use API\TaskBundle\Security\ProjectAclOptions;
 use API\TaskBundle\Security\StatusOptions;
 use API\TaskBundle\Security\UserRoleAclOptions;
@@ -2072,13 +2073,25 @@ class TaskController extends ApiBaseController
             }
             $task->setProject($project);
             $taskProjectId = $requestData['project'];
+
+            // Remove users assigned to task which hasn't RESOLVE_TASK permission in selected project
+            $taskHasAssignedUsers = $task->getTaskHasAssignedUsers();
+            if (count($taskHasAssignedUsers) > 0) {
+                /** @var TaskHasAssignedUser $entity */
+                foreach ($taskHasAssignedUsers as $entity) {
+                    if (!$this->checkIfUserHasResolveTaskAclPermission($entity, $project)) {
+                        $this->getDoctrine()->getManager()->remove($taskHasAssignedUsers);
+                        $this->getDoctrine()->getManager()->flush();
+                    }
+                }
+            }
         } elseif ($task->getProject()) {
             $taskProjectId = $task->getProject()->getId();
         } else {
             $taskProjectId = false;
         }
 
-        if (isset($requestData['project'])) {
+        if (isset($requestData['requester'])) {
             $requestedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requestData['requester']);
             if (!$requestedUser instanceof User) {
                 return $this->createApiResponse([
@@ -2321,6 +2334,13 @@ class TaskController extends ApiBaseController
      *               "id": 12,
      *               "title": "Another Admin Public Tag"
      *             }
+     *          ],
+     *          "assigner":
+     *          [
+     *            {
+     *               "id": 1014,
+     *               "username": "admin"
+     *            }
      *          ]
      *      }
      * @ApiDoc(
@@ -2389,7 +2409,7 @@ class TaskController extends ApiBaseController
             $assignArray = $this->get('api_user.service')->getListOfAvailableProjectAssigners($project, ProjectAclOptions::RESOLVE_TASK);
         } else {
             $assignArray = [
-                'assigner' => [
+                [
                     'id' => $task->getCreatedBy()->getId(),
                     'username' => $task->getCreatedBy()->getUsername()
                 ]
@@ -2924,5 +2944,28 @@ class TaskController extends ApiBaseController
             'from' => $fromData,
             'to' => $toData,
         ];
+    }
+
+    /**
+     * @param TaskHasAssignedUser $entity
+     * @param Project $project
+     * @return bool
+     */
+    private function checkIfUserHasResolveTaskAclPermission(TaskHasAssignedUser $entity, Project $project):bool
+    {
+        $user = $entity->getUser();
+        $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+            'user' => $user,
+            'project' => $project
+        ]);
+        if ($userHasProject instanceof UserHasProject) {
+            $acl = $userHasProject->getAcl();
+            if (in_array(ProjectAclOptions::RESOLVE_TASK, $acl, true)) {
+                return true;
+            } else {
+                false;
+            }
+        }
+        return false;
     }
 }

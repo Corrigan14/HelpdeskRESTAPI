@@ -78,7 +78,7 @@ class CompanyService
     /**
      * @return array
      */
-    public function getListOfCompanies():array
+    public function getListOfAllCompanies():array
     {
         return $this->em->getRepository('APICoreBundle:Company')->getAllCompanyEntitiesWithIdAndTitle();
     }

@@ -77,4 +77,19 @@ class TagRepository extends EntityRepository implements RepositoryInterface
 
         return $query->getQuery()->getArrayResult();
     }
+
+    /**
+     * @param int $userId
+     * @return array
+     */
+    public function getAllTagEntitiesWithIdAndTitle(int $userId):array
+    {
+        $query = $this->createQueryBuilder('tag')
+            ->select('tag.id, tag.title')
+            ->where('tag.public = :public')
+            ->orWhere('tag.createdBy = :userId')
+            ->setParameters(['public' => true, 'userId' => $userId]);
+
+        return $query->getQuery()->getArrayResult();
+    }
 }

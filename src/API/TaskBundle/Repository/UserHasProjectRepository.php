@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Repository;
 
 use API\CoreBundle\Entity\User;
+use API\TaskBundle\Entity\Project;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -27,6 +28,24 @@ class UserHasProjectRepository extends EntityRepository
             ->andWhere('uhp.acl LIKE :rule')
             ->andWhere('project.is_active = :isActive')
             ->setParameters(['user' => $user, 'rule' => '%' . $rule . '%', 'isActive' => true]);
+
+        return $query->getQuery()->getArrayResult();
+    }
+
+    /**
+     * @param Project $project
+     * @param string $rule
+     * @return array
+     */
+    public function getAllUserEntitiesWithIdAndTitle(Project $project, string $rule):array
+    {
+        $query = $this->createQueryBuilder('uhp')
+            ->select('user.id, user.username')
+            ->leftJoin('uhp.user', 'user')
+            ->where('uhp.project = :project')
+            ->andWhere('uhp.acl LIKE :rule')
+            ->andWhere('user.is_active = :isActive')
+            ->setParameters(['project' => $project, 'rule' => '%' . $rule . '%', 'isActive' => true]);
 
         return $query->getQuery()->getArrayResult();
     }

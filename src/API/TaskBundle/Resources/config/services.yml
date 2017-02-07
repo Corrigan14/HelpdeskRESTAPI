@@ -40,3 +40,6 @@ services:
     status_service:
             class: API\TaskBundle\Services\StatusService
             arguments: ["@doctrine.orm.entity_manager", "@router"]
+    tag_service:
+            class: API\TaskBundle\Services\TagService
+            arguments: ["@doctrine.orm.entity_manager", "@router"]

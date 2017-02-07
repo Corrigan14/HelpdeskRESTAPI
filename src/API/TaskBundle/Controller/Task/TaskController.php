@@ -896,7 +896,7 @@ class TaskController extends ApiBaseController
 
     /**
      * ### Response ###
-     *       *      {
+     *      {
      *        "data":
      *        {
      *           "id": 2991,
@@ -1826,7 +1826,7 @@ class TaskController extends ApiBaseController
 
     /**
      * ### Response ###
-     *       *      {
+     *      {
      *        "data":
      *        {
      *           "id": 2991,
@@ -2261,6 +2261,68 @@ class TaskController extends ApiBaseController
     }
 
     /**
+     *  ### Response ###
+     *      {
+     *         "status":
+     *         [
+     *            {
+     *               "id": 178,
+     *               "title": "new"
+     *            },
+     *            {
+     *               "id": 179,
+     *               "title": "In Progress"
+     *            },
+     *         ],
+     *         "project":
+     *         [
+     *            {
+     *               "id": 207,
+     *               "title": "Project of user 2"
+     *            },
+     *            {
+     *              "id": 208,
+     *              "title": "Project of admin"
+     *            },
+     *         ],
+     *         "requester":
+     *         [
+     *            {
+     *               "id": 1014,
+     *               "username": "admin"
+     *            },
+     *            {
+     *               "id": 1015,
+     *               "username": "manager"
+     *            },
+     *         ],
+     *         "company":
+     *         [
+     *           {
+     *              "id": 317,
+     *              "title": "Web-Solutions"
+     *           },
+     *           {
+     *              "id": 318,
+     *              "title": "LanSystems"
+     *           }
+     *         ],
+     *         "tag":
+     *         [
+     *           {
+     *              "id": 9,
+     *              "title": "Free Time"
+     *            },
+     *           {
+     *              "id": 10,
+     *              "title": "Work"
+     *            },
+     *            {
+     *               "id": 12,
+     *               "title": "Another Admin Public Tag"
+     *             }
+     *          ]
+     *      }
      * @ApiDoc(
      *  description="Get all options for task: statuses, available projects, available requesters, available companies, available assigners, available tags",
      *  requirements={
@@ -2316,14 +2378,31 @@ class TaskController extends ApiBaseController
         // Every user can be requester
         $requesterArray = $this->get('api_user.service')->getListOfAllUsers();
         // Every company is available
-        $companyArray = $this->get('api_company.service')->getListOfCompanies();
-
+        $companyArray = $this->get('api_company.service')->getListOfAllCompanies();
+        // Public and logged user's tags are available
+        $tagArray = $this->get('tag_service')->getListOfUsersTags($this->getUser()->getId());
+        // Available assigners are based on project of task
+        // If task has project, assigner has to have RESOLVE_TASK ACL in user_has_project
+        // If task has not project, just creator of task can be assigned to it
+        if ($task->getProject()) {
+            $project = $task->getProject();
+            $assignArray = $this->get('api_user.service')->getListOfAvailableProjectAssigners($project, ProjectAclOptions::RESOLVE_TASK);
+        } else {
+            $assignArray = [
+                'assigner' => [
+                    'id' => $task->getCreatedBy()->getId(),
+                    'username' => $task->getCreatedBy()->getUsername()
+                ]
+            ];
+        }
 
         $response = [
             'status' => $statusesArray,
             'project' => $projectsArray,
             'requester' => $requesterArray,
-            'company' => $companyArray
+            'company' => $companyArray,
+            'tag' => $tagArray,
+            'assigner' => $assignArray
         ];
         return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
     }

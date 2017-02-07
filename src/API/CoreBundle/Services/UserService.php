@@ -4,6 +4,7 @@ namespace API\CoreBundle\Services;
 
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Repository\UserRepository;
+use API\TaskBundle\Entity\Project;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
@@ -122,5 +123,15 @@ class UserService
     public function getListOfAllUsers():array
     {
         return $this->em->getRepository('APICoreBundle:User')->getAllUserEntitiesWithIdAndTitle();
+    }
+
+    /**
+     * @param Project $project
+     * @param string $rule
+     * @return array
+     */
+    public function getListOfAvailableProjectAssigners(Project $project, string $rule):array
+    {
+        return $this->em->getRepository('APITaskBundle:UserHasProject')->getAllUserEntitiesWithIdAndTitle($project, $rule);
     }
 }

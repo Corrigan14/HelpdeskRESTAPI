@@ -2224,9 +2224,9 @@ class TaskController extends ApiBaseController
         $responseData['data'] = $response['data'][0];
         $responseLinks['_links'] = $response['_links'];
         return $this->json(array_merge($responseData, $responseLinks), StatusCodesHelper::SUCCESSFUL_CODE);
-
-
     }
+
+
 
     /**
      * @param Task $task

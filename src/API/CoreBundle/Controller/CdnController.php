@@ -2,6 +2,8 @@
 
 namespace API\CoreBundle\Controller;
 
+use API\TaskBundle\Entity\Task;
+use API\TaskBundle\Entity\TaskHasAttachment;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use API\CoreBundle\Services\CDN\UploadedFile;
 use Igsem\APIBundle\Services\StatusCodesHelper;
@@ -63,24 +65,83 @@ class CdnController extends ApiBaseController
             return $this->createApiResponse(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE ,] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
         }
 
-        $target = $this->getFolderDir();
-        $file->setUploadDir($target['dir']);
-        $fileEntity = new File();
-        $file->save($fileEntity);
-        $file->move($target['path']);
-
-        if ($request->get('public')) {
-            $fileEntity->setPublic(true);
-        }
-
-        $this->getDoctrine()->getManager()->persist($fileEntity);
-        $this->getDoctrine()->getManager()->flush();
-        $slug = $fileEntity->getSlug();
-
+        $slug = $this->processFile($file , $request->get('public'));
 
         return $this->createApiResponse(['slug' => $slug , 'message' => StatusCodesHelper::CREATED_MESSAGE ,] , StatusCodesHelper::CREATED_CODE);
     }
+    /**
+     * @Route("/upload/task/{id}")
+     * @param Request $request
+     *
+     * @return Response
+     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
+     * @throws \LogicException
+     * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
+     * @throws \InvalidArgumentException
+     * @ApiDoc(
+     *  description="Returns full Task Entity including extended about Task Data",
+     *  requirements={
+     *     {
+     *       "name"="id",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of processed object"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  output="API\TaskBundle\Entity\Task",
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity",
+     *  }
+     * )
+     */
+    public function uploadFiles(Request $request , Task $task)
+    {
+        if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_ATTACHMENT_TO_TASK , $task)) {
+            return $this->accessDeniedResponse();
+        }
 
+        $files = $request->files;
+        $slugs = [];
+
+        foreach ($files as $file) {
+            $slugs[] = $this->processFile($file);
+        }
+        foreach ($slugs as $slug) {
+            if ($this->canAddAttachmentToTask($task , $slug)) {
+                $taskHasAttachment = new TaskHasAttachment();
+                $taskHasAttachment->setTask($task);
+                $taskHasAttachment->setSlug($slug);
+                $task->addTaskHasAttachment($taskHasAttachment);
+                $this->getDoctrine()->getManager()->persist($taskHasAttachment);
+            }
+        }
+
+        $this->getDoctrine()->getManager()->persist($task);
+        $this->getDoctrine()->getManager()->flush();
+
+
+        $ids = [
+            'id'          => $task->getId() ,
+            'projectId'   => false ,
+            'requesterId' => false ,
+        ];
+
+        $response = $this->get('task_service')->getTaskResponse($ids);
+        $responseData['data'] = $response['data'][0];
+        $responseLinks['_links'] = $response['_links'];
+
+        return $this->json(array_merge($responseData , $responseLinks) , StatusCodesHelper::CREATED_CODE);
+    }
 
     /**
      * @Route("/load/{slug}", name="cdn_load_file")
@@ -205,5 +266,49 @@ class CdnController extends ApiBaseController
             'path' => $uploadDir ,
             'dir'  => $unique ,
         ];
+    }
+
+    /**
+     * @param UploadedFile $file
+     * @param bool         $public
+     *
+     * @return mixed
+     * @throws \LogicException
+     * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
+     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
+     */
+    private function processFile($file , $public = false)
+    {
+        $target = $this->getFolderDir();
+        $file->setUploadDir($target['dir']);
+        $fileEntity = new File();
+        $file->save($fileEntity);
+        $file->move($target['path']);
+
+        if ($public) {
+            $fileEntity->setPublic(true);
+        }
+
+        $this->getDoctrine()->getManager()->persist($fileEntity);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $fileEntity->getSlug();
+    }
+
+    /**
+     * @param Task   $task
+     * @param string $slug
+     *
+     * @return bool
+     * @throws \LogicException
+     */
+    private function canAddAttachmentToTask(Task $task , string $slug): bool
+    {
+        $taskHasAttachment = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAttachment')->findOneBy([
+            'task' => $task ,
+            'slug' => $slug ,
+        ]);
+
+        return (!$taskHasAttachment instanceof TaskHasAttachment);
     }
 }

@@ -71,12 +71,14 @@ class CdnController extends ApiBaseController
     }
 
     /**
-     * @Route("/upload/task/{id}")
+     * @Route("/upload/task/{id}",name="upload_files_for_task")
      * @param Request $request
      *
      * @param Task    $task
      *
      * @return Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      * @ApiDoc(
      *  description="Returns full Task Entity including extended about Task Data",
      *  requirements={

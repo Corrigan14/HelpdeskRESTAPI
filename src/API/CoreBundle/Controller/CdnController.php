@@ -69,15 +69,14 @@ class CdnController extends ApiBaseController
 
         return $this->createApiResponse(['slug' => $slug , 'message' => StatusCodesHelper::CREATED_MESSAGE ,] , StatusCodesHelper::CREATED_CODE);
     }
+
     /**
      * @Route("/upload/task/{id}")
      * @param Request $request
      *
+     * @param Task    $task
+     *
      * @return Response
-     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
-     * @throws \LogicException
-     * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
-     * @throws \InvalidArgumentException
      * @ApiDoc(
      *  description="Returns full Task Entity including extended about Task Data",
      *  requirements={
@@ -104,7 +103,7 @@ class CdnController extends ApiBaseController
      *  }
      * )
      */
-    public function uploadFiles(Request $request , Task $task)
+    public function uploadFilesAction(Request $request , Task $task)
     {
         if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_ATTACHMENT_TO_TASK , $task)) {
             return $this->accessDeniedResponse();

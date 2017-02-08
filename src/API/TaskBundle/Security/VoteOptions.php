@@ -59,11 +59,6 @@ class VoteOptions
     const VIEW_PROJECT = 'read_project';
     const EDIT_PROJECT = 'edit_project';
 
-    // USER HAS PROJECT ACL OPTIONS
-    const ADD_USER_TO_PROJECT = 'add_user_to_project';
-    const REMOVE_USER_FROM_PROJECT = 'remove_user_from_project';
-    const EDIT_USER_ACL_IN_PROJECT = 'edit_user_acl_in_project';
-
 
 
 

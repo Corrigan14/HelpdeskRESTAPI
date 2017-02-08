@@ -48,7 +48,18 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *            [
      *               {
      *                  "id": 125,
-     *                  "acl": "[\"create_task\"]"
+     *                  "acl": "[\"create_task\"]",
+     *                  "user":
+     *                 {
+     *                    "id": 1014,
+     *                    "username": "admin",
+     *                    "password": "$2y$13$oRdNpKY3bo/dj2WGDKGzCOdcX9VZuxnu2NZKfy3jV2dV8zIW8qHr6",
+     *                    "email": "admin@admin.sk",
+     *                    "roles": "[\"ROLE_ADMIN\"]",
+     *                    "is_active": true,
+     *                    "language": "AJ",
+     *                    "image": null
+     *                 }
      *               }
      *            ]
      *          }
@@ -140,7 +151,18 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *           [
      *              {
      *                 "id": 125,
-     *                 "acl": "[\"create_task\"]"
+     *                 "acl": "[\"create_task\"]",
+     *                 "user":
+     *                 {
+     *                    "id": 1014,
+     *                    "username": "admin",
+     *                    "password": "$2y$13$oRdNpKY3bo/dj2WGDKGzCOdcX9VZuxnu2NZKfy3jV2dV8zIW8qHr6",
+     *                    "email": "admin@admin.sk",
+     *                    "roles": "[\"ROLE_ADMIN\"]",
+     *                    "is_active": true,
+     *                    "language": "AJ",
+     *                    "image": null
+     *                 }
      *              }
      *           ],
      *           "tasks":
@@ -271,7 +293,18 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *           [
      *              {
      *                 "id": 125,
-     *                 "acl": "[\"create_task\"]"
+     *                 "acl": "[\"create_task\"]",
+     *                 "user":
+     *                 {
+     *                    "id": 1014,
+     *                    "username": "admin",
+     *                    "password": "$2y$13$oRdNpKY3bo/dj2WGDKGzCOdcX9VZuxnu2NZKfy3jV2dV8zIW8qHr6",
+     *                    "email": "admin@admin.sk",
+     *                    "roles": "[\"ROLE_ADMIN\"]",
+     *                    "is_active": true,
+     *                    "language": "AJ",
+     *                    "image": null
+     *                 }
      *              }
      *           ]
      *        },
@@ -352,7 +385,18 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *           [
      *              {
      *                 "id": 125,
-     *                 "acl": "[\"create_task\"]"
+     *                 "acl": "[\"create_task\"]",
+     *                 "user":
+     *                 {
+     *                    "id": 1014,
+     *                    "username": "admin",
+     *                    "password": "$2y$13$oRdNpKY3bo/dj2WGDKGzCOdcX9VZuxnu2NZKfy3jV2dV8zIW8qHr6",
+     *                    "email": "admin@admin.sk",
+     *                    "roles": "[\"ROLE_ADMIN\"]",
+     *                    "is_active": true,
+     *                    "language": "AJ",
+     *                    "image": null
+     *                 }
      *              }
      *           ]
      *        },
@@ -441,7 +485,18 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *           [
      *              {
      *                 "id": 125,
-     *                 "acl": "[\"create_task\"]"
+     *                 "acl": "[\"create_task\"]",
+     *                 "user":
+     *                 {
+     *                    "id": 1014,
+     *                    "username": "admin",
+     *                    "password": "$2y$13$oRdNpKY3bo/dj2WGDKGzCOdcX9VZuxnu2NZKfy3jV2dV8zIW8qHr6",
+     *                    "email": "admin@admin.sk",
+     *                    "roles": "[\"ROLE_ADMIN\"]",
+     *                    "is_active": true,
+     *                    "language": "AJ",
+     *                    "image": null
+     *                 }
      *              }
      *           ]
      *        },
@@ -584,7 +639,18 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *           [
      *              {
      *                 "id": 125,
-     *                 "acl": "[\"create_task\"]"
+     *                 "acl": "[\"create_task\"]",
+     *                 "user":
+     *                 {
+     *                    "id": 1014,
+     *                    "username": "admin",
+     *                    "password": "$2y$13$oRdNpKY3bo/dj2WGDKGzCOdcX9VZuxnu2NZKfy3jV2dV8zIW8qHr6",
+     *                    "email": "admin@admin.sk",
+     *                    "roles": "[\"ROLE_ADMIN\"]",
+     *                    "is_active": true,
+     *                    "language": "AJ",
+     *                    "image": null
+     *                 }
      *              }
      *           ]
      *        },
@@ -651,39 +717,52 @@ class ProjectController extends ApiBaseController implements ControllerInterface
     }
 
     /**
-     *  ### Response ###
-     *     {
+     *   ### Response ###
+     *      {
      *        "data":
      *        {
-     *           "id": 28,
-     *           "acl": "[\"create_task_in_project\"]",
-     *           "user":
+     *           "id": "1",
+     *           "title": "Project 1",
+     *           "description": "Description of Project 1",
+     *           "createdAt":
      *           {
-     *             "id": 57,
-     *             "username": "testuser2",
-     *             "email": "testuser2@user.sk",
-     *             "roles": "[\"ROLE_USER\"]",
-     *             "is_active": true,
-     *             "acl": "[]",
-     *             "company": ⊕{...}
+     *              "date": "2016-11-26 21:49:04.000000",
+     *              "timezone_type": 3,
+     *              "timezone": "Europe/Berlin"
      *           },
-     *          "project":
-     *          {
-     *            "id": 54,
-     *            "title": "Project of admin",
-     *            "description": "Description of project of admin.",
-     *            "is_active": true,
-     *            "created_by":  ⊕{...}
-     *            "created_at": "2016-11-29T17:00:00+0100",
-     *            "updated_at": "2016-11-29T17:00:00+0100"
-     *          }
+     *           "updatedAt":
+     *           {
+     *              "date": "2016-11-26 21:49:04.000000",
+     *              "timezone_type": 3,
+     *              "timezone": "Europe/Berlin"
+     *           },
+     *           "userHasProjects":
+     *           [
+     *              {
+     *                 "id": 125,
+     *                 "acl": "[\"create_task\"]",
+     *                 "user":
+     *                 {
+     *                    "id": 1014,
+     *                    "username": "admin",
+     *                    "password": "$2y$13$oRdNpKY3bo/dj2WGDKGzCOdcX9VZuxnu2NZKfy3jV2dV8zIW8qHr6",
+     *                    "email": "admin@admin.sk",
+     *                    "roles": "[\"ROLE_ADMIN\"]",
+     *                    "is_active": true,
+     *                    "language": "AJ",
+     *                    "image": null
+     *                 }
+     *              }
+     *           ]
      *        },
      *        "_links":
      *        {
-     *          "put": "/api/v1/task-bundle/project/54/user/57",
-     *          "delete": "/api/v1/task-bundle/project/54/user/57"
-     *        }
-     *     }
+     *           "put": "/api/v1/task-bundle/projects/211",
+     *           "patch": "/api/v1/task-bundle/projects/211",
+     *           "delete": "/api/v1/task-bundle/projects/211"
+     *         }
+     *      }
+     *
      *
      * @ApiDoc(
      *  resource = true,
@@ -748,7 +827,11 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             ], StatusCodesHelper::NOT_FOUND_CODE);
         }
 
-        if (!$this->get('project_voter')->isGranted(VoteOptions::ADD_USER_TO_PROJECT, $project)) {
+        $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+            'user' => $this->getUser(),
+            'project' => $project
+        ]);
+        if (!$this->get('project_voter')->isGranted(VoteOptions::EDIT_PROJECT, $userHasProject)) {
             return $this->accessDeniedResponse();
         }
 
@@ -758,7 +841,6 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             'project' => $project,
             'user' => $user,
         ]);
-
         if ($existedUserHasProjectEntity instanceof UserHasProject) {
             $userHasProject = $existedUserHasProjectEntity;
         } else {
@@ -772,38 +854,51 @@ class ProjectController extends ApiBaseController implements ControllerInterface
 
     /**
      *  ### Response ###
-     *     {
+     *      {
      *        "data":
      *        {
-     *           "id": 28,
-     *           "acl": "[\"create_task_in_project\"]",
-     *           "user":
+     *           "id": "1",
+     *           "title": "Project 1",
+     *           "description": "Description of Project 1",
+     *           "createdAt":
      *           {
-     *             "id": 57,
-     *             "username": "testuser2",
-     *             "email": "testuser2@user.sk",
-     *             "roles": "[\"ROLE_USER\"]",
-     *             "is_active": true,
-     *             "acl": "[]",
-     *             "company": ⊕{...}
+     *              "date": "2016-11-26 21:49:04.000000",
+     *              "timezone_type": 3,
+     *              "timezone": "Europe/Berlin"
      *           },
-     *          "project":
-     *          {
-     *            "id": 54,
-     *            "title": "Project of admin",
-     *            "description": "Description of project of admin.",
-     *            "is_active": true,
-     *            "created_by":  ⊕{...}
-     *            "created_at": "2016-11-29T17:00:00+0100",
-     *            "updated_at": "2016-11-29T17:00:00+0100"
-     *          }
+     *           "updatedAt":
+     *           {
+     *              "date": "2016-11-26 21:49:04.000000",
+     *              "timezone_type": 3,
+     *              "timezone": "Europe/Berlin"
+     *           },
+     *           "userHasProjects":
+     *           [
+     *              {
+     *                 "id": 125,
+     *                 "acl": "[\"create_task\"]",
+     *                 "user":
+     *                 {
+     *                    "id": 1014,
+     *                    "username": "admin",
+     *                    "password": "$2y$13$oRdNpKY3bo/dj2WGDKGzCOdcX9VZuxnu2NZKfy3jV2dV8zIW8qHr6",
+     *                    "email": "admin@admin.sk",
+     *                    "roles": "[\"ROLE_ADMIN\"]",
+     *                    "is_active": true,
+     *                    "language": "AJ",
+     *                    "image": null
+     *                 }
+     *              }
+     *           ]
      *        },
      *        "_links":
      *        {
-     *          "put": "/api/v1/task-bundle/project/54/user/57",
-     *          "delete": "/api/v1/task-bundle/project/54/user/57"
-     *        }
-     *     }
+     *           "put": "/api/v1/task-bundle/projects/211",
+     *           "patch": "/api/v1/task-bundle/projects/211",
+     *           "delete": "/api/v1/task-bundle/projects/211"
+     *         }
+     *      }
+     *
      *
      * @ApiDoc(
      *  resource = true,
@@ -868,7 +963,11 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             ], StatusCodesHelper::NOT_FOUND_CODE);
         }
 
-        if (!$this->get('project_voter')->isGranted(VoteOptions::EDIT_USER_ACL_IN_PROJECT, $project)) {
+        $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+            'user' => $this->getUser(),
+            'project' => $project
+        ]);
+        if (!$this->get('project_voter')->isGranted(VoteOptions::EDIT_PROJECT, $userHasProject)) {
             return $this->accessDeniedResponse();
         }
 
@@ -889,6 +988,53 @@ class ProjectController extends ApiBaseController implements ControllerInterface
     }
 
     /**
+     *  ### Response ###
+     *      {
+     *        "data":
+     *        {
+     *           "id": "1",
+     *           "title": "Project 1",
+     *           "description": "Description of Project 1",
+     *           "createdAt":
+     *           {
+     *              "date": "2016-11-26 21:49:04.000000",
+     *              "timezone_type": 3,
+     *              "timezone": "Europe/Berlin"
+     *           },
+     *           "updatedAt":
+     *           {
+     *              "date": "2016-11-26 21:49:04.000000",
+     *              "timezone_type": 3,
+     *              "timezone": "Europe/Berlin"
+     *           },
+     *           "userHasProjects":
+     *           [
+     *              {
+     *                 "id": 125,
+     *                 "acl": "[\"create_task\"]",
+     *                 "user":
+     *                 {
+     *                    "id": 1014,
+     *                    "username": "admin",
+     *                    "password": "$2y$13$oRdNpKY3bo/dj2WGDKGzCOdcX9VZuxnu2NZKfy3jV2dV8zIW8qHr6",
+     *                    "email": "admin@admin.sk",
+     *                    "roles": "[\"ROLE_ADMIN\"]",
+     *                    "is_active": true,
+     *                    "language": "AJ",
+     *                    "image": null
+     *                 }
+     *              }
+     *           ]
+     *        },
+     *        "_links":
+     *        {
+     *           "put": "/api/v1/task-bundle/projects/211",
+     *           "patch": "/api/v1/task-bundle/projects/211",
+     *           "delete": "/api/v1/task-bundle/projects/211"
+     *         }
+     *      }
+     *
+     *
      * @ApiDoc(
      *  description="Remove users ACL from project",
      *  requirements={
@@ -945,7 +1091,11 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             ], StatusCodesHelper::NOT_FOUND_CODE);
         }
 
-        if (!$this->get('project_voter')->isGranted(VoteOptions::REMOVE_USER_FROM_PROJECT, $project)) {
+        $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+            'user' => $this->getUser(),
+            'project' => $project
+        ]);
+        if (!$this->get('project_voter')->isGranted(VoteOptions::EDIT_PROJECT, $userHasProject)) {
             return $this->accessDeniedResponse();
         }
 
@@ -1030,7 +1180,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
 
             // Check if all ACL are from allowed options
             foreach ($acl as $key => $value) {
-                if (!in_array($value, VoteOptions::getConstants(), true)) {
+                if (!in_array($value, ProjectAclOptions::getConstants(), true)) {
                     return $this->createApiResponse([
                         'message' => $value . ' ACL is not allowed!',
                     ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
@@ -1044,8 +1194,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             $this->getDoctrine()->getManager()->persist($userHasProject);
             $this->getDoctrine()->getManager()->flush();
 
-            $response = $this->get('project_service')->getUserHasProjectResponse($userHasProject, $userHasProject->getProject()->getId(), $userHasProject->getUser()->getId());
-            return $this->createApiResponse($response, $statusCode);
+            $response = $this->get('project_service')->getEntityResponse($userHasProject->getProject()->getId());
+            return $this->json($response, $statusCode);
         }
 
         $data = [

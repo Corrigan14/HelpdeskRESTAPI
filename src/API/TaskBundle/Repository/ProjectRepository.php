@@ -37,22 +37,25 @@ class ProjectRepository extends EntityRepository implements RepositoryInterface
         if ($isAdmin) {
             if ('true' === $isActive || 'false' === $isActive) {
                 $query = $this->createQueryBuilder('p')
-                    ->select('p, userHasProjects')
+                    ->select('p, userHasProjects, uhpUser')
                     ->leftJoin('p.userHasProjects','userHasProjects')
+                    ->leftJoin('userHasProjects.user','uhpUser')
                     ->where('p.is_active = :isActive')
                     ->setParameter('isActive', $isActiveParam)
                     ->getQuery();
             } else {
                 $query = $this->createQueryBuilder('p')
-                    ->select('p, userHasProjects')
+                    ->select('p, userHasProjects, uhpUser')
                     ->leftJoin('p.userHasProjects','userHasProjects')
+                    ->leftJoin('userHasProjects.user','uhpUser')
                     ->getQuery();
             }
         } else {
             if ('true' === $isActive || 'false' === $isActive) {
                 $query = $this->createQueryBuilder('p')
-                    ->select('p, uhp')
+                    ->select('p, uhp, uhpUser')
                     ->leftJoin('p.userHasProjects', 'uhp')
+                    ->leftJoin('uhp.user','uhpUser')
                     ->where('p.createdBy = :loggedUser')
                     ->orWhere('uhp.user = :loggedUser')
                     ->andWhere('p.is_active = :isActive')
@@ -60,8 +63,9 @@ class ProjectRepository extends EntityRepository implements RepositoryInterface
                     ->getQuery();
             } else {
                 $query = $this->createQueryBuilder('p')
-                    ->select('p, uhp')
+                    ->select('p, uhp, uhpUser')
                     ->leftJoin('p.userHasProjects', 'uhp')
+                    ->leftJoin('uhp.user','uhpUser')
                     ->where('p.createdBy = :loggedUser')
                     ->orWhere('uhp.user = :loggedUser')
                     ->setParameter('loggedUser', $loggedUser)
@@ -143,8 +147,9 @@ class ProjectRepository extends EntityRepository implements RepositoryInterface
     public function getEntityWithTasks($id)
     {
         $query = $this->createQueryBuilder('project')
-            ->select('project, userHasProjects, tasks')
+            ->select('project, userHasProjects, tasks, uhpUser')
             ->leftJoin('project.userHasProjects', 'userHasProjects')
+            ->leftJoin('userHasProjects.user','uhpUser')
             ->leftJoin('project.tasks', 'tasks')
             ->where('project.id = :id')
             ->setParameter('id', $id);
@@ -159,8 +164,9 @@ class ProjectRepository extends EntityRepository implements RepositoryInterface
     public function getEntity($id)
     {
         $query = $this->createQueryBuilder('project')
-            ->select('project, userHasProjects')
+            ->select('project, userHasProjects, uhpUser')
             ->leftJoin('project.userHasProjects', 'userHasProjects')
+            ->leftJoin('userHasProjects.user','uhpUser')
             ->where('project.id = :id')
             ->setParameter('id', $id);
 

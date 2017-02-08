@@ -44,12 +44,6 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
                 return $this->canRead($project);
             case VoteOptions::EDIT_PROJECT:
                 return $this->canEdit($project);
-            case VoteOptions::ADD_USER_TO_PROJECT;
-                return $this->canAddUserToProject($project);
-            case VoteOptions::REMOVE_USER_FROM_PROJECT;
-                return $this->canRemoveUserFromProject($project);
-            case VoteOptions::EDIT_USER_ACL_IN_PROJECT;
-                return $this->canEditUserAclInProject($project);
             default:
                 return false;
         }
@@ -120,60 +114,6 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
         }
 
         return false;
-    }
-
-    /**
-     * @param Project $project
-     * @return bool
-     * @throws \InvalidArgumentException
-     */
-    private function canAddUserToProject($project):bool
-    {
-        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
-            return true;
-        }
-
-        if ($project->getCreatedBy() === $this->user) {
-            return true;
-        }
-
-        return $this->hasAclProjectRight(VoteOptions::ADD_USER_TO_PROJECT, $project);
-    }
-
-    /**
-     * @param Project $project
-     * @return bool
-     * @throws \InvalidArgumentException
-     */
-    private function canRemoveUserFromProject($project):bool
-    {
-        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
-            return true;
-        }
-
-        if ($project->getCreatedBy() === $this->user) {
-            return true;
-        }
-
-        return $this->hasAclProjectRight(VoteOptions::REMOVE_USER_FROM_PROJECT, $project);
-    }
-
-    /**
-     * @param Project $project
-     * @return bool
-     * @throws \InvalidArgumentException
-     */
-    private function canEditUserAclInProject($project):bool
-    {
-        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
-            return true;
-        }
-
-        if ($project->getCreatedBy() === $this->user) {
-            return true;
-        }
-
-        return $this->hasAclProjectRight(VoteOptions::EDIT_USER_ACL_IN_PROJECT, $project);
     }
 
     /**

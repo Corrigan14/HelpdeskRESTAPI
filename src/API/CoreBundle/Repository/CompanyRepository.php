@@ -66,6 +66,7 @@ class CompanyRepository extends EntityRepository implements RepositoryInterface
     /**
      * Return one full entity
      *
+     * @param int $id
      * @return mixed
      */
     public function getEntity(int $id)

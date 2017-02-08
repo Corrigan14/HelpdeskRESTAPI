@@ -54,32 +54,28 @@ class VoteOptions
     const REMOVE_ATTACHMENT_FROM_COMMENT = 'remove_attachment_from_comment';
     const SHOW_LIST_OF_COMMENTS_ATTACHMENTS = 'show_list_of_comments_attachments';
 
-
-
     // PROJECT CRUD
-    const CREATE_PROJECT = 'create_project';
     const LIST_PROJECTS = 'list_projects';
+    const VIEW_PROJECT = 'read_project';
+    const EDIT_PROJECT = 'edit_project';
 
     // USER HAS PROJECT ACL OPTIONS
     const ADD_USER_TO_PROJECT = 'add_user_to_project';
     const REMOVE_USER_FROM_PROJECT = 'remove_user_from_project';
     const EDIT_USER_ACL_IN_PROJECT = 'edit_user_acl_in_project';
-    const VIEW_PROJECT = 'read_project';
-    const UPDATE_PROJECT = 'update_project';
-    const DELETE_PROJECT = 'delete_project';
-
-    const UPDATE_ALL_TASKS_IN_PROJECT = 'update_all_tasks_in_project';
-    const UPDATE_COMPANY_TASKS_IN_PROJECT = 'update_company_tasks_in_project';
-    const UPDATE_USER_TASKS_IN_PROJECT = 'update_user_tasks_in_project';
-    const VIEW_ALL_TASKS_IN_PROJECT = 'view_all_tasks_in_project';
-    const VIEW_COMPANY_TASKS_IN_PROJECT = 'view_company_tasks_in_project';
-    const VIEW_USER_TASKS_IN_PROJECT = 'view_user_tasks_in_project';
-    const SOLVE_ALL_TASKS_IN_PROJECT = 'solve_all_tasks_in_project';
-    const SOLVE_COMPANY_TASKS_IN_PROJECT = 'solve_company_tasks_in_project';
-    const SOLVE_USER_TASKS_IN_PROJECT = 'solve_user_tasks_in_project';
 
 
 
+
+//    const UPDATE_ALL_TASKS_IN_PROJECT = 'update_all_tasks_in_project';
+//    const UPDATE_COMPANY_TASKS_IN_PROJECT = 'update_company_tasks_in_project';
+//    const UPDATE_USER_TASKS_IN_PROJECT = 'update_user_tasks_in_project';
+//    const VIEW_ALL_TASKS_IN_PROJECT = 'view_all_tasks_in_project';
+//    const VIEW_COMPANY_TASKS_IN_PROJECT = 'view_company_tasks_in_project';
+//    const VIEW_USER_TASKS_IN_PROJECT = 'view_user_tasks_in_project';
+//    const SOLVE_ALL_TASKS_IN_PROJECT = 'solve_all_tasks_in_project';
+//    const SOLVE_COMPANY_TASKS_IN_PROJECT = 'solve_company_tasks_in_project';
+//    const SOLVE_USER_TASKS_IN_PROJECT = 'solve_user_tasks_in_project';
 
 
     /**

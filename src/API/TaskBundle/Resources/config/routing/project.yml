@@ -37,7 +37,7 @@ projects_delete:
             id: '\d+'
 
 projects_restore:
-    path:     /projects/{id}/restore
+    path:     /projects/restore/{id}
     defaults: { _controller: APITaskBundle:Project:restore }
     methods: [PATCH]
     requirements:

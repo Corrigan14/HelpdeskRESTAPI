@@ -24,7 +24,7 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
      *
      * @param string $action
      *
-     * @param Project|bool $project
+     * @param UserHasProject|Project|bool $project
      *
      * @return bool
      */
@@ -42,12 +42,8 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
                 return $this->canList();
             case VoteOptions::VIEW_PROJECT:
                 return $this->canRead($project);
-            case VoteOptions::CREATE_PROJECT:
-                return $this->canCreate();
-            case VoteOptions::UPDATE_PROJECT;
-                return $this->canUpdate($project);
-            case VoteOptions::DELETE_PROJECT;
-                return $this->canDelete($project);
+            case VoteOptions::EDIT_PROJECT:
+                return $this->canEdit($project);
             case VoteOptions::ADD_USER_TO_PROJECT;
                 return $this->canAddUserToProject($project);
             case VoteOptions::REMOVE_USER_FROM_PROJECT;
@@ -80,11 +76,6 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
-        $usersProjects = $this->user->getProjects();
-        if (count($usersProjects) > 0) {
-            return true;
-        }
-
         $userHasProjects = $this->user->getUserHasProjects();
         if (count($userHasProjects) > 0) {
             return true;
@@ -104,61 +95,31 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
-        if ($project->getCreatedBy() === $this->user) {
-            return true;
-        }
+        $projectAcl = [
+            ProjectAclOptions::VIEW_ALL_TASKS,
+            ProjectAclOptions::VIEW_OWN_TASKS,
+            ProjectAclOptions::VIEW_TASKS_FROM_USERS_COMPANY
+        ];
 
-        return $this->hasAclProjectRights(VoteOptions::VIEW_PROJECT, $project);
+        return $this->hasAclProjectRightsConditionOR($projectAcl, $project);
     }
 
     /**
-     * Admin can create project or it depends on Users ACL
-     *
-     * @return bool
-     */
-    private function canCreate():bool
-    {
-        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
-            return true;
-        }
-
-        return $this->hasAclRights(VoteOptions::CREATE_PROJECT, $this->user, VoteOptions::getConstants());
-    }
-
-    /**
-     * @param Project $project
+     * @param UserHasProject $userHasProject
      * @return bool
      * @throws \InvalidArgumentException
      */
-    private function canUpdate($project):bool
+    private function canEdit($userHasProject):bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;
         }
 
-        if ($project->getCreatedBy() === $this->user) {
-            return true;
+        if ($userHasProject instanceof UserHasProject) {
+            return $this->hasAclProjectRight(ProjectAclOptions::EDIT_PROJECT, $userHasProject);
         }
 
-        return $this->hasAclProjectRights(VoteOptions::UPDATE_PROJECT, $project);
-    }
-
-    /**
-     * @param Project $project
-     * @return bool
-     * @throws \InvalidArgumentException
-     */
-    private function canDelete($project):bool
-    {
-        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
-            return true;
-        }
-
-        if ($project->getCreatedBy() === $this->user) {
-            return true;
-        }
-
-        return $this->hasAclProjectRights(VoteOptions::DELETE_PROJECT, $project);
+        return false;
     }
 
     /**
@@ -176,7 +137,7 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
-        return $this->hasAclProjectRights(VoteOptions::ADD_USER_TO_PROJECT, $project);
+        return $this->hasAclProjectRight(VoteOptions::ADD_USER_TO_PROJECT, $project);
     }
 
     /**
@@ -194,7 +155,7 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
-        return $this->hasAclProjectRights(VoteOptions::REMOVE_USER_FROM_PROJECT, $project);
+        return $this->hasAclProjectRight(VoteOptions::REMOVE_USER_FROM_PROJECT, $project);
     }
 
     /**
@@ -212,7 +173,7 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
             return true;
         }
 
-        return $this->hasAclProjectRights(VoteOptions::EDIT_USER_ACL_IN_PROJECT, $project);
+        return $this->hasAclProjectRight(VoteOptions::EDIT_USER_ACL_IN_PROJECT, $project);
     }
 
     /**
@@ -220,25 +181,46 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
      *
      * @param string $action
      *
+     * @param UserHasProject $userHasProject
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    public function hasAclProjectRight($action, UserHasProject $userHasProject)
+    {
+        $acl = $userHasProject->getAcl();
+        if (in_array($action, $acl, true)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Every User has a custom array of access rights to every project
+     *
+     * @param array $actions
+     *
      * @param Project $project
      * @return bool
      * @throws \InvalidArgumentException
      */
-    public function hasAclProjectRights($action, Project $project)
+    public function hasAclProjectRightsConditionOR(array $actions, Project $project)
     {
-        if (!in_array($action, VoteOptions::getConstants(), true)) {
-            throw new \InvalidArgumentException('Action is not valid, please list your action in the options list');
-        }
+        foreach ($actions as $action) {
+            if (!in_array($action, ProjectAclOptions::getConstants(), true)) {
+                throw new \InvalidArgumentException('Action is not valid, please list your action in the options list');
+            }
 
-        $userHasProjects = $this->user->getUserHasProjects();
+            $userHasProjects = $this->user->getUserHasProjects();
 
-        if (count($userHasProjects) > 0) {
-            /** @var UserHasProject $uhp */
-            foreach ($userHasProjects as $uhp) {
-                if ($uhp->getProject() === $project) {
-                    $acl = $uhp->getAcl();
-                    if (in_array($action, $acl, true)) {
-                        return true;
+            if (count($userHasProjects) > 0) {
+                /** @var UserHasProject $uhp */
+                foreach ($userHasProjects as $uhp) {
+                    if ($uhp->getProject() === $project) {
+                        $acl = $uhp->getAcl();
+                        if (in_array($action, $acl, true)) {
+                            return true;
+                        }
                     }
                 }
             }

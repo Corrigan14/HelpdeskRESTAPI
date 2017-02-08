@@ -5,6 +5,8 @@ namespace API\TaskBundle\Controller;
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\UserHasProject;
+use API\TaskBundle\Security\ProjectAclOptions;
+use API\TaskBundle\Security\UserRoleAclOptions;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
@@ -41,7 +43,14 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *               "date": "2016-11-26 21:49:04.000000",
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
-     *            }
+     *            },
+     *            "userHasProjects":
+     *            [
+     *               {
+     *                  "id": 125,
+     *                  "acl": "[\"create_task\"]"
+     *               }
+     *            ]
      *          }
      *       ],
      *       "_links":
@@ -112,44 +121,88 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *            "id": "2",
-     *            "title": "Project 1",
-     *            "description": "Description of Project 1",
-     *            "is_active": true,
-     *            "created_by":
+     *           "id": "1",
+     *           "title": "Project 1",
+     *           "description": "Description of Project 1",
+     *           "createdAt":
      *           {
-     *              "id": 19,
-     *              "username": "user",
-     *              "email": "user@user.sk",
-     *              "roles": "[\"ROLE_USER\"]",
-     *              "is_active": true,
-     *              "acl": "[]",
-     *              "company":
+     *              "date": "2016-11-26 21:49:04.000000",
+     *              "timezone_type": 3,
+     *              "timezone": "Europe/Berlin"
+     *           },
+     *           "updatedAt":
+     *           {
+     *              "date": "2016-11-26 21:49:04.000000",
+     *              "timezone_type": 3,
+     *              "timezone": "Europe/Berlin"
+     *           },
+     *           "userHasProjects":
+     *           [
      *              {
-     *                 "id": 86,
-     *                 "title": "LanSystems",
-     *                 "ico": "110258782",
-     *                 "dic": "12587458996244",
-     *                 "street": "Ina cesta 125",
-     *                 "city": "Bratislava",
-     *                 "zip": "021478",
-     *                 "country": "Slovenska Republika",
-     *                 "is_active": true
-     *               }
-     *          }
-     *          "created_at": "2016-11-26T21:49:04+0100",
-     *          "updated_at": "2016-11-26T21:49:04+0100"
+     *                 "id": 125,
+     *                 "acl": "[\"create_task\"]"
+     *              }
+     *           ],
+     *           "tasks":
+     *           [
+     *              {
+     *                 "id": 20048,
+     *                 "title": "Task 2",
+     *                 "description": "Description of Task 2",
+     *                 "deadline": null,
+     *                 "startedAt": null,
+     *                 "closedAt": null,
+     *                 "important": false,
+     *                 "work": null,
+     *                 "work_time": null,
+     *                 "createdAt":
+     *                 {
+     *                    "date": "2017-02-06 14:29:08.000000",
+     *                    "timezone_type": 3,
+     *                    "timezone": "Europe/Berlin"
+     *                 },
+     *                 "updatedAt":
+     *                 {
+     *                    "date": "2017-02-06 14:29:08.000000",
+     *                    "timezone_type": 3,
+     *                    "timezone": "Europe/Berlin"
+     *                  }
+     *               },
+     *              {
+     *                 "id": 20049,
+     *                 "title": "Task 2",
+     *                 "description": "Description of Task 2",
+     *                 "deadline": null,
+     *                 "startedAt": null,
+     *                 "closedAt": null,
+     *                 "important": false,
+     *                 "work": null,
+     *                 "work_time": null,
+     *                 "createdAt":
+     *                 {
+     *                    "date": "2017-02-06 14:29:08.000000",
+     *                    "timezone_type": 3,
+     *                    "timezone": "Europe/Berlin"
+     *                 },
+     *                 "updatedAt":
+     *                 {
+     *                    "date": "2017-02-06 14:29:08.000000",
+     *                    "timezone_type": 3,
+     *                    "timezone": "Europe/Berlin"
+     *                  }
+     *              }
+     *           ]
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/projects/id",
-     *           "patch": "/api/v1/projects/id",
-     *           "delete": "/api/v1/projects/id"
+     *           "put": "/api/v1/task-bundle/projects/211",
+     *           "patch": "/api/v1/task-bundle/projects/211",
+     *           "delete": "/api/v1/task-bundle/projects/211"
      *         }
      *      }
      *
      * @ApiDoc(
-     *  description="Returns a Project Entity",
+     *  description="Returns a Project Entity with list of projects tasks",
      *  requirements={
      *     {
      *       "name"="id",
@@ -190,9 +243,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             return $this->accessDeniedResponse();
         }
 
-        $projectArray = $this->get('project_service')->getProjectResponse($project);
-
-        return $this->createApiResponse($projectArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $projectArray = $this->get('project_service')->getEntityWithTaskResponse($id);
+        return $this->json($projectArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -200,39 +252,34 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *            "id": "2",
-     *            "title": "Project 1",
-     *            "description": "Description of Project 1",
-     *            "is_active": true,
-     *            "created_by":
+     *           "id": "1",
+     *           "title": "Project 1",
+     *           "description": "Description of Project 1",
+     *           "createdAt":
      *           {
-     *              "id": 19,
-     *              "username": "user",
-     *              "email": "user@user.sk",
-     *              "roles": "[\"ROLE_USER\"]",
-     *              "is_active": true,
-     *              "acl": "[]",
-     *              "company":
+     *              "date": "2016-11-26 21:49:04.000000",
+     *              "timezone_type": 3,
+     *              "timezone": "Europe/Berlin"
+     *           },
+     *           "updatedAt":
+     *           {
+     *              "date": "2016-11-26 21:49:04.000000",
+     *              "timezone_type": 3,
+     *              "timezone": "Europe/Berlin"
+     *           },
+     *           "userHasProjects":
+     *           [
      *              {
-     *                 "id": 86,
-     *                 "title": "LanSystems",
-     *                 "ico": "110258782",
-     *                 "dic": "12587458996244",
-     *                 "street": "Ina cesta 125",
-     *                 "city": "Bratislava",
-     *                 "zip": "021478",
-     *                 "country": "Slovenska Republika",
-     *                 "is_active": true
-     *               }
-     *          }
-     *          "created_at": "2016-11-26T21:49:04+0100",
-     *          "updated_at": "2016-11-26T21:49:04+0100"
+     *                 "id": 125,
+     *                 "acl": "[\"create_task\"]"
+     *              }
+     *           ]
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/projects/id",
-     *           "patch": "/api/v1/projects/id",
-     *           "delete": "/api/v1/projects/id"
+     *           "put": "/api/v1/task-bundle/projects/211",
+     *           "patch": "/api/v1/task-bundle/projects/211",
+     *           "delete": "/api/v1/task-bundle/projects/211"
      *         }
      *      }
      *
@@ -263,7 +310,12 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      */
     public function createAction(Request $request)
     {
-        if (!$this->get('project_voter')->isGranted(VoteOptions::CREATE_PROJECT)) {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::CREATE_PROJECTS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
             return $this->accessDeniedResponse();
         }
 
@@ -281,39 +333,34 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *            "id": "2",
-     *            "title": "Project 1",
-     *            "description": "Description of Project 1",
-     *            "is_active": true,
-     *            "created_by":
+     *           "id": "1",
+     *           "title": "Project 1",
+     *           "description": "Description of Project 1",
+     *           "createdAt":
      *           {
-     *              "id": 19,
-     *              "username": "user",
-     *              "email": "user@user.sk",
-     *              "roles": "[\"ROLE_USER\"]",
-     *              "is_active": true,
-     *              "acl": "[]",
-     *              "company":
+     *              "date": "2016-11-26 21:49:04.000000",
+     *              "timezone_type": 3,
+     *              "timezone": "Europe/Berlin"
+     *           },
+     *           "updatedAt":
+     *           {
+     *              "date": "2016-11-26 21:49:04.000000",
+     *              "timezone_type": 3,
+     *              "timezone": "Europe/Berlin"
+     *           },
+     *           "userHasProjects":
+     *           [
      *              {
-     *                 "id": 86,
-     *                 "title": "LanSystems",
-     *                 "ico": "110258782",
-     *                 "dic": "12587458996244",
-     *                 "street": "Ina cesta 125",
-     *                 "city": "Bratislava",
-     *                 "zip": "021478",
-     *                 "country": "Slovenska Republika",
-     *                 "is_active": true
-     *               }
-     *          }
-     *          "created_at": "2016-11-26T21:49:04+0100",
-     *          "updated_at": "2016-11-26T21:49:04+0100"
+     *                 "id": 125,
+     *                 "acl": "[\"create_task\"]"
+     *              }
+     *           ]
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/projects/id",
-     *           "patch": "/api/v1/projects/id",
-     *           "delete": "/api/v1/projects/id"
+     *           "put": "/api/v1/task-bundle/projects/211",
+     *           "patch": "/api/v1/task-bundle/projects/211",
+     *           "delete": "/api/v1/task-bundle/projects/211"
      *         }
      *      }
      *
@@ -358,12 +405,15 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
-        if (!$this->get('project_voter')->isGranted(VoteOptions::UPDATE_PROJECT, $project)) {
+        $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+            'user' => $this->getUser(),
+            'project' => $project
+        ]);
+        if (!$this->get('project_voter')->isGranted(VoteOptions::EDIT_PROJECT, $userHasProject)) {
             return $this->accessDeniedResponse();
         }
 
         $requestData = $request->request->all();
-
         return $this->updateProject($project, $requestData);
     }
 
@@ -372,39 +422,34 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *            "id": "2",
-     *            "title": "Project 1",
-     *            "description": "Description of Project 1",
-     *            "is_active": true,
-     *            "created_by":
+     *           "id": "1",
+     *           "title": "Project 1",
+     *           "description": "Description of Project 1",
+     *           "createdAt":
      *           {
-     *              "id": 19,
-     *              "username": "user",
-     *              "email": "user@user.sk",
-     *              "roles": "[\"ROLE_USER\"]",
-     *              "is_active": true,
-     *              "acl": "[]",
-     *              "company":
+     *              "date": "2016-11-26 21:49:04.000000",
+     *              "timezone_type": 3,
+     *              "timezone": "Europe/Berlin"
+     *           },
+     *           "updatedAt":
+     *           {
+     *              "date": "2016-11-26 21:49:04.000000",
+     *              "timezone_type": 3,
+     *              "timezone": "Europe/Berlin"
+     *           },
+     *           "userHasProjects":
+     *           [
      *              {
-     *                 "id": 86,
-     *                 "title": "LanSystems",
-     *                 "ico": "110258782",
-     *                 "dic": "12587458996244",
-     *                 "street": "Ina cesta 125",
-     *                 "city": "Bratislava",
-     *                 "zip": "021478",
-     *                 "country": "Slovenska Republika",
-     *                 "is_active": true
-     *               }
-     *          }
-     *          "created_at": "2016-11-26T21:49:04+0100",
-     *          "updated_at": "2016-11-26T21:49:04+0100"
+     *                 "id": 125,
+     *                 "acl": "[\"create_task\"]"
+     *              }
+     *           ]
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/projects/id",
-     *           "patch": "/api/v1/projects/id",
-     *           "delete": "/api/v1/projects/id"
+     *           "put": "/api/v1/task-bundle/projects/211",
+     *           "patch": "/api/v1/task-bundle/projects/211",
+     *           "delete": "/api/v1/task-bundle/projects/211"
      *         }
      *      }
      *
@@ -449,12 +494,15 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
-        if (!$this->get('project_voter')->isGranted(VoteOptions::UPDATE_PROJECT, $project)) {
+        $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+            'user' => $this->getUser(),
+            'project' => $project
+        ]);
+        if (!$this->get('project_voter')->isGranted(VoteOptions::EDIT_PROJECT, $userHasProject)) {
             return $this->accessDeniedResponse();
         }
 
         $requestData = $request->request->all();
-
         return $this->updateProject($project, $requestData);
     }
 
@@ -495,7 +543,11 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
-        if (!$this->get('project_voter')->isGranted(VoteOptions::DELETE_PROJECT, $project)) {
+        $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+            'user' => $this->getUser(),
+            'project' => $project
+        ]);
+        if (!$this->get('project_voter')->isGranted(VoteOptions::EDIT_PROJECT, $userHasProject)) {
             return $this->accessDeniedResponse();
         }
 
@@ -513,39 +565,34 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *            "id": "2",
-     *            "title": "Project 1",
-     *            "description": "Description of Project 1",
-     *            "is_active": true,
-     *            "created_by":
+     *           "id": "1",
+     *           "title": "Project 1",
+     *           "description": "Description of Project 1",
+     *           "createdAt":
      *           {
-     *              "id": 19,
-     *              "username": "user",
-     *              "email": "user@user.sk",
-     *              "roles": "[\"ROLE_USER\"]",
-     *              "is_active": true,
-     *              "acl": "[]",
-     *              "company":
+     *              "date": "2016-11-26 21:49:04.000000",
+     *              "timezone_type": 3,
+     *              "timezone": "Europe/Berlin"
+     *           },
+     *           "updatedAt":
+     *           {
+     *              "date": "2016-11-26 21:49:04.000000",
+     *              "timezone_type": 3,
+     *              "timezone": "Europe/Berlin"
+     *           },
+     *           "userHasProjects":
+     *           [
      *              {
-     *                 "id": 86,
-     *                 "title": "LanSystems",
-     *                 "ico": "110258782",
-     *                 "dic": "12587458996244",
-     *                 "street": "Ina cesta 125",
-     *                 "city": "Bratislava",
-     *                 "zip": "021478",
-     *                 "country": "Slovenska Republika",
-     *                 "is_active": true
-     *               }
-     *          }
-     *          "created_at": "2016-11-26T21:49:04+0100",
-     *          "updated_at": "2016-11-26T21:49:04+0100"
+     *                 "id": 125,
+     *                 "acl": "[\"create_task\"]"
+     *              }
+     *           ]
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/projects/id",
-     *           "patch": "/api/v1/projects/id",
-     *           "delete": "/api/v1/projects/id"
+     *           "put": "/api/v1/task-bundle/projects/211",
+     *           "patch": "/api/v1/task-bundle/projects/211",
+     *           "delete": "/api/v1/task-bundle/projects/211"
      *         }
      *      }
      *
@@ -587,7 +634,11 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
-        if (!$this->get('project_voter')->isGranted(VoteOptions::DELETE_PROJECT, $project)) {
+        $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+            'user' => $this->getUser(),
+            'project' => $project
+        ]);
+        if (!$this->get('project_voter')->isGranted(VoteOptions::EDIT_PROJECT, $userHasProject)) {
             return $this->accessDeniedResponse();
         }
 
@@ -595,8 +646,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
         $this->getDoctrine()->getManager()->persist($project);
         $this->getDoctrine()->getManager()->flush();
 
-        $response = $this->get('project_service')->getProjectResponse($project);
-        return $this->createApiResponse($response, StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $this->get('project_service')->getEntityResponse($project->getId());
+        return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -939,8 +990,12 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             $this->getDoctrine()->getManager()->persist($project);
             $this->getDoctrine()->getManager()->flush();
 
-            $response = $this->get('project_service')->getProjectResponse($project);
-            return $this->createApiResponse($response, $statusCode);
+            if ($create) {
+                $this->addProjectAclPermmisionToCreatorOfProject($project);
+            }
+
+            $response = $this->get('project_service')->getEntityResponse($project->getId());
+            return $this->json($response, $statusCode);
         }
 
         $data = [
@@ -998,5 +1053,29 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
         ];
         return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+    }
+
+    /**
+     * @param Project $project
+     */
+    private function addProjectAclPermmisionToCreatorOfProject(Project $project)
+    {
+        $userHasProject = new UserHasProject();
+        $userHasProject->setProject($project);
+        $userHasProject->setUser($this->getUser());
+        $acl = [
+            ProjectAclOptions::VIEW_OWN_TASKS,
+            ProjectAclOptions::VIEW_TASKS_FROM_USERS_COMPANY,
+            ProjectAclOptions::VIEW_ALL_TASKS,
+            ProjectAclOptions::CREATE_TASK,
+            ProjectAclOptions::RESOLVE_TASK,
+            ProjectAclOptions::DELETE_TASK,
+            ProjectAclOptions::VIEW_INTERNAL_NOTE,
+            ProjectAclOptions::EDIT_INTERNAL_NOTE,
+            ProjectAclOptions::EDIT_PROJECT,
+        ];
+        $userHasProject->setAcl($acl);
+        $this->getDoctrine()->getManager()->persist($userHasProject);
+        $this->getDoctrine()->getManager()->flush();
     }
 }

@@ -37,17 +37,21 @@ class ProjectRepository extends EntityRepository implements RepositoryInterface
         if ($isAdmin) {
             if ('true' === $isActive || 'false' === $isActive) {
                 $query = $this->createQueryBuilder('p')
-                    ->select()
+                    ->select('p, userHasProjects')
+                    ->leftJoin('p.userHasProjects','userHasProjects')
                     ->where('p.is_active = :isActive')
                     ->setParameter('isActive', $isActiveParam)
                     ->getQuery();
             } else {
                 $query = $this->createQueryBuilder('p')
+                    ->select('p, userHasProjects')
+                    ->leftJoin('p.userHasProjects','userHasProjects')
                     ->getQuery();
             }
         } else {
             if ('true' === $isActive || 'false' === $isActive) {
                 $query = $this->createQueryBuilder('p')
+                    ->select('p, uhp')
                     ->leftJoin('p.userHasProjects', 'uhp')
                     ->where('p.createdBy = :loggedUser')
                     ->orWhere('uhp.user = :loggedUser')
@@ -56,6 +60,7 @@ class ProjectRepository extends EntityRepository implements RepositoryInterface
                     ->getQuery();
             } else {
                 $query = $this->createQueryBuilder('p')
+                    ->select('p, uhp')
                     ->leftJoin('p.userHasProjects', 'uhp')
                     ->where('p.createdBy = :loggedUser')
                     ->orWhere('uhp.user = :loggedUser')
@@ -129,6 +134,37 @@ class ProjectRepository extends EntityRepository implements RepositoryInterface
         }
 
         return $query->getSingleScalarResult();
+    }
+
+    /**
+     * @param $id
+     * @return array
+     */
+    public function getEntityWithTasks($id)
+    {
+        $query = $this->createQueryBuilder('project')
+            ->select('project, userHasProjects, tasks')
+            ->leftJoin('project.userHasProjects', 'userHasProjects')
+            ->leftJoin('project.tasks', 'tasks')
+            ->where('project.id = :id')
+            ->setParameter('id', $id);
+
+        return $query->getQuery()->getArrayResult();
+    }
+
+    /**
+     * @param $id
+     * @return array
+     */
+    public function getEntity($id)
+    {
+        $query = $this->createQueryBuilder('project')
+            ->select('project, userHasProjects')
+            ->leftJoin('project.userHasProjects', 'userHasProjects')
+            ->where('project.id = :id')
+            ->setParameter('id', $id);
+
+        return $query->getQuery()->getArrayResult();
     }
 
     /**

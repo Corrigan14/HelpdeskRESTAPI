@@ -99,6 +99,34 @@ class ProjectService
     }
 
     /**
+     * @param int $id
+     * @return array
+     */
+    public function getEntityWithTaskResponse(int $id):array
+    {
+        $project = $this->em->getRepository('APITaskBundle:Project')->getEntityWithTasks($id);
+
+        return [
+            'data' => $project[0],
+            '_links' => $this->getProjectLinks($id),
+        ];
+    }
+
+    /**
+     * @param int $id
+     * @return array
+     */
+    public function getEntityResponse(int $id):array
+    {
+        $project = $this->em->getRepository('APITaskBundle:Project')->getEntity($id);
+
+        return [
+            'data' => $project[0],
+            '_links' => $this->getProjectLinks($id),
+        ];
+    }
+
+    /**
      * Return UserHasProject Response which includes all data about UHP Entity and Links to update/partialUpdate/delete
      * @param UserHasProject $userHasProject
      * @param int $projectId

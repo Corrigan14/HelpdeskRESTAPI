@@ -5,6 +5,7 @@ namespace API\TaskBundle\DataFixtures\ORM;
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\UserHasProject;
+use API\TaskBundle\Security\ProjectAclOptions;
 use API\TaskBundle\Security\VoteOptions;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
@@ -49,8 +50,15 @@ class UserHasProjectFixture implements FixtureInterface, ContainerAwareInterface
 
         if ($userUser instanceof User && $adminsProject instanceof Project) {
             $acl = [];
-            $acl[] = VoteOptions::UPDATE_PROJECT;
-            $acl[] = VoteOptions::VIEW_PROJECT;
+            $acl[] = ProjectAclOptions::EDIT_PROJECT;
+            $acl[] = ProjectAclOptions::EDIT_INTERNAL_NOTE;
+            $acl[] = ProjectAclOptions::CREATE_TASK;
+            $acl[] = ProjectAclOptions::RESOLVE_TASK;
+            $acl[] = ProjectAclOptions::DELETE_TASK;
+            $acl[] = ProjectAclOptions::VIEW_INTERNAL_NOTE;
+            $acl[] = ProjectAclOptions::VIEW_ALL_TASKS;
+            $acl[] = ProjectAclOptions::VIEW_OWN_TASKS;
+            $acl[] = ProjectAclOptions::VIEW_TASKS_FROM_USERS_COMPANY;
 
             $userHasProject = new UserHasProject();
             $userHasProject->setUser($userUser);
@@ -62,18 +70,32 @@ class UserHasProjectFixture implements FixtureInterface, ContainerAwareInterface
         }
 
         if ($userAdmin instanceof User && $usersProject instanceof Project) {
+            $acl = [];
+            $acl[] = ProjectAclOptions::EDIT_PROJECT;
+            $acl[] = ProjectAclOptions::CREATE_TASK;
+            $acl[] = ProjectAclOptions::RESOLVE_TASK;
+            $acl[] = ProjectAclOptions::DELETE_TASK;
+            $acl[] = ProjectAclOptions::VIEW_INTERNAL_NOTE;
+            $acl[] = ProjectAclOptions::VIEW_ALL_TASKS;
+            $acl[] = ProjectAclOptions::VIEW_OWN_TASKS;
+            $acl[] = ProjectAclOptions::VIEW_TASKS_FROM_USERS_COMPANY;
+
             $userHasProject = new UserHasProject();
             $userHasProject->setUser($userAdmin);
             $userHasProject->setProject($usersProject);
+            $userHasProject->setAcl($acl);
 
             $manager->persist($userHasProject);
             $manager->flush();
         }
 
         if ($userAdmin instanceof User && $usersProject2 instanceof Project) {
+            $acl = [];
+            $acl[] = ProjectAclOptions::VIEW_ALL_TASKS;
             $userHasProject = new UserHasProject();
             $userHasProject->setUser($userAdmin);
             $userHasProject->setProject($usersProject2);
+            $userHasProject->setAcl($acl);
 
             $manager->persist($userHasProject);
             $manager->flush();

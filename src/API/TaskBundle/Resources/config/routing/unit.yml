@@ -1,0 +1,44 @@
+unit_list:
+    path:     /units
+    defaults: { _controller: APITaskBundle:Unit:list }
+    methods: [GET]
+
+unit:
+    path:     /units/{id}
+    defaults: { _controller: APITaskBundle:Unit:get }
+    methods: [GET]
+    requirements:
+        id: '\d+'
+
+unit_create:
+    path:     /units
+    defaults: { _controller: APITaskBundle:Unit:create }
+    methods: [POST]
+
+unit_update:
+    path:     /units/{id}
+    defaults: { _controller: APITaskBundle:Unit:update }
+    methods: [PUT]
+    requirements:
+            id: '\d+'
+
+unit_partial_update:
+    path:     /units/{id}
+    defaults: { _controller: APITaskBundle:Unit:updatePartial }
+    methods: [PATCH]
+    requirements:
+            id: '\d+'
+
+unit_restore:
+    path:     /units/restore/{id}
+    defaults: { _controller: APITaskBundle:Unit:restore }
+    methods: [PATCH]
+    requirements:
+            id: '\d+'
+
+unit_delete:
+    path:     /units/{id}
+    defaults: { _controller: APITaskBundle:Unit:delete }
+    methods: [DELETE]
+    requirements:
+            id: '\d+'

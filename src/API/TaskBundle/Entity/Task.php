@@ -139,7 +139,7 @@ class Task
      * @var ArrayCollection
      *
      * @ORM\ManyToMany(targetEntity="API\TaskBundle\Entity\Tag", inversedBy="tasks")
-     * @ORM\JoinTable(name="task_has_tag")
+     * @ORM\JoinTable(name="task_has_tag", onDelete="CASCADE")
      * @Serializer\ReadOnly()
      */
     private $tags;

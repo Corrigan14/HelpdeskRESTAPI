@@ -82,7 +82,7 @@ class InvoiceableItemController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
-
+        $invoiceableItemsArray = $this->get('invoiceable_item_service')->getAttributesResponse($task);
     }
 
     /**

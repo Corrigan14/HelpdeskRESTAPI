@@ -358,7 +358,23 @@ class InvoiceableItemController extends ApiBaseController
      */
     public function updateAction(int $taskId, int $invoiceableItemId, Request $request)
     {
-        // TODO: Implement updateAction() method.
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        // Check if user can update selected task
+        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $invoiceableItem = $this->getDoctrine()->getRepository('APITaskBundle:InvoiceableItem')->find($invoiceableItemId);
+        if(!$invoiceableItem instanceof InvoiceableItem){
+
+        }
     }
 
     /**

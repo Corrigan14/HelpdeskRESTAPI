@@ -2260,46 +2260,46 @@ class TaskController extends ApiBaseController
                 }
 
                 // Add tags to task
-                $tagsArray = $requestData['tag'];
-                foreach ($tagsArray as $data) {
-                    $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
-                        'title' => $data['title']
-                    ]);
-
-                    if ($tag instanceof Tag) {
-                        //Check if user can add tag to requested Task
-                        $options = [
-                            'task' => $task,
-                            'tag' => $tag
-                        ];
-
-                        if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_TAG_TO_TASK, $options)) {
-                            return $this->createApiResponse([
-                                'message' => 'Tag with title: ' . $data['title'] . 'can not be added to requested task!',
-                            ], StatusCodesHelper::NOT_FOUND_CODE);
-                        }
-
-                        //Check if tag is already added to task
-                        $taskHasTags = $task->getTags();
-                        if (in_array($tag, $taskHasTags->toArray(), true)) {
-                            continue;
-                        }
-                    } else {
-                        //Create a new tag
-                        $tag = new Tag();
-                        $tag->setTitle($data['title']);
-                        $tag->setPublic(false);
-                        $tag->setColor('FFFF66');
-                        $tag->setCreatedBy($this->getUser());
-
-                        $this->getDoctrine()->getManager()->persist($tag);
-                        $this->getDoctrine()->getManager()->flush();
-                    }
-
-                    //Add tag to task
-                    $task->addTag($tag);
-                    $this->getDoctrine()->getManager()->persist($task);
-                }
+//                $tagsArray = $requestData['tag'];
+//                foreach ($tagsArray as $data) {
+//                    $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
+//                        'title' => $data['title']
+//                    ]);
+//
+//                    if ($tag instanceof Tag) {
+//                        //Check if user can add tag to requested Task
+//                        $options = [
+//                            'task' => $task,
+//                            'tag' => $tag
+//                        ];
+//
+//                        if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_TAG_TO_TASK, $options)) {
+//                            return $this->createApiResponse([
+//                                'message' => 'Tag with title: ' . $data['title'] . 'can not be added to requested task!',
+//                            ], StatusCodesHelper::NOT_FOUND_CODE);
+//                        }
+//
+//                        //Check if tag is already added to task
+//                        $taskHasTags = $task->getTags();
+//                        if (in_array($tag, $taskHasTags->toArray(), true)) {
+//                            continue;
+//                        }
+//                    } else {
+//                        //Create a new tag
+//                        $tag = new Tag();
+//                        $tag->setTitle($data['title']);
+//                        $tag->setPublic(false);
+//                        $tag->setColor('FFFF66');
+//                        $tag->setCreatedBy($this->getUser());
+//
+//                        $this->getDoctrine()->getManager()->persist($tag);
+//                        $this->getDoctrine()->getManager()->flush();
+//                    }
+//
+//                    //Add tag to task
+//                    $task->addTag($tag);
+//                    $this->getDoctrine()->getManager()->persist($task);
+//                }
                 $this->getDoctrine()->getConnection()->commit();
             } catch (\Exception $e) {
                 $this->getDoctrine()->getConnection()->rollBack();

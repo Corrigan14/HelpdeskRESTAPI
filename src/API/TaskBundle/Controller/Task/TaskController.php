@@ -2246,8 +2246,8 @@ class TaskController extends ApiBaseController
             try {
                 // Remove all task's tags
                 $taskHasTags = $task->getTags();
+                dump($taskHasTags);
                 if (count($taskHasTags) > 0) {
-                    dump($taskHasTags);
                     /** @var Tag $taskTag */
                     foreach ($taskHasTags as $taskTag){
                         dump($taskTag);

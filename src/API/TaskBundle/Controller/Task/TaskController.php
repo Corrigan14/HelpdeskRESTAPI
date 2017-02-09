@@ -2247,8 +2247,10 @@ class TaskController extends ApiBaseController
                 // Remove all task's tags
                 $taskHasTags = $task->getTags();
                 if (count($taskHasTags) > 0) {
+                    dump($taskHasTags);
                     /** @var Tag $taskTag */
                     foreach ($taskHasTags as $taskTag){
+                        dump($taskTag);
                         $task->removeTag($taskTag);
                         $taskTag->removeTask($task);
                         $this->getDoctrine()->getManager()->persist($task);

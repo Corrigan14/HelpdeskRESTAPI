@@ -85,11 +85,11 @@ class Task
     private $work;
 
     /**
-     * @var float
+     * @var string
      *
-     * @ORM\Column(name="work_time", type="float", nullable=true)
+     * @ORM\Column(name="work_time", type="string", nullable=true)
      */
-    private $workTime;
+    private $work_time;
 
     /**
      * @var User
@@ -176,6 +176,14 @@ class Task
      * @Serializer\ReadOnly()
      */
     private $company;
+
+    /**
+     * @var
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\InvoiceableItem", mappedBy="task")
+     * @Serializer\ReadOnly()
+     */
+    private $invoiceableItems;
 
     /**
      * Task constructor.
@@ -647,13 +655,13 @@ class Task
     /**
      * Set workTime
      *
-     * @param $workTime
+     * @param string $workTime
      *
      * @return Task
      */
     public function setWorkTime($workTime)
     {
-        $this->workTime = $workTime;
+        $this->work_time = $workTime;
 
         return $this;
     }
@@ -661,10 +669,34 @@ class Task
     /**
      * Get workTime
      *
-     * @return \double
+     * @return string
      */
     public function getWorkTime()
     {
-        return $this->workTime;
+        return $this->work_time;
+    }
+
+    /**
+     * Set company
+     *
+     * @param Company $company
+     *
+     * @return Task
+     */
+    public function setCompany(Company $company = null)
+    {
+        $this->company = $company;
+
+        return $this;
+    }
+
+    /**
+     * Get company
+     *
+     * @return Company
+     */
+    public function getCompany()
+    {
+        return $this->company;
     }
 }

@@ -28,14 +28,22 @@ class UnitFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
         $unit->setTitle('Kilogram');
         $unit->setShortcut('Kg');
         $unit->setIsActive(true);
+        $manager->persist($unit);
+
+        $unit = new Unit();
+        $unit->setTitle('Kus');
+        $unit->setShortcut('Ks');
+        $unit->setIsActive(true);
 
         $manager->persist($unit);
+
         $unit = new Unit();
         $unit->setTitle('Centimeter');
         $unit->setShortcut('cm');
         $unit->setIsActive(true);
 
         $manager->persist($unit);
+
         $unit = new Unit();
         $unit->setTitle('Meter');
         $unit->setShortcut('m');

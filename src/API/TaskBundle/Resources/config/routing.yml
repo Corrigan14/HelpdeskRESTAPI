@@ -25,3 +25,6 @@ api_task_user_role:
 api_task_unit:
     resource: "@APITaskBundle/Resources/config/routing/unit.yml"
     prefix: /
+api_task_invoiceable_item:
+    resource: "@APITaskBundle/Resources/config/routing/invoiceableItem.yml"
+    prefix: /

@@ -178,6 +178,14 @@ class Task
     private $company;
 
     /**
+     * @var
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\InvoiceableItem", mappedBy="task")
+     * @Serializer\ReadOnly()
+     */
+    private $invoiceableItems;
+
+    /**
      * Task constructor.
      */
     public function __construct()
@@ -188,6 +196,7 @@ class Task
         $this->taskHasAssignedUsers = new ArrayCollection();
         $this->taskHasAttachments = new ArrayCollection();
         $this->comments = new ArrayCollection();
+        $this->invoiceableItems = new ArrayCollection();
     }
 
     /**
@@ -690,5 +699,39 @@ class Task
     public function getCompany()
     {
         return $this->company;
+    }
+
+    /**
+     * Add invoiceableItem
+     *
+     * @param InvoiceableItem $invoiceableItem
+     *
+     * @return Task
+     */
+    public function addInvoiceableItem(InvoiceableItem $invoiceableItem)
+    {
+        $this->invoiceableItems[] = $invoiceableItem;
+
+        return $this;
+    }
+
+    /**
+     * Remove invoiceableItem
+     *
+     * @param InvoiceableItem $invoiceableItem
+     */
+    public function removeInvoiceableItem(InvoiceableItem $invoiceableItem)
+    {
+        $this->invoiceableItems->removeElement($invoiceableItem);
+    }
+
+    /**
+     * Get invoiceableItems
+     *
+     * @return ArrayCollection
+     */
+    public function getInvoiceableItems()
+    {
+        return $this->invoiceableItems;
     }
 }

@@ -353,10 +353,11 @@ class InvoiceableItemController extends ApiBaseController
      *
      * @param int $taskId
      * @param int $invoiceableItemId
+     * @param int|bool $unitId
      * @param Request $request
      * @return Response
      */
-    public function updateAction(int $taskId, int $invoiceableItemId, Request $request)
+    public function updateAction(int $taskId, int $invoiceableItemId, Request $request, int $unitId = false)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
@@ -372,9 +373,23 @@ class InvoiceableItemController extends ApiBaseController
         }
 
         $invoiceableItem = $this->getDoctrine()->getRepository('APITaskBundle:InvoiceableItem')->find($invoiceableItemId);
-        if(!$invoiceableItem instanceof InvoiceableItem){
-
+        if (!$invoiceableItem instanceof InvoiceableItem) {
+            return $this->createApiResponse([
+                'message' => 'Invoiceable item with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
         }
+
+        if ($unitId) {
+            $unit = $this->getDoctrine()->getRepository('APITaskBundle:Unit')->find($unitId);
+            if (!$unit instanceof Unit) {
+                return $this->createApiResponse([
+                    'message' => 'Unit item with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+            $invoiceableItem->setUnit($unit);
+        }
+
+        $requestData = $request->request->all();
     }
 
     /**

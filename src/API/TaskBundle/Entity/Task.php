@@ -138,8 +138,11 @@ class Task
     /**
      * @var ArrayCollection
      *
-     * @ORM\ManyToMany(targetEntity="API\TaskBundle\Entity\Tag", inversedBy="tasks", cascade={"persist", "remove"})
-     * @ORM\JoinTable(name="task_has_tag")
+     * @ORM\ManyToMany(targetEntity="API\TaskBundle\Entity\Tag", inversedBy="tasks")
+     * @JoinTable(name="task_has_tag",
+     *      joinColumns={@JoinColumn(name="task_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@JoinColumn(name="tag_id", referencedColumnName="id")}
+     *      )
      * @Serializer\ReadOnly()
      */
     private $tags;

@@ -241,6 +241,12 @@ class InvoiceableItemController extends ApiBaseController
      *       "dataType"="integer",
      *       "requirement"="\d+",
      *       "description"="The id of Task"
+     *     },
+     *     {
+     *       "name"="unitId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of Unit"
      *     }
      *  },
      *  input={"class"="API\TaskBundle\Entity\InvoiceableItem"},
@@ -327,7 +333,13 @@ class InvoiceableItemController extends ApiBaseController
      *  description="Update the Invoiceable item Entity",
      *  requirements={
      *     {
-     *       "name"="id",
+     *       "name"="taskId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of Task"
+     *     },
+     *     {
+     *       "name"="invoiceableItemId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
      *       "description"="The id of processed object"
@@ -357,7 +369,7 @@ class InvoiceableItemController extends ApiBaseController
      * @param Request $request
      * @return Response
      */
-    public function updateAction(int $taskId, int $invoiceableItemId, Request $request, int $unitId = false)
+    public function updateAction(int $taskId, int $invoiceableItemId, Request $request, $unitId = false)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
@@ -390,6 +402,7 @@ class InvoiceableItemController extends ApiBaseController
         }
 
         $requestData = $request->request->all();
+        return $this->updateInvoiceableItem($invoiceableItem, $requestData, false);
     }
 
     /**
@@ -423,7 +436,13 @@ class InvoiceableItemController extends ApiBaseController
      *  description="Partially update the Invoiceable item Entity",
      *  requirements={
      *     {
-     *       "name"="id",
+     *       "name"="taskId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of Task"
+     *     },
+     *     {
+     *       "name"="invoiceableItemId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
      *       "description"="The id of processed object"
@@ -449,12 +468,44 @@ class InvoiceableItemController extends ApiBaseController
      *
      * @param int $taskId
      * @param int $invoiceableItemId
+     * @param int|boolean $unitId
      * @param Request $request
      * @return Response
      */
-    public function updatePartialAction(int $taskId, int $invoiceableItemId, Request $request)
+    public function updatePartialAction(int $taskId, int $invoiceableItemId, Request $request, $unitId = false)
     {
-        // TODO: Implement updatePartialAction() method.
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        // Check if user can update selected task
+        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $invoiceableItem = $this->getDoctrine()->getRepository('APITaskBundle:InvoiceableItem')->find($invoiceableItemId);
+        if (!$invoiceableItem instanceof InvoiceableItem) {
+            return $this->createApiResponse([
+                'message' => 'Invoiceable item with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        if ($unitId) {
+            $unit = $this->getDoctrine()->getRepository('APITaskBundle:Unit')->find($unitId);
+            if (!$unit instanceof Unit) {
+                return $this->createApiResponse([
+                    'message' => 'Unit item with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+            $invoiceableItem->setUnit($unit);
+        }
+
+        $requestData = $request->request->all();
+        return $this->updateInvoiceableItem($invoiceableItem, $requestData, false);
     }
 
     /**
@@ -462,7 +513,13 @@ class InvoiceableItemController extends ApiBaseController
      *  description="Delete Invoiceable item Entity",
      *  requirements={
      *     {
-     *       "name"="id",
+     *       "name"="taskId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of Task"
+     *     },
+     *     {
+     *       "name"="invoiceableItemId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
      *       "description"="The id of processed object"
@@ -488,7 +545,32 @@ class InvoiceableItemController extends ApiBaseController
      */
     public function deleteAction(int $taskId, int $invoiceableItemId)
     {
-        // TODO: Implement deleteAction() method.
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        // Check if user can update selected task
+        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $invoiceableItem = $this->getDoctrine()->getRepository('APITaskBundle:InvoiceableItem')->find($invoiceableItemId);
+        if (!$invoiceableItem instanceof InvoiceableItem) {
+            return $this->createApiResponse([
+                'message' => 'Invoiceable item with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $this->getDoctrine()->getManager()->remove($invoiceableItem);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->createApiResponse([
+            'message' => StatusCodesHelper::DELETED_MESSAGE,
+        ], StatusCodesHelper::DELETED_CODE);
     }
 
     /**
@@ -504,6 +586,25 @@ class InvoiceableItemController extends ApiBaseController
      */
     private function updateInvoiceableItem(InvoiceableItem $invoiceableItem, $requestData, $create = false)
     {
+        $allowedInvoiceableItemEntityParams = [
+            'title',
+            'amount',
+            'unit_price'
+        ];
+
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
+        }
+
+        foreach ($requestData as $key => $value) {
+            if (!in_array($key, $allowedInvoiceableItemEntityParams, true)) {
+                return $this->createApiResponse(
+                    ['message' => $key . ' is not allowed parameter for Invoiceable Item Entity!'],
+                    StatusCodesHelper::INVALID_PARAMETERS_CODE
+                );
+            }
+        }
+
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         $errors = $this->get('entity_processor')->processEntity($invoiceableItem, $requestData);
@@ -512,7 +613,8 @@ class InvoiceableItemController extends ApiBaseController
             $this->getDoctrine()->getManager()->persist($invoiceableItem);
             $this->getDoctrine()->getManager()->flush();
 
-
+            $invoiceableItemArray = $this->get('invoiceable_item_service')->getAttributeResponse($invoiceableItem->getTask()->getId(), $invoiceableItem->getId(), $invoiceableItem->getUnit()->getId());
+            return $this->json($invoiceableItemArray, $statusCode);
         }
 
         $data = [

@@ -528,6 +528,24 @@ class UnitController extends ApiBaseController implements ControllerInterface
      */
     private function updateUnit(Unit $unit, $requestData, $create = false)
     {
+        $allowedUnitEntityParams = [
+            'title',
+            'shortcut'
+        ];
+
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
+        }
+
+        foreach ($requestData as $key => $value) {
+            if (!in_array($key, $allowedUnitEntityParams, true)) {
+                return $this->createApiResponse(
+                    ['message' => $key . ' is not allowed parameter for Invoiceable Item Entity!'],
+                    StatusCodesHelper::INVALID_PARAMETERS_CODE
+                );
+            }
+        }
+
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         $errors = $this->get('entity_processor')->processEntity($unit, $requestData);

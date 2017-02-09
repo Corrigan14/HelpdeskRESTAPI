@@ -2134,8 +2134,8 @@ class TaskController extends ApiBaseController
                 if (count($usersAssignedToTask) > 0) {
                     foreach ($usersAssignedToTask as $userAssignedToTask) {
                         $this->getDoctrine()->getManager()->remove($userAssignedToTask);
-                        $this->getDoctrine()->getManager()->flush();
                     }
+                    $this->getDoctrine()->getManager()->flush();
                 }
 
                 // Add new requested users to the task
@@ -2247,17 +2247,21 @@ class TaskController extends ApiBaseController
                 // Remove all task's tags
                 $taskHasTags = $task->getTags();
                 if (count($taskHasTags) > 0) {
+                    /** @var Tag $taskTag */
                     foreach ($taskHasTags as $taskTag){
-                        $this->getDoctrine()->getManager()->remove($taskTag);
-                        $this->getDoctrine()->getManager()->flush();
+                        $task->removeTag($taskTag);
+                        $taskTag->removeTask($task);
+                        $this->getDoctrine()->getManager()->persist($task);
+                        $this->getDoctrine()->getManager()->persist($taskTag);
                     }
+                    $this->getDoctrine()->getManager()->flush();
                 }
 
                 // Add tags to task
                 $tagsArray = $requestData['tag'];
                 foreach ($tagsArray as $data) {
                     $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
-                        'title' => $data
+                        'title' => $data['title']
                     ]);
 
                     if ($tag instanceof Tag) {
@@ -2269,7 +2273,7 @@ class TaskController extends ApiBaseController
 
                         if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_TAG_TO_TASK, $options)) {
                             return $this->createApiResponse([
-                                'message' => 'Tag with title: ' . $data . 'can not be added to requested task!',
+                                'message' => 'Tag with title: ' . $data['title'] . 'can not be added to requested task!',
                             ], StatusCodesHelper::NOT_FOUND_CODE);
                         }
 
@@ -2281,7 +2285,7 @@ class TaskController extends ApiBaseController
                     } else {
                         //Create a new tag
                         $tag = new Tag();
-                        $tag->setTitle($data);
+                        $tag->setTitle($data['title']);
                         $tag->setPublic(false);
                         $tag->setColor('FFFF66');
                         $tag->setCreatedBy($this->getUser());

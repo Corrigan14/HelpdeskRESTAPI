@@ -2129,20 +2129,31 @@ class TaskController extends ApiBaseController
         if (isset($requestData['assigned'])) {
             $this->getDoctrine()->getConnection()->beginTransaction();
             try {
+                $assignedUsersArray = $requestData['assigned'];
+                $assignedUsersIds = [];
+                foreach ($assignedUsersArray as $item) {
+                    $assignedUsersIds[] = $item['userId'];
+                }
+
                 // Remove all users assigned to task
                 $usersAssignedToTask = $task->getTaskHasAssignedUsers();
                 if (count($usersAssignedToTask) > 0) {
+                    /** @var TaskHasAssignedUser $userAssignedToTask */
                     foreach ($usersAssignedToTask as $userAssignedToTask) {
-                        $this->getDoctrine()->getManager()->remove($userAssignedToTask);
+                        $uid = $userAssignedToTask->getUser()->getId();
+                        if (!in_array($uid, $assignedUsersIds)) {
+                            $this->getDoctrine()->getManager()->remove($userAssignedToTask);
+                        } else {
+                            $key = array_search($uid, $assignedUsersIds);
+                            unset($assignedUsersIds[$key]);
+                        }
                     }
                     $this->getDoctrine()->getManager()->flush();
                 }
 
                 // Add new requested users to the task
-                $assignedUsersArray = $requestData['assigned'];
-                foreach ($assignedUsersArray as $data) {
-                    $assignedUserId = $data['userId'];
-                    $statusId = $data['statusId'];
+                foreach ($assignedUsersIds as $id) {
+                    $assignedUserId = $id;
 
                     $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($assignedUserId);
 
@@ -2173,25 +2184,15 @@ class TaskController extends ApiBaseController
                         $userIsAssignedToTask = new TaskHasAssignedUser();
                     }
 
-                    if ($statusId) {
-                        $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($statusId);
-
-                        if (!$status instanceof Status) {
-                            return $this->createApiResponse([
-                                'message' => 'Status with requested Id does not exist!',
-                            ], StatusCodesHelper::NOT_FOUND_CODE);
-                        }
+                    $newStatus = $this->getDoctrine()->getRepository('APITaskBundle:Status')->findOneBy([
+                        'title' => StatusOptions::NEW,
+                    ]);
+                    if (!$newStatus instanceof Status) {
+                        return $this->createApiResponse([
+                            'message' => 'New Status Entity does not exist!',
+                        ], StatusCodesHelper::NOT_FOUND_CODE);
                     } else {
-                        $newStatus = $this->getDoctrine()->getRepository('APITaskBundle:Status')->findOneBy([
-                            'title' => StatusOptions::NEW,
-                        ]);
-                        if (!$newStatus instanceof Status) {
-                            return $this->createApiResponse([
-                                'message' => 'New Status Entity does not exist!',
-                            ], StatusCodesHelper::NOT_FOUND_CODE);
-                        } else {
-                            $status = $newStatus;
-                        }
+                        $status = $newStatus;
                     }
 
                     $userIsAssignedToTask->setTask($task);
@@ -2248,7 +2249,7 @@ class TaskController extends ApiBaseController
                 $taskHasTags = $task->getTags();
                 if (count($taskHasTags) > 0) {
                     /** @var Tag $taskTag */
-                    foreach ($taskHasTags as $taskTag){
+                    foreach ($taskHasTags as $taskTag) {
                         $task->removeTag($taskTag);
                         $taskTag->removeTask($task);
                         $this->getDoctrine()->getManager()->persist($task);

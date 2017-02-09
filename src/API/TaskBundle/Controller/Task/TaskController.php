@@ -876,6 +876,13 @@ class TaskController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
+        // Check if user can update selected task
+        if ($this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+            $canEdit = true;
+        } else {
+            $canEdit = false;
+        }
+
         if ($task->getProject() instanceof Project) {
             $projectId = $task->getProject()->getId();
         } else {
@@ -890,6 +897,7 @@ class TaskController extends ApiBaseController
 
         $response = $this->get('task_service')->getTaskResponse($ids);
         $responseData['data'] = $response['data'][0];
+        $responseData['data']['canEdit'] = $canEdit;
         $responseLinks['_links'] = $response['_links'];
 
         return $this->json(array_merge($responseData, $responseLinks), StatusCodesHelper::SUCCESSFUL_CODE);

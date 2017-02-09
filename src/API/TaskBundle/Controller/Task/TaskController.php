@@ -2275,8 +2275,17 @@ class TaskController extends ApiBaseController
             'requesterId' => $requesterTaskId,
             'companyId' => $companyTaskId
         ];
+
+        // Check if user can update selected task
+        if ($this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+            $canEdit = true;
+        } else {
+            $canEdit = false;
+        }
+
         $response = $this->get('task_service')->getTaskResponse($ids);
         $responseData['data'] = $response['data'][0];
+        $responseData['data']['canEdit'] = $canEdit;
         $responseLinks['_links'] = $response['_links'];
         return $this->json(array_merge($responseData, $responseLinks), StatusCodesHelper::SUCCESSFUL_CODE);
     }
@@ -2568,8 +2577,16 @@ class TaskController extends ApiBaseController
                 }
             }
 
+            // Check if user can update selected task
+            if ($this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+                $canEdit = true;
+            } else {
+                $canEdit = false;
+            }
+
             $response = $this->get('task_service')->getTaskResponse($ids);
             $responseData['data'] = $response['data'][0];
+            $responseData['data']['canEdit'] = $canEdit;
             $responseLinks['_links'] = $response['_links'];
 
             return $this->json(array_merge($responseData, $responseLinks), $statusCode);

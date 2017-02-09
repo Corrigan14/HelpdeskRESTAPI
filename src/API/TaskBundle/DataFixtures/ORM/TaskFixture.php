@@ -49,6 +49,14 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             'title' => 'Project of user 1'
         ]);
 
+        $usersProject2 = $manager->getRepository('APITaskBundle:Project')->findOneBy([
+            'title' => 'Project of user 2'
+        ]);
+
+        $adminsProject = $manager->getRepository('APITaskBundle:Project')->findOneBy([
+            'title' => 'Project of admin'
+        ]);
+
         $tagFreeTime = $manager->getRepository('APITaskBundle:Tag')->findOneBy([
             'title' => 'Free Time',
         ]);
@@ -133,6 +141,10 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                 $task->setCreatedBy($adminUser);
                 $task->setRequestedBy($adminUser);
                 $task->setCompany($webSolCompany);
+                if ($usersProject2 instanceof Project) {
+                    $task->setProject($usersProject2);
+                }
+
                 $manager->persist($task);
             }
 
@@ -144,6 +156,10 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                 $task->setCreatedBy($userUser);
                 $task->setRequestedBy($userUser);
                 $task->setCompany($lanCompany);
+                if ($adminsProject instanceof Project) {
+                    $task->setProject($adminsProject);
+                }
+
                 $manager->persist($task);
             }
 
@@ -157,6 +173,10 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                     $task->setRequestedBy($userUser);
                     $task->setProject($userProject);
                     $task->setCompany($lanCompany);
+                    if ($adminsProject instanceof Project) {
+                        $task->setProject($adminsProject);
+                    }
+
                     $manager->persist($task);
                 }
             }

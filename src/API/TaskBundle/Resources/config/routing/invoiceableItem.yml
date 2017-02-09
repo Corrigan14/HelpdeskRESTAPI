@@ -6,12 +6,12 @@ invoiceable_item_list:
         taskId: '\d+'
 
 invoiceable_item:
-    path:     /task/{taskId}/invoiceable-items/{id}
+    path:     /task/{taskId}/invoiceable-items/{invoiceableItemId}
     defaults: { _controller: APITaskBundle:InvoiceableItem:get }
     methods: [GET]
     requirements:
         taskId: '\d+'
-        id: '\d+'
+        invoiceableItemId: '\d+'
 
 invoiceable_item_create:
     path:     /task/{taskId}/invoiceable-items
@@ -21,25 +21,25 @@ invoiceable_item_create:
         taskId: '\d+'
 
 invoiceable_item_update:
-    path:     /task/{taskId}/invoiceable-items/{id}
+    path:     /task/{taskId}/invoiceable-items/{invoiceableItemId}
     defaults: { _controller: APITaskBundle:InvoiceableItem:update }
     methods: [PUT]
     requirements:
         taskId: '\d+'
-        id: '\d+'
+        invoiceableItemId: '\d+'
 
 invoiceable_item_partial_update:
-    path:     /task/{taskId}/invoiceable-items/{id}
+    path:     /task/{taskId}/invoiceable-items/{invoiceableItemId}
     defaults: { _controller: APITaskBundle:InvoiceableItem:updatePartial }
     methods: [PATCH]
     requirements:
         taskId: '\d+'
-        id: '\d+'
+        invoiceableItemId: '\d+'
 
 invoiceable_item_delete:
-    path:     /task/{taskId}/invoiceable-items/{id}
+    path:     /task/{taskId}/invoiceable-items/{invoiceableItemId}
     defaults: { _controller: APITaskBundle:InvoiceableItem:delete }
     methods: [DELETE]
     requirements:
         taskId: '\d+'
-        id: '\d+'
+        invoiceableItemId: '\d+'

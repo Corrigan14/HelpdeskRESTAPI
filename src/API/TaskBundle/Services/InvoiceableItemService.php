@@ -53,31 +53,32 @@ class InvoiceableItemService
     }
 
     /**
-     * @param int $id
+     * @param int $taskId
+     * @param int $invoiceableItemId
      * @return array
      */
-    public function getAttributeResponse(int $id): array
+    public function getAttributeResponse(int $taskId, int $invoiceableItemId): array
     {
-        $entity = $this->em->getRepository('APITaskBundle:Unit')->getEntity($id);
+        $invoiceableItem = $this->em->getRepository('APITaskBundle:Unit')->getEntity($invoiceableItemId);
 
         return [
-            'data' => $entity[0],
-            '_links' => $this->getEntityLinks($id),
+            'data' => $invoiceableItem[0],
+            '_links' => $this->getEntityLinks($taskId, $invoiceableItemId),
         ];
     }
 
     /**
-     * @param int $id
-     *
+     * @param int $taskId
+     * @param int $invoiceableItemId
      * @return array
+     *
      */
-    private function getEntityLinks(int $id)
+    private function getEntityLinks(int $taskId, int $invoiceableItemId)
     {
         return [
-            'put' => $this->router->generate('unit_update', ['id' => $id]),
-            'patch' => $this->router->generate('unit_partial_update', ['id' => $id]),
-            'delete' => $this->router->generate('unit_delete', ['id' => $id]),
-            'restore' => $this->router->generate('unit_restore', ['id' => $id]),
+            'put' => $this->router->generate('invoiceable_item_update', ['taskId' => $taskId, 'invoiceableItemId' => $invoiceableItemId]),
+            'patch' => $this->router->generate('unit_partial_update', ['taskId' => $taskId, 'invoiceableItemId' => $invoiceableItemId]),
+            'delete' => $this->router->generate('unit_delete', ['taskId' => $taskId, 'invoiceableItemId' => $invoiceableItemId]),
         ];
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 namespace API\TaskBundle\Repository;
+
 use API\TaskBundle\Entity\Task;
 use Doctrine\ORM\EntityRepository;
 
@@ -18,6 +19,12 @@ class InvoiceableItemRepository extends EntityRepository
      */
     public function getAllEntities(Task $task):array
     {
-        return [];
+        $query = $this->createQueryBuilder('invoiceableItem')
+            ->select('invoiceableItem, unit')
+            ->leftJoin('invoiceableItem.unit', 'unit')
+            ->where('invoiceableItem.task = :task')
+            ->setParameter('task', $task);
+
+        return $query->getQuery()->getArrayResult();
     }
 }

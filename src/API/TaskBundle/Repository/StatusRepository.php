@@ -91,7 +91,7 @@ class StatusRepository extends EntityRepository implements RepositoryInterface
     public function getAllStatusEntitiesWithIdAndTitle()
     {
         $query = $this->createQueryBuilder('s')
-            ->select('s.id,s.title')
+            ->select('s.id,s.title, s.color')
             ->where('s.is_active = :isActive')
             ->setParameter('isActive', true)
             ->getQuery();

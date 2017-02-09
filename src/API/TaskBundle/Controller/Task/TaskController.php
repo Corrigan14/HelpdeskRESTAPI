@@ -2243,7 +2243,7 @@ class TaskController extends ApiBaseController
 
         if (isset($requestData['tag'])) {
             $this->getDoctrine()->getConnection()->beginTransaction();
-            try {
+//            try {
                 // Remove all task's tags
                 $taskHasTags = $task->getTags();
                 if (count($taskHasTags) > 0) {
@@ -2295,12 +2295,12 @@ class TaskController extends ApiBaseController
                     $this->getDoctrine()->getManager()->persist($task);
                 }
                 $this->getDoctrine()->getConnection()->commit();
-            } catch (\Exception $e) {
-                $this->getDoctrine()->getConnection()->rollBack();
-                return $this->createApiResponse([
-                    'message' => 'Tag problem: ' . $e->getMessage(),
-                ], StatusCodesHelper::BAD_REQUEST_CODE);
-            }
+//            } catch (\Exception $e) {
+//                $this->getDoctrine()->getConnection()->rollBack();
+//                return $this->createApiResponse([
+//                    'message' => 'Tag problem: ' . $e->getMessage(),
+//                ], StatusCodesHelper::BAD_REQUEST_CODE);
+//            }
         }
 
         $this->getDoctrine()->getManager()->persist($task);

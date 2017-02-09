@@ -4,6 +4,7 @@ namespace API\TaskBundle\Controller;
 
 use API\TaskBundle\Entity\InvoiceableItem;
 use API\TaskBundle\Entity\Task;
+use API\TaskBundle\Entity\Unit;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
@@ -119,13 +120,25 @@ class InvoiceableItemController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *           "id": "2",
+     *           "id": 4,
+     *           "title": "Keyboard",
+     *           "amount": "2.00",
+     *           "unit_price": "50.00",
+     *           "unit":
+     *           {
+     *              "id": 22,
+     *              "title": "Kus",
+     *              "shortcut": "Ks",
+     *              "is_active": true
+     *           }
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/id",
-     *           "patch": "/api/v1/entityName/id",
-     *           "delete": "/api/v1/entityName/id"
+     *           "put: all entity with unit": "/api/v1/task-bundle/task/38038/invoiceable-items/4/unit/22",
+     *           "put: entity": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
+     *           "patch: all entity with unit": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
+     *           "patch: entity": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
+     *           "delete": "/api/v1/task-bundle/task/38038/invoiceable-items/4"
      *         }
      *      }
      *
@@ -182,33 +195,54 @@ class InvoiceableItemController extends ApiBaseController
 
         $invoiceableItem = $this->getDoctrine()->getRepository('APITaskBundle:InvoiceableItem')->find($invoiceableItemId);
 
-        if(!$invoiceableItem instanceof InvoiceableItem){
+        if (!$invoiceableItem instanceof InvoiceableItem) {
             return $this->createApiResponse([
                 'message' => 'Invoiceable item with requested Id does not exist!',
             ], StatusCodesHelper::NOT_FOUND_CODE);
         }
 
-        $invoiceableItemArray = $this->get('invoiceable_item_service')->getAttributeResponse($taskId, $invoiceableItemId);
+        $invoiceableItemArray = $this->get('invoiceable_item_service')->getAttributeResponse($taskId, $invoiceableItemId, $invoiceableItem->getUnit()->getId());
+        return $this->json($invoiceableItemArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
      * ### Response ###
      *      {
-     *        "data":
+     *       "data":
      *        {
-     *           "id": "2",
+     *           "id": 4,
+     *           "title": "Keyboard",
+     *           "amount": "2.00",
+     *           "unit_price": "50.00",
+     *           "unit":
+     *           {
+     *              "id": 22,
+     *              "title": "Kus",
+     *              "shortcut": "Ks",
+     *              "is_active": true
+     *           }
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *           "put: all entity with unit": "/api/v1/task-bundle/task/38038/invoiceable-items/4/unit/22",
+     *           "put: entity": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
+     *           "patch: all entity with unit": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
+     *           "patch: entity": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
+     *           "delete": "/api/v1/task-bundle/task/38038/invoiceable-items/4"
      *         }
      *      }
      *
      * @ApiDoc(
      *  resource = true,
      *  description="Create a new Invoiceable item Entity",
+     *  requirements={
+     *     {
+     *       "name"="taskId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of Task"
+     *     }
+     *  },
      *  input={"class"="API\TaskBundle\Entity\InvoiceableItem"},
      *  headers={
      *     {
@@ -228,25 +262,64 @@ class InvoiceableItemController extends ApiBaseController
      *
      * @param Request $request
      * @param int $taskId
+     * @param int $unitId
      * @return Response
      */
-    public function createAction(Request $request, int $taskId)
+    public function createAction(Request $request, int $taskId, int $unitId)
     {
-        // TODO: Implement createAction() method.
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+
+        if (!$task instanceof Task) {
+            return $this->createApiResponse([
+                'message' => 'Task with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        // Check if user can update selected task
+        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $unit = $this->getDoctrine()->getRepository('APITaskBundle:Unit')->find($unitId);
+        if (!$unit instanceof Unit) {
+            return $this->createApiResponse([
+                'message' => 'Unit with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $requestData = $request->request->all();
+
+        $invoiceableItem = new InvoiceableItem();
+        $invoiceableItem->setTask($task);
+        $invoiceableItem->setUnit($unit);
+
+        return $this->updateInvoiceableItem($invoiceableItem, $requestData, true);
     }
 
     /**
      * ### Response ###
      *      {
-     *        "data":
+     *       "data":
      *        {
-     *           "id": "2",
+     *           "id": 4,
+     *           "title": "Keyboard",
+     *           "amount": "2.00",
+     *           "unit_price": "50.00",
+     *           "unit":
+     *           {
+     *              "id": 22,
+     *              "title": "Kus",
+     *              "shortcut": "Ks",
+     *              "is_active": true
+     *           }
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *           "put: all entity with unit": "/api/v1/task-bundle/task/38038/invoiceable-items/4/unit/22",
+     *           "put: entity": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
+     *           "patch: all entity with unit": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
+     *           "patch: entity": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
+     *           "delete": "/api/v1/task-bundle/task/38038/invoiceable-items/4"
      *         }
      *      }
      *
@@ -291,15 +364,27 @@ class InvoiceableItemController extends ApiBaseController
     /**
      * ### Response ###
      *      {
-     *        "data":
+     *       "data":
      *        {
-     *           "id": "2",
+     *           "id": 4,
+     *           "title": "Keyboard",
+     *           "amount": "2.00",
+     *           "unit_price": "50.00",
+     *           "unit":
+     *           {
+     *              "id": 22,
+     *              "title": "Kus",
+     *              "shortcut": "Ks",
+     *              "is_active": true
+     *           }
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *           "put: all entity with unit": "/api/v1/task-bundle/task/38038/invoiceable-items/4/unit/22",
+     *           "put: entity": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
+     *           "patch: all entity with unit": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
+     *           "patch: entity": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
+     *           "delete": "/api/v1/task-bundle/task/38038/invoiceable-items/4"
      *         }
      *      }
      *
@@ -367,11 +452,42 @@ class InvoiceableItemController extends ApiBaseController
      *  })
      *
      * @param int $taskId
+     * @param int $invoiceableItemId
      * @return Response
-     *
      */
-    public function deleteAction(int $taskId)
+    public function deleteAction(int $taskId, int $invoiceableItemId)
     {
         // TODO: Implement deleteAction() method.
+    }
+
+    /**
+     * @param InvoiceableItem $invoiceableItem
+     * @param array $requestData
+     * @param bool $create
+     *
+     * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     */
+    private function updateInvoiceableItem(InvoiceableItem $invoiceableItem, $requestData, $create = false)
+    {
+        $statusCode = $this->getCreateUpdateStatusCode($create);
+
+        $errors = $this->get('entity_processor')->processEntity($invoiceableItem, $requestData);
+
+        if (false === $errors) {
+            $this->getDoctrine()->getManager()->persist($invoiceableItem);
+            $this->getDoctrine()->getManager()->flush();
+
+
+        }
+
+        $data = [
+            'errors' => $errors,
+            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+        ];
+        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

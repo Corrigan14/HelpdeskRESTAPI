@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Repository;
 
+use API\TaskBundle\Entity\InvoiceableItem;
 use API\TaskBundle\Entity\Task;
 use Doctrine\ORM\EntityRepository;
 
@@ -24,6 +25,21 @@ class InvoiceableItemRepository extends EntityRepository
             ->leftJoin('invoiceableItem.unit', 'unit')
             ->where('invoiceableItem.task = :task')
             ->setParameter('task', $task);
+
+        return $query->getQuery()->getArrayResult();
+    }
+
+    /**
+     * @param int $invoiceableItem
+     * @return array
+     */
+    public function getEntity(int $invoiceableItem)
+    {
+        $query = $this->createQueryBuilder('invoiceableItem')
+            ->select('invoiceableItem, unit')
+            ->leftJoin('invoiceableItem.unit', 'unit')
+            ->where('invoiceableItem.id = :invoiceableItem')
+            ->setParameter('invoiceableItem', $invoiceableItem);
 
         return $query->getQuery()->getArrayResult();
     }

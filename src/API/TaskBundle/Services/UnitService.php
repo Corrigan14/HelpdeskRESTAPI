@@ -75,6 +75,11 @@ class UnitService
         ];
     }
 
+    public function getListOfAllUnits()
+    {
+        return $this->em->getRepository('APITaskBundle:Unit')->getListOfUnitsWithShortcutAndId();
+    }
+
     /**
      * @param int $id
      *

@@ -168,4 +168,19 @@ class FilterRepository extends EntityRepository implements RepositoryInterface
 
         return $query->getQuery()->getSingleScalarResult();
     }
+
+    /**
+     * @param int $id
+     * @return array
+     */
+    public function getFilterEntity(int $id):array
+    {
+        $query = $this->createQueryBuilder('filter')
+            ->select('filter, project')
+            ->leftJoin('filter.project','project')
+            ->where('filter.id = :id')
+            ->setParameter('id', $id);
+
+        return $query->getQuery()->getArrayResult();
+    }
 }

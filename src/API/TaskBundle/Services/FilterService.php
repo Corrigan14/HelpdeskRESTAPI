@@ -64,14 +64,16 @@ class FilterService
     }
 
     /**
-     * @param Filter $filter
+     * @param int $id
      * @return array
      */
-    public function getFilterResponse(Filter $filter): array
+    public function getFilterResponse(int $id): array
     {
+        $filter = $this->em->getRepository('APITaskBundle:Filter')->getFilterEntity($id);
+
         return [
-            'data' => $filter,
-            '_links' => $this->getFilterLinks($filter->getId()),
+            'data' => $filter[0],
+            '_links' => $this->getFilterLinks($id),
         ];
     }
 

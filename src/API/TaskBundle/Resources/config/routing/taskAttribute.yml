@@ -37,7 +37,7 @@ task_attribute_delete:
             id: '\d+'
 
 task_attribute_restore:
-    path:     /task-attributes/{id}/restore
+    path:     /task-attributes/restore/{id}
     defaults: { _controller: APITaskBundle:TaskAttribute:restore }
     methods: [PATCH]
     requirements:

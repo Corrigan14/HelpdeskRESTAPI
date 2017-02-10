@@ -82,4 +82,18 @@ class TaskAttributeRepository extends EntityRepository implements RepositoryInte
 
         return $query->getSingleScalarResult();
     }
+
+    /**
+     * @param int $id
+     * @return array
+     */
+    public function getEntity(int $id):array
+    {
+        $query = $this->createQueryBuilder('taskAttribute')
+            ->where('taskAttribute.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery();
+
+        return $query->getArrayResult();
+    }
 }

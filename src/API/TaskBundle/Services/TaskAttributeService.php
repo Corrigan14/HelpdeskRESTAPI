@@ -67,19 +67,16 @@ class TaskAttributeService
     }
 
     /**
-     * Return TaskAttribute Response which includes all data about TaskAttribute Entity and Links to update/partialUpdate/delete
-     *
-     * @param TaskAttribute $taskAttribute
+     * @param int $id
      * @return array
-     * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
-     * @throws \Symfony\Component\Routing\Exception\MissingMandatoryParametersException
-     * @throws \Symfony\Component\Routing\Exception\InvalidParameterException
      */
-    public function getTaskAttributeResponse(TaskAttribute $taskAttribute):array
+    public function getTaskAttributeResponse(int $id): array
     {
+        $entity = $this->em->getRepository('APITaskBundle:TaskAttribute')->getEntity($id);
+
         return [
-            'data' => $taskAttribute,
-            '_links' => $this->getLinks($taskAttribute->getId()),
+            'data' => $entity[0],
+            '_links' => $this->getLinks($id),
         ];
     }
 

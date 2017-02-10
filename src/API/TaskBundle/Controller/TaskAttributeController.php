@@ -129,10 +129,10 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *      {
      *        "data":
      *        {
-     *            "id": "1",
-     *            "title": "Input task additional attribute",
-     *            "type": "input"
-     *            "options": null
+     *            "id": 142,
+     *            "title": "input task additional attribute",
+     *            "type": "input",
+     *            "options": null,
      *            "is_active": true
      *        },
      *        "_links":
@@ -191,9 +191,8 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
             return $this->notFoundResponse();
         }
 
-        $caArray = $this->get('task_attribute_service')->getTaskAttributeResponse($ta);
-
-        return $this->createApiResponse($caArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $caArray = $this->get('task_attribute_service')->getTaskAttributeResponse($id);
+        return $this->json($caArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -549,8 +548,8 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
         $this->getDoctrine()->getManager()->persist($taskAttribute);
         $this->getDoctrine()->getManager()->flush();
 
-        $taskAttributeResponse = $this->get('task_attribute_service')->getTaskAttributeResponse($taskAttribute);
-        return $this->createApiResponse($taskAttributeResponse, StatusCodesHelper::SUCCESSFUL_CODE);
+        $caArray = $this->get('task_attribute_service')->getTaskAttributeResponse($taskAttribute->getId());
+        return $this->json($caArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -569,6 +568,25 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      */
     private function updateEntity(array $requestData, TaskAttribute $taskAttribute, $create = false)
     {
+        $allowedUnitEntityParams = [
+            'title',
+            'type',
+            'options'
+        ];
+
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
+        }
+
+        foreach ($requestData as $key => $value) {
+            if (!in_array($key, $allowedUnitEntityParams, true)) {
+                return $this->createApiResponse(
+                    ['message' => $key . ' is not allowed parameter for Task Attribute Entity!'],
+                    StatusCodesHelper::INVALID_PARAMETERS_CODE
+                );
+            }
+        }
+
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         // Check if selected Type is allowed
@@ -589,8 +607,8 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
             $this->getDoctrine()->getManager()->persist($taskAttribute);
             $this->getDoctrine()->getManager()->flush();
 
-            $taskAttributeResponse = $this->get('task_attribute_service')->getTaskAttributeResponse($taskAttribute);
-            return $this->createApiResponse($taskAttributeResponse, $statusCode);
+            $caArray = $this->get('task_attribute_service')->getTaskAttributeResponse($taskAttribute->getId());
+            return $this->json($caArray, $statusCode);
         }
 
         $data = [

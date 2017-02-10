@@ -548,6 +548,25 @@ class StatusController extends ApiBaseController implements ControllerInterface
      */
     private function updateStatus(Status $status, $requestData, $create = false)
     {
+        $allowedUnitEntityParams = [
+            'title',
+            'color',
+            'description'
+        ];
+
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
+        }
+
+        foreach ($requestData as $key => $value) {
+            if (!in_array($key, $allowedUnitEntityParams, true)) {
+                return $this->createApiResponse(
+                    ['message' => $key . ' is not allowed parameter for Tag Entity!'],
+                    StatusCodesHelper::INVALID_PARAMETERS_CODE
+                );
+            }
+        }
+
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         $errors = $this->get('entity_processor')->processEntity($status, $requestData);

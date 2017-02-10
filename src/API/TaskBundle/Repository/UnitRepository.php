@@ -1,6 +1,7 @@
 <?php
 
 namespace API\TaskBundle\Repository;
+
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -92,6 +93,18 @@ class UnitRepository extends EntityRepository
             ->select()
             ->where('unit.id = :unitId')
             ->setParameter('unitId', $id)
+            ->getQuery();
+
+        return $query->getArrayResult();
+    }
+
+    /**
+     * @return array
+     */
+    public function getListOfUnitsWithShortcutAndId()
+    {
+        $query = $this->createQueryBuilder('unit')
+            ->select('unit.shortcut, unit.id')
             ->getQuery();
 
         return $query->getArrayResult();

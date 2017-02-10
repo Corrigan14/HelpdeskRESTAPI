@@ -817,7 +817,37 @@ class TaskController extends ApiBaseController
      *                "id": 1,
      *                "slug": "zsskcd-jpg-2016-12-17-15-36"
      *             }
-     *           ]
+     *           ],
+     *           "invoiceableItems":
+     *           [
+     *              {
+     *                 "id": 4,
+     *                 "title": "Keyboard",
+     *                 "amount": "2.00",
+     *                 "unit_price": "50.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *              },
+     *              {
+     *                 "id": 5,
+     *                 "title": "Mouse",
+     *                 "amount": "5.00",
+     *                 "unit_price": "10.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *               },
+     *            ],
+     *            "canEdit": true
      *        },
      *       "_links":
      *       {
@@ -1057,7 +1087,37 @@ class TaskController extends ApiBaseController
      *                "id": 1,
      *                "slug": "zsskcd-jpg-2016-12-17-15-36"
      *             }
-     *           ]
+     *           ],
+     *           "invoiceableItems":
+     *           [
+     *              {
+     *                 "id": 4,
+     *                 "title": "Keyboard",
+     *                 "amount": "2.00",
+     *                 "unit_price": "50.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *              },
+     *              {
+     *                 "id": 5,
+     *                 "title": "Mouse",
+     *                 "amount": "5.00",
+     *                 "unit_price": "10.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *               },
+     *            ],
+     *            "canEdit": true
      *        },
      *       "_links":
      *       {
@@ -1362,7 +1422,37 @@ class TaskController extends ApiBaseController
      *                "id": 1,
      *                "slug": "zsskcd-jpg-2016-12-17-15-36"
      *             }
-     *           ]
+     *           ],
+     *           "invoiceableItems":
+     *           [
+     *              {
+     *                 "id": 4,
+     *                 "title": "Keyboard",
+     *                 "amount": "2.00",
+     *                 "unit_price": "50.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *              },
+     *              {
+     *                 "id": 5,
+     *                 "title": "Mouse",
+     *                 "amount": "5.00",
+     *                 "unit_price": "10.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *               },
+     *            ],
+     *            "canEdit": true
      *        },
      *       "_links":
      *       {
@@ -1650,7 +1740,37 @@ class TaskController extends ApiBaseController
      *                "id": 1,
      *                "slug": "zsskcd-jpg-2016-12-17-15-36"
      *             }
-     *           ]
+     *           ],
+     *           "invoiceableItems":
+     *           [
+     *              {
+     *                 "id": 4,
+     *                 "title": "Keyboard",
+     *                 "amount": "2.00",
+     *                 "unit_price": "50.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *              },
+     *              {
+     *                 "id": 5,
+     *                 "title": "Mouse",
+     *                 "amount": "5.00",
+     *                 "unit_price": "10.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *               },
+     *            ],
+     *            "canEdit": true
      *        },
      *       "_links":
      *       {
@@ -1987,7 +2107,37 @@ class TaskController extends ApiBaseController
      *                "id": 1,
      *                "slug": "zsskcd-jpg-2016-12-17-15-36"
      *             }
-     *           ]
+     *           ],
+     *           "invoiceableItems":
+     *           [
+     *              {
+     *                 "id": 4,
+     *                 "title": "Keyboard",
+     *                 "amount": "2.00",
+     *                 "unit_price": "50.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *              },
+     *              {
+     *                 "id": 5,
+     *                 "title": "Mouse",
+     *                 "amount": "5.00",
+     *                 "unit_price": "10.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *               },
+     *            ],
+     *            "canEdit": true
      *        },
      *       "_links":
      *       {
@@ -2400,7 +2550,9 @@ class TaskController extends ApiBaseController
      *               "id": 1014,
      *               "username": "admin"
      *            }
-     *          ]
+     *          ],
+     *          "unit":
+     *
      *      }
      * @ApiDoc(
      *  description="Get all options for task: statuses, available projects, available requesters, available companies, available assigners, available tags",
@@ -2474,6 +2626,8 @@ class TaskController extends ApiBaseController
                 ]
             ];
         }
+        // Every unit is available
+        $unitArray = $this->get('unit_service')->getListOfAllUnits();
 
         $response = [
             'status' => $statusesArray,
@@ -2481,7 +2635,8 @@ class TaskController extends ApiBaseController
             'requester' => $requesterArray,
             'company' => $companyArray,
             'tag' => $tagArray,
-            'assigner' => $assignArray
+            'assigner' => $assignArray,
+            'unit' => $unitArray
         ];
         return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
     }

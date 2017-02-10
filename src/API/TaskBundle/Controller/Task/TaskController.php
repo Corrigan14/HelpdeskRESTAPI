@@ -913,24 +913,8 @@ class TaskController extends ApiBaseController
             $canEdit = false;
         }
 
-        if ($task->getProject() instanceof Project) {
-            $projectId = $task->getProject()->getId();
-        } else {
-            $projectId = false;
-        }
-
-        $ids = [
-            'id' => $task->getId(),
-            'projectId' => $projectId,
-            'requesterId' => $task->getRequestedBy()->getId(),
-        ];
-
-        $response = $this->get('task_service')->getTaskResponse($ids);
-        $responseData['data'] = $response['data'][0];
-        $responseData['data']['canEdit'] = $canEdit;
-        $responseLinks['_links'] = $response['_links'];
-
-        return $this->json(array_merge($responseData, $responseLinks), StatusCodesHelper::SUCCESSFUL_CODE);
+        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit);
+        return $this->json($taskArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -1229,11 +1213,9 @@ class TaskController extends ApiBaseController
                 ], StatusCodesHelper::NOT_FOUND_CODE);
             }
             $task->setRequestedBy($requestedUser);
-            $requesterTaskId = $requestedUserId;
             unset($requestData['requestedUserId']);
         } else {
             $task->setRequestedBy($this->getUser());
-            $requesterTaskId = $this->getUser()->getId();
         }
 
         if ($companyId) {
@@ -1245,27 +1227,17 @@ class TaskController extends ApiBaseController
                 ], StatusCodesHelper::NOT_FOUND_CODE);
             }
             $task->setCompany($company);
-            $companyTaskId = $companyId;
             unset($requestData['companyId']);
         } else {
             $loggedUserCompany = $this->getUser()->getCompany();
             if ($loggedUserCompany instanceof Company) {
                 $task->setCompany($loggedUserCompany);
             }
-            $companyTaskId = $loggedUserCompany;
         }
 
         $task->setCreatedBy($this->getUser());
         $task->setImportant(false);
-
-        $ids = [
-            'id' => false,
-            'projectId' => $projectId,
-            'requesterId' => $requesterTaskId,
-            'companyId' => $companyTaskId
-        ];
-
-        return $this->updateTaskEntity($task, $requestData, true, $ids);
+        return $this->updateTaskEntity($task, $requestData, true);
     }
 
     /**
@@ -1553,12 +1525,7 @@ class TaskController extends ApiBaseController
                 ], StatusCodesHelper::ACCESS_DENIED_CODE);
             }
             $task->setProject($project);
-            $taskProjectId = $projectId;
             unset($requestData['projectId']);
-        } elseif ($task->getProject()) {
-            $taskProjectId = $task->getProject()->getId();
-        } else {
-            $taskProjectId = false;
         }
 
         if ($requestedUserId) {
@@ -1571,19 +1538,10 @@ class TaskController extends ApiBaseController
             }
 
             $task->setRequestedBy($requestedUser);
-            $requesterTaskId = $requestedUserId;
             unset($requestData['requestedUserId']);
-        } else {
-            $requesterTaskId = $task->getRequestedBy()->getId();
         }
 
-        $ids = [
-            'id' => $id,
-            'projectId' => $taskProjectId,
-            'requesterId' => $requesterTaskId,
-        ];
-
-        return $this->updateTaskEntity($task, $requestData, false, $ids);
+        return $this->updateTaskEntity($task, $requestData, false);
     }
 
     /**
@@ -1871,12 +1829,7 @@ class TaskController extends ApiBaseController
                 ], StatusCodesHelper::ACCESS_DENIED_CODE);
             }
             $task->setProject($project);
-            $taskProjectId = $projectId;
             unset($requestData['projectId']);
-        } elseif ($task->getProject()) {
-            $taskProjectId = $task->getProject()->getId();
-        } else {
-            $taskProjectId = false;
         }
 
         if ($requestedUserId) {
@@ -1887,19 +1840,10 @@ class TaskController extends ApiBaseController
                 ], StatusCodesHelper::NOT_FOUND_CODE);
             }
             $task->setRequestedBy($requestedUser);
-            $requesterTaskId = $requestedUserId;
             unset($requestData['requestedUserId']);
-        } else {
-            $requesterTaskId = $task->getRequestedBy()->getId();
         }
 
-        $ids = [
-            'id' => $id,
-            'projectId' => $taskProjectId,
-            'requesterId' => $requesterTaskId,
-        ];
-
-        return $this->updateTaskEntity($task, $requestData, false, $ids);
+        return $this->updateTaskEntity($task, $requestData, false);
     }
 
 
@@ -1933,7 +1877,8 @@ class TaskController extends ApiBaseController
      * @return JsonResponse|Response
      * @throws \LogicException
      */
-    public function deleteAction(int $id)
+    public
+    function deleteAction(int $id)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
 
@@ -2198,7 +2143,8 @@ class TaskController extends ApiBaseController
      *
      * @return JsonResponse|Response
      */
-    public function quickUpdateTaskAction(int $taskId, Request $request)
+    public
+    function quickUpdateTaskAction(int $taskId, Request $request)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
@@ -2583,7 +2529,8 @@ class TaskController extends ApiBaseController
      * @return JsonResponse|Response
      * @throws \LogicException
      */
-    public function getTaskOptionsAction(int $taskId)
+    public
+    function getTaskOptionsAction(int $taskId)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
@@ -2646,15 +2593,14 @@ class TaskController extends ApiBaseController
      * @param array $requestData
      * @param bool $create
      *
-     * @param array $ids
-     *
      * @return JsonResponse|Response
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    private function updateTaskEntity(Task $task, array $requestData, $create, array $ids)
+    private
+    function updateTaskEntity(Task $task, array $requestData, $create)
     {
         $allowedUserEntityParams = [
             'title',
@@ -2731,10 +2677,6 @@ class TaskController extends ApiBaseController
             $this->getDoctrine()->getManager()->persist($task);
             $this->getDoctrine()->getManager()->flush();
 
-            if (!$ids['id']) {
-                $ids['id'] = $task->getId();
-            }
-
             /**
              * Fill TaskData Entity if some of its parameters were sent
              */
@@ -2781,12 +2723,8 @@ class TaskController extends ApiBaseController
                 $canEdit = false;
             }
 
-            $response = $this->get('task_service')->getTaskResponse($ids);
-            $responseData['data'] = $response['data'][0];
-            $responseData['data']['canEdit'] = $canEdit;
-            $responseLinks['_links'] = $response['_links'];
-
-            return $this->json(array_merge($responseData, $responseLinks), $statusCode);
+            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit);
+            return $this->json($taskArray, $statusCode);
         }
 
         $data = [
@@ -2803,7 +2741,8 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private function getFilterData(Request $request): array
+    private
+    function getFilterData(Request $request): array
     {
         $data = [];
 
@@ -2882,7 +2821,8 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private function getFilterDataFromSavedFilterArray(array $filterDataArray): array
+    private
+    function getFilterDataFromSavedFilterArray(array $filterDataArray): array
     {
         $data = [];
 
@@ -2944,7 +2884,8 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private function processFilterData(array $data): array
+    private
+    function processFilterData(array $data): array
     {
         // Ina-beznejsia moznost ako zadavat pole hodnot v URL adrese, ktora vracia priamo pole: index.php?id[]=1&id[]=2&id[]=3&name=john
         // na zakodovanie dat do URL je mozne pouzit encodeURIComponent
@@ -3146,7 +3087,8 @@ class TaskController extends ApiBaseController
      *
      * @return array
      */
-    private function separateFromToDateData(string $created): array
+    private
+    function separateFromToDateData(string $created): array
     {
         $fromPosition = strpos($created, 'FROM=');
         $toPosition = strpos($created, 'TO=');
@@ -3173,7 +3115,8 @@ class TaskController extends ApiBaseController
      * @param Project $project
      * @return bool
      */
-    private function checkIfUserHasResolveTaskAclPermission(TaskHasAssignedUser $entity, Project $project):bool
+    private
+    function checkIfUserHasResolveTaskAclPermission(TaskHasAssignedUser $entity, Project $project):bool
     {
         $user = $entity->getUser();
         $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([

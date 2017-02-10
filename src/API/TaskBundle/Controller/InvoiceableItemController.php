@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Controller;
 
 use API\TaskBundle\Entity\InvoiceableItem;
+use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\Unit;
 use API\TaskBundle\Security\VoteOptions;
@@ -206,35 +207,208 @@ class InvoiceableItemController extends ApiBaseController
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
-     *       "data":
+     *        "data":
      *        {
-     *           "id": 4,
-     *           "title": "Keyboard",
-     *           "amount": "2.00",
-     *           "unit_price": "50.00",
-     *           "unit":
+     *           "id": 2991,
+     *           "title": "test 258",
+     *           "description": "Description of Task 1",
+     *           "deadline": null,
+     *           "startedAt": null,
+     *           "closedAt": null,
+     *           "important": false,
+     *           "createdAt":
      *           {
-     *              "id": 22,
-     *              "title": "Kus",
-     *              "shortcut": "Ks",
+     *               "date": "2017-01-26 12:21:59.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *           },
+     *           "updatedAt":
+     *           {
+     *               "date": "2017-01-26 14:34:48.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *           "taskData": [],
+     *           "project":
+     *           {
+     *              "id": 6,
+     *              "title": "Project of user 1",
+     *              "description": "Description of project 1.",
+     *              "is_active": false,
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-01-26 12:21:59.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                  "date": "2017-01-26 12:21:59.000000",
+     *                  "timezone_type": 3,
+     *                  "timezone": "Europe/Berlin"
+     *               }
+     *           },
+     *           "createdBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null,
+     *              "company":
+     *              {
+     *                 "id": 4,
+     *                 "title": "LanSystems",
+     *                 "ico": "110258782",
+     *                 "dic": "12587458996244",
+     *                 "ic_dph": null,
+     *                 "street": "Ina cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true
+     *              }
+     *           },
+     *           "requestedBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null
+     *           },
+     *           "taskHasAssignedUsers":
+     *           [
+     *              {
+     *                  "id": 2,
+     *                  "status_date": null,
+     *                  "time_spent": null,
+     *                  "createdAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "status":
+     *                  {
+     *                     "id": 7,
+     *                     "title": "Completed",
+     *                     "description": "Completed task",
+     *                     "color": "#FF4500",
+     *                     "is_active": true
+     *                  },
+     *                  "user":
+     *                  {
+     *                     "id": 109,
+     *                     "username": "user",
+     *                     "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *                     "email": "user@user.sk",
+     *                     "roles": "[\"ROLE_USER\"]",
+     *                     "is_active": true,
+     *                     "language": "AJ",
+     *                     "image": null
+     *                  }
+     *              }
+     *           ],
+     *           "tags":
+     *           [
+     *             {
+     *                "id": 5,
+     *                "title": "tag1",
+     *                "color": "FFFF66",
+     *                "public": false
+     *             },
+     *             {
+     *               "id": 6,
+     *               "title": "tag2",
+     *               "color": "FFFF66",
+     *               "public": false
+     *             }
+     *           ],
+     *           "company":
+     *           {
+     *              "id": 317,
+     *              "title": "Web-Solutions",
+     *              "ico": "1102587",
+     *              "dic": "12587459644",
+     *              "ic_dph": null,
+     *              "street": "Cesta 125",
+     *              "city": "Bratislava",
+     *              "zip": "021478",
+     *              "country": "Slovenska Republika",
      *              "is_active": true
-     *           }
+     *           },
+     *           "taskHasAttachments":
+     *           [
+     *             {
+     *                "id": 1,
+     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *           ],
+     *           "invoiceableItems":
+     *           [
+     *              {
+     *                 "id": 4,
+     *                 "title": "Keyboard",
+     *                 "amount": "2.00",
+     *                 "unit_price": "50.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *              },
+     *              {
+     *                 "id": 5,
+     *                 "title": "Mouse",
+     *                 "amount": "5.00",
+     *                 "unit_price": "10.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *               },
+     *            ],
+     *            "canEdit": true
      *        },
-     *        "_links":
-     *        {
-     *           "put: all entity with unit": "/api/v1/task-bundle/task/38038/invoiceable-items/4/unit/22",
-     *           "put: entity": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
-     *           "patch: all entity with unit": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
-     *           "patch: entity": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
-     *           "delete": "/api/v1/task-bundle/task/38038/invoiceable-items/4"
-     *         }
-     *      }
+     *       "_links":
+     *       {
+     *         "put: task": "/api/v1/task-bundle/tasks/11970",
+     *         "patch: task": "/api/v1/task-bundle/tasks/11970",
+     *         "delete": "/api/v1/task-bundle/tasks/11970",
+     *         "put: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "patch: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "put: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "patch: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "put: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313",
+     *         "patch: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313"
+     *       }
+     *    }
      *
      * @ApiDoc(
      *  resource = true,
-     *  description="Create a new Invoiceable item Entity",
+     *  description="Create a new Invoiceable item Entity. Returns Task Entity.",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -303,34 +477,207 @@ class InvoiceableItemController extends ApiBaseController
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
-     *       "data":
+     *        "data":
      *        {
-     *           "id": 4,
-     *           "title": "Keyboard",
-     *           "amount": "2.00",
-     *           "unit_price": "50.00",
-     *           "unit":
+     *           "id": 2991,
+     *           "title": "test 258",
+     *           "description": "Description of Task 1",
+     *           "deadline": null,
+     *           "startedAt": null,
+     *           "closedAt": null,
+     *           "important": false,
+     *           "createdAt":
      *           {
-     *              "id": 22,
-     *              "title": "Kus",
-     *              "shortcut": "Ks",
+     *               "date": "2017-01-26 12:21:59.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *           },
+     *           "updatedAt":
+     *           {
+     *               "date": "2017-01-26 14:34:48.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *           "taskData": [],
+     *           "project":
+     *           {
+     *              "id": 6,
+     *              "title": "Project of user 1",
+     *              "description": "Description of project 1.",
+     *              "is_active": false,
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-01-26 12:21:59.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                  "date": "2017-01-26 12:21:59.000000",
+     *                  "timezone_type": 3,
+     *                  "timezone": "Europe/Berlin"
+     *               }
+     *           },
+     *           "createdBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null,
+     *              "company":
+     *              {
+     *                 "id": 4,
+     *                 "title": "LanSystems",
+     *                 "ico": "110258782",
+     *                 "dic": "12587458996244",
+     *                 "ic_dph": null,
+     *                 "street": "Ina cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true
+     *              }
+     *           },
+     *           "requestedBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null
+     *           },
+     *           "taskHasAssignedUsers":
+     *           [
+     *              {
+     *                  "id": 2,
+     *                  "status_date": null,
+     *                  "time_spent": null,
+     *                  "createdAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "status":
+     *                  {
+     *                     "id": 7,
+     *                     "title": "Completed",
+     *                     "description": "Completed task",
+     *                     "color": "#FF4500",
+     *                     "is_active": true
+     *                  },
+     *                  "user":
+     *                  {
+     *                     "id": 109,
+     *                     "username": "user",
+     *                     "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *                     "email": "user@user.sk",
+     *                     "roles": "[\"ROLE_USER\"]",
+     *                     "is_active": true,
+     *                     "language": "AJ",
+     *                     "image": null
+     *                  }
+     *              }
+     *           ],
+     *           "tags":
+     *           [
+     *             {
+     *                "id": 5,
+     *                "title": "tag1",
+     *                "color": "FFFF66",
+     *                "public": false
+     *             },
+     *             {
+     *               "id": 6,
+     *               "title": "tag2",
+     *               "color": "FFFF66",
+     *               "public": false
+     *             }
+     *           ],
+     *           "company":
+     *           {
+     *              "id": 317,
+     *              "title": "Web-Solutions",
+     *              "ico": "1102587",
+     *              "dic": "12587459644",
+     *              "ic_dph": null,
+     *              "street": "Cesta 125",
+     *              "city": "Bratislava",
+     *              "zip": "021478",
+     *              "country": "Slovenska Republika",
      *              "is_active": true
-     *           }
+     *           },
+     *           "taskHasAttachments":
+     *           [
+     *             {
+     *                "id": 1,
+     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *           ],
+     *           "invoiceableItems":
+     *           [
+     *              {
+     *                 "id": 4,
+     *                 "title": "Keyboard",
+     *                 "amount": "2.00",
+     *                 "unit_price": "50.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *              },
+     *              {
+     *                 "id": 5,
+     *                 "title": "Mouse",
+     *                 "amount": "5.00",
+     *                 "unit_price": "10.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *               },
+     *            ],
+     *            "canEdit": true
      *        },
-     *        "_links":
-     *        {
-     *           "put: all entity with unit": "/api/v1/task-bundle/task/38038/invoiceable-items/4/unit/22",
-     *           "put: entity": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
-     *           "patch: all entity with unit": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
-     *           "patch: entity": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
-     *           "delete": "/api/v1/task-bundle/task/38038/invoiceable-items/4"
-     *         }
-     *      }
+     *       "_links":
+     *       {
+     *         "put: task": "/api/v1/task-bundle/tasks/11970",
+     *         "patch: task": "/api/v1/task-bundle/tasks/11970",
+     *         "delete": "/api/v1/task-bundle/tasks/11970",
+     *         "put: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "patch: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "put: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "patch: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "put: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313",
+     *         "patch: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313"
+     *       }
+     *    }
      *
      * @ApiDoc(
-     *  description="Update the Invoiceable item Entity",
+     *  description="Update the Invoiceable item Entity. Returns Task Entity.",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -406,34 +753,207 @@ class InvoiceableItemController extends ApiBaseController
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
-     *       "data":
+     *        "data":
      *        {
-     *           "id": 4,
-     *           "title": "Keyboard",
-     *           "amount": "2.00",
-     *           "unit_price": "50.00",
-     *           "unit":
+     *           "id": 2991,
+     *           "title": "test 258",
+     *           "description": "Description of Task 1",
+     *           "deadline": null,
+     *           "startedAt": null,
+     *           "closedAt": null,
+     *           "important": false,
+     *           "createdAt":
      *           {
-     *              "id": 22,
-     *              "title": "Kus",
-     *              "shortcut": "Ks",
+     *               "date": "2017-01-26 12:21:59.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *           },
+     *           "updatedAt":
+     *           {
+     *               "date": "2017-01-26 14:34:48.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *           "taskData": [],
+     *           "project":
+     *           {
+     *              "id": 6,
+     *              "title": "Project of user 1",
+     *              "description": "Description of project 1.",
+     *              "is_active": false,
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-01-26 12:21:59.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                  "date": "2017-01-26 12:21:59.000000",
+     *                  "timezone_type": 3,
+     *                  "timezone": "Europe/Berlin"
+     *               }
+     *           },
+     *           "createdBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null,
+     *              "company":
+     *              {
+     *                 "id": 4,
+     *                 "title": "LanSystems",
+     *                 "ico": "110258782",
+     *                 "dic": "12587458996244",
+     *                 "ic_dph": null,
+     *                 "street": "Ina cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true
+     *              }
+     *           },
+     *           "requestedBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null
+     *           },
+     *           "taskHasAssignedUsers":
+     *           [
+     *              {
+     *                  "id": 2,
+     *                  "status_date": null,
+     *                  "time_spent": null,
+     *                  "createdAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "status":
+     *                  {
+     *                     "id": 7,
+     *                     "title": "Completed",
+     *                     "description": "Completed task",
+     *                     "color": "#FF4500",
+     *                     "is_active": true
+     *                  },
+     *                  "user":
+     *                  {
+     *                     "id": 109,
+     *                     "username": "user",
+     *                     "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *                     "email": "user@user.sk",
+     *                     "roles": "[\"ROLE_USER\"]",
+     *                     "is_active": true,
+     *                     "language": "AJ",
+     *                     "image": null
+     *                  }
+     *              }
+     *           ],
+     *           "tags":
+     *           [
+     *             {
+     *                "id": 5,
+     *                "title": "tag1",
+     *                "color": "FFFF66",
+     *                "public": false
+     *             },
+     *             {
+     *               "id": 6,
+     *               "title": "tag2",
+     *               "color": "FFFF66",
+     *               "public": false
+     *             }
+     *           ],
+     *           "company":
+     *           {
+     *              "id": 317,
+     *              "title": "Web-Solutions",
+     *              "ico": "1102587",
+     *              "dic": "12587459644",
+     *              "ic_dph": null,
+     *              "street": "Cesta 125",
+     *              "city": "Bratislava",
+     *              "zip": "021478",
+     *              "country": "Slovenska Republika",
      *              "is_active": true
-     *           }
+     *           },
+     *           "taskHasAttachments":
+     *           [
+     *             {
+     *                "id": 1,
+     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *           ],
+     *           "invoiceableItems":
+     *           [
+     *              {
+     *                 "id": 4,
+     *                 "title": "Keyboard",
+     *                 "amount": "2.00",
+     *                 "unit_price": "50.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *              },
+     *              {
+     *                 "id": 5,
+     *                 "title": "Mouse",
+     *                 "amount": "5.00",
+     *                 "unit_price": "10.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *               },
+     *            ],
+     *            "canEdit": true
      *        },
-     *        "_links":
-     *        {
-     *           "put: all entity with unit": "/api/v1/task-bundle/task/38038/invoiceable-items/4/unit/22",
-     *           "put: entity": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
-     *           "patch: all entity with unit": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
-     *           "patch: entity": "/api/v1/task-bundle/task/38038/invoiceable-items/4?unitId=22",
-     *           "delete": "/api/v1/task-bundle/task/38038/invoiceable-items/4"
-     *         }
-     *      }
+     *       "_links":
+     *       {
+     *         "put: task": "/api/v1/task-bundle/tasks/11970",
+     *         "patch: task": "/api/v1/task-bundle/tasks/11970",
+     *         "delete": "/api/v1/task-bundle/tasks/11970",
+     *         "put: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "patch: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "put: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "patch: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "put: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313",
+     *         "patch: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313"
+     *       }
+     *    }
      *
      * @ApiDoc(
-     *  description="Partially update the Invoiceable item Entity",
+     *  description="Partially update the Invoiceable item Entity. Returns Task Entity.",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -613,8 +1133,18 @@ class InvoiceableItemController extends ApiBaseController
             $this->getDoctrine()->getManager()->persist($invoiceableItem);
             $this->getDoctrine()->getManager()->flush();
 
-            $invoiceableItemArray = $this->get('invoiceable_item_service')->getAttributeResponse($invoiceableItem->getTask()->getId(), $invoiceableItem->getId(), $invoiceableItem->getUnit()->getId());
-            return $this->json($invoiceableItemArray, $statusCode);
+            // Return task entity
+            $task = $invoiceableItem->getTask();
+
+            // Check if user can update selected task
+            if ($this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+                $canEdit = true;
+            } else {
+                $canEdit = false;
+            }
+
+            $fullTaskEntity = $this->get('task_service')->getFullTaskEntity($task, $canEdit);
+            return $this->json($fullTaskEntity, $statusCode);
         }
 
         $data = [

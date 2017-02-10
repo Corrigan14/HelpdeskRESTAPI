@@ -83,6 +83,36 @@ class TaskService
     }
 
     /**
+     * @param Task $task
+     * @param bool $canEdit
+     * @return array
+     */
+    public function getFullTaskEntity(Task $task, bool $canEdit):array
+    {
+        $responseData = [];
+        $responseLinks = [];
+
+        if ($task->getProject() instanceof Project) {
+            $projectId = $task->getProject()->getId();
+        } else {
+            $projectId = false;
+        }
+
+        $ids = [
+            'id' => $task->getId(),
+            'projectId' => $projectId,
+            'requesterId' => $task->getRequestedBy()->getId(),
+        ];
+
+        $response = $this->getTaskResponse($ids);
+        $responseData['data'] = $response['data'][0];
+        $responseData['data']['canEdit'] = $canEdit;
+        $responseLinks['_links'] = $response['_links'];
+
+        return array_merge($responseData, $responseLinks);
+    }
+
+    /**
      *
      * @param array $ids
      * @return array

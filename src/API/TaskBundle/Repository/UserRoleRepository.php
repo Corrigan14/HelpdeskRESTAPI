@@ -59,6 +59,38 @@ class UserRoleRepository extends EntityRepository implements RepositoryInterface
      */
     public function countEntities(array $options = [])
     {
-        return 10;
+        $isActive = $options['isActive'];
+
+        $isActiveParam = ('true' === $isActive) ? 1 : 0;
+
+        if ('true' === $isActive || 'false' === $isActive) {
+            $query = $this->createQueryBuilder('userRole')
+                ->select('COUNT(userRole.id)')
+                ->where('userRole.is_active = :isActiveParam')
+                ->setParameter('isActiveParam', $isActiveParam)
+                ->getQuery();
+        } else {
+            $query = $this->createQueryBuilder('userRole')
+                ->select('COUNT(userRole.id)')
+                ->getQuery();
+        }
+
+        return $query->getSingleScalarResult();
+    }
+
+    /**
+     * @param int $id
+     * @return array
+     */
+    public function getEntity(int $id):array
+    {
+        $query = $this->createQueryBuilder('userRole')
+            ->select('userRole, users')
+            ->leftJoin('userRole.users', 'users')
+            ->where('userRole.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery();
+
+        return $query->getArrayResult();
     }
 }

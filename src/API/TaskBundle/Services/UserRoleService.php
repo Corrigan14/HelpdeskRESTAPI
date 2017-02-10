@@ -55,14 +55,16 @@ class UserRoleService
     }
 
     /**
-     * @param UserRole $userRole
+     * @param int $id
      * @return array
      */
-    public function getUserRoleResponse(UserRole $userRole): array
+    public function getUserRoleResponse(int $id): array
     {
+        $userRole = $this->em->getRepository('APITaskBundle:UserRole')->getEntity($id);
+
         return [
-            'data' => $userRole,
-            '_links' => $this->getFilterLinks($userRole->getId()),
+            'data' => $userRole[0],
+            '_links' => $this->getFilterLinks($id),
         ];
     }
 

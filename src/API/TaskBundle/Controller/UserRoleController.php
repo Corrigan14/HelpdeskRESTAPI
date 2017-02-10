@@ -135,82 +135,36 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *      {
      *        "data":
      *        {
-     *          "id": 5,
-     *          "title": "ADMIN",
-     *          "description": "Admin is a main system role. All ACL are available.",
-     *          "homepage": "/",
-     *          "acl": "[\"login_to_system\",\"share_filters\",\"project_shared_filters\",\"report_filters\",\"share_tags\",\"create_projects\",\"sent_emails_from_comments\",\"create_tasks\",\"create_tasks_in_all_projects\",\"update_all_tasks\",\"user_settings\",\"user_role_settings\",\"company_attribute_settings\",\"company_settings\",\"status_settings\",\"task_attribute_settings\",\"unit_settings\",\"system_settings\",\"smtp_settings\",\"imap_settings\"]",
-     *          "is_active": true,
-     *          "order": 1,
-     *          "users":
-     *          {
-     *            "0":
-     *            {
-     *               "id": 47,
-     *               "username": "admin",
-     *               "email": "admin@admin.sk",
-     *               "roles": "[\"ROLE_ADMIN\"]",
-     *               "is_active": true,
-     *               "company":
-     *               {
-     *                 "id": 31,
-     *                 "title": "Web-Solutions",
-     *                 "ico": "1102587",
-     *                 "dic": "12587459644",
-     *                 "street": "Cesta 125",
-     *                 "city": "Bratislava",
-     *                 "zip": "021478",
-     *                 "country": "Slovenska Republika",
+     *           "id": 121,
+     *           "title": "ADMIN",
+     *           "description": "Admin is a main system role. All ACL are available.",
+     *           "homepage": "/",
+     *           "acl": "[\"login_to_system\",\"share_filters\",\"project_shared_filters\",\"report_filters\",\"share_tags\",\"create_projects\",\"sent_emails_from_comments\",\"create_tasks\",\"create_tasks_in_all_projects\",\"update_all_tasks\",\"user_settings\",\"user_role_settings\",\"company_attribute_settings\",\"company_settings\",\"status_settings\",\"task_attribute_settings\",\"unit_settings\",\"system_settings\",\"smtp_settings\",\"imap_settings\"]",
+     *           "is_active": true,
+     *           "order": 1,
+     *           "users":
+     *           {
+     *              "0":
+     *              {
+     *                 "id": 1742,
+     *                 "username": "admin",
+     *                 "password": "$2y$13$vMLBAio6obXwhTo8gvocwe.XkHq/PXeg3IwJLMHA5PF9u0s5npeM6",
+     *                 "email": "admin@admin.sk",
+     *                 "roles": "[\"ROLE_ADMIN\"]",
      *                 "is_active": true,
-     *                 "company_data":
-     *                 {
-     *                    "0":
-     *                    {
-     *                       "id": 31,
-     *                       "value": "10",
-     *                       "company_attribute":
-     *                       {
-     *                          "id": 48,
-     *                          "title": "integer number company additional attribute",
-     *                          "type": "integer_number",
-     *                          "is_active": true
-     *                        }
-     *                    },
-     *                    "1":
-     *                    {
-     *                       "id": 32,
-     *                       "value": "String DATA",
-     *                       "company_attribute":
-     *                       {
-     *                          "id": 46,
-     *                          "title": "input company additional attribute",
-     *                          "type": "input",
-     *                          "is_active": true
-     *                        }
-     *                     }
-     *                 }
-     *              }
-     *            },
-     *            "1":
-     *            {
-     *               "id": 48,
-     *               "username": "user",
-     *               "email": "user@user.sk",
-     *               "roles": "[\"ROLE_USER\"]",
-     *               "is_active": true,
-     *               "company":
-     *               {
-     *                  "id": 32,
-     *                  "title": "LanSystems",
-     *                  "ico": "110258782",
-     *                  "dic": "12587458996244",
-     *                  "street": "Ina cesta 125",
-     *                  "city": "Bratislava",
-     *                  "zip": "021478",
-     *                  "country": "Slovenska Republika",
-     *                  "is_active": true,
-     *                  "company_data": {}
-     *               }
+     *                 "language": "AJ"
+     *               },
+     *              "1":
+     *              {
+     *                 "id": 1743,
+     *                 "username": "admin2",
+     *                 "password": "$2y$13$vMLBAio6obXwhTo8gvocwe.XkHq/PXeg3IwJLMHA5PF9u0s5npeM6",
+     *                 "email": "admin@admin.sk",
+     *                 "roles": "[\"ROLE_ADMIN\"]",
+     *                 "is_active": true,
+     *                 "language": "AJ"
+     *               },
+     *
      *            }
      *        },
      *        "_links":
@@ -271,8 +225,8 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
             ], StatusCodesHelper::NOT_FOUND_CODE);
         }
 
-        $userRoleArray = $this->get('user_role_service')->getUserRoleResponse($userRole);
-        return $this->createApiResponse($userRoleArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $userRoleArray = $this->get('user_role_service')->getUserRoleResponse($id);
+        return $this->json($userRoleArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -280,82 +234,36 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *      {
      *       "data":
      *        {
-     *          "id": 5,
-     *          "title": "ADMIN",
-     *          "description": "Admin is a main system role. All ACL are available.",
-     *          "homepage": "/",
-     *          "acl": "[\"login_to_system\",\"share_filters\",\"project_shared_filters\",\"report_filters\",\"share_tags\",\"create_projects\",\"sent_emails_from_comments\",\"create_tasks\",\"create_tasks_in_all_projects\",\"update_all_tasks\",\"user_settings\",\"user_role_settings\",\"company_attribute_settings\",\"company_settings\",\"status_settings\",\"task_attribute_settings\",\"unit_settings\",\"system_settings\",\"smtp_settings\",\"imap_settings\"]",
-     *          "is_active": true,
-     *          "order": 1,
-     *          "users":
-     *          {
-     *            "0":
-     *            {
-     *               "id": 47,
-     *               "username": "admin",
-     *               "email": "admin@admin.sk",
-     *               "roles": "[\"ROLE_ADMIN\"]",
-     *               "is_active": true,
-     *               "company":
-     *               {
-     *                 "id": 31,
-     *                 "title": "Web-Solutions",
-     *                 "ico": "1102587",
-     *                 "dic": "12587459644",
-     *                 "street": "Cesta 125",
-     *                 "city": "Bratislava",
-     *                 "zip": "021478",
-     *                 "country": "Slovenska Republika",
+     *           "id": 121,
+     *           "title": "ADMIN",
+     *           "description": "Admin is a main system role. All ACL are available.",
+     *           "homepage": "/",
+     *           "acl": "[\"login_to_system\",\"share_filters\",\"project_shared_filters\",\"report_filters\",\"share_tags\",\"create_projects\",\"sent_emails_from_comments\",\"create_tasks\",\"create_tasks_in_all_projects\",\"update_all_tasks\",\"user_settings\",\"user_role_settings\",\"company_attribute_settings\",\"company_settings\",\"status_settings\",\"task_attribute_settings\",\"unit_settings\",\"system_settings\",\"smtp_settings\",\"imap_settings\"]",
+     *           "is_active": true,
+     *           "order": 1,
+     *           "users":
+     *           {
+     *              "0":
+     *              {
+     *                 "id": 1742,
+     *                 "username": "admin",
+     *                 "password": "$2y$13$vMLBAio6obXwhTo8gvocwe.XkHq/PXeg3IwJLMHA5PF9u0s5npeM6",
+     *                 "email": "admin@admin.sk",
+     *                 "roles": "[\"ROLE_ADMIN\"]",
      *                 "is_active": true,
-     *                 "company_data":
-     *                 {
-     *                    "0":
-     *                    {
-     *                       "id": 31,
-     *                       "value": "10",
-     *                       "company_attribute":
-     *                       {
-     *                          "id": 48,
-     *                          "title": "integer number company additional attribute",
-     *                          "type": "integer_number",
-     *                          "is_active": true
-     *                        }
-     *                    },
-     *                    "1":
-     *                    {
-     *                       "id": 32,
-     *                       "value": "String DATA",
-     *                       "company_attribute":
-     *                       {
-     *                          "id": 46,
-     *                          "title": "input company additional attribute",
-     *                          "type": "input",
-     *                          "is_active": true
-     *                        }
-     *                     }
-     *                 }
-     *              }
-     *            },
-     *            "1":
-     *            {
-     *               "id": 48,
-     *               "username": "user",
-     *               "email": "user@user.sk",
-     *               "roles": "[\"ROLE_USER\"]",
-     *               "is_active": true,
-     *               "company":
-     *               {
-     *                  "id": 32,
-     *                  "title": "LanSystems",
-     *                  "ico": "110258782",
-     *                  "dic": "12587458996244",
-     *                  "street": "Ina cesta 125",
-     *                  "city": "Bratislava",
-     *                  "zip": "021478",
-     *                  "country": "Slovenska Republika",
-     *                  "is_active": true,
-     *                  "company_data": {}
-     *               }
+     *                 "language": "AJ"
+     *               },
+     *              "1":
+     *              {
+     *                 "id": 1743,
+     *                 "username": "admin2",
+     *                 "password": "$2y$13$vMLBAio6obXwhTo8gvocwe.XkHq/PXeg3IwJLMHA5PF9u0s5npeM6",
+     *                 "email": "admin@admin.sk",
+     *                 "roles": "[\"ROLE_ADMIN\"]",
+     *                 "is_active": true,
+     *                 "language": "AJ"
+     *               },
+     *
      *            }
      *        },
      *        "_links":
@@ -368,7 +276,7 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *
      * @ApiDoc(
      *  resource = true,
-     *  description="Create a new Entity (POST)",
+     *  description="Create a new User role Entity",
      *  input={"class"="API\TaskBundle\Entity\UserRole"},
      *  headers={
      *     {
@@ -408,7 +316,6 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
         $userRole->setIsActive(true);
 
         $requestData = $request->request->all();
-
         return $this->updateEntity($userRole, $requestData, true);
     }
 
@@ -417,82 +324,36 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *      {
      *        "data":
      *        {
-     *          "id": 5,
-     *          "title": "ADMIN",
-     *          "description": "Admin is a main system role. All ACL are available.",
-     *          "homepage": "/",
-     *          "acl": "[\"login_to_system\",\"share_filters\",\"project_shared_filters\",\"report_filters\",\"share_tags\",\"create_projects\",\"sent_emails_from_comments\",\"create_tasks\",\"create_tasks_in_all_projects\",\"update_all_tasks\",\"user_settings\",\"user_role_settings\",\"company_attribute_settings\",\"company_settings\",\"status_settings\",\"task_attribute_settings\",\"unit_settings\",\"system_settings\",\"smtp_settings\",\"imap_settings\"]",
-     *          "is_active": true,
-     *          "order": 1,
-     *          "users":
-     *          {
-     *            "0":
-     *            {
-     *               "id": 47,
-     *               "username": "admin",
-     *               "email": "admin@admin.sk",
-     *               "roles": "[\"ROLE_ADMIN\"]",
-     *               "is_active": true,
-     *               "company":
-     *               {
-     *                 "id": 31,
-     *                 "title": "Web-Solutions",
-     *                 "ico": "1102587",
-     *                 "dic": "12587459644",
-     *                 "street": "Cesta 125",
-     *                 "city": "Bratislava",
-     *                 "zip": "021478",
-     *                 "country": "Slovenska Republika",
+     *           "id": 121,
+     *           "title": "ADMIN",
+     *           "description": "Admin is a main system role. All ACL are available.",
+     *           "homepage": "/",
+     *           "acl": "[\"login_to_system\",\"share_filters\",\"project_shared_filters\",\"report_filters\",\"share_tags\",\"create_projects\",\"sent_emails_from_comments\",\"create_tasks\",\"create_tasks_in_all_projects\",\"update_all_tasks\",\"user_settings\",\"user_role_settings\",\"company_attribute_settings\",\"company_settings\",\"status_settings\",\"task_attribute_settings\",\"unit_settings\",\"system_settings\",\"smtp_settings\",\"imap_settings\"]",
+     *           "is_active": true,
+     *           "order": 1,
+     *           "users":
+     *           {
+     *              "0":
+     *              {
+     *                 "id": 1742,
+     *                 "username": "admin",
+     *                 "password": "$2y$13$vMLBAio6obXwhTo8gvocwe.XkHq/PXeg3IwJLMHA5PF9u0s5npeM6",
+     *                 "email": "admin@admin.sk",
+     *                 "roles": "[\"ROLE_ADMIN\"]",
      *                 "is_active": true,
-     *                 "company_data":
-     *                 {
-     *                    "0":
-     *                    {
-     *                       "id": 31,
-     *                       "value": "10",
-     *                       "company_attribute":
-     *                       {
-     *                          "id": 48,
-     *                          "title": "integer number company additional attribute",
-     *                          "type": "integer_number",
-     *                          "is_active": true
-     *                        }
-     *                    },
-     *                    "1":
-     *                    {
-     *                       "id": 32,
-     *                       "value": "String DATA",
-     *                       "company_attribute":
-     *                       {
-     *                          "id": 46,
-     *                          "title": "input company additional attribute",
-     *                          "type": "input",
-     *                          "is_active": true
-     *                        }
-     *                     }
-     *                 }
-     *              }
-     *            },
-     *            "1":
-     *            {
-     *               "id": 48,
-     *               "username": "user",
-     *               "email": "user@user.sk",
-     *               "roles": "[\"ROLE_USER\"]",
-     *               "is_active": true,
-     *               "company":
-     *               {
-     *                  "id": 32,
-     *                  "title": "LanSystems",
-     *                  "ico": "110258782",
-     *                  "dic": "12587458996244",
-     *                  "street": "Ina cesta 125",
-     *                  "city": "Bratislava",
-     *                  "zip": "021478",
-     *                  "country": "Slovenska Republika",
-     *                  "is_active": true,
-     *                  "company_data": {}
-     *               }
+     *                 "language": "AJ"
+     *               },
+     *              "1":
+     *              {
+     *                 "id": 1743,
+     *                 "username": "admin2",
+     *                 "password": "$2y$13$vMLBAio6obXwhTo8gvocwe.XkHq/PXeg3IwJLMHA5PF9u0s5npeM6",
+     *                 "email": "admin@admin.sk",
+     *                 "roles": "[\"ROLE_ADMIN\"]",
+     *                 "is_active": true,
+     *                 "language": "AJ"
+     *               },
+     *
      *            }
      *        },
      *        "_links":
@@ -504,7 +365,7 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *      }
      *
      * @ApiDoc(
-     *  description="Update the Entity (PUT)",
+     *  description="Update the User role Entity",
      *  requirements={
      *     {
      *       "name"="id",
@@ -572,82 +433,36 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *      {
      *        "data":
      *        {
-     *          "id": 5,
-     *          "title": "ADMIN",
-     *          "description": "Admin is a main system role. All ACL are available.",
-     *          "homepage": "/",
-     *          "acl": "[\"login_to_system\",\"share_filters\",\"project_shared_filters\",\"report_filters\",\"share_tags\",\"create_projects\",\"sent_emails_from_comments\",\"create_tasks\",\"create_tasks_in_all_projects\",\"update_all_tasks\",\"user_settings\",\"user_role_settings\",\"company_attribute_settings\",\"company_settings\",\"status_settings\",\"task_attribute_settings\",\"unit_settings\",\"system_settings\",\"smtp_settings\",\"imap_settings\"]",
-     *          "is_active": true,
-     *          "order": 1,
-     *          "users":
-     *          {
-     *            "0":
-     *            {
-     *               "id": 47,
-     *               "username": "admin",
-     *               "email": "admin@admin.sk",
-     *               "roles": "[\"ROLE_ADMIN\"]",
-     *               "is_active": true,
-     *               "company":
-     *               {
-     *                 "id": 31,
-     *                 "title": "Web-Solutions",
-     *                 "ico": "1102587",
-     *                 "dic": "12587459644",
-     *                 "street": "Cesta 125",
-     *                 "city": "Bratislava",
-     *                 "zip": "021478",
-     *                 "country": "Slovenska Republika",
+     *           "id": 121,
+     *           "title": "ADMIN",
+     *           "description": "Admin is a main system role. All ACL are available.",
+     *           "homepage": "/",
+     *           "acl": "[\"login_to_system\",\"share_filters\",\"project_shared_filters\",\"report_filters\",\"share_tags\",\"create_projects\",\"sent_emails_from_comments\",\"create_tasks\",\"create_tasks_in_all_projects\",\"update_all_tasks\",\"user_settings\",\"user_role_settings\",\"company_attribute_settings\",\"company_settings\",\"status_settings\",\"task_attribute_settings\",\"unit_settings\",\"system_settings\",\"smtp_settings\",\"imap_settings\"]",
+     *           "is_active": true,
+     *           "order": 1,
+     *           "users":
+     *           {
+     *              "0":
+     *              {
+     *                 "id": 1742,
+     *                 "username": "admin",
+     *                 "password": "$2y$13$vMLBAio6obXwhTo8gvocwe.XkHq/PXeg3IwJLMHA5PF9u0s5npeM6",
+     *                 "email": "admin@admin.sk",
+     *                 "roles": "[\"ROLE_ADMIN\"]",
      *                 "is_active": true,
-     *                 "company_data":
-     *                 {
-     *                    "0":
-     *                    {
-     *                       "id": 31,
-     *                       "value": "10",
-     *                       "company_attribute":
-     *                       {
-     *                          "id": 48,
-     *                          "title": "integer number company additional attribute",
-     *                          "type": "integer_number",
-     *                          "is_active": true
-     *                        }
-     *                    },
-     *                    "1":
-     *                    {
-     *                       "id": 32,
-     *                       "value": "String DATA",
-     *                       "company_attribute":
-     *                       {
-     *                          "id": 46,
-     *                          "title": "input company additional attribute",
-     *                          "type": "input",
-     *                          "is_active": true
-     *                        }
-     *                     }
-     *                 }
-     *              }
-     *            },
-     *            "1":
-     *            {
-     *               "id": 48,
-     *               "username": "user",
-     *               "email": "user@user.sk",
-     *               "roles": "[\"ROLE_USER\"]",
-     *               "is_active": true,
-     *               "company":
-     *               {
-     *                  "id": 32,
-     *                  "title": "LanSystems",
-     *                  "ico": "110258782",
-     *                  "dic": "12587458996244",
-     *                  "street": "Ina cesta 125",
-     *                  "city": "Bratislava",
-     *                  "zip": "021478",
-     *                  "country": "Slovenska Republika",
-     *                  "is_active": true,
-     *                  "company_data": {}
-     *               }
+     *                 "language": "AJ"
+     *               },
+     *              "1":
+     *              {
+     *                 "id": 1743,
+     *                 "username": "admin2",
+     *                 "password": "$2y$13$vMLBAio6obXwhTo8gvocwe.XkHq/PXeg3IwJLMHA5PF9u0s5npeM6",
+     *                 "email": "admin@admin.sk",
+     *                 "roles": "[\"ROLE_ADMIN\"]",
+     *                 "is_active": true,
+     *                 "language": "AJ"
+     *               },
+     *
      *            }
      *        },
      *        "_links":
@@ -659,7 +474,7 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *      }
      *
      * @ApiDoc(
-     *  description="Partially update the Entity (PATCH)",
+     *  description="Partially update the User role Entity",
      *  requirements={
      *     {
      *       "name"="id",
@@ -724,7 +539,7 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
 
     /**
      * @ApiDoc(
-     *  description="Delete Entity (DELETE)",
+     *  description="Delete User role Entity",
      *  requirements={
      *     {
      *       "name"="id",
@@ -786,6 +601,63 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
         ], StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
+
+    /**
+     * @ApiDoc(
+     *  description="Restore User role Entity",
+     *  requirements={
+     *     {
+     *       "name"="id",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of processed object"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="is_active param of Entity was successfully changed to active: 1",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity",
+     *  })
+     *
+     * @param int $id
+     *
+     * @return Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     */
+    public function restoreAction(int $id)
+    {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::USER_ROLE_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($id);
+
+        if (!$userRole instanceof UserRole) {
+            return $this->notFoundResponse();
+        }
+
+        $userRole->setIsActive(true);
+        $this->getDoctrine()->getManager()->persist($userRole);
+        $this->getDoctrine()->getManager()->flush();
+
+        $userRoleArray = $this->get('user_role_service')->getUserRoleResponse($id);
+        return $this->json($userRoleArray, StatusCodesHelper::SUCCESSFUL_CODE);
+    }
+
     /**
      * @param UserRole $userRole
      * @param $requestData
@@ -799,6 +671,28 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      */
     private function updateEntity(UserRole $userRole, $requestData, $create = false)
     {
+        $allowedUnitEntityParams = [
+            'title',
+            'description',
+            'homepage',
+            'acl',
+            'order',
+            'is_active'
+        ];
+
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
+        }
+
+        foreach ($requestData as $key => $value) {
+            if (!in_array($key, $allowedUnitEntityParams, true)) {
+                return $this->createApiResponse(
+                    ['message' => $key . ' is not allowed parameter for Tag Entity!'],
+                    StatusCodesHelper::INVALID_PARAMETERS_CODE
+                );
+            }
+        }
+
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         /** @var User $loggedUser */
@@ -840,7 +734,8 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
             $this->getDoctrine()->getManager()->persist($userRole);
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->createApiResponse($this->get('user_role_service')->getUserRoleResponse($userRole), $statusCode);
+            $userRoleArray = $this->get('user_role_service')->getUserRoleResponse($userRole->getId());
+            return $this->json($userRoleArray, $statusCode);
         }
 
         $data = [

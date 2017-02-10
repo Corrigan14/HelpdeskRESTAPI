@@ -64,6 +64,19 @@ class TagRepository extends EntityRepository implements RepositoryInterface
     }
 
     /**
+     * @param int $id
+     * @return array
+     */
+    public function getEntity(int $id):array
+    {
+        $query = $this->createQueryBuilder('tag')
+            ->where('tag.id = :tagId')
+            ->setParameter('tagId', $id);
+
+        return $query->getQuery()->getArrayResult();
+    }
+
+    /**
      * Return all User's Tags
      *
      * @param int $userId

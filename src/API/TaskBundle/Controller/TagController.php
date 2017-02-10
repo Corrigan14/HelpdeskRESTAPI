@@ -78,7 +78,8 @@ class TagController extends ApiBaseController implements ControllerInterface
         $tagRepository = $this->getDoctrine()->getRepository('APITaskBundle:Tag');
         $loggedUserId = $this->getUser()->getId();
 
-        return $this->json($this->get('api_base.service')->getEntitiesResponse($tagRepository, $page, 'tag_list', ['userId' => $loggedUserId]), StatusCodesHelper::SUCCESSFUL_CODE);
+        $tagArray = $this->get('api_base.service')->getEntitiesResponse($tagRepository, $page, 'tag_list', ['userId' => $loggedUserId]);
+        return $this->json($tagArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -86,28 +87,10 @@ class TagController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "2",
-     *           "title": "Work",
-     *           "color": "4871BF"
+     *           "id": 37,
+     *           "title": "Free Time",
+     *           "color": "BF4848",
      *           "public": true
-     *           "created_by":
-     *           {
-     *              "id": 19,
-     *              "username": "user",
-     *              "email": "user@user.sk",
-     *              "roles": "[\"ROLE_USER\"]",
-     *              "is_active": true,
-     *              "user_role":
-     *              {
-     *                  "id": 2,
-     *                  "title": "MANAGER",
-     *                  "description": null,
-     *                  "homepage": "/",
-     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                  "is_active": true
-     *                  "order": 2
-     *              }
-     *          }
      *        },
      *        "_links":
      *        {
@@ -161,40 +144,19 @@ class TagController extends ApiBaseController implements ControllerInterface
             return $this->accessDeniedResponse();
         }
 
-        $tag = $this->get('api_base.service')->getEntityResponse($t, 'tag');
-
-        return $this->createApiResponse($tag, StatusCodesHelper::SUCCESSFUL_CODE);
+        $tagArray = $this->get('tag_service')->getAttributeResponse($id);
+        return $this->json($tagArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
      *        "data":
      *        {
-     *           "id": "2",
-     *           "user_id": "18",
-     *           "title": "Work",
-     *           "color": "4871BF"
+     *           "id": 37,
+     *           "title": "Free Time",
+     *           "color": "BF4848",
      *           "public": true
-     *           "created_by":
-     *           {
-     *              "id": 19,
-     *              "username": "user",
-     *              "email": "user@user.sk",
-     *              "roles": "[\"ROLE_USER\"]",
-     *              "is_active": true,
-     *              "acl": "[]",
-     *              "user_role":
-     *              {
-     *                  "id": 2,
-     *                  "title": "MANAGER",
-     *                  "description": null,
-     *                  "homepage": "/",
-     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                  "is_active": true
-     *                  "order": 2
-     *              }
-     *          }
      *        },
      *        "_links":
      *        {
@@ -243,33 +205,14 @@ class TagController extends ApiBaseController implements ControllerInterface
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
      *        "data":
      *        {
-     *           "id": "2",
-     *           "title": "Work",
-     *           "color": "4871BF",
+     *           "id": 37,
+     *           "title": "Free Time",
+     *           "color": "BF4848",
      *           "public": true
-     *           "created_by":
-     *           {
-     *              "id": 19,
-     *              "username": "user",
-     *              "email": "user@user.sk",
-     *              "roles": "[\"ROLE_USER\"]",
-     *              "is_active": true,
-     *              "acl": "[]",
-     *              "user_role":
-     *              {
-     *                  "id": 2,
-     *                  "title": "MANAGER",
-     *                  "description": null,
-     *                  "homepage": "/",
-     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                  "is_active": true
-     *                  "order": 2
-     *              }
-     *          }
      *        },
      *        "_links":
      *        {
@@ -278,6 +221,7 @@ class TagController extends ApiBaseController implements ControllerInterface
      *           "delete": "/api/v1/task-bundle/tags/2"
      *         }
      *      }
+     *
      *
      * @ApiDoc(
      *  description="Update the Tag",
@@ -337,33 +281,14 @@ class TagController extends ApiBaseController implements ControllerInterface
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
      *        "data":
      *        {
-     *           "id": "2",
-     *           "title": "Work",
-     *           "color": "4871BF",
+     *           "id": 37,
+     *           "title": "Free Time",
+     *           "color": "BF4848",
      *           "public": true
-     *           "created_by":
-     *           {
-     *              "id": 19,
-     *              "username": "user",
-     *              "email": "user@user.sk",
-     *              "roles": "[\"ROLE_USER\"]",
-     *              "is_active": true,
-     *              "acl": "[]",
-     *              "user_role":
-     *              {
-     *                  "id": 2,
-     *                  "title": "MANAGER",
-     *                  "description": null,
-     *                  "homepage": "/",
-     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                  "is_active": true
-     *                  "order": 2
-     *              }
-     *          }
      *        },
      *        "_links":
      *        {
@@ -372,6 +297,7 @@ class TagController extends ApiBaseController implements ControllerInterface
      *           "delete": "/api/v1/task-bundle/tags/2"
      *         }
      *      }
+     *
      *
      * @ApiDoc(
      *  description="Partially update the Tag",
@@ -509,6 +435,25 @@ class TagController extends ApiBaseController implements ControllerInterface
      */
     private function processTag(Tag $tag, $requestData, $create = false)
     {
+        $allowedUnitEntityParams = [
+            'title',
+            'color',
+            'public'
+        ];
+
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
+        }
+
+        foreach ($requestData as $key => $value) {
+            if (!in_array($key, $allowedUnitEntityParams, true)) {
+                return $this->createApiResponse(
+                    ['message' => $key . ' is not allowed parameter for Tag Entity!'],
+                    StatusCodesHelper::INVALID_PARAMETERS_CODE
+                );
+            }
+        }
+
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         if (isset($requestData['public']) && $requestData['public']) {
@@ -534,7 +479,8 @@ class TagController extends ApiBaseController implements ControllerInterface
             $this->getDoctrine()->getManager()->persist($tag);
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->createApiResponse($this->get('api_base.service')->getEntityResponse($tag, 'tag'), $statusCode);
+            $tagArray = $this->get('tag_service')->getAttributeResponse($tag->getId());
+            return $this->json($tagArray, $statusCode);
         }
 
         $data = [

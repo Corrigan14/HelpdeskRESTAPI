@@ -73,4 +73,20 @@ class CommentRepository extends EntityRepository
 
         return $query->getSingleScalarResult();
     }
+
+    /**
+     * @param $id
+     * @return array
+     */
+    public function getCommentEntity($id):array
+    {
+        $query = $this->createQueryBuilder('comment')
+            ->select('comment, creator, subcomments')
+            ->leftJoin('comment.createdBy', 'creator')
+            ->leftJoin('comment.comment', 'subcomments')
+            ->where('comment.id = :id')
+            ->setParameter('id', $id);
+
+        return $query->getQuery()->getArrayResult();
+    }
 }

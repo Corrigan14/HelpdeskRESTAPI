@@ -149,31 +149,46 @@ class CommentController extends ApiBaseController
         ];
 
         $commentsArray = $this->get('task_additional_service')->getCommentsOfTaskResponse($options, $page, $routeOptions);
-        return $this->createApiResponse($commentsArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($commentsArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
      *  ### Response ###
      *      {
-     *        "data":
-     *        {
-     *           "id": 9,
-     *           "title": "Koment - public",
-     *           "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *           "internal": true,
-     *           "email": false,
-     *           "created_by":
-     *           {
-     *              "id": 35,
-     *              "username": "admin",
-     *              "email": "admin@admin.sk",
-     *              "roles": "[\"ROLE_ADMIN\"]",
-     *              "is_active": true,
-     *              "acl": "[]",
-     *              "company": ⊕{...}
-     *            },
-     *           "created_at": "2016-12-27T15:03:10+0100",
-     *           "updated_at": "2016-12-27T15:03:10+0100"
+     *       "data":
+     *       {
+     *          "id": 1,
+     *          "title": "Koment - public",
+     *          "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *          "internal": false,
+     *          "email": false,
+     *          "email_to": null,
+     *          "email_cc": null,
+     *          "email_bcc": null,
+     *          "createdAt":
+     *          {
+     *             "date": "2017-02-10 15:47:50.000000",
+     *             "timezone_type": 3,
+     *             "timezone": "Europe/Berlin"
+     *          },
+     *          "updatedAt":
+     *          {
+     *             "date": "2017-02-10 15:47:50.000000",
+     *             "timezone_type": 3,
+     *             "timezone": "Europe/Berlin"
+     *          },
+     *          "createdBy":
+     *          {
+     *             "id": 1846,
+     *             "username": "admin",
+     *             "password": "$2y$13$elpnHhCe/zvKZeezL8CkS.5.GgBwXYev/32i1AcTqEH2Vg6WzGHz6",
+     *             "email": "admin@admin.sk",
+     *             "roles": "[\"ROLE_ADMIN\"]",
+     *             "is_active": true,
+     *             "language": "AJ",
+     *             "image": null
+     *          },
+     *          "comment": null
      *        },
      *        "_links":
      *        {
@@ -225,32 +240,47 @@ class CommentController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
-        $commentArray = $this->get('task_additional_service')->getCommentOfTaskResponse($comment);
-        return $this->createApiResponse($commentArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $commentArray = $this->get('task_additional_service')->getCommentOfTaskResponse($commentId);
+        return $this->json($commentArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
      * ### Response ###
      *      {
      *        "data":
-     *        {
-     *           "id": 9,
-     *           "title": "Koment - public, podkomentar komentu",
-     *           "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *           "internal": true,
-     *           "email": false,
-     *           "created_by":
-     *           {
-     *              "id": 35,
-     *              "username": "admin",
-     *              "email": "admin@admin.sk",
-     *              "roles": "[\"ROLE_ADMIN\"]",
-     *              "is_active": true,
-     *              "acl": "[]",
-     *              "company": ⊕{...}
-     *            },
-     *           "created_at": "2016-12-27T15:03:10+0100",
-     *           "updated_at": "2016-12-27T15:03:10+0100"
+     *       {
+     *          "id": 1,
+     *          "title": "Koment - public",
+     *          "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *          "internal": false,
+     *          "email": false,
+     *          "email_to": null,
+     *          "email_cc": null,
+     *          "email_bcc": null,
+     *          "createdAt":
+     *          {
+     *             "date": "2017-02-10 15:47:50.000000",
+     *             "timezone_type": 3,
+     *             "timezone": "Europe/Berlin"
+     *          },
+     *          "updatedAt":
+     *          {
+     *             "date": "2017-02-10 15:47:50.000000",
+     *             "timezone_type": 3,
+     *             "timezone": "Europe/Berlin"
+     *          },
+     *          "createdBy":
+     *          {
+     *             "id": 1846,
+     *             "username": "admin",
+     *             "password": "$2y$13$elpnHhCe/zvKZeezL8CkS.5.GgBwXYev/32i1AcTqEH2Vg6WzGHz6",
+     *             "email": "admin@admin.sk",
+     *             "roles": "[\"ROLE_ADMIN\"]",
+     *             "is_active": true,
+     *             "language": "AJ",
+     *             "image": null
+     *          },
+     *          "comment": null
      *        },
      *        "_links":
      *        {
@@ -320,34 +350,39 @@ class CommentController extends ApiBaseController
      * ### Response ###
      *      {
      *        "data":
-     *        {
-     *           "id": 9,
-     *           "title": "Koment - public, podkomentar komentu",
-     *           "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *           "internal": true,
-     *           "email": false,
-     *           "comment":
-     *           {
-     *              "id": 8,
-     *              "title": "Koment - public",
-     *              "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *              "internal": false,
-     *              "email": false,
-     *              "created_at": "2016-12-27T15:03:10+0100",
-     *              "updated_at": "2016-12-27T15:03:10+0100"
-     *           },
-     *           "created_by":
-     *           {
-     *              "id": 35,
-     *              "username": "admin",
-     *              "email": "admin@admin.sk",
-     *              "roles": "[\"ROLE_ADMIN\"]",
-     *              "is_active": true,
-     *              "acl": "[]",
-     *              "company": ⊕{...}
-     *            }
-     *           "created_at": "2016-12-27T15:03:10+0100",
-     *           "updated_at": "2016-12-27T15:03:10+0100"
+     *       {
+     *          "id": 1,
+     *          "title": "Koment - public",
+     *          "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *          "internal": false,
+     *          "email": false,
+     *          "email_to": null,
+     *          "email_cc": null,
+     *          "email_bcc": null,
+     *          "createdAt":
+     *          {
+     *             "date": "2017-02-10 15:47:50.000000",
+     *             "timezone_type": 3,
+     *             "timezone": "Europe/Berlin"
+     *          },
+     *          "updatedAt":
+     *          {
+     *             "date": "2017-02-10 15:47:50.000000",
+     *             "timezone_type": 3,
+     *             "timezone": "Europe/Berlin"
+     *          },
+     *          "createdBy":
+     *          {
+     *             "id": 1846,
+     *             "username": "admin",
+     *             "password": "$2y$13$elpnHhCe/zvKZeezL8CkS.5.GgBwXYev/32i1AcTqEH2Vg6WzGHz6",
+     *             "email": "admin@admin.sk",
+     *             "roles": "[\"ROLE_ADMIN\"]",
+     *             "is_active": true,
+     *             "language": "AJ",
+     *             "image": null
+     *          },
+     *          "comment": null
      *        },
      *        "_links":
      *        {
@@ -418,7 +453,7 @@ class CommentController extends ApiBaseController
 
     /**
      * @ApiDoc(
-     *  description="Delete Entity (DELETE)",
+     *  description="Delete Comment Entity",
      *  requirements={
      *     {
      *       "name"="commentId",
@@ -472,23 +507,46 @@ class CommentController extends ApiBaseController
 
     /**
      * @param $comment
-     * @param $data
+     * @param $requestData
      * @return Response
      * @throws \InvalidArgumentException
      * @throws \LogicException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
-    private function updateCommentEntity($comment, $data)
+    private function updateCommentEntity($comment, $requestData)
     {
-        $errors = $this->get('entity_processor')->processEntity($comment, $data);
+        $allowedUnitEntityParams = [
+            'title',
+            'body',
+            'internal',
+            'email',
+            'email_to',
+            'email_cc',
+            'email_bcc'
+        ];
+
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
+        }
+
+        foreach ($requestData as $key => $value) {
+            if (!in_array($key, $allowedUnitEntityParams, true)) {
+                return $this->createApiResponse(
+                    ['message' => $key . ' is not allowed parameter for Comment Entity!'],
+                    StatusCodesHelper::INVALID_PARAMETERS_CODE
+                );
+            }
+        }
+
+        $errors = $this->get('entity_processor')->processEntity($comment, $requestData);
 
         if (false === $errors) {
             $this->getDoctrine()->getManager()->persist($comment);
             $this->getDoctrine()->getManager()->flush();
 
-            $commentArray = $this->get('task_additional_service')->getCommentOfTaskResponse($comment);
-            return $this->createApiResponse($commentArray, StatusCodesHelper::CREATED_CODE);
+            $commentArray = $this->get('task_additional_service')->getCommentOfTaskResponse($comment->getId());
+            return $this->json($commentArray, StatusCodesHelper::SUCCESSFUL_CODE);
         }
 
         $data = [

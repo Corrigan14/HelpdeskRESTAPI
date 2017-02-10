@@ -38,7 +38,7 @@ class CommentFixture implements FixtureInterface, ContainerAwareInterface, Order
     public function load(ObjectManager $manager)
     {
         $adminsTask = $manager->getRepository('APITaskBundle:Task')->findOneBy([
-            'title' => 'Task 3'
+            'title' => 'Task 3 - admin is creator, admin is requested'
         ]);
 
         $adminUser = $manager->getRepository('APICoreBundle:User')->findOneBy([
@@ -97,6 +97,6 @@ class CommentFixture implements FixtureInterface, ContainerAwareInterface, Order
      */
     public function getOrder()
     {
-        return 12;
+        return 17;
     }
 }

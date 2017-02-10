@@ -193,16 +193,18 @@ class TaskAdditionalService
     /**
      * Return Entity Response which includes all data about Entity and Link to delete
      *
-     * @param Comment $entity
+     * @param int $id
      *
      * @return array
      */
-    public function getCommentOfTaskResponse($entity): array
+    public function getCommentOfTaskResponse(int $id): array
     {
+        $comment = $this->em->getRepository('APITaskBundle:Comment')->getCommentEntity($id);
+
         return [
-            'data' => $entity,
+            'data' => $comment[0],
             '_links' => [
-                'delete' => $this->router->generate('tasks_delete_tasks_comment', ['commentId' => $entity->getId()])
+                'delete' => $this->router->generate('tasks_delete_tasks_comment', ['commentId' => $id])
             ],
         ];
     }

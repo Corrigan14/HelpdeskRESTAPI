@@ -2,7 +2,6 @@
 
 namespace API\TaskBundle\Services;
 
-use API\CoreBundle\Services\HateoasHelper;
 use API\TaskBundle\Entity\TaskAttribute;
 use API\TaskBundle\Repository\TaskAttributeRepository;
 use Doctrine\ORM\EntityManager;
@@ -51,21 +50,18 @@ class TaskAttributeService
      */
     public function getTaskAttributesResponse(int $page, array $options):array
     {
-        /** @var TaskAttributeRepository */
-        $taskAttributeRepository = $this->em->getRepository('APITaskBundle:TaskAttribute');
-        $taskAttributes = $taskAttributeRepository->getAllEntities($page, $options);
+        $attributes = $this->em->getRepository('APITaskBundle:TaskAttribute')->getAllEntities($page, $options);
+        $count = $this->em->getRepository('APITaskBundle:TaskAttribute')->countEntities($options);
 
         $response = [
-            'data' => $taskAttributes,
+            'data' => $attributes,
         ];
-        $pagination = HateoasHelper::getPagination(
-            $this->router->generate('task_attribute_list'),
-            $page,
-            $taskAttributeRepository->countEntities($options),
-            TaskAttributeRepository::LIMIT,
-            $fields = [],
-            $options['isActive']
-        );
+
+        $url = $this->router->generate('task_attribute_list');
+        $limit = TaskAttributeRepository::LIMIT;
+        $filters = $options['filtersForUrl'];
+
+        $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);
 
         return array_merge($response, $pagination);
     }

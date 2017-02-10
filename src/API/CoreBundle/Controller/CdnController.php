@@ -215,7 +215,7 @@ class CdnController extends ApiBaseController
         // Set headers
         $response->headers->set('Content-type' , mime_content_type($file));//$fileEntity->getType());
         $response->headers->set('Content-length' , filesize($file));//$fileEntity->getSize());
-        $response->headers->set('Access-Control-Allow-Origin' , '*');
+//        $response->headers->set('Access-Control-Allow-Origin' , '*');
         $response->headers->set('Last-Modified' , gmdate('D, d M Y H:i:s' , filemtime($file)) . ' GMT');
 
         // Send headers before outputting anything

@@ -26,12 +26,24 @@ class TagController extends ApiBaseController implements ControllerInterface
      *       "data":
      *       [
      *          {
-     *             "id": "2",
-     *             "title": "Work",
-     *             "color": "4871BF",
+     *             "id": 37,
+     *             "title": "Free Time",
+     *             "color": "BF4848",
      *             "public": true
-     *          }
-     *       ],
+     *          },
+     *          {
+     *              "id": 38,
+     *              "title": "Work",
+     *              "color": "4871BF",
+     *              "public": true
+     *          },
+     *          {
+     *              "id": 40,
+     *              "title": "Another Admin Public Tag",
+     *              "color": "DFD115",
+     *              "public": false
+     *           }
+     *        ],
      *       "_links":
      *       {
      *           "self": "/api/v1/task-bundle/tags?page=1",
@@ -74,11 +86,15 @@ class TagController extends ApiBaseController implements ControllerInterface
     public function listAction(Request $request)
     {
         $page = $request->get('page') ?: 1;
+        $filtersForUrl = [];
 
-        $tagRepository = $this->getDoctrine()->getRepository('APITaskBundle:Tag');
-        $loggedUserId = $this->getUser()->getId();
+        $options = [
+            'loggedUserId' => $this->getUser()->getId(),
+            'isActive' => false,
+            'filtersForUrl' => $filtersForUrl
+        ];
 
-        $tagArray = $this->get('api_base.service')->getEntitiesResponse($tagRepository, $page, 'tag_list', ['userId' => $loggedUserId]);
+        $tagArray = $this->get('tag_service')->getAttributesResponse($page, $options);
         return $this->json($tagArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 

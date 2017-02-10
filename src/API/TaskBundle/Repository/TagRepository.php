@@ -21,7 +21,7 @@ class TagRepository extends EntityRepository implements RepositoryInterface
      */
     public function getAllEntities(int $page, array $options = [])
     {
-        $userId = $options['userId'];
+        $userId = $options['loggedUserId'];
 
         $query = $this->createQueryBuilder('t')
             ->where('t.createdBy = :userId')
@@ -50,7 +50,7 @@ class TagRepository extends EntityRepository implements RepositoryInterface
      */
     public function countEntities(array $options = [])
     {
-        $userId = $options['userId'];
+        $userId = $options['loggedUserId'];
 
         $query = $this->createQueryBuilder('t')
             ->select('COUNT(t.id)')

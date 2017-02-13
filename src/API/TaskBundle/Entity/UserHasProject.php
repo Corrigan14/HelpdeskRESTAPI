@@ -46,7 +46,7 @@ class UserHasProject
      * @var Project
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Project", inversedBy="userHasProjects")
-     * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=false)
+     * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=false, onDelete="CASCADE")
      * @ReadOnly()
      */
     private $project;

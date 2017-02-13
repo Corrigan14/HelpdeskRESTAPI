@@ -836,10 +836,6 @@ class FilterController extends ApiBaseController implements ControllerInterface
         if (isset($data['filter'])) {
             $filters = $data['filter'];
 
-            if (!is_array($filter)) {
-                $filters = explode(',', $filters);
-            }
-
             foreach ($filters as $key => $value) {
                 if (!in_array($key, FilterAttributeOptions::getConstants(), true)) {
                     return $this->createApiResponse([
@@ -867,6 +863,11 @@ class FilterController extends ApiBaseController implements ControllerInterface
             unset($data['report']);
         } else {
             $filter->setReport(false);
+        }
+
+        // Check id user want to set this filter like default
+        if (!isset($data['default'])) {
+            $data['default'] = false;
         }
 
         $errors = $this->get('entity_processor')->processEntity($filter, $data);

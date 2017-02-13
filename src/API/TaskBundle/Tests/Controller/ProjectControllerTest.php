@@ -4,7 +4,7 @@ namespace API\TaskBundle\Tests\Controller;
 
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\UserHasProject;
-use API\TaskBundle\Security\VoteOptions;
+use API\TaskBundle\Security\ProjectAclOptions;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 
@@ -35,10 +35,6 @@ class ProjectControllerTest extends ApiTestCase
         parent::testPostSingleErrors();
 
         $data = $this->returnPostTestData();
-
-        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
-        // entity corresponding to the post data
-        $this->removeTestEntity();
 
         // Try to create entity with ROLE_USER which hasn't permission to this action
         $this->getClient(true)->request('POST', $this->getBaseUrl(), $data, [],
@@ -365,8 +361,15 @@ class ProjectControllerTest extends ApiTestCase
         }
 
         $acl = [];
-        $acl[] = VoteOptions::CREATE_TASK_IN_PROJECT;
-        $acl[] = VoteOptions::VIEW_ALL_TASKS_IN_PROJECT;
+        $acl[] = ProjectAclOptions::EDIT_PROJECT;
+        $acl[] = ProjectAclOptions::EDIT_INTERNAL_NOTE;
+        $acl[] = ProjectAclOptions::CREATE_TASK;
+        $acl[] = ProjectAclOptions::RESOLVE_TASK;
+        $acl[] = ProjectAclOptions::DELETE_TASK;
+        $acl[] = ProjectAclOptions::VIEW_INTERNAL_NOTE;
+        $acl[] = ProjectAclOptions::VIEW_ALL_TASKS;
+        $acl[] = ProjectAclOptions::VIEW_OWN_TASKS;
+        $acl[] = ProjectAclOptions::VIEW_TASKS_FROM_USERS_COMPANY;
 
         $this->getClient(true)->request('POST', $this->getBaseUrl() . '/project/' . $project->getId() . '/user/' . $user->getId(),
             [$acl], [],

@@ -45,12 +45,12 @@ class FilterControllerTest extends ApiTestCase
         // entity corresponding to the post data
         $this->removeTestEntity();
 
-        // Try to add Entity with ROLE_USER which hasn't permission to create PUBLIc filter this action
+        // Try to add Entity with ROLE_USER which hasn't permission to create PUBLIC filter this action
         $this->getClient(true)->request('POST', $this->getBaseUrl(), $publicData, [],
             ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
-        // Try to add Entity with invalid parameters - not existed Filter attribute
+        // Try to add Entity with invalid parameters - not allowed Filter attribute
         $this->getClient(true)->request('POST', $this->getBaseUrl(), $invalidData, [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
@@ -392,7 +392,7 @@ class FilterControllerTest extends ApiTestCase
         $filter = [
             FilterAttributeOptions::STATUS => $status->getId(),
             FilterAttributeOptions::CREATOR => $user->getId() . ',' . $admin->getId(),
-            'test' => 'test'
+            'bad_param' => 'test'
         ];
 
         return [

@@ -2,6 +2,7 @@
 
 namespace API\CoreBundle\Tests\Controller;
 
+use API\CoreBundle\Entity\Company;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 
@@ -114,12 +115,9 @@ class CompanyControllerTest extends ApiTestCase
         $entity = $this->findOneEntity();
 
         // Restore Entity
-        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . 'restore/' . $entity->getId(),
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/restore/' . $entity->getId(),
             [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
-        $this->assertEquals(true , $response['data']['is_active']);
     }
 
     /**
@@ -130,16 +128,16 @@ class CompanyControllerTest extends ApiTestCase
         $entity = $this->findOneEntity();
 
         // Try to restore Entity without authorization header
-        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . 'restore/' . $entity->getId(), [], [], []);
+        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/restore/' . $entity->getId(), [], [], []);
         $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to restore Entity with not existed ID (as Admin)
-        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . 'restore/12548700',
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/restore/12548700',
             [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE, $this->getClient()->getResponse()->getStatusCode());
 
         // Try to restore a company with USER_ROLE without ACL permission to restore companies
-        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/' . 'restore/' . $entity->getId(), [], [],
+        $this->getClient()->request('PATCH', $this->getBaseUrl() . '/restore/' . $entity->getId(), [], [],
             ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
@@ -165,13 +163,11 @@ class CompanyControllerTest extends ApiTestCase
             'title' => 'Test Company'
         ]);
 
-        if (null !== $company) {
+        if ($company instanceof Company) {
             return $company;
         }
 
-        $companyArray = $this->createEntity();
-
-        return $this->em->getRepository('APICoreBundle:Company')->find($companyArray['id']);
+        return $this->createEntity();
     }
 
     /**
@@ -181,15 +177,17 @@ class CompanyControllerTest extends ApiTestCase
      */
     public function createEntity()
     {
-        $this->getClient(true)->request('POST', $this->getBaseUrl(),
-            ['title' => 'Test Company', 'ico' => '1102545', 'dic' => '11452', 'street' => 'test street', 'city' => 'test city', 'zip' => '25897', 'country' => 'test country'],
-            [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(201, $this->getClient()->getResponse()->getStatusCode());
+        $createdCompany = new Company();
+        $createdCompany->setTitle('Test Company')
+            ->setIco('11025848744')
+            ->setDic('1258745968444')
+            ->setStreet('Cesta 125')
+            ->setZip('021478')
+            ->setCity('Bratislava')
+            ->setCountry('Slovenska Republika');
 
-        // Check if Entity was created
-        $createdCompany = json_decode($this->getClient()->getResponse()->getContent(), true);
-        $createdCompany = $createdCompany['data'];
-        $this->assertTrue(array_key_exists('id', $createdCompany));
+        $this->em->persist($createdCompany);
+        $this->em->flush();
 
         return $createdCompany;
     }

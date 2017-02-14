@@ -199,14 +199,14 @@ class FollowerController extends ApiBaseController
 
         if ($this->canAddTaskFollower($user, $task)) {
             $task->addFollower($user);
-            $user->addFollowedTask($task);
+
             $this->getDoctrine()->getManager()->persist($task);
-            $this->getDoctrine()->getManager()->persist($user);
             $this->getDoctrine()->getManager()->flush();
         }
 
         $listOfTaskFollowers = $task->getFollowers();
-        return $this->createApiResponse($listOfTaskFollowers, StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->createApiResponse([],StatusCodesHelper::SUCCESSFUL_CODE);
+
     }
 
     /**

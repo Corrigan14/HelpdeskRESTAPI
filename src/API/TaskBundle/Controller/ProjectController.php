@@ -827,6 +827,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             ], StatusCodesHelper::NOT_FOUND_CODE);
         }
 
+        //Check if logged user can Update ACL in requested project
         $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
             'user' => $this->getUser(),
             'project' => $project
@@ -842,14 +843,14 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             'user' => $user,
         ]);
         if ($existedUserHasProjectEntity instanceof UserHasProject) {
-            $userHasProject = $existedUserHasProjectEntity;
+            $userHasProjectAdd = $existedUserHasProjectEntity;
         } else {
-            $userHasProject = new UserHasProject();
-            $userHasProject->setProject($project);
-            $userHasProject->setUser($user);
+            $userHasProjectAdd = new UserHasProject();
+            $userHasProjectAdd->setProject($project);
+            $userHasProjectAdd->setUser($user);
         }
 
-        return $this->updateUserHasProject($requestData, $userHasProject, true);
+        return $this->updateUserHasProject($requestData, $userHasProjectAdd, true);
     }
 
     /**

@@ -508,13 +508,14 @@ class CommentController extends ApiBaseController
     /**
      * @param $comment
      * @param $requestData
+     * @param bool $create
      * @return Response
      * @throws \InvalidArgumentException
      * @throws \LogicException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
-    private function updateCommentEntity($comment, $requestData)
+    private function updateCommentEntity($comment, $requestData, $create = true)
     {
         $allowedUnitEntityParams = [
             'title',
@@ -539,6 +540,8 @@ class CommentController extends ApiBaseController
             }
         }
 
+        $statusCode = $this->getCreateUpdateStatusCode($create);
+
         $errors = $this->get('entity_processor')->processEntity($comment, $requestData);
 
         if (false === $errors) {
@@ -546,7 +549,7 @@ class CommentController extends ApiBaseController
             $this->getDoctrine()->getManager()->flush();
 
             $commentArray = $this->get('task_additional_service')->getCommentOfTaskResponse($comment->getId());
-            return $this->json($commentArray, StatusCodesHelper::SUCCESSFUL_CODE);
+            return $this->json($commentArray, $statusCode);
         }
 
         $data = [

@@ -49,10 +49,6 @@ class TaskRepository extends EntityRepository
             ->leftJoin('task.tags', 'tags')
             ->leftJoin('task.company', 'taskCompany');
 
-        if (array_key_exists('tags.id', $inFilter)) {
-            $query->innerJoin('task.tags', 'tags');
-        }
-
         if (array_key_exists('followers.id', $inFilter) || array_key_exists('followers.id', $equalFilter)) {
             $query->innerJoin('task.followers', 'followers');
         }

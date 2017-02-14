@@ -81,9 +81,11 @@ class CommentRepository extends EntityRepository
     public function getCommentEntity($id):array
     {
         $query = $this->createQueryBuilder('comment')
-            ->select('comment, creator, subcomments')
+            ->select('comment, creator, subcomments, commentHasAttachments, subCommenthasattachments')
             ->leftJoin('comment.createdBy', 'creator')
             ->leftJoin('comment.comment', 'subcomments')
+            ->leftJoin('comment.commentHasAttachments','commentHasAttachments')
+            ->leftJoin('subcomments.commentHasAttachments','subCommenthasattachments')
             ->where('comment.id = :id')
             ->setParameter('id', $id);
 

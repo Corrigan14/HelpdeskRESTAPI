@@ -23,21 +23,11 @@ class CommentAttachmentController extends ApiBaseController
      * ### Response ###
      *      {
      *        "data":
-     *        {
-     *          "0":
-     *          {
-     *            "id": 2,
-     *            "name": "lamp",
-     *            "slug": "lamp-2016-12-19-02-21",
-     *            "temp_name": "phpJXtI4V",
-     *            "type": "text/plain",
-     *            "size": 35,
-     *            "upload_dir": "ee4ee8b963284e98df96aa0c04b4e9a6",
-     *            "public": false,
-     *            "created_at": "2016-12-19T02:21:50+0100",
-     *            "updated_at": "2016-12-19T02:21:50+0100"
-     *          }
-     *        },
+     *        [
+     *           {
+     *              "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *           }
+     *        ],
      *        "_links":
      *        {
      *          "self": "/api/v1/task-bundle/tasks/comments/14/attachment?page=1",
@@ -52,7 +42,7 @@ class CommentAttachmentController extends ApiBaseController
      *      }
      *
      * @ApiDoc(
-     *  description="Returns a list of comments attachments",
+     *  description="Returns a list of slugs of comments attachments.",
      *  filters={
      *     {
      *       "name"="page",
@@ -113,42 +103,62 @@ class CommentAttachmentController extends ApiBaseController
         ];
 
         $attachmentArray = $this->get('task_additional_service')->getCommentAttachmentsResponse($options, $page, $routeOptions);
-        return $this->createApiResponse($attachmentArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($attachmentArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
-     *        "0":
+     *       "data":
+     *       {
+     *          "id": 1,
+     *          "title": "Koment - public",
+     *          "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *          "internal": false,
+     *          "email": false,
+     *          "email_to": null,
+     *          "email_cc": null,
+     *          "email_bcc": null,
+     *          "createdAt":
+     *          {
+     *             "date": "2017-02-10 15:47:50.000000",
+     *             "timezone_type": 3,
+     *             "timezone": "Europe/Berlin"
+     *          },
+     *          "updatedAt":
+     *          {
+     *             "date": "2017-02-10 15:47:50.000000",
+     *             "timezone_type": 3,
+     *             "timezone": "Europe/Berlin"
+     *          },
+     *          "createdBy":
+     *          {
+     *             "id": 1846,
+     *             "username": "admin",
+     *             "password": "$2y$13$elpnHhCe/zvKZeezL8CkS.5.GgBwXYev/32i1AcTqEH2Vg6WzGHz6",
+     *             "email": "admin@admin.sk",
+     *             "roles": "[\"ROLE_ADMIN\"]",
+     *             "is_active": true,
+     *             "language": "AJ",
+     *             "image": null
+     *          },
+     *          "comment": null,
+     *          "commentHasAttachments":
+     *          [
+     *             {
+     *                 "id": 3,
+     *                 "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *          ]
+     *        },
+     *        "_links":
      *        {
-     *          "id": 2,
-     *          "name": "lamp",
-     *          "slug": "lamp-2016-12-19-02-21",
-     *          "temp_name": "phpJXtI4V",
-     *          "type": "text/plain",
-     *          "size": 35,
-     *          "upload_dir": "ee4ee8b963284e98df96aa0c04b4e9a6",
-     *          "public": false,
-     *          "created_at": "2016-12-19T02:21:50+0100",
-     *          "updated_at": "2016-12-19T02:21:50+0100"
-     *         }
-     *         "1":
-     *        {
-     *          "id": 3,
-     *          "name": "lamp2",
-     *          "slug": "lamp2-2016-12-19-02-21",
-     *          "temp_name": "phpJXtI4V",
-     *          "type": "text/plain",
-     *          "size": 38,
-     *          "upload_dir": "ee4ee8b963284e98df96aa0c04b4e9a6",
-     *          "public": false,
-     *          "created_at": "2016-12-19T02:21:50+0100",
-     *          "updated_at": "2016-12-19T02:21:50+0100"
+     *           "delete": "/api/v1/task-bundle/tasks/comments/9"
      *         }
      *      }
      *
      * @ApiDoc(
-     *  description="Add a new attachment to the Comment. Returns a list of comments attachments.",
+     *  description="Add a new attachment to the Comment. Returns a comment.",
      *  requirements={
      *     {
      *       "name"="commentId",
@@ -218,11 +228,61 @@ class CommentAttachmentController extends ApiBaseController
             $this->getDoctrine()->getManager()->flush();
         }
 
-        $commentAttachmentsArray = $this->getCommentAttachments($comment);
-        return $this->createApiResponse($commentAttachmentsArray, StatusCodesHelper::CREATED_CODE);
+        $commentArray = $this->get('task_additional_service')->getCommentOfTaskResponse($commentId);
+        return $this->json($commentArray, StatusCodesHelper::CREATED_CODE);
     }
 
     /**
+     *  ### Response ###
+     *      {
+     *       "data":
+     *       {
+     *          "id": 1,
+     *          "title": "Koment - public",
+     *          "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *          "internal": false,
+     *          "email": false,
+     *          "email_to": null,
+     *          "email_cc": null,
+     *          "email_bcc": null,
+     *          "createdAt":
+     *          {
+     *             "date": "2017-02-10 15:47:50.000000",
+     *             "timezone_type": 3,
+     *             "timezone": "Europe/Berlin"
+     *          },
+     *          "updatedAt":
+     *          {
+     *             "date": "2017-02-10 15:47:50.000000",
+     *             "timezone_type": 3,
+     *             "timezone": "Europe/Berlin"
+     *          },
+     *          "createdBy":
+     *          {
+     *             "id": 1846,
+     *             "username": "admin",
+     *             "password": "$2y$13$elpnHhCe/zvKZeezL8CkS.5.GgBwXYev/32i1AcTqEH2Vg6WzGHz6",
+     *             "email": "admin@admin.sk",
+     *             "roles": "[\"ROLE_ADMIN\"]",
+     *             "is_active": true,
+     *             "language": "AJ",
+     *             "image": null
+     *          },
+     *          "comment": null,
+     *          "commentHasAttachments":
+     *          [
+     *             {
+     *                 "id": 3,
+     *                 "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *          ]
+     *        },
+     *        "_links":
+     *        {
+     *           "delete": "/api/v1/task-bundle/tasks/comments/9"
+     *         }
+     *      }
+     *
      * @ApiDoc(
      *  description="Remove attachment from the Comment",
      *  requirements={
@@ -297,9 +357,8 @@ class CommentAttachmentController extends ApiBaseController
         $this->getDoctrine()->getManager()->remove($commentHasAttachment);
         $this->getDoctrine()->getManager()->flush();
 
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::DELETED_MESSAGE,
-        ], StatusCodesHelper::DELETED_CODE);
+        $commentArray = $this->get('task_additional_service')->getCommentOfTaskResponse($commentId);
+        return $this->json($commentArray, StatusCodesHelper::DELETED_CODE);
     }
 
     /**
@@ -316,28 +375,5 @@ class CommentAttachmentController extends ApiBaseController
         ]);
 
         return (!$commentHasAttachment instanceof CommentHasAttachment);
-    }
-
-    /**
-     * @param Comment $comment
-     * @return array
-     * @throws \LogicException
-     */
-    private function getCommentAttachments(Comment $comment): array
-    {
-        $commentHasAttachments = $comment->getCommentHasAttachments();
-        $attachmentsOfComments = [];
-
-        if (count($commentHasAttachments) > 0) {
-            /** @var CommentHasAttachment $cha */
-            foreach ($commentHasAttachments as $cha) {
-                $file = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
-                    'slug' => $cha->getSlug(),
-                ]);
-                $attachmentsOfComments[] = $file;
-            }
-        }
-
-        return $attachmentsOfComments;
     }
 }

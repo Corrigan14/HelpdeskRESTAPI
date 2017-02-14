@@ -23,22 +23,12 @@ class AttachmentController extends ApiBaseController
     /**
      * ### Response ###
      *      {
-     *        "data":
-     *        {
-     *          "0":
-     *          {
-     *            "id": 2,
-     *            "name": "lamp",
-     *            "slug": "lamp-2016-12-19-02-21",
-     *            "temp_name": "phpJXtI4V",
-     *            "type": "text/plain",
-     *            "size": 35,
-     *            "upload_dir": "ee4ee8b963284e98df96aa0c04b4e9a6",
-     *            "public": false,
-     *            "created_at": "2016-12-19T02:21:50+0100",
-     *            "updated_at": "2016-12-19T02:21:50+0100"
-     *          }
-     *        },
+     *         "data":
+     *         [
+     *            {
+     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *         ],
      *        "_links":
      *        {
      *          "self": "/api/v1/task-bundle/tasks/7/attachment?page=1",
@@ -53,7 +43,7 @@ class AttachmentController extends ApiBaseController
      *      }
      *
      * @ApiDoc(
-     *  description="Returns a list of tasks attachments",
+     *  description="Returns a list of slugs of task attachments",
      *  filters={
      *     {
      *       "name"="page",

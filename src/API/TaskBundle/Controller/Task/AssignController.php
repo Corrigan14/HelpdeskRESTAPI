@@ -945,21 +945,15 @@ class AssignController extends ApiBaseController
             $this->getDoctrine()->getManager()->persist($user);
             $this->getDoctrine()->getManager()->flush();
 
-            if ($task->getProject()) {
-                $projectId = $task->getProject()->getId();
+            // Check if user can update selected task
+            if ($this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+                $canEdit = true;
             } else {
-                $projectId = false;
+                $canEdit = false;
             }
-            $ids = [
-                'id' => $task->getId(),
-                'projectId' => $projectId,
-                'requesterId' => $task->getRequestedBy()->getId(),
-            ];
-            $response = $this->get('task_service')->getTaskResponse($ids);
-            $responseData['data'] = $response['data'][0];
-            $responseLinks['_links'] = $response['_links'];
 
-            return $this->json(array_merge($responseData, $responseLinks), $statusCode);
+            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit);
+            return $this->json($taskArray, $statusCode);
         }
 
         $data = [

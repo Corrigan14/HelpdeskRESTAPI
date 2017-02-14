@@ -188,7 +188,14 @@ class CommentController extends ApiBaseController
      *             "language": "AJ",
      *             "image": null
      *          },
-     *          "comment": null
+     *          "comment": null,
+     *          "commentHasAttachments":
+     *          [
+     *             {
+     *                 "id": 3,
+     *                 "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *          ]
      *        },
      *        "_links":
      *        {
@@ -280,7 +287,14 @@ class CommentController extends ApiBaseController
      *             "language": "AJ",
      *             "image": null
      *          },
-     *          "comment": null
+     *          "comment": null,
+     *          "commentHasAttachments":
+     *          [
+     *             {
+     *                 "id": 3,
+     *                 "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *          ]
      *        },
      *        "_links":
      *        {
@@ -382,7 +396,14 @@ class CommentController extends ApiBaseController
      *             "language": "AJ",
      *             "image": null
      *          },
-     *          "comment": null
+     *          "comment": null,
+     *          "commentHasAttachments":
+     *          [
+     *             {
+     *                 "id": 3,
+     *                 "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *          ]
      *        },
      *        "_links":
      *        {

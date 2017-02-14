@@ -54,18 +54,8 @@ class TaskAdditionalService
         $fileSlugs = $this->em->getRepository('APITaskBundle:TaskHasAttachment')->getAllAttachmentSlugs($taskId, $page);
         $count = $this->em->getRepository('APITaskBundle:TaskHasAttachment')->countAttachmentEntities($taskId);
 
-        $attachmentsArray = [];
-        if (count($fileSlugs) > 0) {
-            foreach ($fileSlugs as $slug) {
-                $file = $this->em->getRepository('APICoreBundle:File')->findOneBy([
-                    'slug' => $slug
-                ]);
-                $attachmentsArray[] = $file;
-            }
-        }
-
         $response = [
-            'data' => $attachmentsArray,
+            'data' => $fileSlugs,
         ];
 
         $pagination = $this->getPagination($page, $count, $routeOptions);
@@ -227,18 +217,8 @@ class TaskAdditionalService
         $fileSlugs = $this->em->getRepository('APITaskBundle:CommentHasAttachment')->getAllAttachmentSlugs($commentId, $page);
         $count = $this->em->getRepository('APITaskBundle:CommentHasAttachment')->countAttachmentEntities($commentId);
 
-        $attachmentsArray = [];
-        if (count($fileSlugs) > 0) {
-            foreach ($fileSlugs as $slug) {
-                $file = $this->em->getRepository('APICoreBundle:File')->findOneBy([
-                    'slug' => $slug
-                ]);
-                $attachmentsArray[] = $file;
-            }
-        }
-
         $response = [
-            'data' => $attachmentsArray,
+            'data' => $fileSlugs,
         ];
 
         $pagination = $this->getPagination($page, $count, $routeOptions);

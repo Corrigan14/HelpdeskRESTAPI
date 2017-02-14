@@ -8,11 +8,11 @@ use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 
 /**
- * Class UserControllerTest
+ * Class UserControllerNewTest
  *
  * @package API\CoreBundle\Tests\Controller
  */
-class UserControllerTest extends ApiTestCase
+class UserControllerNewTest extends ApiTestCase
 {
     const BASE_URL = '/api/v1/core-bundle/users';
 

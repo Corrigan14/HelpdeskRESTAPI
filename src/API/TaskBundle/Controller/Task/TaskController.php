@@ -1877,8 +1877,7 @@ class TaskController extends ApiBaseController
      * @return JsonResponse|Response
      * @throws \LogicException
      */
-    public
-    function deleteAction(int $id)
+    public function deleteAction(int $id)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
 
@@ -2143,8 +2142,7 @@ class TaskController extends ApiBaseController
      *
      * @return JsonResponse|Response
      */
-    public
-    function quickUpdateTaskAction(int $taskId, Request $request)
+    public function quickUpdateTaskAction(int $taskId, Request $request)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
@@ -2529,8 +2527,7 @@ class TaskController extends ApiBaseController
      * @return JsonResponse|Response
      * @throws \LogicException
      */
-    public
-    function getTaskOptionsAction(int $taskId)
+    public function getTaskOptionsAction(int $taskId)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
@@ -2599,8 +2596,7 @@ class TaskController extends ApiBaseController
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    private
-    function updateTaskEntity(Task $task, array $requestData, $create)
+    private function updateTaskEntity(Task $task, array $requestData, $create)
     {
         $allowedUserEntityParams = [
             'title',

@@ -23,48 +23,76 @@ class CommentController extends ApiBaseController
      *     {
      *       "data":
      *       [
-     *           "0":
-     *           {
-     *             "id": 8,
-     *             "title": "Koment - public",
-     *             "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *             "internal": false,
-     *             "email": false,
-     *             "created_by":
-     *             {
-     *                "id": 35,
-     *                "username": "admin",
-     *                "email": "admin@admin.sk",
-     *                "roles": "[\"ROLE_ADMIN\"]",
-     *                "is_active": true,
-     *                "acl": "[]",
-     *                "company": ⊕{...}
-     *             },
-     *             "createdAt": "2016-12-27T15:03:10+0100",
-     *             "updatedAt": "2016-12-27T15:03:10+0100"
-     *          },
-     *          "1":
-     *          {
-     *            "id": 11,
-     *            "title": "Email - public",
+     *         {
+     *            "id": 2,
+     *            "title": "Koment - publik, podkomentar komentu",
      *            "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *            "internal": false,
-     *            "email": true,
-     *            "email_to": "a:1:{i:0;s:15:\"email@email.com\";}",
-     *            "email_cc": "a:2:{i:0;s:15:\"email2@email.sk\";i:1;s:16:\"email3@email.com\";}",
-     *            "created_by":
+     *            "internal": true,
+     *            "email": false,
+     *            "email_to": null,
+     *            "email_cc": null,
+     *            "email_bcc": null,
+     *            "createdAt":
      *            {
-     *                "id": 35,
-     *                "username": "admin",
-     *                "email": "admin@admin.sk",
-     *                "roles": "[\"ROLE_ADMIN\"]",
-     *                "is_active": true,
-     *                "acl": "[]",
-     *                "company": ⊕{...}
+     *               "date": "2017-02-10 15:47:50.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
      *            },
-     *            "createdAt": "2016-12-27T15:03:10+0100",
-     *            "updatedAt": "2016-12-27T15:03:10+0100"
-     *          }
+     *            "updatedAt":
+     *            {
+     *               "date": "2017-02-10 15:47:50.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *            "createdBy":
+     *            {
+     *               "id": 1846,
+     *               "username": "admin",
+     *               "password": "$2y$13$elpnHhCe/zvKZeezL8CkS.5.GgBwXYev/32i1AcTqEH2Vg6WzGHz6",
+     *               "email": "admin@admin.sk",
+     *               "roles": "[\"ROLE_ADMIN\"]",
+     *               "is_active": true,
+     *               "language": "AJ",
+     *               "image": null
+     *             },
+     *             "commentHasAttachments":
+     *             [
+     *                {
+     *                   "id": 2,
+     *                   "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                }
+     *             ],
+     *             "comment":
+     *             {
+     *                "id": 1,
+     *                "title": "Subcoment - public",
+     *                "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *                "internal": false,
+     *                "email": false,
+     *                "email_to": null,
+     *                "email_cc": null,
+     *                "email_bcc": null,
+     *                "createdAt":
+     *                {
+     *                   "date": "2017-02-10 15:47:50.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                },
+     *                "updatedAt":
+     *                {
+     *                   "date": "2017-02-10 15:47:50.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                },
+     *                "commentHasAttachments":
+     *                [
+     *                   {
+     *                      "id": 1,
+     *                      "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                   }
+     *                ]
+     *             }
+     *          },
      *       ],
      *       "_links":
      *       {

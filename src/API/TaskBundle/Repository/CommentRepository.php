@@ -23,13 +23,23 @@ class CommentRepository extends EntityRepository
 
         if ('false' === strtolower($internal)) {
             $query = $this->createQueryBuilder('c')
+                ->select('c,createdby,subcomments,commenthasattachments,subcommentAttachments')
                 ->where('c.task = :taskId')
+                ->leftJoin('c.createdBy', 'createdby')
+                ->leftJoin('c.commentHasAttachments', 'commenthasattachments')
+                ->leftJoin('c.comment', 'subcomments')
+                ->leftJoin('subcomments.commentHasAttachments', 'subcommentAttachments')
                 ->andWhere('c.internal = :internal')
                 ->setParameters(['taskId' => $task, 'internal' => 0])
                 ->getQuery();
         } else {
             $query = $this->createQueryBuilder('c')
+                ->select('c,createdby,subcomments,commenthasattachments,subcommentAttachments')
                 ->where('c.task = :taskId')
+                ->leftJoin('c.createdBy', 'createdby')
+                ->leftJoin('c.commentHasAttachments', 'commenthasattachments')
+                ->leftJoin('c.comment', 'subcomments')
+                ->leftJoin('subcomments.commentHasAttachments', 'subcommentAttachments')
                 ->setParameter('taskId', $task)
                 ->getQuery();
         }
@@ -84,8 +94,8 @@ class CommentRepository extends EntityRepository
             ->select('comment, creator, subcomments, commentHasAttachments, subCommenthasattachments')
             ->leftJoin('comment.createdBy', 'creator')
             ->leftJoin('comment.comment', 'subcomments')
-            ->leftJoin('comment.commentHasAttachments','commentHasAttachments')
-            ->leftJoin('subcomments.commentHasAttachments','subCommenthasattachments')
+            ->leftJoin('comment.commentHasAttachments', 'commentHasAttachments')
+            ->leftJoin('subcomments.commentHasAttachments', 'subCommenthasattachments')
             ->where('comment.id = :id')
             ->setParameter('id', $id);
 

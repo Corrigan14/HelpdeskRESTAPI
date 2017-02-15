@@ -486,10 +486,9 @@ class TaskRepository extends EntityRepository
 
     /**
      * @param int $taskId
-     * @param int $page
      * @return array
      */
-    public function getTasksTags(int $taskId, int $page): array
+    public function getAllTasksTags(int $taskId): array
     {
         $query = $this->createQueryBuilder('t')
             ->select('t,tag')
@@ -497,35 +496,20 @@ class TaskRepository extends EntityRepository
             ->leftJoin('t.tags', 'tag')
             ->setParameter('taskId', $taskId);
 
-        $query->setMaxResults(TaskRepository::LIMIT);
-
-        // Pagination calculating offset
-        if (1 < $page) {
-            $query->setFirstResult(TaskRepository::LIMIT * $page - TaskRepository::LIMIT);
-        }
-
         return $query->getQuery()->getArrayResult();
     }
 
     /**
      * @param int $taskId
-     * @param int $page
      * @return array
      */
-    public function getTasksFollowers(int $taskId, int $page): array
+    public function getAllTaskFollowers(int $taskId): array
     {
         $query = $this->createQueryBuilder('t')
             ->select('t,follower')
             ->where('t.id = :taskId')
             ->leftJoin('t.followers', 'follower')
             ->setParameter('taskId', $taskId);
-
-        $query->setMaxResults(TaskRepository::LIMIT);
-
-        // Pagination calculating offset
-        if (1 < $page) {
-            $query->setFirstResult(TaskRepository::LIMIT * $page - TaskRepository::LIMIT);
-        }
 
         return $query->getQuery()->getArrayResult();
     }

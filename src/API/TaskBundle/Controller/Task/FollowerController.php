@@ -22,38 +22,60 @@ class FollowerController extends ApiBaseController
      * ### Response ###
      *      {
      *         "data":
-     *         {
-     *            "0":
-     *            {
-     *               "id": 11,
-     *               "username": "admin",
-     *               "email": "admin@admin.sk",
-     *               "roles": "[\"ROLE_ADMIN\"]",
-     *               "is_active": true,
-     *               "acl": "[]"
-     *            }
-     *         },
-     *         "_links":
-     *         {
-     *              "self": "/api/v1/task-bundle/tasks/7/follower?page=1",
-     *              "first": "/api/v1/task-bundle/tasks/7/follower?page=1",
-     *              "prev": false,
-     *              "next": false,
-     *              "last": "/api/v1/task-bundle/tasks/7/follower?page=1"
-     *         },
-     *         "total": 1,
-     *         "page": 1,
-     *         "numberOfPages": 1
+     *         [
+     *           {
+     *              "id": 44031,
+     *              "title": "Task 1999",
+     *              "description": "Description of Users Task 1999",
+     *              "deadline": null,
+     *              "startedAt": null,
+     *              "closedAt": null,
+     *              "important": true,
+     *              "work": null,
+     *              "work_time": null,
+     *              "createdAt":
+     *              {
+     *                  "date": "2017-02-10 15:47:48.000000",
+     *                  "timezone_type": 3,
+     *                  "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                  "date": "2017-02-14 11:52:30.000000",
+     *                  "timezone_type": 3,
+     *                  "timezone": "Europe/Berlin"
+     *              },
+     *              "followers":
+     *              [
+     *                 {
+     *                     "id": 1855,
+     *                     "username": "customer5",
+     *                     "password": "$2y$13$P5./aAvPh98PZqOSxHb4ceDeBqxgGVGip.JJvOOXNDLf8T6ei29Wy",
+     *                     "email": "customer@customer5.sk",
+     *                     "roles": "[\"ROLE_USER\"]",
+     *                     "is_active": true,
+     *                     "language": "AJ",
+     *                     "image": null
+     *                 },
+     *                 {
+     *                     "id": 1856,
+     *                     "username": "customer6",
+     *                     "password": "$2y$13$2glfkRbwTj4BLtgwEn/ireOzhoZwMJIliPq4Frge0E5SRn/.RMcja",
+     *                     "email": "customer@customer6.sk",
+     *                     "roles": "[\"ROLE_USER\"]",
+     *                     "is_active": true,
+     *                     "language": "AJ",
+     *                     "image": null
+     *                 }
+     *              ]
+     *           }
+     *        ],
+     *        "_links": [],
+     *        "total": 2
      *      }
      *
      * @ApiDoc(
-     *  description="Returns array of tasks followers",
-     *  filters={
-     *     {
-     *       "name"="page",
-     *       "description"="Pagination, limit is set to 10 records"
-     *     }
-     *  },
+     *  description="Returns array of tasks followers.",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -77,12 +99,11 @@ class FollowerController extends ApiBaseController
      *  }
      * )
      *
-     * @param Request $request
      * @param int $taskId
      * @return Response
      * @throws \LogicException
      */
-    public function listOfTasksFollowersAction(Request $request, int $taskId)
+    public function listOfTasksFollowersAction(int $taskId)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
@@ -96,7 +117,7 @@ class FollowerController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
-        $page = $request->get('page') ?: 1;
+        $page = 1;
 
         $options['task'] = $task;
         $routeOptions = [
@@ -105,36 +126,212 @@ class FollowerController extends ApiBaseController
         ];
 
         $followersArray = $this->get('task_additional_service')->getTaskFollowerResponse($options, $page, $routeOptions);
-        return $this->createApiResponse($followersArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($followersArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
-     *         "0":
-     *         {
-     *            "id": 85,
-     *            "username": "admin",
-     *            "email": "admin@admin.sk",
-     *            "roles": "[\"ROLE_ADMIN\"]",
-     *            "is_active": true,
-     *            "acl": "[]",
-     *            "company": ⊕{...}
-     *         },
-     *         "1":
-     *         {
-     *            "id": 87,
-     *            "username": "testuser2",
-     *            "email": "testuser2@user.sk",
-     *            "roles": "[\"ROLE_USER\"]",
-     *            "is_active": true,
-     *            "acl": "[]",
-     *            "company": ⊕{...}
-     *         }
-     *      }
+     *        "data":
+     *        {
+     *           "id": 2991,
+     *           "title": "test 258",
+     *           "description": "Description of Task 1",
+     *           "deadline": null,
+     *           "startedAt": null,
+     *           "closedAt": null,
+     *           "important": false,
+     *           "createdAt":
+     *           {
+     *               "date": "2017-01-26 12:21:59.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *           },
+     *           "updatedAt":
+     *           {
+     *               "date": "2017-01-26 14:34:48.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *           "taskData": [],
+     *           "project":
+     *           {
+     *              "id": 6,
+     *              "title": "Project of user 1",
+     *              "description": "Description of project 1.",
+     *              "is_active": false,
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-01-26 12:21:59.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                  "date": "2017-01-26 12:21:59.000000",
+     *                  "timezone_type": 3,
+     *                  "timezone": "Europe/Berlin"
+     *               }
+     *           },
+     *           "createdBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null,
+     *              "company":
+     *              {
+     *                 "id": 4,
+     *                 "title": "LanSystems",
+     *                 "ico": "110258782",
+     *                 "dic": "12587458996244",
+     *                 "ic_dph": null,
+     *                 "street": "Ina cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true
+     *              }
+     *           },
+     *           "requestedBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null
+     *           },
+     *           "taskHasAssignedUsers":
+     *           [
+     *              {
+     *                  "id": 2,
+     *                  "status_date": null,
+     *                  "time_spent": null,
+     *                  "createdAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "status":
+     *                  {
+     *                     "id": 7,
+     *                     "title": "Completed",
+     *                     "description": "Completed task",
+     *                     "color": "#FF4500",
+     *                     "is_active": true
+     *                  },
+     *                  "user":
+     *                  {
+     *                     "id": 109,
+     *                     "username": "user",
+     *                     "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *                     "email": "user@user.sk",
+     *                     "roles": "[\"ROLE_USER\"]",
+     *                     "is_active": true,
+     *                     "language": "AJ",
+     *                     "image": null
+     *                  }
+     *              }
+     *           ],
+     *           "tags":
+     *           [
+     *             {
+     *                "id": 5,
+     *                "title": "tag1",
+     *                "color": "FFFF66",
+     *                "public": false
+     *             },
+     *             {
+     *               "id": 6,
+     *               "title": "tag2",
+     *               "color": "FFFF66",
+     *               "public": false
+     *             }
+     *           ],
+     *           "company":
+     *           {
+     *              "id": 317,
+     *              "title": "Web-Solutions",
+     *              "ico": "1102587",
+     *              "dic": "12587459644",
+     *              "ic_dph": null,
+     *              "street": "Cesta 125",
+     *              "city": "Bratislava",
+     *              "zip": "021478",
+     *              "country": "Slovenska Republika",
+     *              "is_active": true
+     *           },
+     *           "taskHasAttachments":
+     *           [
+     *             {
+     *                "id": 1,
+     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *           ],
+     *           "invoiceableItems":
+     *           [
+     *              {
+     *                 "id": 4,
+     *                 "title": "Keyboard",
+     *                 "amount": "2.00",
+     *                 "unit_price": "50.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *              },
+     *              {
+     *                 "id": 5,
+     *                 "title": "Mouse",
+     *                 "amount": "5.00",
+     *                 "unit_price": "10.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *               },
+     *            ],
+     *            "canEdit": true,
+     *            "follow": false
+     *        },
+     *       "_links":
+     *       {
+     *         "put: task": "/api/v1/task-bundle/tasks/11970",
+     *         "patch: task": "/api/v1/task-bundle/tasks/11970",
+     *         "delete": "/api/v1/task-bundle/tasks/11970",
+     *         "put: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "patch: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "put: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "patch: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "put: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313",
+     *         "patch: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313"
+     *       }
+     *    }
      *
      * @ApiDoc(
-     *  description="Add a new follower to the Task. Returns a list of tasks followers",
+     *  description="Add a new follower to the Task. Returns a task.",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -204,38 +401,220 @@ class FollowerController extends ApiBaseController
             $this->getDoctrine()->getManager()->flush();
         }
 
-        $listOfTaskFollowers = $task->getFollowers();
-        return $this->createApiResponse([],StatusCodesHelper::SUCCESSFUL_CODE);
+        // Check if user can update selected task
+        if ($this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+            $canEdit = true;
+        } else {
+            $canEdit = false;
+        }
 
+        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser()->getId());
+        return $this->json($taskArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
+     *      {
+     *        "data":
+     *        {
+     *           "id": 2991,
+     *           "title": "test 258",
+     *           "description": "Description of Task 1",
+     *           "deadline": null,
+     *           "startedAt": null,
+     *           "closedAt": null,
+     *           "important": false,
+     *           "createdAt":
+     *           {
+     *               "date": "2017-01-26 12:21:59.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *           },
+     *           "updatedAt":
+     *           {
+     *               "date": "2017-01-26 14:34:48.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *           "taskData": [],
+     *           "project":
+     *           {
+     *              "id": 6,
+     *              "title": "Project of user 1",
+     *              "description": "Description of project 1.",
+     *              "is_active": false,
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-01-26 12:21:59.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                  "date": "2017-01-26 12:21:59.000000",
+     *                  "timezone_type": 3,
+     *                  "timezone": "Europe/Berlin"
+     *               }
+     *           },
+     *           "createdBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null,
+     *              "company":
+     *              {
+     *                 "id": 4,
+     *                 "title": "LanSystems",
+     *                 "ico": "110258782",
+     *                 "dic": "12587458996244",
+     *                 "ic_dph": null,
+     *                 "street": "Ina cesta 125",
+     *                 "city": "Bratislava",
+     *                 "zip": "021478",
+     *                 "country": "Slovenska Republika",
+     *                 "is_active": true
+     *              }
+     *           },
+     *           "requestedBy":
+     *           {
+     *              "id": 109,
+     *              "username": "user",
+     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *              "email": "user@user.sk",
+     *              "roles": "[\"ROLE_USER\"]",
+     *              "is_active": true,
+     *              "language": "AJ",
+     *              "image": null,
+     *              "detailData": null
+     *           },
+     *           "taskHasAssignedUsers":
+     *           [
+     *              {
+     *                  "id": 2,
+     *                  "status_date": null,
+     *                  "time_spent": null,
+     *                  "createdAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "status":
+     *                  {
+     *                     "id": 7,
+     *                     "title": "Completed",
+     *                     "description": "Completed task",
+     *                     "color": "#FF4500",
+     *                     "is_active": true
+     *                  },
+     *                  "user":
+     *                  {
+     *                     "id": 109,
+     *                     "username": "user",
+     *                     "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
+     *                     "email": "user@user.sk",
+     *                     "roles": "[\"ROLE_USER\"]",
+     *                     "is_active": true,
+     *                     "language": "AJ",
+     *                     "image": null
+     *                  }
+     *              }
+     *           ],
+     *           "tags":
+     *           [
+     *             {
+     *                "id": 5,
+     *                "title": "tag1",
+     *                "color": "FFFF66",
+     *                "public": false
+     *             },
+     *             {
+     *               "id": 6,
+     *               "title": "tag2",
+     *               "color": "FFFF66",
+     *               "public": false
+     *             }
+     *           ],
+     *           "company":
+     *           {
+     *              "id": 317,
+     *              "title": "Web-Solutions",
+     *              "ico": "1102587",
+     *              "dic": "12587459644",
+     *              "ic_dph": null,
+     *              "street": "Cesta 125",
+     *              "city": "Bratislava",
+     *              "zip": "021478",
+     *              "country": "Slovenska Republika",
+     *              "is_active": true
+     *           },
+     *           "taskHasAttachments":
+     *           [
+     *             {
+     *                "id": 1,
+     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *             }
+     *           ],
+     *           "invoiceableItems":
+     *           [
+     *              {
+     *                 "id": 4,
+     *                 "title": "Keyboard",
+     *                 "amount": "2.00",
+     *                 "unit_price": "50.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *              },
+     *              {
+     *                 "id": 5,
+     *                 "title": "Mouse",
+     *                 "amount": "5.00",
+     *                 "unit_price": "10.00",
+     *                 "unit":
+     *                 {
+     *                    "id": 22,
+     *                    "title": "Kus",
+     *                    "shortcut": "Ks",
+     *                    "is_active": true
+     *                  }
+     *               },
+     *            ],
+     *            "canEdit": true,
+     *            "follow": false
+     *        },
+     *       "_links":
      *       {
-     *         "0":
-     *         {
-     *            "id": 85,
-     *            "username": "admin",
-     *            "email": "admin@admin.sk",
-     *            "roles": "[\"ROLE_ADMIN\"]",
-     *            "is_active": true,
-     *            "acl": "[]",
-     *            "company": ⊕{...}
-     *         },
-     *         "1":
-     *         {
-     *            "id": 87,
-     *            "username": "testuser2",
-     *            "email": "testuser2@user.sk",
-     *            "roles": "[\"ROLE_USER\"]",
-     *            "is_active": true,
-     *            "acl": "[]",
-     *            "company": ⊕{...}
-     *         }
-     *      }
+     *         "put: task": "/api/v1/task-bundle/tasks/11970",
+     *         "patch: task": "/api/v1/task-bundle/tasks/11970",
+     *         "delete": "/api/v1/task-bundle/tasks/11970",
+     *         "put: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "patch: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
+     *         "put: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "patch: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
+     *         "put: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313",
+     *         "patch: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313"
+     *       }
+     *    }
      *
      * @ApiDoc(
-     *  description="Remove the follower from the Task. Returns array of tasks followers",
+     *  description="Remove the follower from the Task. Returns Task Entity.",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -304,8 +683,15 @@ class FollowerController extends ApiBaseController
             $this->getDoctrine()->getManager()->persist($user);
             $this->getDoctrine()->getManager()->flush();
 
-            $listOfTaskFollowers = $task->getFollowers();
-            return $this->createApiResponse($listOfTaskFollowers, StatusCodesHelper::SUCCESSFUL_CODE);
+            // Check if user can update selected task
+            if ($this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+                $canEdit = true;
+            } else {
+                $canEdit = false;
+            }
+
+            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser()->getId());
+            return $this->json($taskArray, StatusCodesHelper::SUCCESSFUL_CODE);
         }
 
         return $this->notFoundResponse();

@@ -85,9 +85,10 @@ class TaskService
     /**
      * @param Task $task
      * @param bool $canEdit
+     * @param int $loggedUserId
      * @return array
      */
-    public function getFullTaskEntity(Task $task, bool $canEdit):array
+    public function getFullTaskEntity(Task $task, bool $canEdit, int $loggedUserId):array
     {
         $responseData = [];
         $responseLinks = [];
@@ -96,6 +97,20 @@ class TaskService
             $projectId = $task->getProject()->getId();
         } else {
             $projectId = false;
+        }
+
+        $followers = $task->getFollowers();
+        $followTask = false;
+        if (count($followers) > 0) {
+            $followersId = [];
+            foreach ($followers as $follower) {
+                $followersId[] = $follower->getId();
+            }
+            if (in_array($loggedUserId, $followersId)) {
+                $followTask = true;
+            } else {
+                $followTask = false;
+            }
         }
 
         $ids = [
@@ -107,6 +122,7 @@ class TaskService
         $response = $this->getTaskResponse($ids);
         $responseData['data'] = $response['data'][0];
         $responseData['data']['canEdit'] = $canEdit;
+        $responseData['data']['follow'] = $followTask;
         $responseLinks['_links'] = $response['_links'];
 
         return array_merge($responseData, $responseLinks);

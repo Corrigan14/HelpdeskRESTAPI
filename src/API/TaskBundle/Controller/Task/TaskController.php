@@ -847,7 +847,8 @@ class TaskController extends ApiBaseController
      *                  }
      *               },
      *            ],
-     *            "canEdit": true
+     *            "canEdit": true,
+     *            "follow": false
      *        },
      *       "_links":
      *       {
@@ -864,7 +865,7 @@ class TaskController extends ApiBaseController
      *    }
      *
      * @ApiDoc(
-     *  description="Returns full Task Entity including extended about Task Data",
+     *  description="Returns full Task Entity including extended Task Data",
      *  requirements={
      *     {
      *       "name"="id",
@@ -913,12 +914,12 @@ class TaskController extends ApiBaseController
             $canEdit = false;
         }
 
-        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit);
+        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser()->getId());
         return $this->json($taskArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
      *        "data":
      *        {
@@ -1101,7 +1102,8 @@ class TaskController extends ApiBaseController
      *                  }
      *               },
      *            ],
-     *            "canEdit": true
+     *            "canEdit": true,
+     *            "follow": false
      *        },
      *       "_links":
      *       {
@@ -1241,7 +1243,7 @@ class TaskController extends ApiBaseController
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
      *        "data":
      *        {
@@ -1424,7 +1426,8 @@ class TaskController extends ApiBaseController
      *                  }
      *               },
      *            ],
-     *            "canEdit": true
+     *            "canEdit": true,
+     *            "follow": false
      *        },
      *       "_links":
      *       {
@@ -1545,8 +1548,8 @@ class TaskController extends ApiBaseController
     }
 
     /**
-     * ### Response ###
-     *       *      {
+     *  ### Response ###
+     *      {
      *        "data":
      *        {
      *           "id": 2991,
@@ -1728,7 +1731,8 @@ class TaskController extends ApiBaseController
      *                  }
      *               },
      *            ],
-     *            "canEdit": true
+     *            "canEdit": true,
+     *            "follow": false
      *        },
      *       "_links":
      *       {
@@ -2719,7 +2723,7 @@ class TaskController extends ApiBaseController
                 $canEdit = false;
             }
 
-            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit);
+            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser()->getId());
             return $this->json($taskArray, $statusCode);
         }
 

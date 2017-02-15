@@ -74,19 +74,17 @@ class TaskAdditionalService
         /** @var Task $task */
         $task = $options['task'];
         $taskTags = $task->getTags();
-        $taskTagsArray = $this->em->getRepository('APITaskBundle:Task')->getTasksTags($task->getId(), $page);
+        $taskTagsArray = $this->em->getRepository('APITaskBundle:Task')->getAllTasksTags($task->getId());
         $count = count($taskTags);
 
         $response = [
-            'data' => []
+            'data' => $taskTagsArray
         ];
-        if (count($taskTagsArray) > 0) {
-            $response = [
-                'data' => $taskTagsArray[0]['tags'],
-            ];
-        }
 
-        $pagination = $this->getPagination($page, $count, $routeOptions);
+        $pagination = [
+            '_links' => [],
+            'total' => $count
+        ];
 
         return array_merge($response, $pagination);
     }
@@ -102,25 +100,17 @@ class TaskAdditionalService
         /** @var Task $task */
         $task = $options['task'];
         $taskFollowers = $task->getFollowers();
-        $taskFollowersArray = $this->em->getRepository('APITaskBundle:Task')->getTasksFollowers($task->getId(), $page);
+        $taskFollowersArray = $this->em->getRepository('APITaskBundle:Task')->getAllTaskFollowers($task->getId());
         $count = count($taskFollowers);
 
         $response = [
-            'data' => []
+            'data' => $taskFollowersArray
         ];
 
-        if (count($taskFollowersArray) > 0) {
-            $data = [];
-            foreach ($taskFollowersArray[0]['followers'] as $item) {
-                unset($item['password']);
-                $data[] = $item;
-            }
-            $response = [
-                'data' => $data,
-            ];
-        }
-
-        $pagination = $this->getPagination($page, $count, $routeOptions);
+        $pagination = [
+            '_links' => [],
+            'total' => $count
+        ];
 
         return array_merge($response, $pagination);
     }

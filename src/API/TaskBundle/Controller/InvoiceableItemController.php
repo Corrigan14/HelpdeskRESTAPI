@@ -390,7 +390,8 @@ class InvoiceableItemController extends ApiBaseController
      *                  }
      *               },
      *            ],
-     *            "canEdit": true
+     *            "canEdit": true,
+     *            "follow": false
      *        },
      *       "_links":
      *       {
@@ -660,7 +661,8 @@ class InvoiceableItemController extends ApiBaseController
      *                  }
      *               },
      *            ],
-     *            "canEdit": true
+     *            "canEdit": true,
+     *            "follow": false
      *        },
      *       "_links":
      *       {
@@ -936,7 +938,8 @@ class InvoiceableItemController extends ApiBaseController
      *                  }
      *               },
      *            ],
-     *            "canEdit": true
+     *            "canEdit": true,
+     *            "follow": false
      *        },
      *       "_links":
      *       {
@@ -1143,7 +1146,7 @@ class InvoiceableItemController extends ApiBaseController
                 $canEdit = false;
             }
 
-            $fullTaskEntity = $this->get('task_service')->getFullTaskEntity($task, $canEdit);
+            $fullTaskEntity = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser()->getId());
             return $this->json($fullTaskEntity, $statusCode);
         }
 

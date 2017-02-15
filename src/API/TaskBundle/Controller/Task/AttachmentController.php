@@ -108,7 +108,7 @@ class AttachmentController extends ApiBaseController
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
      *        "data":
      *        {
@@ -291,7 +291,8 @@ class AttachmentController extends ApiBaseController
      *                  }
      *               },
      *            ],
-     *            "canEdit": true
+     *            "canEdit": true,
+     *            "follow": false
      *        },
      *       "_links":
      *       {
@@ -385,12 +386,12 @@ class AttachmentController extends ApiBaseController
             $canEdit = false;
         }
 
-        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit);
+        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser()->getId());
         return $this->json($taskArray, StatusCodesHelper::CREATED_CODE);
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
      *        "data":
      *        {
@@ -573,7 +574,8 @@ class AttachmentController extends ApiBaseController
      *                  }
      *               },
      *            ],
-     *            "canEdit": true
+     *            "canEdit": true,
+     *            "follow": false
      *        },
      *       "_links":
      *       {
@@ -671,7 +673,7 @@ class AttachmentController extends ApiBaseController
             $canEdit = false;
         }
 
-        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit);
+        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser()->getId());
         return $this->json($taskArray, StatusCodesHelper::DELETED_CODE);
     }
 

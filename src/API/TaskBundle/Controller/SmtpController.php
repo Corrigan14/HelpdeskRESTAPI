@@ -2,11 +2,14 @@
 
 namespace API\TaskBundle\Controller;
 
+use API\TaskBundle\Security\UserRoleAclOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
+use Igsem\APIBundle\Services\StatusCodesHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class SmtpController
@@ -20,32 +23,24 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      *     {
      *       "data":
      *       [
-     *          {
-     *            "id": "1",
+     *         {
+     *            "id": 1,
+     *            "host": "Host",
+     *            "port": 3306,
+     *            "email": "mb@web-solutions.sk",
+     *            "name": "test",
+     *            "password": "test",
+     *            "ssl": true,
+     *            "tls": false
      *          }
-     *       ],
-     *       "_links":
-     *       {
-     *           "self": "/entity?page=1",
-     *           "first": "/entity?page=1",
-     *           "prev": false,
-     *           "next": "/entity?page=2",
-     *            "last": "/entity?page=3"
-     *       },
-     *       "total": 22,
-     *       "page": 1,
-     *       "numberOfPages": 3
+     *        ],
+     *        "_links": [],
+     *        "total": 1
      *     }
      *
      *
      * @ApiDoc(
      *  description="Returns a list of SMTP Entities",
-     *  filters={
-     *     {
-     *       "name"="page",
-     *       "description"="Pagination, limit is set to 10 records"
-     *     }
-     *  },
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -61,11 +56,25 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
-     * @return JsonResponse
+     * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function listAction(Request $request)
     {
-        // TODO: Implement listAction() method.
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::SMTP_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $smtpArray = $this->get('smtp_service')->getAttributesResponse();
+        return $this->json($smtpArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -110,7 +119,7 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param int $id
-     * @return JsonResponse
+     * @return Response
      */
     public function getAction(int $id)
     {
@@ -153,7 +162,7 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
-     * @return JsonResponse
+     * @return Response
      */
     public function createAction(Request $request)
     {
@@ -205,7 +214,7 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @param Request $request
-     * @return JsonResponse
+     * @return Response
      */
     public function updateAction(int $id, Request $request)
     {
@@ -257,7 +266,7 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @param Request $request
-     * @return JsonResponse
+     * @return Response
      */
     public function updatePartialAction(int $id, Request $request)
     {
@@ -291,7 +300,7 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      *
-     * @return JsonResponse
+     * @return Response
      */
     public function deleteAction(int $id)
     {

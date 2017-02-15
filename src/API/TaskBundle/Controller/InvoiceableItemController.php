@@ -95,6 +95,7 @@ class InvoiceableItemController extends ApiBaseController
      *
      * @param int $taskId
      * @return Response
+     * @throws \LogicException
      * @internal param Request $request
      */
     public function listAction(int $taskId)

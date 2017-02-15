@@ -5,7 +5,6 @@ namespace API\TaskBundle\Tests\Controller;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\UserHasProject;
 use API\TaskBundle\Security\ProjectAclOptions;
-use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 

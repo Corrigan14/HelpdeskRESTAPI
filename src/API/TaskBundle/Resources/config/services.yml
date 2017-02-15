@@ -49,3 +49,6 @@ services:
     invoiceable_item_service:
             class: API\TaskBundle\Services\InvoiceableItemService
             arguments: ["@doctrine.orm.entity_manager", "@router"]
+    smtp_service:
+            class: API\TaskBundle\Services\SmtpService
+            arguments: ["@doctrine.orm.entity_manager", "@router"]

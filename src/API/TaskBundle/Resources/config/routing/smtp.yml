@@ -1,0 +1,37 @@
+smtp_list:
+    path:     /smtp
+    defaults: { _controller: APITaskBundle:Smtp:list }
+    methods: [GET]
+
+smtp:
+    path:     /smtp/{id}
+    defaults: { _controller: APITaskBundle:Smtp:get }
+    methods: [GET]
+    requirements:
+        id: '\d+'
+
+smtp_create:
+    path:     /smtp
+    defaults: { _controller: APITaskBundle:Smtp:create }
+    methods: [POST]
+
+smtp_update:
+    path:     /smtp/{id}
+    defaults: { _controller: APITaskBundle:Smtp:update }
+    methods: [PUT]
+    requirements:
+            id: '\d+'
+
+smtp_partial_update:
+    path:     /smtp/{id}
+    defaults: { _controller: APITaskBundle:Smtp:updatePartial }
+    methods: [PATCH]
+    requirements:
+            id: '\d+'
+
+smtp_delete:
+    path:     /smtp/{id}
+    defaults: { _controller: APITaskBundle:Smtp:delete }
+    methods: [DELETE]
+    requirements:
+            id: '\d+'

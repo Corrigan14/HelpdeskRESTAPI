@@ -4,7 +4,6 @@ namespace API\TaskBundle\Repository;
 
 use API\TaskBundle\Services\VariableHelper;
 use Doctrine\ORM\EntityRepository;
-use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
  * TaskRepository

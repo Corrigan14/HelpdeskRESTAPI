@@ -41,6 +41,12 @@ class SmtpRepository extends EntityRepository
      */
     public function getEntity(int $id): array
     {
+        $query = $this->createQueryBuilder('smtp')
+            ->select()
+            ->where('smtp.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery();
 
+        return $query->getArrayResult();
     }
 }

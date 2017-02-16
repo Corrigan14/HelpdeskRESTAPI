@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Controller;
 
+use API\TaskBundle\Entity\Smtp;
 use API\TaskBundle\Security\UserRoleAclOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
@@ -80,16 +81,23 @@ class SmtpController extends ApiBaseController implements ControllerInterface
     /**
      *  ### Response ###
      *      {
-     *        "data":
-     *        {
-     *           "id": "2",
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/entityName/id",
-     *           "patch": "/api/v1/entityName/id",
-     *           "delete": "/api/v1/entityName/id"
-     *         }
+     *          "data":
+     *          {
+     *             "id": 1,
+     *             "host": "Host",
+     *             "port": 3306,
+     *             "email": "mb@web-solutions.sk",
+     *             "name": "test",
+     *             "password": "test",
+     *             "ssl": true,
+     *             "tls": false
+     *          },
+     *          "_links":
+     *          {
+     *             "put": "/api/v1/task-bundle/smtp/1",
+     *             "patch": "/api/v1/task-bundle/smtp/1",
+     *             "delete": "/api/v1/task-bundle/smtp/1"
+     *          }
      *      }
      *
      * @ApiDoc(
@@ -120,25 +128,50 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @return Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function getAction(int $id)
     {
-        // TODO: Implement getAction() method.
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::SMTP_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $smtpEntity = $this->getDoctrine()->getRepository('APITaskBundle:Smtp')->find($id);
+
+        if (!$smtpEntity instanceof Smtp) {
+            return $this->notFoundResponse();
+        }
+
+        $smtpArray = $this->get('smtp_service')->getAttributeResponse($id);
+        return $this->json($smtpArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
-     *        "data":
-     *        {
-     *           "id": "2",
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
-     *         }
+     *          "data":
+     *          {
+     *             "id": 1,
+     *             "host": "Host",
+     *             "port": 3306,
+     *             "email": "mb@web-solutions.sk",
+     *             "name": "test",
+     *             "password": "test",
+     *             "ssl": true,
+     *             "tls": false
+     *          },
+     *          "_links":
+     *          {
+     *             "put": "/api/v1/task-bundle/smtp/1",
+     *             "patch": "/api/v1/task-bundle/smtp/1",
+     *             "delete": "/api/v1/task-bundle/smtp/1"
+     *          }
      *      }
      *
      * @ApiDoc(
@@ -172,6 +205,9 @@ class SmtpController extends ApiBaseController implements ControllerInterface
     /**
      * ### Response ###
      *      {
+     *          "data":
+     *          {### Response ###
+     *      {
      *        "data":
      *        {
      *           "id": "2",
@@ -182,6 +218,22 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      *           "patch": "/api/v1/entityName/2",
      *           "delete": "/api/v1/entityName/2"
      *         }
+     *      }
+     *             "id": 1,
+     *             "host": "Host",
+     *             "port": 3306,
+     *             "email": "mb@web-solutions.sk",
+     *             "name": "test",
+     *             "password": "test",
+     *             "ssl": true,
+     *             "tls": false
+     *          },
+     *          "_links":
+     *          {
+     *             "put": "/api/v1/task-bundle/smtp/1",
+     *             "patch": "/api/v1/task-bundle/smtp/1",
+     *             "delete": "/api/v1/task-bundle/smtp/1"
+     *          }
      *      }
      *
      * @ApiDoc(
@@ -222,18 +274,25 @@ class SmtpController extends ApiBaseController implements ControllerInterface
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
-     *        "data":
-     *        {
-     *           "id": "2",
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
-     *         }
+     *          "data":
+     *          {
+     *             "id": 1,
+     *             "host": "Host",
+     *             "port": 3306,
+     *             "email": "mb@web-solutions.sk",
+     *             "name": "test",
+     *             "password": "test",
+     *             "ssl": true,
+     *             "tls": false
+     *          },
+     *          "_links":
+     *          {
+     *             "put": "/api/v1/task-bundle/smtp/1",
+     *             "patch": "/api/v1/task-bundle/smtp/1",
+     *             "delete": "/api/v1/task-bundle/smtp/1"
+     *          }
      *      }
      *
      * @ApiDoc(

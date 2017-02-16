@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Tests\Controller;
 
 use API\TaskBundle\Entity\Smtp;
+use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 
 /**
@@ -13,6 +14,21 @@ use Igsem\APIBundle\Tests\Controller\ApiTestCase;
 class SmtpControllerTest extends ApiTestCase
 {
     const BASE_URL = '/api/v1/task-bundle/smtp';
+
+    /**
+     * GET SINGLE - errors
+     */
+    public function testGetSingleErrors()
+    {
+        parent::testGetSingleErrors();
+
+        $entity = $this->findOneEntity();
+
+        // Try to load entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/' . $entity->getId(), [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
 
     /**
      * Get the url for requests

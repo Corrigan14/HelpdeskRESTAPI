@@ -2145,6 +2145,8 @@ class TaskController extends ApiBaseController
      * @param Request $request
      *
      * @return JsonResponse|Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function quickUpdateTaskAction(int $taskId, Request $request)
     {

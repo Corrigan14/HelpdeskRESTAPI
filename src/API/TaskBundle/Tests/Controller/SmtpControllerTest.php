@@ -31,6 +31,58 @@ class SmtpControllerTest extends ApiTestCase
     }
 
     /**
+     *  POST SINGLE - errors
+     */
+    public function testPostSingleErrors()
+    {
+        parent::testPostSingleErrors();
+
+        $data = $this->returnPostTestData();
+        $errorData = $this->returnErrorPostTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        // Try to create entity with ROLE_USER which hasn't permission to this action
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), $data, [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to create entity with invalid parameter Email
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), $errorData, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
+     *  UPDATE SINGLE - errors
+     */
+    public function testUpdateSingleErrors()
+    {
+        parent::testUpdateSingleErrors();
+
+        $data = $this->returnUpdateTestData();
+        $errorData = $this->returnErrorPostTestData();
+
+        // We need to make sure that the post data doesn't exist in the DB, we expect the remove entity to delete the
+        // entity corresponding to the post data
+        $this->removeTestEntity();
+
+        $entity = $this->findOneEntity();
+
+        // Try to update entity with ROLE_USER which hasn't permission to this action: method PUT
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(), $data, [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to create entity with invalid parameter Email: method PUT
+        $this->getClient(true)->request('PUT', $this->getBaseUrl() . '/' . $entity->getId(), $errorData, [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::INVALID_PARAMETERS_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
      * Get the url for requests
      *
      * @return string
@@ -100,6 +152,25 @@ class SmtpControllerTest extends ApiTestCase
             'host' => 'Host TEST',
             'port' => '3306',
             'email' => 'vb@verts.sk',
+            'name' => 'TestName',
+            'password' => 'TestPassword',
+            'ssl' => true,
+            'tls' => false
+        ];
+    }
+
+
+    /**
+     * Return Post data
+     *
+     * @return array
+     */
+    public function returnErrorPostTestData()
+    {
+        return [
+            'host' => 'Host TEST',
+            'port' => '3306',
+            'email' => 'vbverts.sk',
             'name' => 'TestName',
             'password' => 'TestPassword',
             'ssl' => true,

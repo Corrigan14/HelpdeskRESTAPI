@@ -201,16 +201,8 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
         $this->getClient(true)->request('PUT' , $this->getBaseUrl() . '/' . $entity->getId() , $data);
         $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE , $this->getClient()->getResponse()->getStatusCode());
 
-        // Try to update test Entity without authorization header: method PATCH
-        $this->getClient(true)->request('PATCH' , $this->getBaseUrl() . '/' . $entity->getId() , $data);
-        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE , $this->getClient()->getResponse()->getStatusCode());
-
         // Try to update test Entity with not existed ID: method PUT (as admin)
         $this->getClient(true)->request('PUT' , $this->getBaseUrl() . '/1125874' , [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE , $this->getClient()->getResponse()->getStatusCode());
-
-        // Try to update test Entity with not existed ID: method PATCH (as admin)
-        $this->getClient(true)->request('PATCH' , $this->getBaseUrl() . '/1125874' , [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::NOT_FOUND_CODE , $this->getClient()->getResponse()->getStatusCode());
     }
 

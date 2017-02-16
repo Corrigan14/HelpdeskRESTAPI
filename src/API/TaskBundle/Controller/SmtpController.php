@@ -196,10 +196,26 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function createAction(Request $request)
     {
-        // TODO: Implement createAction() method.
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::SMTP_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $smtp = new Smtp();
+        $requestData = $request->request->all();
+
+        return $this->updateSmtpEntity($smtp, $requestData, true);
     }
 
     /**
@@ -267,10 +283,30 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
      */
     public function updateAction(int $id, Request $request)
     {
-        // TODO: Implement updateAction() method.
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::SMTP_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $smtp = $this->getDoctrine()->getRepository('APITaskBundle:Smtp')->find($id);
+        if (!$smtp instanceof Smtp) {
+            return $this->notFoundResponse();
+        }
+
+        $requestData = $request->request->all();
+
+        return $this->updateSmtpEntity($smtp, $requestData, false);
     }
 
     /**
@@ -326,10 +362,29 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
     public function updatePartialAction(int $id, Request $request)
     {
-        // TODO: Implement updatePartialAction() method.
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::SMTP_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $smtp = $this->getDoctrine()->getRepository('APITaskBundle:Smtp')->find($id);
+        if (!$smtp instanceof Smtp) {
+            return $this->notFoundResponse();
+        }
+
+        $requestData = json_decode($request->getContent(), true);
+        return $this->updateSmtpEntity($smtp, $requestData, false);
     }
 
     /**
@@ -364,5 +419,59 @@ class SmtpController extends ApiBaseController implements ControllerInterface
     public function deleteAction(int $id)
     {
         // TODO: Implement deleteAction() method.
+    }
+
+    /**
+     * @param Smtp $smtp
+     * @param array $requestData
+     * @param bool $create
+     * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     */
+    private function updateSmtpEntity(Smtp $smtp, array $requestData, $create = false)
+    {
+        $allowedEntityParams = [
+            'host',
+            'port',
+            'email',
+            'name',
+            'password',
+            'ssl',
+            'tls'
+        ];
+
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
+        }
+
+        foreach ($requestData as $key => $value) {
+            if (!in_array($key, $allowedEntityParams, true)) {
+                return $this->createApiResponse(
+                    ['message' => $key . ' is not allowed parameter for Tag Entity!'],
+                    StatusCodesHelper::INVALID_PARAMETERS_CODE
+                );
+            }
+        }
+
+        $statusCode = $this->getCreateUpdateStatusCode($create);
+
+        $errors = $this->get('entity_processor')->processEntity($smtp, $requestData);
+
+        if (false === $errors) {
+            $this->getDoctrine()->getManager()->persist($smtp);
+            $this->getDoctrine()->getManager()->flush();
+
+            $tagArray = $this->get('smtp_service')->getAttributeResponse($smtp->getId());
+            return $this->json($tagArray, $statusCode);
+        }
+
+        $data = [
+            'errors' => $errors,
+            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+        ];
+        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

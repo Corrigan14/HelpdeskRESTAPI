@@ -415,10 +415,31 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      * @param int $id
      *
      * @return Response
+     * @throws \LogicException
      */
     public function deleteAction(int $id)
     {
-        // TODO: Implement deleteAction() method.
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::SMTP_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $smtp = $this->getDoctrine()->getRepository('APITaskBundle:Smtp')->find($id);
+
+        if (!$smtp instanceof Smtp) {
+            return $this->notFoundResponse();
+        }
+
+        $this->getDoctrine()->getManager()->remove($smtp);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->createApiResponse([
+            'message' => StatusCodesHelper::DELETED_MESSAGE,
+        ], StatusCodesHelper::DELETED_CODE);
     }
 
     /**

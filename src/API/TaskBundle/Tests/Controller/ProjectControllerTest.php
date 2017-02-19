@@ -208,14 +208,6 @@ class ProjectControllerTest extends ApiTestCase
         $this->getClient(true)->request('DELETE', self::PROJECT_ACL_URL . '/project/' . $project->getId() . '/user/' . $user->getId(),
             [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::DELETED_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        // Check if UserHasProject Entity was removed
-        $userHasProjectEntityAfter = $this->em->getRepository('APITaskBundle:UserHasProject')->findOneBy([
-            'user' => $user,
-            'project' => $project,
-        ]);
-
-        $this->assertEquals(null, $userHasProjectEntityAfter);
     }
 
     /**

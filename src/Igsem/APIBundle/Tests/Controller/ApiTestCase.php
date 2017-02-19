@@ -177,11 +177,6 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
         $this->getClient(true)->request('PUT' , $this->getBaseUrl() . '/' . $entity->getId() ,
             $data , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE , $this->getClient()->getResponse()->getStatusCode());
-
-        // Update Entity: PATCH method (as admin)
-        $this->getClient()->request('PATCH' , $this->getBaseUrl() . '/' . $entity->getId() ,
-            $data , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE , $this->getClient()->getResponse()->getStatusCode());
     }
 
     /**

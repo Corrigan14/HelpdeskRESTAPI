@@ -31,3 +31,6 @@ api_task_invoiceable_item:
 api_task_smtp:
     resource: "@APITaskBundle/Resources/config/routing/smtp.yml"
     prefix: /
+api_task_imap:
+    resource: "@APITaskBundle/Resources/config/routing/imap.yml"
+    prefix: /

@@ -59,7 +59,7 @@ class InvoiceableItem
     private $unit;
 
     /**
-     * @var Unit
+     * @var Task
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Task", inversedBy="invoiceableItems")
      * @ORM\JoinColumn(name="task_id", referencedColumnName="id", nullable=true)
@@ -171,5 +171,29 @@ class InvoiceableItem
     public function getUnit()
     {
         return $this->unit;
+    }
+
+    /**
+     * Set task
+     *
+     * @param Task $task
+     *
+     * @return InvoiceableItem
+     */
+    public function setTask(Task $task = null)
+    {
+        $this->task = $task;
+
+        return $this;
+    }
+
+    /**
+     * Get task
+     *
+     * @return Task
+     */
+    public function getTask()
+    {
+        return $this->task;
     }
 }

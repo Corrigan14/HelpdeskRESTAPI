@@ -90,6 +90,14 @@ class Project
     private $filters;
 
     /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Imap", mappedBy="project")
+     * @Exclude()
+     */
+    private $imaps;
+
+    /**
      * Project constructor.
      */
     public function __construct()
@@ -97,6 +105,7 @@ class Project
         $this->userHasProjects = new ArrayCollection();
         $this->tasks = new ArrayCollection();
         $this->filters = new ArrayCollection();
+        $this->imaps = new ArrayCollection();
     }
 
     /**
@@ -305,5 +314,39 @@ class Project
     public function getFilters()
     {
         return $this->filters;
+    }
+
+    /**
+     * Add imap
+     *
+     * @param Imap $imap
+     *
+     * @return Project
+     */
+    public function addImap(Imap $imap)
+    {
+        $this->imaps[] = $imap;
+
+        return $this;
+    }
+
+    /**
+     * Remove imap
+     *
+     * @param Imap $imap
+     */
+    public function removeImap(Imap $imap)
+    {
+        $this->imaps->removeElement($imap);
+    }
+
+    /**
+     * Get imaps
+     *
+     * @return ArrayCollection
+     */
+    public function getImaps()
+    {
+        return $this->imaps;
     }
 }

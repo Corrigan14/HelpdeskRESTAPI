@@ -76,12 +76,25 @@ class UserRoleControllerTest extends ApiTestCase
     }
 
     /**
+     * UPDATE SINGLE - success
+     */
+    public function testUpdateSingleSuccess()
+    {
+        $data = $this->returnUpdateTestData();
+
+        $entity = $this->findOneEntity();
+
+        // Update Entity: POST method (as admin)
+        $this->getClient(true)->request('PUT' , $this->getBaseUrl() . '/' . $entity->getId() ,
+            $data , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE , $this->getClient()->getResponse()->getStatusCode());
+    }
+
+    /**
      *  POST SINGLE - errors
      */
     public function testUpdateSingleErrors()
     {
-        parent::testUpdateSingleErrors();
-
         $entity = $this->findOneEntity();
 
         $data = $this->returnUpdateTestData();

@@ -139,7 +139,10 @@ class Task
      * @var ArrayCollection
      *
      * @ORM\ManyToMany(targetEntity="API\TaskBundle\Entity\Tag", inversedBy="tasks")
-     * @ORM\JoinTable(name="task_has_tag")
+     * @ORM\JoinTable(name="task_has_tag",
+     *      joinColumns={@ORM\JoinColumn(name="task_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="tag_id", referencedColumnName="id")}
+     *      )
      * @Serializer\ReadOnly()
      */
     private $tags;
@@ -196,6 +199,7 @@ class Task
         $this->taskHasAssignedUsers = new ArrayCollection();
         $this->taskHasAttachments = new ArrayCollection();
         $this->comments = new ArrayCollection();
+        $this->invoiceableItems = new ArrayCollection();
     }
 
     /**
@@ -698,5 +702,39 @@ class Task
     public function getCompany()
     {
         return $this->company;
+    }
+
+    /**
+     * Add invoiceableItem
+     *
+     * @param InvoiceableItem $invoiceableItem
+     *
+     * @return Task
+     */
+    public function addInvoiceableItem(InvoiceableItem $invoiceableItem)
+    {
+        $this->invoiceableItems[] = $invoiceableItem;
+
+        return $this;
+    }
+
+    /**
+     * Remove invoiceableItem
+     *
+     * @param InvoiceableItem $invoiceableItem
+     */
+    public function removeInvoiceableItem(InvoiceableItem $invoiceableItem)
+    {
+        $this->invoiceableItems->removeElement($invoiceableItem);
+    }
+
+    /**
+     * Get invoiceableItems
+     *
+     * @return ArrayCollection
+     */
+    public function getInvoiceableItems()
+    {
+        return $this->invoiceableItems;
     }
 }

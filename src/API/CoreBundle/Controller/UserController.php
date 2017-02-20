@@ -328,18 +328,21 @@ class UserController extends ApiBaseController
      */
     public function getAction(int $id)
     {
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::USER_SETTINGS,
-            'user' => $this->getUser()
-        ];
-
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
-        }
-
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (!$user instanceof User) {
             return $this->notFoundResponse();
+        }
+
+        // User can view his own data
+        if ($this->getUser()->getId() !== $id) {
+            $aclOptions = [
+                'acl' => UserRoleAclOptions::USER_SETTINGS,
+                'user' => $this->getUser()
+            ];
+
+            if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+                return $this->accessDeniedResponse();
+            }
         }
 
         $userCompany = $user->getCompany();
@@ -680,16 +683,18 @@ class UserController extends ApiBaseController
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-
     public function updateAction(int $id, Request $request, $userRoleId = false, $companyId = false)
     {
         // Check if user has permission to CRUD User entity
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::USER_SETTINGS,
-            'user' => $this->getUser()
-        ];
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+        // User can update his own data
+        if ($this->getUser()->getId() !== $id) {
+            $aclOptions = [
+                'acl' => UserRoleAclOptions::USER_SETTINGS,
+                'user' => $this->getUser()
+            ];
+            if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+                return $this->accessDeniedResponse();
+            }
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
@@ -699,7 +704,7 @@ class UserController extends ApiBaseController
             ], StatusCodesHelper::NOT_FOUND_CODE);
         }
 
-        if ($userRoleId) {
+        if ($userRoleId && $this->getUser()->getId() !== $id) {
             $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($userRoleId);
             if (!$userRole instanceof UserRole) {
                 return $this->createApiResponse([
@@ -722,9 +727,13 @@ class UserController extends ApiBaseController
             } else {
                 $user->setRoles(['ROLE_USER']);
             }
+        } elseif ($userRoleId && $this->getUser()->getId() === $id) {
+            return $this->createApiResponse([
+                'message' => 'You can not change your own User Role!',
+            ], StatusCodesHelper::ACCESS_DENIED_CODE);
         }
 
-        if ($companyId) {
+        if ($companyId && $this->getUser()->getId() !== $id) {
             $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
 
             if (!$company instanceof Company) {
@@ -733,6 +742,10 @@ class UserController extends ApiBaseController
                 ], StatusCodesHelper::NOT_FOUND_CODE);
             }
             $user->setCompany($company);
+        } elseif ($companyId && $this->getUser()->getId() === $id) {
+            return $this->createApiResponse([
+                'message' => 'You can not change your own Company!',
+            ], StatusCodesHelper::ACCESS_DENIED_CODE);
         }
 
         // Upload and save avatar
@@ -942,7 +955,7 @@ class UserController extends ApiBaseController
             $user->setImage($imageSlug);
         }
 
-        $requestData = json_decode($request->getContent(),true);
+        $requestData = json_decode($request->getContent(), true);
 
         return $this->updateUser($user, $requestData);
     }
@@ -1263,20 +1276,21 @@ class UserController extends ApiBaseController
             } else {
                 $userCompanyId = false;
             }
+            $userId = $user->getId();
             $ids = [
-                'userId' => $user->getId(),
+                'userId' => $userId,
                 'userRoleId' => $user->getUserRole()->getId(),
                 'userCompanyId' => $userCompanyId
             ];
-            //upload avatar
-//            $image = $this->get('upload_helper')->uploadFile($editForm->get('image')->getData());
-//            $user->setImage($image);
 
             /**
              * Fill UserData Entity if some its parameters were sent
              */
             if ($requestDetailData) {
-                $userData = $user->getDetailData();
+                $userData = $this->getDoctrine()->getRepository('APICoreBundle:UserData')->findOneBy([
+                    'user' => $userId
+                ]);
+
                 if (null === $userData) {
                     $userData = new UserData();
                     $userData->setUser($user);
@@ -1289,6 +1303,12 @@ class UserController extends ApiBaseController
 
                     $userArray = $this->get('api_user.service')->getUserResponse($ids);
                     return $this->json($userArray, $statusCode);
+                } else {
+                    $data = [
+                        'errors' => $errorsUserData,
+                        'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+                    ];
+                    return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 }
             } else {
                 $userArray = $this->get('api_user.service')->getUserResponse($ids);

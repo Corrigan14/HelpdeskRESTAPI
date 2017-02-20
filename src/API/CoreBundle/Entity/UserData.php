@@ -97,7 +97,7 @@ class UserData
      * @var string
      *
      * @ORM\Column(name="signature", type="text", nullable=true)
-     * @Assert\Type("text")
+     * @Assert\Type("string")
      */
     private $signature;
 

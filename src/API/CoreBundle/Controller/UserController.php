@@ -942,7 +942,7 @@ class UserController extends ApiBaseController
             $user->setImage($imageSlug);
         }
 
-        $requestData = $request->request->all();
+        $requestData = json_decode($request->getContent(),true);
 
         return $this->updateUser($user, $requestData);
     }

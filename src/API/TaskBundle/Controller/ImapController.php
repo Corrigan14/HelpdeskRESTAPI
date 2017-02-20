@@ -2,41 +2,60 @@
 
 namespace API\TaskBundle\Controller;
 
+use API\TaskBundle\Security\UserRoleAclOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
-use Igsem\APIBundle\Controller\ControllerInterface;
+use Igsem\APIBundle\Services\StatusCodesHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class ImapController
  *
  * @package API\TaskBundle\Controller
  */
-class ImapController extends ApiBaseController implements ControllerInterface
+class ImapController extends ApiBaseController
 {
     /**
      *  ### Response ###
      *     {
-     *       "data":
-     *       [
+     *        "data":
+     *        [
      *          {
-     *            "id": "1",
+     *             "id": 1,
+     *             "host": "test",
+     *             "port": 3306,
+     *             "name": "test",
+     *             "password": "test",
+     *             "ssl": true,
+     *             "inbox_email": "test@test.sk",
+     *             "move_email": "test@test.sk",
+     *             "ignore_certificate": false,
+     *             "project":
+     *             {
+     *                "id": 258,
+     *                "title": "Project of user 1",
+     *                "description": "Description of project 1.",
+     *                "is_active": false,
+     *                "createdAt":
+     *                {
+     *                   "date": "2017-02-20 09:18:42.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                },
+     *                "updatedAt":
+     *                {
+     *                   "date": "2017-02-20 09:18:42.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                }
+     *             }
      *          }
-     *       ],
-     *       "_links":
-     *       {
-     *           "self": "/entity?page=1",
-     *           "first": "/entity?page=1",
-     *           "prev": false,
-     *           "next": "/entity?page=2",
-     *            "last": "/entity?page=3"
-     *       },
-     *       "total": 22,
-     *       "page": 1,
-     *       "numberOfPages": 3
+     *        ],
+     *        "_links": [],
+     *        "total": 1
      *     }
-     *
      *
      * @ApiDoc(
      *  description="Returns a list of IMAP Entities",
@@ -54,12 +73,21 @@ class ImapController extends ApiBaseController implements ControllerInterface
      *  }
      * )
      *
-     * @param Request $request
-     * @return JsonResponse
+     * @return Response
      */
-    public function listAction(Request $request)
+    public function listAction()
     {
-        // TODO: Implement listAction() method.
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::IMAP_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $imapArray = $this->get('imap_service')->getAttributesResponse();
+        return $this->json($imapArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -104,7 +132,7 @@ class ImapController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param int $id
-     * @return JsonResponse
+     * @return Response
      */
     public function getAction(int $id)
     {
@@ -147,7 +175,7 @@ class ImapController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
-     * @return JsonResponse
+     * @return Response
      */
     public function createAction(Request $request)
     {
@@ -199,7 +227,7 @@ class ImapController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @param Request $request
-     * @return JsonResponse
+     * @return Response
      */
     public function updateAction(int $id, Request $request)
     {
@@ -251,7 +279,7 @@ class ImapController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @param Request $request
-     * @return JsonResponse
+     * @return Response
      */
     public function updatePartialAction(int $id, Request $request)
     {
@@ -285,7 +313,7 @@ class ImapController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      *
-     * @return JsonResponse
+     * @return Response
      */
     public function deleteAction(int $id)
     {

@@ -52,3 +52,6 @@ services:
     smtp_service:
             class: API\TaskBundle\Services\SmtpService
             arguments: ["@doctrine.orm.entity_manager", "@router"]
+    imap_service:
+            class: API\TaskBundle\Services\ImapService
+            arguments: ["@doctrine.orm.entity_manager", "@router"]

@@ -25,12 +25,12 @@ class SmtpFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
     public function load(ObjectManager $manager)
     {
         $smtp = new Smtp();
-        $smtp->setHost('Host');
-        $smtp->setPort(3306);
-        $smtp->setEmail('mb@web-solutions.sk');
-        $smtp->setName('test');
-        $smtp->setPassword('test');
-        $smtp->setSsl(true);
+        $smtp->setHost('smtp.lanhelpdesk.com');
+        $smtp->setPort(25);
+        $smtp->setEmail('symfony@lanhelpdesk.com');
+        $smtp->setName('symfony@lanhelpdesk.com');
+        $smtp->setPassword('eglrdAYVXB@18');
+        $smtp->setSsl(false);
         $smtp->setTls(false);
 
         $manager->persist($smtp);

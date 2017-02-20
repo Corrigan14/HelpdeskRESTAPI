@@ -54,16 +54,16 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
      */
     public function testListSuccess()
     {
-//        // Load list of data of Entity (as Admin)
-//        $this->getClient(true)->request('GET' , $this->getBaseUrl() , [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
-//        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE , $this->getClient()->getResponse()->getStatusCode());
-//
-//        // We expect at least one Entity, response has to include array with data and _links param
-//        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
-//        $keys = array_keys($response['data'][0]);
-//        $this->assertTrue(array_key_exists('_links' , $response));
-//
-//        return $keys;
+        // Load list of data of Entity (as Admin)
+        $this->getClient(true)->request('GET' , $this->getBaseUrl() , [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE , $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect at least one Entity, response has to include array with data and _links param
+        $response = json_decode($this->getClient()->getResponse()->getContent() , true);
+        $keys = array_keys($response['data'][0]);
+        $this->assertTrue(array_key_exists('_links' , $response));
+
+        return $keys;
     }
 
     /**
@@ -71,11 +71,11 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
      */
     public function testListErrors()
     {
-//        // Try to load list of entities without authorization header
-//        $this->getClient(true)->request('GET' , $this->getBaseUrl());
-//        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE , $this->getClient()->getResponse()->getStatusCode());
-//
-//        $this->assertContains('Auth header required' , $this->getClient()->getResponse()->getContent());
+        // Try to load list of entities without authorization header
+        $this->getClient(true)->request('GET' , $this->getBaseUrl());
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE , $this->getClient()->getResponse()->getStatusCode());
+
+        $this->assertContains('Auth header required' , $this->getClient()->getResponse()->getContent());
     }
 
     /**

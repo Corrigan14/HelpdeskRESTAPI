@@ -2,6 +2,8 @@
 
 namespace API\TaskBundle\Controller;
 
+use API\TaskBundle\Entity\Imap;
+use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Security\UserRoleAclOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
@@ -95,13 +97,40 @@ class ImapController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *           "id": "2",
+     *           "id": 1,
+     *           "host": "test",
+     *           "port": 3306,
+     *           "name": "test",
+     *           "password": "test",
+     *           "ssl": true,
+     *           "inbox_email": "test@test.sk",
+     *           "move_email": "test@test.sk",
+     *           "ignore_certificate": false,
+     *           "project":
+     *           {
+     *              "id": 258,
+     *              "title": "Project of user 1",
+     *              "description": "Description of project 1.",
+     *              "is_active": false,
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-02-20 09:18:42.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                 "date": "2017-02-20 09:18:42.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *               }
+     *            }
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/id",
-     *           "patch": "/api/v1/entityName/id",
-     *           "delete": "/api/v1/entityName/id"
+     *           "put": "/api/v1/task-bundle/imap/1",
+     *           "patch": "/api/v1/task-bundle/imap/1",
+     *           "delete": "/api/v1/task-bundle/imap/1"
      *         }
      *      }
      *
@@ -136,7 +165,24 @@ class ImapController extends ApiBaseController
      */
     public function getAction(int $id)
     {
-        // TODO: Implement getAction() method.
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::IMAP_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $imap = $this->getDoctrine()->getRepository('APITaskBundle:Imap')->find($id);
+        if (!$imap instanceof Imap) {
+            return $this->createApiResponse([
+                'message' => 'Imap with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $imapArray = $this->get('imap_service')->getAttributeResponse($id);
+        return $this->json($imapArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -144,19 +190,54 @@ class ImapController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *           "id": "2",
+     *           "id": 1,
+     *           "host": "test",
+     *           "port": 3306,
+     *           "name": "test",
+     *           "password": "test",
+     *           "ssl": true,
+     *           "inbox_email": "test@test.sk",
+     *           "move_email": "test@test.sk",
+     *           "ignore_certificate": false,
+     *           "project":
+     *           {
+     *              "id": 258,
+     *              "title": "Project of user 1",
+     *              "description": "Description of project 1.",
+     *              "is_active": false,
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-02-20 09:18:42.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                 "date": "2017-02-20 09:18:42.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *               }
+     *            }
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *           "put": "/api/v1/task-bundle/imap/1",
+     *           "patch": "/api/v1/task-bundle/imap/1",
+     *           "delete": "/api/v1/task-bundle/imap/1"
      *         }
      *      }
      *
      * @ApiDoc(
      *  resource = true,
      *  description="Create a new IMAP Entity",
+     *  requirements={
+     *     {
+     *       "name"="projectId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of project"
+     *     }
+     *  },
      *  input={"class"="API\TaskBundle\Entity\Imap"},
      *  headers={
      *     {
@@ -175,11 +256,33 @@ class ImapController extends ApiBaseController
      * )
      *
      * @param Request $request
+     * @param int $projectId
      * @return Response
      */
-    public function createAction(Request $request)
+    public function createAction(Request $request, int $projectId)
     {
-        // TODO: Implement createAction() method.
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::IMAP_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
+        if (!$project instanceof Project) {
+            return $this->createApiResponse([
+                'message' => 'Project with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $requestData = $request->request->all();
+
+        $imap = new Imap();
+        $imap->setProject($project);
+
+        return $this->updateImapEntity($imap, $requestData, true);
     }
 
     /**
@@ -187,13 +290,40 @@ class ImapController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *           "id": "2",
+     *           "id": 1,
+     *           "host": "test",
+     *           "port": 3306,
+     *           "name": "test",
+     *           "password": "test",
+     *           "ssl": true,
+     *           "inbox_email": "test@test.sk",
+     *           "move_email": "test@test.sk",
+     *           "ignore_certificate": false,
+     *           "project":
+     *           {
+     *              "id": 258,
+     *              "title": "Project of user 1",
+     *              "description": "Description of project 1.",
+     *              "is_active": false,
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-02-20 09:18:42.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                 "date": "2017-02-20 09:18:42.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *               }
+     *            }
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *           "put": "/api/v1/task-bundle/imap/1",
+     *           "patch": "/api/v1/task-bundle/imap/1",
+     *           "delete": "/api/v1/task-bundle/imap/1"
      *         }
      *      }
      *
@@ -227,25 +357,80 @@ class ImapController extends ApiBaseController
      *
      * @param int $id
      * @param Request $request
+     * @param int|bool $projectId
      * @return Response
      */
-    public function updateAction(int $id, Request $request)
+    public function updateAction(int $id, Request $request, $projectId = false)
     {
-        // TODO: Implement updateAction() method.
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::IMAP_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $imap = $this->getDoctrine()->getRepository('APITaskBundle:Imap')->find($id);
+        if (!$imap instanceof Imap) {
+            return $this->createApiResponse([
+                'message' => 'Imap with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        if ($projectId) {
+            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
+            if (!$project instanceof Project) {
+                return $this->createApiResponse([
+                    'message' => 'Project with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+            $imap->setProject($project);
+        }
+
+        $requestData = $request->request->all();
+        return $this->updateImapEntity($imap, $requestData, false);
     }
 
     /**
      * ### Response ###
-     *      {
+     *     {
      *        "data":
      *        {
-     *           "id": "2",
+     *           "id": 1,
+     *           "host": "test",
+     *           "port": 3306,
+     *           "name": "test",
+     *           "password": "test",
+     *           "ssl": true,
+     *           "inbox_email": "test@test.sk",
+     *           "move_email": "test@test.sk",
+     *           "ignore_certificate": false,
+     *           "project":
+     *           {
+     *              "id": 258,
+     *              "title": "Project of user 1",
+     *              "description": "Description of project 1.",
+     *              "is_active": false,
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-02-20 09:18:42.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                 "date": "2017-02-20 09:18:42.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *               }
+     *            }
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
+     *           "put": "/api/v1/task-bundle/imap/1",
+     *           "patch": "/api/v1/task-bundle/imap/1",
+     *           "delete": "/api/v1/task-bundle/imap/1"
      *         }
      *      }
      *
@@ -279,11 +464,39 @@ class ImapController extends ApiBaseController
      *
      * @param int $id
      * @param Request $request
+     * @param int|bool $projectId
      * @return Response
      */
-    public function updatePartialAction(int $id, Request $request)
+    public function updatePartialAction(int $id, Request $request, $projectId = false)
     {
-        // TODO: Implement updatePartialAction() method.
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::IMAP_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $imap = $this->getDoctrine()->getRepository('APITaskBundle:Imap')->find($id);
+        if (!$imap instanceof Imap) {
+            return $this->createApiResponse([
+                'message' => 'Imap with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        if ($projectId) {
+            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
+            if (!$project instanceof Project) {
+                return $this->createApiResponse([
+                    'message' => 'Project with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+            $imap->setProject($project);
+        }
+
+        $requestData = $request->request->all();
+        return $this->updateImapEntity($imap, $requestData, false);
     }
 
     /**
@@ -317,6 +530,82 @@ class ImapController extends ApiBaseController
      */
     public function deleteAction(int $id)
     {
-        // TODO: Implement deleteAction() method.
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::IMAP_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $imap = $this->getDoctrine()->getRepository('APITaskBundle:Imap')->find($id);
+        if (!$imap instanceof Imap) {
+            return $this->createApiResponse([
+                'message' => 'Imap with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $this->getDoctrine()->getManager()->remove($imap);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->createApiResponse([
+            'message' => StatusCodesHelper::DELETED_MESSAGE,
+        ], StatusCodesHelper::DELETED_CODE);
+    }
+
+    /**
+     * @param Imap $imap
+     * @param array $requestData
+     * @param bool $create
+     * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     */
+    private function updateImapEntity(Imap $imap, array $requestData, $create = false)
+    {
+        $allowedEntityParams = [
+            'host',
+            'port',
+            'name',
+            'password',
+            'inbox_email',
+            'move_email',
+            'ignore_certificate',
+            'ssl',
+        ];
+
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
+        }
+
+        foreach ($requestData as $key => $value) {
+            if (!in_array($key, $allowedEntityParams, true)) {
+                return $this->createApiResponse(
+                    ['message' => $key . ' is not allowed parameter for Tag Entity!'],
+                    StatusCodesHelper::INVALID_PARAMETERS_CODE
+                );
+            }
+        }
+
+        $statusCode = $this->getCreateUpdateStatusCode($create);
+
+        $errors = $this->get('entity_processor')->processEntity($imap, $requestData);
+
+        if (false === $errors) {
+            $this->getDoctrine()->getManager()->persist($imap);
+            $this->getDoctrine()->getManager()->flush();
+
+            $imapArray = $this->get('imap_service')->getAttributeResponse($imap->getId());
+            return $this->json($imapArray, $statusCode);
+        }
+
+        $data = [
+            'errors' => $errors,
+            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+        ];
+        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

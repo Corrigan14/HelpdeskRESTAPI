@@ -67,20 +67,23 @@ class ImapService
 
         return [
             'data' => $entity[0],
-            '_links' => $this->getEntityLinks($id),
+            '_links' => $this->getEntityLinks($id, $entity[0]['project']['id']),
         ];
     }
 
     /**
      * @param int $id
      *
+     * @param int $projectId
      * @return array
      */
-    private function getEntityLinks(int $id)
+    private function getEntityLinks(int $id, int $projectId)
     {
         return [
             'put' => $this->router->generate('imap_update', ['id' => $id]),
+            'put: project' => $this->router->generate('imap_update_with_project', ['id' => $id, 'projectId' => $projectId]),
             'patch' => $this->router->generate('imap_partial_update', ['id' => $id]),
+            'patch: project' => $this->router->generate('imap_partial_update_with_project', ['id' => $id, 'projectId' => $projectId]),
             'delete' => $this->router->generate('imap_delete', ['id' => $id])
         ];
     }

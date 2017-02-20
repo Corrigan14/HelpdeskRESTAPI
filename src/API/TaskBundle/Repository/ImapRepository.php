@@ -41,7 +41,8 @@ class ImapRepository extends EntityRepository
     public function getEntity(int $id):array
     {
         $query = $this->createQueryBuilder('imap')
-            ->select()
+            ->select('imap, project')
+            ->leftJoin('imap.project','project')
             ->where('imap.id = :id')
             ->setParameter('id', $id)
             ->getQuery();

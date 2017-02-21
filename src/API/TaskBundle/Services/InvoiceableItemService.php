@@ -49,7 +49,11 @@ class InvoiceableItemService
             'data' => $attributes,
         ];
 
-        return $response;
+        $pagination = [
+            '_links' => [],
+        ];
+
+        return array_merge($response, $pagination);
     }
 
     /**

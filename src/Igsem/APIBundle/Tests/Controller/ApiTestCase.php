@@ -55,7 +55,8 @@ abstract class ApiTestCase extends WebTestCase implements ControllerTestInterfac
     public function testListSuccess()
     {
         // Load list of data of Entity (as Admin)
-        $this->getClient(true)->request('GET' , $this->getBaseUrl() , [] , [] , ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->getClient(true)->request('GET' , $this->getBaseUrl() , [] , [] ,
+            ['Authorization' => 'Bearer ' . $this->adminToken , 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE , $this->getClient()->getResponse()->getStatusCode());
 
         // We expect at least one Entity, response has to include array with data and _links param

@@ -533,7 +533,8 @@ class UnitController extends ApiBaseController implements ControllerInterface
     {
         $allowedUnitEntityParams = [
             'title',
-            'shortcut'
+            'shortcut',
+            'is_active'
         ];
 
         if (array_key_exists('_format', $requestData)) {

@@ -66,7 +66,8 @@ class InvoiceableItemController extends ApiBaseController
      *               "is_active": true
      *            }
      *          }
-     *        ]
+     *        ],
+     *        "_links": []
      *     }
      *
      * @ApiDoc(

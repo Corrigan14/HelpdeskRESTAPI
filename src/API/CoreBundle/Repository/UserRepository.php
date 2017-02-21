@@ -48,12 +48,12 @@ class UserRepository extends EntityRepository
      * Return count of all users
      *
      * @param string|bool $isActive
+     * @param bool $term
      * @return int
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      */
-    public function countUsers($isActive = false): int
+    public function countUsers($isActive = false, $term = false): int
     {
+        $parameters = [];
         if ('true' === $isActive || 'false' === $isActive) {
             if ($isActive === 'true') {
                 $isActiveParam = 1;
@@ -62,23 +62,70 @@ class UserRepository extends EntityRepository
             }
             $query = $this->createQueryBuilder('u')
                 ->select('COUNT(u.id)')
-                ->where('u.is_active = :isActive')
-                ->setParameter('isActive', $isActiveParam)
-                ->getQuery()
-                ->getSingleScalarResult();
+                ->where('u.is_active = :isActive');
+            $parameters['isActive'] = $isActiveParam;
         } else {
             $query = $this->createQueryBuilder('u')
-                ->select('COUNT(u.id)')
-                ->getQuery()
-                ->getSingleScalarResult();
+                ->select('COUNT(u.id)');
         }
 
-        return $query;
+        if ($term) {
+            $query->andWhere('u.username LIKE :term');
+            $parameters['term'] = '%' . $term . '%';
+        }
+
+        $query->setParameters($parameters);
+
+        return $query->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * @param string $term
+     * @param int $page
+     * @param string|bool $isActive
+     * @return array
+     */
+    public function getUsersSearch(string $term, int $page, $isActive):array
+    {
+        if ('true' === $isActive || 'false' === $isActive) {
+            if ($isActive === 'true') {
+                $isActiveParam = 1;
+            } else {
+                $isActiveParam = 0;
+            }
+            $query = $this->createQueryBuilder('u')
+                ->select('u,d,userRole,company,companyData,companyAttribute')
+                ->leftJoin('u.detailData', 'd')
+                ->leftJoin('u.user_role', 'userRole')
+                ->leftJoin('u.company', 'company')
+                ->leftJoin('company.companyData', 'companyData')
+                ->leftJoin('companyData.companyAttribute', 'companyAttribute')
+                ->where('u.is_active = :isActive')
+                ->andWhere('u.username LIKE :term')
+                ->setParameters(['isActive' => $isActiveParam, 'term' => '%' . $term . '%'])
+                ->getQuery();
+        } else {
+            $query = $this->createQueryBuilder('u')
+                ->select('u,d,userRole,company,companyData,companyAttribute')
+                ->leftJoin('u.detailData', 'd')
+                ->leftJoin('u.user_role', 'userRole')
+                ->leftJoin('u.company', 'company')
+                ->leftJoin('company.companyData', 'companyData')
+                ->leftJoin('companyData.companyAttribute', 'companyAttribute')
+                ->where('u.username LIKE :term')
+                ->setParameter('term', '%' . $term . '%')
+                ->getQuery();
+        }
+
+        $query->setMaxResults(self::LIMIT);
+        $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
+
+        return $query->getArrayResult();
     }
 
     /**
      * @param array $fields
-     * @param string $isActive
+     * @param string|bool $isActive
      * @return \Doctrine\ORM\Query
      */
     private function getUserQuery(array $fields = [], $isActive)

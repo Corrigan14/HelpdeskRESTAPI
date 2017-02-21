@@ -1017,7 +1017,6 @@ class UserController extends ApiBaseController
         ], StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
-
     /**
      * ### Response ###
      *      ▿{
@@ -1179,6 +1178,186 @@ class UserController extends ApiBaseController
         ];
         $userArray = $this->get('api_user.service')->getUserResponse($ids);
         return $this->json($userArray, StatusCodesHelper::SUCCESSFUL_CODE);
+    }
+
+    /**
+     * ### Response ###
+     *     {
+     *       "data":
+     *       [
+     *          {
+     *            "id": "1",
+     *            "username": "admin",
+     *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
+     *            "email": "admin@admin.sk",
+     *            "roles": "[\"ROLE_ADMIN\"]",
+     *            "language": "AJ",
+     *            "is_active": true,
+     *            "image": null,
+     *            "detailData":
+     *            {
+     *               "id": 4,
+     *               "name": "Martinka",
+     *               "surname": "Babinska",
+     *               "title_before": null,
+     *               "title_after": null,
+     *               "function": null,
+     *               "mobile": null,
+     *               "tel": null,
+     *               "fax": null,
+     *               "signature": null,
+     *               "street": null,
+     *               "city": null,
+     *               "zip": null,
+     *               "country": null,
+     *               "facebook": "facebook.sk",
+     *               "twitter": "twitter.sk",
+     *               "linkdin": "linkdin.sk",
+     *               "google": "google.sk"
+     *            },
+     *            "user_role":
+     *            {
+     *               "id": 2,
+     *               "title": "ADMIN",
+     *               "description": null,
+     *               "homepage": "/",
+     *               "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *               "is_active": true
+     *               "order": 2
+     *            }
+     *          },
+     *          {
+     *            "id": 69,
+     *            "username": "manager",
+     *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
+     *            "email": "manager@manager.sk",
+     *            "roles": "[\"ROLE_USER\"]",
+     *            "language": "AJ",
+     *            "is_active": true,
+     *            "image": null,
+     *            "detailData": null,
+     *            "user_role":
+     *            {
+     *              "id": 26,
+     *              "title": "MANAGER",
+     *              "description": null,
+     *              "homepage": "/",
+     *              "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *              "is_active": true,
+     *              "order": 2
+     *            },
+     *            "company":
+     *            {
+     *              "id": 1,
+     *              "title": "Web-Solutions",
+     *              "ico": "1102587",
+     *              "dic": "12587459644",
+     *              "street": "Cesta 125",
+     *              "city": "Bratislava",
+     *              "zip": "021478",
+     *              "country": "Slovenska Republika",
+     *              "is_active": true,
+     *              "companyData": {
+     *              {
+     *                 "id": 44,
+     *                 "value": "data val",
+     *                 "companyAttribute":
+     *                 {
+     *                    "id": 1,
+     *                    "title": "input company additional attribute",
+     *                    "type": "input",
+     *                    "is_active": true
+     *                  }
+     *              },
+     *              {
+     *                "id": 45,
+     *                "value": "data valluesgyda gfg",
+     *                "companyAttribute":
+     *                {
+     *                  "id": 2,
+     *                  "title": "select company additional attribute",
+     *                  "type": "simple_select",
+     *                  "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *                  "is_active": true
+     *                }
+     *              }
+     *            }
+     *         }
+     *       ]
+     *       "_links":
+     *       {
+     *           "self": "/api/v1/core-bundle/users?page=1&term=customer70",
+     *           "first": "/api/v1/core-bundle/users?page=1&term=customer70",
+     *           "prev": false,
+     *           "next": false,
+     *           "last": "/api/v1/core-bundle/users?page=1&term=customer70"
+     *       },
+     *       "total": 22,
+     *       "page": 1,
+     *       "numberOfPages": 3
+     *     }
+     *
+     * @ApiDoc(
+     *  description="Search in User Entity",
+     *  filters={
+     *     {
+     *       "name"="term",
+     *       "description"="Search term"
+     *     },
+     *     {
+     *       "name"="isActive",
+     *       "description"="Return's only ACTIVE users if this param is TRUE, only INACTIVE users if param is FALSE"
+     *     },
+     *     {
+     *       "name"="page",
+     *       "description"="Pagination, limit is set to 10 records"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="Entity was successfully found",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied"
+     *  })
+     *
+     * @param Request $request
+     * @return JsonResponse|Response
+     */
+    public function searchAction(Request $request)
+    {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::USER_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $filtersForUrl = [];
+
+        $term = $request->get('term');
+        $term = strtolower($term);
+        if (null !== $term) {
+            $filtersForUrl['term'] = '&term=' . $term;
+        }
+        $page = $request->get('page') ?: 1;
+
+        $isActive = $request->get('isActive');
+        if (null !== $isActive) {
+            $filtersForUrl['isActive'] = '&isActive=' . $isActive;
+        } else {
+            $isActive = false;
+        }
+
+        $usersArray = $this->get('api_user.service')->getUsersSearchResponse($term, $page, $isActive, $filtersForUrl);
+        return $this->json($usersArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

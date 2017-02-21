@@ -5,6 +5,7 @@ namespace API\CoreBundle\Services;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Repository\UserRepository;
 use API\TaskBundle\Entity\Project;
+use API\TaskBundle\Services\PaginationHelper;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
@@ -85,6 +86,50 @@ class UserService
     }
 
     /**
+     * @param string $term
+     * @param int $page
+     * @param string|bool $isActive
+     * @param array $filtersForUrl
+     * @return array
+     */
+    public function getUsersSearchResponse(string $term, int $page, $isActive, array $filtersForUrl):array
+    {
+        /** @var UserRepository $userRepository */
+        $userRepository = $this->em->getRepository('APICoreBundle:User');
+        $users = $userRepository->getUsersSearch($term, $page, $isActive);
+
+        $response = [
+            'data' => $users,
+        ];
+
+        $url = $this->router->generate('users_list');
+        $limit = UserRepository::LIMIT;
+        $count = $userRepository->countUsers($isActive, $term);
+
+        $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filtersForUrl);
+
+        return array_merge($response, $pagination);
+    }
+
+    /**
+     * @return array
+     */
+    public function getListOfAllUsers():array
+    {
+        return $this->em->getRepository('APICoreBundle:User')->getAllUserEntitiesWithIdAndTitle();
+    }
+
+    /**
+     * @param Project $project
+     * @param string $rule
+     * @return array
+     */
+    public function getListOfAvailableProjectAssigners(Project $project, string $rule):array
+    {
+        return $this->em->getRepository('APITaskBundle:UserHasProject')->getAllUserEntitiesWithIdAndTitle($project, $rule);
+    }
+
+    /**
      * @param array $ids
      * @return array
      */
@@ -117,21 +162,4 @@ class UserService
         return array_merge($otherLinks, $linksForCompany);
     }
 
-    /**
-     * @return array
-     */
-    public function getListOfAllUsers():array
-    {
-        return $this->em->getRepository('APICoreBundle:User')->getAllUserEntitiesWithIdAndTitle();
-    }
-
-    /**
-     * @param Project $project
-     * @param string $rule
-     * @return array
-     */
-    public function getListOfAvailableProjectAssigners(Project $project, string $rule):array
-    {
-        return $this->em->getRepository('APITaskBundle:UserHasProject')->getAllUserEntitiesWithIdAndTitle($project, $rule);
-    }
 }

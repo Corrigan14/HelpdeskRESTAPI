@@ -412,6 +412,45 @@ class UserControllerNewTest extends ApiTestCase
         $this->assertEquals(true, $response['data']['is_active']);
     }
 
+    /**
+     * SEARCH - success
+     */
+    public function testSearchSuccess()
+    {
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/search', [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect at least one Entity, response has to include array with data and _links param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertTrue(array_key_exists('_links', $response));
+        $this->assertTrue(array_key_exists('data', $response));
+
+        // Success with set parameters: PAGE, TERM, isActive
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/search?page=1&term=user&isActive=false', [], [],
+            ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
+        $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // We expect at least one Entity, response has to include array with data and _links param
+        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
+        $this->assertTrue(array_key_exists('_links', $response));
+        $this->assertTrue(array_key_exists('data', $response));
+    }
+
+    /**
+     * SEARCH - errors
+     */
+    public function testSearchErrors()
+    {
+        // Try to load list of entities without authorization header
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/search', [], [], []);
+        $this->assertEquals(StatusCodesHelper::UNAUTHORIZED_CODE, $this->getClient()->getResponse()->getStatusCode());
+
+        // Try to load User Entities with logged ROLE_USER if user doesn't have permission
+        $this->getClient(true)->request('GET', $this->getBaseUrl() . '/search', [], [],
+            ['Authorization' => 'Bearer ' . $this->userToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
+        $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
+    }
 
     /**
      * Return Base URL

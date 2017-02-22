@@ -106,4 +106,4 @@ user_restore:
 user_search:
     path:     /users/search
     defaults: { _controller: APICoreBundle:User:search }
-    methods: [POST]
+    methods: [GET]

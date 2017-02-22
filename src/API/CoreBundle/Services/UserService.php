@@ -86,13 +86,13 @@ class UserService
     }
 
     /**
-     * @param string $term
+     * @param string|bool $term
      * @param int $page
      * @param string|bool $isActive
      * @param array $filtersForUrl
      * @return array
      */
-    public function getUsersSearchResponse(string $term, int $page, $isActive, array $filtersForUrl):array
+    public function getUsersSearchResponse($term, int $page, $isActive, array $filtersForUrl):array
     {
         /** @var UserRepository $userRepository */
         $userRepository = $this->em->getRepository('APICoreBundle:User');
@@ -102,7 +102,7 @@ class UserService
             'data' => $users,
         ];
 
-        $url = $this->router->generate('users_list');
+        $url = $this->router->generate('user_search');
         $limit = UserRepository::LIMIT;
         $count = $userRepository->countUsers($isActive, $term);
 

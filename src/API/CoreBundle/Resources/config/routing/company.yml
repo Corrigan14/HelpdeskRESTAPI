@@ -42,3 +42,8 @@ company_restore:
     methods: [PATCH]
     requirements:
         id: '\d+'
+
+company_search:
+    path:     companies/search
+    defaults: { _controller: APICoreBundle:Company:search }
+    methods: [GET]

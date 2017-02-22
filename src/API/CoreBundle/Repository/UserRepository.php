@@ -48,7 +48,7 @@ class UserRepository extends EntityRepository
      * Return count of all users
      *
      * @param string|bool $isActive
-     * @param bool $term
+     * @param bool|string $term
      * @return int
      */
     public function countUsers($isActive = false, $term = false): int
@@ -80,13 +80,14 @@ class UserRepository extends EntityRepository
     }
 
     /**
-     * @param string $term
+     * @param string|bool $term
      * @param int $page
      * @param string|bool $isActive
      * @return array
      */
-    public function getUsersSearch(string $term, int $page, $isActive):array
+    public function getUsersSearch($term, int $page, $isActive):array
     {
+        $parameters = [];
         if ('true' === $isActive || 'false' === $isActive) {
             if ($isActive === 'true') {
                 $isActiveParam = 1;
@@ -100,10 +101,8 @@ class UserRepository extends EntityRepository
                 ->leftJoin('u.company', 'company')
                 ->leftJoin('company.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
-                ->where('u.is_active = :isActive')
-                ->andWhere('u.username LIKE :term')
-                ->setParameters(['isActive' => $isActiveParam, 'term' => '%' . $term . '%'])
-                ->getQuery();
+                ->where('u.is_active = :isActive');
+            $parameters['isActive'] = $isActiveParam;
         } else {
             $query = $this->createQueryBuilder('u')
                 ->select('u,d,userRole,company,companyData,companyAttribute')
@@ -111,16 +110,21 @@ class UserRepository extends EntityRepository
                 ->leftJoin('u.user_role', 'userRole')
                 ->leftJoin('u.company', 'company')
                 ->leftJoin('company.companyData', 'companyData')
-                ->leftJoin('companyData.companyAttribute', 'companyAttribute')
-                ->where('u.username LIKE :term')
-                ->setParameter('term', '%' . $term . '%')
-                ->getQuery();
+                ->leftJoin('companyData.companyAttribute', 'companyAttribute');
         }
 
+        if ($term) {
+            $query->andWhere('u.username LIKE :term')
+            ->orWhere('u.email LIKE :term')
+            ->orWhere('company.title LIKE :term');
+            $parameters['term'] = '%' . $term . '%';
+        }
+
+        $query->setParameters($parameters);
         $query->setMaxResults(self::LIMIT);
         $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
 
-        return $query->getArrayResult();
+        return $query->getQuery()->getArrayResult();
     }
 
     /**

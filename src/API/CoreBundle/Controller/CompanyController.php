@@ -112,18 +112,28 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *  },
      *  statusCodes={
      *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request"
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied"
      *  }
      * )
      *
      * @param Request $request
-     * @return JsonResponse
+     * @return Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
     public function listAction(Request $request)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $page = $request->get('page') ?: 1;
         $isActive = $request->get('isActive');
 
@@ -211,6 +221,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
+     *      403 ="Access denied",
      *      404 ="Not found Entity"
      *  }
      * )
@@ -221,6 +232,15 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      */
     public function getAction(int $id)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
         $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
 
         if (!$company instanceof Company) {
@@ -703,6 +723,142 @@ class CompanyController extends ApiBaseController implements ControllerInterface
 
         $companyArray = $this->get('api_company.service')->getCompanyResponse($company->getId());
         return $this->json($companyArray, StatusCodesHelper::SUCCESSFUL_CODE);
+    }
+
+    /**
+     * ### Response ###
+     *     {
+     *       "data":
+     *       [
+     *          {
+     *            "id": "1",
+     *            "title": "Web-Solutions",
+     *            "ico": "1102587",
+     *            "dic": "12587459644",
+     *            "ic_dph": "12587459644",
+     *            "street": "Cesta 125",
+     *            "city": "Bratislava",
+     *            "zip": "02587",
+     *            "country": "SR",
+     *            "is_active": true,
+     *            "companyData":
+     *            {
+     *             {
+     *               "id": 44,
+     *               "value": "data val",
+     *               "companyAttribute":
+     *               {
+     *                 "id": 1,
+     *                 "title": "input company additional attribute",
+     *                 "type": "input",
+     *                 "is_active": true
+     *               }
+     *             },
+     *             {
+     *               "id": 45,
+     *               "value": "data valluesgyda gfg",
+     *               "companyAttribute":
+     *               {
+     *                 "id": 2,
+     *                 "title": "select company additional attribute",
+     *                 "type": "simple_select",
+     *                 "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *                 "is_active": true
+     *               }
+     *             }
+     *          },
+     *          {
+     *             "id": 42,
+     *             "title": "LanSystems",
+     *             "ico": "110258782",
+     *             "dic": "12587458996244",
+     *             "ic_dph": null,
+     *             "street": "Ina cesta 125",
+     *             "city": "Bratislava",
+     *             "zip": "021478",
+     *             "country": "Slovenska Republika",
+     *             "is_active": true,
+     *             "companyData": []
+     *           }
+     *       ],
+     *       "_links":
+     *       {
+     *           "self": "api/v1/core-bundle/companies?page=1",
+     *           "first": "api/v1/core-bundle/companies?page=1",
+     *           "prev": false,
+     *           "next": "api/v1/core-bundle/companies?page=2",
+     *           "last": "api/v1/core-bundle/companies?page=3"
+     *       },
+     *       "total": 22,
+     *       "page": 1,
+     *       "numberOfPages": 3
+     *     }
+     *
+     *
+     * @ApiDoc(
+     *  description="Search in Company Entities",
+     *  filters={
+     *     {
+     *       "name"="term",
+     *       "description"="Search term"
+     *     },
+     *     {
+     *       "name"="isActive",
+     *       "description"="Return's only ACTIVE users if this param is TRUE, only INACTIVE users if param is FALSE"
+     *     },
+     *     {
+     *       "name"="page",
+     *       "description"="Pagination, limit is set to 10 records"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="Entity was successfully found",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied"
+     *  })
+     *
+     * @param Request $request
+     * @return JsonResponse|Response
+     */
+    public function searchAction(Request $request)
+    {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $filtersForUrl = [];
+
+        $term = $request->get('term');
+        if (null !== $term) {
+            $term = strtolower($term);
+            $filtersForUrl['term'] = '&term=' . $term;
+        }else{
+            $term = false;
+        }
+        $page = $request->get('page') ?: 1;
+
+        $isActive = $request->get('isActive');
+        if (null !== $isActive) {
+            $isActive = strtolower($isActive);
+            $filtersForUrl['isActive'] = '&isActive=' . $isActive;
+        } else {
+            $isActive = false;
+        }
+
+        $companiesArray = $this->get('api_company.service')->getCompaniesSearchResponse($term, $page, $isActive, $filtersForUrl);
+        return $this->json($companiesArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

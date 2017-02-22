@@ -46,7 +46,7 @@ class CompanyService
     public function getCompaniesResponse(int $page, array $options): array
     {
         $companies = $this->em->getRepository('APICoreBundle:Company')->getAllEntities($page, $options);
-        $count = $this->em->getRepository('APICoreBundle:Company')->countEntities($options);
+        $count = $this->em->getRepository('APICoreBundle:Company')->countEntities($options['isActive']);
 
         $response = [
             'data' => $companies,
@@ -73,6 +73,32 @@ class CompanyService
             'data' => $entity[0],
             '_links' => $this->getEntityLinks($id),
         ];
+    }
+
+    /**
+     * @param string|bool $term
+     * @param int $page
+     * @param string|bool $isActive
+     * @param array $filtersForUrl
+     * @return array
+     */
+    public function getCompaniesSearchResponse($term, int $page, $isActive, array $filtersForUrl):array
+    {
+        /** @var CompanyRepository $userRepository */
+        $companyRepository = $this->em->getRepository('APICoreBundle:Company');
+        $companies = $companyRepository->getCompaniesSearch($term, $page, $isActive);
+
+        $response = [
+            'data' => $companies,
+        ];
+
+        $url = $this->router->generate('company_search');
+        $limit = CompanyRepository::LIMIT;
+        $count = $companyRepository->countEntities($isActive, $term);
+
+        $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filtersForUrl);
+
+        return array_merge($response, $pagination);
     }
 
     /**

@@ -1343,9 +1343,11 @@ class UserController extends ApiBaseController
         $filtersForUrl = [];
 
         $term = $request->get('term');
-        $term = strtolower($term);
         if (null !== $term) {
+            $term = strtolower($term);
             $filtersForUrl['term'] = '&term=' . $term;
+        }else{
+            $term = false;
         }
         $page = $request->get('page') ?: 1;
 

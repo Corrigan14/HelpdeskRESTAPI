@@ -1,0 +1,44 @@
+system_settings_list:
+    path:     /system-settings
+    defaults: { _controller: APITaskBundle:SystemSettings:list }
+    methods: [GET]
+
+system_settings:
+    path:     /system-settings/{id}
+    defaults: { _controller: APITaskBundle:SystemSettings:get }
+    methods: [GET]
+    requirements:
+        id: '\d+'
+
+system_settings_create:
+    path:     /system-settings
+    defaults: { _controller: APITaskBundle:SystemSettings:create }
+    methods: [POST]
+
+system_settings_update:
+    path:     /system-settings/{id}
+    defaults: { _controller: APITaskBundle:SystemSettings:update }
+    methods: [PUT]
+    requirements:
+            id: '\d+'
+
+system_settings_partial_update:
+    path:     /system-settings/{id}
+    defaults: { _controller: APITaskBundle:SystemSettings:updatePartial }
+    methods: [PATCH]
+    requirements:
+            id: '\d+'
+
+system_settings_delete:
+    path:     /system-settings/{id}
+    defaults: { _controller: APITaskBundle:SystemSettings:delete }
+    methods: [DELETE]
+    requirements:
+            id: '\d+'
+
+system_settings_restore:
+    path:     /system-settings/restore/{id}
+    defaults: { _controller: APITaskBundle:SystemSettings:restore }
+    methods: [PATCH]
+    requirements:
+            id: '\d+'

@@ -34,3 +34,6 @@ api_task_smtp:
 api_task_imap:
     resource: "@APITaskBundle/Resources/config/routing/imap.yml"
     prefix: /
+api_task_system_settings:
+    resource: "@APITaskBundle/Resources/config/routing/systemSettings.yml"
+    prefix: /

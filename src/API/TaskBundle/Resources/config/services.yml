@@ -55,3 +55,6 @@ services:
     imap_service:
             class: API\TaskBundle\Services\ImapService
             arguments: ["@doctrine.orm.entity_manager", "@router"]
+    system_settings_service:
+            class: API\TaskBundle\Services\SystemSettingsService
+            arguments: ["@doctrine.orm.entity_manager", "@router"]

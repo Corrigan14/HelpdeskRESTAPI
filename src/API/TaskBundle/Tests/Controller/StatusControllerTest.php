@@ -113,7 +113,7 @@ class StatusControllerTest extends ApiTestCase
         $entity = $this->findOneEntity();
 
         // Delete Entity
-        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(),
             [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
     }
@@ -128,7 +128,7 @@ class StatusControllerTest extends ApiTestCase
         $entity = $this->findOneEntity();
 
         // Try to delete Status Entity with logged ROLE_USER if user doesn't have permission
-        $this->getClient(true)->request('DELETE', $this->getBaseUrl() . '/' . $entity->getId(),
+        $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/' . $entity->getId(),
             [], [], ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->userToken]);
         $this->assertEquals(StatusCodesHelper::ACCESS_DENIED_CODE, $this->getClient()->getResponse()->getStatusCode());
     }

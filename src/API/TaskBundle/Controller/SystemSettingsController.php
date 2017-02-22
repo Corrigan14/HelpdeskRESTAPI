@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Controller;
 
+use API\TaskBundle\Entity\SystemSettings;
 use API\TaskBundle\Security\UserRoleAclOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
@@ -108,16 +109,20 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
     /**
      *  ### Response ###
      *      {
-     *        "data":
-     *        {
-     *           "id": "2",
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/entityName/id",
-     *           "patch": "/api/v1/entityName/id",
-     *           "delete": "/api/v1/entityName/id"
-     *         }
+     *       "data":
+     *       {
+     *          "id": 3,
+     *          "title": "Company Name",
+     *          "value": "Lan Systems",
+     *          "is_active": true
+     *       },
+     *       "_links":
+     *       {
+     *          "put": "/api/v1/task-bundle/system-settings/3",
+     *          "patch": "/api/v1/task-bundle/system-settings/3",
+     *          "delete": "/api/v1/task-bundle/system-settings/3",
+     *          "restore": "/api/v1/task-bundle/system-settings/restore/3"
+     *        }
      *      }
      *
      * @ApiDoc(
@@ -151,22 +156,43 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      */
     public function getAction(int $id)
     {
-        // TODO: Implement getAction() method.
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::SYSTEM_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $systemSettingEntity = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->find($id);
+        if (!$systemSettingEntity instanceof SystemSettings) {
+            return $this->createApiResponse([
+                'message' => 'System setting with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $systemSettingArray = $this->get('system_settings_service')->getAttributeResponse($id);
+        return $this->json($systemSettingArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
-     *        "data":
-     *        {
-     *           "id": "2",
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
-     *         }
+     *       "data":
+     *       {
+     *          "id": 3,
+     *          "title": "Company Name",
+     *          "value": "Lan Systems",
+     *          "is_active": true
+     *       },
+     *       "_links":
+     *       {
+     *          "put": "/api/v1/task-bundle/system-settings/3",
+     *          "patch": "/api/v1/task-bundle/system-settings/3",
+     *          "delete": "/api/v1/task-bundle/system-settings/3",
+     *          "restore": "/api/v1/task-bundle/system-settings/restore/3"
+     *        }
      *      }
      *
      * @ApiDoc(
@@ -194,22 +220,40 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      */
     public function createAction(Request $request)
     {
-        // TODO: Implement createAction() method.
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::SYSTEM_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $requestData = $request->request->all();
+
+        $systemSettings = new SystemSettings();
+        $systemSettings->setIsActive(true);
+
+        return $this->updateEntity($systemSettings, $requestData, true);
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
-     *        "data":
-     *        {
-     *           "id": "2",
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
-     *         }
+     *       "data":
+     *       {
+     *          "id": 3,
+     *          "title": "Company Name",
+     *          "value": "Lan Systems",
+     *          "is_active": true
+     *       },
+     *       "_links":
+     *       {
+     *          "put": "/api/v1/task-bundle/system-settings/3",
+     *          "patch": "/api/v1/task-bundle/system-settings/3",
+     *          "delete": "/api/v1/task-bundle/system-settings/3",
+     *          "restore": "/api/v1/task-bundle/system-settings/restore/3"
+     *        }
      *      }
      *
      * @ApiDoc(
@@ -246,22 +290,44 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      */
     public function updateAction(int $id, Request $request)
     {
-        // TODO: Implement updateAction() method.
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::SYSTEM_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $systemSettingEntity = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->find($id);
+        if (!$systemSettingEntity instanceof SystemSettings) {
+            return $this->createApiResponse([
+                'message' => 'System setting with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $requestData = $request->request->all();
+
+        return $this->updateEntity($systemSettingEntity, $requestData, false);
     }
 
     /**
-     * ### Response ###
+     *  ### Response ###
      *      {
-     *        "data":
-     *        {
-     *           "id": "2",
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
-     *         }
+     *       "data":
+     *       {
+     *          "id": 3,
+     *          "title": "Company Name",
+     *          "value": "Lan Systems",
+     *          "is_active": true
+     *       },
+     *       "_links":
+     *       {
+     *          "put": "/api/v1/task-bundle/system-settings/3",
+     *          "patch": "/api/v1/task-bundle/system-settings/3",
+     *          "delete": "/api/v1/task-bundle/system-settings/3",
+     *          "restore": "/api/v1/task-bundle/system-settings/restore/3"
+     *        }
      *      }
      *
      * @ApiDoc(
@@ -298,7 +364,25 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      */
     public function updatePartialAction(int $id, Request $request)
     {
-        // TODO: Implement updatePartialAction() method.
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::SYSTEM_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $systemSettingEntity = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->find($id);
+        if (!$systemSettingEntity instanceof SystemSettings) {
+            return $this->createApiResponse([
+                'message' => 'System setting with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $requestData = json_decode($request->getContent(), true);
+
+        return $this->updateEntity($systemSettingEntity, $requestData, false);
     }
 
     /**
@@ -332,22 +416,48 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      */
     public function deleteAction(int $id)
     {
-        // TODO: Implement deleteAction() method.
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::SYSTEM_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $systemSettingEntity = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->find($id);
+        if (!$systemSettingEntity instanceof SystemSettings) {
+            return $this->createApiResponse([
+                'message' => 'System setting with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $systemSettingEntity->setIsActive(false);
+        $this->getDoctrine()->getManager()->persist($systemSettingEntity);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->createApiResponse([
+            'message' => StatusCodesHelper::UNACITVATE_MESSAGE,
+        ], StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
      * ### Response ###
-     *      {
-     *        "data":
-     *        {
-     *           "id": "2",
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
-     *         }
+     *     {
+     *       "data":
+     *       {
+     *          "id": 3,
+     *          "title": "Company Name",
+     *          "value": "Lan Systems",
+     *          "is_active": true
+     *       },
+     *       "_links":
+     *       {
+     *          "put": "/api/v1/task-bundle/system-settings/3",
+     *          "patch": "/api/v1/task-bundle/system-settings/3",
+     *          "delete": "/api/v1/task-bundle/system-settings/3",
+     *          "restore": "/api/v1/task-bundle/system-settings/restore/3"
+     *        }
      *      }
      *
      * @ApiDoc(
@@ -360,7 +470,6 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      *       "description"="The id of processed object"
      *     }
      *  },
-     *  input={"class"="API\TaskBundle\Entity\SystemSettings"},
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -373,17 +482,87 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
+     *      404 ="Not found Entity"
      *  }
      * )
      *
      * @param int $id
-     * @param Request $request
      * @return Response
      */
-    public function restoreAction(int $id, Request $request)
+    public function restoreAction(int $id)
     {
-        // TODO: Implement updatePartialAction() method.
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::SYSTEM_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        $systemSettingEntity = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->find($id);
+        if (!$systemSettingEntity instanceof SystemSettings) {
+            return $this->createApiResponse([
+                'message' => 'System setting with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $systemSettingEntity->setIsActive(true);
+        $this->getDoctrine()->getManager()->persist($systemSettingEntity);
+        $this->getDoctrine()->getManager()->flush();
+
+        $systemSettingsArray = $this->get('system_settings_service')->getAttributeResponse($id);
+        return $this->json($systemSettingsArray, StatusCodesHelper::SUCCESSFUL_CODE);
+    }
+
+    /**
+     * @param SystemSettings $status
+     * @param array $requestData
+     * @param bool $create
+     *
+     * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     */
+    private function updateEntity(SystemSettings $status, $requestData, $create = false)
+    {
+        $allowedUnitEntityParams = [
+            'title',
+            'value',
+            'is_active'
+        ];
+
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
+        }
+
+        foreach ($requestData as $key => $value) {
+            if (!in_array($key, $allowedUnitEntityParams, true)) {
+                return $this->createApiResponse(
+                    ['message' => $key . ' is not allowed parameter for System Setting Entity!'],
+                    StatusCodesHelper::INVALID_PARAMETERS_CODE
+                );
+            }
+        }
+
+        $statusCode = $this->getCreateUpdateStatusCode($create);
+
+        $errors = $this->get('entity_processor')->processEntity($status, $requestData);
+
+        if (false === $errors) {
+            $this->getDoctrine()->getManager()->persist($status);
+            $this->getDoctrine()->getManager()->flush();
+
+            $systemSettingsArray = $this->get('system_settings_service')->getAttributeResponse($status->getId());
+            return $this->json($systemSettingsArray, $statusCode);
+        }
+
+        $data = [
+            'errors' => $errors,
+            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+        ];
+        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 }

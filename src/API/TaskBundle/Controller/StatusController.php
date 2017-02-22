@@ -561,7 +561,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
         foreach ($requestData as $key => $value) {
             if (!in_array($key, $allowedUnitEntityParams, true)) {
                 return $this->createApiResponse(
-                    ['message' => $key . ' is not allowed parameter for Tag Entity!'],
+                    ['message' => $key . ' is not allowed parameter for Status Entity!'],
                     StatusCodesHelper::INVALID_PARAMETERS_CODE
                 );
             }

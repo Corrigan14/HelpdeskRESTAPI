@@ -30,9 +30,9 @@ system_settings_partial_update:
             id: '\d+'
 
 system_settings_delete:
-    path:     /system-settings/{id}
+    path:     /system-settings/delete/{id}
     defaults: { _controller: APITaskBundle:SystemSettings:delete }
-    methods: [DELETE]
+    methods: [PATCH]
     requirements:
             id: '\d+'
 

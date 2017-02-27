@@ -844,7 +844,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
         if (null !== $term) {
             $term = strtolower($term);
             $filtersForUrl['term'] = '&term=' . $term;
-        }else{
+        } else {
             $term = false;
         }
         $page = $request->get('page') ?: 1;
@@ -882,7 +882,8 @@ class CompanyController extends ApiBaseController implements ControllerInterface
             'street',
             'city',
             'zip',
-            'country'
+            'country',
+            'is_active'
         ];
 
         $requestDetailData = [];
@@ -893,6 +894,17 @@ class CompanyController extends ApiBaseController implements ControllerInterface
 
         if (array_key_exists('_format', $requestData)) {
             unset($requestData['_format']);
+        }
+
+        // Set is_active param
+        if (array_key_exists('is_active', $requestData)) {
+            $isActive = strtolower($requestData['is_active']);
+            unset($requestData['is_active']);
+            if ('true' === $isActive || true === $isActive || '1' === $isActive || 1 === $isActive) {
+                $company->setIsActive(true);
+            } elseif ('false' === $isActive || false === $isActive || '0' === $isActive || 0 === $isActive) {
+                $company->setIsActive(false);
+            }
         }
 
         foreach ($requestData as $key => $value) {

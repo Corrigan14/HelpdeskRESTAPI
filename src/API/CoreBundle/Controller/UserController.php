@@ -1385,7 +1385,8 @@ class UserController extends ApiBaseController
             'password',
             'email',
             'language',
-            'image'
+            'image',
+            'is_active'
         ];
 
         $alowedUserDetailDataParams = [
@@ -1418,6 +1419,17 @@ class UserController extends ApiBaseController
             unset($requestData['_format']);
         }
 
+        // Set is_active param
+        if (array_key_exists('is_active', $requestData)) {
+            $isActive = strtolower($requestData['is_active']);
+            unset($requestData['is_active']);
+            if ('true' === $isActive || true === $isActive || '1' === $isActive || 1 === $isActive) {
+                $user->setIsActive(true);
+            } elseif ('false' === $isActive || false === $isActive || '0' === $isActive || 0 === $isActive) {
+                $user->setIsActive(false);
+            }
+        }
+
         foreach ($requestData as $key => $value) {
             if (!in_array($key, $allowedUserEntityParams, true)) {
                 return $this->createApiResponse(
@@ -1435,7 +1447,6 @@ class UserController extends ApiBaseController
                 );
             }
         }
-
 
         $statusCode = $this->getCreateUpdateStatusCode($create);
 

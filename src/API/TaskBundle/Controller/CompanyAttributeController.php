@@ -537,9 +537,40 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    private function updateCompanyAttribute($companyAttribute, $requestData, $create = false)
+    private function updateCompanyAttribute(CompanyAttribute $companyAttribute, $requestData, $create = false)
     {
+        $allowedUnitEntityParams = [
+            'title',
+            'type',
+            'options',
+            'is_active'
+        ];
+
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
+        }
+
+        foreach ($requestData as $key => $value) {
+            if (!in_array($key, $allowedUnitEntityParams, true)) {
+                return $this->createApiResponse(
+                    ['message' => $key . ' is not allowed parameter for Tag Entity!'],
+                    StatusCodesHelper::INVALID_PARAMETERS_CODE
+                );
+            }
+        }
+
         $statusCode = $this->getCreateUpdateStatusCode($create);
+
+        // Set is_active param
+        if (array_key_exists('is_active', $requestData)) {
+            $isActive = strtolower($requestData['is_active']);
+            unset($requestData['is_active']);
+            if ('true' === $isActive || true === $isActive || '1' === $isActive || 1 === $isActive) {
+                $companyAttribute->setIsActive(true);
+            } elseif ('false' === $isActive || false === $isActive || '0' === $isActive || 0 === $isActive) {
+                $companyAttribute->setIsActive(false);
+            }
+        }
 
         // Check if type is instance of Variables in VariableHelper
         if (isset($requestData['type'])) {

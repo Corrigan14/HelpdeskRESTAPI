@@ -317,6 +317,16 @@ class TaskRepository extends EntityRepository
      */
     public function getAllUsersTasks(int $page, int $userId, int $companyId, $dividedProjects, array $options)
     {
+        $inFilter = $options['inFilter'];
+        $equalFilter = $options['equalFilter'];
+        $dateFilter = $options['dateFilter'];
+        $isNullFilter = $options['isNullFilter'];
+        $searchFilter = $options['searchFilter'];
+        $notAndCurrentFilter = $options['notAndCurrentFilter'];
+        $inFilterAddedParams = $options['inFilterAddedParams'];
+        $equalFilterAddedParams = $options['equalFilterAddedParams'];
+        $dateFilterAddedParams = $options['dateFilterAddedParams'];
+
         $query = $this->createQueryBuilder('task')
             ->select('task, taskData, taskAttribute, project, createdBy, company, requestedBy, thau, status, assignedUser, creatorDetailData, requesterDetailData, tags, taskCompany')
             ->leftJoin('task.taskData', 'taskData')
@@ -332,12 +342,15 @@ class TaskRepository extends EntityRepository
             ->leftJoin('thau.status', 'status')
             ->leftJoin('thau.user', 'assignedUser')
             ->leftJoin('task.tags', 'tags')
-            ->leftJoin('task.company', 'taskCompany')
-            ->where('t.createdBy = :userId')
-            ->orWhere('t.requestedBy = :userId');
+            ->leftJoin('task.company', 'taskCompany');
 
-        $paramArray['userId'] = $userId;
+        if (array_key_exists('followers.id', $inFilter) || array_key_exists('followers.id', $equalFilter)) {
+            $query->innerJoin('task.followers', 'followers');
+        }
 
+        $query->where('task.id is not NULL');
+
+        // Check and apply User's project ACL
         if (array_key_exists('VIEW_ALL_TASKS_IN_PROJECT', $dividedProjects)) {
             /** @var array $allTasksInProject */
             $allTasksInProject = $dividedProjects['VIEW_ALL_TASKS_IN_PROJECT'];
@@ -352,17 +365,31 @@ class TaskRepository extends EntityRepository
             $companyTasksInProject = [];
         }
 
+        if (array_key_exists('VIEW_OWN_TASKS', $dividedProjects)) {
+            /** @var array $companyTasksInProject */
+            $ownTasksInProject = $dividedProjects['VIEW_OWN_TASKS'];
+        } else {
+            $ownTasksInProject = [];
+        }
+
+        dump($allTasksInProject);
+        dump($companyTasksInProject);
+        dump($ownTasksInProject);
         $paramNum = 0;
-        if (count($allTasksInProject) > 0) {
-            $query->orWhere('t.project IN (:parameters' . $paramNum . ')');
-            $paramArray['parameters' . $paramNum] = $allTasksInProject;
 
-            $paramNum++;
-        }
+        $query->andWhere('project.id IN (:parameters' . $paramNum . ')');
+        $paramArray['parameters' . $paramNum] = $allTasksInProject;
+        $paramNum++;
 
-        if (count($companyTasksInProject) > 0) {
+        $query->orWhere('project.id IN (:parameters' . $paramNum . ')');
+        $paramArray['parameters' . $paramNum] = $ownTasksInProject;
+        $paramNum++;
+        $query->andWhere('requestedBy.id = :userId')
+            ->orWhere('createdBy.id = :userId');
+        $paramArray['userId'] = $userId;
 
-        }
+        $query->orWhere('taskCompany.id IN (:parameters' . $paramNum . ')');
+        $paramArray['parameters' . $paramNum] = $companyTasksInProject;
 
         if (!empty($paramArray)) {
             $query->setParameters($paramArray);

@@ -571,7 +571,8 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
         $allowedUnitEntityParams = [
             'title',
             'type',
-            'options'
+            'options',
+            'is_active'
         ];
 
         if (array_key_exists('_format', $requestData)) {

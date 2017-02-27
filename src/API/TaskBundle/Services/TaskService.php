@@ -231,6 +231,10 @@ class TaskService
                     $dividedProjects['VIEW_COMPANY_TASKS_IN_PROJECT'][] = $uhp->getProject()->getId();
                     continue;
                 }
+                if (in_array(ProjectAclOptions::VIEW_OWN_TASKS, $acl, true)) {
+                    $dividedProjects['VIEW_OWN_TASKS'][] = $uhp->getProject()->getId();
+                    continue;
+                }
             }
         }
 

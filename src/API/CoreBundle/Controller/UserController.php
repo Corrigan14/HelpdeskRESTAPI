@@ -5,7 +5,9 @@ namespace API\CoreBundle\Controller;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
 use API\CoreBundle\Security\VoteOptions;
+use API\TaskBundle\Entity\UserHasProject;
 use API\TaskBundle\Entity\UserRole;
+use API\TaskBundle\Security\ProjectAclOptions;
 use API\TaskBundle\Security\UserRoleAclOptions;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Controller\ApiBaseController;
@@ -1346,7 +1348,7 @@ class UserController extends ApiBaseController
         if (null !== $term) {
             $term = strtolower($term);
             $filtersForUrl['term'] = '&term=' . $term;
-        }else{
+        } else {
             $term = false;
         }
         $page = $request->get('page') ?: 1;
@@ -1457,6 +1459,22 @@ class UserController extends ApiBaseController
             } else {
                 $userCompanyId = false;
             }
+
+            if ($create) {
+                // Every New USER has ACL VIEW_OWN_TASKS to INBOX project
+                $inboxProject = $this->getDoctrine()->getRepository('APITaskBundle:Project')->findOneBy([
+                    'title' => 'INBOX'
+                ]);
+                $acl = [];
+                $acl[] = ProjectAclOptions::VIEW_OWN_TASKS;
+                $userHasProject = new UserHasProject();
+                $userHasProject->setUser($user);
+                $userHasProject->setProject($inboxProject);
+                $userHasProject->setAcl($acl);
+                $this->getDoctrine()->getManager()->persist($userHasProject);
+                $this->getDoctrine()->getManager()->flush();
+            }
+
             $userId = $user->getId();
             $ids = [
                 'userId' => $userId,

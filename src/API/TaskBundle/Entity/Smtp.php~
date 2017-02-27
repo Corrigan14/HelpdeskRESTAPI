@@ -263,4 +263,3 @@ class Smtp
         return $this->tls;
     }
 }
-

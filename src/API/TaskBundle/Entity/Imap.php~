@@ -112,8 +112,6 @@ class Imap
      */
     private $project;
 
-
-
     /**
      * Get id
      *
@@ -315,5 +313,28 @@ class Imap
     {
         return $this->ssl;
     }
-}
 
+    /**
+     * Set project
+     *
+     * @param Project $project
+     *
+     * @return Imap
+     */
+    public function setProject(Project $project)
+    {
+        $this->project = $project;
+
+        return $this;
+    }
+
+    /**
+     * Get project
+     *
+     * @return Project
+     */
+    public function getProject()
+    {
+        return $this->project;
+    }
+}

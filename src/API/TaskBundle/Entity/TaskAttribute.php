@@ -146,7 +146,7 @@ class TaskAttribute
      */
     public function setOptions($options)
     {
-        $this->options = serialize($options);
+        $this->options = json_encode($options);
 
         return $this;
     }
@@ -158,7 +158,7 @@ class TaskAttribute
      */
     public function getOptions()
     {
-        return unserialize($this->options);
+        return json_decode($this->options);
     }
 
     /**

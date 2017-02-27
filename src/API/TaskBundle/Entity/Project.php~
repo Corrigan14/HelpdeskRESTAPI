@@ -315,4 +315,38 @@ class Project
     {
         return $this->filters;
     }
+
+    /**
+     * Add imap
+     *
+     * @param Imap $imap
+     *
+     * @return Project
+     */
+    public function addImap(Imap $imap)
+    {
+        $this->imaps[] = $imap;
+
+        return $this;
+    }
+
+    /**
+     * Remove imap
+     *
+     * @param Imap $imap
+     */
+    public function removeImap(Imap $imap)
+    {
+        $this->imaps->removeElement($imap);
+    }
+
+    /**
+     * Get imaps
+     *
+     * @return ArrayCollection
+     */
+    public function getImaps()
+    {
+        return $this->imaps;
+    }
 }

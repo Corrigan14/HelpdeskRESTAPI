@@ -8,6 +8,7 @@ use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\UserHasProject;
 use API\TaskBundle\Repository\TaskRepository;
+use API\TaskBundle\Security\ProjectAclOptions;
 use API\TaskBundle\Security\VoteOptions;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
@@ -222,11 +223,11 @@ class TaskService
                 if (null === $acl) {
                     continue;
                 }
-                if (in_array(VoteOptions::VIEW_ALL_TASKS_IN_PROJECT, $acl, true)) {
+                if (in_array(ProjectAclOptions::VIEW_ALL_TASKS, $acl, true)) {
                     $dividedProjects['VIEW_ALL_TASKS_IN_PROJECT'][] = $uhp->getProject()->getId();
                     continue;
                 }
-                if (in_array(VoteOptions::VIEW_COMPANY_TASKS_IN_PROJECT, $acl, true)) {
+                if (in_array(ProjectAclOptions::VIEW_TASKS_FROM_USERS_COMPANY, $acl, true)) {
                     $dividedProjects['VIEW_COMPANY_TASKS_IN_PROJECT'][] = $uhp->getProject()->getId();
                     continue;
                 }
@@ -239,8 +240,8 @@ class TaskService
             $companyId = $usersCompany->getId();
         }
 
-        $usersTasks = $this->em->getRepository('APITaskBundle:Task')->getAllUsersTasks($page, $loggedUser->getId(), $companyId, $dividedProjects, $optionsNeeded);
-        $usersTasksCount = $this->em->getRepository('APITaskBundle:Task')->countAllUsersTasks($loggedUser->getId(), $companyId, $dividedProjects, $optionsNeeded);
+        $usersTasks = $this->em->getRepository('APITaskBundle:Task')->getAllUsersTasks($page, $loggedUser->getId(), $companyId, $dividedProjects, $options);
+        $usersTasksCount = $this->em->getRepository('APITaskBundle:Task')->countAllUsersTasks($loggedUser->getId(), $companyId, $dividedProjects, $options);
 
         return [
             'tasks' => $usersTasks,

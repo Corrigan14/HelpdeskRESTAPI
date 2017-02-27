@@ -317,6 +317,27 @@ class TaskRepository extends EntityRepository
      */
     public function getAllUsersTasks(int $page, int $userId, int $companyId, $dividedProjects, array $options)
     {
+        $query = $this->createQueryBuilder('task')
+            ->select('task, taskData, taskAttribute, project, createdBy, company, requestedBy, thau, status, assignedUser, creatorDetailData, requesterDetailData, tags, taskCompany')
+            ->leftJoin('task.taskData', 'taskData')
+            ->leftJoin('taskData.taskAttribute', 'taskAttribute')
+            ->leftJoin('task.project', 'project')
+            ->leftJoin('project.createdBy', 'projectCreator')
+            ->leftJoin('task.createdBy', 'createdBy')
+            ->leftJoin('createdBy.detailData', 'creatorDetailData')
+            ->leftJoin('createdBy.company', 'company')
+            ->leftJoin('task.requestedBy', 'requestedBy')
+            ->leftJoin('requestedBy.detailData', 'requesterDetailData')
+            ->leftJoin('task.taskHasAssignedUsers', 'thau')
+            ->leftJoin('thau.status', 'status')
+            ->leftJoin('thau.user', 'assignedUser')
+            ->leftJoin('task.tags', 'tags')
+            ->leftJoin('task.company', 'taskCompany')
+            ->where('t.createdBy = :userId')
+            ->orWhere('t.requestedBy = :userId');
+
+        $paramArray['userId'] = $userId;
+
         if (array_key_exists('VIEW_ALL_TASKS_IN_PROJECT', $dividedProjects)) {
             /** @var array $allTasksInProject */
             $allTasksInProject = $dividedProjects['VIEW_ALL_TASKS_IN_PROJECT'];
@@ -331,40 +352,16 @@ class TaskRepository extends EntityRepository
             $companyTasksInProject = [];
         }
 
-        $query = $this->createQueryBuilder('t')
-            ->where('t.createdBy = :userId')
-            ->orWhere('t.requestedBy = :userId');
-        $paramArray['userId'] = $userId;
-
         $paramNum = 0;
         if (count($allTasksInProject) > 0) {
-            foreach ($allTasksInProject as $project) {
-                $query->orWhere('t.project = :project' . $paramNum);
-                $paramArray['project' . $paramNum] = $project;
+            $query->orWhere('t.project IN (:parameters' . $paramNum . ')');
+            $paramArray['parameters' . $paramNum] = $allTasksInProject;
 
-                $paramNum++;
-            }
+            $paramNum++;
         }
 
         if (count($companyTasksInProject) > 0) {
-            foreach ($companyTasksInProject as $project) {
-                $query->orWhere('t.project = :project' . $paramNum)
-                    ->leftJoin('t.createdBy', 'u')
-                    ->andWhere('u.company = :companyId');
-                $paramArray['project' . $paramNum] = $project;
 
-                $paramNum++;
-            }
-            $paramArray['companyId'] = $companyId;
-        }
-
-        foreach ($options as $key => $value) {
-            if (false !== $value) {
-                $query->andWhere($key . '= :parameter' . $paramNum);
-                $paramArray['parameter' . $paramNum] = $value;
-
-                $paramNum++;
-            }
         }
 
         if (!empty($paramArray)) {

@@ -57,8 +57,7 @@ class TaskRepository extends EntityRepository
         $paramArray = [];
         $paramNum = 0;
         if (null !== $searchFilter) {
-            $query->andWhere('task.id LIKE :taskIdParam');
-            $query->orWhere('task.title LIKE :taskTitleParam');
+            $query->andWhere('task.id LIKE :taskIdParam OR task.title LIKE :taskTitleParam');
             $paramArray['taskIdParam'] = '%' . $searchFilter . '%';
             $paramArray['taskTitleParam'] = '%' . $searchFilter . '%';
         }
@@ -91,8 +90,7 @@ class TaskRepository extends EntityRepository
 
         foreach ($notAndCurrentFilter as $filter) {
             if (in_array($filter['not'], VariableHelper::$allowedKeysInFilter) && in_array($filter['equal']['key'], VariableHelper::$allowedKeysInFilter)) {
-                $query->andWhere($filter['not'] . ' IS NULL');
-                $query->orWhere($filter['equal']['key'] . ' = :parameter' . $paramNum);
+                $query->andWhere($filter['not'] . ' IS NULL' . ' OR ' . $filter['equal']['key'] . ' = :parameter' . $paramNum);
                 $paramArray['parameter' . $paramNum] = $filter['equal']['value'];
             }
         }
@@ -317,6 +315,8 @@ class TaskRepository extends EntityRepository
      */
     public function getAllUsersTasks(int $page, int $userId, int $companyId, $dividedProjects, array $options)
     {
+        $paramArray = [];
+
         $inFilter = $options['inFilter'];
         $equalFilter = $options['equalFilter'];
         $dateFilter = $options['dateFilter'];
@@ -379,6 +379,107 @@ class TaskRepository extends EntityRepository
         $paramArray['ownTasksInProject'] = $ownTasksInProject;
         $paramArray['loggedUserId'] = $userId;
 
+        //Check and apply filters
+        $paramNum = 0;
+        if (null !== $searchFilter) {
+            $query->andWhere('task.id LIKE :taskIdParam OR task.title LIKE :taskTitleParam');
+            $paramArray['taskIdParam'] = '%' . $searchFilter . '%';
+            $paramArray['taskTitleParam'] = '%' . $searchFilter . '%';
+        }
+
+        foreach ($isNullFilter as $value) {
+            // check if query is allowed
+            if (in_array($value, VariableHelper::$allowedKeysInFilter)) {
+                $query->andWhere($value . ' IS NULL');
+            }
+        }
+
+        foreach ($inFilter as $key => $value) {
+            // check if query is allowed
+            if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
+                $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
+                $paramArray['parameters' . $paramNum] = $value;
+
+                $paramNum++;
+            }
+        }
+
+        foreach ($equalFilter as $key => $value) {
+            if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
+                $query->andWhere($key . ' = :parameter' . $paramNum);
+                $paramArray['parameter' . $paramNum] = $value;
+
+                $paramNum++;
+            }
+        }
+
+        foreach ($notAndCurrentFilter as $filter) {
+            if (in_array($filter['not'], VariableHelper::$allowedKeysInFilter) && in_array($filter['equal']['key'], VariableHelper::$allowedKeysInFilter)) {
+                $query->andWhere($filter['not'] . ' IS NULL' . ' OR ' . $filter['equal']['key'] . ' = :parameter' . $paramNum);
+                $paramArray['parameter' . $paramNum] = $filter['equal']['value'];
+            }
+        }
+
+        foreach ($dateFilter as $key => $value) {
+            if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
+                if (isset($value['from']) && isset($value['to'])) {
+                    $query->andWhere($query->expr()->between($key, ':FROM' . $paramNum, ':TO' . $paramNum));
+                    $paramArray['FROM' . $paramNum] = $value['from'];
+                    $paramArray['TO' . $paramNum] = $value['to'];
+
+                    $paramNum++;
+                } elseif (isset($value['from']) && !isset($value['to'])) {
+                    $query->andWhere($key . '>= :FROM' . $paramNum);
+                    $paramArray['FROM' . $paramNum] = $value['from'];
+
+                    $paramNum++;
+                } elseif (isset($value['to']) && !isset($value['from'])) {
+                    if (strtolower($value['to']) === 'now') {
+                        $query->andWhere($key . '<= :TO' . $paramNum);
+                        $nowDate = new \DateTime();
+                        $nowDate->format('Y-m-d H:i:s');
+                        $paramArray['TO' . $paramNum] = $nowDate;
+                    } else {
+                        $query->andWhere($key . '<= :TO' . $paramNum);
+                        $paramArray['TO' . $paramNum] = $value['to'];
+                    }
+                    $paramNum++;
+                }
+            }
+        }
+
+        foreach ($inFilterAddedParams as $key => $value) {
+            $query->andWhere('taskAttribute.id = :attributeId');
+            $query->andWhere('taskData.value IN (:parameters' . $paramNum . ')');
+            $paramArray['parameters' . $paramNum] = $value;
+            $paramArray['attributeId'] = $key;
+
+            $paramNum++;
+        }
+
+        foreach ($equalFilterAddedParams as $key => $value) {
+            $query->andWhere('taskAttribute.id = :attributeId');
+            $query->andWhere('taskData.value = :parameter' . $paramNum);
+            $paramArray['parameter' . $paramNum] = $value;
+            $paramArray['attributeId'] = $key;
+
+            $paramNum++;
+        }
+
+        foreach ($dateFilterAddedParams as $key => $value) {
+            if (isset($value[0])) {
+                if (isset($value[1])) {
+                    $query->andWhere('taskAttribute.id = :attributeId');
+                    $query->andWhere($query->expr()->between('taskData.value', ':FROM' . $paramNum, ':TO' . $paramNum));
+                    $paramArray['FROM' . $paramNum] = $value[0];
+                    $paramArray['TO' . $paramNum] = $value[1];
+                    $paramArray['attributeId'] = $key;
+
+                    $paramNum++;
+                }
+            }
+        }
+
         if (!empty($paramArray)) {
             $query->setParameters($paramArray);
         }
@@ -389,7 +490,6 @@ class TaskRepository extends EntityRepository
         if (1 < $page) {
             $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
         }
-        dump($query->getQuery());
 
         return $query->getQuery()->getArrayResult();
     }

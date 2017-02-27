@@ -572,7 +572,8 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
             'title',
             'type',
             'options',
-            'is_active'
+            'is_active',
+            'description'
         ];
 
         if (array_key_exists('_format', $requestData)) {

@@ -55,13 +55,19 @@ class TaskAttribute
     private $options;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="description", type="text", nullable=true)
+     */
+    private $description;
+
+    /**
      * @var bool
      *
      * @ORM\Column(name="is_active", type="boolean", options={"default":1})
      * @ReadOnly()
      */
     private $is_active = true;
-
 
     /**
      * @var
@@ -217,5 +223,29 @@ class TaskAttribute
     public function getTaskData()
     {
         return $this->taskData;
+    }
+
+    /**
+     * Set description
+     *
+     * @param string $description
+     *
+     * @return TaskAttribute
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
     }
 }

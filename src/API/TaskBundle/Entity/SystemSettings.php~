@@ -133,4 +133,3 @@ class SystemSettings
         return $this->is_active;
     }
 }
-

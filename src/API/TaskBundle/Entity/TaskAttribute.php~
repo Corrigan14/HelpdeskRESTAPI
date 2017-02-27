@@ -55,6 +55,13 @@ class TaskAttribute
     private $options;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="description", type="text", nullable=true)
+     */
+    private $description;
+
+    /**
      * @var bool
      *
      * @ORM\Column(name="is_active", type="boolean", options={"default":1})

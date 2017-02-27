@@ -27,11 +27,13 @@ class TaskAttributeFixture implements FixtureInterface, ContainerAwareInterface,
         $ta = new TaskAttribute();
         $ta->setTitle('input task additional attribute');
         $ta->setType(VariableHelper::INPUT);
+        $ta->setDescription('Test description of Input');
         $manager->persist($ta);
 
         $ta = new TaskAttribute();
         $ta->setTitle('select task additional attribute');
         $ta->setType(VariableHelper::SIMPLE_SELECT);
+        $ta->setDescription('Test description of Simple select');
         $options = [
             'select1' => 'select1',
             'select2' => 'select2',

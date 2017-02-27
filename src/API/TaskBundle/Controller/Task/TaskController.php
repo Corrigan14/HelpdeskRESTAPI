@@ -1204,6 +1204,12 @@ class TaskController extends ApiBaseController
             }
             $task->setProject($project);
             unset($requestData['projectId']);
+        } else {
+            $inboxProject = $this->getDoctrine()->getRepository('APITaskBundle:Project')->findOneBy([
+                'title' => 'INBOX'
+            ]);
+            $task->setProject($inboxProject);
+            unset($requestData['projectId']);
         }
 
         if ($requestedUserId) {
@@ -1236,7 +1242,6 @@ class TaskController extends ApiBaseController
                 $task->setCompany($loggedUserCompany);
             }
         }
-
         $task->setCreatedBy($this->getUser());
         $task->setImportant(false);
         return $this->updateTaskEntity($task, $requestData, true);
@@ -2612,7 +2617,9 @@ class TaskController extends ApiBaseController
             'important',
             'started_at',
             'work',
-            'work_time'
+            'work_time',
+            'projectId',
+            'companyId'
         ];
 
         $requestDetailData = false;

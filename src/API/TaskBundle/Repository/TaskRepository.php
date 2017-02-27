@@ -348,8 +348,6 @@ class TaskRepository extends EntityRepository
             $query->innerJoin('task.followers', 'followers');
         }
 
-        $query->where('task.id is not NULL');
-
         // Check and apply User's project ACL
         if (array_key_exists('VIEW_ALL_TASKS_IN_PROJECT', $dividedProjects)) {
             /** @var array $allTasksInProject */
@@ -372,24 +370,14 @@ class TaskRepository extends EntityRepository
             $ownTasksInProject = [];
         }
 
-        dump($allTasksInProject);
-        dump($companyTasksInProject);
-        dump($ownTasksInProject);
-        $paramNum = 0;
-
-        $query->andWhere('project.id IN (:parameters' . $paramNum . ')');
-        $paramArray['parameters' . $paramNum] = $allTasksInProject;
-        $paramNum++;
-
-        $query->orWhere('project.id IN (:parameters' . $paramNum . ')');
-        $paramArray['parameters' . $paramNum] = $ownTasksInProject;
-        $paramNum++;
-        $query->andWhere('requestedBy.id = :userId')
-            ->orWhere('createdBy.id = :userId');
-        $paramArray['userId'] = $userId;
-
-        $query->orWhere('taskCompany.id IN (:parameters' . $paramNum . ')');
-        $paramArray['parameters' . $paramNum] = $companyTasksInProject;
+        $query->where('project.id IN (:allTasksInProject) ')
+            ->orWhere('project.id IN (:companyTasksInProject) AND taskCompany.id = :loggedUserCompanyId')
+            ->orWhere('project.id IN (:ownTasksInProject) AND (requestedBy.id = :loggedUserId OR createdBy.id = :loggedUserId)');
+        $paramArray['allTasksInProject'] = $allTasksInProject;
+        $paramArray['companyTasksInProject'] = $companyTasksInProject;
+        $paramArray['loggedUserCompanyId'] = $companyId;
+        $paramArray['ownTasksInProject'] = $ownTasksInProject;
+        $paramArray['loggedUserId'] = $userId;
 
         if (!empty($paramArray)) {
             $query->setParameters($paramArray);
@@ -401,6 +389,7 @@ class TaskRepository extends EntityRepository
         if (1 < $page) {
             $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
         }
+        dump($query->getQuery());
 
         return $query->getQuery()->getArrayResult();
     }
@@ -418,62 +407,7 @@ class TaskRepository extends EntityRepository
      */
     public function countAllUsersTasks(int $userId, int $companyId, $dividedProjects, array $options)
     {
-        if (array_key_exists('VIEW_ALL_TASKS_IN_PROJECT', $dividedProjects)) {
-            /** @var array $allTasksInProject */
-            $allTasksInProject = $dividedProjects['VIEW_ALL_TASKS_IN_PROJECT'];
-        } else {
-            $allTasksInProject = [];
-        }
-
-        if (array_key_exists('VIEW_COMPANY_TASKS_IN_PROJECT', $dividedProjects)) {
-            /** @var array $companyTasksInProject */
-            $companyTasksInProject = $dividedProjects['VIEW_COMPANY_TASKS_IN_PROJECT'];
-        } else {
-            $companyTasksInProject = [];
-        }
-
-        $query = $this->createQueryBuilder('t')
-            ->select('COUNT(t.id)')
-            ->where('t.createdBy = :userId')
-            ->orWhere('t.requestedBy = :userId');
-        $paramArray['userId'] = $userId;
-
-        $paramNum = 0;
-        if (count($allTasksInProject) > 0) {
-            foreach ($allTasksInProject as $project) {
-                $query->orWhere('t.project = :project' . $paramNum);
-                $paramArray['project' . $paramNum] = $project;
-
-                $paramNum++;
-            }
-        }
-
-        if (count($companyTasksInProject) > 0) {
-            foreach ($companyTasksInProject as $project) {
-                $query->orWhere('t.project = :project' . $paramNum)
-                    ->leftJoin('t.createdBy', 'u')
-                    ->andWhere('u.company = :companyId');
-                $paramArray['project' . $paramNum] = $project;
-
-                $paramNum++;
-            }
-            $paramArray['companyId'] = $companyId;
-        }
-
-        foreach ($options as $key => $value) {
-            if (false !== $value) {
-                $query->andWhere($key . '= :parameter' . $paramNum);
-                $paramArray['parameter' . $paramNum] = $value;
-
-                $paramNum++;
-            }
-        }
-
-        if (!empty($paramArray)) {
-            $query->setParameters($paramArray);
-        }
-
-        return $query->getQuery()->getSingleScalarResult();
+        return 10;
     }
 
     /**

@@ -2567,13 +2567,17 @@ class TaskController extends ApiBaseController
         $companyArray = $this->get('api_company.service')->getListOfAllCompanies();
         // Public and logged user's tags are available
         $tagArray = $this->get('tag_service')->getListOfUsersTags($this->getUser()->getId());
+        // Every unit is available
+        $unitArray = $this->get('unit_service')->getListOfAllUnits();
         // Available assigners are based on project of task
         // If task has project, assigner has to have RESOLVE_TASK ACL in user_has_project
         // If task has not project, just creator of task can be assigned to it
+        $assignArray = [];
         if ($task->getProject()) {
             $project = $task->getProject();
             $assignArray = $this->get('api_user.service')->getListOfAvailableProjectAssigners($project, ProjectAclOptions::RESOLVE_TASK);
-        } else {
+        }
+        if (!count($assignArray) > 0) {
             $assignArray = [
                 [
                     'id' => $task->getCreatedBy()->getId(),
@@ -2581,8 +2585,6 @@ class TaskController extends ApiBaseController
                 ]
             ];
         }
-        // Every unit is available
-        $unitArray = $this->get('unit_service')->getListOfAllUnits();
 
         $response = [
             'status' => $statusesArray,

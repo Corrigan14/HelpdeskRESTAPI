@@ -44,10 +44,6 @@ class UserHasProjectFixture implements FixtureInterface, ContainerAwareInterface
             'title' => 'Project of user 1'
         ]);
 
-        $usersProject2 = $manager->getRepository('APITaskBundle:Project')->findOneBy([
-            'title' => 'Project of user 2'
-        ]);
-
         $adminsProject = $manager->getRepository('APITaskBundle:Project')->findOneBy([
             'title' => 'Project of admin'
         ]);
@@ -69,7 +65,12 @@ class UserHasProjectFixture implements FixtureInterface, ContainerAwareInterface
             }
         }
 
-        if ($userUser instanceof User && $adminsProject instanceof Project && $userAdmin instanceof User) {
+        if ($userUser instanceof User && $adminsProject instanceof Project) {
+            $userHasProjectExist = $manager->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+                'user' => $userUser,
+                'project' => $adminsProject
+            ]);
+
             $acl = [];
             $acl[] = ProjectAclOptions::EDIT_PROJECT;
             $acl[] = ProjectAclOptions::EDIT_INTERNAL_NOTE;
@@ -81,22 +82,25 @@ class UserHasProjectFixture implements FixtureInterface, ContainerAwareInterface
             $acl[] = ProjectAclOptions::VIEW_OWN_TASKS;
             $acl[] = ProjectAclOptions::VIEW_TASKS_FROM_USERS_COMPANY;
 
-            $userHasProject = new UserHasProject();
-            $userHasProject->setUser($userUser);
-            $userHasProject->setProject($adminsProject);
-            $userHasProject->setAcl($acl);
-            $manager->persist($userHasProject);
-
-            $userHasProject = new UserHasProject();
-            $userHasProject->setUser($userAdmin);
-            $userHasProject->setProject($adminsProject);
-            $userHasProject->setAcl($acl);
-
-            $manager->persist($userHasProject);
+            if ($userHasProjectExist instanceof UserHasProject) {
+                $userHasProjectExist->setAcl($acl);
+                $manager->persist($userHasProjectExist);
+            } else {
+                $userHasProject = new UserHasProject();
+                $userHasProject->setUser($userUser);
+                $userHasProject->setProject($adminsProject);
+                $userHasProject->setAcl($acl);
+                $manager->persist($userHasProject);
+            }
             $manager->flush();
         }
 
-        if ($userAdmin instanceof User && $usersProject instanceof Project && $userUser instanceof User) {
+        if ($userAdmin instanceof User && $usersProject instanceof Project) {
+            $userHasProjectExist = $manager->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+                'user' => $userUser,
+                'project' => $adminsProject
+            ]);
+
             $acl = [];
             $acl[] = ProjectAclOptions::EDIT_PROJECT;
             $acl[] = ProjectAclOptions::CREATE_TASK;
@@ -107,51 +111,20 @@ class UserHasProjectFixture implements FixtureInterface, ContainerAwareInterface
             $acl[] = ProjectAclOptions::VIEW_OWN_TASKS;
             $acl[] = ProjectAclOptions::VIEW_TASKS_FROM_USERS_COMPANY;
 
-            $userHasProject = new UserHasProject();
-            $userHasProject->setUser($userAdmin);
-            $userHasProject->setProject($usersProject);
-            $userHasProject->setAcl($acl);
+            if ($userHasProjectExist instanceof UserHasProject) {
+                $userHasProjectExist->setAcl($acl);
+                $manager->persist($userHasProjectExist);
+            } else {
+                $userHasProject = new UserHasProject();
+                $userHasProject->setUser($userAdmin);
+                $userHasProject->setProject($usersProject);
+                $userHasProject->setAcl($acl);
 
-            $manager->persist($userHasProject);
-
-            $userHasProject = new UserHasProject();
-            $userHasProject->setUser($userUser);
-            $userHasProject->setProject($usersProject);
-            $userHasProject->setAcl($acl);
-
-            $manager->persist($userHasProject);
+                $manager->persist($userHasProject);
+            }
 
             $manager->flush();
         }
-
-        if ($userAdmin instanceof User && $usersProject2 instanceof Project && $userAdmin instanceof User) {
-            $acl = [];
-            $acl[] = ProjectAclOptions::EDIT_PROJECT;
-            $acl[] = ProjectAclOptions::CREATE_TASK;
-            $acl[] = ProjectAclOptions::RESOLVE_TASK;
-            $acl[] = ProjectAclOptions::DELETE_TASK;
-            $acl[] = ProjectAclOptions::VIEW_INTERNAL_NOTE;
-            $acl[] = ProjectAclOptions::VIEW_ALL_TASKS;
-            $acl[] = ProjectAclOptions::VIEW_OWN_TASKS;
-            $acl[] = ProjectAclOptions::VIEW_TASKS_FROM_USERS_COMPANY;
-
-            $userHasProject = new UserHasProject();
-            $userHasProject->setUser($userAdmin);
-            $userHasProject->setProject($usersProject);
-            $userHasProject->setAcl($acl);
-
-            $manager->persist($userHasProject);
-
-            $userHasProject = new UserHasProject();
-            $userHasProject->setUser($userUser);
-            $userHasProject->setProject($usersProject);
-            $userHasProject->setAcl($acl);
-
-            $manager->persist($userHasProject);
-
-            $manager->flush();
-        }
-
     }
 
     /**

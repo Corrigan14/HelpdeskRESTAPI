@@ -65,7 +65,6 @@ class TaskAttribute
      * @var bool
      *
      * @ORM\Column(name="is_active", type="boolean", options={"default":1})
-     * @ReadOnly()
      */
     private $is_active = true;
 

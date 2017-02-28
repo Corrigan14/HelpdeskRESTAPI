@@ -375,6 +375,7 @@ class TaskController extends ApiBaseController
         ];
 
         $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);
+        dump($tasksArray);
 
         return $this->json($tasksArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }

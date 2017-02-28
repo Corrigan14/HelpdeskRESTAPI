@@ -4,6 +4,7 @@ namespace API\TaskBundle\Repository;
 
 use API\TaskBundle\Services\VariableHelper;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * TaskRepository
@@ -17,7 +18,6 @@ class TaskRepository extends EntityRepository
      *
      * @param int $page
      * @param array $options
-     * @return array
      */
     public function getAllAdminTasks(int $page, array $options)
     {
@@ -32,7 +32,21 @@ class TaskRepository extends EntityRepository
         $dateFilterAddedParams = $options['dateFilterAddedParams'];
 
         $query = $this->createQueryBuilder('task')
-            ->select('task, taskData, taskAttribute, project, createdBy, company, requestedBy, thau, status, assignedUser, creatorDetailData, requesterDetailData, tags, taskCompany')
+            ->select('task')
+            ->addSelect('taskData')
+            ->addSelect('taskAttribute')
+            ->addSelect('project')
+            ->addSelect('projectCreator')
+            ->addSelect('createdBy')
+            ->addSelect('creatorDetailData')
+            ->addSelect('company')
+            ->addSelect('requestedBy')
+            ->addSelect('requesterDetailData')
+            ->addSelect('thau')
+            ->addSelect('status')
+            ->addSelect('assignedUser')
+            ->addSelect('tags')
+            ->addSelect('taskCompany')
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')
@@ -46,7 +60,9 @@ class TaskRepository extends EntityRepository
             ->leftJoin('thau.status', 'status')
             ->leftJoin('thau.user', 'assignedUser')
             ->leftJoin('task.tags', 'tags')
-            ->leftJoin('task.company', 'taskCompany');
+            ->leftJoin('task.company', 'taskCompany')
+            ->orderBy('task.id', 'ASC')
+            ->distinct();
 
         if (array_key_exists('followers.id', $inFilter) || array_key_exists('followers.id', $equalFilter)) {
             $query->innerJoin('task.followers', 'followers');
@@ -159,14 +175,30 @@ class TaskRepository extends EntityRepository
             $query->setParameters($paramArray);
         }
 
-        $query->setMaxResults(self::LIMIT);
-
-        // Pagination calculating offset
+        // Pagination
         if (1 < $page) {
             $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
+        } else {
+            $query->setFirstResult(0);
         }
 
-        return $query->getQuery()->getArrayResult();
+        $query->setMaxResults(self::LIMIT);
+
+        $paginator = new Paginator($query, $fetchJoinCollection = true);
+        $count = $paginator->count();
+
+        return [];
+
+        // Pagination calculating offset
+//        if (1 < $page) {
+//            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
+//        } else {
+//            $query->setFirstResult(0);
+//        }
+//
+//        $query->setMaxResults(self::LIMIT);
+//
+//        return $query->getQuery()->getArrayResult();
     }
 
     /**

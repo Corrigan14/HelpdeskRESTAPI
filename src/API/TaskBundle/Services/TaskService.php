@@ -190,11 +190,10 @@ class TaskService
 
         // Return's all Tasks - logged user is ADMIN
         if ($isAdmin) {
-            $tasks = $this->em->getRepository('APITaskBundle:Task')->getAllAdminTasks($page, $options);
-            $count = $this->em->getRepository('APITaskBundle:Task')->countAllAdminTasks($options);
+            $response = $this->em->getRepository('APITaskBundle:Task')->getAllAdminTasks($page, $options);
             return [
-                'tasks' => $tasks,
-                'count' => $count
+                'tasks' => $response['array'],
+                'count' => $response['count']
             ];
         }
 

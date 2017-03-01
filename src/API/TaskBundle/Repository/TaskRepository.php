@@ -2,6 +2,14 @@
 
 namespace API\TaskBundle\Repository;
 
+use API\CoreBundle\Entity\User;
+use API\TaskBundle\Entity\Comment;
+use API\TaskBundle\Entity\InvoiceableItem;
+use API\TaskBundle\Entity\Tag;
+use API\TaskBundle\Entity\Task;
+use API\TaskBundle\Entity\TaskData;
+use API\TaskBundle\Entity\TaskHasAssignedUser;
+use API\TaskBundle\Entity\TaskHasAttachment;
 use API\TaskBundle\Services\VariableHelper;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
@@ -18,6 +26,7 @@ class TaskRepository extends EntityRepository
      *
      * @param int $page
      * @param array $options
+     * @return array
      */
     public function getAllAdminTasks(int $page, array $options)
     {
@@ -187,7 +196,10 @@ class TaskRepository extends EntityRepository
         $paginator = new Paginator($query, $fetchJoinCollection = true);
         $count = $paginator->count();
 
-        return [];
+        return [
+            'count' => $count,
+            'array' => $this->formatData($paginator)
+        ];
 
         // Pagination calculating offset
 //        if (1 < $page) {
@@ -784,5 +796,247 @@ class TaskRepository extends EntityRepository
             ->setParameter('taskId', $taskId);
 
         return $query->getQuery()->getArrayResult();
+    }
+
+    /**
+     * @param $paginatorData
+     * @return array
+     */
+    private function formatData($paginatorData):array
+    {
+        $response = [];
+        /** @var Task $data */
+        foreach ($paginatorData as $data) {
+            $taskData = $data->getTaskData();
+            $taskDataArray = [];
+            if (count($taskData) > 0) {
+                /** @var TaskData $item */
+                foreach ($taskData as $item) {
+                    $taskDataArray[] = [
+                        'id' => $item->getId(),
+                        'value' => $item->getValue(),
+                        'taskAttribute' => [
+                            'id' => $item->getTaskAttribute()->getId(),
+                            'title' => $item->getTaskAttribute()->getTitle(),
+                        ]
+                    ];
+                }
+            }
+            $followers = $data->getFollowers();
+            $followersArray = [];
+            if (count($followers) > 0) {
+                /** @var User $item */
+                foreach ($followers as $item) {
+                    $followersArray[] = [
+                        'id' => $item->getId(),
+                        'username' => $item->getUsername(),
+                        'email' => $item->getEmail()
+                    ];
+                }
+            }
+            $tags = $data->getTags();
+            $tagsArray = [];
+            if (count($tags) > 0) {
+                /** @var Tag $item */
+                foreach ($tags as $item) {
+                    $tagsArray[] = [
+                        'id' => $item->getId(),
+                        'title' => $item->getTitle(),
+                        'color' => $item->getColor()
+                    ];
+                }
+            }
+            $taskHasAssignedUsers = $data->getTaskHasAssignedUsers();
+            $taskHasAssignedUsersArray = [];
+            if (count($taskHasAssignedUsers) > 0) {
+                /** @var TaskHasAssignedUser $item */
+                foreach ($taskHasAssignedUsers as $item) {
+                    $taskHasAssignedUsersArray[] = [
+                        'id' => $item->getId(),
+                        'status_date' => $item->getStatusDate(),
+                        'time_spent' => $item->getTimeSpent(),
+                        'createdAt' => $item->getCreatedAt(),
+                        'updatedAt' => $item->getUpdatedAt(),
+                        'status' => [
+                            'id' => $item->getStatus()->getId(),
+                            'title' => $item->getStatus()->getTitle(),
+                            'color' => $item->getStatus()->getColor(),
+                        ],
+                        'user' => [
+                            'id' => $item->getUser()->getId(),
+                            'username' => $item->getUser()->getUsername(),
+                            'email' => $item->getUser()->getEmail()
+                        ]
+                    ];
+                }
+            }
+            $taskHasAttachments = $data->getTaskHasAttachments();
+            $taskHasAttachmentsArray = [];
+            if (count($taskHasAttachments) > 0) {
+                /** @var TaskHasAttachment $item */
+                foreach ($taskHasAttachments as $item) {
+                    $taskHasAttachmentsArray[] = [
+                        'id' => $item->getId(),
+                        'slug' => $item->getSlug()
+                    ];
+                }
+            }
+            $comments = $data->getComments();
+            $commentsArray = [];
+            $processedCommentsIds = [];
+            if (count($comments) > 0) {
+                /** @var Comment $comment */
+                foreach ($comments as $comment) {
+                    // Check if comment was processed yet
+                    if (in_array($comment->getId(), $processedCommentsIds)) {
+                        continue;
+                    }
+
+                    // Check if comment has children or not
+                    $commentsChildren = $comment->getInversedComment();
+                    if (count($commentsChildren) > 0) {
+                        $processedCommentsIds[] = $comment->getId();
+                        $commentsArray[] = [
+                            'parent' => true,
+                            'id' => $comment->getId(),
+                            'title' => $comment->getTitle(),
+                            'body' => $comment->getBody(),
+                            'createdAt' => $comment->getCreatedAt(),
+                            'updatedAt' => $comment->getUpdatedAt(),
+                            'internal' => $comment->getInternal(),
+                            'email' => $comment->getEmail(),
+                            'email_to' => $comment->getEmailTo(),
+                            'email_cc' => $comment->getEmailCc(),
+                            'email_bcc' => $comment->getEmailBcc(),
+                            'createdBy' => [
+                                'id' => $comment->getCreatedBy()->getId(),
+                                'username' => $comment->getCreatedBy()->getUsername(),
+                                'email' => $comment->getCreatedBy()->getEmail()
+                            ]
+                        ];
+                        $this->buildCommentTree($comment, $commentsArray, $processedCommentsIds, $comment->getId(), false);
+                    } else {
+                        $processedCommentsIds[] = $comment->getId();
+                        $commentsArray[] = [
+                            'id' => $comment->getId(),
+                            'title' => $comment->getTitle(),
+                            'body' => $comment->getBody(),
+                            'createdAt' => $comment->getCreatedAt(),
+                            'updatedAt' => $comment->getUpdatedAt(),
+                            'internal' => $comment->getInternal(),
+                            'email' => $comment->getEmail(),
+                            'email_to' => $comment->getEmailTo(),
+                            'email_cc' => $comment->getEmailCc(),
+                            'email_bcc' => $comment->getEmailBcc(),
+                            'createdBy' => [
+                                'id' => $comment->getCreatedBy()->getId(),
+                                'username' => $comment->getCreatedBy()->getUsername(),
+                                'email' => $comment->getCreatedBy()->getEmail()
+                            ]
+                        ];
+                    }
+                }
+            }
+            $invoiceableItems = $data->getInvoiceableItems();
+            $invoiceableItemsArray = [];
+            if (count($invoiceableItems) > 0) {
+                /** @var InvoiceableItem $item */
+                foreach ($invoiceableItems as $item) {
+                    $invoiceableItemsArray[] = [
+                        'id' => $item->getId(),
+                        'title' => $item->getTitle(),
+                        'amount' => $item->getAmount(),
+                        'unit_price' => $item->getUnitPrice(),
+                        'unit' => [
+                            'id' => $item->getUnit()->getId(),
+                            'title' => $item->getUnit()->getTitle(),
+                            'shortcut' => $item->getUnit()->getShortcut(),
+                        ]
+                    ];
+                }
+            }
+
+            $response[] = [
+                'id' => $data->getId(),
+                'title' => $data->getTitle(),
+                'description' => $data->getDescription(),
+                'deadline' => $data->getDeadline(),
+                'startedAt' => $data->getDeadline(),
+                'closedAt' => $data->getDeadline(),
+                'important' => $data->getImportant(),
+                'work' => $data->getWork(),
+                'work_time' => $data->getWorkTime(),
+                'createdAt' => $data->getCreatedAt(),
+                'updatedAt' => $data->getUpdatedAt(),
+                'createdBy' => [
+                    'id' => $data->getCreatedBy()->getId(),
+                    'username' => $data->getCreatedBy()->getUsername(),
+                    'email' => $data->getCreatedBy()->getEmail()
+                ],
+                'requestedBy' => [
+                    'id' => $data->getRequestedBy()->getId(),
+                    'username' => $data->getRequestedBy()->getUsername(),
+                    'email' => $data->getRequestedBy()->getEmail()
+                ],
+                'project' => [
+                    'id' => $data->getProject()->getId(),
+                    'title' => $data->getProject()->getTitle()
+                ],
+                'company' => [
+                    'id' => $data->getCompany()->getId(),
+                    'title' => $data->getCompany()->getTitle()
+                ],
+                'taskData' => $taskDataArray,
+                'followers' => $followersArray,
+                'tags' => $tagsArray,
+                'taskHasAssignedUsers' => $taskHasAssignedUsersArray,
+                'taskHasAttachments' => $taskHasAttachmentsArray,
+                'comments' => $commentsArray,
+                'invoiceableItems' => $invoiceableItemsArray
+            ];
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param Comment $comment
+     * @param array $commentsArray
+     * @param array $processedCommentsIds
+     * @param int $parentId
+     * @param bool $addToArray
+     * @return array
+     */
+    private function buildCommentTree(Comment $comment, array &$commentsArray, array &$processedCommentsIds, int $parentId, $addToArray = false):array
+    {
+        if ($addToArray) {
+            $processedCommentsIds[] = $comment->getId();
+            $commentsArray[$parentId][] = [
+                'child' => true,
+                'parentId' => $parentId,
+                'id' => $comment->getId(),
+                'title' => $comment->getTitle(),
+                'body' => $comment->getBody(),
+                'createdAt' => $comment->getCreatedAt(),
+                'updatedAt' => $comment->getUpdatedAt(),
+                'internal' => $comment->getInternal(),
+                'email' => $comment->getEmail(),
+                'email_to' => $comment->getEmailTo(),
+                'email_cc' => $comment->getEmailCc(),
+                'email_bcc' => $comment->getEmailBcc(),
+                'createdBy' => [
+                    'id' => $comment->getCreatedBy()->getId(),
+                    'username' => $comment->getCreatedBy()->getUsername(),
+                    'email' => $comment->getCreatedBy()->getEmail()
+                ]
+            ];
+        }
+
+        $children = $comment->getInversedComment();
+        foreach ($children as $child) {
+            $this->buildCommentTree($child, $commentsArray, $processedCommentsIds, $comment->getId(), true);
+        }
+
+        return $commentsArray;
     }
 }

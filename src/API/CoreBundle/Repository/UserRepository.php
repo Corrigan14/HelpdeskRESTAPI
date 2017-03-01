@@ -99,6 +99,8 @@ class UserRepository extends EntityRepository
                 ->leftJoin('u.company', 'company')
                 ->leftJoin('company.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
+                ->orderBy('u.id')
+                ->distinct()
                 ->where('u.is_active = :isActive');
             $parameters['isActive'] = $isActiveParam;
         } else {
@@ -108,21 +110,33 @@ class UserRepository extends EntityRepository
                 ->leftJoin('u.user_role', 'userRole')
                 ->leftJoin('u.company', 'company')
                 ->leftJoin('company.companyData', 'companyData')
-                ->leftJoin('companyData.companyAttribute', 'companyAttribute');
+                ->leftJoin('companyData.companyAttribute', 'companyAttribute')
+                ->orderBy('u.id')
+                ->distinct();
         }
 
         if ($term) {
-            $query->andWhere('u.username LIKE :term')
-                ->orWhere('u.email LIKE :term')
-                ->orWhere('company.title LIKE :term');
+            $query->andWhere('u.username LIKE :term OR u.email LIKE :term OR company.title LIKE :term');
             $parameters['term'] = '%' . $term . '%';
         }
-
         $query->setParameters($parameters);
-        $query->setMaxResults(self::LIMIT);
-        $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
 
-        return $query->getQuery()->getArrayResult();
+        // Pagination
+        if (1 < $page) {
+            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
+        } else {
+            $query->setFirstResult(0);
+        }
+
+        $query->setMaxResults(self::LIMIT);
+
+        $paginator = new Paginator($query, $fetchJoinCollection = true);
+        $count = $paginator->count();
+
+        return [
+            'count' => $count,
+            'array' => $this->formatData($paginator)
+        ];
     }
 
     /**
@@ -200,7 +214,7 @@ class UserRepository extends EntityRepository
                 'is_active' => $data->getIsActive(),
                 'image' => $data->getImage(),
                 'detailData' => $detailDataArray,
-                'user_role'=>[
+                'user_role' => [
                     'id' => $data->getUserRole()->getId(),
                     'title' => $data->getUserRole()->getTitle(),
                     'description' => $data->getUserRole()->getDescription(),

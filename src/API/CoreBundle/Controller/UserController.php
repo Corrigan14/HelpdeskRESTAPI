@@ -28,113 +28,57 @@ class UserController extends ApiBaseController
      * ### Response ###
      *     {
      *       "data":
-     *       [
+     *         *       [
      *          {
-     *            "id": "1",
-     *            "username": "admin",
-     *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
-     *            "email": "admin@admin.sk",
-     *            "roles": "[\"ROLE_ADMIN\"]",
-     *            "language": "AJ",
-     *            "is_active": true,
-     *            "image": null,
-     *            "detailData":
-     *            {
-     *               "id": 4,
-     *               "name": "Martinka",
-     *               "surname": "Babinska",
-     *               "title_before": null,
-     *               "title_after": null,
-     *               "function": null,
-     *               "mobile": null,
-     *               "tel": null,
-     *               "fax": null,
-     *               "signature": null,
-     *               "street": null,
-     *               "city": null,
-     *               "zip": null,
-     *               "country": null,
-     *               "facebook": "facebook.sk",
-     *               "twitter": "twitter.sk",
-     *               "linkdin": "linkdin.sk",
-     *               "google": "google.sk"
-     *            },
-     *            "user_role":
-     *            {
-     *               "id": 2,
-     *               "title": "ADMIN",
-     *               "description": null,
-     *               "homepage": "/",
-     *               "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *               "is_active": true
-     *               "order": 2
-     *            }
-     *          },
-     *          {
-     *            "id": 69,
-     *            "username": "manager",
-     *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
-     *            "email": "manager@manager.sk",
-     *            "roles": "[\"ROLE_USER\"]",
-     *            "language": "AJ",
-     *            "is_active": true,
-     *            "image": null,
-     *            "detailData": null,
-     *            "user_role":
-     *            {
-     *              "id": 26,
-     *              "title": "MANAGER",
-     *              "description": null,
-     *              "homepage": "/",
-     *              "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *              "is_active": true,
-     *              "order": 2
-     *            },
-     *            "company":
-     *            {
-     *              "id": 1,
-     *              "title": "Web-Solutions",
-     *              "ico": "1102587",
-     *              "dic": "12587459644",
-     *              "street": "Cesta 125",
-     *              "city": "Bratislava",
-     *              "zip": "021478",
-     *              "country": "Slovenska Republika",
-     *              "is_active": true,
-     *              "companyData": {
-     *              {
-     *                 "id": 44,
-     *                 "value": "data val",
-     *                 "companyAttribute":
-     *                 {
-     *                    "id": 1,
-     *                    "title": "input company additional attribute",
-     *                    "type": "input",
-     *                    "is_active": true
-     *                  }
+     *             "id": 2581,
+     *             "username": "customer2",
+     *             "email": "customer@customer2.sk",
+     *             "language": "AJ",
+     *             "is_active": true,
+     *             "image": null,
+     *             "detailData":
+     *             {
+     *                "id": 2306,
+     *                "name": "Customer2",
+     *                "surname": "Customerovic2",
+     *                "title_before": null,
+     *                "title_after": null,
+     *                "function": null,
+     *                "mobile": null,
+     *                "tel": null,
+     *                "fax": null,
+     *                "signature": null,
+     *                "street": null,
+     *                "city": null,
+     *                "zip": null,
+     *                "country": null,
+     *                "facebook": null,
+     *                "twitter": null,
+     *                "linkdin": null,
+     *                "google": null
      *              },
+     *              "user_role":
      *              {
-     *                "id": 45,
-     *                "value": "data valluesgyda gfg",
-     *                "companyAttribute":
-     *                {
-     *                  "id": 2,
-     *                  "title": "select company additional attribute",
-     *                  "type": "simple_select",
-     *                  "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
-     *                  "is_active": true
-     *                }
+     *                 "id": 157,
+     *                 "title": "CUSTOMER",
+     *                 "description": null,
+     *                 "homepage": "/",
+     *                 "acl":
+     *                 [
+     *                    "login_to_system",
+     *                    "create_tasks"
+     *                 ],
+     *                 "order": 4
      *              }
-     *            }
-     *         }
+     *           },
      *       ]
      *       "_links":
      *       {
-     *           "self": "/api/v1/core-bundle/users?page=1&fields=id,email,username",
-     *           "first": "/api/v1/core-bundle/users?page=1&fields=id,email,username",
+     *           "self": "/api/v1/core-bundle/users?page=1",
+     *           "first": "/api/v1/core-bundle/users?page=1",
      *           "prev": false,
-     *           "next": "/api/v1/core-bundle/users?page=2&fields=id,email,username",
-     *           "last": "/api/v1/core-bundle/users?page=3&fields=id,email,username"
+     *           "next": "/api/v1/core-bundle/users?page=2",
+     *           "last": "/api/v1/core-bundle/users?page=3"
      *       },
      *       "total": 22,
      *       "page": 1,
@@ -1183,103 +1127,47 @@ class UserController extends ApiBaseController
      *       "data":
      *       [
      *          {
-     *            "id": "1",
-     *            "username": "admin",
-     *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
-     *            "email": "admin@admin.sk",
-     *            "roles": "[\"ROLE_ADMIN\"]",
-     *            "language": "AJ",
-     *            "is_active": true,
-     *            "image": null,
-     *            "detailData":
-     *            {
-     *               "id": 4,
-     *               "name": "Martinka",
-     *               "surname": "Babinska",
-     *               "title_before": null,
-     *               "title_after": null,
-     *               "function": null,
-     *               "mobile": null,
-     *               "tel": null,
-     *               "fax": null,
-     *               "signature": null,
-     *               "street": null,
-     *               "city": null,
-     *               "zip": null,
-     *               "country": null,
-     *               "facebook": "facebook.sk",
-     *               "twitter": "twitter.sk",
-     *               "linkdin": "linkdin.sk",
-     *               "google": "google.sk"
-     *            },
-     *            "user_role":
-     *            {
-     *               "id": 2,
-     *               "title": "ADMIN",
-     *               "description": null,
-     *               "homepage": "/",
-     *               "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *               "is_active": true
-     *               "order": 2
-     *            }
-     *          },
-     *          {
-     *            "id": 69,
-     *            "username": "manager",
-     *            "password": "$2y$13$Ki4oUBYQ0/4eJSluQ.hGyucdHtmWqPI10tl6tqbUF/2iMxWi3CLZy",
-     *            "email": "manager@manager.sk",
-     *            "roles": "[\"ROLE_USER\"]",
-     *            "language": "AJ",
-     *            "is_active": true,
-     *            "image": null,
-     *            "detailData": null,
-     *            "user_role":
-     *            {
-     *              "id": 26,
-     *              "title": "MANAGER",
-     *              "description": null,
-     *              "homepage": "/",
-     *              "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *              "is_active": true,
-     *              "order": 2
-     *            },
-     *            "company":
-     *            {
-     *              "id": 1,
-     *              "title": "Web-Solutions",
-     *              "ico": "1102587",
-     *              "dic": "12587459644",
-     *              "street": "Cesta 125",
-     *              "city": "Bratislava",
-     *              "zip": "021478",
-     *              "country": "Slovenska Republika",
-     *              "is_active": true,
-     *              "companyData": {
-     *              {
-     *                 "id": 44,
-     *                 "value": "data val",
-     *                 "companyAttribute":
-     *                 {
-     *                    "id": 1,
-     *                    "title": "input company additional attribute",
-     *                    "type": "input",
-     *                    "is_active": true
-     *                  }
+     *             "id": 2581,
+     *             "username": "customer2",
+     *             "email": "customer@customer2.sk",
+     *             "language": "AJ",
+     *             "is_active": true,
+     *             "image": null,
+     *             "detailData":
+     *             {
+     *                "id": 2306,
+     *                "name": "Customer2",
+     *                "surname": "Customerovic2",
+     *                "title_before": null,
+     *                "title_after": null,
+     *                "function": null,
+     *                "mobile": null,
+     *                "tel": null,
+     *                "fax": null,
+     *                "signature": null,
+     *                "street": null,
+     *                "city": null,
+     *                "zip": null,
+     *                "country": null,
+     *                "facebook": null,
+     *                "twitter": null,
+     *                "linkdin": null,
+     *                "google": null
      *              },
+     *              "user_role":
      *              {
-     *                "id": 45,
-     *                "value": "data valluesgyda gfg",
-     *                "companyAttribute":
-     *                {
-     *                  "id": 2,
-     *                  "title": "select company additional attribute",
-     *                  "type": "simple_select",
-     *                  "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
-     *                  "is_active": true
-     *                }
+     *                 "id": 157,
+     *                 "title": "CUSTOMER",
+     *                 "description": null,
+     *                 "homepage": "/",
+     *                 "acl":
+     *                 [
+     *                    "login_to_system",
+     *                    "create_tasks"
+     *                 ],
+     *                 "order": 4
      *              }
-     *            }
-     *         }
+     *           },
      *       ]
      *       "_links":
      *       {

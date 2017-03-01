@@ -91,17 +91,15 @@ class UserService
      */
     public function getUsersSearchResponse($term, int $page, $isActive, array $filtersForUrl):array
     {
-        /** @var UserRepository $userRepository */
-        $userRepository = $this->em->getRepository('APICoreBundle:User');
-        $users = $userRepository->getUsersSearch($term, $page, $isActive);
+        $responseData = $this->em->getRepository('APICoreBundle:User')->getUsersSearch($term, $page, $isActive);
 
         $response = [
-            'data' => $users,
+            'data' => $responseData['array'],
         ];
 
         $url = $this->router->generate('user_search');
         $limit = UserRepository::LIMIT;
-        $count = $userRepository->countUsers($isActive, $term);
+        $count = $responseData['count'];
 
         $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filtersForUrl);
 

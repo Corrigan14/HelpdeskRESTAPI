@@ -224,6 +224,10 @@ class Smtp
      */
     public function setSsl($ssl)
     {
+        if (is_string($ssl)) {
+            $ssl = $ssl === 'true' ? true : false;
+        }
+
         $this->ssl = $ssl;
 
         return $this;
@@ -248,6 +252,10 @@ class Smtp
      */
     public function setTls($tls)
     {
+        if (is_string($tls)) {
+            $tls = $tls === 'true' ? true : false;
+        }
+
         $this->tls = $tls;
 
         return $this;

@@ -140,6 +140,10 @@ class Tag
      */
     public function setPublic($public)
     {
+        if (is_string($public)) {
+            $public = $public === 'true' ? true : false;
+        }
+
         $this->public = $public;
 
         return $this;

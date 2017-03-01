@@ -118,6 +118,10 @@ class SystemSettings
      */
     public function setIsActive($isActive)
     {
+        if (is_string($isActive)) {
+            $isActive = $isActive === 'true' ? true : false;
+        }
+
         $this->is_active = $isActive;
 
         return $this;

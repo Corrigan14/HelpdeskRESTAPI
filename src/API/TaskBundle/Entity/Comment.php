@@ -203,6 +203,10 @@ class Comment
      */
     public function setInternal($internal)
     {
+        if (is_string($internal)) {
+            $internal = $internal === 'true' ? true : false;
+        }
+
         $this->internal = $internal;
 
         return $this;
@@ -227,6 +231,10 @@ class Comment
      */
     public function setEmail($email)
     {
+        if (is_string($email)) {
+            $email = $email === 'true' ? true : false;
+        }
+
         $this->email = $email;
 
         return $this;

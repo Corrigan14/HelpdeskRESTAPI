@@ -832,17 +832,6 @@ class FilterController extends ApiBaseController implements ControllerInterface
 
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
-        // Set is_active param
-        if (array_key_exists('is_active', $data)) {
-            $isActive = strtolower($data['is_active']);
-            unset($data['is_active']);
-            if ('true' === $isActive || true === $isActive || '1' === $isActive || 1 === $isActive) {
-                $filter->setIsActive(true);
-            } elseif ('false' === $isActive || false === $isActive || '0' === $isActive || 0 === $isActive) {
-                $filter->setIsActive(false);
-            }
-        }
-
         // Check if every key sent in filter array is allowed in FilterOptions
         if (isset($data['filter'])) {
             $filters = $data['filter'];

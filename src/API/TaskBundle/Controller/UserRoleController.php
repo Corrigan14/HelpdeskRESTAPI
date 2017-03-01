@@ -680,17 +680,6 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
             'is_active'
         ];
 
-        // Set is_active param
-        if (array_key_exists('is_active', $requestData)) {
-            $isActive = strtolower($requestData['is_active']);
-            unset($requestData['is_active']);
-            if ('true' === $isActive || true === $isActive || '1' === $isActive || 1 === $isActive) {
-                $userRole->setIsActive(true);
-            } elseif ('false' === $isActive || false === $isActive || '0' === $isActive || 0 === $isActive) {
-                $userRole->setIsActive(false);
-            }
-        }
-
         if (array_key_exists('_format', $requestData)) {
             unset($requestData['_format']);
         }

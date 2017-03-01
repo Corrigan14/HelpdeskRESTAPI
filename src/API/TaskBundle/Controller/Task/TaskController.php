@@ -2832,8 +2832,7 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private
-    function getFilterDataFromSavedFilterArray(array $filterDataArray): array
+    private function getFilterDataFromSavedFilterArray(array $filterDataArray): array
     {
         $data = [];
 
@@ -2895,8 +2894,7 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private
-    function processFilterData(array $data): array
+    private function processFilterData(array $data): array
     {
         // Ina-beznejsia moznost ako zadavat pole hodnot v URL adrese, ktora vracia priamo pole: index.php?id[]=1&id[]=2&id[]=3&name=john
         // na zakodovanie dat do URL je mozne pouzit encodeURIComponent
@@ -3098,8 +3096,7 @@ class TaskController extends ApiBaseController
      *
      * @return array
      */
-    private
-    function separateFromToDateData(string $created): array
+    private function separateFromToDateData(string $created): array
     {
         $fromPosition = strpos($created, 'FROM=');
         $toPosition = strpos($created, 'TO=');
@@ -3126,8 +3123,7 @@ class TaskController extends ApiBaseController
      * @param Project $project
      * @return bool
      */
-    private
-    function checkIfUserHasResolveTaskAclPermission(TaskHasAssignedUser $entity, Project $project):bool
+    private function checkIfUserHasResolveTaskAclPermission(TaskHasAssignedUser $entity, Project $project):bool
     {
         $user = $entity->getUser();
         $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([

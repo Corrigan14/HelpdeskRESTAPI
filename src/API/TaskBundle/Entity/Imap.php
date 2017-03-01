@@ -269,12 +269,15 @@ class Imap
     /**
      * Set ignoreCertificate
      *
-     * @param boolean $ignoreCertificate
+     * @param boolean|string $ignoreCertificate
      *
      * @return Imap
      */
     public function setIgnoreCertificate($ignoreCertificate)
     {
+        if (is_string($ignoreCertificate)) {
+            $ignoreCertificate = $ignoreCertificate === 'true' ? true : false;
+        }
         $this->ignore_certificate = $ignoreCertificate;
 
         return $this;
@@ -293,12 +296,16 @@ class Imap
     /**
      * Set ssl
      *
-     * @param boolean $ssl
+     * @param boolean|string $ssl
      *
      * @return Imap
      */
     public function setSsl($ssl)
     {
+        if (is_string($ssl)) {
+            $ssl = $ssl === 'true' ? true : false;
+        }
+
         $this->ssl = $ssl;
 
         return $this;

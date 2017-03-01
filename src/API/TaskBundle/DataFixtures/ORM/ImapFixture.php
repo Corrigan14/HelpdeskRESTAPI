@@ -43,7 +43,7 @@ class ImapFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
         $imap->setPort(143);
         $imap->setName('symfony@lanhelpdesk.com');
         $imap->setPassword('eglrdAYVXB@18');
-        $imap->setSsl(false);
+        $imap->setSsl('false');
         $imap->setInboxEmail('symfony@lanhelpdesk.com');
         $imap->setMoveEmail('done@done.sk');
         $imap->setIgnoreCertificate(true);

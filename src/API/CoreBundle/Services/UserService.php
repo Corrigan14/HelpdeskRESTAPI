@@ -39,7 +39,6 @@ class UserService
     /**
      * Return Users Response  which includes Data and Links and Pagination
      *
-     * @param array $fields
      * @param int $page
      *
      * @param string $isActive
@@ -47,21 +46,19 @@ class UserService
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function getUsersResponse(array $fields, int $page, $isActive)
+    public function getUsersResponse(int $page, $isActive)
     {
-        /** @var UserRepository $userRepository */
-        $userRepository = $this->em->getRepository('APICoreBundle:User');
-        $users = $userRepository->getCustomUsers($fields, $page, $isActive);
+        $responseData = $this->em->getRepository('APICoreBundle:User')->getCustomUsers($page, $isActive);
 
         $response = [
-            'data' => $users,
+            'data' => $responseData['array'],
         ];
         $pagination = HateoasHelper::getPagination(
             $this->router->generate('users_list'),
             $page,
-            $userRepository->countUsers($isActive),
+            $responseData['count'],
             UserRepository::LIMIT,
-            $fields,
+            [],
             $isActive
         );
 

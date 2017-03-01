@@ -146,10 +146,6 @@ class UserController extends ApiBaseController
      *  a fields option to get custom data",
      *  filters={
      *     {
-     *       "name"="fields",
-     *       "description"="Custom fields to get only selected data, see options in list of parameters"
-     *     },
-     *     {
      *       "name"="isActive",
      *       "description"="Return's only ACTIVE users if this param is TRUE, only INACTIVE users if param is FALSE"
      *     },
@@ -192,11 +188,10 @@ class UserController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
-        $fields = $request->get('fields') ? explode(',', $request->get('fields')) : [];
         $page = $request->get('page') ?: 1;
         $isActive = $request->get('isActive') ?: 'all';
 
-        return $this->json($this->get('api_user.service')->getUsersResponse($fields, $page, $isActive), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($this->get('api_user.service')->getUsersResponse($page, $isActive), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

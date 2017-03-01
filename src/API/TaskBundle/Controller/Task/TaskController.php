@@ -37,189 +37,146 @@ class TaskController extends ApiBaseController
      *     {
      *       "data":
      *       [
-     *          {
-     *             "id": 59,
-     *             "title": "Task 1 - user is creator, user is requested",
-     *             "description": "Description of Task 1",
-     *             "deadline": null,
-     *             "startedAt": null,
-     *             "closedAt": null,
-     *             "important": false,
-     *             "createdAt":
-     *             {
-     *               "date": "2017-01-03 22:16:51.000000",
+     *         {
+     *            "id": 62020,
+     *            "title": "Task 3 - admin is creator, admin is requested",
+     *            "description": "Description of Task 3",
+     *            "deadline": null,
+     *            "startedAt": null,
+     *            "closedAt": null,
+     *            "important": false,
+     *            "work": null,
+     *            "work_time": null,
+     *            "createdAt":
+     *            {
+     *               "date": "2017-02-27 15:55:15.000000",
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *               "date": "2017-01-03 14:16:51.000000",
+     *            },
+     *            "updatedAt":
+     *            {
+     *               "date": "2017-02-27 15:55:15.000000",
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
+     *            },
+     *            "createdBy":
+     *            {
+     *               "id": 2575,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk"
+     *            },
+     *            "requestedBy":
+     *            {
+     *               "id": 2575,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk"
+     *            },
+     *            "project":
+     *            {
+     *               "id": 284,
+     *               "title": "Project of user 1"
      *             },
-     *             "taskData":
-     *             [
-     *               {
-     *                  "id": 39,
-     *                  "value": "some input",
-     *                  "taskAttribute":
-     *                  {
-     *                     "id": 52,
-     *                     "title": "input task additional attribute",
-     *                     "type": "input",
-     *                     "options": null,
-     *                     "is_active": true
-     *                  }
-     *               },
-     *               {
-     *                 "id": 40,
-     *                 "value": "select1",
+     *            "company":
+     *            {
+     *               "id": 1802,
+     *               "title": "Web-Solutions"
+     *            },
+     *            "taskData":
+     *            [
+     *              {
+     *                 "id": 113,
+     *                 "value": "some input",
      *                 "taskAttribute":
      *                 {
-     *                    "id": 53,
-     *                    "title": "select task additional attribute",
-     *                    "type": "simple_select",
-     *                    "options":
-     *                    "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
-     *                    "is_active": true
-     *                 }
-     *               }
-     *             ],
-     *             "project":
-     *             {
-     *                "id": 86,
-     *                "title": "Project of user 1",
-     *                "description": "Description of project 1.",
-     *                "is_active": false,
-     *                "createdAt":
-     *                {
-     *                   "date": "2017-01-03 14:16:51.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
-     *                },
-     *                "updatedAt":
-     *                {
-     *                   "date": "2017-01-03 14:16:51.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
-     *                }
-     *             },
-     *             "createdBy":
-     *             {
-     *                "id": 65,
-     *                "username": "user",
-     *                "password": "$2y$13$upBgDlLWe7MhoAzma.kvoufabj4cNAZQ9BgG412hU7KohSLxxZ4NW",
-     *                "email": "user@user.sk",
-     *                "roles": "[\"ROLE_USER\"]",
-     *                "is_active": true,
-     *                "image": null,
-     *                "company":
-     *                {
-     *                   "id": 65,
-     *                   "title": "LanSystems",
-     *                   "ico": "110258782",
-     *                   "dic": "12587458996244",
-     *                   "ic_dph": null,
-     *                   "street": "Ina cesta 125",
-     *                   "city": "Bratislava",
-     *                   "zip": "021478",
-     *                   "country": "Slovenska Republika",
-     *                   "is_active": true
-     *                 },
-     *                 "user_role":
-     *                 {
-     *                   "id": 2,
-     *                   "title": "MANAGER",
-     *                   "description": null,
-     *                   "homepage": "/",
-     *                   "acl":
-     *                   "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                   "is_active": true
-     *                   "order": 2
-     *                 }
-     *             },
-     *             "requestedBy":
-     *             {
-     *                "id": 65,
-     *                "username": "user",
-     *                "password": "$2y$13$upBgDlLWe7MhoAzma.kvoufabj4cNAZQ9BgG412hU7KohSLxxZ4NW",
-     *                "email": "user@user.sk",
-     *                "roles": "[\"ROLE_USER\"]",
-     *                "is_active": true,
-     *                "image": null,
-     *                "user_role":
-     *                 {
-     *                   "id": 2,
-     *                   "title": "MANAGER",
-     *                   "description": null,
-     *                   "homepage": "/",
-     *                   "acl":
-     *                   "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                   "is_active": true
-     *                   "order": 2
-     *                 }
-     *             },
-     *             "taskHasAssignedUsers":
-     *             [
-     *                {
-     *                   "id": 28,
-     *                   "status_date": null,
-     *                   "time_spent": null,
-     *                   "createdAt":
-     *                   {
-     *                      "date": "2017-01-03 14:16:51.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                   },
-     *                   "updatedAt":
-     *                   {
-     *                      "date": "2017-01-03 14:16:51.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                   },
-     *                  "status":
-     *                  {
-     *                     "id": 84,
-     *                     "title": "Completed",
-     *                     "is_active": true
-     *                  },
-     *                 "user":
-     *                 {
-     *                     "id": 65,
-     *                     "username": "user",
-     *                     "password": "$2y$13$upBgDlLWe7MhoAzma.kvoufabj4cNAZQ9BgG412hU7KohSLxxZ4NW",
-     *                     "email": "user@user.sk",
-     *                     "roles": "[\"ROLE_USER\"]",
-     *                     "is_active": true,
-     *                     "image": null,
-     *                     "user_role":
-     *                      {
-     *                          "id": 2,
-     *                          "title": "MANAGER",
-     *                          "description": null,
-     *                          "homepage": "/",
-     *                          "acl":
-     *                          "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                          "is_active": true
-     *                          "order": 2
-     *                      }
+     *                    "id": 169,
+     *                    "title": "input task additional attribute"
      *                  }
+     *               }
+     *            ],
+     *            "followers": [],
+     *            "tags":
+     *            [
+     *               {
+     *                  "id": 71,
+     *                  "title": "Free Time",
+     *                  "color": "BF4848"
+     *               },
+     *               {
+     *                  "id": 73,
+     *                  "title": "Home",
+     *                  "color": "DFD112"
      *                }
-     *             ],
-     *             "company":
-     *             {
-     *                "id": 317,
-     *                "title": "Web-Solutions",
-     *                "ico": "1102587",
-     *                "dic": "12587459644",
-     *                "ic_dph": null,
-     *                "street": "Cesta 125",
-     *                "city": "Bratislava",
-     *                "zip": "021478",
-     *                "country": "Slovenska Republika",
-     *                "is_active": true
-     *             }
-     *          }
+     *            ],
+     *            "taskHasAssignedUsers": [],
+     *            "taskHasAttachments": [],
+     *            "comments":
+     *            {
+     *               "0":
+     *               {
+     *                  "parent": true,
+     *                  "id": 30,
+     *                  "title": "Koment - public",
+     *                  "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *                  "createdAt":
+     *                  {
+     *                     "date": "2017-02-27 15:55:17.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                     "date": "2017-02-27 15:55:17.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                   },
+     *                   "internal": false,
+     *                   "email": false,
+     *                   "email_to": false,
+     *                   "email_cc": false,
+     *                   "email_bcc": false,
+     *                   "createdBy":
+     *                   {
+     *                      "id": 2575,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk"
+     *                   }
+     *               },
+     *               "30":
+     *               [
+     *                  {
+     *                      "child": true,
+     *                      "parentId": 30,
+     *                      "id": 30,
+     *                      "title": "Koment - public",
+     *                      "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *                      "createdAt":
+     *                      {
+     *                         "date": "2017-02-27 15:55:17.000000",
+     *                         "timezone_type": 3,
+     *                         "timezone": "Europe/Berlin"
+     *                       },
+     *                      "updatedAt":
+     *                      {
+     *                         "date": "2017-02-27 15:55:17.000000",
+     *                         "timezone_type": 3,
+     *                         "timezone": "Europe/Berlin"
+     *                      },
+     *                      "internal": false,
+     *                      "email": false,
+     *                      "email_to": false,
+     *                      "email_cc": false,
+     *                      "email_bcc": false,
+     *                      "createdBy":
+     *                      {
+     *                         "id": 2575,
+     *                         "username": "admin",
+     *                         "email": "admin@admin.sk"
+     *                      }
+     *                   }
+     *                ]
+     *             },
+     *             "invoiceableItems": []
+     *           }
      *       ],
      *       "_links":
      *       {
@@ -384,200 +341,154 @@ class TaskController extends ApiBaseController
      *     {
      *       "data":
      *       [
-     *          {
-     *             "id": 59,
-     *             "title": "Task 1 - user is creator, user is requested",
-     *             "description": "Description of Task 1",
-     *             "deadline": null,
-     *             "startedAt": null,
-     *             "closedAt": null,
-     *             "important": false,
-     *             "createdAt":
-     *             {
-     *               "date": "2017-01-03 22:16:51.000000",
+     *         {
+     *            "id": 62020,
+     *            "title": "Task 3 - admin is creator, admin is requested",
+     *            "description": "Description of Task 3",
+     *            "deadline": null,
+     *            "startedAt": null,
+     *            "closedAt": null,
+     *            "important": false,
+     *            "work": null,
+     *            "work_time": null,
+     *            "createdAt":
+     *            {
+     *               "date": "2017-02-27 15:55:15.000000",
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *               "date": "2017-01-03 14:16:51.000000",
+     *            },
+     *            "updatedAt":
+     *            {
+     *               "date": "2017-02-27 15:55:15.000000",
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
+     *            },
+     *            "createdBy":
+     *            {
+     *               "id": 2575,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk"
+     *            },
+     *            "requestedBy":
+     *            {
+     *               "id": 2575,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk"
+     *            },
+     *            "project":
+     *            {
+     *               "id": 284,
+     *               "title": "Project of user 1"
      *             },
-     *             "taskData":
-     *             [
-     *               {
-     *                  "id": 39,
-     *                  "value": "some input",
-     *                  "taskAttribute":
-     *                  {
-     *                     "id": 52,
-     *                     "title": "input task additional attribute",
-     *                     "type": "input",
-     *                     "options": null,
-     *                     "is_active": true
-     *                  }
-     *               },
-     *               {
-     *                 "id": 40,
-     *                 "value": "select1",
+     *            "company":
+     *            {
+     *               "id": 1802,
+     *               "title": "Web-Solutions"
+     *            },
+     *            "taskData":
+     *            [
+     *              {
+     *                 "id": 113,
+     *                 "value": "some input",
      *                 "taskAttribute":
      *                 {
-     *                    "id": 53,
-     *                    "title": "select task additional attribute",
-     *                    "type": "simple_select",
-     *                    "options":
-     *                    "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
-     *                    "is_active": true
-     *                 }
-     *               }
-     *             ],
-     *             "project":
-     *             {
-     *                "id": 86,
-     *                "title": "Project of user 1",
-     *                "description": "Description of project 1.",
-     *                "is_active": false,
-     *                "createdAt":
-     *                {
-     *                   "date": "2017-01-03 14:16:51.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
-     *                },
-     *                "updatedAt":
-     *                {
-     *                   "date": "2017-01-03 14:16:51.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
-     *                }
-     *             },
-     *             "createdBy":
-     *             {
-     *                "id": 65,
-     *                "username": "user",
-     *                "password": "$2y$13$upBgDlLWe7MhoAzma.kvoufabj4cNAZQ9BgG412hU7KohSLxxZ4NW",
-     *                "email": "user@user.sk",
-     *                "roles": "[\"ROLE_USER\"]",
-     *                "is_active": true,
-     *                "image": null,
-     *                "detailData":
-     *                {
-     *                  "name": "Martina",
-     *                  "surname": "Kollar",
-     *                  "title_before": null,
-     *                  "title_after": null,
-     *                  "function": "developer",
-     *                  "mobile": "00421 0987 544",
-     *                  "tel": null,
-     *                  "fax": null,
-     *                  "signature": "Martina Kollar, Web-Solutions",
-     *                  "street": "Nova 487",
-     *                  "city": "Bratislava",
-     *                  "zip": "025874",
-     *                  "country": "SR"
-     *                },
-     *                "company":
-     *                {
-     *                   "id": 65,
-     *                   "title": "LanSystems",
-     *                   "ico": "110258782",
-     *                   "dic": "12587458996244",
-     *                   "ic_dph": null,
-     *                   "street": "Ina cesta 125",
-     *                   "city": "Bratislava",
-     *                   "zip": "021478",
-     *                   "country": "Slovenska Republika",
-     *                   "is_active": true
-     *                 },
-     *                 "user_role":
-     *                 {
-     *                   "id": 2,
-     *                   "title": "MANAGER",
-     *                   "description": null,
-     *                   "homepage": "/",
-     *                   "acl":
-     *                   "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                   "is_active": true
-     *                   "order": 2
-     *                 }
-     *             },
-     *             "requestedBy":
-     *             {
-     *                "id": 65,
-     *                "username": "user",
-     *                "password": "$2y$13$upBgDlLWe7MhoAzma.kvoufabj4cNAZQ9BgG412hU7KohSLxxZ4NW",
-     *                "email": "user@user.sk",
-     *                "roles": "[\"ROLE_USER\"]",
-     *                "is_active": true,
-     *                "image": null,
-     *                "user_role":
-     *                 {
-     *                   "id": 2,
-     *                   "title": "MANAGER",
-     *                   "description": null,
-     *                   "homepage": "/",
-     *                   "acl":
-     *                   "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                   "is_active": true
-     *                   "order": 2
-     *                 }
-     *             },
-     *             "taskHasAssignedUsers":
-     *             [
-     *                {
-     *                   "id": 28,
-     *                   "status_date": null,
-     *                   "time_spent": null,
-     *                   "createdAt":
-     *                   {
-     *                      "date": "2017-01-03 14:16:51.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                   },
-     *                   "updatedAt":
-     *                   {
-     *                      "date": "2017-01-03 14:16:51.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                   },
-     *                  "status":
-     *                  {
-     *                     "id": 84,
-     *                     "title": "Completed",
-     *                     "is_active": true
-     *                  },
-     *                 "user":
-     *                 {
-     *                     "id": 65,
-     *                     "username": "user",
-     *                     "password": "$2y$13$upBgDlLWe7MhoAzma.kvoufabj4cNAZQ9BgG412hU7KohSLxxZ4NW",
-     *                     "email": "user@user.sk",
-     *                     "roles": "[\"ROLE_USER\"]",
-     *                     "is_active": true,
-     *                     "image": null,
-     *                     "user_role":
-     *                     {
-     *                        "id": 2,
-     *                        "title": "MANAGER",
-     *                        "description": null,
-     *                        "homepage": "/",
-     *                        "acl":
-     *                        "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                        "is_active": true
-     *                        "order": 2
-     *                     }
+     *                    "id": 169,
+     *                    "title": "input task additional attribute"
      *                  }
+     *               }
+     *            ],
+     *            "followers": [],
+     *            "tags":
+     *            [
+     *               {
+     *                  "id": 71,
+     *                  "title": "Free Time",
+     *                  "color": "BF4848"
+     *               },
+     *               {
+     *                  "id": 73,
+     *                  "title": "Home",
+     *                  "color": "DFD112"
      *                }
-     *             ]
-     *          }
+     *            ],
+     *            "taskHasAssignedUsers": [],
+     *            "taskHasAttachments": [],
+     *            "comments":
+     *            {
+     *               "0":
+     *               {
+     *                  "parent": true,
+     *                  "id": 30,
+     *                  "title": "Koment - public",
+     *                  "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *                  "createdAt":
+     *                  {
+     *                     "date": "2017-02-27 15:55:17.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                     "date": "2017-02-27 15:55:17.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                   },
+     *                   "internal": false,
+     *                   "email": false,
+     *                   "email_to": false,
+     *                   "email_cc": false,
+     *                   "email_bcc": false,
+     *                   "createdBy":
+     *                   {
+     *                      "id": 2575,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk"
+     *                   }
+     *               },
+     *               "30":
+     *               [
+     *                  {
+     *                      "child": true,
+     *                      "parentId": 30,
+     *                      "id": 30,
+     *                      "title": "Koment - public",
+     *                      "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *                      "createdAt":
+     *                      {
+     *                         "date": "2017-02-27 15:55:17.000000",
+     *                         "timezone_type": 3,
+     *                         "timezone": "Europe/Berlin"
+     *                       },
+     *                      "updatedAt":
+     *                      {
+     *                         "date": "2017-02-27 15:55:17.000000",
+     *                         "timezone_type": 3,
+     *                         "timezone": "Europe/Berlin"
+     *                      },
+     *                      "internal": false,
+     *                      "email": false,
+     *                      "email_to": false,
+     *                      "email_cc": false,
+     *                      "email_bcc": false,
+     *                      "createdBy":
+     *                      {
+     *                         "id": 2575,
+     *                         "username": "admin",
+     *                         "email": "admin@admin.sk"
+     *                      }
+     *                   }
+     *                ]
+     *             },
+     *             "invoiceableItems": []
+     *           }
      *       ],
      *       "_links":
      *       {
-     *           "self": "/api/v1/task-bundle/task?page=1&filterId=145",
-     *           "first": "/api/v1/task-bundle/task?page=1&filterId=145",
+     *           "self": "/api/v1/task-bundle/task?page=1&project=145&creator=21",
+     *           "first": "/api/v1/task-bundle/task?page=1&project=145&creator=21",
      *           "prev": false,
-     *           "next": "/api/v1/task-bundle/task?page=2&filterId=145",
-     *           "last": "/api/v1/task-bundle/task?page=3&filterId=145"
+     *           "next": "/api/v1/task-bundle/task?page=2&project=145&creator=21",
+     *           "last": "/api/v1/task-bundle/task?page=3&project=145&creator=21"
      *       },
      *       "total": 22,
      *       "page": 1,

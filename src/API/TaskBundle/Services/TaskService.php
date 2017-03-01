@@ -243,12 +243,11 @@ class TaskService
             $companyId = $usersCompany->getId();
         }
 
-        $usersTasks = $this->em->getRepository('APITaskBundle:Task')->getAllUsersTasks($page, $loggedUser->getId(), $companyId, $dividedProjects, $options);
-        $usersTasksCount = $this->em->getRepository('APITaskBundle:Task')->countAllUsersTasks($loggedUser->getId(), $companyId, $dividedProjects, $options);
+        $response = $this->em->getRepository('APITaskBundle:Task')->getAllUsersTasks($page, $loggedUser->getId(), $companyId, $dividedProjects, $options);
 
         return [
-            'tasks' => $usersTasks,
-            'count' => $usersTasksCount
+            'tasks' => $response['array'],
+            'count' => $response['count']
         ];
     }
 }

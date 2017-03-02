@@ -121,7 +121,7 @@ class TaskService
         ];
 
         $response = $this->getTaskResponse($ids);
-        $responseData['data'] = $response['data'][0];
+        $responseData['data'] = $response['data'];
         $responseData['data']['canEdit'] = $canEdit;
         $responseData['data']['follow'] = $followTask;
         $responseLinks['_links'] = $response['_links'];

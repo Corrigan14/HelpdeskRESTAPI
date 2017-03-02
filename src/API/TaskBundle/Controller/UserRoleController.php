@@ -30,7 +30,29 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *             "title": "ADMIN",
      *             "description": "Admin is a main system role. All ACL are available.",
      *             "homepage": "/",
-     *             "acl": "[\"login_to_system\",\"share_filters\",\"project_shared_filters\",\"report_filters\",\"share_tags\",\"create_projects\",\"sent_emails_from_comments\",\"create_tasks\",\"create_tasks_in_all_projects\",\"update_all_tasks\",\"user_settings\",\"user_role_settings\",\"company_attribute_settings\",\"company_settings\",\"status_settings\",\"task_attribute_settings\",\"unit_settings\",\"system_settings\",\"smtp_settings\",\"imap_settings\"]",
+     *             "acl":
+     *             [
+     *                "login_to_system",
+     *                "share_filters",
+     *                "project_shared_filters",
+     *                "report_filters",
+     *                "share_tags",
+     *                "create_projects",
+     *                "sent_emails_from_comments",
+     *                "create_tasks",
+     *                "create_tasks_in_all_projects",
+     *                "update_all_tasks",
+     *                "user_settings",
+     *                "user_role_settings",
+     *                "company_attribute_settings",
+     *                "company_settings",
+     *                "status_settings",
+     *                "task_attribute_settings",
+     *                "unit_settings",
+     *                "system_settings",
+     *                "smtp_settings",
+     *                "imap_settings"
+     *             ]
      *             "is_active": true,
      *             "order": 1
      *          },
@@ -39,7 +61,16 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *              "title": "MANAGER",
      *              "description": null,
      *              "homepage": "/",
-     *              "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *              "acl":
+     *              [
+     *                "login_to_system",
+     *                "create_tasks",
+     *                "create_projects",
+     *                "company_settings",
+     *                "report_filters",
+     *                "sent_emails_from_comments",
+     *                "update_all_tasks"
+     *              ]
      *              "is_active": true
      *              "order": 2
      *           },
@@ -48,7 +79,14 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *               "title": "AGENT",
      *               "description": null,
      *               "homepage": "/",
-     *               "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"sent_emails_from_comments\"]",
+     *               "acl":
+     *               [
+     *                  "login_to_system",
+     *                  "create_tasks",
+     *                  "create_projects",
+     *                  "company_settings",
+     *                  "sent_emails_from_comments"
+     *               ]
      *               "is_active": true
      *               "order": 3
      *            },
@@ -57,7 +95,11 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *                "title": "CUSTOMER",
      *                "description": null,
      *                "homepage": "/",
-     *                "acl": "[\"login_to_system\",\"create_tasks\"]",
+     *                "acl":
+     *                [
+     *                   "login_to_system",
+     *                   "create_tasks"
+     *                ],
      *                "is_active": true
      *                "order": 4
      *             }
@@ -135,37 +177,30 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *      {
      *        "data":
      *        {
-     *           "id": 121,
-     *           "title": "ADMIN",
-     *           "description": "Admin is a main system role. All ACL are available.",
+     *           "id": 155,
+     *           "title": "MANAGER",
+     *           "description": null,
      *           "homepage": "/",
-     *           "acl": "[\"login_to_system\",\"share_filters\",\"project_shared_filters\",\"report_filters\",\"share_tags\",\"create_projects\",\"sent_emails_from_comments\",\"create_tasks\",\"create_tasks_in_all_projects\",\"update_all_tasks\",\"user_settings\",\"user_role_settings\",\"company_attribute_settings\",\"company_settings\",\"status_settings\",\"task_attribute_settings\",\"unit_settings\",\"system_settings\",\"smtp_settings\",\"imap_settings\"]",
+     *           "acl":
+     *           [
+     *              "login_to_system",
+     *              "create_tasks",
+     *              "create_projects",
+     *              "company_settings",
+     *              "report_filters",
+     *              "sent_emails_from_comments",
+     *              "update_all_tasks"
+     *           ],
+     *           "order": 2,
      *           "is_active": true,
-     *           "order": 1,
      *           "users":
-     *           {
-     *              "0":
+     *           [
      *              {
-     *                 "id": 1742,
-     *                 "username": "admin",
-     *                 "password": "$2y$13$vMLBAio6obXwhTo8gvocwe.XkHq/PXeg3IwJLMHA5PF9u0s5npeM6",
-     *                 "email": "admin@admin.sk",
-     *                 "roles": "[\"ROLE_ADMIN\"]",
-     *                 "is_active": true,
-     *                 "language": "AJ"
-     *               },
-     *              "1":
-     *              {
-     *                 "id": 1743,
-     *                 "username": "admin2",
-     *                 "password": "$2y$13$vMLBAio6obXwhTo8gvocwe.XkHq/PXeg3IwJLMHA5PF9u0s5npeM6",
-     *                 "email": "admin@admin.sk",
-     *                 "roles": "[\"ROLE_ADMIN\"]",
-     *                 "is_active": true,
-     *                 "language": "AJ"
-     *               },
-     *
-     *            }
+     *                 "id": 2576,
+     *                 "username": "manager",
+     *                 "email": "manager@manager.sk"
+     *               }
+     *           ]
      *        },
      *        "_links":
      *        {
@@ -234,37 +269,30 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *      {
      *       "data":
      *        {
-     *           "id": 121,
-     *           "title": "ADMIN",
-     *           "description": "Admin is a main system role. All ACL are available.",
+     *           "id": 155,
+     *           "title": "MANAGER",
+     *           "description": null,
      *           "homepage": "/",
-     *           "acl": "[\"login_to_system\",\"share_filters\",\"project_shared_filters\",\"report_filters\",\"share_tags\",\"create_projects\",\"sent_emails_from_comments\",\"create_tasks\",\"create_tasks_in_all_projects\",\"update_all_tasks\",\"user_settings\",\"user_role_settings\",\"company_attribute_settings\",\"company_settings\",\"status_settings\",\"task_attribute_settings\",\"unit_settings\",\"system_settings\",\"smtp_settings\",\"imap_settings\"]",
+     *           "acl":
+     *           [
+     *              "login_to_system",
+     *              "create_tasks",
+     *              "create_projects",
+     *              "company_settings",
+     *              "report_filters",
+     *              "sent_emails_from_comments",
+     *              "update_all_tasks"
+     *           ],
+     *           "order": 2,
      *           "is_active": true,
-     *           "order": 1,
      *           "users":
-     *           {
-     *              "0":
+     *           [
      *              {
-     *                 "id": 1742,
-     *                 "username": "admin",
-     *                 "password": "$2y$13$vMLBAio6obXwhTo8gvocwe.XkHq/PXeg3IwJLMHA5PF9u0s5npeM6",
-     *                 "email": "admin@admin.sk",
-     *                 "roles": "[\"ROLE_ADMIN\"]",
-     *                 "is_active": true,
-     *                 "language": "AJ"
-     *               },
-     *              "1":
-     *              {
-     *                 "id": 1743,
-     *                 "username": "admin2",
-     *                 "password": "$2y$13$vMLBAio6obXwhTo8gvocwe.XkHq/PXeg3IwJLMHA5PF9u0s5npeM6",
-     *                 "email": "admin@admin.sk",
-     *                 "roles": "[\"ROLE_ADMIN\"]",
-     *                 "is_active": true,
-     *                 "language": "AJ"
-     *               },
-     *
-     *            }
+     *                 "id": 2576,
+     *                 "username": "manager",
+     *                 "email": "manager@manager.sk"
+     *               }
+     *           ]
      *        },
      *        "_links":
      *        {
@@ -324,37 +352,30 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *      {
      *        "data":
      *        {
-     *           "id": 121,
-     *           "title": "ADMIN",
-     *           "description": "Admin is a main system role. All ACL are available.",
+     *           "id": 155,
+     *           "title": "MANAGER",
+     *           "description": null,
      *           "homepage": "/",
-     *           "acl": "[\"login_to_system\",\"share_filters\",\"project_shared_filters\",\"report_filters\",\"share_tags\",\"create_projects\",\"sent_emails_from_comments\",\"create_tasks\",\"create_tasks_in_all_projects\",\"update_all_tasks\",\"user_settings\",\"user_role_settings\",\"company_attribute_settings\",\"company_settings\",\"status_settings\",\"task_attribute_settings\",\"unit_settings\",\"system_settings\",\"smtp_settings\",\"imap_settings\"]",
+     *           "acl":
+     *           [
+     *              "login_to_system",
+     *              "create_tasks",
+     *              "create_projects",
+     *              "company_settings",
+     *              "report_filters",
+     *              "sent_emails_from_comments",
+     *              "update_all_tasks"
+     *           ],
+     *           "order": 2,
      *           "is_active": true,
-     *           "order": 1,
      *           "users":
-     *           {
-     *              "0":
+     *           [
      *              {
-     *                 "id": 1742,
-     *                 "username": "admin",
-     *                 "password": "$2y$13$vMLBAio6obXwhTo8gvocwe.XkHq/PXeg3IwJLMHA5PF9u0s5npeM6",
-     *                 "email": "admin@admin.sk",
-     *                 "roles": "[\"ROLE_ADMIN\"]",
-     *                 "is_active": true,
-     *                 "language": "AJ"
-     *               },
-     *              "1":
-     *              {
-     *                 "id": 1743,
-     *                 "username": "admin2",
-     *                 "password": "$2y$13$vMLBAio6obXwhTo8gvocwe.XkHq/PXeg3IwJLMHA5PF9u0s5npeM6",
-     *                 "email": "admin@admin.sk",
-     *                 "roles": "[\"ROLE_ADMIN\"]",
-     *                 "is_active": true,
-     *                 "language": "AJ"
-     *               },
-     *
-     *            }
+     *                 "id": 2576,
+     *                 "username": "manager",
+     *                 "email": "manager@manager.sk"
+     *               }
+     *           ]
      *        },
      *        "_links":
      *        {
@@ -433,37 +454,30 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *      {
      *        "data":
      *        {
-     *           "id": 121,
-     *           "title": "ADMIN",
-     *           "description": "Admin is a main system role. All ACL are available.",
+     *           "id": 155,
+     *           "title": "MANAGER",
+     *           "description": null,
      *           "homepage": "/",
-     *           "acl": "[\"login_to_system\",\"share_filters\",\"project_shared_filters\",\"report_filters\",\"share_tags\",\"create_projects\",\"sent_emails_from_comments\",\"create_tasks\",\"create_tasks_in_all_projects\",\"update_all_tasks\",\"user_settings\",\"user_role_settings\",\"company_attribute_settings\",\"company_settings\",\"status_settings\",\"task_attribute_settings\",\"unit_settings\",\"system_settings\",\"smtp_settings\",\"imap_settings\"]",
+     *           "acl":
+     *           [
+     *              "login_to_system",
+     *              "create_tasks",
+     *              "create_projects",
+     *              "company_settings",
+     *              "report_filters",
+     *              "sent_emails_from_comments",
+     *              "update_all_tasks"
+     *           ],
+     *           "order": 2,
      *           "is_active": true,
-     *           "order": 1,
      *           "users":
-     *           {
-     *              "0":
+     *           [
      *              {
-     *                 "id": 1742,
-     *                 "username": "admin",
-     *                 "password": "$2y$13$vMLBAio6obXwhTo8gvocwe.XkHq/PXeg3IwJLMHA5PF9u0s5npeM6",
-     *                 "email": "admin@admin.sk",
-     *                 "roles": "[\"ROLE_ADMIN\"]",
-     *                 "is_active": true,
-     *                 "language": "AJ"
-     *               },
-     *              "1":
-     *              {
-     *                 "id": 1743,
-     *                 "username": "admin2",
-     *                 "password": "$2y$13$vMLBAio6obXwhTo8gvocwe.XkHq/PXeg3IwJLMHA5PF9u0s5npeM6",
-     *                 "email": "admin@admin.sk",
-     *                 "roles": "[\"ROLE_ADMIN\"]",
-     *                 "is_active": true,
-     *                 "language": "AJ"
-     *               },
-     *
-     *            }
+     *                 "id": 2576,
+     *                 "username": "manager",
+     *                 "email": "manager@manager.sk"
+     *               }
+     *           ]
      *        },
      *        "_links":
      *        {
@@ -603,6 +617,43 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
 
 
     /**
+     *  ### Response ###
+     *      {
+     *        "data":
+     *        {
+     *           "id": 155,
+     *           "title": "MANAGER",
+     *           "description": null,
+     *           "homepage": "/",
+     *           "acl":
+     *           [
+     *              "login_to_system",
+     *              "create_tasks",
+     *              "create_projects",
+     *              "company_settings",
+     *              "report_filters",
+     *              "sent_emails_from_comments",
+     *              "update_all_tasks"
+     *           ],
+     *           "order": 2,
+     *           "is_active": true,
+     *           "users":
+     *           [
+     *              {
+     *                 "id": 2576,
+     *                 "username": "manager",
+     *                 "email": "manager@manager.sk"
+     *               }
+     *           ]
+     *        },
+     *        "_links":
+     *        {
+     *           "put": "/api/v1/task-bundle/user-roles/5",
+     *           "patch": "/api/v1/task-bundle/user-roles/5",
+     *           "delete": "/api/v1/task-bundle/user-roles/5"
+     *         }
+     *      }
+     *
      * @ApiDoc(
      *  description="Restore User role Entity",
      *  requirements={

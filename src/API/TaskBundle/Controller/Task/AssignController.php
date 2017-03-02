@@ -125,188 +125,217 @@ class AssignController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *           "id": 2991,
-     *           "title": "test 258",
-     *           "description": "Description of Task 1",
-     *           "deadline": null,
-     *           "startedAt": null,
-     *           "closedAt": null,
-     *           "important": false,
-     *           "createdAt":
-     *           {
-     *               "date": "2017-01-26 12:21:59.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *           },
-     *           "updatedAt":
-     *           {
-     *               "date": "2017-01-26 14:34:48.000000",
+     *            "id": 62020,
+     *            "title": "Task 3 - admin is creator, admin is requested",
+     *            "description": "Description of Task 3",
+     *            "deadline": null,
+     *            "startedAt": null,
+     *            "closedAt": null,
+     *            "important": false,
+     *            "work": null,
+     *            "work_time": null,
+     *            "createdAt":
+     *            {
+     *               "date": "2017-02-27 15:55:15.000000",
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
      *            },
-     *           "taskData": [],
-     *           "project":
-     *           {
-     *              "id": 6,
-     *              "title": "Project of user 1",
-     *              "description": "Description of project 1.",
-     *              "is_active": false,
-     *              "createdAt":
+     *            "updatedAt":
+     *            {
+     *               "date": "2017-02-27 15:55:15.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *            "createdBy":
+     *            {
+     *               "id": 2575,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk"
+     *            },
+     *            "requestedBy":
+     *            {
+     *               "id": 2575,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk"
+     *            },
+     *            "project":
+     *            {
+     *               "id": 284,
+     *               "title": "Project of user 1"
+     *             },
+     *            "company":
+     *            {
+     *               "id": 1802,
+     *               "title": "Web-Solutions"
+     *            },
+     *            "taskData":
+     *            [
      *              {
-     *                 "date": "2017-01-26 12:21:59.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "updatedAt":
-     *              {
-     *                  "date": "2017-01-26 12:21:59.000000",
-     *                  "timezone_type": 3,
-     *                  "timezone": "Europe/Berlin"
+     *                 "id": 113,
+     *                 "value": "some input",
+     *                 "taskAttribute":
+     *                 {
+     *                    "id": 169,
+     *                    "title": "input task additional attribute"
+     *                  }
      *               }
-     *           },
-     *           "createdBy":
-     *           {
-     *              "id": 109,
-     *              "username": "user",
-     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
-     *              "email": "user@user.sk",
-     *              "roles": "[\"ROLE_USER\"]",
-     *              "is_active": true,
-     *              "language": "AJ",
-     *              "image": null,
-     *              "detailData": null,
-     *              "company":
+     *            ],
+     *            "followers":
+     *            [
      *              {
-     *                 "id": 4,
-     *                 "title": "LanSystems",
-     *                 "ico": "110258782",
-     *                 "dic": "12587458996244",
-     *                 "ic_dph": null,
-     *                 "street": "Ina cesta 125",
-     *                 "city": "Bratislava",
-     *                 "zip": "021478",
-     *                 "country": "Slovenska Republika",
-     *                 "is_active": true
-     *              }
-     *           },
-     *           "requestedBy":
-     *           {
-     *              "id": 109,
-     *              "username": "user",
-     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
-     *              "email": "user@user.sk",
-     *              "roles": "[\"ROLE_USER\"]",
-     *              "is_active": true,
-     *              "language": "AJ",
-     *              "image": null,
-     *              "detailData": null
-     *           },
-     *           "taskHasAssignedUsers":
-     *           [
-     *              {
-     *                  "id": 2,
+     *                 "id": 2575,
+     *                 "username": "admin",
+     *                 "email": "admin@admin.sk"
+     *               }
+     *            ],
+     *            "tags":
+     *            [
+     *               {
+     *                  "id": 71,
+     *                  "title": "Free Time",
+     *                  "color": "BF4848"
+     *               },
+     *               {
+     *                  "id": 73,
+     *                  "title": "Home",
+     *                  "color": "DFD112"
+     *                }
+     *            ],
+     *            "taskHasAssignedUsers":
+     *            [
+     *               {
+     *                  "id": 69,
      *                  "status_date": null,
      *                  "time_spent": null,
      *                  "createdAt":
      *                  {
-     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "date": "2017-02-27 15:55:17.000000",
      *                     "timezone_type": 3,
      *                     "timezone": "Europe/Berlin"
      *                  },
      *                  "updatedAt":
      *                  {
-     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "date": "2017-02-27 15:55:17.000000",
      *                     "timezone_type": 3,
      *                     "timezone": "Europe/Berlin"
      *                  },
      *                  "status":
      *                  {
-     *                     "id": 7,
+     *                     "id": 240,
      *                     "title": "Completed",
-     *                     "description": "Completed task",
-     *                     "color": "#FF4500",
-     *                     "is_active": true
+     *                     "color": "#FF4500"
      *                  },
      *                  "user":
      *                  {
-     *                     "id": 109,
-     *                     "username": "user",
-     *                     "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
-     *                     "email": "user@user.sk",
-     *                     "roles": "[\"ROLE_USER\"]",
-     *                     "is_active": true,
-     *                     "language": "AJ",
-     *                     "image": null
-     *                  }
-     *              }
-     *           ],
-     *           "tags":
-     *           [
-     *             {
-     *                "id": 5,
-     *                "title": "tag1",
-     *                "color": "FFFF66",
-     *                "public": false
-     *             },
-     *             {
-     *               "id": 6,
-     *               "title": "tag2",
-     *               "color": "FFFF66",
-     *               "public": false
-     *             }
-     *           ],
-     *           "company":
-     *           {
-     *              "id": 317,
-     *              "title": "Web-Solutions",
-     *              "ico": "1102587",
-     *              "dic": "12587459644",
-     *              "ic_dph": null,
-     *              "street": "Cesta 125",
-     *              "city": "Bratislava",
-     *              "zip": "021478",
-     *              "country": "Slovenska Republika",
-     *              "is_active": true
-     *           },
-     *           "taskHasAttachments":
-     *           [
-     *             {
-     *                "id": 1,
-     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *             }
-     *           ],
-     *           "invoiceableItems":
-     *           [
-     *              {
-     *                 "id": 4,
-     *                 "title": "Keyboard",
-     *                 "amount": "2.00",
-     *                 "unit_price": "50.00",
-     *                 "unit":
-     *                 {
-     *                    "id": 22,
-     *                    "title": "Kus",
-     *                    "shortcut": "Ks",
-     *                    "is_active": true
-     *                  }
-     *              },
-     *              {
-     *                 "id": 5,
-     *                 "title": "Mouse",
-     *                 "amount": "5.00",
-     *                 "unit_price": "10.00",
-     *                 "unit":
-     *                 {
-     *                    "id": 22,
-     *                    "title": "Kus",
-     *                    "shortcut": "Ks",
-     *                    "is_active": true
-     *                  }
-     *               },
+     *                      "id": 2579,
+     *                      "username": "user",
+     *                      "email": "user@user.sk"
+     *                   }
+     *                }
      *            ],
-     *            "canEdit": true,
-     *            "follow": false
-     *        },
+     *            "taskHasAttachments":
+     *            [
+     *               {
+     *                   "id": 240,
+     *                   "slug": "Slug-of-image-12-14-2015",
+     *               }
+     *            ],
+     *            "comments":
+     *            {
+     *               "0":
+     *               {
+     *                  "parent": true,
+     *                  "id": 30,
+     *                  "title": "Koment - public",
+     *                  "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *                  "createdAt":
+     *                  {
+     *                     "date": "2017-02-27 15:55:17.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                     "date": "2017-02-27 15:55:17.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                   },
+     *                   "internal": false,
+     *                   "email": false,
+     *                   "email_to": false,
+     *                   "email_cc": false,
+     *                   "email_bcc": false,
+     *                   "createdBy":
+     *                   {
+     *                      "id": 2575,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk"
+     *                   }
+     *               },
+     *               "30":
+     *               [
+     *                  {
+     *                      "child": true,
+     *                      "parentId": 30,
+     *                      "id": 30,
+     *                      "title": "Koment - public",
+     *                      "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *                      "createdAt":
+     *                      {
+     *                         "date": "2017-02-27 15:55:17.000000",
+     *                         "timezone_type": 3,
+     *                         "timezone": "Europe/Berlin"
+     *                       },
+     *                      "updatedAt":
+     *                      {
+     *                         "date": "2017-02-27 15:55:17.000000",
+     *                         "timezone_type": 3,
+     *                         "timezone": "Europe/Berlin"
+     *                      },
+     *                      "internal": false,
+     *                      "email": false,
+     *                      "email_to": false,
+     *                      "email_cc": false,
+     *                      "email_bcc": false,
+     *                      "createdBy":
+     *                      {
+     *                         "id": 2575,
+     *                         "username": "admin",
+     *                         "email": "admin@admin.sk"
+     *                      }
+     *                   }
+     *                ]
+     *             },
+     *             "invoiceableItems":
+     *             [
+     *                {
+     *                   "id": 30,
+     *                   "title": "Keyboard",
+     *                   "amount": "2.00",
+     *                   "unit_price": "50.00",
+     *                   "unit":
+     *                   {
+     *                      "id": 54,
+     *                      "title": "Kus",
+     *                      "shortcut": "Ks"
+     *                   }
+     *                },
+     *                {
+     *                   "id": 31,
+     *                   "title": "Mouse",
+     *                   "amount": "5.00",
+     *                   "unit_price": "10.00",
+     *                   "unit":
+     *                   {
+     *                      "id": 54,
+     *                      "title": "Kus",
+     *                      "shortcut": "Ks"
+     *                    }
+     *                },
+     *             ],
+     *             "canEdit": true,
+     *             "follow": true
+     *           }
      *       "_links":
      *       {
      *         "put: task": "/api/v1/task-bundle/tasks/11970",
@@ -410,7 +439,7 @@ class AssignController extends ApiBaseController
                 return $this->createApiResponse([
                     'message' => 'New Status Entity does not exist!',
                 ], StatusCodesHelper::NOT_FOUND_CODE);
-            }else{
+            } else {
                 $status = $newStatus;
             }
         }
@@ -435,188 +464,217 @@ class AssignController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *           "id": 2991,
-     *           "title": "test 258",
-     *           "description": "Description of Task 1",
-     *           "deadline": null,
-     *           "startedAt": null,
-     *           "closedAt": null,
-     *           "important": false,
-     *           "createdAt":
-     *           {
-     *               "date": "2017-01-26 12:21:59.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *           },
-     *           "updatedAt":
-     *           {
-     *               "date": "2017-01-26 14:34:48.000000",
+     *            "id": 62020,
+     *            "title": "Task 3 - admin is creator, admin is requested",
+     *            "description": "Description of Task 3",
+     *            "deadline": null,
+     *            "startedAt": null,
+     *            "closedAt": null,
+     *            "important": false,
+     *            "work": null,
+     *            "work_time": null,
+     *            "createdAt":
+     *            {
+     *               "date": "2017-02-27 15:55:15.000000",
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
      *            },
-     *           "taskData": [],
-     *           "project":
-     *           {
-     *              "id": 6,
-     *              "title": "Project of user 1",
-     *              "description": "Description of project 1.",
-     *              "is_active": false,
-     *              "createdAt":
+     *            "updatedAt":
+     *            {
+     *               "date": "2017-02-27 15:55:15.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *            "createdBy":
+     *            {
+     *               "id": 2575,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk"
+     *            },
+     *            "requestedBy":
+     *            {
+     *               "id": 2575,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk"
+     *            },
+     *            "project":
+     *            {
+     *               "id": 284,
+     *               "title": "Project of user 1"
+     *             },
+     *            "company":
+     *            {
+     *               "id": 1802,
+     *               "title": "Web-Solutions"
+     *            },
+     *            "taskData":
+     *            [
      *              {
-     *                 "date": "2017-01-26 12:21:59.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "updatedAt":
-     *              {
-     *                  "date": "2017-01-26 12:21:59.000000",
-     *                  "timezone_type": 3,
-     *                  "timezone": "Europe/Berlin"
+     *                 "id": 113,
+     *                 "value": "some input",
+     *                 "taskAttribute":
+     *                 {
+     *                    "id": 169,
+     *                    "title": "input task additional attribute"
+     *                  }
      *               }
-     *           },
-     *           "createdBy":
-     *           {
-     *              "id": 109,
-     *              "username": "user",
-     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
-     *              "email": "user@user.sk",
-     *              "roles": "[\"ROLE_USER\"]",
-     *              "is_active": true,
-     *              "language": "AJ",
-     *              "image": null,
-     *              "detailData": null,
-     *              "company":
+     *            ],
+     *            "followers":
+     *            [
      *              {
-     *                 "id": 4,
-     *                 "title": "LanSystems",
-     *                 "ico": "110258782",
-     *                 "dic": "12587458996244",
-     *                 "ic_dph": null,
-     *                 "street": "Ina cesta 125",
-     *                 "city": "Bratislava",
-     *                 "zip": "021478",
-     *                 "country": "Slovenska Republika",
-     *                 "is_active": true
-     *              }
-     *           },
-     *           "requestedBy":
-     *           {
-     *              "id": 109,
-     *              "username": "user",
-     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
-     *              "email": "user@user.sk",
-     *              "roles": "[\"ROLE_USER\"]",
-     *              "is_active": true,
-     *              "language": "AJ",
-     *              "image": null,
-     *              "detailData": null
-     *           },
-     *           "taskHasAssignedUsers":
-     *           [
-     *              {
-     *                  "id": 2,
+     *                 "id": 2575,
+     *                 "username": "admin",
+     *                 "email": "admin@admin.sk"
+     *               }
+     *            ],
+     *            "tags":
+     *            [
+     *               {
+     *                  "id": 71,
+     *                  "title": "Free Time",
+     *                  "color": "BF4848"
+     *               },
+     *               {
+     *                  "id": 73,
+     *                  "title": "Home",
+     *                  "color": "DFD112"
+     *                }
+     *            ],
+     *            "taskHasAssignedUsers":
+     *            [
+     *               {
+     *                  "id": 69,
      *                  "status_date": null,
      *                  "time_spent": null,
      *                  "createdAt":
      *                  {
-     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "date": "2017-02-27 15:55:17.000000",
      *                     "timezone_type": 3,
      *                     "timezone": "Europe/Berlin"
      *                  },
      *                  "updatedAt":
      *                  {
-     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "date": "2017-02-27 15:55:17.000000",
      *                     "timezone_type": 3,
      *                     "timezone": "Europe/Berlin"
      *                  },
      *                  "status":
      *                  {
-     *                     "id": 7,
+     *                     "id": 240,
      *                     "title": "Completed",
-     *                     "description": "Completed task",
-     *                     "color": "#FF4500",
-     *                     "is_active": true
+     *                     "color": "#FF4500"
      *                  },
      *                  "user":
      *                  {
-     *                     "id": 109,
-     *                     "username": "user",
-     *                     "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
-     *                     "email": "user@user.sk",
-     *                     "roles": "[\"ROLE_USER\"]",
-     *                     "is_active": true,
-     *                     "language": "AJ",
-     *                     "image": null
-     *                  }
-     *              }
-     *           ],
-     *           "tags":
-     *           [
-     *             {
-     *                "id": 5,
-     *                "title": "tag1",
-     *                "color": "FFFF66",
-     *                "public": false
-     *             },
-     *             {
-     *               "id": 6,
-     *               "title": "tag2",
-     *               "color": "FFFF66",
-     *               "public": false
-     *             }
-     *           ],
-     *           "company":
-     *           {
-     *              "id": 317,
-     *              "title": "Web-Solutions",
-     *              "ico": "1102587",
-     *              "dic": "12587459644",
-     *              "ic_dph": null,
-     *              "street": "Cesta 125",
-     *              "city": "Bratislava",
-     *              "zip": "021478",
-     *              "country": "Slovenska Republika",
-     *              "is_active": true
-     *           },
-     *           "taskHasAttachments":
-     *           [
-     *             {
-     *                "id": 1,
-     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *             }
-     *           ],
-     *           "invoiceableItems":
-     *           [
-     *              {
-     *                 "id": 4,
-     *                 "title": "Keyboard",
-     *                 "amount": "2.00",
-     *                 "unit_price": "50.00",
-     *                 "unit":
-     *                 {
-     *                    "id": 22,
-     *                    "title": "Kus",
-     *                    "shortcut": "Ks",
-     *                    "is_active": true
-     *                  }
-     *              },
-     *              {
-     *                 "id": 5,
-     *                 "title": "Mouse",
-     *                 "amount": "5.00",
-     *                 "unit_price": "10.00",
-     *                 "unit":
-     *                 {
-     *                    "id": 22,
-     *                    "title": "Kus",
-     *                    "shortcut": "Ks",
-     *                    "is_active": true
-     *                  }
-     *               },
+     *                      "id": 2579,
+     *                      "username": "user",
+     *                      "email": "user@user.sk"
+     *                   }
+     *                }
      *            ],
-     *            "canEdit": true,
-     *            "follow": false
-     *        },
+     *            "taskHasAttachments":
+     *            [
+     *               {
+     *                   "id": 240,
+     *                   "slug": "Slug-of-image-12-14-2015",
+     *               }
+     *            ],
+     *            "comments":
+     *            {
+     *               "0":
+     *               {
+     *                  "parent": true,
+     *                  "id": 30,
+     *                  "title": "Koment - public",
+     *                  "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *                  "createdAt":
+     *                  {
+     *                     "date": "2017-02-27 15:55:17.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                     "date": "2017-02-27 15:55:17.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                   },
+     *                   "internal": false,
+     *                   "email": false,
+     *                   "email_to": false,
+     *                   "email_cc": false,
+     *                   "email_bcc": false,
+     *                   "createdBy":
+     *                   {
+     *                      "id": 2575,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk"
+     *                   }
+     *               },
+     *               "30":
+     *               [
+     *                  {
+     *                      "child": true,
+     *                      "parentId": 30,
+     *                      "id": 30,
+     *                      "title": "Koment - public",
+     *                      "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *                      "createdAt":
+     *                      {
+     *                         "date": "2017-02-27 15:55:17.000000",
+     *                         "timezone_type": 3,
+     *                         "timezone": "Europe/Berlin"
+     *                       },
+     *                      "updatedAt":
+     *                      {
+     *                         "date": "2017-02-27 15:55:17.000000",
+     *                         "timezone_type": 3,
+     *                         "timezone": "Europe/Berlin"
+     *                      },
+     *                      "internal": false,
+     *                      "email": false,
+     *                      "email_to": false,
+     *                      "email_cc": false,
+     *                      "email_bcc": false,
+     *                      "createdBy":
+     *                      {
+     *                         "id": 2575,
+     *                         "username": "admin",
+     *                         "email": "admin@admin.sk"
+     *                      }
+     *                   }
+     *                ]
+     *             },
+     *             "invoiceableItems":
+     *             [
+     *                {
+     *                   "id": 30,
+     *                   "title": "Keyboard",
+     *                   "amount": "2.00",
+     *                   "unit_price": "50.00",
+     *                   "unit":
+     *                   {
+     *                      "id": 54,
+     *                      "title": "Kus",
+     *                      "shortcut": "Ks"
+     *                   }
+     *                },
+     *                {
+     *                   "id": 31,
+     *                   "title": "Mouse",
+     *                   "amount": "5.00",
+     *                   "unit_price": "10.00",
+     *                   "unit":
+     *                   {
+     *                      "id": 54,
+     *                      "title": "Kus",
+     *                      "shortcut": "Ks"
+     *                    }
+     *                },
+     *             ],
+     *             "canEdit": true,
+     *             "follow": true
+     *           }
      *       "_links":
      *       {
      *         "put: task": "/api/v1/task-bundle/tasks/11970",
@@ -757,188 +815,217 @@ class AssignController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *           "id": 2991,
-     *           "title": "test 258",
-     *           "description": "Description of Task 1",
-     *           "deadline": null,
-     *           "startedAt": null,
-     *           "closedAt": null,
-     *           "important": false,
-     *           "createdAt":
-     *           {
-     *               "date": "2017-01-26 12:21:59.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *           },
-     *           "updatedAt":
-     *           {
-     *               "date": "2017-01-26 14:34:48.000000",
+     *            "id": 62020,
+     *            "title": "Task 3 - admin is creator, admin is requested",
+     *            "description": "Description of Task 3",
+     *            "deadline": null,
+     *            "startedAt": null,
+     *            "closedAt": null,
+     *            "important": false,
+     *            "work": null,
+     *            "work_time": null,
+     *            "createdAt":
+     *            {
+     *               "date": "2017-02-27 15:55:15.000000",
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
      *            },
-     *           "taskData": [],
-     *           "project":
-     *           {
-     *              "id": 6,
-     *              "title": "Project of user 1",
-     *              "description": "Description of project 1.",
-     *              "is_active": false,
-     *              "createdAt":
+     *            "updatedAt":
+     *            {
+     *               "date": "2017-02-27 15:55:15.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *            "createdBy":
+     *            {
+     *               "id": 2575,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk"
+     *            },
+     *            "requestedBy":
+     *            {
+     *               "id": 2575,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk"
+     *            },
+     *            "project":
+     *            {
+     *               "id": 284,
+     *               "title": "Project of user 1"
+     *             },
+     *            "company":
+     *            {
+     *               "id": 1802,
+     *               "title": "Web-Solutions"
+     *            },
+     *            "taskData":
+     *            [
      *              {
-     *                 "date": "2017-01-26 12:21:59.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "updatedAt":
-     *              {
-     *                  "date": "2017-01-26 12:21:59.000000",
-     *                  "timezone_type": 3,
-     *                  "timezone": "Europe/Berlin"
+     *                 "id": 113,
+     *                 "value": "some input",
+     *                 "taskAttribute":
+     *                 {
+     *                    "id": 169,
+     *                    "title": "input task additional attribute"
+     *                  }
      *               }
-     *           },
-     *           "createdBy":
-     *           {
-     *              "id": 109,
-     *              "username": "user",
-     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
-     *              "email": "user@user.sk",
-     *              "roles": "[\"ROLE_USER\"]",
-     *              "is_active": true,
-     *              "language": "AJ",
-     *              "image": null,
-     *              "detailData": null,
-     *              "company":
+     *            ],
+     *            "followers":
+     *            [
      *              {
-     *                 "id": 4,
-     *                 "title": "LanSystems",
-     *                 "ico": "110258782",
-     *                 "dic": "12587458996244",
-     *                 "ic_dph": null,
-     *                 "street": "Ina cesta 125",
-     *                 "city": "Bratislava",
-     *                 "zip": "021478",
-     *                 "country": "Slovenska Republika",
-     *                 "is_active": true
-     *              }
-     *           },
-     *           "requestedBy":
-     *           {
-     *              "id": 109,
-     *              "username": "user",
-     *              "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
-     *              "email": "user@user.sk",
-     *              "roles": "[\"ROLE_USER\"]",
-     *              "is_active": true,
-     *              "language": "AJ",
-     *              "image": null,
-     *              "detailData": null
-     *           },
-     *           "taskHasAssignedUsers":
-     *           [
-     *              {
-     *                  "id": 2,
+     *                 "id": 2575,
+     *                 "username": "admin",
+     *                 "email": "admin@admin.sk"
+     *               }
+     *            ],
+     *            "tags":
+     *            [
+     *               {
+     *                  "id": 71,
+     *                  "title": "Free Time",
+     *                  "color": "BF4848"
+     *               },
+     *               {
+     *                  "id": 73,
+     *                  "title": "Home",
+     *                  "color": "DFD112"
+     *                }
+     *            ],
+     *            "taskHasAssignedUsers":
+     *            [
+     *               {
+     *                  "id": 69,
      *                  "status_date": null,
      *                  "time_spent": null,
      *                  "createdAt":
      *                  {
-     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "date": "2017-02-27 15:55:17.000000",
      *                     "timezone_type": 3,
      *                     "timezone": "Europe/Berlin"
      *                  },
      *                  "updatedAt":
      *                  {
-     *                     "date": "2017-01-26 12:22:00.000000",
+     *                     "date": "2017-02-27 15:55:17.000000",
      *                     "timezone_type": 3,
      *                     "timezone": "Europe/Berlin"
      *                  },
      *                  "status":
      *                  {
-     *                     "id": 7,
+     *                     "id": 240,
      *                     "title": "Completed",
-     *                     "description": "Completed task",
-     *                     "color": "#FF4500",
-     *                     "is_active": true
+     *                     "color": "#FF4500"
      *                  },
      *                  "user":
      *                  {
-     *                     "id": 109,
-     *                     "username": "user",
-     *                     "password": "$2y$13$sSNk/RwtxwjKtesqSZ6Bx.mm5pGbmGxm3DsJTdIK7iZHkXALYihvq",
-     *                     "email": "user@user.sk",
-     *                     "roles": "[\"ROLE_USER\"]",
-     *                     "is_active": true,
-     *                     "language": "AJ",
-     *                     "image": null
-     *                  }
-     *              }
-     *           ],
-     *           "tags":
-     *           [
-     *             {
-     *                "id": 5,
-     *                "title": "tag1",
-     *                "color": "FFFF66",
-     *                "public": false
-     *             },
-     *             {
-     *               "id": 6,
-     *               "title": "tag2",
-     *               "color": "FFFF66",
-     *               "public": false
-     *             }
-     *           ],
-     *           "company":
-     *           {
-     *              "id": 317,
-     *              "title": "Web-Solutions",
-     *              "ico": "1102587",
-     *              "dic": "12587459644",
-     *              "ic_dph": null,
-     *              "street": "Cesta 125",
-     *              "city": "Bratislava",
-     *              "zip": "021478",
-     *              "country": "Slovenska Republika",
-     *              "is_active": true
-     *           },
-     *           "taskHasAttachments":
-     *           [
-     *             {
-     *                "id": 1,
-     *                "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *             }
-     *           ],
-     *           "invoiceableItems":
-     *           [
-     *              {
-     *                 "id": 4,
-     *                 "title": "Keyboard",
-     *                 "amount": "2.00",
-     *                 "unit_price": "50.00",
-     *                 "unit":
-     *                 {
-     *                    "id": 22,
-     *                    "title": "Kus",
-     *                    "shortcut": "Ks",
-     *                    "is_active": true
-     *                  }
-     *              },
-     *              {
-     *                 "id": 5,
-     *                 "title": "Mouse",
-     *                 "amount": "5.00",
-     *                 "unit_price": "10.00",
-     *                 "unit":
-     *                 {
-     *                    "id": 22,
-     *                    "title": "Kus",
-     *                    "shortcut": "Ks",
-     *                    "is_active": true
-     *                  }
-     *               },
+     *                      "id": 2579,
+     *                      "username": "user",
+     *                      "email": "user@user.sk"
+     *                   }
+     *                }
      *            ],
-     *            "canEdit": true,
-     *            "follow": false
-     *        },
+     *            "taskHasAttachments":
+     *            [
+     *               {
+     *                   "id": 240,
+     *                   "slug": "Slug-of-image-12-14-2015",
+     *               }
+     *            ],
+     *            "comments":
+     *            {
+     *               "0":
+     *               {
+     *                  "parent": true,
+     *                  "id": 30,
+     *                  "title": "Koment - public",
+     *                  "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *                  "createdAt":
+     *                  {
+     *                     "date": "2017-02-27 15:55:17.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                     "date": "2017-02-27 15:55:17.000000",
+     *                     "timezone_type": 3,
+     *                     "timezone": "Europe/Berlin"
+     *                   },
+     *                   "internal": false,
+     *                   "email": false,
+     *                   "email_to": false,
+     *                   "email_cc": false,
+     *                   "email_bcc": false,
+     *                   "createdBy":
+     *                   {
+     *                      "id": 2575,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk"
+     *                   }
+     *               },
+     *               "30":
+     *               [
+     *                  {
+     *                      "child": true,
+     *                      "parentId": 30,
+     *                      "id": 30,
+     *                      "title": "Koment - public",
+     *                      "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *                      "createdAt":
+     *                      {
+     *                         "date": "2017-02-27 15:55:17.000000",
+     *                         "timezone_type": 3,
+     *                         "timezone": "Europe/Berlin"
+     *                       },
+     *                      "updatedAt":
+     *                      {
+     *                         "date": "2017-02-27 15:55:17.000000",
+     *                         "timezone_type": 3,
+     *                         "timezone": "Europe/Berlin"
+     *                      },
+     *                      "internal": false,
+     *                      "email": false,
+     *                      "email_to": false,
+     *                      "email_cc": false,
+     *                      "email_bcc": false,
+     *                      "createdBy":
+     *                      {
+     *                         "id": 2575,
+     *                         "username": "admin",
+     *                         "email": "admin@admin.sk"
+     *                      }
+     *                   }
+     *                ]
+     *             },
+     *             "invoiceableItems":
+     *             [
+     *                {
+     *                   "id": 30,
+     *                   "title": "Keyboard",
+     *                   "amount": "2.00",
+     *                   "unit_price": "50.00",
+     *                   "unit":
+     *                   {
+     *                      "id": 54,
+     *                      "title": "Kus",
+     *                      "shortcut": "Ks"
+     *                   }
+     *                },
+     *                {
+     *                   "id": 31,
+     *                   "title": "Mouse",
+     *                   "amount": "5.00",
+     *                   "unit_price": "10.00",
+     *                   "unit":
+     *                   {
+     *                      "id": 54,
+     *                      "title": "Kus",
+     *                      "shortcut": "Ks"
+     *                    }
+     *                },
+     *             ],
+     *             "canEdit": true,
+     *             "follow": true
+     *           }
      *       "_links":
      *       {
      *         "put: task": "/api/v1/task-bundle/tasks/11970",

@@ -38,13 +38,13 @@ class UserRoleService
      */
     public function getUserRolesResponse(int $page, array $options):array
     {
-        $data = $this->em->getRepository('APITaskBundle:UserRole')->getAllEntities($page, $options);
-        $count = $this->em->getRepository('APITaskBundle:UserRole')->countEntities($options);
+        $responseData = $this->em->getRepository('APITaskBundle:UserRole')->getAllEntities($page, $options);
 
         $response = [
-            'data' => $data,
+            'data' => $responseData['array'],
         ];
 
+        $count = $responseData['count'];
         $url = $this->router->generate('user_role_list');
         $limit = UserRoleRepository::LIMIT;
         $filters = $options['filtersForUrl'];
@@ -63,7 +63,7 @@ class UserRoleService
         $userRole = $this->em->getRepository('APITaskBundle:UserRole')->getEntity($id);
 
         return [
-            'data' => $userRole[0],
+            'data' => $userRole,
             '_links' => $this->getFilterLinks($id),
         ];
     }

@@ -107,12 +107,17 @@ class TaskTestCase extends WebTestCase
             'username' => 'admin'
         ]);
 
+        $webSolCompany = $this->em->getRepository('APICoreBundle:Company')->findOneBy([
+            'title' => 'Web-Solutions'
+        ]);
+
         $task = new Task();
         $task->setTitle('Task TEST - admin is creator, admin is requested 2');
         $task->setDescription('Description of Task TEST');
         $task->setImportant(false);
         $task->setCreatedBy($adminUser);
         $task->setRequestedBy($adminUser);
+        $task->setCompany($webSolCompany);
 
         $this->em->persist($task);
         $this->em->flush();

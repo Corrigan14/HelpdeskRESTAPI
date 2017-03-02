@@ -2,7 +2,9 @@
 
 namespace API\TaskBundle\Repository;
 
+use API\TaskBundle\Entity\Unit;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * UnitRepository
@@ -32,55 +34,34 @@ class UnitRepository extends EntityRepository
                 $isActiveParam = 0;
             }
             $query = $this->createQueryBuilder('unit')
+                ->select()
+                ->orderBy('unit.id')
                 ->where('unit.is_active = :isActiveParam')
                 ->setParameter('isActiveParam', $isActiveParam)
                 ->getQuery();
         } else {
             $query = $this->createQueryBuilder('unit')
+                ->select()
+                ->orderBy('unit.id')
                 ->getQuery();
+        }
+
+        // Pagination
+        if (1 < $page) {
+            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
+        } else {
+            $query->setFirstResult(0);
         }
 
         $query->setMaxResults(self::LIMIT);
 
-        // Pagination calculating offset
-        if (1 < $page) {
-            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
-        }
+        $paginator = new Paginator($query, $fetchJoinCollection = true);
+        $count = $paginator->count();
 
-        return $query->getArrayResult();
-    }
-
-    /**
-     * Return count of all Entities
-     *
-     * @param array $options
-     *
-     * @return int
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
-     */
-    public function countEntities(array $options)
-    {
-        $isActive = $options['isActive'];
-
-        if ('true' === $isActive || 'false' === $isActive) {
-            if ($isActive === 'true') {
-                $isActiveParam = 1;
-            } else {
-                $isActiveParam = 0;
-            }
-            $query = $this->createQueryBuilder('unit')
-                ->select('COUNT(unit.id)')
-                ->where('unit.is_active = :isActiveParam')
-                ->setParameter('isActiveParam', $isActiveParam)
-                ->getQuery();
-        } else {
-            $query = $this->createQueryBuilder('unit')
-                ->select('COUNT(unit.id)')
-                ->getQuery();
-        }
-
-        return $query->getSingleScalarResult();
+        return [
+            'count' => $count,
+            'array' => $this->formatData($paginator)
+        ];
     }
 
     /**
@@ -95,7 +76,7 @@ class UnitRepository extends EntityRepository
             ->setParameter('unitId', $id)
             ->getQuery();
 
-        return $query->getArrayResult();
+        return $this->processData($query->getSingleResult());
     }
 
     /**
@@ -108,6 +89,37 @@ class UnitRepository extends EntityRepository
             ->getQuery();
 
         return $query->getArrayResult();
+    }
+
+    /**
+     * @param $paginatorData
+     * @return array
+     */
+    private function formatData($paginatorData):array
+    {
+        $response = [];
+        /** @var Unit $data */
+        foreach ($paginatorData as $data) {
+            $response[] = $this->processData($data);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param Unit $data
+     * @return array
+     */
+    private function processData(Unit $data):array
+    {
+        $response = [
+            'id' => $data->getId(),
+            'title' => $data->getId(),
+            'shortcut' => $data->getShortcut(),
+            'is_active' => $data->getIsActive()
+        ];
+
+        return $response;
     }
 
 }

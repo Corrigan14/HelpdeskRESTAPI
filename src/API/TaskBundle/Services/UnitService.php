@@ -45,18 +45,17 @@ class UnitService
      */
     public function getAttributesResponse(int $page, array $options): array
     {
-        $attributes = $this->em->getRepository('APITaskBundle:Unit')->getAllEntities($page, $options);
-        $count = $this->em->getRepository('APITaskBundle:Unit')->countEntities($options);
+        $responseData = $this->em->getRepository('APITaskBundle:Unit')->getAllEntities($page, $options);
 
         $response = [
-            'data' => $attributes,
+            'data' => $responseData['array'],
         ];
 
         $url = $this->router->generate('unit_list');
         $limit = UnitRepository::LIMIT;
         $filters = $options['filtersForUrl'];
 
-        $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);
+        $pagination = PaginationHelper::getPagination($url, $limit, $page, $responseData['count'], $filters);
 
         return array_merge($response, $pagination);
     }
@@ -70,7 +69,7 @@ class UnitService
         $entity = $this->em->getRepository('APITaskBundle:Unit')->getEntity($id);
 
         return [
-            'data' => $entity[0],
+            'data' => $entity,
             '_links' => $this->getEntityLinks($id),
         ];
     }

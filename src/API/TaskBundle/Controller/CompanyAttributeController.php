@@ -543,7 +543,8 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             'title',
             'type',
             'options',
-            'is_active'
+            'is_active',
+            'description'
         ];
 
         if (array_key_exists('_format', $requestData)) {

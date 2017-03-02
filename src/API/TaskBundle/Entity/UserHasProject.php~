@@ -29,7 +29,8 @@ class UserHasProject
     /**
      * @var array
      *
-     * @ORM\Column(name="acl", type="text", nullable=true)
+     * @ORM\Column(name="acl", type="text", nullable=false)
+     * @Assert\NotBlank(message="ACL is required")
      */
     private $acl;
 

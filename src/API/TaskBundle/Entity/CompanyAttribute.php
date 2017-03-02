@@ -63,6 +63,13 @@ class CompanyAttribute
     private $is_active = true;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="description", type="text", nullable=true)
+     */
+    private $description;
+
+    /**
      * @var CompanyData
      *
      * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\CompanyData", mappedBy="companyAttribute")
@@ -220,5 +227,29 @@ class CompanyAttribute
     public function getCompanyData()
     {
         return $this->companyData;
+    }
+
+    /**
+     * Set description
+     *
+     * @param string $description
+     *
+     * @return CompanyAttribute
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
     }
 }

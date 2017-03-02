@@ -143,6 +143,10 @@ class Filter
      */
     public function setPublic($public)
     {
+        if (is_string($public)) {
+            $public = $public === 'true' ? true : false;
+        }
+
         $this->public = $public;
 
         return $this;
@@ -239,6 +243,10 @@ class Filter
      */
     public function setReport($report)
     {
+        if (is_string($report)) {
+            $report = $report === 'true' ? true : false;
+        }
+
         $this->report = $report;
 
         return $this;
@@ -263,6 +271,10 @@ class Filter
      */
     public function setIsActive($isActive)
     {
+        if (is_string($isActive)) {
+            $isActive = $isActive === 'true' ? true : false;
+        }
+
         $this->is_active = $isActive;
 
         return $this;
@@ -287,6 +299,10 @@ class Filter
      */
     public function setDefault($default)
     {
+        if (is_string($default)) {
+            $default = $default === 'true' ? true : false;
+        }
+
         $this->default = $default;
 
         return $this;

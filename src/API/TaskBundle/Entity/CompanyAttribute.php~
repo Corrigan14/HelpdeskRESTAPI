@@ -63,6 +63,13 @@ class CompanyAttribute
     private $is_active = true;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="description", type="text", nullable=true)
+     */
+    private $description;
+
+    /**
      * @var CompanyData
      *
      * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\CompanyData", mappedBy="companyAttribute")
@@ -169,6 +176,10 @@ class CompanyAttribute
      */
     public function setIsActive($isActive)
     {
+        if (is_string($isActive)) {
+            $isActive = $isActive === 'true' ? true : false;
+        }
+
         $this->is_active = $isActive;
 
         return $this;

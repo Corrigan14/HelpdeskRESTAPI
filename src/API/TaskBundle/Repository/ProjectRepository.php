@@ -187,7 +187,7 @@ class ProjectRepository extends EntityRepository
 
         $response = [
             'id' => $data->getId(),
-            'title' => $data->getId(),
+            'title' => $data->getTitle(),
             'description' => $data->getDescription(),
             'createdAt' => $data->getCreatedAt(),
             'updatedAt' => $data->getUpdatedAt(),

@@ -99,7 +99,7 @@ class TaskAttributeRepository extends EntityRepository
     {
         $response = [
             'id' => $data->getId(),
-            'title' => $data->getId(),
+            'title' => $data->getTitle(),
             'type' => $data->getType(),
             'options' => $data->getOptions(),
             'is_active' => $data->getIsActive(),

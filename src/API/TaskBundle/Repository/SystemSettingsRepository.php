@@ -96,7 +96,7 @@ class SystemSettingsRepository extends EntityRepository
     {
         $response = [
             'id' => $data->getId(),
-            'title' => $data->getId(),
+            'title' => $data->getTitle(),
             'value' => $data->getValue(),
             'is_active' => $data->getIsActive()
         ];

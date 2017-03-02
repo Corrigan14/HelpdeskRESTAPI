@@ -121,7 +121,7 @@ class TagRepository extends EntityRepository
     {
         $response = [
             'id' => $data->getId(),
-            'title' => $data->getId(),
+            'title' => $data->getTitle(),
             'color' => $data->getColor(),
             'public' => $data->getPublic(),
             'createdBy' => [

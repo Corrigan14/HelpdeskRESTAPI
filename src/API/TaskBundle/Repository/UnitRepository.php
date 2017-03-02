@@ -114,7 +114,7 @@ class UnitRepository extends EntityRepository
     {
         $response = [
             'id' => $data->getId(),
-            'title' => $data->getId(),
+            'title' => $data->getTitle(),
             'shortcut' => $data->getShortcut(),
             'is_active' => $data->getIsActive()
         ];

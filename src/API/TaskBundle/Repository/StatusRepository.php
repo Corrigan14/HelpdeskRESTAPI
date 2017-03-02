@@ -115,7 +115,7 @@ class StatusRepository extends EntityRepository
     {
         $response = [
             'id' => $data->getId(),
-            'title' => $data->getId(),
+            'title' => $data->getTitle(),
             'color' => $data->getColor(),
             'description' => $data->getDescription(),
             'is_active' => $data->getIsActive()

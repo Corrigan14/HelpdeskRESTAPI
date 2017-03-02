@@ -477,6 +477,16 @@ class SmtpController extends ApiBaseController implements ControllerInterface
             }
         }
 
+        // Check if values for ssl and tls are sent. If not, default value = false
+        if ($create) {
+            if (!array_key_exists('ssl', $requestData)) {
+                $smtp->setSsl(false);
+            }
+            if (!array_key_exists('tls', $requestData)) {
+                $smtp->setTls(false);
+            }
+        }
+
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         $errors = $this->get('entity_processor')->processEntity($smtp, $requestData);

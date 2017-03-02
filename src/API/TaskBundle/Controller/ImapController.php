@@ -590,6 +590,7 @@ class ImapController extends ApiBaseController
             }
         }
 
+        // Check if values for ssl and ignore_certificate are sent. If not, default value = false
         if ($create) {
             if (!array_key_exists('ssl', $requestData)) {
                 $imap->setSsl(false);

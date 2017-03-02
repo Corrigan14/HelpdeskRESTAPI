@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Controller;
 
 use API\CoreBundle\Entity\User;
+use API\TaskBundle\DataFixtures\ORM\UserRoleFixture;
 use API\TaskBundle\Entity\UserRole;
 use API\TaskBundle\Security\UserRoleAclOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
@@ -777,6 +778,13 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
                 }
             }
             $requestData['acl'] = $aclData;
+        }
+
+        // Check if Homepage is set, if not: "/" will be set as Default
+        if ($create) {
+            if (!isset($requestData['homepage'])) {
+                $userRole->setHomepage(UserRoleFixture::BASE_URL);
+            }
         }
 
         $errors = $this->get('entity_processor')->processEntity($userRole, $requestData);

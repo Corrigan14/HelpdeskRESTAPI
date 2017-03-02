@@ -45,18 +45,17 @@ class CompanyAttributeService
      */
     public function getAttributesResponse(int $page, array $options): array
     {
-        $attributes = $this->em->getRepository('APITaskBundle:CompanyAttribute')->getAllEntities($page, $options);
-        $count = $this->em->getRepository('APITaskBundle:CompanyAttribute')->countEntities($options);
+        $responseData = $this->em->getRepository('APITaskBundle:CompanyAttribute')->getAllEntities($page, $options);
 
         $response = [
-            'data' => $attributes,
+            'data' => $responseData['array'],
         ];
 
         $url = $this->router->generate('company_attribute_list');
         $limit = CompanyAttributeRepository::LIMIT;
         $filters = $options['filtersForUrl'];
 
-        $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);
+        $pagination = PaginationHelper::getPagination($url, $limit, $page, $responseData['count'], $filters);
 
         return array_merge($response, $pagination);
     }
@@ -70,7 +69,7 @@ class CompanyAttributeService
         $entity = $this->em->getRepository('APITaskBundle:CompanyAttribute')->getEntity($id);
 
         return [
-            'data' => $entity[0],
+            'data' => $entity,
             '_links' => $this->getEntityLinks($id),
         ];
     }

@@ -28,83 +28,51 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *       "data":
      *       [
      *          {
-     *             "id": 2,
-     *             "title": "Admins PRIVATE Filter where status=new, creator = admin, user, archived = true",
-     *             "public": false,
-     *             "filter": "a:4:{s:6:\"status\";i:49;s:7:\"creator\";i:39;i:0;i:38;s:8:\"archived\";b:1;}",
+     *             "id": 145,
+     *             "title": 145,
+     *             "public": true,
+     *             "filter":
+     *             {
+     *                "status": "238,239",
+     *                "assigned": "not,current-user"
+     *             },
+     *             "report": false,
+     *             "is_active": true,
+     *             "default": true,
+     *             "icon_class": "&#xE88A;"
+     *             "createdBy":
+     *             {
+     *                "id": 2575,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             },
+     *             "project":
+     *             {
+     *                "id": 2575,
+     *                "title": "INBOX",
+     *             }
+     *          },
+     *          {
+     *             "id": 146,
+     *             "title": 146,
+     *             "public": true,
+     *             "filter":
+     *             {
+     *                "important": "TRUE",
+     *                "assigned": "current-user"
+     *             },
      *             "report": false,
      *             "is_active": true,
      *             "default": false,
+     *             "icon_class": "&#xE88A;"
      *             "createdBy":
      *             {
-     *                "id": 38,
+     *                "id": 2575,
      *                "username": "admin",
-     *                "password": "$2y$13$NGzQjENbAf8ooYzIxqMhyuXjXjOMX/mxyJk3.0aO3wDjo6i8E8//m",
-     *                "email": "admin@admin.sk",
-     *                "roles": "[\"ROLE_ADMIN\"]",
-     *                "is_active": true,
-     *                "image": null,
-     *                "user_role":
-     *                {
-     *                   "id": 2,
-     *                   "title": "MANAGER",
-     *                   "description": null,
-     *                   "homepage": "/",
-     *                   "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                   "is_active": true
-     *                   "order": 2
-     *                }
+     *                "email": "admin@admin.sk"
      *             },
      *             "project": null
-     *          },
-     *          {
-     *              "id": 1,
-     *              "title": "Users PUBLIC Filter where status=new, creator = admin, user, archived = true",
-     *              "public": true,
-     *              "filter": "status=53&project61&creator=41,42&requester=42",
-     *              "report": false,
-     *              "is_active": true,
-     *              "default": false,
-     *              "createdBy":
-     *              {
-     *                "id": 39,
-     *                "username": "user",
-     *                "password": "$2y$13$cRIMO.MJJp1DrsB89ru97.4q2NftRbXBCiKBPSfcb/bUKgXCtuJ1q",
-     *                "email": "user@user.sk",
-     *                "roles": "[\"ROLE_USER\"]",
-     *                "is_active": true,
-     *                "image": null,
-     *                "user_role":
-     *                {
-     *                   "id": 2,
-     *                   "title": "MANAGER",
-     *                   "description": null,
-     *                   "homepage": "/",
-     *                   "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"create_user_with_role_customer\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                   "is_active": true
-     *                   "order": 2
-     *                }
-     *              },
-     *              "project":
-     *              {
-     *                "id": 58,
-     *                "title": "Project of admin",
-     *                "description": "Description of project of admin.",
-     *                "is_active": true,
-     *                "createdAt":
-     *                {
-     *                    "date": "2017-01-03 17:40:43.000000",
-     *                    "timezone_type": 3,
-     *                    "timezone": "Europe/Berlin"
-     *                },
-     *                "updatedAt":
-     *                {
-     *                    "date": "2017-01-03 17:40:43.000000",
-     *                    "timezone_type": 3,
-     *                    "timezone": "Europe/Berlin"
-     *                }
-     *             }
-     *          }
+     *           },
      *       ],
      *       "_links":
      *       {
@@ -206,14 +174,29 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *      {
      *         "data":
      *         {
-     *            "id": 113,
-     *            "title": "DO IT",
-     *            "public": true,
-     *            "filter": "{\"status\":\"206,207\",\"assigned\":\"not,current-user\"}",
-     *            "report": false,
-     *            "is_active": true,
-     *            "default": true,
-     *            "icon_class": "&#xE88A;"
+     *             "id": 145,
+     *             "title": 145,
+     *             "public": true,
+     *             "filter":
+     *             {
+     *                "status": "238,239",
+     *                "assigned": "not,current-user"
+     *             },
+     *             "report": false,
+     *             "is_active": true,
+     *             "default": true,
+     *             "icon_class": "&#xE88A;"
+     *             "createdBy":
+     *             {
+     *                "id": 2575,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             },
+     *             "project":
+     *             {
+     *                "id": 2575,
+     *                "title": "INBOX",
+     *             }
      *         },
      *        "_links":
      *        {
@@ -274,14 +257,29 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *         {
-     *            "id": 113,
-     *            "title": "DO IT",
-     *            "public": true,
-     *            "filter": "{\"status\":\"206,207\",\"assigned\":\"not,current-user\"}",
-     *            "report": false,
-     *            "is_active": true,
-     *            "default": true,
-     *            "icon_class": "&#xE88A;"
+     *             "id": 145,
+     *             "title": 145,
+     *             "public": true,
+     *             "filter":
+     *             {
+     *                "status": "238,239",
+     *                "assigned": "not,current-user"
+     *             },
+     *             "report": false,
+     *             "is_active": true,
+     *             "default": true,
+     *             "icon_class": "&#xE88A;"
+     *             "createdBy":
+     *             {
+     *                "id": 2575,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             },
+     *             "project":
+     *             {
+     *                "id": 2575,
+     *                "title": "INBOX",
+     *             }
      *         },
      *        "_links":
      *        {
@@ -357,14 +355,29 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *         {
-     *            "id": 113,
-     *            "title": "DO IT",
-     *            "public": true,
-     *            "filter": "{\"status\":\"206,207\",\"assigned\":\"not,current-user\"}",
-     *            "report": false,
-     *            "is_active": true,
-     *            "default": true,
-     *            "icon_class": "&#xE88A;"
+     *             "id": 145,
+     *             "title": 145,
+     *             "public": true,
+     *             "filter":
+     *             {
+     *                "status": "238,239",
+     *                "assigned": "not,current-user"
+     *             },
+     *             "report": false,
+     *             "is_active": true,
+     *             "default": true,
+     *             "icon_class": "&#xE88A;"
+     *             "createdBy":
+     *             {
+     *                "id": 2575,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             },
+     *             "project":
+     *             {
+     *                "id": 2575,
+     *                "title": "INBOX",
+     *             }
      *         },
      *        "_links":
      *        {
@@ -446,14 +459,29 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *         {
-     *            "id": 113,
-     *            "title": "DO IT",
-     *            "public": true,
-     *            "filter": "{\"status\":\"206,207\",\"assigned\":\"not,current-user\"}",
-     *            "report": false,
-     *            "is_active": true,
-     *            "default": true,
-     *            "icon_class": "&#xE88A;"
+     *             "id": 145,
+     *             "title": 145,
+     *             "public": true,
+     *             "filter":
+     *             {
+     *                "status": "238,239",
+     *                "assigned": "not,current-user"
+     *             },
+     *             "report": false,
+     *             "is_active": true,
+     *             "default": true,
+     *             "icon_class": "&#xE88A;"
+     *             "createdBy":
+     *             {
+     *                "id": 2575,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             },
+     *             "project":
+     *             {
+     *                "id": 2575,
+     *                "title": "INBOX",
+     *             }
      *         },
      *        "_links":
      *        {
@@ -540,16 +568,31 @@ class FilterController extends ApiBaseController implements ControllerInterface
     /**
      * ### Response ###
      *      {
-     *       "data":
-     *         {
-     *            "id": 113,
-     *            "title": "DO IT",
-     *            "public": true,
-     *            "filter": "{\"status\":\"206,207\",\"assigned\":\"not,current-user\"}",
-     *            "report": false,
-     *            "is_active": true,
-     *            "default": true,
-     *            "icon_class": "&#xE88A;"
+     *        "data":
+     *        {
+     *             "id": 145,
+     *             "title": 145,
+     *             "public": true,
+     *             "filter":
+     *             {
+     *                "status": "238,239",
+     *                "assigned": "not,current-user"
+     *             },
+     *             "report": false,
+     *             "is_active": true,
+     *             "default": true,
+     *             "icon_class": "&#xE88A;"
+     *             "createdBy":
+     *             {
+     *                "id": 2575,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             },
+     *             "project":
+     *             {
+     *                "id": 2575,
+     *                "title": "INBOX",
+     *             }
      *         },
      *        "_links":
      *        {
@@ -653,14 +696,29 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *         {
-     *            "id": 113,
-     *            "title": "DO IT",
-     *            "public": true,
-     *            "filter": "{\"status\":\"206,207\",\"assigned\":\"not,current-user\"}",
-     *            "report": false,
-     *            "is_active": true,
-     *            "default": true,
-     *            "icon_class": "&#xE88A;"
+     *             "id": 145,
+     *             "title": 145,
+     *             "public": true,
+     *             "filter":
+     *             {
+     *                "status": "238,239",
+     *                "assigned": "not,current-user"
+     *             },
+     *             "report": false,
+     *             "is_active": true,
+     *             "default": true,
+     *             "icon_class": "&#xE88A;"
+     *             "createdBy":
+     *             {
+     *                "id": 2575,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             },
+     *             "project":
+     *             {
+     *                "id": 2575,
+     *                "title": "INBOX",
+     *             }
      *         },
      *        "_links":
      *        {

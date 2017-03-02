@@ -47,18 +47,17 @@ class FilterService
      */
     public function getFiltersResponse(int $page, array $options): array
     {
-        $filters = $this->em->getRepository('APITaskBundle:Filter')->getAllEntities($page, $options);
-        $count = $this->em->getRepository('APITaskBundle:Filter')->countEntities($options);
+        $responseData = $this->em->getRepository('APITaskBundle:Filter')->getAllEntities($page, $options);
 
         $response = [
-            'data' => $filters,
+            'data' => $responseData['array'],
         ];
 
         $url = $this->router->generate('filter_list');
         $limit = FilterRepository::LIMIT;
         $filters = $options['filtersForUrl'];
 
-        $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);
+        $pagination = PaginationHelper::getPagination($url, $limit, $page, $responseData['count'], $filters);
 
         return array_merge($response, $pagination);
     }
@@ -72,7 +71,7 @@ class FilterService
         $filter = $this->em->getRepository('APITaskBundle:Filter')->getFilterEntity($id);
 
         return [
-            'data' => $filter[0],
+            'data' => $filter,
             '_links' => $this->getFilterLinks($id),
         ];
     }

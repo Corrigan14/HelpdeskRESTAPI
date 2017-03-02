@@ -505,6 +505,7 @@ class TaskControllerTest extends ApiTestCase
         $adminProject = $this->em->getRepository('APITaskBundle:Project')->findOneBy([
             'title' => 'Project of admin'
         ]);
+
         $webSolCompany = $this->em->getRepository('APICoreBundle:Company')->findOneBy([
             'title' => 'Web-Solutions'
         ]);

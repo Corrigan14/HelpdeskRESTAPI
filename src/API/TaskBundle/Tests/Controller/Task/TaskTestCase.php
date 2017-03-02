@@ -86,7 +86,7 @@ class TaskTestCase extends WebTestCase
     protected function findOneAdminEntity()
     {
         $task = $this->em->getRepository('APITaskBundle:Task')->findOneBy([
-            'title' => 'Task TEST - admin is creator, admin is requested 2'
+            'title' => 'Task TEST - admin is creator, admin is requested 3'
         ]);
 
         if ($task instanceof Task) {
@@ -111,13 +111,18 @@ class TaskTestCase extends WebTestCase
             'title' => 'Web-Solutions'
         ]);
 
+        $adminProject = $this->em->getRepository('APITaskBundle:Project')->findOneBy([
+            'title' => 'Project of admin'
+        ]);
+
         $task = new Task();
-        $task->setTitle('Task TEST - admin is creator, admin is requested 2');
+        $task->setTitle('Task TEST - admin is creator, admin is requested 3');
         $task->setDescription('Description of Task TEST');
         $task->setImportant(false);
         $task->setCreatedBy($adminUser);
         $task->setRequestedBy($adminUser);
         $task->setCompany($webSolCompany);
+        $task->setProject($adminProject);
 
         $this->em->persist($task);
         $this->em->flush();

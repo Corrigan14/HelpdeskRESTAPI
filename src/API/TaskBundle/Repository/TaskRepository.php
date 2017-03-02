@@ -646,6 +646,22 @@ class TaskRepository extends EntityRepository
                     ]
                 ];
             }
+        };
+        $project = $data->getProject();
+        $projectArray = [];
+        if ($project) {
+            $projectArray = [
+                'id' => $data->getProject()->getId(),
+                'title' => $data->getProject()->getTitle()
+            ];
+        }
+        $company = $data->getCompany();
+        $companyArray = [];
+        if ($company) {
+            $companyArray = [
+                'id' => $data->getCompany()->getId(),
+                'title' => $data->getCompany()->getTitle()
+            ];
         }
 
         $response = [
@@ -670,14 +686,8 @@ class TaskRepository extends EntityRepository
                 'username' => $data->getRequestedBy()->getUsername(),
                 'email' => $data->getRequestedBy()->getEmail()
             ],
-            'project' => [
-                'id' => $data->getProject()->getId(),
-                'title' => $data->getProject()->getTitle()
-            ],
-            'company' => [
-                'id' => $data->getCompany()->getId(),
-                'title' => $data->getCompany()->getTitle()
-            ],
+            'project' => $projectArray,
+            'company' => $companyArray,
             'taskData' => $taskDataArray,
             'followers' => $followersArray,
             'tags' => $tagsArray,

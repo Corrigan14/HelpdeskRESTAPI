@@ -2,7 +2,9 @@
 
 namespace API\TaskBundle\Repository;
 
+use API\TaskBundle\Entity\TaskHasAssignedUser;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * TaskHasAssignedUserRepository
@@ -22,16 +24,68 @@ class TaskHasAssignedUserRepository extends EntityRepository
         $query = $this->createQueryBuilder('tau')
             ->select('tau, user')
             ->leftJoin('tau.user', 'user')
+            ->orderBy('tau.id')
+            ->distinct()
             ->where('tau.task = :taskId')
             ->setParameter('taskId', $taskId);
 
-        $query->setMaxResults(TaskRepository::LIMIT);
-
-        // Pagination calculating offset
+        // Pagination
         if (1 < $page) {
             $query->setFirstResult(TaskRepository::LIMIT * $page - TaskRepository::LIMIT);
+        } else {
+            $query->setFirstResult(0);
         }
 
-        return $query->getQuery()->getArrayResult();
+        $query->setMaxResults(TaskRepository::LIMIT);
+
+        $paginator = new Paginator($query, $fetchJoinCollection = true);
+        $count = $paginator->count();
+
+        return [
+            'count' => $count,
+            'array' => $this->formatData($paginator)
+        ];
+    }
+
+    /**
+     * @param $paginatorData
+     * @return array
+     */
+    private function formatData($paginatorData):array
+    {
+        $response = [];
+        /** @var TaskHasAssignedUser $data */
+        foreach ($paginatorData as $data) {
+            $response[] = $this->processData($data);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param TaskHasAssignedUser $data
+     * @return array
+     */
+    private function processData(TaskHasAssignedUser $data):array
+    {
+        $response = [
+            'id' => $data->getId(),
+            'createdAt' => $data->getCreatedAt(),
+            'updatedAt' => $data->getUpdatedAt(),
+            'status_date' => $data->getStatusDate(),
+            'time_spent' => $data->getTimeSpent(),
+            'user' => [
+                'id' => $data->getUser()->getId(),
+                'username' => $data->getUser()->getUsername(),
+                'email' => $data->getUser()->getEmail()
+            ],
+            'status' => [
+                'id' => $data->getStatus()->getId(),
+                'title' => $data->getStatus()->getTitle(),
+                'color' => $data->getStatus()->getColor(),
+            ]
+        ];
+
+        return $response;
     }
 }

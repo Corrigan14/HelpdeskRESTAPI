@@ -25,26 +25,64 @@ class AssignController extends ApiBaseController
      * ### Response ###
      *      {
      *        "data":
+     *         {
+     *            "id": 69,
+     *            "createdAt":
+     *            {
+     *               "date": "2017-02-27 15:55:17.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *            "updatedAt":
+     *            {
+     *               "date": "2017-02-27 15:55:17.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *            "status_date": null,
+     *            "time_spent": null,
+     *            "user":
+     *            {
+     *               "id": 2579,
+     *               "username": "user",
+     *               "email": "user@user.sk"
+     *            },
+     *            "status":
+     *            {
+     *               "id": 240,
+     *               "title": "Completed",
+     *               "color": "#FF4500"
+     *            }
+     *         },
      *        {
-     *          "0":
-     *          {
-     *            "id": 11,
-     *            "username": "admin",
-     *            "email": "admin@admin.sk",
-     *            "roles": "[\"ROLE_ADMIN\"]",
-     *            "is_active": true,
-     *            "acl": "[]"
-     *          },
-     *          "1":
-     *          {
-     *            "id": 12,
-     *            "username": "user",
-     *            "email": "user@user.sk",
-     *            "roles": "[\"ROLE_USER\"]",
-     *            "is_active": true,
-     *            "acl": "[]"
-     *          },
-     *        },
+     *            "id": 70,
+     *            "createdAt":
+     *            {
+     *               "date": "2017-02-27 15:55:17.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *            "updatedAt":
+     *            {
+     *               "date": "2017-02-27 15:55:17.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *            },
+     *            "status_date": null,
+     *            "time_spent": null,
+     *            "user":
+     *            {
+     *               "id": 2578,
+     *               "username": "user",
+     *               "email": "user@user.sk"
+     *            },
+     *            "status":
+     *            {
+     *               "id": 240,
+     *               "title": "Completed",
+     *               "color": "#FF4500"
+     *            }
+     *         }
      *        "_links":
      *        {
      *          "self": "/api/v1/task-bundle/tasks/7/assign-user?page=1",

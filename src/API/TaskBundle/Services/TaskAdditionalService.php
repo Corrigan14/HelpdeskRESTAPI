@@ -125,25 +125,13 @@ class TaskAdditionalService
     {
         /** @var Task $task */
         $task = $options['task'];
-        $taskAssignedUsers = $task->getTaskHasAssignedUsers();
-        $taskAssignedUsersArray = $this->em->getRepository('APITaskBundle:TaskHasAssignedUser')->getTasksAssignedUsers($task->getId(), $page);
-        $count = count($taskAssignedUsers);
+        $responseData = $this->em->getRepository('APITaskBundle:TaskHasAssignedUser')->getTasksAssignedUsers($task->getId(), $page);
 
         $response = [
-            'data' => []
+            'data' => $responseData['array']
         ];
-        if (count($taskAssignedUsersArray) > 0) {
-            $data = [];
-            foreach ($taskAssignedUsersArray as $item) {
-                unset($item['user']['password']);
-                $data[] = $item['user'];
-            }
-            $response = [
-                'data' => $data,
-            ];
-        }
 
-        $pagination = $this->getPagination($page, $count, $routeOptions);
+        $pagination = $this->getPagination($page, $responseData['count'], $routeOptions);
 
         return array_merge($response, $pagination);
     }

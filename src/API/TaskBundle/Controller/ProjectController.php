@@ -29,40 +29,51 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *       "data":
      *       [
      *          {
-     *            "id": "1",
-     *            "title": "Project 1",
-     *            "description": "Description of Project 1",
-     *            "createdAt":
-     *            {
+     *             "id": "1",
+     *             "title": "Project 1",
+     *             "description": "Description of Project 1",
+     *             "createdAt":
+     *             {
      *               "date": "2016-11-26 21:49:04.000000",
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
-     *            },
-     *            "updatedAt":
-     *            {
+     *             },
+     *             "updatedAt":
+     *             {
      *               "date": "2016-11-26 21:49:04.000000",
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
-     *            },
-     *            "userHasProjects":
-     *            [
-     *               {
-     *                  "id": 125,
-     *                  "acl": "[\"create_task\"]",
-     *                  "user":
-     *                 {
-     *                    "id": 1014,
-     *                    "username": "admin",
-     *                    "password": "$2y$13$oRdNpKY3bo/dj2WGDKGzCOdcX9VZuxnu2NZKfy3jV2dV8zIW8qHr6",
-     *                    "email": "admin@admin.sk",
-     *                    "roles": "[\"ROLE_ADMIN\"]",
-     *                    "is_active": true,
-     *                    "language": "AJ",
-     *                    "image": null
-     *                 }
-     *               }
-     *            ]
-     *          }
+     *             },
+     *             "userHasProjects":
+     *             [
+     *                {
+     *                   "id": 300,
+     *                   "user":
+     *                   {
+     *                      "id": 2575,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk"
+     *                    },
+     *                    "acl":
+     *                    [
+     *                      "view_own_tasks"
+     *                    ]
+     *                },
+     *                {
+     *                   "id": 301,
+     *                   "user":
+     *                   {
+     *                      "id": 2576,
+     *                      "username": "manager",
+     *                      "email": "manager@manager.sk"
+     *                    },
+     *                   "acl":
+     *                   [
+     *                      "view_own_tasks"
+     *                   ]
+     *                },
+     *             ]
+     *          },
      *       ],
      *       "_links":
      *       {

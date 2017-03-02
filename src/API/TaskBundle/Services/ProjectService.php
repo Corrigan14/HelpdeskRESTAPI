@@ -51,17 +51,15 @@ class ProjectService
      */
     public function getProjectsResponse(int $page, array $options):array
     {
-        /** @var ProjectRepository $projectRepository */
-        $projectRepository = $this->em->getRepository('APITaskBundle:Project');
-        $projects = $projectRepository->getAllEntities($page, $options);
+        $responseData = $this->em->getRepository('APITaskBundle:Project')->getAllEntities($page, $options);
 
         $response = [
-            'data' => $projects,
+            'data' => $responseData['array'],
         ];
         $pagination = HateoasHelper::getPagination(
             $this->router->generate('projects_list'),
             $page,
-            $projectRepository->countEntities($options),
+            $responseData['count'],
             ProjectRepository::LIMIT,
             $fields = [],
             $options['isActive']

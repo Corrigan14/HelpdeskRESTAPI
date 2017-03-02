@@ -590,6 +590,15 @@ class ImapController extends ApiBaseController
             }
         }
 
+        if ($create) {
+            if (!array_key_exists('ssl', $requestData)) {
+                $imap->setSsl(false);
+            }
+            if (!array_key_exists('ignore_certificate', $requestData)) {
+                $imap->setIgnoreCertificate(false);
+            }
+        }
+
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         $errors = $this->get('entity_processor')->processEntity($imap, $requestData);

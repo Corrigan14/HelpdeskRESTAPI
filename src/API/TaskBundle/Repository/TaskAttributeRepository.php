@@ -2,13 +2,14 @@
 
 namespace API\TaskBundle\Repository;
 
-use API\CoreBundle\Repository\RepositoryInterface;
+use API\TaskBundle\Entity\TaskAttribute;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * TaskAttributeRepository
  */
-class TaskAttributeRepository extends EntityRepository implements RepositoryInterface
+class TaskAttributeRepository extends EntityRepository
 {
     const LIMIT = 10;
 
@@ -31,56 +32,34 @@ class TaskAttributeRepository extends EntityRepository implements RepositoryInte
 
         if ('true' === $isActive || 'false' === $isActive) {
             $query = $this->createQueryBuilder('ca')
+                ->select()
+                ->orderBy('ca.id')
                 ->where('ca.is_active = :isActive')
                 ->setParameter('isActive', $isActiveParam)
                 ->getQuery();
         } else {
             $query = $this->createQueryBuilder('ca')
+                ->select()
+                ->orderBy('ca.id')
                 ->getQuery();
+        }
+
+        // Pagination
+        if (1 < $page) {
+            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
+        } else {
+            $query->setFirstResult(0);
         }
 
         $query->setMaxResults(self::LIMIT);
 
-        // Pagination calculating offset
-        if (1 < $page) {
-            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
-        }
+        $paginator = new Paginator($query, $fetchJoinCollection = true);
+        $count = $paginator->count();
 
-        return $query->getArrayResult();
-    }
-
-    /**
-     * Return count of all Entities
-     *
-     * @param array $options
-     *
-     * @return int
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
-     */
-    public function countEntities(array $options = [])
-    {
-        $isActive = $options['isActive'];
-
-        if ('true' === $isActive) {
-            $isActiveParam = 1;
-        } else {
-            $isActiveParam = 0;
-        }
-
-        if ('true' === $isActive || 'false' === $isActive) {
-            $query = $this->createQueryBuilder('ca')
-                ->select('COUNT(ca.id)')
-                ->where('ca.is_active = :isActive')
-                ->setParameter('isActive', $isActiveParam)
-                ->getQuery();
-        } else {
-            $query = $this->createQueryBuilder('ca')
-                ->select('COUNT(ca.id)')
-                ->getQuery();
-        }
-
-        return $query->getSingleScalarResult();
+        return [
+            'count' => $count,
+            'array' => $this->formatData($paginator)
+        ];
     }
 
     /**
@@ -94,6 +73,38 @@ class TaskAttributeRepository extends EntityRepository implements RepositoryInte
             ->setParameter('id', $id)
             ->getQuery();
 
-        return $query->getArrayResult();
+        return $this->processData($query->getSingleResult());
+    }
+
+    /**
+     * @param $paginatorData
+     * @return array
+     */
+    private function formatData($paginatorData):array
+    {
+        $response = [];
+        /** @var TaskAttribute $data */
+        foreach ($paginatorData as $data) {
+            $response[] = $this->processData($data);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param TaskAttribute $data
+     * @return array
+     */
+    private function processData(TaskAttribute $data):array
+    {
+        $response = [
+            'id' => $data->getId(),
+            'title' => $data->getId(),
+            'type' => $data->getType(),
+            'options' => $data->getOptions(),
+            'is_active' => $data->getIsActive(),
+        ];
+
+        return $response;
     }
 }

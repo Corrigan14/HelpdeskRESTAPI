@@ -36,15 +36,20 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *              "id": 143,
      *              "title": "select task additional attribute",
      *              "type": "simple_select",
-     *              "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
+     *              "options":
+     *              {
+     *                 "select1": "select1",
+     *                 "select2": "select2",
+     *                 "select3": "select3"
+     *              },
      *              "is_active": true
      *           },
      *           {
-     *               "id": 144,
-     *               "title": "integer number task additional attribute",
-     *               "type": "integer_number",
-     *               "options": null,
-     *               "is_active": true
+     *              "id": 144,
+     *              "title": "integer number task additional attribute",
+     *              "type": "integer_number",
+     *              "options": null,
+     *              "is_active": true
      *            }
      *       ],
      *       "_links":
@@ -132,7 +137,12 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *            "id": 142,
      *            "title": "input task additional attribute",
      *            "type": "input",
-     *            "options": null,
+     *            "options":
+     *             {
+     *                "select1": "select1",
+     *                "select2": "select2",
+     *                "select3": "select3"
+     *             },
      *            "is_active": true
      *        },
      *        "_links":
@@ -203,7 +213,12 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *            "id": "1",
      *            "title": "Input task additional attribute",
      *            "type": "input"
-     *            "options": null
+     *            "options":
+     *            {
+     *               "select1": "select1",
+     *               "select2": "select2",
+     *               "select3": "select3"
+     *            },
      *            "is_active": true
      *        },
      *        "_links":
@@ -270,7 +285,12 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *            "id": "1",
      *            "title": "Input task additional attribute",
      *            "type": "input"
-     *            "options": null
+     *            "options":
+     *            {
+     *               "select1": "select1",
+     *               "select2": "select2",
+     *               "select3": "select3"
+     *            },
      *            "is_active": true
      *        },
      *        "_links":
@@ -350,7 +370,12 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *            "id": "1",
      *            "title": "Input task additional attribute",
      *            "type": "input"
-     *            "options": null
+     *            "options":
+     *            {
+     *               "select1": "select1",
+     *               "select2": "select2",
+     *               "select3": "select3"
+     *            },
      *            "is_active": true
      *        },
      *        "_links":
@@ -486,7 +511,12 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *            "id": "1",
      *            "title": "Input task additional attribute",
      *            "type": "input"
-     *            "options": null
+     *            "options":
+     *            {
+     *               "select1": "select1",
+     *               "select2": "select2",
+     *               "select3": "select3"
+     *            },
      *            "is_active": true
      *        },
      *        "_links":

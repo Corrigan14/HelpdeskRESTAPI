@@ -50,18 +50,17 @@ class TaskAttributeService
      */
     public function getTaskAttributesResponse(int $page, array $options):array
     {
-        $attributes = $this->em->getRepository('APITaskBundle:TaskAttribute')->getAllEntities($page, $options);
-        $count = $this->em->getRepository('APITaskBundle:TaskAttribute')->countEntities($options);
+        $responseData = $this->em->getRepository('APITaskBundle:TaskAttribute')->getAllEntities($page, $options);
 
         $response = [
-            'data' => $attributes,
+            'data' => $responseData['array'],
         ];
 
         $url = $this->router->generate('task_attribute_list');
         $limit = TaskAttributeRepository::LIMIT;
         $filters = $options['filtersForUrl'];
 
-        $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);
+        $pagination = PaginationHelper::getPagination($url, $limit, $page, $responseData['count'], $filters);
 
         return array_merge($response, $pagination);
     }
@@ -75,7 +74,7 @@ class TaskAttributeService
         $entity = $this->em->getRepository('APITaskBundle:TaskAttribute')->getEntity($id);
 
         return [
-            'data' => $entity[0],
+            'data' => $entity,
             '_links' => $this->getLinks($id),
         ];
     }

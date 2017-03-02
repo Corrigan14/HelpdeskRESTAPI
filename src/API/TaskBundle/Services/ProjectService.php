@@ -119,7 +119,7 @@ class ProjectService
         $project = $this->em->getRepository('APITaskBundle:Project')->getEntity($id);
 
         return [
-            'data' => $project[0],
+            'data' => $project,
             '_links' => $this->getProjectLinks($id),
         ];
     }

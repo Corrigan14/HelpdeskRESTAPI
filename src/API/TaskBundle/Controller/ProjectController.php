@@ -143,89 +143,51 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *      {
      *        "data":
      *        {
-     *           "id": "1",
-     *           "title": "Project 1",
-     *           "description": "Description of Project 1",
-     *           "createdAt":
-     *           {
-     *              "date": "2016-11-26 21:49:04.000000",
-     *              "timezone_type": 3,
-     *              "timezone": "Europe/Berlin"
-     *           },
-     *           "updatedAt":
-     *           {
-     *              "date": "2016-11-26 21:49:04.000000",
-     *              "timezone_type": 3,
-     *              "timezone": "Europe/Berlin"
-     *           },
-     *           "userHasProjects":
-     *           [
-     *              {
-     *                 "id": 125,
-     *                 "acl": "[\"create_task\"]",
-     *                 "user":
-     *                 {
-     *                    "id": 1014,
-     *                    "username": "admin",
-     *                    "password": "$2y$13$oRdNpKY3bo/dj2WGDKGzCOdcX9VZuxnu2NZKfy3jV2dV8zIW8qHr6",
-     *                    "email": "admin@admin.sk",
-     *                    "roles": "[\"ROLE_ADMIN\"]",
-     *                    "is_active": true,
-     *                    "language": "AJ",
-     *                    "image": null
-     *                 }
-     *              }
-     *           ],
-     *           "tasks":
-     *           [
-     *              {
-     *                 "id": 20048,
-     *                 "title": "Task 2",
-     *                 "description": "Description of Task 2",
-     *                 "deadline": null,
-     *                 "startedAt": null,
-     *                 "closedAt": null,
-     *                 "important": false,
-     *                 "work": null,
-     *                 "work_time": null,
-     *                 "createdAt":
-     *                 {
-     *                    "date": "2017-02-06 14:29:08.000000",
-     *                    "timezone_type": 3,
-     *                    "timezone": "Europe/Berlin"
-     *                 },
-     *                 "updatedAt":
-     *                 {
-     *                    "date": "2017-02-06 14:29:08.000000",
-     *                    "timezone_type": 3,
-     *                    "timezone": "Europe/Berlin"
-     *                  }
-     *               },
-     *              {
-     *                 "id": 20049,
-     *                 "title": "Task 2",
-     *                 "description": "Description of Task 2",
-     *                 "deadline": null,
-     *                 "startedAt": null,
-     *                 "closedAt": null,
-     *                 "important": false,
-     *                 "work": null,
-     *                 "work_time": null,
-     *                 "createdAt":
-     *                 {
-     *                    "date": "2017-02-06 14:29:08.000000",
-     *                    "timezone_type": 3,
-     *                    "timezone": "Europe/Berlin"
-     *                 },
-     *                 "updatedAt":
-     *                 {
-     *                    "date": "2017-02-06 14:29:08.000000",
-     *                    "timezone_type": 3,
-     *                    "timezone": "Europe/Berlin"
-     *                  }
-     *              }
-     *           ]
-     *        },
+     *             "id": "1",
+     *             "title": "Project 1",
+     *             "description": "Description of Project 1",
+     *             "createdAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "updatedAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "userHasProjects":
+     *             [
+     *                {
+     *                   "id": 300,
+     *                   "user":
+     *                   {
+     *                      "id": 2575,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk"
+     *                    },
+     *                    "acl":
+     *                    [
+     *                      "view_own_tasks"
+     *                    ]
+     *                },
+     *                {
+     *                   "id": 301,
+     *                   "user":
+     *                   {
+     *                      "id": 2576,
+     *                      "username": "manager",
+     *                      "email": "manager@manager.sk"
+     *                    },
+     *                   "acl":
+     *                   [
+     *                      "view_own_tasks"
+     *                   ]
+     *                },
+     *             ]
+     *         }
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/projects/211",
@@ -235,7 +197,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *      }
      *
      * @ApiDoc(
-     *  description="Returns a Project Entity with list of projects tasks",
+     *  description="Returns a Project Entity.",
      *  requirements={
      *     {
      *       "name"="id",
@@ -276,7 +238,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             return $this->accessDeniedResponse();
         }
 
-        $projectArray = $this->get('project_service')->getEntityWithTaskResponse($id);
+        $projectArray = $this->get('project_service')->getEntityResponse($id);
         return $this->json($projectArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
@@ -284,40 +246,52 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *  ### Response ###
      *      {
      *        "data":
-     *        {
-     *           "id": "1",
-     *           "title": "Project 1",
-     *           "description": "Description of Project 1",
-     *           "createdAt":
-     *           {
-     *              "date": "2016-11-26 21:49:04.000000",
-     *              "timezone_type": 3,
-     *              "timezone": "Europe/Berlin"
-     *           },
-     *           "updatedAt":
-     *           {
-     *              "date": "2016-11-26 21:49:04.000000",
-     *              "timezone_type": 3,
-     *              "timezone": "Europe/Berlin"
-     *           },
-     *           "userHasProjects":
-     *           [
-     *              {
-     *                 "id": 125,
-     *                 "acl": "[\"create_task\"]",
-     *                 "user":
-     *                 {
-     *                    "id": 1014,
-     *                    "username": "admin",
-     *                    "password": "$2y$13$oRdNpKY3bo/dj2WGDKGzCOdcX9VZuxnu2NZKfy3jV2dV8zIW8qHr6",
-     *                    "email": "admin@admin.sk",
-     *                    "roles": "[\"ROLE_ADMIN\"]",
-     *                    "is_active": true,
-     *                    "language": "AJ",
-     *                    "image": null
-     *                 }
-     *              }
-     *           ]
+     *         {
+     *             "id": "1",
+     *             "title": "Project 1",
+     *             "description": "Description of Project 1",
+     *             "createdAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "updatedAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "userHasProjects":
+     *             [
+     *                {
+     *                   "id": 300,
+     *                   "user":
+     *                   {
+     *                      "id": 2575,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk"
+     *                    },
+     *                    "acl":
+     *                    [
+     *                      "view_own_tasks"
+     *                    ]
+     *                },
+     *                {
+     *                   "id": 301,
+     *                   "user":
+     *                   {
+     *                      "id": 2576,
+     *                      "username": "manager",
+     *                      "email": "manager@manager.sk"
+     *                    },
+     *                   "acl":
+     *                   [
+     *                      "view_own_tasks"
+     *                   ]
+     *                },
+     *             ]
+     *          }
      *        },
      *        "_links":
      *        {
@@ -376,41 +350,52 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *  ### Response ###
      *      {
      *        "data":
-     *        {
-     *           "id": "1",
-     *           "title": "Project 1",
-     *           "description": "Description of Project 1",
-     *           "createdAt":
-     *           {
-     *              "date": "2016-11-26 21:49:04.000000",
-     *              "timezone_type": 3,
-     *              "timezone": "Europe/Berlin"
-     *           },
-     *           "updatedAt":
-     *           {
-     *              "date": "2016-11-26 21:49:04.000000",
-     *              "timezone_type": 3,
-     *              "timezone": "Europe/Berlin"
-     *           },
-     *           "userHasProjects":
-     *           [
-     *              {
-     *                 "id": 125,
-     *                 "acl": "[\"create_task\"]",
-     *                 "user":
-     *                 {
-     *                    "id": 1014,
-     *                    "username": "admin",
-     *                    "password": "$2y$13$oRdNpKY3bo/dj2WGDKGzCOdcX9VZuxnu2NZKfy3jV2dV8zIW8qHr6",
-     *                    "email": "admin@admin.sk",
-     *                    "roles": "[\"ROLE_ADMIN\"]",
-     *                    "is_active": true,
-     *                    "language": "AJ",
-     *                    "image": null
-     *                 }
-     *              }
-     *           ]
-     *        },
+     *         {
+     *             "id": "1",
+     *             "title": "Project 1",
+     *             "description": "Description of Project 1",
+     *             "createdAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "updatedAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "userHasProjects":
+     *             [
+     *                {
+     *                   "id": 300,
+     *                   "user":
+     *                   {
+     *                      "id": 2575,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk"
+     *                    },
+     *                    "acl":
+     *                    [
+     *                      "view_own_tasks"
+     *                    ]
+     *                },
+     *                {
+     *                   "id": 301,
+     *                   "user":
+     *                   {
+     *                      "id": 2576,
+     *                      "username": "manager",
+     *                      "email": "manager@manager.sk"
+     *                    },
+     *                   "acl":
+     *                   [
+     *                      "view_own_tasks"
+     *                   ]
+     *                },
+     *             ]
+     *         },
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/projects/211",
@@ -476,41 +461,52 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *  ### Response ###
      *      {
      *        "data":
-     *        {
-     *           "id": "1",
-     *           "title": "Project 1",
-     *           "description": "Description of Project 1",
-     *           "createdAt":
-     *           {
-     *              "date": "2016-11-26 21:49:04.000000",
-     *              "timezone_type": 3,
-     *              "timezone": "Europe/Berlin"
-     *           },
-     *           "updatedAt":
-     *           {
-     *              "date": "2016-11-26 21:49:04.000000",
-     *              "timezone_type": 3,
-     *              "timezone": "Europe/Berlin"
-     *           },
-     *           "userHasProjects":
-     *           [
-     *              {
-     *                 "id": 125,
-     *                 "acl": "[\"create_task\"]",
-     *                 "user":
-     *                 {
-     *                    "id": 1014,
-     *                    "username": "admin",
-     *                    "password": "$2y$13$oRdNpKY3bo/dj2WGDKGzCOdcX9VZuxnu2NZKfy3jV2dV8zIW8qHr6",
-     *                    "email": "admin@admin.sk",
-     *                    "roles": "[\"ROLE_ADMIN\"]",
-     *                    "is_active": true,
-     *                    "language": "AJ",
-     *                    "image": null
-     *                 }
-     *              }
-     *           ]
-     *        },
+     *         {
+     *             "id": "1",
+     *             "title": "Project 1",
+     *             "description": "Description of Project 1",
+     *             "createdAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "updatedAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "userHasProjects":
+     *             [
+     *                {
+     *                   "id": 300,
+     *                   "user":
+     *                   {
+     *                      "id": 2575,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk"
+     *                    },
+     *                    "acl":
+     *                    [
+     *                      "view_own_tasks"
+     *                    ]
+     *                },
+     *                {
+     *                   "id": 301,
+     *                   "user":
+     *                   {
+     *                      "id": 2576,
+     *                      "username": "manager",
+     *                      "email": "manager@manager.sk"
+     *                    },
+     *                   "acl":
+     *                   [
+     *                      "view_own_tasks"
+     *                   ]
+     *                },
+     *             ]
+     *         },
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/projects/211",
@@ -630,41 +626,52 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *  ### Response ###
      *      {
      *        "data":
-     *        {
-     *           "id": "1",
-     *           "title": "Project 1",
-     *           "description": "Description of Project 1",
-     *           "createdAt":
-     *           {
-     *              "date": "2016-11-26 21:49:04.000000",
-     *              "timezone_type": 3,
-     *              "timezone": "Europe/Berlin"
-     *           },
-     *           "updatedAt":
-     *           {
-     *              "date": "2016-11-26 21:49:04.000000",
-     *              "timezone_type": 3,
-     *              "timezone": "Europe/Berlin"
-     *           },
-     *           "userHasProjects":
-     *           [
-     *              {
-     *                 "id": 125,
-     *                 "acl": "[\"create_task\"]",
-     *                 "user":
-     *                 {
-     *                    "id": 1014,
-     *                    "username": "admin",
-     *                    "password": "$2y$13$oRdNpKY3bo/dj2WGDKGzCOdcX9VZuxnu2NZKfy3jV2dV8zIW8qHr6",
-     *                    "email": "admin@admin.sk",
-     *                    "roles": "[\"ROLE_ADMIN\"]",
-     *                    "is_active": true,
-     *                    "language": "AJ",
-     *                    "image": null
-     *                 }
-     *              }
-     *           ]
-     *        },
+     *         {
+     *             "id": "1",
+     *             "title": "Project 1",
+     *             "description": "Description of Project 1",
+     *             "createdAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "updatedAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "userHasProjects":
+     *             [
+     *                {
+     *                   "id": 300,
+     *                   "user":
+     *                   {
+     *                      "id": 2575,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk"
+     *                    },
+     *                    "acl":
+     *                    [
+     *                      "view_own_tasks"
+     *                    ]
+     *                },
+     *                {
+     *                   "id": 301,
+     *                   "user":
+     *                   {
+     *                      "id": 2576,
+     *                      "username": "manager",
+     *                      "email": "manager@manager.sk"
+     *                    },
+     *                   "acl":
+     *                   [
+     *                      "view_own_tasks"
+     *                   ]
+     *                },
+     *             ]
+     *         },
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/projects/211",
@@ -731,41 +738,52 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *   ### Response ###
      *      {
      *        "data":
-     *        {
-     *           "id": "1",
-     *           "title": "Project 1",
-     *           "description": "Description of Project 1",
-     *           "createdAt":
-     *           {
-     *              "date": "2016-11-26 21:49:04.000000",
-     *              "timezone_type": 3,
-     *              "timezone": "Europe/Berlin"
-     *           },
-     *           "updatedAt":
-     *           {
-     *              "date": "2016-11-26 21:49:04.000000",
-     *              "timezone_type": 3,
-     *              "timezone": "Europe/Berlin"
-     *           },
-     *           "userHasProjects":
-     *           [
-     *              {
-     *                 "id": 125,
-     *                 "acl": "[\"create_task\"]",
-     *                 "user":
-     *                 {
-     *                    "id": 1014,
-     *                    "username": "admin",
-     *                    "password": "$2y$13$oRdNpKY3bo/dj2WGDKGzCOdcX9VZuxnu2NZKfy3jV2dV8zIW8qHr6",
-     *                    "email": "admin@admin.sk",
-     *                    "roles": "[\"ROLE_ADMIN\"]",
-     *                    "is_active": true,
-     *                    "language": "AJ",
-     *                    "image": null
-     *                 }
-     *              }
-     *           ]
-     *        },
+     *         {
+     *             "id": "1",
+     *             "title": "Project 1",
+     *             "description": "Description of Project 1",
+     *             "createdAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "updatedAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "userHasProjects":
+     *             [
+     *                {
+     *                   "id": 300,
+     *                   "user":
+     *                   {
+     *                      "id": 2575,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk"
+     *                    },
+     *                    "acl":
+     *                    [
+     *                      "view_own_tasks"
+     *                    ]
+     *                },
+     *                {
+     *                   "id": 301,
+     *                   "user":
+     *                   {
+     *                      "id": 2576,
+     *                      "username": "manager",
+     *                      "email": "manager@manager.sk"
+     *                    },
+     *                   "acl":
+     *                   [
+     *                      "view_own_tasks"
+     *                   ]
+     *                },
+     *             ]
+     *         }
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/projects/211",
@@ -868,41 +886,52 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *  ### Response ###
      *      {
      *        "data":
-     *        {
-     *           "id": "1",
-     *           "title": "Project 1",
-     *           "description": "Description of Project 1",
-     *           "createdAt":
-     *           {
-     *              "date": "2016-11-26 21:49:04.000000",
-     *              "timezone_type": 3,
-     *              "timezone": "Europe/Berlin"
-     *           },
-     *           "updatedAt":
-     *           {
-     *              "date": "2016-11-26 21:49:04.000000",
-     *              "timezone_type": 3,
-     *              "timezone": "Europe/Berlin"
-     *           },
-     *           "userHasProjects":
-     *           [
-     *              {
-     *                 "id": 125,
-     *                 "acl": "[\"create_task\"]",
-     *                 "user":
-     *                 {
-     *                    "id": 1014,
-     *                    "username": "admin",
-     *                    "password": "$2y$13$oRdNpKY3bo/dj2WGDKGzCOdcX9VZuxnu2NZKfy3jV2dV8zIW8qHr6",
-     *                    "email": "admin@admin.sk",
-     *                    "roles": "[\"ROLE_ADMIN\"]",
-     *                    "is_active": true,
-     *                    "language": "AJ",
-     *                    "image": null
-     *                 }
-     *              }
-     *           ]
-     *        },
+     *         {
+     *             "id": "1",
+     *             "title": "Project 1",
+     *             "description": "Description of Project 1",
+     *             "createdAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "updatedAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "userHasProjects":
+     *             [
+     *                {
+     *                   "id": 300,
+     *                   "user":
+     *                   {
+     *                      "id": 2575,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk"
+     *                    },
+     *                    "acl":
+     *                    [
+     *                      "view_own_tasks"
+     *                    ]
+     *                },
+     *                {
+     *                   "id": 301,
+     *                   "user":
+     *                   {
+     *                      "id": 2576,
+     *                      "username": "manager",
+     *                      "email": "manager@manager.sk"
+     *                    },
+     *                   "acl":
+     *                   [
+     *                      "view_own_tasks"
+     *                   ]
+     *                },
+     *             ]
+     *         }
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/projects/211",
@@ -1003,41 +1032,52 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *  ### Response ###
      *      {
      *        "data":
-     *        {
-     *           "id": "1",
-     *           "title": "Project 1",
-     *           "description": "Description of Project 1",
-     *           "createdAt":
-     *           {
-     *              "date": "2016-11-26 21:49:04.000000",
-     *              "timezone_type": 3,
-     *              "timezone": "Europe/Berlin"
-     *           },
-     *           "updatedAt":
-     *           {
-     *              "date": "2016-11-26 21:49:04.000000",
-     *              "timezone_type": 3,
-     *              "timezone": "Europe/Berlin"
-     *           },
-     *           "userHasProjects":
-     *           [
-     *              {
-     *                 "id": 125,
-     *                 "acl": "[\"create_task\"]",
-     *                 "user":
-     *                 {
-     *                    "id": 1014,
-     *                    "username": "admin",
-     *                    "password": "$2y$13$oRdNpKY3bo/dj2WGDKGzCOdcX9VZuxnu2NZKfy3jV2dV8zIW8qHr6",
-     *                    "email": "admin@admin.sk",
-     *                    "roles": "[\"ROLE_ADMIN\"]",
-     *                    "is_active": true,
-     *                    "language": "AJ",
-     *                    "image": null
-     *                 }
-     *              }
-     *           ]
-     *        },
+     *         {
+     *             "id": "1",
+     *             "title": "Project 1",
+     *             "description": "Description of Project 1",
+     *             "createdAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "updatedAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "userHasProjects":
+     *             [
+     *                {
+     *                   "id": 300,
+     *                   "user":
+     *                   {
+     *                      "id": 2575,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk"
+     *                    },
+     *                    "acl":
+     *                    [
+     *                      "view_own_tasks"
+     *                    ]
+     *                },
+     *                {
+     *                   "id": 301,
+     *                   "user":
+     *                   {
+     *                      "id": 2576,
+     *                      "username": "manager",
+     *                      "email": "manager@manager.sk"
+     *                    },
+     *                   "acl":
+     *                   [
+     *                      "view_own_tasks"
+     *                   ]
+     *                },
+     *             ]
+     *         }
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/projects/211",

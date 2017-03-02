@@ -2,13 +2,14 @@
 
 namespace API\TaskBundle\Repository;
 
-use API\CoreBundle\Repository\RepositoryInterface;
+use API\TaskBundle\Entity\Tag;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * TagRepository
  */
-class TagRepository extends EntityRepository implements RepositoryInterface
+class TagRepository extends EntityRepository
 {
     const LIMIT = 10;
 
@@ -24,6 +25,10 @@ class TagRepository extends EntityRepository implements RepositoryInterface
         $userId = $options['loggedUserId'];
 
         $query = $this->createQueryBuilder('t')
+            ->select('t, createdBy')
+            ->leftJoin('t.createdBy', 'createdBy')
+            ->orderBy('t.id')
+            ->distinct()
             ->where('t.createdBy = :userId')
             ->orWhere('t.public = :public')
             ->setParameters(['userId' => $userId, 'public' => true])
@@ -31,36 +36,22 @@ class TagRepository extends EntityRepository implements RepositoryInterface
 
         $query->setMaxResults(self::LIMIT);
 
-        // Pagination calculating offset
+        // Pagination
         if (1 < $page) {
             $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
+        } else {
+            $query->setFirstResult(0);
         }
 
-        return $query->getArrayResult();
-    }
+        $query->setMaxResults(self::LIMIT);
 
-    /**
-     * Return count of all Entities
-     *
-     * @param array $options
-     *
-     * @return int
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
-     */
-    public function countEntities(array $options = [])
-    {
-        $userId = $options['loggedUserId'];
+        $paginator = new Paginator($query, $fetchJoinCollection = true);
+        $count = $paginator->count();
 
-        $query = $this->createQueryBuilder('t')
-            ->select('COUNT(t.id)')
-            ->where('t.createdBy = :userId')
-            ->orWhere('t.public = :public')
-            ->setParameters(['userId' => $userId, 'public' => true])
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        return $query;
+        return [
+            'count' => $count,
+            'array' => $this->formatData($paginator)
+        ];
     }
 
     /**
@@ -71,9 +62,10 @@ class TagRepository extends EntityRepository implements RepositoryInterface
     {
         $query = $this->createQueryBuilder('tag')
             ->where('tag.id = :tagId')
-            ->setParameter('tagId', $id);
+            ->setParameter('tagId', $id)
+            ->getQuery();
 
-        return $query->getQuery()->getArrayResult();
+        return $this->processData($query->getSingleResult());
     }
 
     /**
@@ -104,5 +96,41 @@ class TagRepository extends EntityRepository implements RepositoryInterface
             ->setParameters(['public' => true, 'userId' => $userId]);
 
         return $query->getQuery()->getArrayResult();
+    }
+
+    /**
+     * @param $paginatorData
+     * @return array
+     */
+    private function formatData($paginatorData):array
+    {
+        $response = [];
+        /** @var Tag $data */
+        foreach ($paginatorData as $data) {
+            $response[] = $this->processData($data);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param Tag $data
+     * @return array
+     */
+    private function processData(Tag $data):array
+    {
+        $response = [
+            'id' => $data->getId(),
+            'title' => $data->getId(),
+            'color' => $data->getColor(),
+            'public' => $data->getPublic(),
+            'createdBy' => [
+                'id' => $data->getCreatedBy()->getId(),
+                'username' => $data->getCreatedBy()->getUsername(),
+                'email' => $data->getCreatedBy()->getEmail()
+            ]
+        ];
+
+        return $response;
     }
 }

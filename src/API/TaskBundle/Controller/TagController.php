@@ -29,19 +29,37 @@ class TagController extends ApiBaseController implements ControllerInterface
      *             "id": 37,
      *             "title": "Free Time",
      *             "color": "BF4848",
-     *             "public": true
+     *             "public": true,
+     *             "createdBy":
+     *             {
+     *                "id": 2575,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             }
      *          },
      *          {
      *              "id": 38,
      *              "title": "Work",
      *              "color": "4871BF",
-     *              "public": true
+     *              "public": true,
+     *              "createdBy":
+     *             {
+     *                "id": 2575,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             }
      *          },
      *          {
      *              "id": 40,
      *              "title": "Another Admin Public Tag",
      *              "color": "DFD115",
-     *              "public": false
+     *              "public": false,
+     *              "createdBy":
+     *             {
+     *                "id": 2575,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             }
      *           }
      *        ],
      *       "_links":
@@ -106,8 +124,14 @@ class TagController extends ApiBaseController implements ControllerInterface
      *           "id": 37,
      *           "title": "Free Time",
      *           "color": "BF4848",
-     *           "public": true
-     *        },
+     *           "public": true,
+     *           "createdBy":
+     *            {
+     *               "id": 2575,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk"
+     *            }
+     *        }
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/tags/2",
@@ -172,8 +196,14 @@ class TagController extends ApiBaseController implements ControllerInterface
      *           "id": 37,
      *           "title": "Free Time",
      *           "color": "BF4848",
-     *           "public": true
-     *        },
+     *           "public": true,
+     *           "createdBy":
+     *            {
+     *               "id": 2575,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk"
+     *            }
+     *        }
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/tags/2",
@@ -228,8 +258,14 @@ class TagController extends ApiBaseController implements ControllerInterface
      *           "id": 37,
      *           "title": "Free Time",
      *           "color": "BF4848",
-     *           "public": true
-     *        },
+     *           "public": true,
+     *           "createdBy":
+     *            {
+     *               "id": 2575,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk"
+     *            }
+     *        }
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/tags/2",
@@ -304,8 +340,14 @@ class TagController extends ApiBaseController implements ControllerInterface
      *           "id": 37,
      *           "title": "Free Time",
      *           "color": "BF4848",
-     *           "public": true
-     *        },
+     *           "public": true,
+     *           "createdBy":
+     *            {
+     *               "id": 2575,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk"
+     *            }
+     *        }
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/tags/2",

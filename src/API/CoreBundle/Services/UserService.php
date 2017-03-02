@@ -77,7 +77,7 @@ class UserService
         $user = $this->em->getRepository('APICoreBundle:User')->getUserResponse($userId);
 
         return [
-            'data' => $user[0],
+            'data' => $user,
             '_links' => $this->getUserLinks($ids),
         ];
     }

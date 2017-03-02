@@ -509,6 +509,7 @@ class TaskControllerTest extends ApiTestCase
             'title' => 'Web-Solutions'
         ]);
 
+
         $task = new Task();
         $task->setTitle('Task TEST - admin is creator, admin is requested');
         $task->setDescription('Description of Task TEST');
@@ -538,6 +539,10 @@ class TaskControllerTest extends ApiTestCase
             'title' => 'Web-Solutions'
         ]);
 
+        $inbox = $this->em->getRepository('APITaskBundle:Project')->findOneBy([
+            'title' => 'INBOX'
+        ]);
+
         $task = new Task();
         $task->setTitle('Task TEST - admin is creator, admin is requested 2');
         $task->setDescription('Description of Task TEST');
@@ -545,6 +550,7 @@ class TaskControllerTest extends ApiTestCase
         $task->setCreatedBy($adminUser);
         $task->setRequestedBy($adminUser);
         $task->setCompany($webSolCompany);
+        $task->setProject($inbox);
 
         $this->em->persist($task);
         $this->em->flush();

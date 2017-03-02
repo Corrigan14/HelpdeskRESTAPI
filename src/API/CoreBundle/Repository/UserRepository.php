@@ -156,7 +156,7 @@ class UserRepository extends EntityRepository
             ->setParameter('userId', $userId)
             ->getQuery();
 
-        return $query->getArrayResult();
+        return $this->processData($query->getSingleResult());
     }
 
     /**
@@ -181,49 +181,71 @@ class UserRepository extends EntityRepository
         $response = [];
         /** @var User $data */
         foreach ($paginator as $data) {
-            $detailData = $data->getDetailData();
-            $detailDataArray = [];
-            if ($detailData) {
-                $detailDataArray = [
-                    'id' => $data->getDetailData()->getId(),
-                    'name' => $data->getDetailData()->getName(),
-                    'surname' => $data->getDetailData()->getSurname(),
-                    'title_before' => $data->getDetailData()->getTitleBefore(),
-                    'title_after' => $data->getDetailData()->getTitleAfter(),
-                    'function' => $data->getDetailData()->getFunction(),
-                    'mobile' => $data->getDetailData()->getMobile(),
-                    'tel' => $data->getDetailData()->getTel(),
-                    'fax' => $data->getDetailData()->getFax(),
-                    'signature' => $data->getDetailData()->getSignature(),
-                    'street' => $data->getDetailData()->getStreet(),
-                    'city' => $data->getDetailData()->getCity(),
-                    'zip' => $data->getDetailData()->getZip(),
-                    'country' => $data->getDetailData()->getCountry(),
-                    'facebook' => $data->getDetailData()->getFacebook(),
-                    'twitter' => $data->getDetailData()->getTwitter(),
-                    'linkdin' => $data->getDetailData()->getLinkdin(),
-                    'google' => $data->getDetailData()->getGoogle(),
-                ];
-            }
+            $response[] = $this->processData($data);
+        }
 
-            $response[] = [
-                'id' => $data->getId(),
-                'username' => $data->getUsername(),
-                'email' => $data->getEmail(),
-                'language' => $data->getLanguage(),
-                'is_active' => $data->getIsActive(),
-                'image' => $data->getImage(),
-                'detailData' => $detailDataArray,
-                'user_role' => [
-                    'id' => $data->getUserRole()->getId(),
-                    'title' => $data->getUserRole()->getTitle(),
-                    'description' => $data->getUserRole()->getDescription(),
-                    'homepage' => $data->getUserRole()->getHomepage(),
-                    'acl' => $data->getUserRole()->getAcl(),
-                    'order' => $data->getUserRole()->getOrder(),
-                ]
+        return $response;
+    }
+
+    /**
+     * @param User $data
+     * @return array
+     */
+    private function processData(User $data):array
+    {
+        $detailData = $data->getDetailData();
+        $detailDataArray = [];
+        if ($detailData) {
+            $detailDataArray = [
+                'id' => $data->getDetailData()->getId(),
+                'name' => $data->getDetailData()->getName(),
+                'surname' => $data->getDetailData()->getSurname(),
+                'title_before' => $data->getDetailData()->getTitleBefore(),
+                'title_after' => $data->getDetailData()->getTitleAfter(),
+                'function' => $data->getDetailData()->getFunction(),
+                'mobile' => $data->getDetailData()->getMobile(),
+                'tel' => $data->getDetailData()->getTel(),
+                'fax' => $data->getDetailData()->getFax(),
+                'signature' => $data->getDetailData()->getSignature(),
+                'street' => $data->getDetailData()->getStreet(),
+                'city' => $data->getDetailData()->getCity(),
+                'zip' => $data->getDetailData()->getZip(),
+                'country' => $data->getDetailData()->getCountry(),
+                'facebook' => $data->getDetailData()->getFacebook(),
+                'twitter' => $data->getDetailData()->getTwitter(),
+                'linkdin' => $data->getDetailData()->getLinkdin(),
+                'google' => $data->getDetailData()->getGoogle(),
             ];
         }
+
+        $company = $data->getCompany();
+        $companyArray = [];
+        if ($company) {
+            $companyArray = [
+                'id' => $company->getId(),
+                'title' => $company->getTitle()
+            ];
+        }
+
+        $response = [
+            'id' => $data->getId(),
+            'username' => $data->getUsername(),
+            'email' => $data->getEmail(),
+            'language' => $data->getLanguage(),
+            'is_active' => $data->getIsActive(),
+            'image' => $data->getImage(),
+            'detailData' => $detailDataArray,
+            'user_role' => [
+                'id' => $data->getUserRole()->getId(),
+                'title' => $data->getUserRole()->getTitle(),
+                'description' => $data->getUserRole()->getDescription(),
+                'homepage' => $data->getUserRole()->getHomepage(),
+                'acl' => $data->getUserRole()->getAcl(),
+                'order' => $data->getUserRole()->getOrder(),
+            ],
+            'company' => $companyArray
+        ];
+
         return $response;
     }
 }

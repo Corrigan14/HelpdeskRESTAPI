@@ -75,7 +75,7 @@ class StatusRepository extends EntityRepository
             ->setParameter('sId', $id)
             ->getQuery();
 
-        return $query->getArrayResult();
+        return $this->processData($query->getSingleResult());
     }
 
     /**

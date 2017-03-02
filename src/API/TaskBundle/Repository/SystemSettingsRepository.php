@@ -2,7 +2,9 @@
 
 namespace API\TaskBundle\Repository;
 
+use API\TaskBundle\Entity\SystemSettings;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * SystemSettingsRepository
@@ -28,40 +30,32 @@ class SystemSettingsRepository extends EntityRepository
             }
             $query = $this->createQueryBuilder('systemSettings')
                 ->where('systemSettings.is_active = :isActiveParam')
+                ->orderBy('systemSettings.id')
                 ->setParameter('isActiveParam', $isActiveParam)
                 ->getQuery();
         } else {
             $query = $this->createQueryBuilder('systemSettings')
+                ->select()
+                ->orderBy('systemSettings.id')
                 ->getQuery();
+        }
+
+        // Pagination
+        if (1 < $page) {
+            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
+        } else {
+            $query->setFirstResult(0);
         }
 
         $query->setMaxResults(self::LIMIT);
 
-        // Pagination calculating offset
-        if (1 < $page) {
-            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
-        }
+        $paginator = new Paginator($query, $fetchJoinCollection = true);
+        $count = $paginator->count();
 
-        return $query->getArrayResult();
-    }
-
-    /**
-     * Return count of all Entities
-     *
-     * @param array $options
-     *
-     * @return int
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
-     */
-    public function countEntities(array $options = [])
-    {
-        $query = $this->createQueryBuilder('systemSettings')
-            ->select('COUNT(systemSettings.id)')
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        return $query;
+        return [
+            'count' => $count,
+            'array' => $this->formatData($paginator)
+        ];
     }
 
     /**
@@ -76,6 +70,37 @@ class SystemSettingsRepository extends EntityRepository
             ->setParameter('systemSettingsId', $id)
             ->getQuery();
 
-        return $query->getArrayResult();
+        return $this->processData($query->getSingleResult());
+    }
+
+    /**
+     * @param $paginatorData
+     * @return array
+     */
+    private function formatData($paginatorData):array
+    {
+        $response = [];
+        /** @var SystemSettings $data */
+        foreach ($paginatorData as $data) {
+            $response[] = $this->processData($data);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param SystemSettings $data
+     * @return array
+     */
+    private function processData(SystemSettings $data):array
+    {
+        $response = [
+            'id' => $data->getId(),
+            'title' => $data->getId(),
+            'value' => $data->getValue(),
+            'is_active' => $data->getIsActive()
+        ];
+
+        return $response;
     }
 }

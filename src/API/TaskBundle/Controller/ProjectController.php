@@ -44,6 +44,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
      *             },
+     *             "is_active" => true,
      *             "userHasProjects":
      *             [
      *                {
@@ -158,6 +159,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
      *             },
+     *             "is_active" => true,
      *             "userHasProjects":
      *             [
      *                {
@@ -262,6 +264,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
      *             },
+     *             "is_active" => true,
      *             "userHasProjects":
      *             [
      *                {
@@ -366,6 +369,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
      *             },
+     *             "is_active" => true,
      *             "userHasProjects":
      *             [
      *                {
@@ -477,6 +481,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
      *             },
+     *             "is_active" => true,
      *             "userHasProjects":
      *             [
      *                {
@@ -642,6 +647,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
      *             },
+     *             "is_active" => true,
      *             "userHasProjects":
      *             [
      *                {
@@ -754,6 +760,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
      *             },
+     *             "is_active" => true,
      *             "userHasProjects":
      *             [
      *                {
@@ -902,6 +909,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
      *             },
+     *             "is_active" => true,
      *             "userHasProjects":
      *             [
      *                {
@@ -1048,6 +1056,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *               "timezone_type": 3,
      *               "timezone": "Europe/Berlin"
      *             },
+     *             "is_active" => true,
      *             "userHasProjects":
      *             [
      *                {

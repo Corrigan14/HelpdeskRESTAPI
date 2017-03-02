@@ -191,6 +191,7 @@ class ProjectRepository extends EntityRepository
             'description' => $data->getDescription(),
             'createdAt' => $data->getCreatedAt(),
             'updatedAt' => $data->getUpdatedAt(),
+            'is_active' => $data->getIsActive(),
             'userHasProjects' => $userHasProjectsArray
         ];
 

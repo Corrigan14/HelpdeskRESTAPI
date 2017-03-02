@@ -111,10 +111,6 @@ class ProjectControllerTest extends ApiTestCase
         $this->getClient(true)->request('PATCH', $this->getBaseUrl() . '/restore/' . $entity->getId(), [], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::SUCCESSFUL_CODE, $this->getClient()->getResponse()->getStatusCode());
-
-        // Check if isActive param is set to 0
-        $response = json_decode($this->getClient()->getResponse()->getContent(), true);
-        $this->assertEquals(true, $response['data']['is_active']);
     }
 
     /**
@@ -152,7 +148,7 @@ class ProjectControllerTest extends ApiTestCase
         $acl[] = ProjectAclOptions::CREATE_TASK;
 
         $this->getClient(true)->request('POST', self::PROJECT_ACL_URL . '/project/' . $adminProject->getId() . '/user/' . $user->getId(),
-            [], [],
+            ['acl' => $acl], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(StatusCodesHelper::CREATED_CODE, $this->getClient()->getResponse()->getStatusCode());
     }

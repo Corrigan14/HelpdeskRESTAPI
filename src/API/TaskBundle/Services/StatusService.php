@@ -45,18 +45,17 @@ class StatusService
      */
     public function getAttributesResponse(int $page, array $options): array
     {
-        $attributes = $this->em->getRepository('APITaskBundle:Status')->getAllEntities($page, $options);
-        $count = $this->em->getRepository('APITaskBundle:Status')->countEntities($options);
+        $responseData = $this->em->getRepository('APITaskBundle:Status')->getAllEntities($page, $options);
 
         $response = [
-            'data' => $attributes,
+            'data' => $responseData['array'],
         ];
 
         $url = $this->router->generate('status_list');
         $limit = StatusRepository::LIMIT;
         $filters = $options['filtersForUrl'];
 
-        $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);
+        $pagination = PaginationHelper::getPagination($url, $limit, $page, $responseData['count'], $filters);
 
         return array_merge($response, $pagination);
     }
@@ -78,7 +77,7 @@ class StatusService
         $entity = $this->em->getRepository('APITaskBundle:Status')->getEntity($id);
 
         return [
-            'data' => $entity[0],
+            'data' => $entity,
             '_links' => $this->getEntityLinks($id),
         ];
     }

@@ -89,7 +89,7 @@ class LoginController extends Controller
 
         $userImage = $user->getImage();
         if (null !== $userImage) {
-            $imageLink = $this->generateUrl('cdn_load_file', ['slug' => $userImage]);
+            $imageLink = $this->generateUrl('file_load', ['slug' => $userImage]);
         } else {
             $imageLink = null;
         }

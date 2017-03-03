@@ -191,14 +191,13 @@ class TaskAdditionalService
     {
         $commentId = $options['comment'];
 
-        $fileSlugs = $this->em->getRepository('APITaskBundle:CommentHasAttachment')->getAllAttachmentSlugs($commentId, $page);
-        $count = $this->em->getRepository('APITaskBundle:CommentHasAttachment')->countAttachmentEntities($commentId);
+        $responseData = $this->em->getRepository('APITaskBundle:CommentHasAttachment')->getAllAttachmentSlugs($commentId, $page);
 
         $response = [
-            'data' => $fileSlugs,
+            'data' => $responseData['array'],
         ];
 
-        $pagination = $this->getPagination($page, $count, $routeOptions);
+        $pagination = $this->getPagination($page, $responseData['count'], $routeOptions);
 
         return array_merge($response, $pagination);
     }

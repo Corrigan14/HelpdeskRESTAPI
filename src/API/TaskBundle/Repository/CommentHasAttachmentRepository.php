@@ -2,7 +2,9 @@
 
 namespace API\TaskBundle\Repository;
 
+use API\TaskBundle\Entity\CommentHasAttachment;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * CommentHasAttachmentRepository
@@ -19,37 +21,59 @@ class CommentHasAttachmentRepository extends EntityRepository
     public function getAllAttachmentSlugs(int $commentId, int $page)
     {
         $query = $this->createQueryBuilder('cha')
-            ->select('cha.slug')
-            ->where('cha.comment = :commentId')
+            ->select('cha')
+            ->leftJoin('cha.comment', 'comment')
+            ->orderBy('cha.id')
+            ->distinct()
+            ->where('comment.id = :commentId')
             ->setParameter('commentId', $commentId);
 
         $query->setMaxResults(TaskRepository::LIMIT);
 
-        // Pagination calculating offset
+        // Pagination
         if (1 < $page) {
             $query->setFirstResult(TaskRepository::LIMIT * $page - TaskRepository::LIMIT);
+        } else {
+            $query->setFirstResult(0);
         }
 
-        return $query->getQuery()->getArrayResult();
+        $query->setMaxResults(TaskRepository::LIMIT);
+
+        $paginator = new Paginator($query, $fetchJoinCollection = true);
+        $count = $paginator->count();
+
+        return [
+            'count' => $count,
+            'array' => $this->formatData($paginator)
+        ];
     }
 
     /**
-     * Return count of all Entities
-     *
-     * @param int $commentId
-     * @return int
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
-     * @internal param array $options
-     *
+     * @param $paginatorData
+     * @return array
      */
-    public function countAttachmentEntities(int $commentId)
+    private function formatData($paginatorData):array
     {
-        $query = $this->createQueryBuilder('cha')
-            ->select('COUNT(cha.id)')
-            ->where('cha.comment = :commentId')
-            ->setParameter('commentId', $commentId);
+        $response = [];
+        /** @var CommentHasAttachment $data */
+        foreach ($paginatorData as $data) {
+            $response[] = $this->processData($data);
+        }
 
-        return $query->getQuery()->getSingleScalarResult();
+        return $response;
     }
+
+    /**
+     * @param CommentHasAttachment $data
+     * @return array
+     */
+    private function processData(CommentHasAttachment $data):array
+    {
+        $response = [
+            'slug' => $data->getSlug()
+        ];
+
+        return $response;
+    }
+
 }

@@ -464,21 +464,6 @@ class TaskRepository extends EntityRepository
     }
 
     /**
-     * @param int $taskId
-     * @return array
-     */
-    public function getAllTaskFollowers(int $taskId): array
-    {
-        $query = $this->createQueryBuilder('t')
-            ->select('t,follower')
-            ->where('t.id = :taskId')
-            ->leftJoin('t.followers', 'follower')
-            ->setParameter('taskId', $taskId);
-
-        return $query->getQuery()->getArrayResult();
-    }
-
-    /**
      * @param $paginatorData
      * @return array
      */

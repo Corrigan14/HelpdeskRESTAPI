@@ -98,17 +98,24 @@ class TaskAdditionalService
     {
         /** @var Task $task */
         $task = $options['task'];
-        $taskFollowers = $task->getFollowers();
-        $taskFollowersArray = $this->em->getRepository('APITaskBundle:Task')->getAllTaskFollowers($task->getId());
-        $count = count($taskFollowers);
+        $followersArray = [];
+
+        $responseData = $task->getFollowers();
+        foreach ($responseData as $follower) {
+            $followersArray[] = [
+                'id' => $follower->getId(),
+                'username' => $follower->getUsername(),
+                'email' => $follower->getEmail()
+            ];
+        }
 
         $response = [
-            'data' => $taskFollowersArray
+            'data' => $followersArray
         ];
 
         $pagination = [
             '_links' => [],
-            'total' => $count
+            'total' => count($followersArray)
         ];
 
         return array_merge($response, $pagination);

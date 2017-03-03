@@ -24,52 +24,17 @@ class FollowerController extends ApiBaseController
      *         "data":
      *         [
      *           {
-     *              "id": 44031,
-     *              "title": "Task 1999",
-     *              "description": "Description of Users Task 1999",
-     *              "deadline": null,
-     *              "startedAt": null,
-     *              "closedAt": null,
-     *              "important": true,
-     *              "work": null,
-     *              "work_time": null,
-     *              "createdAt":
-     *              {
-     *                  "date": "2017-02-10 15:47:48.000000",
-     *                  "timezone_type": 3,
-     *                  "timezone": "Europe/Berlin"
-     *              },
-     *              "updatedAt":
-     *              {
-     *                  "date": "2017-02-14 11:52:30.000000",
-     *                  "timezone_type": 3,
-     *                  "timezone": "Europe/Berlin"
-     *              },
-     *              "followers":
-     *              [
-     *                 {
-     *                     "id": 1855,
-     *                     "username": "customer5",
-     *                     "password": "$2y$13$P5./aAvPh98PZqOSxHb4ceDeBqxgGVGip.JJvOOXNDLf8T6ei29Wy",
-     *                     "email": "customer@customer5.sk",
-     *                     "roles": "[\"ROLE_USER\"]",
-     *                     "is_active": true,
-     *                     "language": "AJ",
-     *                     "image": null
-     *                 },
-     *                 {
-     *                     "id": 1856,
-     *                     "username": "customer6",
-     *                     "password": "$2y$13$2glfkRbwTj4BLtgwEn/ireOzhoZwMJIliPq4Frge0E5SRn/.RMcja",
-     *                     "email": "customer@customer6.sk",
-     *                     "roles": "[\"ROLE_USER\"]",
-     *                     "is_active": true,
-     *                     "language": "AJ",
-     *                     "image": null
-     *                 }
-     *              ]
-     *           }
-     *        ],
+     *              "id": 2575,
+     *              "username": "admin",
+     *              "email": "admin@admin.sk"
+     *           },
+     *           {
+     *              "id": 2576,
+     *              "username": "admin2",
+     *              "email": "admin2@admin.sk"
+     *           },
+     *
+     *        ]
      *        "_links": [],
      *        "total": 2
      *      }

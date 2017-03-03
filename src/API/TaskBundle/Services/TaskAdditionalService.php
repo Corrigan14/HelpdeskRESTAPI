@@ -145,14 +145,13 @@ class TaskAdditionalService
      */
     public function getCommentsOfTaskResponse(array $options, int $page, array $routeOptions): array
     {
-        $commentsArray = $this->em->getRepository('APITaskBundle:Comment')->getTaskComments($options, $page);
-        $countComments = $this->em->getRepository('APITaskBundle:Comment')->countTaskComments($options);
+        $responseData = $this->em->getRepository('APITaskBundle:Comment')->getTaskComments($options, $page);
 
         $response = [
-            'data' => $commentsArray
+            'data' => $responseData['array']
         ];
 
-        $pagination = $this->getPagination($page, $countComments, $routeOptions);
+        $pagination = $this->getPagination($page, $responseData['count'], $routeOptions);
 
         return array_merge($response, $pagination);
     }

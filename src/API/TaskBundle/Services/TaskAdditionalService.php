@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Services;
 
 use API\TaskBundle\Entity\Comment;
+use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Repository\TaskRepository;
 use API\TaskBundle\Repository\TaskHasAssignedUserRepository;
@@ -72,9 +73,16 @@ class TaskAdditionalService
     {
         /** @var Task $task */
         $task = $options['task'];
+        $taskTagsArray = [];
         $taskTags = $task->getTags();
-        $taskTagsArray = $this->em->getRepository('APITaskBundle:Task')->getAllTasksTags($task->getId());
-        $count = count($taskTags);
+        /** @var Tag $tag */
+        foreach ($taskTags as $tag) {
+            $taskTagsArray [] = [
+                'id' => $tag->getId(),
+                'title' => $tag->getTitle(),
+                'color' => $tag->getColor()
+            ];
+        }
 
         $response = [
             'data' => $taskTagsArray
@@ -82,7 +90,7 @@ class TaskAdditionalService
 
         $pagination = [
             '_links' => [],
-            'total' => $count
+            'total' => count($taskTagsArray)
         ];
 
         return array_merge($response, $pagination);

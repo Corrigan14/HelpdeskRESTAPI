@@ -449,21 +449,6 @@ class TaskRepository extends EntityRepository
     }
 
     /**
-     * @param int $taskId
-     * @return array
-     */
-    public function getAllTasksTags(int $taskId): array
-    {
-        $query = $this->createQueryBuilder('t')
-            ->select('t,tag')
-            ->where('t.id = :taskId')
-            ->leftJoin('t.tags', 'tag')
-            ->setParameter('taskId', $taskId);
-
-        return $query->getQuery()->getArrayResult();
-    }
-
-    /**
      * @param $paginatorData
      * @return array
      */

@@ -23,44 +23,16 @@ class TagController extends ApiBaseController
      *      {
      *       "data":
      *       [
-     *         {
-     *            "id": 41035,
-     *            "title": "Task 1",
-     *            "description": "Description of Task 1",
-     *            "deadline": null,
-     *            "startedAt": null,
-     *            "closedAt": null,
-     *            "important": false,
-     *            "work": null,
-     *            "work_time": null,
-     *            "createdAt":
-     *            {
-     *               "date": "2017-02-10 15:47:48.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
-     *            "updatedAt":
-     *            {
-     *               "date": "2017-02-10 15:47:48.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
-     *            "tags":
-     *            [
-     *               {
-     *                  "id": 44,
-     *                  "title": "Work",
-     *                  "color": "4871BF",
-     *                  "public": true
-     *               },
-     *               {
-     *                  "id": 45,
-     *                  "title": "Home",
-     *                  "color": "DFD112",
-     *                  "public": false
-     *                }
-     *             ]
-     *           }
+     *          {
+     *             "id": 72,
+     *             "title": "Work",
+     *             "color": "4871BF"
+     *          },
+     *          {
+     *             "id": 73,
+     *             "title": "Home",
+     *             "color": "DFD112"
+     *          }
      *       ],
      *       "_links": [],
      *       "total": 2

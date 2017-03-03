@@ -51,14 +51,13 @@ class TaskAdditionalService
     {
         $taskId = $options['task'];
 
-        $fileSlugs = $this->em->getRepository('APITaskBundle:TaskHasAttachment')->getAllAttachmentSlugs($taskId, $page);
-        $count = $this->em->getRepository('APITaskBundle:TaskHasAttachment')->countAttachmentEntities($taskId);
+        $responseData = $this->em->getRepository('APITaskBundle:TaskHasAttachment')->getAllAttachmentSlugs($taskId, $page);
 
         $response = [
-            'data' => $fileSlugs,
+            'data' => $responseData['array'],
         ];
 
-        $pagination = $this->getPagination($page, $count, $routeOptions);
+        $pagination = $this->getPagination($page, $responseData['count'], $routeOptions);
 
         return array_merge($response, $pagination);
     }

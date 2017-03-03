@@ -2,7 +2,9 @@
 
 namespace API\TaskBundle\Repository;
 
+use API\TaskBundle\Entity\TaskHasAttachment;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * TaskHasAttachmentRepository
@@ -22,37 +24,56 @@ class TaskHasAttachmentRepository extends EntityRepository
     public function getAllAttachmentSlugs(int $taskId, int $page)
     {
         $query = $this->createQueryBuilder('tha')
-            ->select('tha.slug')
-            ->where('tha.task = :taskId')
+            ->select('tha')
+            ->leftJoin('tha.task','task')
+            ->orderBy('tha.id')
+            ->where('task.id = :taskId')
             ->setParameter('taskId', $taskId);
+
+        // Pagination
+        if (1 < $page) {
+            $query->setFirstResult(TaskRepository::LIMIT * $page - TaskRepository::LIMIT);
+        } else {
+            $query->setFirstResult(0);
+        }
 
         $query->setMaxResults(TaskRepository::LIMIT);
 
-        // Pagination calculating offset
-        if (1 < $page) {
-            $query->setFirstResult(TaskRepository::LIMIT * $page - TaskRepository::LIMIT);
-        }
+        $paginator = new Paginator($query, $fetchJoinCollection = true);
+        $count = $paginator->count();
 
-        return $query->getQuery()->getArrayResult();
+        return [
+            'count' => $count,
+            'array' => $this->formatData($paginator)
+        ];
     }
 
     /**
-     * Return count of all Entities
-     *
-     * @param int $taskId
-     * @return int
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
-     * @internal param array $options
-     *
+     * @param $paginatorData
+     * @return array
      */
-    public function countAttachmentEntities(int $taskId)
+    private function formatData($paginatorData):array
     {
-        $query = $this->createQueryBuilder('tha')
-            ->select('COUNT(tha.id)')
-            ->where('tha.task = :taskId')
-            ->setParameter('taskId', $taskId);
+        $response = [];
+        /** @var TaskHasAttachment $data */
+        foreach ($paginatorData as $data) {
+            $response[] = $this->processData($data);
+        }
 
-        return $query->getQuery()->getSingleScalarResult();
+        return $response;
+    }
+
+
+    /**
+     * @param TaskHasAttachment $data
+     * @return array
+     */
+    private function processData(TaskHasAttachment $data):array
+    {
+        $response = [
+            'slug' => $data->getSlug()
+        ];
+
+        return $response;
     }
 }

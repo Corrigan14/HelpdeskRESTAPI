@@ -2,7 +2,10 @@
 
 namespace API\CoreBundle\Repository;
 
+use API\CoreBundle\Entity\Company;
+use API\TaskBundle\Entity\CompanyData;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Traits\CompanyRepositoryTrait;
 
 /**
@@ -41,6 +44,8 @@ class CompanyRepository extends EntityRepository
                 ->leftJoin('c.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
                 ->where('c.is_active = :isActiveParam')
+                ->orderBy('c.id')
+                ->distinct()
                 ->setParameter('isActiveParam', $isActiveParam)
                 ->getQuery();
         } else {
@@ -48,19 +53,27 @@ class CompanyRepository extends EntityRepository
                 ->select('c,companyData, companyAttribute')
                 ->leftJoin('c.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
+                ->orderBy('c.id')
+                ->distinct()
                 ->getQuery();
+        }
+
+        // Pagination
+        if (1 < $page) {
+            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
+        } else {
+            $query->setFirstResult(0);
         }
 
         $query->setMaxResults(self::LIMIT);
 
-        /**
-         * Pagination calculating offset
-         */
-        if (1 < $page) {
-            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
-        }
+        $paginator = new Paginator($query, $fetchJoinCollection = true);
+        $count = $paginator->count();
 
-        return $query->getArrayResult();
+        return [
+            'count' => $count,
+            'array' => $this->formatData($paginator)
+        ];
     }
 
     /**
@@ -79,7 +92,7 @@ class CompanyRepository extends EntityRepository
             ->setParameter('companyId', $id)
             ->getQuery();
 
-        return $query->getArrayResult();
+        return $this->processData($query->getSingleResult());
     }
 
     /**
@@ -101,13 +114,17 @@ class CompanyRepository extends EntityRepository
                 ->select('c,companyData, companyAttribute')
                 ->leftJoin('c.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
-                ->where('c.is_active = :isActiveParam');
+                ->where('c.is_active = :isActiveParam')
+                ->orderBy('c.id')
+                ->distinct();
             $parameters['isActiveParam'] = $isActiveParam;
         } else {
             $query = $this->createQueryBuilder('c')
                 ->select('c,companyData, companyAttribute')
                 ->leftJoin('c.companyData', 'companyData')
-                ->leftJoin('companyData.companyAttribute', 'companyAttribute');
+                ->leftJoin('companyData.companyAttribute', 'companyAttribute')
+                ->orderBy('c.id')
+                ->distinct();
         }
 
         if ($term) {
@@ -116,49 +133,23 @@ class CompanyRepository extends EntityRepository
         }
 
         $query->setParameters($parameters);
-        $query->setMaxResults(self::LIMIT);
+
+        // Pagination
         if (1 < $page) {
             $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
-        }
-
-        return $query->getQuery()->getArrayResult();
-    }
-
-    /**
-     * Return count of all Entities
-     *
-     * @param bool|string $isActive
-     * @param bool|string $term
-     * @return int
-     * @internal param bool|string $options
-     */
-    public function countEntities($isActive, $term = false)
-    {
-        $parameters = [];
-
-        if ('true' === $isActive || 'false' === $isActive) {
-            if ($isActive === 'true') {
-                $isActiveParam = 1;
-            } else {
-                $isActiveParam = 0;
-            }
-            $query = $this->createQueryBuilder('c')
-                ->select('COUNT(c.id)')
-                ->where('c.is_active = :isActiveParam');
-
-            $parameters['isActiveParam'] = $isActiveParam;
         } else {
-            $query = $this->createQueryBuilder('c')
-                ->select('COUNT(c.id)');
+            $query->setFirstResult(0);
         }
 
-        if ($term) {
-            $query->andWhere('c.title LIKE :term');
-            $parameters['term'] = '%' . $term . '%';
-        }
+        $query->setMaxResults(self::LIMIT);
 
-        $query->setParameters($parameters);
-        return $query->getQuery()->getSingleScalarResult();
+        $paginator = new Paginator($query, $fetchJoinCollection = true);
+        $count = $paginator->count();
+
+        return [
+            'count' => $count,
+            'array' => $this->formatData($paginator)
+        ];
     }
 
     /**
@@ -172,5 +163,59 @@ class CompanyRepository extends EntityRepository
             ->setParameter('isActive', true);
 
         return $query->getQuery()->getArrayResult();
+    }
+
+    /**
+     * @param $paginatorData
+     * @return array
+     */
+    private function formatData($paginatorData):array
+    {
+        $response = [];
+        /** @var Company $data */
+        foreach ($paginatorData as $data) {
+            $response[] = $this->processData($data);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param Company $data
+     * @return array
+     */
+    private function processData(Company $data):array
+    {
+        $companyData = $data->getCompanyData();
+        $companyDataArray = [];
+        if (count($companyData) > 0) {
+            /** @var CompanyData $item */
+            foreach ($companyData as $item) {
+                $companyDataArray[] = [
+                    'id' => $item->getId(),
+                    'value' => $item->getValue(),
+                    'companyAttribute' => [
+                        'id' => $item->getCompanyAttribute()->getId(),
+                        'title' => $item->getCompanyAttribute()->getTitle(),
+                    ]
+                ];
+            }
+        }
+
+        $response = [
+            'id' => $data->getId(),
+            'title' => $data->getTitle(),
+            'ico' => $data->getIco(),
+            'dic' => $data->getDic(),
+            'ic_dph' => $data->getIcDph(),
+            'street' => $data->getStreet(),
+            'city' => $data->getCity(),
+            'zip' => $data->getZip(),
+            'country' => $data->getCountry(),
+            'is_active' => $data->getIsActive(),
+            'companyData' => $companyDataArray
+        ];
+
+        return $response;
     }
 }

@@ -45,18 +45,17 @@ class CompanyService
      */
     public function getCompaniesResponse(int $page, array $options): array
     {
-        $companies = $this->em->getRepository('APICoreBundle:Company')->getAllEntities($page, $options);
-        $count = $this->em->getRepository('APICoreBundle:Company')->countEntities($options['isActive']);
+        $responseData = $this->em->getRepository('APICoreBundle:Company')->getAllEntities($page, $options);
 
         $response = [
-            'data' => $companies,
+            'data' => $responseData['array'],
         ];
 
         $url = $this->router->generate('company_list');
         $limit = CompanyRepository::LIMIT;
         $filters = $options['filtersForUrl'];
 
-        $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);
+        $pagination = PaginationHelper::getPagination($url, $limit, $page, $responseData['count'], $filters);
 
         return array_merge($response, $pagination);
     }
@@ -70,7 +69,7 @@ class CompanyService
         $entity = $this->em->getRepository('APICoreBundle:Company')->getEntity($id);
 
         return [
-            'data' => $entity[0],
+            'data' => $entity,
             '_links' => $this->getEntityLinks($id),
         ];
     }
@@ -84,17 +83,15 @@ class CompanyService
      */
     public function getCompaniesSearchResponse($term, int $page, $isActive, array $filtersForUrl):array
     {
-        /** @var CompanyRepository $userRepository */
-        $companyRepository = $this->em->getRepository('APICoreBundle:Company');
-        $companies = $companyRepository->getCompaniesSearch($term, $page, $isActive);
+        $responseData = $this->em->getRepository('APICoreBundle:Company')->getCompaniesSearch($term, $page, $isActive);
 
         $response = [
-            'data' => $companies,
+            'data' => $responseData['array'],
         ];
 
         $url = $this->router->generate('company_search');
         $limit = CompanyRepository::LIMIT;
-        $count = $companyRepository->countEntities($isActive, $term);
+        $count = $responseData['count'];
 
         $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filtersForUrl);
 

@@ -38,30 +38,26 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *            "country": "SR",
      *            "is_active": true,
      *            "companyData":
-     *            {
-     *             {
-     *               "id": 44,
-     *               "value": "data val",
-     *               "companyAttribute":
+     *            [
      *               {
-     *                 "id": 1,
-     *                 "title": "input company additional attribute",
-     *                 "type": "input",
-     *                 "is_active": true
-     *               }
-     *             },
-     *             {
-     *               "id": 45,
-     *               "value": "data valluesgyda gfg",
-     *               "companyAttribute":
+     *                  "id": 140,
+     *                  "value": "10",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 177,
+     *                     "title": "integer number company additional attribute"
+     *                  }
+     *               },
      *               {
-     *                 "id": 2,
-     *                 "title": "select company additional attribute",
-     *                 "type": "simple_select",
-     *                 "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
-     *                 "is_active": true
-     *               }
-     *             }
+     *                  "id": 141,
+     *                  "value": "String DATA",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 175,
+     *                     "title": "input company additional attribute"
+     *                   }
+     *                }
+     *            ]
      *          },
      *          {
      *             "id": 42,
@@ -167,30 +163,26 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *            "country": "SR",
      *            "is_active": true,
      *            "companyData":
-     *            {
-     *             {
-     *               "id": 44,
-     *               "value": "data val",
-     *               "companyAttribute":
+     *            [
      *               {
-     *                 "id": 1,
-     *                 "title": "input company additional attribute",
-     *                 "type": "input",
-     *                 "is_active": true
-     *               }
-     *             },
-     *             {
-     *               "id": 45,
-     *               "value": "data valluesgyda gfg",
-     *               "companyAttribute":
+     *                  "id": 140,
+     *                  "value": "10",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 177,
+     *                     "title": "integer number company additional attribute"
+     *                  }
+     *               },
      *               {
-     *                 "id": 2,
-     *                 "title": "select company additional attribute",
-     *                 "type": "simple_select",
-     *                 "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
-     *                 "is_active": true
-     *               }
-     *           }
+     *                  "id": 141,
+     *                  "value": "String DATA",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 175,
+     *                     "title": "input company additional attribute"
+     *                   }
+     *                }
+     *            ]
      *        },
      *        "_links":
      *        {
@@ -267,30 +259,26 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *            "country": "SR",
      *            "is_active": true,
      *            "companyData":
-     *            {
-     *             {
-     *               "id": 44,
-     *               "value": "data val",
-     *               "companyAttribute":
+     *            [
      *               {
-     *                 "id": 1,
-     *                 "title": "input company additional attribute",
-     *                 "type": "input",
-     *                 "is_active": true
-     *               }
-     *             },
-     *             {
-     *               "id": 45,
-     *               "value": "data valluesgyda gfg",
-     *               "companyAttribute":
+     *                  "id": 140,
+     *                  "value": "10",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 177,
+     *                     "title": "integer number company additional attribute"
+     *                  }
+     *               },
      *               {
-     *                 "id": 2,
-     *                 "title": "select company additional attribute",
-     *                 "type": "simple_select",
-     *                 "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
-     *                 "is_active": true
-     *               }
-     *           }
+     *                  "id": 141,
+     *                  "value": "String DATA",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 175,
+     *                     "title": "input company additional attribute"
+     *                   }
+     *                }
+     *            ]
      *        },
      *        "_links":
      *        {
@@ -363,30 +351,26 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *            "country": "SR",
      *            "is_active": true,
      *            "companyData":
-     *            {
-     *             {
-     *               "id": 44,
-     *               "value": "data val",
-     *               "companyAttribute":
+     *            [
      *               {
-     *                 "id": 1,
-     *                 "title": "input company additional attribute",
-     *                 "type": "input",
-     *                 "is_active": true
-     *               }
-     *             },
-     *             {
-     *               "id": 45,
-     *               "value": "data valluesgyda gfg",
-     *               "companyAttribute":
+     *                  "id": 140,
+     *                  "value": "10",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 177,
+     *                     "title": "integer number company additional attribute"
+     *                  }
+     *               },
      *               {
-     *                 "id": 2,
-     *                 "title": "select company additional attribute",
-     *                 "type": "simple_select",
-     *                 "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
-     *                 "is_active": true
-     *               }
-     *           }
+     *                  "id": 141,
+     *                  "value": "String DATA",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 175,
+     *                     "title": "input company additional attribute"
+     *                   }
+     *                }
+     *            ]
      *        },
      *        "_links":
      *        {
@@ -473,30 +457,26 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *            "country": "SR",
      *            "is_active": true,
      *            "companyData":
-     *            {
-     *             {
-     *               "id": 44,
-     *               "value": "data val",
-     *               "companyAttribute":
+     *            [
      *               {
-     *                 "id": 1,
-     *                 "title": "input company additional attribute",
-     *                 "type": "input",
-     *                 "is_active": true
-     *               }
-     *             },
-     *             {
-     *               "id": 45,
-     *               "value": "data valluesgyda gfg",
-     *               "companyAttribute":
+     *                  "id": 140,
+     *                  "value": "10",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 177,
+     *                     "title": "integer number company additional attribute"
+     *                  }
+     *               },
      *               {
-     *                 "id": 2,
-     *                 "title": "select company additional attribute",
-     *                 "type": "simple_select",
-     *                 "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
-     *                 "is_active": true
-     *               }
-     *           }
+     *                  "id": 141,
+     *                  "value": "String DATA",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 175,
+     *                     "title": "input company additional attribute"
+     *                   }
+     *                }
+     *            ]
      *        },
      *        "_links":
      *        {
@@ -638,30 +618,26 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *            "country": "SR",
      *            "is_active": true,
      *            "companyData":
-     *            {
-     *             {
-     *               "id": 44,
-     *               "value": "data val",
-     *               "companyAttribute":
+     *            [
      *               {
-     *                 "id": 1,
-     *                 "title": "input company additional attribute",
-     *                 "type": "input",
-     *                 "is_active": true
-     *               }
-     *             },
-     *             {
-     *               "id": 45,
-     *               "value": "data valluesgyda gfg",
-     *               "companyAttribute":
+     *                  "id": 140,
+     *                  "value": "10",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 177,
+     *                     "title": "integer number company additional attribute"
+     *                  }
+     *               },
      *               {
-     *                 "id": 2,
-     *                 "title": "select company additional attribute",
-     *                 "type": "simple_select",
-     *                 "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
-     *                 "is_active": true
-     *               }
-     *           }
+     *                  "id": 141,
+     *                  "value": "String DATA",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 175,
+     *                     "title": "input company additional attribute"
+     *                   }
+     *                }
+     *            ]
      *        },
      *        "_links":
      *        {
@@ -741,31 +717,27 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *            "zip": "02587",
      *            "country": "SR",
      *            "is_active": true,
-     *            "companyData":
-     *            {
-     *             {
-     *               "id": 44,
-     *               "value": "data val",
-     *               "companyAttribute":
+     *           "companyData":
+     *            [
      *               {
-     *                 "id": 1,
-     *                 "title": "input company additional attribute",
-     *                 "type": "input",
-     *                 "is_active": true
-     *               }
-     *             },
-     *             {
-     *               "id": 45,
-     *               "value": "data valluesgyda gfg",
-     *               "companyAttribute":
+     *                  "id": 140,
+     *                  "value": "10",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 177,
+     *                     "title": "integer number company additional attribute"
+     *                  }
+     *               },
      *               {
-     *                 "id": 2,
-     *                 "title": "select company additional attribute",
-     *                 "type": "simple_select",
-     *                 "options": "a:3:{s:7:\"select1\";s:7:\"select1\";s:7:\"select2\";s:7:\"select2\";s:7:\"select3\";s:7:\"select3\";}",
-     *                 "is_active": true
-     *               }
-     *             }
+     *                  "id": 141,
+     *                  "value": "String DATA",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 175,
+     *                     "title": "input company additional attribute"
+     *                   }
+     *                }
+     *            ]
      *          },
      *          {
      *             "id": 42,

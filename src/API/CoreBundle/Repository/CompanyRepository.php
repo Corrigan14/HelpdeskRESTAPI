@@ -32,6 +32,7 @@ class CompanyRepository extends EntityRepository
     public function getAllEntities(int $page, array $options = [])
     {
         $isActive = $options['isActive'];
+        $order = $options['order'];
 
         if ('true' === $isActive || 'false' === $isActive) {
             if ($isActive === 'true') {
@@ -44,8 +45,8 @@ class CompanyRepository extends EntityRepository
                 ->leftJoin('c.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
                 ->where('c.is_active = :isActiveParam')
-                ->orderBy('c.title','DESC')
                 ->groupBy('c.id')
+                ->orderBy('c.title', $order)
                 ->setParameter('isActiveParam', $isActiveParam)
                 ->getQuery();
         } else {
@@ -53,8 +54,8 @@ class CompanyRepository extends EntityRepository
                 ->select('c,companyData, companyAttribute')
                 ->leftJoin('c.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
-                ->orderBy('c.title','DESC')
                 ->groupBy('c.id')
+                ->orderBy('c.title', $order)
                 ->getQuery();
         }
 
@@ -99,9 +100,10 @@ class CompanyRepository extends EntityRepository
      * @param string|bool $term
      * @param int $page
      * @param string|bool $isActive
+     * @param string $order
      * @return array
      */
-    public function getCompaniesSearch($term, int $page, $isActive):array
+    public function getCompaniesSearch($term, int $page, $isActive, string $order):array
     {
         $parameters = [];
         if ('true' === $isActive || 'false' === $isActive) {
@@ -115,8 +117,8 @@ class CompanyRepository extends EntityRepository
                 ->leftJoin('c.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
                 ->where('c.is_active = :isActiveParam')
-                ->orderBy('c.id')
-                ->distinct();
+                ->groupBy('c.id')
+                ->orderBy('c.title', $order);
             $parameters['isActiveParam'] = $isActiveParam;
         } else {
             $query = $this->createQueryBuilder('c')
@@ -124,7 +126,8 @@ class CompanyRepository extends EntityRepository
                 ->leftJoin('c.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
                 ->orderBy('c.id')
-                ->distinct();
+                ->groupBy('c.id')
+                ->orderBy('c.title', $order);
         }
 
         if ($term) {
@@ -133,6 +136,7 @@ class CompanyRepository extends EntityRepository
         }
 
         $query->setParameters($parameters);
+        $query->getQuery();
 
         // Pagination
         if (1 < $page) {

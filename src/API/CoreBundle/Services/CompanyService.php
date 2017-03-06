@@ -79,11 +79,12 @@ class CompanyService
      * @param int $page
      * @param string|bool $isActive
      * @param array $filtersForUrl
+     * @param string $order
      * @return array
      */
-    public function getCompaniesSearchResponse($term, int $page, $isActive, array $filtersForUrl):array
+    public function getCompaniesSearchResponse($term, int $page, $isActive, array $filtersForUrl, string $order):array
     {
-        $responseData = $this->em->getRepository('APICoreBundle:Company')->getCompaniesSearch($term, $page, $isActive);
+        $responseData = $this->em->getRepository('APICoreBundle:Company')->getCompaniesSearch($term, $page, $isActive, $order);
 
         $response = [
             'data' => $responseData['array'],

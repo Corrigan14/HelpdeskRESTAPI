@@ -95,6 +95,10 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *       "description"="Pagination, limit is set to 10 records"
      *     },
      *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by title"
+     *     },
+     *     {
      *       "name"="isActive",
      *       "description"="Return's only ACTIVE users if this param is TRUE, only INACTIVE users if param is FALSE"
      *     },
@@ -131,6 +135,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
         }
 
         $page = $request->get('page') ?: 1;
+        $order = $request->get('order') ?: 'ASC';
         $isActive = $request->get('isActive');
 
         $filtersForUrl = [];
@@ -141,7 +146,8 @@ class CompanyController extends ApiBaseController implements ControllerInterface
         $options = [
             'loggedUserId' => $this->getUser()->getId(),
             'isActive' => strtolower($isActive),
-            'filtersForUrl' => $filtersForUrl
+            'filtersForUrl' => $filtersForUrl,
+            'order' => $order
         ];
 
         return $this->json($this->get('api_company.service')->getCompaniesResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);
@@ -781,7 +787,11 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *     {
      *       "name"="page",
      *       "description"="Pagination, limit is set to 10 records"
-     *     }
+     *     },
+     *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by title"
+     *     },
      *  },
      *  headers={
      *     {
@@ -820,6 +830,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
             $term = false;
         }
         $page = $request->get('page') ?: 1;
+        $order = $request->get('order') ?: 'ASC';
 
         $isActive = $request->get('isActive');
         if (null !== $isActive) {
@@ -829,7 +840,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
             $isActive = false;
         }
 
-        $companiesArray = $this->get('api_company.service')->getCompaniesSearchResponse($term, $page, $isActive, $filtersForUrl);
+        $companiesArray = $this->get('api_company.service')->getCompaniesSearchResponse($term, $page, $isActive, $filtersForUrl, $order);
         return $this->json($companiesArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 

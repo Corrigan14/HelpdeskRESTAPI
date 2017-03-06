@@ -23,6 +23,7 @@ class TaskAttributeRepository extends EntityRepository
     public function getAllEntities(int $page, array $options = [])
     {
         $isActive = $options['isActive'];
+        $order = $options['order'];
 
         if ('true' === $isActive) {
             $isActiveParam = 1;
@@ -33,14 +34,14 @@ class TaskAttributeRepository extends EntityRepository
         if ('true' === $isActive || 'false' === $isActive) {
             $query = $this->createQueryBuilder('ca')
                 ->select()
-                ->orderBy('ca.id')
                 ->where('ca.is_active = :isActive')
+                ->orderBy('ca.title', $order)
                 ->setParameter('isActive', $isActiveParam)
                 ->getQuery();
         } else {
             $query = $this->createQueryBuilder('ca')
                 ->select()
-                ->orderBy('ca.id')
+                ->orderBy('ca.title', $order)
                 ->getQuery();
         }
 

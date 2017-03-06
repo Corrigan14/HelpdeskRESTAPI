@@ -42,6 +42,12 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      *
      * @ApiDoc(
      *  description="Returns a list of SMTP Entities",
+     *  filters={
+     *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by Email"
+     *     }
+     *  },
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -74,7 +80,9 @@ class SmtpController extends ApiBaseController implements ControllerInterface
             return $this->accessDeniedResponse();
         }
 
-        $smtpArray = $this->get('smtp_service')->getAttributesResponse();
+        $order = $request->get('order') ?: 'ASC';
+
+        $smtpArray = $this->get('smtp_service')->getAttributesResponse($order);
         return $this->json($smtpArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 

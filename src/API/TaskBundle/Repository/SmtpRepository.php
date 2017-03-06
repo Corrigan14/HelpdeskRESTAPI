@@ -10,12 +10,14 @@ use Doctrine\ORM\EntityRepository;
 class SmtpRepository extends EntityRepository
 {
     /**
+     * @param string $order
      * @return array
      */
-    public function getAllEntities(): array
+    public function getAllEntities(string $order): array
     {
         $query = $this->createQueryBuilder('smtp')
-            ->select()
+            ->select('smtp')
+            ->orderBy('smtp.email', $order)
             ->getQuery();
 
         return $query->getArrayResult();

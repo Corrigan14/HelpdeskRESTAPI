@@ -76,6 +76,10 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *     {
      *       "name"="isActive",
      *       "description"="Return's only ACTIVE attributes if this param is TRUE, only INACTIVE attributes if param is FALSE"
+     *     },
+     *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by Title"
      *     }
      *  },
      *  headers={
@@ -114,6 +118,7 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
         }
 
         $page = $request->get('page') ?: 1;
+        $order = $request->get('order') ?: 'ASC';
         $isActive = $request->get('isActive');
         $filtersForUrl = [];
         if (null !== $isActive) {
@@ -123,7 +128,8 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
         $options = [
             'loggedUserId' => $this->getUser()->getId(),
             'isActive' => strtolower($isActive),
-            'filtersForUrl' => $filtersForUrl
+            'order' => $order,
+            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order])
         ];
 
         return $this->json($this->get('task_attribute_service')->getTaskAttributesResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);

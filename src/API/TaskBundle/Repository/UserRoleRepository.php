@@ -27,21 +27,20 @@ class UserRoleRepository extends EntityRepository
     public function getAllEntities(int $page, array $options = [])
     {
         $isActive = $options['isActive'];
+        $order = $options['order'];
 
         $isActiveParam = ('true' === $isActive) ? 1 : 0;
 
         if ('true' === $isActive || 'false' === $isActive) {
             $query = $this->createQueryBuilder('userRole')
                 ->select()
-                ->orderBy('userRole.id', 'ASC')
-                ->distinct()
+                ->orderBy('userRole.order', $order)
                 ->where('userRole.is_active = :isActiveParam')
                 ->setParameter('isActiveParam', $isActiveParam);
         } else {
             $query = $this->createQueryBuilder('userRole')
                 ->select()
-                ->orderBy('userRole.id', 'ASC')
-                ->distinct();
+                ->orderBy('userRole.order', $order);
         }
 
         // Pagination

@@ -127,6 +127,10 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *       "description"="Pagination, limit is set to 10 records"
      *     },
      *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by Order"
+     *     },
+     *     {
      *       "name"="isActive",
      *       "description"="Return's only ACTIVE user roles if this param is TRUE, only INACTIVE user roles if param is FALSE"
      *     }
@@ -161,12 +165,14 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
         }
 
         $page = $request->get('page') ?: 1;
+        $order = $request->get('order') ?: 'ASC';
         $isActive = $request->get('isActive');
 
         $filtersForUrl['isActive'] = '&isActive=' . $isActive;
         $options = [
             'isActive' => $isActive,
-            'filtersForUrl' => $filtersForUrl
+            'order' => $order,
+            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order])
         ];
 
         $userRolesArray = $this->get('user_role_service')->getUserRolesResponse($page, $options);

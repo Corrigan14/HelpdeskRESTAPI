@@ -317,9 +317,14 @@ class TaskController extends ApiBaseController
      */
     public function listAction(Request $request)
     {
-        $page = $request->get('page') ?: 1;
         $filterData = $this->getFilterData($request);
-        $order = $request->get('order') ?: 'ASC';
+
+        $pageNum = $request->get('page');
+        $page = (is_integer($pageNum)) ? $pageNum : 1;
+
+        $orderString = $request->get('order');
+        $orderString = strtolower($orderString);
+        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
 
         $options = [
             'loggedUser' => $this->getUser(),
@@ -632,7 +637,11 @@ class TaskController extends ApiBaseController
         }
 
         $page = $request->get('page') ?: 1;
-        $order = $request->get('order') ?: 'ASC';
+
+        $orderString = $request->get('order');
+        $orderString = strtolower($orderString);
+        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
+
         $filterDataArray = $filter->getFilter();
         $filterData = $this->getFilterDataFromSavedFilterArray($filterDataArray);
         $options = [

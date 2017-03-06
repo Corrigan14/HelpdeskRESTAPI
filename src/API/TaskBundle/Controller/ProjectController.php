@@ -127,7 +127,9 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             return $this->accessDeniedResponse();
         }
 
-        $page = $request->get('page') ?: 1;
+        $pageNum = $request->get('page');
+        $page = (is_integer($pageNum)) ? $pageNum : 1;
+
         $isActive = $request->get('isActive') ?: 'all';
 
         $options = [

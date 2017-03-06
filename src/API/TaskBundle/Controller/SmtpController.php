@@ -80,7 +80,9 @@ class SmtpController extends ApiBaseController implements ControllerInterface
             return $this->accessDeniedResponse();
         }
 
-        $order = $request->get('order') ?: 'ASC';
+        $orderString = $request->get('order');
+        $orderString = strtolower($orderString);
+        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
 
         $smtpArray = $this->get('smtp_service')->getAttributesResponse($order);
         return $this->json($smtpArray, StatusCodesHelper::SUCCESSFUL_CODE);

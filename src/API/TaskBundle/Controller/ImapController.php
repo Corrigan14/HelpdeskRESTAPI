@@ -95,7 +95,9 @@ class ImapController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
-        $order = $request->get('order') ?: 'ASC';
+        $orderString = $request->get('order');
+        $orderString = strtolower($orderString);
+        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
 
         $imapArray = $this->get('imap_service')->getAttributesResponse($order);
         return $this->json($imapArray, StatusCodesHelper::SUCCESSFUL_CODE);

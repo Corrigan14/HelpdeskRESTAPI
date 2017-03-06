@@ -103,7 +103,9 @@ class TagController extends ApiBaseController implements ControllerInterface
      */
     public function listAction(Request $request)
     {
-        $page = $request->get('page') ?: 1;
+        $pageNum = $request->get('page');
+        $page = (is_integer($pageNum)) ? $pageNum : 1;
+
         $filtersForUrl = [];
 
         $options = [

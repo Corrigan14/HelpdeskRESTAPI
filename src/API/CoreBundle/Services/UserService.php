@@ -42,25 +42,22 @@ class UserService
      * @param int $page
      *
      * @param string $isActive
+     * @param string $order
+     * @param array $filtersForUrl
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      */
-    public function getUsersResponse(int $page, $isActive)
+    public function getUsersResponse(int $page, $isActive, string $order, array $filtersForUrl)
     {
-        $responseData = $this->em->getRepository('APICoreBundle:User')->getCustomUsers($page, $isActive);
+        $responseData = $this->em->getRepository('APICoreBundle:User')->getCustomUsers($page, $isActive, $order);
 
         $response = [
             'data' => $responseData['array'],
         ];
-        $pagination = HateoasHelper::getPagination(
-            $this->router->generate('users_list'),
-            $page,
-            $responseData['count'],
-            UserRepository::LIMIT,
-            [],
-            $isActive
-        );
+
+        $url = $this->router->generate('users_list');
+        $limit = UserRepository::LIMIT;
+
+        $pagination = PaginationHelper::getPagination($url, $limit, $page, $responseData['count'], $filtersForUrl);
 
         return array_merge($response, $pagination);
     }
@@ -87,11 +84,12 @@ class UserService
      * @param int $page
      * @param string|bool $isActive
      * @param array $filtersForUrl
+     * @param string $order
      * @return array
      */
-    public function getUsersSearchResponse($term, int $page, $isActive, array $filtersForUrl):array
+    public function getUsersSearchResponse($term, int $page, $isActive, array $filtersForUrl, string $order):array
     {
-        $responseData = $this->em->getRepository('APICoreBundle:User')->getUsersSearch($term, $page, $isActive);
+        $responseData = $this->em->getRepository('APICoreBundle:User')->getUsersSearch($term, $page, $isActive, $order);
 
         $response = [
             'data' => $responseData['array'],

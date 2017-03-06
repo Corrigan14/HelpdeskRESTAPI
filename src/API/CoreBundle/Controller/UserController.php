@@ -101,6 +101,10 @@ class UserController extends ApiBaseController
      *     {
      *       "name"="page",
      *       "description"="Pagination, limit is set to 10 records"
+     *     },
+     *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by Username"
      *     }
      *  },
      *  headers={
@@ -137,10 +141,20 @@ class UserController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
-        $page = $request->get('page') ?: 1;
-        $isActive = $request->get('isActive') ?: 'all';
+        $pageNum = $request->get('page');
+        $page = (is_integer($pageNum)) ? $pageNum : 1;
 
-        return $this->json($this->get('api_user.service')->getUsersResponse($page, $isActive), StatusCodesHelper::SUCCESSFUL_CODE);
+        $orderString = $request->get('order');
+        $orderString = strtolower($orderString);
+        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
+
+        $isActive = $request->get('isActive') ?: 'all';
+        $filtersForUrl = [
+            'isActive' => '&isActive=' . $isActive,
+            'order' => '&order=' . $order
+        ];
+
+        return $this->json($this->get('api_user.service')->getUsersResponse($page, $isActive, $order, $filtersForUrl), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -1061,6 +1075,10 @@ class UserController extends ApiBaseController
      *     {
      *       "name"="page",
      *       "description"="Pagination, limit is set to 10 records"
+     *     },
+     *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by Username"
      *     }
      *  },
      *  headers={
@@ -1099,7 +1117,13 @@ class UserController extends ApiBaseController
         } else {
             $term = false;
         }
-        $page = $request->get('page') ?: 1;
+
+        $pageNum = $request->get('page');
+        $page = (is_integer($pageNum)) ? $pageNum : 1;
+
+        $orderString = $request->get('order');
+        $orderString = strtolower($orderString);
+        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
 
         $isActive = $request->get('isActive');
         if (null !== $isActive) {
@@ -1108,7 +1132,9 @@ class UserController extends ApiBaseController
             $isActive = false;
         }
 
-        $usersArray = $this->get('api_user.service')->getUsersSearchResponse($term, $page, $isActive, $filtersForUrl);
+        $filtersForUrl['order'] = '&order=' . $order;
+
+        $usersArray = $this->get('api_user.service')->getUsersSearchResponse($term, $page, $isActive, $filtersForUrl, $order);
         return $this->json($usersArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 

@@ -103,8 +103,13 @@ class UnitController extends ApiBaseController implements ControllerInterface
             return $this->accessDeniedResponse();
         }
 
-        $page = $request->get('page') ?: 1;
-        $order = $request->get('order') ?: 'ASC';
+        $pageNum = $request->get('page');
+        $page = (is_integer($pageNum)) ? $pageNum : 1;
+
+        $orderString = $request->get('order');
+        $orderString = strtolower($orderString);
+        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
+
         $isActive = $request->get('isActive');
 
         $filtersForUrl = [];

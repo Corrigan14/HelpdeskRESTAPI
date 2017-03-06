@@ -39,6 +39,7 @@ class TaskRepository extends EntityRepository
         $inFilterAddedParams = $options['inFilterAddedParams'];
         $equalFilterAddedParams = $options['equalFilterAddedParams'];
         $dateFilterAddedParams = $options['dateFilterAddedParams'];
+        $order = $options['order'];
 
         $query = $this->createQueryBuilder('task')
             ->select('task')
@@ -70,8 +71,9 @@ class TaskRepository extends EntityRepository
             ->leftJoin('thau.user', 'assignedUser')
             ->leftJoin('task.tags', 'tags')
             ->leftJoin('task.company', 'taskCompany')
-            ->orderBy('task.id', 'ASC')
-            ->distinct();
+            ->groupBy('task.id')
+            ->orderBy('task.createdAt', $order);
+
 
         if (array_key_exists('followers.id', $inFilter) || array_key_exists('followers.id', $equalFilter)) {
             $query->innerJoin('task.followers', 'followers');
@@ -224,6 +226,7 @@ class TaskRepository extends EntityRepository
         $inFilterAddedParams = $options['inFilterAddedParams'];
         $equalFilterAddedParams = $options['equalFilterAddedParams'];
         $dateFilterAddedParams = $options['dateFilterAddedParams'];
+        $order = $options['order'];
 
         $query = $this->createQueryBuilder('task')
             ->select('task')
@@ -255,8 +258,8 @@ class TaskRepository extends EntityRepository
             ->leftJoin('thau.user', 'assignedUser')
             ->leftJoin('task.tags', 'tags')
             ->leftJoin('task.company', 'taskCompany')
-            ->orderBy('task.id', 'ASC')
-            ->distinct();
+            ->groupBy('task.id')
+            ->orderBy('task.id', $order);
 
         if (array_key_exists('followers.id', $inFilter) || array_key_exists('followers.id', $equalFilter)) {
             $query->innerJoin('task.followers', 'followers');

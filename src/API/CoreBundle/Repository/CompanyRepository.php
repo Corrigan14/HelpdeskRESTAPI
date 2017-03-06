@@ -40,12 +40,12 @@ class CompanyRepository extends EntityRepository
                 $isActiveParam = 0;
             }
             $query = $this->createQueryBuilder('c')
-                ->select('c,companyData, companyAttribute')
+                ->select('c, companyData, companyAttribute')
                 ->leftJoin('c.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
                 ->where('c.is_active = :isActiveParam')
-                ->orderBy('c.id')
-                ->distinct()
+                ->orderBy('c.title','DESC')
+                ->groupBy('c.id')
                 ->setParameter('isActiveParam', $isActiveParam)
                 ->getQuery();
         } else {
@@ -53,8 +53,8 @@ class CompanyRepository extends EntityRepository
                 ->select('c,companyData, companyAttribute')
                 ->leftJoin('c.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
-                ->orderBy('c.id')
-                ->distinct()
+                ->orderBy('c.title','DESC')
+                ->groupBy('c.id')
                 ->getQuery();
         }
 

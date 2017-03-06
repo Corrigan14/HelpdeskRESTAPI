@@ -200,6 +200,10 @@ class TaskController extends ApiBaseController
      *       "description"="Pagination, limit is set to 10 records"
      *     },
      *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by Created at date"
+     *     },
+     *     {
      *       "name"="search",
      *       "description"="Search string - system is searching in ID and TITLE"
      *     },
@@ -315,6 +319,7 @@ class TaskController extends ApiBaseController
     {
         $page = $request->get('page') ?: 1;
         $filterData = $this->getFilterData($request);
+        $order = $request->get('order') ?: 'ASC';
 
         $options = [
             'loggedUser' => $this->getUser(),
@@ -329,6 +334,7 @@ class TaskController extends ApiBaseController
             'equalFilterAddedParams' => $filterData['equalFilterAddedParams'],
             'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
             'filtersForUrl' => $filterData['filterForUrl'],
+            'order' => $order
         ];
 
         $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);
@@ -580,6 +586,10 @@ class TaskController extends ApiBaseController
      *     {
      *       "name"="page",
      *       "description"="Pagination, limit is set to 10 records"
+     *     },
+     *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by Created at date"
      *     }
      *  },
      *  headers={
@@ -622,6 +632,7 @@ class TaskController extends ApiBaseController
         }
 
         $page = $request->get('page') ?: 1;
+        $order = $request->get('order') ?: 'ASC';
         $filterDataArray = $filter->getFilter();
         $filterData = $this->getFilterDataFromSavedFilterArray($filterDataArray);
         $options = [
@@ -637,6 +648,7 @@ class TaskController extends ApiBaseController
             'equalFilterAddedParams' => $filterData['equalFilterAddedParams'],
             'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
             'filtersForUrl' => $filterData['filterForUrl'],
+            'order' => $order
         ];
 
         $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);

@@ -10,6 +10,7 @@ namespace API\TaskBundle\Services;
 class FilterAttributeOptions
 {
     // Attributes available for filter
+    const TITLE = 'title';
     const STATUS = 'status';
     const PROJECT = 'project';
     const CREATOR = 'creator';

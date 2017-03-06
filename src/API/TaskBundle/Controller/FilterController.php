@@ -50,7 +50,22 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *             {
      *                "id": 2575,
      *                "title": "INBOX",
-     *             }
+     *             },
+     *             "columns":
+     *             [
+     *                "title",
+     *                "creator",
+     *                "company",
+     *                "assigned",
+     *                "createdTime",
+     *                "deadlineTime",
+     *                "status"
+     *             ],
+     *             "columns_task_attributes":
+     *             [
+     *                205,
+     *                206
+     *             ]
      *          },
      *          {
      *             "id": 146,
@@ -71,7 +86,22 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *                "username": "admin",
      *                "email": "admin@admin.sk"
      *             },
-     *             "project": null
+     *             "project": null,
+     *             "columns":
+     *             [
+     *                "title",
+     *                "creator",
+     *                "company",
+     *                "assigned",
+     *                "createdTime",
+     *                "deadlineTime",
+     *                "status"
+     *             ],
+     *             "columns_task_attributes":
+     *             [
+     *                205,
+     *                206
+     *             ]
      *           },
      *       ],
      *       "_links":
@@ -207,7 +237,22 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *             {
      *                "id": 2575,
      *                "title": "INBOX",
-     *             }
+     *             },
+     *             "columns":
+     *             [
+     *                "title",
+     *                "creator",
+     *                "company",
+     *                "assigned",
+     *                "createdTime",
+     *                "deadlineTime",
+     *                "status"
+     *             ],
+     *             "columns_task_attributes":
+     *             [
+     *                205,
+     *                206
+     *             ]
      *         },
      *        "_links":
      *        {
@@ -290,7 +335,22 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *             {
      *                "id": 2575,
      *                "title": "INBOX",
-     *             }
+     *             },
+     *             "columns":
+     *             [
+     *                "title",
+     *                "creator",
+     *                "company",
+     *                "assigned",
+     *                "createdTime",
+     *                "deadlineTime",
+     *                "status"
+     *             ],
+     *             "columns_task_attributes":
+     *             [
+     *                205,
+     *                206
+     *             ]
      *         },
      *        "_links":
      *        {
@@ -388,7 +448,22 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *             {
      *                "id": 2575,
      *                "title": "INBOX",
-     *             }
+     *             },
+     *            "columns":
+     *             [
+     *                "title",
+     *                "creator",
+     *                "company",
+     *                "assigned",
+     *                "createdTime",
+     *                "deadlineTime",
+     *                "status"
+     *             ],
+     *             "columns_task_attributes":
+     *             [
+     *                205,
+     *                206
+     *             ]
      *         },
      *        "_links":
      *        {
@@ -492,7 +567,22 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *             {
      *                "id": 2575,
      *                "title": "INBOX",
-     *             }
+     *             },
+     *             "columns":
+     *             [
+     *                "title",
+     *                "creator",
+     *                "company",
+     *                "assigned",
+     *                "createdTime",
+     *                "deadlineTime",
+     *                "status"
+     *             ],
+     *             "columns_task_attributes":
+     *             [
+     *                205,
+     *                206
+     *             ]
      *         },
      *        "_links":
      *        {
@@ -603,7 +693,22 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *             {
      *                "id": 2575,
      *                "title": "INBOX",
-     *             }
+     *             },
+     *            "columns":
+     *             [
+     *                "title",
+     *                "creator",
+     *                "company",
+     *                "assigned",
+     *                "createdTime",
+     *                "deadlineTime",
+     *                "status"
+     *             ],
+     *             "columns_task_attributes":
+     *             [
+     *                205,
+     *                206
+     *             ]
      *         },
      *        "_links":
      *        {
@@ -729,7 +834,22 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *             {
      *                "id": 2575,
      *                "title": "INBOX",
-     *             }
+     *             },
+     *             "columns":
+     *             [
+     *                "title",
+     *                "creator",
+     *                "company",
+     *                "assigned",
+     *                "createdTime",
+     *                "deadlineTime",
+     *                "status"
+     *             ],
+     *             "columns_task_attributes":
+     *             [
+     *                205,
+     *                206
+     *             ]
      *         },
      *        "_links":
      *        {
@@ -884,7 +1004,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
             'is_active',
             'default',
             'icon_class',
-            'order'
+            'order',
+            'columns'
         ];
 
         if (array_key_exists('_format', $data)) {
@@ -938,6 +1059,19 @@ class FilterController extends ApiBaseController implements ControllerInterface
         // Check id user want to set this filter like default
         if (!isset($data['default'])) {
             $data['default'] = false;
+        }
+
+        // Check if user set som Columns and if these columns are allowed (exists)
+        if (isset($data['columns'])) {
+            $dataColumnsArray = (!is_array($data['columns'])) ? explode(',', $data['columns']) : $data['columns'];
+
+            foreach ($dataColumnsArray as $col) {
+
+            }
+
+            $filter->setColumns($dataColumnsArray);
+            unset($data['columns']);
+            dump($dataColumnsArray);
         }
 
         $errors = $this->get('entity_processor')->processEntity($filter, $data);

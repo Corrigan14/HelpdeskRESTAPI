@@ -90,6 +90,20 @@ class Filter
     private $order;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="columns", type="text", nullable = true)
+     */
+    private $columns;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="columns_task_attributes", type="text", nullable = true)
+     */
+    private $columns_task_attributes;
+
+    /**
      * @var User
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="filters")
@@ -372,5 +386,53 @@ class Filter
     public function getOrder()
     {
         return $this->order;
+    }
+
+    /**
+     * Set columns
+     *
+     * @param array $columns
+     *
+     * @return Filter
+     */
+    public function setColumns(array $columns)
+    {
+        $this->columns = json_encode($columns);
+
+        return $this;
+    }
+
+    /**
+     * Get columns
+     *
+     * @return array
+     */
+    public function getColumns()
+    {
+        return json_decode($this->columns);
+    }
+
+    /**
+     * Set columnsAddedParams
+     *
+     * @param array $columnsAddedParams
+     *
+     * @return Filter
+     */
+    public function setColumnsTaskAttributes(array $columnsAddedParams)
+    {
+        $this->columns_task_attributes = json_encode($columnsAddedParams);
+
+        return $this;
+    }
+
+    /**
+     * Get columnsAddedParams
+     *
+     * @return array
+     */
+    public function getColumnsTaskAttributes()
+    {
+        return json_decode($this->columns_task_attributes);
     }
 }

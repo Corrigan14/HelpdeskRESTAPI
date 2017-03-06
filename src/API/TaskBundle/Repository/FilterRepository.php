@@ -166,7 +166,9 @@ class FilterRepository extends EntityRepository
                 'username' => $data->getCreatedBy()->getUsername(),
                 'email' => $data->getCreatedBy()->getEmail()
             ],
-            'project' => $projectArray
+            'project' => $projectArray,
+            'columns' => $data->getColumns(),
+            'columns_task_attributes' => $data->getColumnsTaskAttributes()
         ];
 
         return $response;

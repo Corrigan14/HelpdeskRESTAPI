@@ -36,13 +36,12 @@ class ImapService
     /**
      * Return SMTP Response
      *
+     * @param string $order
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      */
-    public function getAttributesResponse(): array
+    public function getAttributesResponse(string $order): array
     {
-        $attributes = $this->em->getRepository('APITaskBundle:Imap')->getAllEntities();
+        $attributes = $this->em->getRepository('APITaskBundle:Imap')->getAllEntities($order);
         $count = $this->em->getRepository('APITaskBundle:Imap')->countEntities();
 
         $response = [

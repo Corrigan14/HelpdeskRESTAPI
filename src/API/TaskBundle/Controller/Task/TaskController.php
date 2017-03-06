@@ -333,7 +333,7 @@ class TaskController extends ApiBaseController
             'inFilterAddedParams' => $filterData['inFilterAddedParams'],
             'equalFilterAddedParams' => $filterData['equalFilterAddedParams'],
             'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
-            'filtersForUrl' => $filterData['filterForUrl'],
+            'filtersForUrl' => array_merge($filterData['filterForUrl'], ['order' => '&order=' . $order]),
             'order' => $order
         ];
 
@@ -647,7 +647,7 @@ class TaskController extends ApiBaseController
             'inFilterAddedParams' => $filterData['inFilterAddedParams'],
             'equalFilterAddedParams' => $filterData['equalFilterAddedParams'],
             'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
-            'filtersForUrl' => $filterData['filterForUrl'],
+            'filtersForUrl' => array_merge($filterData['filterForUrl'], ['order' => '&order=' . $order]),
             'order' => $order
         ];
 

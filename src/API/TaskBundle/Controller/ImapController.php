@@ -61,6 +61,12 @@ class ImapController extends ApiBaseController
      *
      * @ApiDoc(
      *  description="Returns a list of IMAP Entities",
+     *  filters={
+     *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by Inbox email titile"
+     *     }
+     *  },
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -75,9 +81,10 @@ class ImapController extends ApiBaseController
      *  }
      * )
      *
+     * @param Request $request
      * @return Response
      */
-    public function listAction()
+    public function listAction(Request $request)
     {
         $aclOptions = [
             'acl' => UserRoleAclOptions::IMAP_SETTINGS,
@@ -88,7 +95,9 @@ class ImapController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
-        $imapArray = $this->get('imap_service')->getAttributesResponse();
+        $order = $request->get('order') ?: 'ASC';
+
+        $imapArray = $this->get('imap_service')->getAttributesResponse($order);
         return $this->json($imapArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 

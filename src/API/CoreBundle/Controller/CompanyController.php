@@ -146,7 +146,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
         $options = [
             'loggedUserId' => $this->getUser()->getId(),
             'isActive' => strtolower($isActive),
-            'filtersForUrl' => $filtersForUrl,
+            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order]),
             'order' => $order
         ];
 
@@ -839,6 +839,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
         } else {
             $isActive = false;
         }
+        $filtersForUrl = array_merge($filtersForUrl, ['order' => '&order=' . $order]);
 
         $companiesArray = $this->get('api_company.service')->getCompaniesSearchResponse($term, $page, $isActive, $filtersForUrl, $order);
         return $this->json($companiesArray, StatusCodesHelper::SUCCESSFUL_CODE);

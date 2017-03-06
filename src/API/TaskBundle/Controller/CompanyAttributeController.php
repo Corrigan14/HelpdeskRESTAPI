@@ -107,7 +107,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
         $options = [
             'loggedUserId' => $this->getUser()->getId(),
             'isActive' => strtolower($isActive),
-            'filtersForUrl' => $filtersForUrl,
+            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order]),
             'order' => $order
         ];
 

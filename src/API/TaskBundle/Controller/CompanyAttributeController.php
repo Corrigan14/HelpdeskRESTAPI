@@ -55,6 +55,10 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *       "description"="Pagination, limit is set to 10 records"
      *     },
      *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by Created at date"
+     *     },
+     *     {
      *       "name"="isActive",
      *       "description"="Return's only ACTIVE company attributes if this param is TRUE, only INACTIVE company attributes if param is FALSE"
      *     }
@@ -92,6 +96,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
         }
 
         $page = $request->get('page') ?: 1;
+        $order = $request->get('order') ?: 'ASC';
         $isActive = $request->get('isActive');
 
         $filtersForUrl = [];
@@ -102,7 +107,8 @@ class CompanyAttributeController extends ApiBaseController implements Controller
         $options = [
             'loggedUserId' => $this->getUser()->getId(),
             'isActive' => strtolower($isActive),
-            'filtersForUrl' => $filtersForUrl
+            'filtersForUrl' => $filtersForUrl,
+            'order' => $order
         ];
 
         return $this->json($this->get('company_attribute_service')->getAttributesResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);

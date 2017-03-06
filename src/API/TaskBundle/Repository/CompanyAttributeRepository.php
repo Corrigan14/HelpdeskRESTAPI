@@ -26,6 +26,7 @@ class CompanyAttributeRepository extends EntityRepository
     public function getAllEntities(int $page, array $options = [])
     {
         $isActive = $options['isActive'];
+        $order = $options['order'];
 
         if ('true' === $isActive || 'false' === $isActive) {
             if ($isActive === 'true') {
@@ -35,14 +36,14 @@ class CompanyAttributeRepository extends EntityRepository
             }
             $query = $this->createQueryBuilder('ca')
                 ->select()
-                ->orderBy('ca.id', 'ASC')
+                ->orderBy('ca.title', $order)
                 ->where('ca.is_active = :isActiveParam')
                 ->setParameter('isActiveParam', $isActiveParam)
                 ->getQuery();
         } else {
             $query = $this->createQueryBuilder('ca')
                 ->select()
-                ->orderBy('ca.id', 'ASC')
+                ->orderBy('ca.title', $order)
                 ->getQuery();
         }
 

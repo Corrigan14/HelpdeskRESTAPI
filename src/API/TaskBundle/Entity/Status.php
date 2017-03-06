@@ -63,6 +63,14 @@ class Status
     private $is_active = true;
 
     /**
+     * @var int
+     *
+     * @ORM\Column(name="`order`", type="integer")
+     * @Assert\NotBlank(message="Order number is required!")
+     */
+    private $order;
+
+    /**
      * @var ArrayCollection
      *
      * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskHasAssignedUser", mappedBy="status")
@@ -220,5 +228,29 @@ class Status
     public function getColor()
     {
         return $this->color;
+    }
+
+    /**
+     * Set order
+     *
+     * @param integer $order
+     *
+     * @return Status
+     */
+    public function setOrder($order)
+    {
+        $this->order = $order;
+
+        return $this;
+    }
+
+    /**
+     * Get order
+     *
+     * @return integer
+     */
+    public function getOrder()
+    {
+        return $this->order;
     }
 }

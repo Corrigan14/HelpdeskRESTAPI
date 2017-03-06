@@ -61,6 +61,10 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *       "description"="Pagination, limit is set to 10 records"
      *     },
      *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by Order"
+     *     },
+     *     {
      *       "name"="isActive",
      *       "description"="Return's only ACTIVE statuses if this param is TRUE, only INACTIVE statuses if param is FALSE"
      *     }
@@ -98,6 +102,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
         }
 
         $page = $request->get('page') ?: 1;
+        $order = $request->get('order') ?: 'ASC';
         $isActive = $request->get('isActive');
         $filtersForUrl = [];
         if (null !== $isActive) {
@@ -107,7 +112,8 @@ class StatusController extends ApiBaseController implements ControllerInterface
         $options = [
             'loggedUserId' => $this->getUser()->getId(),
             'isActive' => strtolower($isActive),
-            'filtersForUrl' => $filtersForUrl
+            'order' => $order,
+            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order])
         ];
 
         return $this->json($this->get('status_service')->getAttributesResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);
@@ -552,7 +558,8 @@ class StatusController extends ApiBaseController implements ControllerInterface
             'title',
             'color',
             'description',
-            'is_active'
+            'is_active',
+            'order'
         ];
 
         if (array_key_exists('_format', $requestData)) {

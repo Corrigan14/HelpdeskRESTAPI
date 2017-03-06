@@ -63,6 +63,14 @@ class Status
     private $is_active = true;
 
     /**
+     * @var int
+     *
+     * @ORM\Column(name="`order`", type="integer")
+     * @Assert\NotBlank(message="Order number is required!")
+     */
+    private $order;
+
+    /**
      * @var ArrayCollection
      *
      * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskHasAssignedUser", mappedBy="status")

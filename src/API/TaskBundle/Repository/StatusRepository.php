@@ -26,6 +26,7 @@ class StatusRepository extends EntityRepository
     public function getAllEntities(int $page, array $options = [])
     {
         $isActive = $options['isActive'];
+        $order = $options['order'];
 
         if ('true' === $isActive || 'false' === $isActive) {
             if ($isActive === 'true') {
@@ -34,14 +35,15 @@ class StatusRepository extends EntityRepository
                 $isActiveParam = 0;
             }
             $query = $this->createQueryBuilder('s')
+                ->select('s')
                 ->where('s.is_active = :isActiveParam')
-                ->orderBy('s.id')
+                ->orderBy('s.order', $order)
                 ->setParameter('isActiveParam', $isActiveParam)
                 ->getQuery();
         } else {
             $query = $this->createQueryBuilder('s')
-                ->select()
-                ->orderBy('s.id')
+                ->select('s')
+                ->orderBy('s.order', $order)
                 ->getQuery();
         }
 
@@ -118,6 +120,7 @@ class StatusRepository extends EntityRepository
             'title' => $data->getTitle(),
             'color' => $data->getColor(),
             'description' => $data->getDescription(),
+            'order' => $data->getOrder(),
             'is_active' => $data->getIsActive()
         ];
 

@@ -878,7 +878,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
             'report',
             'is_active',
             'default',
-            'icon_class'
+            'icon_class',
+            'order'
         ];
 
         if (array_key_exists('_format', $data)) {

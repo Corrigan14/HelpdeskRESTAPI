@@ -170,7 +170,7 @@ class StatusControllerTest extends ApiTestCase
      */
     public function createEntity()
     {
-        $this->getClient(true)->request('POST', $this->getBaseUrl(), ['title' => 'Created Status', 'color' => '#1E90FF'], [],
+        $this->getClient(true)->request('POST', $this->getBaseUrl(), ['title' => 'Created Status', 'color' => '#1E90FF', 'order' => 5], [],
             ['Authorization' => 'Bearer ' . $this->adminToken, 'HTTP_AUTHORIZATION' => 'Bearer ' . $this->adminToken]);
         $this->assertEquals(201, $this->getClient()->getResponse()->getStatusCode());
 
@@ -200,7 +200,8 @@ class StatusControllerTest extends ApiTestCase
     {
         return [
             'title' => 'Created Status',
-            'color' => '#1E90FF'
+            'color' => '#1E90FF',
+            'order' => 6
         ];
     }
 
@@ -213,7 +214,8 @@ class StatusControllerTest extends ApiTestCase
     {
         return [
             'title' => 'Updated Status',
-            'color' => '#1E90FF'
+            'color' => '#1E90FF',
+            'order' => 7
         ];
     }
 

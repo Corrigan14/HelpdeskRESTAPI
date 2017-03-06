@@ -249,6 +249,7 @@ class FilterControllerTest extends ApiTestCase
         $filter->setDefault(false);
         $filter->setProject($project);
         $filter->setIconClass('&#xE858;');
+        $filter->setOrder(5);
 
         $this->em->persist($filter);
         $this->em->flush();
@@ -297,7 +298,8 @@ class FilterControllerTest extends ApiTestCase
             'public' => false,
             'report' => false,
             'default' => false,
-            'icon_class' => '&#xE858;'
+            'icon_class' => '&#xE858;',
+            'order' => 6
         ];
     }
 
@@ -331,7 +333,8 @@ class FilterControllerTest extends ApiTestCase
             'public' => true,
             'report' => false,
             'default' => false,
-            'icon_class' => '&#xE858;'
+            'icon_class' => '&#xE858;',
+            'order' => 7
         ];
     }
 
@@ -365,7 +368,8 @@ class FilterControllerTest extends ApiTestCase
             'public' => false,
             'report' => false,
             'default' => false,
-            'icon_class' => '&#xE858;'
+            'icon_class' => '&#xE858;',
+            'order' => 8
         ];
     }
 
@@ -401,7 +405,8 @@ class FilterControllerTest extends ApiTestCase
             'public' => false,
             'report' => false,
             'default' => false,
-            'icon_class' => '&#xE858;'
+            'icon_class' => '&#xE858;',
+            'order' => 9
         ];
     }
 

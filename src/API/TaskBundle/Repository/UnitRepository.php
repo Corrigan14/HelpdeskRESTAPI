@@ -26,6 +26,7 @@ class UnitRepository extends EntityRepository
     public function getAllEntities(int $page, array $options = [])
     {
         $isActive = $options['isActive'];
+        $order = $options['order'];
 
         if ('true' === $isActive || 'false' === $isActive) {
             if ($isActive === 'true') {
@@ -35,15 +36,13 @@ class UnitRepository extends EntityRepository
             }
             $query = $this->createQueryBuilder('unit')
                 ->select()
-                ->orderBy('unit.id')
                 ->where('unit.is_active = :isActiveParam')
-                ->setParameter('isActiveParam', $isActiveParam)
-                ->getQuery();
+                ->orderBy('unit.title', $order)
+                ->setParameter('isActiveParam', $isActiveParam);
         } else {
             $query = $this->createQueryBuilder('unit')
                 ->select()
-                ->orderBy('unit.id')
-                ->getQuery();
+                ->orderBy('unit.title', $order);
         }
 
         // Pagination

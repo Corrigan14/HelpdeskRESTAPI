@@ -64,6 +64,10 @@ class UnitController extends ApiBaseController implements ControllerInterface
      *       "description"="Pagination, limit is set to 10 records"
      *     },
      *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by Title"
+     *     },
+     *     {
      *       "name"="isActive",
      *       "description"="Return's only ACTIVE units if this param is TRUE, only INACTIVE units if param is FALSE"
      *     }
@@ -100,6 +104,7 @@ class UnitController extends ApiBaseController implements ControllerInterface
         }
 
         $page = $request->get('page') ?: 1;
+        $order = $request->get('order') ?: 'ASC';
         $isActive = $request->get('isActive');
 
         $filtersForUrl = [];
@@ -110,7 +115,8 @@ class UnitController extends ApiBaseController implements ControllerInterface
         $options = [
             'loggedUserId' => $this->getUser()->getId(),
             'isActive' => strtolower($isActive),
-            'filtersForUrl' => $filtersForUrl
+            'order' => $order,
+            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order])
         ];
 
         return $this->json($this->get('unit_service')->getAttributesResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);

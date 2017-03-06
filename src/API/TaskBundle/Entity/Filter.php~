@@ -82,6 +82,14 @@ class Filter
     private $icon_class;
 
     /**
+     * @var int
+     *
+     * @ORM\Column(name="`order`", type="integer")
+     * @Assert\NotBlank(message="Order number is required!")
+     */
+    private $order;
+
+    /**
      * @var User
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="filters")
@@ -340,5 +348,29 @@ class Filter
     public function getIconClass()
     {
         return $this->icon_class;
+    }
+
+    /**
+     * Set order
+     *
+     * @param integer $order
+     *
+     * @return Filter
+     */
+    public function setOrder($order)
+    {
+        $this->order = $order;
+
+        return $this;
+    }
+
+    /**
+     * Get order
+     *
+     * @return integer
+     */
+    public function getOrder()
+    {
+        return $this->order;
     }
 }

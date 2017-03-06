@@ -54,6 +54,7 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
         $filter->setReport(false);
         $filter->setDefault(true);
         $filter->setIconClass('&#xE88A;');
+        $filter->setOrder(1);
 
         $manager->persist($filter);
 
@@ -70,6 +71,7 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
         $filter->setReport(false);
         $filter->setDefault(false);
         $filter->setIconClass('&#xE838;');
+        $filter->setOrder(2);
 
         $manager->persist($filter);
 
@@ -85,6 +87,7 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
         $filter->setReport(false);
         $filter->setDefault(false);
         $filter->setIconClass('&#xE858;');
+        $filter->setOrder(3);
 
         $manager->persist($filter);
 
@@ -100,6 +103,7 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
         $filter->setReport(false);
         $filter->setDefault(false);
         $filter->setIconClass('&#xE7EF;');
+        $filter->setOrder(4);
 
         $manager->persist($filter);
 

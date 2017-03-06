@@ -27,14 +27,15 @@ class FilterRepository extends EntityRepository
         $report = $options['report'];
         $project = $options['project'];
         $loggedUserId = $options['loggedUserId'];
+        $order = $options['order'];
 
         $query = $this->createQueryBuilder('f')
             ->select('f, createdBy,project')
             ->leftJoin('f.createdBy', 'createdBy')
             ->leftJoin('f.project', 'project')
             ->leftJoin('project.createdBy', 'projectCreator')
-            ->orderBy('f.id')
-            ->distinct()
+            ->groupBy('f.id')
+            ->orderBy('f.order', $order)
             ->where('f.id is not NULL');
 
         $paramArray = [];
@@ -159,6 +160,7 @@ class FilterRepository extends EntityRepository
             'is_active' => $data->getIsActive(),
             'default' => $data->getDefault(),
             'icon_class' => $data->getIconClass(),
+            'order' => $data->getOrder(),
             'createdBy' => [
                 'id' => $data->getCreatedBy()->getId(),
                 'username' => $data->getCreatedBy()->getUsername(),

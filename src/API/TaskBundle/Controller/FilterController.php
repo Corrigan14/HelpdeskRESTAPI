@@ -96,6 +96,10 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *       "description"="Pagination, limit is set to 10 records"
      *     },
      *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by ORDER number of filter"
+     *     },
+     *     {
      *       "name"="public",
      *       "description"="Return's only PUBLIC filters if this param is TRUE, only logged user's filter's without
      *       PUBLIC filters, if param is FALSE. Else returns both: PUBLIC filters and filters created by logged user."
@@ -138,6 +142,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
     public function listAction(Request $request)
     {
         $page = $request->get('page') ?: 1;
+        $order = $request->get('order') ?: 'ASC';
         $isActive = $request->get('isActive');
         $public = $request->get('public');
         $report = $request->get('report');
@@ -163,7 +168,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
             'public' => strtolower($public),
             'report' => strtolower($report),
             'project' => strtolower($project),
-            'filtersForUrl' => $filtersForUrl
+            'order' => $order,
+            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order])
         ];
 
         return $this->json($this->get('filter_service')->getFiltersResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);

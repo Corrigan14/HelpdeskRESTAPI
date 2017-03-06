@@ -89,9 +89,6 @@ class Imap
      *
      * @ORM\Column(name="move_email", type="string", length=255)
      * @Assert\NotBlank(message="Move email is required")
-     * @Assert\Email(
-     *     message = "The email '{{ value }}' is not a valid email."
-     * )
      * @Assert\Type("string")
      */
     private $move_email;

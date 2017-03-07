@@ -4,6 +4,7 @@ namespace API\TaskBundle\Controller;
 
 use API\TaskBundle\Entity\Filter;
 use API\TaskBundle\Entity\Project;
+use API\TaskBundle\Entity\TaskAttribute;
 use API\TaskBundle\Security\UserRoleAclOptions;
 use API\TaskBundle\Security\VoteOptions;
 use API\TaskBundle\Services\FilterAttributeOptions;
@@ -1005,7 +1006,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
             'default',
             'icon_class',
             'order',
-            'columns'
+            'columns',
+            'columns_task_attributes'
         ];
 
         if (array_key_exists('_format', $data)) {
@@ -1026,14 +1028,28 @@ class FilterController extends ApiBaseController implements ControllerInterface
         // Check if every key sent in filter array is allowed in FilterOptions
         if (isset($data['filter'])) {
             $filters = $data['filter'];
+            if (!is_array($filters)) {
+                $filtersArray = explode(',', $filters);
+                $filtersExplodedArray = [];
+                foreach ($filtersArray as $array) {
+                    $keyValue = explode('=>', $array);
+                    $filtersExplodedArray[$keyValue[0]] = $keyValue[1];
+                }
+                $filtersArray = $filtersExplodedArray;
+            } else {
+                $filtersArray = $filters;
+            }
 
-            foreach ($filters as $key => $value) {
+            foreach ($filtersArray as $key => $value) {
                 if (!in_array($key, FilterAttributeOptions::getConstants(), true)) {
                     return $this->createApiResponse([
                         'message' => 'Requested filter parameter ' . $key . ' is not allowed!',
                     ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 }
             }
+
+            $filter->setFilter($filtersArray);
+            unset($data['filter']);
         }
 
         // Check if user can create REPORT Filter (it's role has to have ACL REPORT_FILTERS)
@@ -1061,17 +1077,38 @@ class FilterController extends ApiBaseController implements ControllerInterface
             $data['default'] = false;
         }
 
-        // Check if user set som Columns and if these columns are allowed (exists)
+        // Check if user set some Columns and if these columns are allowed (exists)
         if (isset($data['columns'])) {
             $dataColumnsArray = (!is_array($data['columns'])) ? explode(',', $data['columns']) : $data['columns'];
 
             foreach ($dataColumnsArray as $col) {
-
+                if (!in_array($col, FilterAttributeOptions::getConstants(), true)) {
+                    return $this->createApiResponse([
+                        'message' => 'Requested column parameter ' . $col . ' is not allowed!',
+                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                }
             }
 
             $filter->setColumns($dataColumnsArray);
             unset($data['columns']);
-            dump($dataColumnsArray);
+        }
+
+        // Check if user set some Columns_task_attributes and if these columns are allowed (exists)
+        if (isset($data['columns_task_attributes'])) {
+            $dataColumnsArray = (!is_array($data['columns_task_attributes'])) ? explode(',', $data['columns_task_attributes']) : $data['columns_task_attributes'];
+
+            foreach ($dataColumnsArray as $col) {
+                $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($col);
+
+                if (!$taskAttribute instanceof TaskAttribute) {
+                    return $this->createApiResponse([
+                        'message' => 'Requested task attribute with id ' . $col . ' does not exist!',
+                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                }
+            }
+
+            $filter->setColumnsTaskAttributes($dataColumnsArray);
+            unset($data['columns_task_attributes']);
         }
 
         $errors = $this->get('entity_processor')->processEntity($filter, $data);

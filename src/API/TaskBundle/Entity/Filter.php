@@ -187,11 +187,11 @@ class Filter
     /**
      * Set filter
      *
-     * @param array $filter
+     * @param $filter
      *
      * @return Filter
      */
-    public function setFilter(array $filter)
+    public function setFilter($filter)
     {
         $this->filter = json_encode($filter);
 

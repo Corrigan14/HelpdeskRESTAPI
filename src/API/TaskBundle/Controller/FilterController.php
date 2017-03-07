@@ -5,6 +5,7 @@ namespace API\TaskBundle\Controller;
 use API\TaskBundle\Entity\Filter;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\TaskAttribute;
+use API\TaskBundle\Security\ProjectAclOptions;
 use API\TaskBundle\Security\UserRoleAclOptions;
 use API\TaskBundle\Security\VoteOptions;
 use API\TaskBundle\Services\FilterAttributeOptions;
@@ -982,6 +983,142 @@ class FilterController extends ApiBaseController implements ControllerInterface
         return $this->createApiResponse([
             'message' => StatusCodesHelper::DELETED_MESSAGE,
         ], StatusCodesHelper::DELETED_CODE);
+    }
+
+    /**
+     *  ### Response ###
+     *      {
+     *         "status":
+     *         [
+     *            {
+     *               "id": 178,
+     *               "title": "new"
+     *            },
+     *            {
+     *               "id": 179,
+     *               "title": "In Progress"
+     *            },
+     *         ],
+     *         "project":
+     *         [
+     *            {
+     *               "id": 207,
+     *               "title": "Project of user 2"
+     *            },
+     *            {
+     *              "id": 208,
+     *              "title": "Project of admin"
+     *            },
+     *         ],
+     *         "requester":
+     *         [
+     *            {
+     *               "id": 1014,
+     *               "username": "admin"
+     *            },
+     *            {
+     *               "id": 1015,
+     *               "username": "manager"
+     *            },
+     *         ],
+     *         "created":
+     *         [
+     *            {
+     *               "id": 1014,
+     *               "username": "admin"
+     *            },
+     *            {
+     *               "id": 1015,
+     *               "username": "manager"
+     *            },
+     *         ],
+     *         "company":
+     *         [
+     *           {
+     *              "id": 317,
+     *              "title": "Web-Solutions"
+     *           },
+     *           {
+     *              "id": 318,
+     *              "title": "LanSystems"
+     *           }
+     *         ],
+     *         "tag":
+     *         [
+     *           {
+     *              "id": 9,
+     *              "title": "Free Time"
+     *            },
+     *           {
+     *              "id": 10,
+     *              "title": "Work"
+     *            },
+     *            {
+     *               "id": 12,
+     *               "title": "Another Admin Public Tag"
+     *             }
+     *          ],
+     *          "assigned":
+     *          [
+     *            {
+     *               "id": 1014,
+     *               "username": "admin"
+     *            }
+     *          ]
+     *      }
+     * @ApiDoc(
+     *  description="Get all options for filter: statuses, available projects, available creators, available requesters, available companies, available assigners, available tags",
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request"
+     *  })
+     *
+     *
+     * @return JsonResponse
+     */
+    public function getFilterOptionsAction()
+    {
+        // Return arrays of options
+        $statusesArray = $this->get('status_service')->getListOfExistedStatuses();
+
+        // Available projects are where logged user have CREATE_TASK ACL
+        // Admin can use All existed projects
+        $isAdmin = $this->get('task_voter')->isAdmin();
+        $projectsArray = $this->get('project_service')->getListOfAvailableProjects($this->getUser(), $isAdmin, ProjectAclOptions::CREATE_TASK);
+
+        // Every user can be creator
+        $creatorArray = $this->get('api_user.service')->getListOfAllUsers();
+
+        // Every user can be requester
+        $requesterArray = $creatorArray;
+
+        // Every company is available
+        $companyArray = $this->get('api_company.service')->getListOfAllCompanies();
+
+        // Public and logged user's tags are available
+        $tagArray = $this->get('tag_service')->getListOfUsersTags($this->getUser()->getId());
+
+        // Every user can have assigned tasks
+        $assignArray = $creatorArray;
+
+        $response = [
+            'status' => $statusesArray,
+            'project' => $projectsArray,
+            'created' => $requesterArray,
+            'requester' => $requesterArray,
+            'company' => $companyArray,
+            'tag' => $tagArray,
+            'assigned' => $assignArray
+        ];
+
+        return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

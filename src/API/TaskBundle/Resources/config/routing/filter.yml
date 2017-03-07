@@ -50,3 +50,9 @@ filter_delete:
     methods: [DELETE]
     requirements:
             id: '\d+'
+
+filter_options:
+    path:     /filters/options
+    defaults: { _controller: APITaskBundle:Filter:getFilterOptions }
+    methods: [GET]
+    requirements:

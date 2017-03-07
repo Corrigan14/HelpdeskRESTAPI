@@ -2654,7 +2654,7 @@ class TaskController extends ApiBaseController
      *               "username": "admin"
      *            }
      *          ],
-     *          "unit":
+     *          "unit":[]
      *
      *      }
      * @ApiDoc(

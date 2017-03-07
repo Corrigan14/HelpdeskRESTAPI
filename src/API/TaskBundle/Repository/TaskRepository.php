@@ -10,6 +10,7 @@ use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskData;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
 use API\TaskBundle\Entity\TaskHasAttachment;
+use API\TaskBundle\Services\FilterAttributeOptions;
 use API\TaskBundle\Services\VariableHelper;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
@@ -57,6 +58,7 @@ class TaskRepository extends EntityRepository
             ->addSelect('assignedUser')
             ->addSelect('tags')
             ->addSelect('taskCompany')
+            ->addSelect('followers')
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')
@@ -71,12 +73,59 @@ class TaskRepository extends EntityRepository
             ->leftJoin('thau.user', 'assignedUser')
             ->leftJoin('task.tags', 'tags')
             ->leftJoin('task.company', 'taskCompany')
-            ->groupBy('task.id')
-            ->orderBy('task.createdAt', $order);
+            ->leftJoin('task.followers', 'followers')
+            ->distinct();
 
-
-        if (array_key_exists('followers.id', $inFilter) || array_key_exists('followers.id', $equalFilter)) {
-            $query->innerJoin('task.followers', 'followers');
+        foreach ($order as $key => $value) {
+            switch ($key) {
+                case FilterAttributeOptions::TITLE:
+                    $query->addOrderBy('task.title', $value);
+                    break;
+                case FilterAttributeOptions::STATUS:
+                    $query->addOrderBy('status.id', $value);
+                    break;
+                case FilterAttributeOptions::PROJECT:
+                    $query->addOrderBy('project.id', $value);
+                    break;
+                case FilterAttributeOptions::CREATOR:
+                    $query->addOrderBy('createdBy.id', $value);
+                    break;
+                case FilterAttributeOptions::REQUESTER:
+                    $query->addOrderBy('requestedBy.id', $value);
+                    break;
+                case FilterAttributeOptions::COMPANY:
+                    $query->addOrderBy('company.id', $value);
+                    break;
+                case FilterAttributeOptions::ASSIGNED:
+                    $query->addOrderBy('assignedUser.id', $value);
+                    break;
+                case FilterAttributeOptions::TAG:
+                    $query->addOrderBy('tags.id', $value);
+                    break;
+                case FilterAttributeOptions::FOLLOWER:
+                    $query->addOrderBy('followers.id', $value);
+                    break;
+                case FilterAttributeOptions::CREATED:
+                    $query->addOrderBy('task.createdAt', $value);
+                    break;
+                case FilterAttributeOptions::STARTED:
+                    $query->addOrderBy('task.startedAt', $value);
+                    break;
+                case FilterAttributeOptions::DEADLINE:
+                    $query->addOrderBy('task.deadline', $value);
+                    break;
+                case FilterAttributeOptions::CLOSED:
+                    $query->addOrderBy('task.closedAt', $value);
+                    break;
+                case FilterAttributeOptions::IMPORTANT:
+                    $query->addOrderBy('task.important', $value);
+                    break;
+                case FilterAttributeOptions::ARCHIVED:
+                    $query->addOrderBy('project.is_active', $value);
+                    break;
+                default:
+                    $query->addOrderBy('task.id', 'ASC');
+            }
         }
 
         $query->where('task.id is not NULL');
@@ -258,11 +307,59 @@ class TaskRepository extends EntityRepository
             ->leftJoin('thau.user', 'assignedUser')
             ->leftJoin('task.tags', 'tags')
             ->leftJoin('task.company', 'taskCompany')
-            ->groupBy('task.id')
-            ->orderBy('task.id', $order);
+            ->leftJoin('task.followers', 'followers')
+            ->distinct();
 
-        if (array_key_exists('followers.id', $inFilter) || array_key_exists('followers.id', $equalFilter)) {
-            $query->innerJoin('task.followers', 'followers');
+        foreach ($order as $key => $value) {
+            switch ($key) {
+                case FilterAttributeOptions::TITLE:
+                    $query->addOrderBy('task.title', $value);
+                    break;
+                case FilterAttributeOptions::STATUS:
+                    $query->addOrderBy('status.id', $value);
+                    break;
+                case FilterAttributeOptions::PROJECT:
+                    $query->addOrderBy('project.id', $value);
+                    break;
+                case FilterAttributeOptions::CREATOR:
+                    $query->addOrderBy('createdBy.id', $value);
+                    break;
+                case FilterAttributeOptions::REQUESTER:
+                    $query->addOrderBy('requestedBy.id', $value);
+                    break;
+                case FilterAttributeOptions::COMPANY:
+                    $query->addOrderBy('company.id', $value);
+                    break;
+                case FilterAttributeOptions::ASSIGNED:
+                    $query->addOrderBy('assignedUser.id', $value);
+                    break;
+                case FilterAttributeOptions::TAG:
+                    $query->addOrderBy('tags.id', $value);
+                    break;
+                case FilterAttributeOptions::FOLLOWER:
+                    $query->addOrderBy('followers.id', $value);
+                    break;
+                case FilterAttributeOptions::CREATED:
+                    $query->addOrderBy('task.createdAt', $value);
+                    break;
+                case FilterAttributeOptions::STARTED:
+                    $query->addOrderBy('task.startedAt', $value);
+                    break;
+                case FilterAttributeOptions::DEADLINE:
+                    $query->addOrderBy('task.deadline', $value);
+                    break;
+                case FilterAttributeOptions::CLOSED:
+                    $query->addOrderBy('task.closedAt', $value);
+                    break;
+                case FilterAttributeOptions::IMPORTANT:
+                    $query->addOrderBy('task.important', $value);
+                    break;
+                case FilterAttributeOptions::ARCHIVED:
+                    $query->addOrderBy('project.is_active', $value);
+                    break;
+                default:
+                    $query->addOrderBy('task.id', 'ASC');
+            }
         }
 
         // Check and apply User's project ACL

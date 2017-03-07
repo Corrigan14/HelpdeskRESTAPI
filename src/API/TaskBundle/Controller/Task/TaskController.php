@@ -201,7 +201,7 @@ class TaskController extends ApiBaseController
      *     },
      *     {
      *       "name"="order",
-     *       "description"="ASC or DESC order by Created at date"
+     *       "description"="Array of key=>value values, where KEY is column to sort by, VALUE is ASC or DESC order chart"
      *     },
      *     {
      *       "name"="search",
@@ -323,8 +323,7 @@ class TaskController extends ApiBaseController
         $page = (is_integer($pageNum)) ? $pageNum : 1;
 
         $orderString = $request->get('order');
-        $orderString = strtolower($orderString);
-        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
+        $order = $this->processOrderData($orderString);
 
         $options = [
             'loggedUser' => $this->getUser(),
@@ -338,7 +337,7 @@ class TaskController extends ApiBaseController
             'inFilterAddedParams' => $filterData['inFilterAddedParams'],
             'equalFilterAddedParams' => $filterData['equalFilterAddedParams'],
             'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
-            'filtersForUrl' => array_merge($filterData['filterForUrl'], ['order' => '&order=' . $order]),
+            'filtersForUrl' => array_merge($filterData['filterForUrl'], ['order' => '&order=' . $orderString]),
             'order' => $order
         ];
 
@@ -2580,7 +2579,7 @@ class TaskController extends ApiBaseController
         }
 
         $response = $this->get('task_service')->getTaskResponse($ids);
-        $responseData['data'] = $response['data'][0];
+        $responseData['data'] = $response['data'];
         $responseData['data']['canEdit'] = $canEdit;
         $responseLinks['_links'] = $response['_links'];
         return $this->json(array_merge($responseData, $responseLinks), StatusCodesHelper::SUCCESSFUL_CODE);
@@ -3287,5 +3286,37 @@ class TaskController extends ApiBaseController
             }
         }
         return false;
+    }
+
+    /**
+     * @param string|null $orderString
+     * @return array|Response
+     */
+    private function processOrderData($orderString)
+    {
+        $order = [];
+        if (null !== $orderString) {
+            $orderArray = explode(',', $orderString);
+            foreach ($orderArray as $item) {
+                $orderArrayKeyValue = explode('=>', $item);
+                //Check if param to order by is allowed
+                if (!in_array($orderArrayKeyValue[0], FilterAttributeOptions::getConstants(), true)) {
+                    return $this->createApiResponse([
+                        'message' => 'Requested filter parameter ' . $orderArrayKeyValue[0] . ' is not allowed!',
+                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                }
+                if (!(strtolower($orderArrayKeyValue[1]) === 'asc' || strtolower($orderArrayKeyValue[1]) === 'desc')) {
+                    return $this->createApiResponse([
+                        'message' => $orderArrayKeyValue[1] . ' Is not allowed! You can order data only ASC or DESC!',
+                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                }
+                $order[$orderArrayKeyValue[0]] = $orderArrayKeyValue[1];
+            }
+        }
+        if (count($order) === 0) {
+            $order['id'] = 'ASC';
+        }
+
+        return $order;
     }
 }

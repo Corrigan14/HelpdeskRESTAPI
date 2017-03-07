@@ -45,8 +45,8 @@ class UserRepository extends EntityRepository
                 ->leftJoin('company.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
                 ->where('u.is_active = :isActive')
-                ->groupBy('u.id')
                 ->orderBy('u.username', $order)
+                ->distinct()
                 ->setParameter('isActive', $isActiveParam);
         } else {
             $query = $this->createQueryBuilder('u')
@@ -56,8 +56,8 @@ class UserRepository extends EntityRepository
                 ->leftJoin('u.company', 'company')
                 ->leftJoin('company.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
-                ->groupBy('u.id')
-                ->orderBy('u.username', $order);
+                ->orderBy('u.username', $order)
+                ->distinct();
         }
 
         // Pagination
@@ -102,8 +102,8 @@ class UserRepository extends EntityRepository
                 ->leftJoin('company.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
                 ->where('u.is_active = :isActive')
-                ->groupBy('u.id')
-                ->orderBy('u.username', $order);
+                ->orderBy('u.username', $order)
+                ->distinct();
             $parameters['isActive'] = $isActiveParam;
         } else {
             $query = $this->createQueryBuilder('u')
@@ -113,8 +113,8 @@ class UserRepository extends EntityRepository
                 ->leftJoin('u.company', 'company')
                 ->leftJoin('company.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
-                ->groupBy('u.id')
-                ->orderBy('u.username', $order);
+                ->orderBy('u.username', $order)
+                ->distinct();
         }
 
         if ($term) {

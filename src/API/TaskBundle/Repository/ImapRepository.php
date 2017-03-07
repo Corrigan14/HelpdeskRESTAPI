@@ -17,8 +17,8 @@ class ImapRepository extends EntityRepository
         $query = $this->createQueryBuilder('imap')
             ->select('imap, project')
             ->leftJoin('imap.project', 'project')
-            ->groupBy('imap.id')
             ->orderBy('imap.inbox_email', $order)
+            ->distinct()
             ->getQuery();
 
         return $query->getArrayResult();

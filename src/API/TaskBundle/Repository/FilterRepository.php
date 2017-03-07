@@ -34,8 +34,8 @@ class FilterRepository extends EntityRepository
             ->leftJoin('f.createdBy', 'createdBy')
             ->leftJoin('f.project', 'project')
             ->leftJoin('project.createdBy', 'projectCreator')
-            ->groupBy('f.id')
             ->orderBy('f.order', $order)
+            ->distinct()
             ->where('f.id is not NULL');
 
         $paramArray = [];

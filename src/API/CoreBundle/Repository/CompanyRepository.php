@@ -45,8 +45,8 @@ class CompanyRepository extends EntityRepository
                 ->leftJoin('c.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
                 ->where('c.is_active = :isActiveParam')
-                ->groupBy('c.id')
                 ->orderBy('c.title', $order)
+                ->distinct()
                 ->setParameter('isActiveParam', $isActiveParam)
                 ->getQuery();
         } else {
@@ -54,8 +54,8 @@ class CompanyRepository extends EntityRepository
                 ->select('c,companyData, companyAttribute')
                 ->leftJoin('c.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
-                ->groupBy('c.id')
                 ->orderBy('c.title', $order)
+                ->distinct()
                 ->getQuery();
         }
 
@@ -117,17 +117,16 @@ class CompanyRepository extends EntityRepository
                 ->leftJoin('c.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
                 ->where('c.is_active = :isActiveParam')
-                ->groupBy('c.id')
-                ->orderBy('c.title', $order);
+                ->orderBy('c.title', $order)
+                ->distinct();
             $parameters['isActiveParam'] = $isActiveParam;
         } else {
             $query = $this->createQueryBuilder('c')
                 ->select('c,companyData, companyAttribute')
                 ->leftJoin('c.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
-                ->orderBy('c.id')
-                ->groupBy('c.id')
-                ->orderBy('c.title', $order);
+                ->orderBy('c.title', $order)
+                ->distinct();
         }
 
         if ($term) {

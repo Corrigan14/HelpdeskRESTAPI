@@ -1139,6 +1139,81 @@ class UserController extends ApiBaseController
     }
 
     /**
+     * @ApiDoc(
+     *  description="Restore User Entity",
+     *  requirements={
+     *     {
+     *       "name"="id",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of processed object"
+     *     }
+     *  },
+     *  parameters={
+     *          {"name"="password", "dataType"="string", "required"=true, "format"="POST", "description"="Reseted password"},
+     *          {"name"="password_repeat", "dataType"="string", "required"=true, "format"="POST", "description"="Reseted password - repeat"}
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="Password was successfully reseted",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found user",
+     *      409 ="Invalid parameters",
+     *  })
+     *
+     * @param Request $request
+     * @param int $id
+     * @return Response|bool
+     */
+    public function resetPasswordAction(Request $request, int $id)
+    {
+        // Only admin can reset password
+        if (!$this->get('acl_helper')->isAdmin()) {
+            return $this->createApiResponse([
+                'message' => 'Only admin can reset password!',
+            ], StatusCodesHelper::ACCESS_DENIED_CODE);
+        }
+
+        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
+        if (!$user instanceof User) {
+            return $this->createApiResponse([
+                'message' => 'User with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $password = $request->get('password');
+        $passwordRepeated = $request->get('password_repeat');
+
+        if (strlen($password) < 8) {
+            return $this->createApiResponse([
+                'message' => 'Password has to have at least 8 characters!',
+            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        }
+
+        if ($password !== $passwordRepeated) {
+            return $this->createApiResponse([
+                'message' => 'Password and repeated password are not the same!',
+            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        }
+
+        $user->setPassword($this->get('security.password_encoder')->encodePassword($user, $password));
+        $this->getDoctrine()->getManager()->persist($user);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->createApiResponse([
+            'message' => 'Password was successfully changed!',
+        ], StatusCodesHelper::SUCCESSFUL_CODE);
+
+    }
+
+    /**
      * @param User|null $user
      *
      * @param array $requestData

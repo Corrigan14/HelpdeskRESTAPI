@@ -79,7 +79,7 @@ class CommentRepository extends EntityRepository
             ->where('comment.id = :id')
             ->setParameter('id', $id);
 
-        return $query->getQuery()->getArrayResult();
+        return $this->fillArray($query->getQuery()->getSingleResult());
     }
 
     /**

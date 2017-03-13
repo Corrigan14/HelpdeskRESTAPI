@@ -273,7 +273,7 @@ class Imap
     public function setIgnoreCertificate($ignoreCertificate)
     {
         if (is_string($ignoreCertificate)) {
-            $ignoreCertificate = $ignoreCertificate === 'true' ? true : false;
+            $ignoreCertificate = ($ignoreCertificate === 'true' || $ignoreCertificate == 1) ? true : false;
         }
         $this->ignore_certificate = $ignoreCertificate;
 
@@ -300,7 +300,7 @@ class Imap
     public function setSsl($ssl)
     {
         if (is_string($ssl)) {
-            $ssl = $ssl === 'true' ? true : false;
+            $ssl = ($ssl === 'true' || $ssl == 1) ? true : false;
         }
 
         $this->ssl = $ssl;

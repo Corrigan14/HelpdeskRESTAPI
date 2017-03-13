@@ -7,9 +7,13 @@ use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
+use PHPUnit\Framework\Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Validation;
 
 /**
  * Class CommentController
@@ -555,7 +559,7 @@ class CommentController extends ApiBaseController
     }
 
     /**
-     * @param $comment
+     * @param Comment $comment
      * @param $requestData
      * @param bool $create
      * @return Response
@@ -564,7 +568,7 @@ class CommentController extends ApiBaseController
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
-    private function updateCommentEntity($comment, $requestData, $create = true)
+    private function updateCommentEntity(Comment $comment, $requestData, $create = true)
     {
         $allowedUnitEntityParams = [
             'title',
@@ -589,6 +593,17 @@ class CommentController extends ApiBaseController
             }
         }
 
+        // If comment is sending like Email, email_to param has to be set
+        $emailAddresses = [];
+        if (isset($requestData['email'])) {
+            $isEmail = ('true' === strtolower($requestData['email']) || 1 == $requestData['email']) ? true : false;
+            if ($isEmail) {
+                $this->processEmailAddress($requestData, $comment, $emailAddresses);
+            }
+        }
+
+        dump($emailAddresses);
+
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         $errors = $this->get('entity_processor')->processEntity($comment, $requestData);
@@ -598,6 +613,27 @@ class CommentController extends ApiBaseController
             $this->getDoctrine()->getManager()->flush();
 
             $commentArray = $this->get('task_additional_service')->getCommentOfTaskResponse($comment->getId());
+
+            // Comment is an Email
+            if ($isEmail) {
+                $params = [
+                    'subject' => $requestData['title'],
+                    'from' => 'symfony@lanhelpdesk.com',
+                    'to' => 'mb@web-solutions.sk',
+                    'body' => $this->renderView('@APITask/Emails/comment.html.twig', ['text' => $requestData['body']])
+                ];
+
+                $sendingError = $this->get('email_service')->sendEmail($params);
+
+                if (true !== $sendingError) {
+                    $data = [
+                        'errors' => $sendingError,
+                        'message' => 'Error with email sending!'
+                    ];
+                    return $this->createApiResponse($data, StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
+                }
+            }
+
             return $this->json($commentArray, $statusCode);
         }
 
@@ -607,4 +643,51 @@ class CommentController extends ApiBaseController
         ];
         return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
+
+    /**
+     * @param $requestData
+     * @param Comment $comment
+     * @param array $emailAddress
+     * @return Response
+     */
+    private function processEmailAddress(&$requestData, Comment &$comment, array &$emailAddress):Response
+    {
+        $validator = $this->get('validator');
+        $constraints = [
+            new Email(),
+            new NotBlank()
+        ];
+        $emailToArray = [];
+        $emailCcArray = [];
+        $emailBccArray = [];
+
+        if (isset($requestData['email_to'])) {
+            $emailTo = $requestData['email_to'];
+            if (!is_array($emailTo)) {
+                $emailToArray = explode(';', $emailTo);
+            } else {
+                $emailToArray = $emailTo;
+            }
+
+            // Check the correct email address
+            foreach ($emailToArray as $item) {
+                $emailError = $validator->validate($item, $constraints);
+                if (count($emailError)) {
+                    return $this->createApiResponse(
+                        ['message' => 'Not valid email address: ' . $item],
+                        StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                }
+            }
+            $comment->setEmailTo($emailToArray);
+            unset($requestData['email_to']);
+        } else {
+            return $this->createApiResponse(
+                ['message' => 'Email address is required to sent comment like Email!'],
+                StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        }
+
+        $emailAddress = array_merge($emailToArray, $emailCcArray, $emailBccArray);
+    }
 }
+
+

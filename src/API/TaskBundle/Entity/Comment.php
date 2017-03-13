@@ -64,7 +64,7 @@ class Comment
      * @var string
      *
      * @ORM\Column(name="email_to", type="text", nullable=true)
-     * @Assert\Type("text")
+     * @Assert\Type("string")
      */
     private $email_to;
 
@@ -72,7 +72,7 @@ class Comment
      * @var string
      *
      * @ORM\Column(name="email_cc", type="text", nullable=true)
-     * @Assert\Type("text")
+     * @Assert\Type("string")
      */
     private $email_cc;
 
@@ -80,7 +80,7 @@ class Comment
      * @var string
      *
      * @ORM\Column(name="email_bcc", type="text", nullable=true)
-     * @Assert\Type("text")
+     * @Assert\Type("string")
      */
     private $email_bcc;
 
@@ -204,7 +204,7 @@ class Comment
     public function setInternal($internal)
     {
         if (is_string($internal)) {
-            $internal = $internal === 'true' ? true : false;
+            $internal = ($internal === 'true' || $internal = 1) ? true : false;
         }
 
         $this->internal = $internal;
@@ -232,7 +232,7 @@ class Comment
     public function setEmail($email)
     {
         if (is_string($email)) {
-            $email = $email === 'true' ? true : false;
+            $email = ($email === 'true' || $email == 1) ? true : false;
         }
 
         $this->email = $email;
@@ -259,7 +259,7 @@ class Comment
      */
     public function setEmailTo($emailTo)
     {
-        $this->email_to = serialize($emailTo);
+        $this->email_to = json_encode($emailTo);
 
         return $this;
     }
@@ -271,7 +271,7 @@ class Comment
      */
     public function getEmailTo()
     {
-        return unserialize($this->email_to);
+        return json_decode($this->email_to);
     }
 
     /**
@@ -283,7 +283,7 @@ class Comment
      */
     public function setEmailCc($emailCc)
     {
-        $this->email_cc = serialize($emailCc);
+        $this->email_cc = json_encode($emailCc);
 
         return $this;
     }
@@ -295,7 +295,7 @@ class Comment
      */
     public function getEmailCc()
     {
-        return unserialize($this->email_cc);
+        return json_decode($this->email_cc);
     }
 
     /**
@@ -307,7 +307,7 @@ class Comment
      */
     public function setEmailBcc($emailBcc)
     {
-        $this->email_bcc = serialize($emailBcc);
+        $this->email_bcc = json_encode($emailBcc);
 
         return $this;
     }
@@ -319,7 +319,7 @@ class Comment
      */
     public function getEmailBcc()
     {
-        return unserialize($this->email_bcc);
+        return json_decode($this->email_bcc);
     }
 
     /**

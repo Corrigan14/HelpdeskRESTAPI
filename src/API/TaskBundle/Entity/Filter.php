@@ -166,7 +166,7 @@ class Filter
     public function setPublic($public)
     {
         if (is_string($public)) {
-            $public = $public === 'true' ? true : false;
+            $public = ($public === 'true' || $public == 1) ? true : false;
         }
 
         $this->public = $public;
@@ -266,7 +266,7 @@ class Filter
     public function setReport($report)
     {
         if (is_string($report)) {
-            $report = $report === 'true' ? true : false;
+            $report = ($report === 'true' || $report == 1) ? true : false;
         }
 
         $this->report = $report;
@@ -294,7 +294,7 @@ class Filter
     public function setIsActive($isActive)
     {
         if (is_string($isActive)) {
-            $isActive = $isActive === 'true' ? true : false;
+            $isActive = ($isActive === 'true' || $isActive == 1) ? true : false;
         }
 
         $this->is_active = $isActive;
@@ -322,7 +322,7 @@ class Filter
     public function setDefault($default)
     {
         if (is_string($default)) {
-            $default = $default === 'true' ? true : false;
+            $default = ($default === 'true' || $default == 1) ? true : false;
         }
 
         $this->default = $default;

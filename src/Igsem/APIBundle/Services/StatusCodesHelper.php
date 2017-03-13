@@ -40,6 +40,7 @@ class StatusCodesHelper
     const ROUTE_REQUIREMENT_NOTMET_CODE = 405;
     const INVALID_PARAMETERS_MESSAGE = 'Invalid parameters';
     const INVALID_PARAMETERS_CODE = 409;
+    const PROBLEM_WITH_EMAIL_SENDING = 422;
 
 
     const INVALID_JWT_TOKEN_MESSAGE = 'Invalid JWT Token';

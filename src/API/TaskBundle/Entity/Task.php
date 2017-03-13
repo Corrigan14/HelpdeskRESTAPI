@@ -294,7 +294,7 @@ class Task
     public function setImportant($important)
     {
         if (is_string($important)) {
-            $important = $important === 'true' ? true : false;
+            $important = ($important === 'true' || $important == 1) ? true : false;
         }
 
         $this->important = $important;

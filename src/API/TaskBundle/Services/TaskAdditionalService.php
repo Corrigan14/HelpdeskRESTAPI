@@ -183,7 +183,7 @@ class TaskAdditionalService
         $comment = $this->em->getRepository('APITaskBundle:Comment')->getCommentEntity($id);
 
         return [
-            'data' => $comment[0],
+            'data' => $comment,
             '_links' => [
                 'delete' => $this->router->generate('tasks_delete_tasks_comment', ['commentId' => $id])
             ],

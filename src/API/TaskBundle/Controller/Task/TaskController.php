@@ -593,7 +593,7 @@ class TaskController extends ApiBaseController
      *     },
      *     {
      *       "name"="order",
-     *       "description"="ASC or DESC order by Created at date"
+     *       "description"="Array of key=>value values, where KEY is column to sort by, VALUE is ASC or DESC order chart"
      *     }
      *  },
      *  headers={
@@ -638,8 +638,7 @@ class TaskController extends ApiBaseController
         $page = $request->get('page') ?: 1;
 
         $orderString = $request->get('order');
-        $orderString = strtolower($orderString);
-        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
+        $order = $this->processOrderData($orderString);
 
         $filterDataArray = $filter->getFilter();
         $filterData = $this->getFilterDataFromSavedFilterArray($filterDataArray);

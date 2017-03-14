@@ -593,16 +593,32 @@ class CommentController extends ApiBaseController
             }
         }
 
-        // If comment is sending like Email, email_to param has to be set
+        // Comment marked like Email
         $emailAddresses = [];
+        $notValidEmailAddresses = [];
+        $isEmail = false;
         if (isset($requestData['email'])) {
             $isEmail = ('true' === strtolower($requestData['email']) || 1 == $requestData['email']) ? true : false;
             if ($isEmail) {
-                $this->processEmailAddress($requestData, $comment, $emailAddresses);
+                if (isset($requestData['email_to'])) {
+                    $this->processEmailAddress($requestData, $comment, $emailAddresses, $notValidEmailAddresses);
+
+                    if (count($notValidEmailAddresses) > 0) {
+                        return $this->createApiResponse(
+                            ['message' => 'Not valid email address: ' . implode(";", $notValidEmailAddresses)],
+                            StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    }
+                } else {
+                    return $this->createApiResponse(
+                        ['message' => 'Email address is required to sent comment like Email!'],
+                        StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                }
+            } else {
+                unset($requestData['email_to']);
+                unset($requestData['email_cc']);
+                unset($requestData['email_bcc']);
             }
         }
-
-        dump($emailAddresses);
 
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
@@ -617,7 +633,7 @@ class CommentController extends ApiBaseController
             // Comment is an Email
             if ($isEmail) {
                 $params = [
-                    'subject' => $requestData['title'],
+                    'subject' => [$comment->getTask()->getId()].$requestData['title'],
                     'from' => 'symfony@lanhelpdesk.com',
                     'to' => 'mb@web-solutions.sk',
                     'body' => $this->renderView('@APITask/Emails/comment.html.twig', ['text' => $requestData['body']])
@@ -644,47 +660,75 @@ class CommentController extends ApiBaseController
         return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
     }
 
+
     /**
      * @param $requestData
      * @param Comment $comment
      * @param array $emailAddress
-     * @return Response
+     * @param array $notValidEmailAddresses
      */
-    private function processEmailAddress(&$requestData, Comment &$comment, array &$emailAddress):Response
+    private function processEmailAddress(&$requestData, Comment &$comment, array &$emailAddress, array &$notValidEmailAddresses)
     {
         $validator = $this->get('validator');
         $constraints = [
             new Email(),
             new NotBlank()
         ];
-        $emailToArray = [];
-        $emailCcArray = [];
-        $emailBccArray = [];
 
-        if (isset($requestData['email_to'])) {
-            $emailTo = $requestData['email_to'];
-            if (!is_array($emailTo)) {
-                $emailToArray = explode(';', $emailTo);
-            } else {
-                $emailToArray = $emailTo;
-            }
-
-            // Check the correct email address
-            foreach ($emailToArray as $item) {
-                $emailError = $validator->validate($item, $constraints);
-                if (count($emailError)) {
-                    return $this->createApiResponse(
-                        ['message' => 'Not valid email address: ' . $item],
-                        StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                }
-            }
-            $comment->setEmailTo($emailToArray);
-            unset($requestData['email_to']);
+        // Email TO
+        $emailTo = $requestData['email_to'];
+        if (!is_array($emailTo)) {
+            $emailToArray = explode(';', $emailTo);
         } else {
-            return $this->createApiResponse(
-                ['message' => 'Email address is required to sent comment like Email!'],
-                StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $emailToArray = $emailTo;
         }
+
+        // Check the correct email address
+        foreach ($emailToArray as $item) {
+            $emailError = $validator->validate($item, $constraints);
+            if (count($emailError)) {
+                $notValidEmailAddresses[] = $item;
+            }
+        }
+        $comment->setEmailTo($emailToArray);
+        unset($requestData['email_to']);
+
+
+        // Email CC
+        $emailCc = $requestData['email_cc'];
+        if (!is_array($emailCc)) {
+            $emailCcArray = explode(';', $emailCc);
+        } else {
+            $emailCcArray = $emailCc;
+        }
+
+        // Check the correct email address
+        foreach ($emailCcArray as $item) {
+            $emailError = $validator->validate($item, $constraints);
+            if (count($emailError)) {
+                $notValidEmailAddresses[] = $item;
+            }
+        }
+        $comment->setEmailCc($emailCcArray);
+        unset($requestData['email_cc']);
+
+        // Email BCC
+        $emailBcc = $requestData['email_bcc'];
+        if (!is_array($emailBcc)) {
+            $emailBccArray = explode(';', $emailBcc);
+        } else {
+            $emailBccArray = $emailBcc;
+        }
+
+        // Check the correct email address
+        foreach ($emailBccArray as $item) {
+            $emailError = $validator->validate($item, $constraints);
+            if (count($emailError)) {
+                $notValidEmailAddresses[] = $item;
+            }
+        }
+        $comment->setEmailBcc($emailBccArray);
+        unset($requestData['email_bcc']);
 
         $emailAddress = array_merge($emailToArray, $emailCcArray, $emailBccArray);
     }

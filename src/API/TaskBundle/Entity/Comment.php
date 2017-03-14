@@ -49,14 +49,14 @@ class Comment
     /**
      * @var bool
      *
-     * @ORM\Column(name="internal", type="boolean", nullable=false,  options={"default":0})
+     * @ORM\Column(name="internal", type="boolean", nullable=true,  options={"default":0})
      */
     private $internal;
 
     /**
      * @var bool
      *
-     * @ORM\Column(name="email", type="boolean", nullable=false,  options={"default":0})
+     * @ORM\Column(name="email", type="boolean", nullable=true,  options={"default":0})
      */
     private $email;
 
@@ -204,7 +204,7 @@ class Comment
     public function setInternal($internal)
     {
         if (is_string($internal)) {
-            $internal = ($internal === 'true' || $internal = 1) ? true : false;
+            $internal = ($internal === 'true' || $internal == 1) ? true : false;
         }
 
         $this->internal = $internal;

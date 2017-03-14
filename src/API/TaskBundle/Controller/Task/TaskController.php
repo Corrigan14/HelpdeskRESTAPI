@@ -654,7 +654,7 @@ class TaskController extends ApiBaseController
             'inFilterAddedParams' => $filterData['inFilterAddedParams'],
             'equalFilterAddedParams' => $filterData['equalFilterAddedParams'],
             'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
-            'filtersForUrl' => array_merge($filterData['filterForUrl'], ['order' => '&order=' . $order]),
+            'filtersForUrl' => array_merge($filterData['filterForUrl'], ['order' => '&order=' . $orderString]),
             'order' => $order
         ];
 

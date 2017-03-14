@@ -596,7 +596,7 @@ class CommentController extends ApiBaseController
             }
         }
 
-        // Comment marked like Email
+        // Comment marked like Email - validation of email addresses
         $emailAddresses = [];
         $notValidEmailAddresses = [];
         $isEmail = false;
@@ -616,12 +616,12 @@ class CommentController extends ApiBaseController
                         ['message' => 'Email address is required to sent comment like Email!'],
                         StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 }
-            } else {
-                unset($requestData['email_to']);
-                unset($requestData['email_cc']);
-                unset($requestData['email_bcc']);
             }
         }
+
+        unset($requestData['email_to']);
+        unset($requestData['email_cc']);
+        unset($requestData['email_bcc']);
 
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
@@ -633,9 +633,12 @@ class CommentController extends ApiBaseController
 
             $commentArray = $this->get('task_additional_service')->getCommentOfTaskResponse($comment->getId());
 
-            // Comment is an Email - send Email
+            $task = $comment->getTask();
+            $loggedUserEmail = $this->getUser()->getEmail();
+
+            // If Comment is an Email - send Email
             if ($isEmail) {
-                $templateParams = $this->getTemplateParams($comment, $requestData, $emailAddresses);
+                $templateParams = $this->getTemplateParams($task->getId(), $requestData, $emailAddresses);
                 $sendingError = $this->get('email_service')->sendEmail($templateParams);
                 if (true !== $sendingError) {
                     $data = [
@@ -645,6 +648,15 @@ class CommentController extends ApiBaseController
                     return $this->createApiResponse($data, StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
                 }
             }
+
+            // Notification about creation of Comment to task REQUESTER, ASSIGNED USERS, FOLLOWERS
+            $notificationEmailAddresses = [];
+
+            $requester = $task->getRequestedBy()->getEmail();
+            if ($loggedUserEmail !== $requester) {
+                $notificationEmailAddresses[] = $requester;
+            }
+            dump($notificationEmailAddresses);
 
             return $this->json($commentArray, $statusCode);
         }
@@ -689,7 +701,6 @@ class CommentController extends ApiBaseController
             }
         }
         $comment->setEmailTo($emailToArray);
-        unset($requestData['email_to']);
 
 
         // Email CC
@@ -709,7 +720,6 @@ class CommentController extends ApiBaseController
                 }
             }
             $comment->setEmailCc($emailCcArray);
-            unset($requestData['email_cc']);
         }
 
         // Email BCC
@@ -729,19 +739,18 @@ class CommentController extends ApiBaseController
                 }
             }
             $comment->setEmailBcc($emailBccArray);
-            unset($requestData['email_bcc']);
         }
 
         $emailAddress = array_merge($emailToArray, $emailCcArray, $emailBccArray);
     }
 
     /**
-     * @param Comment $comment
+     * @param int $taskId
      * @param array $requestData
      * @param array $emailAddresses
      * @return array
      */
-    private function getTemplateParams(Comment $comment, array $requestData, array $emailAddresses):array
+    private function getTemplateParams(int $taskId, array $requestData, array $emailAddresses):array
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -755,7 +764,7 @@ class CommentController extends ApiBaseController
         }
         $todayDate = new \DateTime();
         $email = $user->getEmail();
-        $taskId = $comment->getTask()->getId();
+        $taskId = $taskId;
         $baseFrontURL = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->findOneBy([
             'title' => 'Base Front URL'
         ]);

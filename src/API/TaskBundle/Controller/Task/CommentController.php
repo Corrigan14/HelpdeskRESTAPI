@@ -652,10 +652,24 @@ class CommentController extends ApiBaseController
             // Notification about creation of Comment to task REQUESTER, ASSIGNED USERS, FOLLOWERS
             $notificationEmailAddresses = [];
 
-            $requester = $task->getRequestedBy()->getEmail();
-            if ($loggedUserEmail !== $requester) {
-                $notificationEmailAddresses[] = $requester;
+            $requesterEmail = $task->getRequestedBy()->getEmail();
+            if ($loggedUserEmail !== $requesterEmail && !in_array($requesterEmail, $emailAddresses) && !in_array($requesterEmail, $notificationEmailAddresses)) {
+                $notificationEmailAddresses[] = $requesterEmail;
             }
+
+            $followers = $task->getFollowers();
+            if (count($followers) > 0) {
+                /** @var User $follower */
+                foreach ($followers as $follower) {
+                    $followerEmail = $follower->getEmail();
+                    dump($followerEmail);
+                    if ($loggedUserEmail !== $followerEmail && !in_array($followerEmail, $emailAddresses) && !in_array($followerEmail, $notificationEmailAddresses)) {
+                        $notificationEmailAddresses[] = $requesterEmail;
+                    }
+                }
+            }
+
+
             dump($notificationEmailAddresses);
 
             return $this->json($commentArray, $statusCode);

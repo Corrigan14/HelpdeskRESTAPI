@@ -5,7 +5,35 @@
     <title>Title</title>
 </head>
 <body>
-    <h3>You did it! </h3>
-    <p>{{ text }}</p>
+<p style="margin-top: 0; margin-bottom: 0">
+    {{ date|date("d.m.Y H:i") }}
+</p>
+
+<p style="margin-top: 0; margin-bottom: 0">
+    <b>{{ username }}</b>
+    ({{ email }})
+    <span>napísal komentár</span>
+</p>
+
+<p style="margin-top: 0">
+    {{ taskId }} : {{ subject }}
+</p>
+
+<p style="margin-top: 20px; margin-bottom: 20px">
+    {{ commentBody }}
+</p>
+
+<p>
+    {{ signature }}
+</p>
+
+<p style="margin-top: 40px; margin-bottom: 0">
+    Pre zobrazenie úlohy kliknite na odkaz:
+</p>
+<p style="margin-top: 0">
+    <a href={{ taskLink }}>
+        {{ taskLink }}
+    </a>
+</p>
 </body>
 </html>

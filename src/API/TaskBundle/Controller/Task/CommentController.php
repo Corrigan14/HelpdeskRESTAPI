@@ -2,6 +2,8 @@
 
 namespace API\TaskBundle\Controller\Task;
 
+use API\CoreBundle\Entity\User;
+use API\CoreBundle\Entity\UserData;
 use API\TaskBundle\Entity\Comment;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Security\VoteOptions;
@@ -11,6 +13,7 @@ use PHPUnit\Framework\Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Constraints\DateTime;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Validation;
@@ -630,17 +633,10 @@ class CommentController extends ApiBaseController
 
             $commentArray = $this->get('task_additional_service')->getCommentOfTaskResponse($comment->getId());
 
-            // Comment is an Email
+            // Comment is an Email - send Email
             if ($isEmail) {
-                $params = [
-                    'subject' => [$comment->getTask()->getId()].$requestData['title'],
-                    'from' => 'symfony@lanhelpdesk.com',
-                    'to' => 'mb@web-solutions.sk',
-                    'body' => $this->renderView('@APITask/Emails/comment.html.twig', ['text' => $requestData['body']])
-                ];
-
-                $sendingError = $this->get('email_service')->sendEmail($params);
-
+                $templateParams = $this->getTemplateParams($comment, $requestData, $emailAddresses);
+                $sendingError = $this->get('email_service')->sendEmail($templateParams);
                 if (true !== $sendingError) {
                     $data = [
                         'errors' => $sendingError,
@@ -674,6 +670,8 @@ class CommentController extends ApiBaseController
             new Email(),
             new NotBlank()
         ];
+        $emailBccArray = [];
+        $emailCcArray = [];
 
         // Email TO
         $emailTo = $requestData['email_to'];
@@ -695,42 +693,90 @@ class CommentController extends ApiBaseController
 
 
         // Email CC
-        $emailCc = $requestData['email_cc'];
-        if (!is_array($emailCc)) {
-            $emailCcArray = explode(';', $emailCc);
-        } else {
-            $emailCcArray = $emailCc;
-        }
-
-        // Check the correct email address
-        foreach ($emailCcArray as $item) {
-            $emailError = $validator->validate($item, $constraints);
-            if (count($emailError)) {
-                $notValidEmailAddresses[] = $item;
+        if (isset($requestData['email_cc'])) {
+            $emailCc = $requestData['email_cc'];
+            if (!is_array($emailCc)) {
+                $emailCcArray = explode(';', $emailCc);
+            } else {
+                $emailCcArray = $emailCc;
             }
+
+            // Check the correct email address
+            foreach ($emailCcArray as $item) {
+                $emailError = $validator->validate($item, $constraints);
+                if (count($emailError)) {
+                    $notValidEmailAddresses[] = $item;
+                }
+            }
+            $comment->setEmailCc($emailCcArray);
+            unset($requestData['email_cc']);
         }
-        $comment->setEmailCc($emailCcArray);
-        unset($requestData['email_cc']);
 
         // Email BCC
-        $emailBcc = $requestData['email_bcc'];
-        if (!is_array($emailBcc)) {
-            $emailBccArray = explode(';', $emailBcc);
-        } else {
-            $emailBccArray = $emailBcc;
-        }
-
-        // Check the correct email address
-        foreach ($emailBccArray as $item) {
-            $emailError = $validator->validate($item, $constraints);
-            if (count($emailError)) {
-                $notValidEmailAddresses[] = $item;
+        if (isset($requestData['email_bcc'])) {
+            $emailBcc = $requestData['email_bcc'];
+            if (!is_array($emailBcc)) {
+                $emailBccArray = explode(';', $emailBcc);
+            } else {
+                $emailBccArray = $emailBcc;
             }
+
+            // Check the correct email address
+            foreach ($emailBccArray as $item) {
+                $emailError = $validator->validate($item, $constraints);
+                if (count($emailError)) {
+                    $notValidEmailAddresses[] = $item;
+                }
+            }
+            $comment->setEmailBcc($emailBccArray);
+            unset($requestData['email_bcc']);
         }
-        $comment->setEmailBcc($emailBccArray);
-        unset($requestData['email_bcc']);
 
         $emailAddress = array_merge($emailToArray, $emailCcArray, $emailBccArray);
+    }
+
+    /**
+     * @param Comment $comment
+     * @param array $requestData
+     * @param array $emailAddresses
+     * @return array
+     */
+    private function getTemplateParams(Comment $comment, array $requestData, array $emailAddresses):array
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $userDetailData = $user->getDetailData();
+        if ($userDetailData instanceof UserData) {
+            $usersSignature = $userDetailData->getSignature();
+            $username = $userDetailData->getName() . ' ' . $userDetailData->getSurname();
+        } else {
+            $usersSignature = '';
+            $username = '';
+        }
+        $todayDate = new \DateTime();
+        $email = $user->getEmail();
+        $taskId = $comment->getTask()->getId();
+        $baseFrontURL = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->findOneBy([
+            'title' => 'Base Front URL'
+        ]);
+        $templateParams = [
+            'date' => $todayDate,
+            'username' => $username,
+            'email' => $email,
+            'taskId' => $taskId,
+            'subject' => $requestData['title'],
+            'commentBody' => $requestData['body'],
+            'signature' => $usersSignature,
+            'taskLink' => $baseFrontURL->getValue() . '/tasks/' . $taskId
+        ];
+        $params = [
+            'subject' => '[' . $taskId . ']' . ' ' . $requestData['title'],
+            'from' => $email,
+            'to' => $emailAddresses,
+            'body' => $this->renderView('@APITask/Emails/comment.html.twig', $templateParams)
+        ];
+
+        return $params;
     }
 }
 

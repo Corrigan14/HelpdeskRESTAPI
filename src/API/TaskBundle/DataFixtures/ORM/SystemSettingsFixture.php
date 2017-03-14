@@ -34,6 +34,12 @@ class SystemSettingsFixture implements FixtureInterface, ContainerAwareInterface
         $systemSetting->setIsActive(true);
         $manager->persist($systemSetting);
 
+        $systemSetting = new SystemSettings();
+        $systemSetting->setTitle('Base Front URL');
+        $systemSetting->setValue('localhost:3000');
+        $systemSetting->setIsActive(true);
+        $manager->persist($systemSetting);
+
         $manager->flush();
     }
 

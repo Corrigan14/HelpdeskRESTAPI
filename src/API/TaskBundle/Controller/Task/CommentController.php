@@ -6,6 +6,7 @@ use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
 use API\TaskBundle\Entity\Comment;
 use API\TaskBundle\Entity\Task;
+use API\TaskBundle\Entity\TaskHasAssignedUser;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
@@ -643,34 +644,25 @@ class CommentController extends ApiBaseController
                 if (true !== $sendingError) {
                     $data = [
                         'errors' => $sendingError,
-                        'message' => 'Error with email sending!'
+                        'message' => 'Error with sending emails!'
                     ];
                     return $this->createApiResponse($data, StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
                 }
             }
 
             // Notification about creation of Comment to task REQUESTER, ASSIGNED USERS, FOLLOWERS
-            $notificationEmailAddresses = [];
-
-            $requesterEmail = $task->getRequestedBy()->getEmail();
-            if ($loggedUserEmail !== $requesterEmail && !in_array($requesterEmail, $emailAddresses) && !in_array($requesterEmail, $notificationEmailAddresses)) {
-                $notificationEmailAddresses[] = $requesterEmail;
-            }
-
-            $followers = $task->getFollowers();
-            if (count($followers) > 0) {
-                /** @var User $follower */
-                foreach ($followers as $follower) {
-                    $followerEmail = $follower->getEmail();
-                    dump($followerEmail);
-                    if ($loggedUserEmail !== $followerEmail && !in_array($followerEmail, $emailAddresses) && !in_array($followerEmail, $notificationEmailAddresses)) {
-                        $notificationEmailAddresses[] = $requesterEmail;
-                    }
+            $notificationEmailAddresses = $this->getEmailForAddCommentNotification($task, $loggedUserEmail, $emailAddresses);
+            if (count($notificationEmailAddresses) > 0) {
+                $templateParams = $this->getTemplateParams($task->getId(), $requestData, $notificationEmailAddresses);
+                $sendingError = $this->get('email_service')->sendEmail($templateParams);
+                if (true !== $sendingError) {
+                    $data = [
+                        'errors' => $sendingError,
+                        'message' => 'Error with sending notifications!'
+                    ];
+                    return $this->createApiResponse($data, StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
                 }
             }
-
-
-            dump($notificationEmailAddresses);
 
             return $this->json($commentArray, $statusCode);
         }
@@ -778,7 +770,6 @@ class CommentController extends ApiBaseController
         }
         $todayDate = new \DateTime();
         $email = $user->getEmail();
-        $taskId = $taskId;
         $baseFrontURL = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->findOneBy([
             'title' => 'Base Front URL'
         ]);
@@ -800,6 +791,46 @@ class CommentController extends ApiBaseController
         ];
 
         return $params;
+    }
+
+    /**
+     * @param Task $task
+     * @param string $loggedUserEmail
+     * @param array $emailAddresses
+     * @return array
+     */
+    private function getEmailForAddCommentNotification(Task $task, string $loggedUserEmail, array $emailAddresses):array
+    {
+        $notificationEmailAddresses = [];
+
+        $requesterEmail = $task->getRequestedBy()->getEmail();
+        if ($loggedUserEmail !== $requesterEmail && !in_array($requesterEmail, $emailAddresses) && !in_array($requesterEmail, $notificationEmailAddresses)) {
+            $notificationEmailAddresses[] = $requesterEmail;
+        }
+
+        $followers = $task->getFollowers();
+        if (count($followers) > 0) {
+            /** @var User $follower */
+            foreach ($followers as $follower) {
+                $followerEmail = $follower->getEmail();
+                if ($loggedUserEmail !== $followerEmail && !in_array($followerEmail, $emailAddresses) && !in_array($followerEmail, $notificationEmailAddresses)) {
+                    $notificationEmailAddresses[] = $followerEmail;
+                }
+            }
+        }
+
+        $assignedUsers = $task->getTaskHasAssignedUsers();
+        if (count($assignedUsers) > 0) {
+            /** @var TaskHasAssignedUser $item */
+            foreach ($assignedUsers as $item) {
+                $assignedUserEmail = $item->getUser()->getEmail();
+                if ($loggedUserEmail !== $assignedUserEmail && !in_array($assignedUserEmail, $emailAddresses) && !in_array($assignedUserEmail, $notificationEmailAddresses)) {
+                    $notificationEmailAddresses[] = $assignedUserEmail;
+                }
+            }
+        }
+
+        return $notificationEmailAddresses;
     }
 }
 

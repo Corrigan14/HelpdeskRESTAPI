@@ -1639,7 +1639,7 @@ class TaskController extends ApiBaseController
         }
 
         // Find changed params for notifications
-        $changedParams = $this->getChangedParams($task, $requestData);
+        $changedParams = $this->getChangedParams($requestData);
 
         return $this->updateTaskEntity($task, $requestData, false, $changedParams);
     }
@@ -2782,10 +2782,6 @@ class TaskController extends ApiBaseController
             unset($requestData['task_data']);
         }
 
-        if (array_key_exists('_format', $requestData)) {
-            unset($requestData['_format']);
-        }
-
         foreach ($requestData as $key => $value) {
             if (!in_array($key, $allowedUserEntityParams, true)) {
                 return $this->createApiResponse(
@@ -3459,25 +3455,17 @@ class TaskController extends ApiBaseController
     }
 
     /**
-     * @param Task $task
      * @param array $requestData
      * @return array
      */
-    private function getChangedParams(Task $task, array $requestData):array
+    private function getChangedParams(array &$requestData):array
     {
-        $changedParams = [];
-        if (isset($requestData['title']) && $requestData['title'] !== $task->getTitle()) {
-            $changedParams[] = 'Title z ' . $task->getTitle() . ' na ' . $requestData['title'];
-        }
-        $description = $task->getDescription();
-        if (isset($requestData['description']) && $requestData['description'] !== $description) {
-            if (!empty($description)) {
-                $changedParams[] = 'Popis ulohy z: ' . $task->getDescription() . ' na: ' . $requestData['description'];
-            } else {
-                $changedParams[] = 'Pridal popis ulohy: ' . $requestData['description'];
-            }
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
         }
 
+        $changedParams = [];
+        dump($requestData);
 
         return $changedParams;
     }

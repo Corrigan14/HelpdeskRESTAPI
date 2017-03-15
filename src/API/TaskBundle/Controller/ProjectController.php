@@ -953,7 +953,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      * @ApiDoc(
      *  resource = true,
-     *  description="Remove users ACL from project",
+     *  description="Update users ACL of project",
      *  requirements={
      *     {
      *       "name"="projectId",
@@ -1179,7 +1179,177 @@ class ProjectController extends ApiBaseController implements ControllerInterface
         return $this->createApiResponse([
             'message' => 'The requested User did not have permission to requested Project!',
         ], StatusCodesHelper::NOT_FOUND_CODE);
+    }
 
+    /**
+     *  ### Response ###
+     *      {
+     *        "data":
+     *         {
+     *             "id": "1",
+     *             "title": "Project 1",
+     *             "description": "Description of Project 1",
+     *             "createdAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "updatedAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "is_active" => true,
+     *             "userHasProjects":
+     *             [
+     *                {
+     *                   "id": 300,
+     *                   "user":
+     *                   {
+     *                      "id": 2575,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk"
+     *                    },
+     *                    "acl":
+     *                    [
+     *                      "view_own_tasks"
+     *                    ]
+     *                },
+     *                {
+     *                   "id": 301,
+     *                   "user":
+     *                   {
+     *                      "id": 2576,
+     *                      "username": "manager",
+     *                      "email": "manager@manager.sk"
+     *                    },
+     *                   "acl":
+     *                   [
+     *                      "view_own_tasks"
+     *                   ]
+     *                },
+     *             ]
+     *         }
+     *        "_links":
+     *        {
+     *           "put": "/api/v1/task-bundle/projects/211",
+     *           "patch": "/api/v1/task-bundle/projects/211",
+     *           "delete": "/api/v1/task-bundle/projects/211"
+     *         }
+     *      }
+     *
+     *
+     * @ApiDoc(
+     *  resource = true,
+     *  description="Add or update users ACL of project. Input: [userId => [projectAcl1, projectAcl2]].
+     *               Return project details with list of users with their project ACL.",
+     *  requirements={
+     *     {
+     *       "name"="projectId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of project"
+     *     }
+     *  },
+     *  parameters={
+     *      {"name"="usersAcl", "dataType"="string", "required"=true, "description"="Array of users with array of its project ACL: [userId => [projectAcl1, projectAcl2]]"}
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="Data were successfully processed",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found project",
+     *      409 ="Invalid parameters"
+     *  }
+     * )
+     *
+     * @param Request $request
+     * @param int $projectId
+     * @return Response
+     */
+    public function processProjectAclForUsersAction(Request $request, int $projectId)
+    {
+        $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
+
+        if (!$project instanceof Project) {
+            return $this->createApiResponse([
+                'message' => 'Project with requested Id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+            'user' => $this->getUser(),
+            'project' => $project
+        ]);
+        if (!$this->get('project_voter')->isGranted(VoteOptions::EDIT_PROJECT, $userHasProject)) {
+            return $this->accessDeniedResponse();
+        }
+
+        // Create or update UserHasProject Entity for every sent User
+        $requestData = json_decode($request->getContent(), true);
+//        $requestData = [
+//            3927 => [
+//                ProjectAclOptions::CREATE_TASK,
+//                ProjectAclOptions::DELETE_TASK
+//            ],
+//            3930 => [
+//                ProjectAclOptions::EDIT_INTERNAL_NOTE,
+//            ]
+//        ];
+
+        if (count($requestData) > 0) {
+            foreach ($requestData as $key => $aclArray) {
+                $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($key);
+                if (!$user instanceof User) {
+                    return $this->createApiResponse([
+                        'message' => 'User with requested Id ' . $key . ' does not exist!',
+                    ], StatusCodesHelper::NOT_FOUND_CODE);
+                }
+
+                // Check if all ACL are from allowed options
+                if (is_array($aclArray)) {
+                    foreach ($aclArray as $acl) {
+                        if (!in_array($acl, ProjectAclOptions::getConstants(), true)) {
+                            return $this->createApiResponse([
+                                'message' => $acl . ' ACL is not allowed!',
+                            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        }
+                    }
+
+                    // Check if it is an UPDATE of existed user's ACL
+                    $userHasProjectNew = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+                        'user' => $user,
+                        'project' => $project
+                    ]);
+                    if ($userHasProjectNew instanceof UserHasProject) {
+                        $userHasProjectNew->setAcl($aclArray);
+                        $this->getDoctrine()->getManager()->persist($userHasProjectNew);
+                    } else {
+                        $userHasProjectNewAdd = new UserHasProject();
+                        $userHasProjectNewAdd->setProject($project);
+                        $userHasProjectNewAdd->setUser($user);
+                        $userHasProjectNewAdd->setAcl($aclArray);
+                        $this->getDoctrine()->getManager()->persist($userHasProjectNewAdd);
+                    }
+                } else {
+                    return $this->createApiResponse([
+                        'message' => 'ACL for every user has to be an array, which includes only allowed parameters from ProjectAclOptions!',
+                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                }
+            }
+            $this->getDoctrine()->getManager()->flush();
+        }
+        $response = $this->get('project_service')->getEntityResponse($project->getId());
+        return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

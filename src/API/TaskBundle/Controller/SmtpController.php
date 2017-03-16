@@ -452,6 +452,12 @@ class SmtpController extends ApiBaseController implements ControllerInterface
         ], StatusCodesHelper::DELETED_CODE);
     }
 
+
+    public function testSMTPConnectionAction()
+    {
+
+    }
+
     /**
      * @param Smtp $smtp
      * @param array $requestData

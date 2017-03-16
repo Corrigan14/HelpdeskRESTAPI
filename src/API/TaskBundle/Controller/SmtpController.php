@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 /**
  * Class SmtpController
@@ -452,9 +454,82 @@ class SmtpController extends ApiBaseController implements ControllerInterface
         ], StatusCodesHelper::DELETED_CODE);
     }
 
-
-    public function testSMTPConnectionAction()
+    /**
+     * @ApiDoc(
+     *  description="Test SMTP Connection",
+     *  parameters={
+     *      {"name"="emails", "dataType"="string", "required"=true, "description"="Array or coma separated Email addresses - on these Emails will be delivered testing message!"}
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="Email was successfully sent",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      409 ="Invalid parameters - email/s",
+     *  })
+     *
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function testSMTPConnectionAction(Request $request)
     {
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::SMTP_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            return $this->accessDeniedResponse();
+        }
+
+        // Load SMTP settings
+        $smtpSettings = $this->getDoctrine()->getRepository('APITaskBundle:Smtp')->findOneBy([]);
+
+        if ($smtpSettings instanceof Smtp) {
+            $testEmails = $request->request->get('emails');
+
+            if (isset($testEmails)) {
+                // Validate requested Email addresses
+                $notValidEmailAddresses = $this->validateEmailAddresses($testEmails);
+                if (count($notValidEmailAddresses) > 0) {
+                    return $this->createApiResponse(
+                        ['message' => 'Not valid email address: ' . implode(";", $notValidEmailAddresses)],
+                        StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                }
+
+                // Prepare params
+                $templateParams = $this->getTemplateParams($smtpSettings->getEmail(), $smtpSettings->getHost(), $testEmails);
+
+                // Send emails
+                $sendingError = $this->get('email_service')->sendEmail($templateParams);
+                if (true !== $sendingError) {
+                    $data = [
+                        'errors' => $sendingError,
+                        'message' => 'Error with sending email!'
+                    ];
+                    return $this->createApiResponse($data, StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
+                }
+
+                return $this->createApiResponse(
+                    ['message' => 'Email/s was/were successfully sent!'],
+                    StatusCodesHelper::SUCCESSFUL_CODE);
+            }
+
+            return $this->createApiResponse(
+                ['message' => 'At least one Email address is required!'],
+                StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        }
+
+        return $this->createApiResponse([
+            'message' => 'SMTP Settings are not correctly set in Database!',
+        ], StatusCodesHelper::NOT_FOUND_CODE);
 
     }
 
@@ -520,5 +595,63 @@ class SmtpController extends ApiBaseController implements ControllerInterface
             'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
         ];
         return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+    }
+
+    /**
+     * @param string $smtpEmail
+     * @param string $smtpHost
+     * @param array $emailAddresses
+     * @return array
+     */
+    private function getTemplateParams(string $smtpEmail, string $smtpHost, array $emailAddresses):array
+    {
+        $todayDate = new \DateTime();
+        $email = $smtpEmail;
+        $host = $smtpHost;
+
+        $templateParams = [
+            'date' => $todayDate,
+            'email' => $email,
+            'host' => $host
+        ];
+        $params = [
+            'subject' => 'LanHelpdesk - SMTP Test',
+            'from' => $smtpEmail,
+            'to' => $emailAddresses,
+            'body' => $this->renderView('@APITask/Emails/testSMTP.html.twig', $templateParams)
+        ];
+
+        return $params;
+    }
+
+    /**
+     * @param $testEmails
+     * @return array
+     */
+    private function validateEmailAddresses(&$testEmails):array
+    {
+        $notValidEmailAddresses = [];
+
+        // Validate Requested Email/s
+        if (!is_array($testEmails)) {
+            $testEmails = explode(',', $testEmails);
+        }
+
+        if (count($testEmails) > 0) {
+            $validator = $this->get('validator');
+            $constraints = [
+                new Email(),
+                new NotBlank()
+            ];
+
+            foreach ($testEmails as $email) {
+                $emailError = $validator->validate($email, $constraints);
+                if (count($emailError)) {
+                    $notValidEmailAddresses[] = $email;
+                }
+            }
+        }
+
+        return $notValidEmailAddresses;
     }
 }

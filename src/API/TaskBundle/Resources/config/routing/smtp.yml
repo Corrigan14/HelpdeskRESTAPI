@@ -35,3 +35,8 @@ smtp_delete:
     methods: [DELETE]
     requirements:
             id: '\d+'
+
+smtp_test_connection:
+    path:     /smtp/connection-test
+    defaults: { _controller: APITaskBundle:Smtp:testSMTPConnection }
+    methods: [POST]

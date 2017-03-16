@@ -2324,9 +2324,7 @@ class TaskController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
-        dump($request->getContent());
         $requestData = json_decode($request->getContent(), true);
-        dump($requestData);
 
         $changedParams = [];
 

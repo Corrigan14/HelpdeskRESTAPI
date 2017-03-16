@@ -112,16 +112,16 @@ class ProjectService
 
     /**
      * @param int $id
+     * @param bool $canEdit
      * @return array
      */
-    public function getEntityResponse(int $id):array
+    public function getEntityResponse(int $id, bool $canEdit):array
     {
-        $project = $this->em->getRepository('APITaskBundle:Project')->getEntity($id);
+        $responseData['data'] = $this->em->getRepository('APITaskBundle:Project')->getEntity($id);
+        $responseData['data']['canEdit'] = $canEdit;
+        $responseLinks['_links'] = $this->getProjectLinks($id);
 
-        return [
-            'data' => $project,
-            '_links' => $this->getProjectLinks($id),
-        ];
+        return array_merge($responseData, $responseLinks);
     }
 
     /**

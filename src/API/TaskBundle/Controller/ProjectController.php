@@ -190,7 +190,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *                      "view_own_tasks"
      *                   ]
      *                },
-     *             ]
+     *             ],
+     *             "canEdit": true
      *         }
      *        "_links":
      *        {
@@ -242,7 +243,9 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             return $this->accessDeniedResponse();
         }
 
-        $projectArray = $this->get('project_service')->getEntityResponse($id);
+        $canEdit = $this->canEditProject($project);
+
+        $projectArray = $this->get('project_service')->getEntityResponse($id, $canEdit);
         return $this->json($projectArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
@@ -295,7 +298,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *                      "view_own_tasks"
      *                   ]
      *                },
-     *             ]
+     *             ],
+     *             "canEdit": true
      *          }
      *        },
      *        "_links":
@@ -400,7 +404,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *                      "view_own_tasks"
      *                   ]
      *                },
-     *             ]
+     *             ],
+     *             "canEdit": true
      *         },
      *        "_links":
      *        {
@@ -512,7 +517,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *                      "view_own_tasks"
      *                   ]
      *                },
-     *             ]
+     *             ],
+     *             "canEdit": true
      *         },
      *        "_links":
      *        {
@@ -678,7 +684,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *                      "view_own_tasks"
      *                   ]
      *                },
-     *             ]
+     *             ],
+     *             "canEdit": true
      *         },
      *        "_links":
      *        {
@@ -738,7 +745,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
         $this->getDoctrine()->getManager()->persist($project);
         $this->getDoctrine()->getManager()->flush();
 
-        $response = $this->get('project_service')->getEntityResponse($project->getId());
+        $canEdit = true;
+        $response = $this->get('project_service')->getEntityResponse($project->getId(), $canEdit);
         return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
@@ -791,7 +799,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *                      "view_own_tasks"
      *                   ]
      *                },
-     *             ]
+     *             ],
+     *             "canEdit": true
      *         }
      *        "_links":
      *        {
@@ -940,7 +949,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *                      "view_own_tasks"
      *                   ]
      *                },
-     *             ]
+     *             ],
+     *             "canEdit": true
      *         }
      *        "_links":
      *        {
@@ -1087,7 +1097,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *                      "view_own_tasks"
      *                   ]
      *                },
-     *             ]
+     *             ],
+     *             "canEdit": true
      *         }
      *        "_links":
      *        {
@@ -1230,7 +1241,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *                      "view_own_tasks"
      *                   ]
      *                },
-     *             ]
+     *             ],
+     *             "canEdit": true
      *         }
      *        "_links":
      *        {
@@ -1296,15 +1308,6 @@ class ProjectController extends ApiBaseController implements ControllerInterface
 
         // Create or update UserHasProject Entity for every sent User
         $requestData = json_decode($request->getContent(), true);
-//        $requestData = [
-//            3927 => [
-//                ProjectAclOptions::CREATE_TASK,
-//                ProjectAclOptions::DELETE_TASK
-//            ],
-//            3930 => [
-//                ProjectAclOptions::EDIT_INTERNAL_NOTE,
-//            ]
-//        ];
 
         if (count($requestData) > 0) {
             foreach ($requestData as $key => $aclArray) {
@@ -1348,7 +1351,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             }
             $this->getDoctrine()->getManager()->flush();
         }
-        $response = $this->get('project_service')->getEntityResponse($project->getId());
+        $canEdit = true;
+        $response = $this->get('project_service')->getEntityResponse($project->getId(), $canEdit);
         return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
@@ -1390,14 +1394,21 @@ class ProjectController extends ApiBaseController implements ControllerInterface
 
         if (false === $errors) {
             $this->getDoctrine()->getManager()->persist($project);
+
             $this->getDoctrine()->getManager()->flush();
 
             if ($create) {
-                $this->addProjectAclPermmisionToCreatorOfProject($project);
+                $addedAcl = [];
+                $addedAcl[] = $this->addProjectAclPermmisionToCreatorOfProject($project);
+                $canEdit = true;
+                $response = $this->get('project_service')->getEntityResponse($project->getId(), $canEdit);
+                $response['data']['userHasProjects'] = $addedAcl;
+                return $this->json($response, $statusCode);
+            } else {
+                $canEdit = true;
+                $response = $this->get('project_service')->getEntityResponse($project->getId(), $canEdit);
+                return $this->json($response, $statusCode);
             }
-
-            $response = $this->get('project_service')->getEntityResponse($project->getId());
-            return $this->json($response, $statusCode);
         }
 
         $data = [
@@ -1446,7 +1457,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             $this->getDoctrine()->getManager()->persist($userHasProject);
             $this->getDoctrine()->getManager()->flush();
 
-            $response = $this->get('project_service')->getEntityResponse($userHasProject->getProject()->getId());
+            $response = $this->get('project_service')->getEntityResponse($userHasProject->getProject()->getId(), true);
             return $this->json($response, $statusCode);
         }
 
@@ -1459,6 +1470,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
 
     /**
      * @param Project $project
+     * @return array
      */
     private function addProjectAclPermmisionToCreatorOfProject(Project $project)
     {
@@ -1478,6 +1490,37 @@ class ProjectController extends ApiBaseController implements ControllerInterface
         ];
         $userHasProject->setAcl($acl);
         $this->getDoctrine()->getManager()->persist($userHasProject);
+        $this->getDoctrine()->getManager()->persist($project);
         $this->getDoctrine()->getManager()->flush();
+
+        return [
+            'id' => $userHasProject->getId(),
+            'user' => [
+                'id' => $userHasProject->getUser()->getId(),
+                'username' => $userHasProject->getUser()->getUsername(),
+                'email' => $userHasProject->getUser()->getEmail()
+            ],
+            'acl' => $userHasProject->getAcl()
+        ];
+    }
+
+    /**
+     * @param Project $project
+     * @return bool
+     */
+    private function canEditProject(Project $project):bool
+    {
+        $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+            'user' => $this->getUser(),
+            'project' => $project
+        ]);
+
+        if ($userHasProject instanceof UserHasProject) {
+            if ($this->get('project_voter')->isGranted(VoteOptions::EDIT_PROJECT, $userHasProject)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

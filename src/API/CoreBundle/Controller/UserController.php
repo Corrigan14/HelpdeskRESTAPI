@@ -158,6 +158,65 @@ class UserController extends ApiBaseController
     }
 
     /**
+     * ### Response ###
+     *     {
+     *       "data":
+     *       [
+     *          {
+     *             "id": 2581,
+     *             "username": "customer2",
+     *          },
+     *          {
+     *             "id": 2582,
+     *             "username": "customer3",
+     *          },
+     *          {
+     *             "id": 2583,
+     *             "username": "customer4",
+     *          },
+     *          {
+     *             "id": 2584,
+     *             "username": "customer5",
+     *          },
+     *          {
+     *             "id": 2585,
+     *             "username": "customer6",
+     *          },
+     *          {
+     *             "id": 2586,
+     *             "username": "customer7",
+     *          },
+     *          {
+     *             "id": 2587,
+     *             "username": "customer8",
+     *          },
+     *       ]
+     *     }
+     *
+     * @ApiDoc(
+     *  description="Returns a list of All active Users",
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request"
+     *  },
+     * )
+     *
+     * @return JsonResponse
+     */
+    public function listOfAllUsersAction():JsonResponse
+    {
+        $allUsers = $this->get('api_user.service')->getListOfAllUsers();
+        return $this->json($allUsers, StatusCodesHelper::SUCCESSFUL_CODE);
+    }
+
+    /**
      *  ### Response ###
      *      {
      *        "data":

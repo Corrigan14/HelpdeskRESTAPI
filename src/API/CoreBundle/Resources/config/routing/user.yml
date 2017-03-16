@@ -3,6 +3,11 @@ users_list:
     defaults: { _controller: APICoreBundle:User:list }
     methods: [GET]
 
+users_list_of_all_active:
+    path:     /users/all
+    defaults: { _controller: APICoreBundle:User:listOfAllUsers }
+    methods: [GET]
+
 user:
     path:     /users/{id}
     defaults: { _controller: APICoreBundle:User:get }

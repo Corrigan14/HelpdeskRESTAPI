@@ -1605,6 +1605,7 @@ class TaskController extends ApiBaseController
         }
 
         $requestData = $request->request->all();
+        $changedParams = [];
 
         // Check if project and requested user exists
         if ($projectId) {
@@ -1623,6 +1624,7 @@ class TaskController extends ApiBaseController
             }
             $task->setProject($project);
             unset($requestData['projectId']);
+            $changedParams[] = 'project';
         }
 
         if ($requestedUserId) {
@@ -1636,10 +1638,8 @@ class TaskController extends ApiBaseController
 
             $task->setRequestedBy($requestedUser);
             unset($requestData['requestedUserId']);
+            $changedParams[] = 'requested user';
         }
-
-        // Find changed params for notifications
-        $changedParams = $this->getChangedParams($requestData);
 
         return $this->updateTaskEntity($task, $requestData, false, $changedParams);
     }
@@ -1942,6 +1942,7 @@ class TaskController extends ApiBaseController
         }
 
         $requestData = $request->request->all();
+        $changedParams = [];
 
         // Check if project and requested user exists
         if ($projectId) {
@@ -1960,20 +1961,24 @@ class TaskController extends ApiBaseController
             }
             $task->setProject($project);
             unset($requestData['projectId']);
+            $changedParams[] = 'project';
         }
 
         if ($requestedUserId) {
             $requestedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requestedUserId);
+
             if (!$requestedUser instanceof User) {
                 return $this->createApiResponse([
                     'message' => 'Requested user with requested Id does not exist!',
                 ], StatusCodesHelper::NOT_FOUND_CODE);
             }
+
             $task->setRequestedBy($requestedUser);
             unset($requestData['requestedUserId']);
+            $changedParams[] = 'requested user';
         }
 
-        return $this->updateTaskEntity($task, $requestData, false);
+        return $this->updateTaskEntity($task, $requestData, false, $changedParams);
     }
 
 
@@ -2320,6 +2325,8 @@ class TaskController extends ApiBaseController
         }
 
         $requestData = json_decode($request->getContent(), true);
+        $changedParams = [];
+
         if (isset($requestData['project'])) {
             $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($requestData['project']);
             if (!$project instanceof Project) {
@@ -2336,6 +2343,7 @@ class TaskController extends ApiBaseController
             }
             $task->setProject($project);
             $taskProjectId = $requestData['project'];
+            $changedParams[] = 'project';
 
             // Remove users assigned to task which hasn't RESOLVE_TASK permission in selected project
             $taskHasAssignedUsers = $task->getTaskHasAssignedUsers();
@@ -2343,10 +2351,10 @@ class TaskController extends ApiBaseController
                 /** @var TaskHasAssignedUser $entity */
                 foreach ($taskHasAssignedUsers as $entity) {
                     if (!$this->checkIfUserHasResolveTaskAclPermission($entity, $project)) {
-                        $this->getDoctrine()->getManager()->remove($taskHasAssignedUsers);
-                        $this->getDoctrine()->getManager()->flush();
+                        $this->getDoctrine()->getManager()->remove($entity);
                     }
                 }
+                $this->getDoctrine()->getManager()->flush();
             }
         } elseif ($task->getProject()) {
             $taskProjectId = $task->getProject()->getId();
@@ -2363,6 +2371,7 @@ class TaskController extends ApiBaseController
             }
             $task->setRequestedBy($requestedUser);
             $requesterTaskId = $requestData['requester'];
+            $changedParams[] = 'requester';
         } else {
             $requesterTaskId = $task->getRequestedBy()->getId();
         }
@@ -2376,6 +2385,7 @@ class TaskController extends ApiBaseController
             }
             $task->setCompany($company);
             $companyTaskId = $requestData['company'];
+            $changedParams[] = 'company';
         } elseif ($task->getCompany()) {
             $companyTaskId = $task->getCompany()->getId();
         } else {
@@ -2457,6 +2467,7 @@ class TaskController extends ApiBaseController
                     $this->getDoctrine()->getManager()->persist($userIsAssignedToTask);
                 }
                 $this->getDoctrine()->getConnection()->commit();
+                $changedParams[] = 'assigned user/s';
             } catch (\Exception $e) {
                 $this->getDoctrine()->getConnection()->rollBack();
                 return $this->createApiResponse([
@@ -2469,6 +2480,7 @@ class TaskController extends ApiBaseController
             try {
                 $startedAtDateTimeObject = new \Datetime($requestData['startedAt']);
                 $task->setStartedAt($startedAtDateTimeObject);
+                $changedParams[] = 'started at';
             } catch (\Exception $e) {
                 return $this->createApiResponse([
                     'message' => 'startedAt parameter is not in a valid format! Expected format: Unix',
@@ -2480,6 +2492,7 @@ class TaskController extends ApiBaseController
             try {
                 $startedAtDateTimeObject = new \Datetime($requestData['deadline']);
                 $task->setDeadline($startedAtDateTimeObject);
+                $changedParams[] = 'deadline';
             } catch (\Exception $e) {
                 return $this->createApiResponse([
                     'message' => 'deadline parameter is not in a valid format! Expected format: Unix',
@@ -2491,6 +2504,7 @@ class TaskController extends ApiBaseController
             try {
                 $startedAtDateTimeObject = new \Datetime($requestData['closedAt']);
                 $task->setClosedAt($startedAtDateTimeObject);
+                $changedParams[] = 'closed At';
             } catch (\Exception $e) {
                 return $this->createApiResponse([
                     'message' => 'closedAt parameter is not in a valid format! Expected format: Unix',
@@ -2556,6 +2570,7 @@ class TaskController extends ApiBaseController
                     $this->getDoctrine()->getManager()->persist($task);
                 }
                 $this->getDoctrine()->getConnection()->commit();
+                $changedParams[] = 'tag/s';
             } catch (\Exception $e) {
                 $this->getDoctrine()->getConnection()->rollBack();
                 return $this->createApiResponse([
@@ -2566,6 +2581,23 @@ class TaskController extends ApiBaseController
 
         $this->getDoctrine()->getManager()->persist($task);
         $this->getDoctrine()->getManager()->flush();
+
+        // Sent Notification Emails about updating of Task to task REQUESTER, ASSIGNED USERS, FOLLOWERS
+        if (count($changedParams) > 0) {
+            $loggedUser = $this->getUser();
+            $notificationEmailAddresses = $this->getEmailForUpdateTaskNotification($task, $loggedUser->getEmail());
+            if (count($notificationEmailAddresses) > 0) {
+                $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $notificationEmailAddresses, $loggedUser, $changedParams);
+                $sendingError = $this->get('email_service')->sendEmail($templateParams);
+                if (true !== $sendingError) {
+                    $data = [
+                        'errors' => $sendingError,
+                        'message' => 'Error with sending notifications!'
+                    ];
+                    return $this->createApiResponse($data, StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
+                }
+            }
+        }
 
         $ids = [
             'id' => $taskId,
@@ -2776,6 +2808,10 @@ class TaskController extends ApiBaseController
             'companyId'
         ];
 
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
+        }
+
         $requestDetailData = false;
         if (isset($requestData['task_data']) && count($requestData['task_data']) > 0) {
             $requestDetailData = $requestData['task_data'];
@@ -2796,45 +2832,21 @@ class TaskController extends ApiBaseController
         if (isset($requestData['startedAt'])) {
             try {
                 $startedAtDateTimeObject = new \Datetime($requestData['startedAt']);
-
-                // Changed params for notification
-                if (false === $create) {
-                    $deadline = $task->getStartedAt();
-                    if (null !== $deadline) {
-                        if ($startedAtDateTimeObject->format('d.m.Y H:i') !== $deadline->format('d.m.Y H:i')) {
-                            $changedParams[] = 'Started At parameter z ' . $deadline->format('d.m.Y H:i') . ' na ' . $startedAtDateTimeObject->format('d.m.Y H:i');
-                        }
-                    } else {
-                        $changedParams[] = 'Started At parameter na ' . $startedAtDateTimeObject->format('d.m.Y H:i');
-                    }
-                }
-
                 $task->setStartedAt($startedAtDateTimeObject);
                 unset($requestData['startedAt']);
+                $changedParams[] = 'started at';
             } catch (\Exception $e) {
                 return $this->createApiResponse([
-                    'message' => 'started_at parameter is not in a valid format! Expected format: Unix',
+                    'message' => 'startedAt parameter is not in a valid format! Expected format: Unix',
                 ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
             }
         }
         if (isset($requestData['closedAt'])) {
             try {
-                $startedAtDateTimeObject = new \Datetime($requestData['closedAt']);
-
-                // Changed params for notification
-                if (false === $create) {
-                    $deadline = $task->getClosedAt();
-                    if (null !== $deadline) {
-                        if ($startedAtDateTimeObject->format('d.m.Y H:i') !== $deadline->format('d.m.Y H:i')) {
-                            $changedParams[] = 'Closed At parameter z ' . $deadline->format('d.m.Y H:i') . ' na ' . $startedAtDateTimeObject->format('d.m.Y H:i');
-                        }
-                    } else {
-                        $changedParams[] = 'Closed At parameter na ' . $startedAtDateTimeObject->format('d.m.Y H:i');
-                    }
-                }
-
-                $task->setClosedAt($startedAtDateTimeObject);
+                $closedAtDateTimeObject = new \Datetime($requestData['closedAt']);
+                $task->setClosedAt($closedAtDateTimeObject);
                 unset($requestData['closedAt']);
+                $changedParams[] = 'closed at';
             } catch (\Exception $e) {
                 return $this->createApiResponse([
                     'message' => 'closedAt parameter is not in a valid format! Expected format: Unix',
@@ -2843,22 +2855,10 @@ class TaskController extends ApiBaseController
         }
         if (isset($requestData['deadline'])) {
             try {
-                $startedAtDateTimeObject = new \Datetime($requestData['deadline']);
-
-                // Changed params for notification
-                if (false === $create) {
-                    $deadline = $task->getDeadline();
-                    if (null !== $deadline) {
-                        if ($startedAtDateTimeObject->format('d.m.Y H:i') !== $deadline->format('d.m.Y H:i')) {
-                            $changedParams[] = 'Deadline parameter z ' . $deadline->format('d.m.Y H:i') . ' na ' . $startedAtDateTimeObject->format('d.m.Y H:i');
-                        }
-                    } else {
-                        $changedParams[] = 'Deadline parameter na ' . $startedAtDateTimeObject->format('d.m.Y H:i');
-                    }
-                }
-
-                $task->setDeadline($startedAtDateTimeObject);
+                $deadlineDateTimeObject = new \Datetime($requestData['deadline']);
+                $task->setDeadline($deadlineDateTimeObject);
                 unset($requestData['deadline']);
+                $changedParams[] = 'deadline';
             } catch (\Exception $e) {
                 return $this->createApiResponse([
                     'message' => 'deadline parameter is not in a valid format! Expected format: Unix',
@@ -2875,22 +2875,10 @@ class TaskController extends ApiBaseController
             $this->getDoctrine()->getManager()->flush();
 
             $user = $this->getUser();
-            // Notifications about updating of Task to task REQUESTER, ASSIGNED USERS, FOLLOWERS
+
             if (false === $create) {
-                $notificationEmailAddresses = $this->getEmailForUpdateTaskNotification($task, $user->getEmail());
-                if (count($notificationEmailAddresses) > 0) {
-//                    dump($changedParams);
-                    $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $notificationEmailAddresses, $user, $changedParams);
-//                    dump($templateParams);
-                    $sendingError = $this->get('email_service')->sendEmail($templateParams);
-                    if (true !== $sendingError) {
-                        $data = [
-                            'errors' => $sendingError,
-                            'message' => 'Error with sending notifications!'
-                        ];
-                        return $this->createApiResponse($data, StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
-                    }
-                }
+                // Find changed params for notifications
+                $this->getChangedParams($requestData, $changedParams);
             }
 
             // Fill TaskData Entity if some of its parameters were sent
@@ -2916,7 +2904,11 @@ class TaskController extends ApiBaseController
                             $task->addTaskDatum($cd);
                             $this->getDoctrine()->getManager()->persist($task);
                             $this->getDoctrine()->getManager()->persist($cd);
-                            $this->getDoctrine()->getManager()->flush();
+
+                            // Notification
+                            if (false === $create) {
+                                $changedParams[] = $taskAttribute->getTitle();
+                            }
                         } else {
                             $this->createApiResponse([
                                 'message' => 'The value of task_data with key: ' . $key . ' is invalid',
@@ -2926,6 +2918,23 @@ class TaskController extends ApiBaseController
                         return $this->createApiResponse([
                             'message' => 'The key: ' . $key . ' of Task Attribute is not valid (Task Attribute with this ID doesn\'t exist)',
                         ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    }
+                }
+                $this->getDoctrine()->getManager()->flush();
+            }
+
+            // Sent Notification Emails about updating of Task to task REQUESTER, ASSIGNED USERS, FOLLOWERS
+            if (count($changedParams) > 0) {
+                $notificationEmailAddresses = $this->getEmailForUpdateTaskNotification($task, $user->getEmail());
+                if (count($notificationEmailAddresses) > 0) {
+                    $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $notificationEmailAddresses, $user, $changedParams);
+                    $sendingError = $this->get('email_service')->sendEmail($templateParams);
+                    if (true !== $sendingError) {
+                        $data = [
+                            'errors' => $sendingError,
+                            'message' => 'Error with sending notifications!'
+                        ];
+                        return $this->createApiResponse($data, StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
                     }
                 }
             }
@@ -3442,7 +3451,7 @@ class TaskController extends ApiBaseController
             'taskId' => $taskId,
             'subject' => $title,
             'taskLink' => $baseFrontURL->getValue() . '/tasks/' . $taskId,
-            'changedParams' => $changedParams
+            'changedParams' => implode(', ', $changedParams)
         ];
         $params = [
             'subject' => 'LanHelpdesk - ' . '[#' . $taskId . '] ' . 'Úloha bola zmenená',
@@ -3456,16 +3465,16 @@ class TaskController extends ApiBaseController
 
     /**
      * @param array $requestData
+     * @param array $changedParams
      * @return array
      */
-    private function getChangedParams(array &$requestData):array
+    private function getChangedParams(array &$requestData, array &$changedParams):array
     {
-        if (array_key_exists('_format', $requestData)) {
-            unset($requestData['_format']);
+        if (count($requestData) > 0) {
+            foreach ($requestData as $key => $value) {
+                $changedParams[] = $key;
+            }
         }
-
-        $changedParams = [];
-        dump($requestData);
 
         return $changedParams;
     }

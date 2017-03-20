@@ -30,78 +30,112 @@ class CommentController extends ApiBaseController
      *  ### Response ###
      *     {
      *       "data":
-     *       [
-     *         {
-     *            "id": 2,
-     *            "title": "Koment - publik, podkomentar komentu",
-     *            "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *            "internal": true,
-     *            "email": false,
-     *            "email_to": null,
-     *            "email_cc": null,
-     *            "email_bcc": null,
-     *            "createdAt":
-     *            {
-     *               "date": "2017-02-10 15:47:50.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
-     *            "updatedAt":
-     *            {
-     *               "date": "2017-02-10 15:47:50.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
-     *            "createdBy":
-     *            {
-     *               "id": 1846,
-     *               "username": "admin",
-     *               "password": "$2y$13$elpnHhCe/zvKZeezL8CkS.5.GgBwXYev/32i1AcTqEH2Vg6WzGHz6",
-     *               "email": "admin@admin.sk",
-     *               "roles": "[\"ROLE_ADMIN\"]",
-     *               "is_active": true,
-     *               "language": "AJ",
-     *               "image": null
-     *             },
-     *             "commentHasAttachments":
-     *             [
-     *                {
-     *                   "id": 2,
-     *                   "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                }
-     *             ],
-     *             "comment":
+     *       {
+     *          "188":
+     *          {
+     *             "id": 188,
+     *             "title": "test",
+     *             "body": "gggg 222",
+     *             "createdAt":
      *             {
-     *                "id": 1,
-     *                "title": "Subcoment - public",
-     *                "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                "internal": false,
-     *                "email": false,
-     *                "email_to": null,
-     *                "email_cc": null,
-     *                "email_bcc": null,
+     *                "date": "2017-03-16 11:23:43.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
+     *             },
+     *             "updatedAt":
+     *             {
+     *                "date": "2017-03-16 11:23:43.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
+     *             },
+     *             "internal": true,
+     *             "email": true,
+     *             "email_to":
+     *             [
+     *                "mb@web-solutions.sk"
+     *             ],
+     *             "email_cc": null,
+     *             "email_bcc": null,
+     *             "createdBy":
+     *             {
+     *                "id": 4031,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             },
+     *             "children":
+     *             {
+     *                "189": 189,
+     *                "190": 190
+     *              }
+     *           },
+     *           "189":
+     *           {
+     *              "id": 189,
+     *              "title": "test",
+     *              "body": "gggg 222 222",
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-03-16 11:23:43.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                 "date": "2017-03-16 11:23:43.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "internal": true,
+     *              "email": true,
+     *              "email_to":
+     *              [
+     *                 "mb@web-solutions.sk"
+     *              ],
+     *              "email_cc": null,
+     *              "email_bcc": null,
+     *              "createdBy":
+     *              {
+     *                 "id": 4031,
+     *                 "username": "admin",
+     *                 "email": "admin@admin.sk"
+     *               },
+     *               "children": false
+     *             },
+     *             "190":
+     *             {
+     *                "id": 190,
+     *                "title": "test",
+     *                "body": "gggg 222 222 555",
      *                "createdAt":
      *                {
-     *                   "date": "2017-02-10 15:47:50.000000",
+     *                   "date": "2017-03-16 11:23:43.000000",
      *                   "timezone_type": 3,
      *                   "timezone": "Europe/Berlin"
      *                },
      *                "updatedAt":
      *                {
-     *                   "date": "2017-02-10 15:47:50.000000",
+     *                   "date": "2017-03-16 11:23:43.000000",
      *                   "timezone_type": 3,
      *                   "timezone": "Europe/Berlin"
      *                },
-     *                "commentHasAttachments":
+     *                "internal": true,
+     *                "email": true,
+     *                "email_to":
      *                [
-     *                   {
-     *                      "id": 1,
-     *                      "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                   }
-     *                ]
-     *             }
-     *          },
-     *       ],
+     *                   "mb@web-solutions.sk"
+     *                ],
+     *                "email_cc": null,
+     *                "email_bcc": null,
+     *                "createdBy":
+     *                {
+     *                   "id": 4031,
+     *                   "username": "admin",
+     *                   "email": "admin@admin.sk"
+     *                 },
+     *                 "children": false
+     *               }
+     *            }
+     *       }
      *       "_links":
      *       {
      *           "self": "/api/v1/task-bundle/tasks/21/comments?page=1",
@@ -784,7 +818,7 @@ class CommentController extends ApiBaseController
             'taskLink' => $baseFrontURL->getValue() . '/tasks/' . $taskId
         ];
         $params = [
-            'subject' => 'LanHelpdesk - '.'[#' . $taskId . ']' . ' ' . $requestData['title'],
+            'subject' => 'LanHelpdesk - ' . '[#' . $taskId . ']' . ' ' . $requestData['title'],
             'from' => $email,
             'to' => $emailAddresses,
             'body' => $this->renderView('@APITask/Emails/comment.html.twig', $templateParams)

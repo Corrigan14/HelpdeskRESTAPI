@@ -111,73 +111,112 @@ class TaskController extends ApiBaseController
      *            "taskHasAssignedUsers": [],
      *            "taskHasAttachments": [],
      *            "comments":
-     *            {
-     *               "0":
-     *               {
-     *                  "parent": true,
-     *                  "id": 30,
-     *                  "title": "Koment - public",
-     *                  "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                  "createdAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                   },
-     *                   "internal": false,
-     *                   "email": false,
-     *                   "email_to": false,
-     *                   "email_cc": false,
-     *                   "email_bcc": false,
-     *                   "createdBy":
-     *                   {
-     *                      "id": 2575,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk"
-     *                   }
-     *               },
-     *               "30":
-     *               [
-     *                  {
-     *                      "child": true,
-     *                      "parentId": 30,
-     *                      "id": 30,
-     *                      "title": "Koment - public",
-     *                      "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                      "createdAt":
-     *                      {
-     *                         "date": "2017-02-27 15:55:17.000000",
-     *                         "timezone_type": 3,
-     *                         "timezone": "Europe/Berlin"
-     *                       },
-     *                      "updatedAt":
-     *                      {
-     *                         "date": "2017-02-27 15:55:17.000000",
-     *                         "timezone_type": 3,
-     *                         "timezone": "Europe/Berlin"
-     *                      },
-     *                      "internal": false,
-     *                      "email": false,
-     *                      "email_to": false,
-     *                      "email_cc": false,
-     *                      "email_bcc": false,
-     *                      "createdBy":
-     *                      {
-     *                         "id": 2575,
-     *                         "username": "admin",
-     *                         "email": "admin@admin.sk"
-     *                      }
-     *                   }
-     *                ]
+     *               *          "188":
+     *          {
+     *             "id": 188,
+     *             "title": "test",
+     *             "body": "gggg 222",
+     *             "createdAt":
+     *             {
+     *                "date": "2017-03-16 11:23:43.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
      *             },
-     *             "invoiceableItems": []
-     *           }
+     *             "updatedAt":
+     *             {
+     *                "date": "2017-03-16 11:23:43.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
+     *             },
+     *             "internal": true,
+     *             "email": true,
+     *             "email_to":
+     *             [
+     *                "mb@web-solutions.sk"
+     *             ],
+     *             "email_cc": null,
+     *             "email_bcc": null,
+     *             "createdBy":
+     *             {
+     *                "id": 4031,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             },
+     *             "children":
+     *             {
+     *                "189": 189,
+     *                "190": 190
+     *              }
+     *           },
+     *           "189":
+     *           {
+     *              "id": 189,
+     *              "title": "test",
+     *              "body": "gggg 222 222",
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-03-16 11:23:43.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                 "date": "2017-03-16 11:23:43.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "internal": true,
+     *              "email": true,
+     *              "email_to":
+     *              [
+     *                 "mb@web-solutions.sk"
+     *              ],
+     *              "email_cc": null,
+     *              "email_bcc": null,
+     *              "createdBy":
+     *              {
+     *                 "id": 4031,
+     *                 "username": "admin",
+     *                 "email": "admin@admin.sk"
+     *               },
+     *               "children": false
+     *             },
+     *             "190":
+     *             {
+     *                "id": 190,
+     *                "title": "test",
+     *                "body": "gggg 222 222 555",
+     *                "createdAt":
+     *                {
+     *                   "date": "2017-03-16 11:23:43.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                },
+     *                "updatedAt":
+     *                {
+     *                   "date": "2017-03-16 11:23:43.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                },
+     *                "internal": true,
+     *                "email": true,
+     *                "email_to":
+     *                [
+     *                   "mb@web-solutions.sk"
+     *                ],
+     *                "email_cc": null,
+     *                "email_bcc": null,
+     *                "createdBy":
+     *                {
+     *                   "id": 4031,
+     *                   "username": "admin",
+     *                   "email": "admin@admin.sk"
+     *                 },
+     *                 "children": false
+     *               }
+     *            },
+     *            "invoiceableItems": []
+     *          }
      *       ],
      *       "_links":
      *       {
@@ -469,73 +508,112 @@ class TaskController extends ApiBaseController
      *               }
      *            ],
      *            "comments":
-     *            {
-     *               "0":
-     *               {
-     *                  "parent": true,
-     *                  "id": 30,
-     *                  "title": "Koment - public",
-     *                  "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                  "createdAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                   },
-     *                   "internal": false,
-     *                   "email": false,
-     *                   "email_to": false,
-     *                   "email_cc": false,
-     *                   "email_bcc": false,
-     *                   "createdBy":
-     *                   {
-     *                      "id": 2575,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk"
-     *                   }
-     *               },
-     *               "30":
-     *               [
-     *                  {
-     *                      "child": true,
-     *                      "parentId": 30,
-     *                      "id": 30,
-     *                      "title": "Koment - public",
-     *                      "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                      "createdAt":
-     *                      {
-     *                         "date": "2017-02-27 15:55:17.000000",
-     *                         "timezone_type": 3,
-     *                         "timezone": "Europe/Berlin"
-     *                       },
-     *                      "updatedAt":
-     *                      {
-     *                         "date": "2017-02-27 15:55:17.000000",
-     *                         "timezone_type": 3,
-     *                         "timezone": "Europe/Berlin"
-     *                      },
-     *                      "internal": false,
-     *                      "email": false,
-     *                      "email_to": false,
-     *                      "email_cc": false,
-     *                      "email_bcc": false,
-     *                      "createdBy":
-     *                      {
-     *                         "id": 2575,
-     *                         "username": "admin",
-     *                         "email": "admin@admin.sk"
-     *                      }
-     *                   }
-     *                ]
+     *               *          "188":
+     *          {
+     *             "id": 188,
+     *             "title": "test",
+     *             "body": "gggg 222",
+     *             "createdAt":
+     *             {
+     *                "date": "2017-03-16 11:23:43.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
      *             },
-     *             "invoiceableItems":
+     *             "updatedAt":
+     *             {
+     *                "date": "2017-03-16 11:23:43.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
+     *             },
+     *             "internal": true,
+     *             "email": true,
+     *             "email_to":
      *             [
+     *                "mb@web-solutions.sk"
+     *             ],
+     *             "email_cc": null,
+     *             "email_bcc": null,
+     *             "createdBy":
+     *             {
+     *                "id": 4031,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             },
+     *             "children":
+     *             {
+     *                "189": 189,
+     *                "190": 190
+     *              }
+     *           },
+     *           "189":
+     *           {
+     *              "id": 189,
+     *              "title": "test",
+     *              "body": "gggg 222 222",
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-03-16 11:23:43.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                 "date": "2017-03-16 11:23:43.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "internal": true,
+     *              "email": true,
+     *              "email_to":
+     *              [
+     *                 "mb@web-solutions.sk"
+     *              ],
+     *              "email_cc": null,
+     *              "email_bcc": null,
+     *              "createdBy":
+     *              {
+     *                 "id": 4031,
+     *                 "username": "admin",
+     *                 "email": "admin@admin.sk"
+     *               },
+     *               "children": false
+     *             },
+     *             "190":
+     *             {
+     *                "id": 190,
+     *                "title": "test",
+     *                "body": "gggg 222 222 555",
+     *                "createdAt":
+     *                {
+     *                   "date": "2017-03-16 11:23:43.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                },
+     *                "updatedAt":
+     *                {
+     *                   "date": "2017-03-16 11:23:43.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                },
+     *                "internal": true,
+     *                "email": true,
+     *                "email_to":
+     *                [
+     *                   "mb@web-solutions.sk"
+     *                ],
+     *                "email_cc": null,
+     *                "email_bcc": null,
+     *                "createdBy":
+     *                {
+     *                   "id": 4031,
+     *                   "username": "admin",
+     *                   "email": "admin@admin.sk"
+     *                 },
+     *                 "children": false
+     *               }
+     *            },
+     *            "invoiceableItems":
+     *            [
      *                {
      *                   "id": 30,
      *                   "title": "Keyboard",
@@ -785,70 +863,109 @@ class TaskController extends ApiBaseController
      *               }
      *            ],
      *            "comments":
-     *            {
-     *               "0":
-     *               {
-     *                  "parent": true,
-     *                  "id": 30,
-     *                  "title": "Koment - public",
-     *                  "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                  "createdAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                   },
-     *                   "internal": false,
-     *                   "email": false,
-     *                   "email_to": false,
-     *                   "email_cc": false,
-     *                   "email_bcc": false,
-     *                   "createdBy":
-     *                   {
-     *                      "id": 2575,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk"
-     *                   }
+     *               *          "188":
+     *          {
+     *             "id": 188,
+     *             "title": "test",
+     *             "body": "gggg 222",
+     *             "createdAt":
+     *             {
+     *                "date": "2017-03-16 11:23:43.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
+     *             },
+     *             "updatedAt":
+     *             {
+     *                "date": "2017-03-16 11:23:43.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
+     *             },
+     *             "internal": true,
+     *             "email": true,
+     *             "email_to":
+     *             [
+     *                "mb@web-solutions.sk"
+     *             ],
+     *             "email_cc": null,
+     *             "email_bcc": null,
+     *             "createdBy":
+     *             {
+     *                "id": 4031,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             },
+     *             "children":
+     *             {
+     *                "189": 189,
+     *                "190": 190
+     *              }
+     *           },
+     *           "189":
+     *           {
+     *              "id": 189,
+     *              "title": "test",
+     *              "body": "gggg 222 222",
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-03-16 11:23:43.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                 "date": "2017-03-16 11:23:43.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "internal": true,
+     *              "email": true,
+     *              "email_to":
+     *              [
+     *                 "mb@web-solutions.sk"
+     *              ],
+     *              "email_cc": null,
+     *              "email_bcc": null,
+     *              "createdBy":
+     *              {
+     *                 "id": 4031,
+     *                 "username": "admin",
+     *                 "email": "admin@admin.sk"
      *               },
-     *               "30":
-     *               [
-     *                  {
-     *                      "child": true,
-     *                      "parentId": 30,
-     *                      "id": 30,
-     *                      "title": "Koment - public",
-     *                      "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                      "createdAt":
-     *                      {
-     *                         "date": "2017-02-27 15:55:17.000000",
-     *                         "timezone_type": 3,
-     *                         "timezone": "Europe/Berlin"
-     *                       },
-     *                      "updatedAt":
-     *                      {
-     *                         "date": "2017-02-27 15:55:17.000000",
-     *                         "timezone_type": 3,
-     *                         "timezone": "Europe/Berlin"
-     *                      },
-     *                      "internal": false,
-     *                      "email": false,
-     *                      "email_to": false,
-     *                      "email_cc": false,
-     *                      "email_bcc": false,
-     *                      "createdBy":
-     *                      {
-     *                         "id": 2575,
-     *                         "username": "admin",
-     *                         "email": "admin@admin.sk"
-     *                      }
-     *                   }
-     *                ]
+     *               "children": false
+     *             },
+     *             "190":
+     *             {
+     *                "id": 190,
+     *                "title": "test",
+     *                "body": "gggg 222 222 555",
+     *                "createdAt":
+     *                {
+     *                   "date": "2017-03-16 11:23:43.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                },
+     *                "updatedAt":
+     *                {
+     *                   "date": "2017-03-16 11:23:43.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                },
+     *                "internal": true,
+     *                "email": true,
+     *                "email_to":
+     *                [
+     *                   "mb@web-solutions.sk"
+     *                ],
+     *                "email_cc": null,
+     *                "email_bcc": null,
+     *                "createdBy":
+     *                {
+     *                   "id": 4031,
+     *                   "username": "admin",
+     *                   "email": "admin@admin.sk"
+     *                 },
+     *                 "children": false
+     *               }
      *             },
      *             "invoiceableItems":
      *             [
@@ -1069,70 +1186,109 @@ class TaskController extends ApiBaseController
      *               }
      *            ],
      *            "comments":
-     *            {
-     *               "0":
-     *               {
-     *                  "parent": true,
-     *                  "id": 30,
-     *                  "title": "Koment - public",
-     *                  "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                  "createdAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                   },
-     *                   "internal": false,
-     *                   "email": false,
-     *                   "email_to": false,
-     *                   "email_cc": false,
-     *                   "email_bcc": false,
-     *                   "createdBy":
-     *                   {
-     *                      "id": 2575,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk"
-     *                   }
+     *               *          "188":
+     *          {
+     *             "id": 188,
+     *             "title": "test",
+     *             "body": "gggg 222",
+     *             "createdAt":
+     *             {
+     *                "date": "2017-03-16 11:23:43.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
+     *             },
+     *             "updatedAt":
+     *             {
+     *                "date": "2017-03-16 11:23:43.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
+     *             },
+     *             "internal": true,
+     *             "email": true,
+     *             "email_to":
+     *             [
+     *                "mb@web-solutions.sk"
+     *             ],
+     *             "email_cc": null,
+     *             "email_bcc": null,
+     *             "createdBy":
+     *             {
+     *                "id": 4031,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             },
+     *             "children":
+     *             {
+     *                "189": 189,
+     *                "190": 190
+     *              }
+     *           },
+     *           "189":
+     *           {
+     *              "id": 189,
+     *              "title": "test",
+     *              "body": "gggg 222 222",
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-03-16 11:23:43.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                 "date": "2017-03-16 11:23:43.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "internal": true,
+     *              "email": true,
+     *              "email_to":
+     *              [
+     *                 "mb@web-solutions.sk"
+     *              ],
+     *              "email_cc": null,
+     *              "email_bcc": null,
+     *              "createdBy":
+     *              {
+     *                 "id": 4031,
+     *                 "username": "admin",
+     *                 "email": "admin@admin.sk"
      *               },
-     *               "30":
-     *               [
-     *                  {
-     *                      "child": true,
-     *                      "parentId": 30,
-     *                      "id": 30,
-     *                      "title": "Koment - public",
-     *                      "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                      "createdAt":
-     *                      {
-     *                         "date": "2017-02-27 15:55:17.000000",
-     *                         "timezone_type": 3,
-     *                         "timezone": "Europe/Berlin"
-     *                       },
-     *                      "updatedAt":
-     *                      {
-     *                         "date": "2017-02-27 15:55:17.000000",
-     *                         "timezone_type": 3,
-     *                         "timezone": "Europe/Berlin"
-     *                      },
-     *                      "internal": false,
-     *                      "email": false,
-     *                      "email_to": false,
-     *                      "email_cc": false,
-     *                      "email_bcc": false,
-     *                      "createdBy":
-     *                      {
-     *                         "id": 2575,
-     *                         "username": "admin",
-     *                         "email": "admin@admin.sk"
-     *                      }
-     *                   }
-     *                ]
+     *               "children": false
+     *             },
+     *             "190":
+     *             {
+     *                "id": 190,
+     *                "title": "test",
+     *                "body": "gggg 222 222 555",
+     *                "createdAt":
+     *                {
+     *                   "date": "2017-03-16 11:23:43.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                },
+     *                "updatedAt":
+     *                {
+     *                   "date": "2017-03-16 11:23:43.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                },
+     *                "internal": true,
+     *                "email": true,
+     *                "email_to":
+     *                [
+     *                   "mb@web-solutions.sk"
+     *                ],
+     *                "email_cc": null,
+     *                "email_bcc": null,
+     *                "createdBy":
+     *                {
+     *                   "id": 4031,
+     *                   "username": "admin",
+     *                   "email": "admin@admin.sk"
+     *                 },
+     *                 "children": false
+     *               }
      *             },
      *             "invoiceableItems":
      *             [
@@ -1428,72 +1584,111 @@ class TaskController extends ApiBaseController
      *               }
      *            ],
      *            "comments":
-     *            {
-     *               "0":
-     *               {
-     *                  "parent": true,
-     *                  "id": 30,
-     *                  "title": "Koment - public",
-     *                  "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                  "createdAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                   },
-     *                   "internal": false,
-     *                   "email": false,
-     *                   "email_to": false,
-     *                   "email_cc": false,
-     *                   "email_bcc": false,
-     *                   "createdBy":
-     *                   {
-     *                      "id": 2575,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk"
-     *                   }
-     *               },
-     *               "30":
-     *               [
-     *                  {
-     *                      "child": true,
-     *                      "parentId": 30,
-     *                      "id": 30,
-     *                      "title": "Koment - public",
-     *                      "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                      "createdAt":
-     *                      {
-     *                         "date": "2017-02-27 15:55:17.000000",
-     *                         "timezone_type": 3,
-     *                         "timezone": "Europe/Berlin"
-     *                       },
-     *                      "updatedAt":
-     *                      {
-     *                         "date": "2017-02-27 15:55:17.000000",
-     *                         "timezone_type": 3,
-     *                         "timezone": "Europe/Berlin"
-     *                      },
-     *                      "internal": false,
-     *                      "email": false,
-     *                      "email_to": false,
-     *                      "email_cc": false,
-     *                      "email_bcc": false,
-     *                      "createdBy":
-     *                      {
-     *                         "id": 2575,
-     *                         "username": "admin",
-     *                         "email": "admin@admin.sk"
-     *                      }
-     *                   }
-     *                ]
+     *               *          "188":
+     *          {
+     *             "id": 188,
+     *             "title": "test",
+     *             "body": "gggg 222",
+     *             "createdAt":
+     *             {
+     *                "date": "2017-03-16 11:23:43.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
      *             },
-     *             "invoiceableItems":
+     *             "updatedAt":
+     *             {
+     *                "date": "2017-03-16 11:23:43.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
+     *             },
+     *             "internal": true,
+     *             "email": true,
+     *             "email_to":
+     *             [
+     *                "mb@web-solutions.sk"
+     *             ],
+     *             "email_cc": null,
+     *             "email_bcc": null,
+     *             "createdBy":
+     *             {
+     *                "id": 4031,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             },
+     *             "children":
+     *             {
+     *                "189": 189,
+     *                "190": 190
+     *              }
+     *           },
+     *           "189":
+     *           {
+     *              "id": 189,
+     *              "title": "test",
+     *              "body": "gggg 222 222",
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-03-16 11:23:43.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                 "date": "2017-03-16 11:23:43.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "internal": true,
+     *              "email": true,
+     *              "email_to":
+     *              [
+     *                 "mb@web-solutions.sk"
+     *              ],
+     *              "email_cc": null,
+     *              "email_bcc": null,
+     *              "createdBy":
+     *              {
+     *                 "id": 4031,
+     *                 "username": "admin",
+     *                 "email": "admin@admin.sk"
+     *               },
+     *               "children": false
+     *             },
+     *             "190":
+     *             {
+     *                "id": 190,
+     *                "title": "test",
+     *                "body": "gggg 222 222 555",
+     *                "createdAt":
+     *                {
+     *                   "date": "2017-03-16 11:23:43.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                },
+     *                "updatedAt":
+     *                {
+     *                   "date": "2017-03-16 11:23:43.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                },
+     *                "internal": true,
+     *                "email": true,
+     *                "email_to":
+     *                [
+     *                   "mb@web-solutions.sk"
+     *                ],
+     *                "email_cc": null,
+     *                "email_bcc": null,
+     *                "createdBy":
+     *                {
+     *                   "id": 4031,
+     *                   "username": "admin",
+     *                   "email": "admin@admin.sk"
+     *                 },
+     *                 "children": false
+     *               }
+     *            },
+     *            "invoiceableItems":
      *             [
      *                {
      *                   "id": 30,
@@ -1765,70 +1960,109 @@ class TaskController extends ApiBaseController
      *               }
      *            ],
      *            "comments":
-     *            {
-     *               "0":
-     *               {
-     *                  "parent": true,
-     *                  "id": 30,
-     *                  "title": "Koment - public",
-     *                  "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                  "createdAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                   },
-     *                   "internal": false,
-     *                   "email": false,
-     *                   "email_to": false,
-     *                   "email_cc": false,
-     *                   "email_bcc": false,
-     *                   "createdBy":
-     *                   {
-     *                      "id": 2575,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk"
-     *                   }
+     *               *          "188":
+     *          {
+     *             "id": 188,
+     *             "title": "test",
+     *             "body": "gggg 222",
+     *             "createdAt":
+     *             {
+     *                "date": "2017-03-16 11:23:43.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
+     *             },
+     *             "updatedAt":
+     *             {
+     *                "date": "2017-03-16 11:23:43.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
+     *             },
+     *             "internal": true,
+     *             "email": true,
+     *             "email_to":
+     *             [
+     *                "mb@web-solutions.sk"
+     *             ],
+     *             "email_cc": null,
+     *             "email_bcc": null,
+     *             "createdBy":
+     *             {
+     *                "id": 4031,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             },
+     *             "children":
+     *             {
+     *                "189": 189,
+     *                "190": 190
+     *              }
+     *           },
+     *           "189":
+     *           {
+     *              "id": 189,
+     *              "title": "test",
+     *              "body": "gggg 222 222",
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-03-16 11:23:43.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                 "date": "2017-03-16 11:23:43.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "internal": true,
+     *              "email": true,
+     *              "email_to":
+     *              [
+     *                 "mb@web-solutions.sk"
+     *              ],
+     *              "email_cc": null,
+     *              "email_bcc": null,
+     *              "createdBy":
+     *              {
+     *                 "id": 4031,
+     *                 "username": "admin",
+     *                 "email": "admin@admin.sk"
      *               },
-     *               "30":
-     *               [
-     *                  {
-     *                      "child": true,
-     *                      "parentId": 30,
-     *                      "id": 30,
-     *                      "title": "Koment - public",
-     *                      "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                      "createdAt":
-     *                      {
-     *                         "date": "2017-02-27 15:55:17.000000",
-     *                         "timezone_type": 3,
-     *                         "timezone": "Europe/Berlin"
-     *                       },
-     *                      "updatedAt":
-     *                      {
-     *                         "date": "2017-02-27 15:55:17.000000",
-     *                         "timezone_type": 3,
-     *                         "timezone": "Europe/Berlin"
-     *                      },
-     *                      "internal": false,
-     *                      "email": false,
-     *                      "email_to": false,
-     *                      "email_cc": false,
-     *                      "email_bcc": false,
-     *                      "createdBy":
-     *                      {
-     *                         "id": 2575,
-     *                         "username": "admin",
-     *                         "email": "admin@admin.sk"
-     *                      }
-     *                   }
-     *                ]
+     *               "children": false
+     *             },
+     *             "190":
+     *             {
+     *                "id": 190,
+     *                "title": "test",
+     *                "body": "gggg 222 222 555",
+     *                "createdAt":
+     *                {
+     *                   "date": "2017-03-16 11:23:43.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                },
+     *                "updatedAt":
+     *                {
+     *                   "date": "2017-03-16 11:23:43.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                },
+     *                "internal": true,
+     *                "email": true,
+     *                "email_to":
+     *                [
+     *                   "mb@web-solutions.sk"
+     *                ],
+     *                "email_cc": null,
+     *                "email_bcc": null,
+     *                "createdBy":
+     *                {
+     *                   "id": 4031,
+     *                   "username": "admin",
+     *                   "email": "admin@admin.sk"
+     *                 },
+     *                 "children": false
+     *               }
      *             },
      *             "invoiceableItems":
      *             [
@@ -2153,70 +2387,109 @@ class TaskController extends ApiBaseController
      *               }
      *            ],
      *            "comments":
-     *            {
-     *               "0":
-     *               {
-     *                  "parent": true,
-     *                  "id": 30,
-     *                  "title": "Koment - public",
-     *                  "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                  "createdAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                   },
-     *                   "internal": false,
-     *                   "email": false,
-     *                   "email_to": false,
-     *                   "email_cc": false,
-     *                   "email_bcc": false,
-     *                   "createdBy":
-     *                   {
-     *                      "id": 2575,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk"
-     *                   }
+     *              *          "188":
+     *          {
+     *             "id": 188,
+     *             "title": "test",
+     *             "body": "gggg 222",
+     *             "createdAt":
+     *             {
+     *                "date": "2017-03-16 11:23:43.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
+     *             },
+     *             "updatedAt":
+     *             {
+     *                "date": "2017-03-16 11:23:43.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
+     *             },
+     *             "internal": true,
+     *             "email": true,
+     *             "email_to":
+     *             [
+     *                "mb@web-solutions.sk"
+     *             ],
+     *             "email_cc": null,
+     *             "email_bcc": null,
+     *             "createdBy":
+     *             {
+     *                "id": 4031,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             },
+     *             "children":
+     *             {
+     *                "189": 189,
+     *                "190": 190
+     *              }
+     *           },
+     *           "189":
+     *           {
+     *              "id": 189,
+     *              "title": "test",
+     *              "body": "gggg 222 222",
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-03-16 11:23:43.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                 "date": "2017-03-16 11:23:43.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "internal": true,
+     *              "email": true,
+     *              "email_to":
+     *              [
+     *                 "mb@web-solutions.sk"
+     *              ],
+     *              "email_cc": null,
+     *              "email_bcc": null,
+     *              "createdBy":
+     *              {
+     *                 "id": 4031,
+     *                 "username": "admin",
+     *                 "email": "admin@admin.sk"
      *               },
-     *               "30":
-     *               [
-     *                  {
-     *                      "child": true,
-     *                      "parentId": 30,
-     *                      "id": 30,
-     *                      "title": "Koment - public",
-     *                      "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                      "createdAt":
-     *                      {
-     *                         "date": "2017-02-27 15:55:17.000000",
-     *                         "timezone_type": 3,
-     *                         "timezone": "Europe/Berlin"
-     *                       },
-     *                      "updatedAt":
-     *                      {
-     *                         "date": "2017-02-27 15:55:17.000000",
-     *                         "timezone_type": 3,
-     *                         "timezone": "Europe/Berlin"
-     *                      },
-     *                      "internal": false,
-     *                      "email": false,
-     *                      "email_to": false,
-     *                      "email_cc": false,
-     *                      "email_bcc": false,
-     *                      "createdBy":
-     *                      {
-     *                         "id": 2575,
-     *                         "username": "admin",
-     *                         "email": "admin@admin.sk"
-     *                      }
-     *                   }
-     *                ]
+     *               "children": false
+     *             },
+     *             "190":
+     *             {
+     *                "id": 190,
+     *                "title": "test",
+     *                "body": "gggg 222 222 555",
+     *                "createdAt":
+     *                {
+     *                   "date": "2017-03-16 11:23:43.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                },
+     *                "updatedAt":
+     *                {
+     *                   "date": "2017-03-16 11:23:43.000000",
+     *                   "timezone_type": 3,
+     *                   "timezone": "Europe/Berlin"
+     *                },
+     *                "internal": true,
+     *                "email": true,
+     *                "email_to":
+     *                [
+     *                   "mb@web-solutions.sk"
+     *                ],
+     *                "email_cc": null,
+     *                "email_bcc": null,
+     *                "createdBy":
+     *                {
+     *                   "id": 4031,
+     *                   "username": "admin",
+     *                   "email": "admin@admin.sk"
+     *                 },
+     *                 "children": false
+     *               }
      *             },
      *             "invoiceableItems":
      *             [

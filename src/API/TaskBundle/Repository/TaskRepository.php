@@ -644,61 +644,7 @@ class TaskRepository extends EntityRepository
             }
         }
         $comments = $data->getComments();
-        $commentsArray = [];
-        $processedCommentsIds = [];
-        if (count($comments) > 0) {
-            /** @var Comment $comment */
-            foreach ($comments as $comment) {
-                // Check if comment was processed yet
-                if (in_array($comment->getId(), $processedCommentsIds)) {
-                    continue;
-                }
-
-                // Check if comment has children or not
-                $commentsChildren = $comment->getInversedComment();
-                if (count($commentsChildren) > 0) {
-                    $processedCommentsIds[] = $comment->getId();
-                    $commentsArray[] = [
-                        'parent' => true,
-                        'id' => $comment->getId(),
-                        'title' => $comment->getTitle(),
-                        'body' => $comment->getBody(),
-                        'createdAt' => $comment->getCreatedAt(),
-                        'updatedAt' => $comment->getUpdatedAt(),
-                        'internal' => $comment->getInternal(),
-                        'email' => $comment->getEmail(),
-                        'email_to' => $comment->getEmailTo(),
-                        'email_cc' => $comment->getEmailCc(),
-                        'email_bcc' => $comment->getEmailBcc(),
-                        'createdBy' => [
-                            'id' => $comment->getCreatedBy()->getId(),
-                            'username' => $comment->getCreatedBy()->getUsername(),
-                            'email' => $comment->getCreatedBy()->getEmail()
-                        ]
-                    ];
-                    $this->buildCommentTree($comment, $commentsArray, $processedCommentsIds, $comment->getId(), false);
-                } else {
-                    $processedCommentsIds[] = $comment->getId();
-                    $commentsArray[] = [
-                        'id' => $comment->getId(),
-                        'title' => $comment->getTitle(),
-                        'body' => $comment->getBody(),
-                        'createdAt' => $comment->getCreatedAt(),
-                        'updatedAt' => $comment->getUpdatedAt(),
-                        'internal' => $comment->getInternal(),
-                        'email' => $comment->getEmail(),
-                        'email_to' => $comment->getEmailTo(),
-                        'email_cc' => $comment->getEmailCc(),
-                        'email_bcc' => $comment->getEmailBcc(),
-                        'createdBy' => [
-                            'id' => $comment->getCreatedBy()->getId(),
-                            'username' => $comment->getCreatedBy()->getUsername(),
-                            'email' => $comment->getCreatedBy()->getEmail()
-                        ]
-                    ];
-                }
-            }
-        }
+        $commentsArray = $this->formatCommentData($comments);
         $invoiceableItems = $data->getInvoiceableItems();
         $invoiceableItemsArray = [];
         if (count($invoiceableItems) > 0) {
@@ -771,43 +717,73 @@ class TaskRepository extends EntityRepository
     }
 
     /**
-     * @param Comment $comment
-     * @param array $commentsArray
-     * @param array $processedCommentsIds
-     * @param int $parentId
-     * @param bool $addToArray
+     * @param $paginatorData
      * @return array
      */
-    private function buildCommentTree(Comment $comment, array &$commentsArray, array &$processedCommentsIds, int $parentId, $addToArray = false):array
+    private function formatCommentData($paginatorData):array
     {
-        if ($addToArray) {
-            $processedCommentsIds[] = $comment->getId();
-            $commentsArray[$parentId][] = [
-                'child' => true,
-                'parentId' => $parentId,
-                'id' => $comment->getId(),
-                'title' => $comment->getTitle(),
-                'body' => $comment->getBody(),
-                'createdAt' => $comment->getCreatedAt(),
-                'updatedAt' => $comment->getUpdatedAt(),
-                'internal' => $comment->getInternal(),
-                'email' => $comment->getEmail(),
-                'email_to' => $comment->getEmailTo(),
-                'email_cc' => $comment->getEmailCc(),
-                'email_bcc' => $comment->getEmailBcc(),
-                'createdBy' => [
-                    'id' => $comment->getCreatedBy()->getId(),
-                    'username' => $comment->getCreatedBy()->getUsername(),
-                    'email' => $comment->getCreatedBy()->getEmail()
-                ]
-            ];
+        $response = [];
+        $processedCommentIds = [];
+
+        /** @var Comment $comment */
+        foreach ($paginatorData as $comment) {
+            if (in_array($comment->getId(), $processedCommentIds)) {
+                continue;
+            }
+            $this->buildCommentTree($response, $processedCommentIds, $comment);
         }
 
-        $children = $comment->getInversedComment();
-        foreach ($children as $child) {
-            $this->buildCommentTree($child, $commentsArray, $processedCommentsIds, $comment->getId(), true);
-        }
+        return $response;
+    }
 
-        return $commentsArray;
+    /**
+     * @param $response
+     * @param $processedCommentIds
+     * @param Comment $comment
+     */
+    private function buildCommentTree(&$response, &$processedCommentIds, Comment $comment)
+    {
+        $commentId = $comment->getId();
+
+        if (!in_array($commentId, $processedCommentIds)) {
+            $processedCommentIds[] = $commentId;
+            $children = $comment->getInversedComment();
+            if (count($children) > 0) {
+                $response[$commentId] = $this->fillArray($comment);
+                foreach ($children as $child) {
+                    $response[$commentId]['children'][$child->getId()] = $child->getId();
+                }
+            } else {
+                $response[$commentId] = $this->fillArray($comment);
+                $response[$commentId]['children'] = false;
+            }
+        }
+    }
+
+    /**
+     * @param Comment $comment
+     * @return array
+     */
+    private function fillArray(Comment $comment)
+    {
+        $array = [
+            'id' => $comment->getId(),
+            'title' => $comment->getTitle(),
+            'body' => $comment->getBody(),
+            'createdAt' => $comment->getCreatedAt(),
+            'updatedAt' => $comment->getUpdatedAt(),
+            'internal' => $comment->getInternal(),
+            'email' => $comment->getEmail(),
+            'email_to' => $comment->getEmailTo(),
+            'email_cc' => $comment->getEmailCc(),
+            'email_bcc' => $comment->getEmailBcc(),
+            'createdBy' => [
+                'id' => $comment->getCreatedBy()->getId(),
+                'username' => $comment->getCreatedBy()->getUsername(),
+                'email' => $comment->getCreatedBy()->getEmail()
+            ]
+        ];
+
+        return $array;
     }
 }

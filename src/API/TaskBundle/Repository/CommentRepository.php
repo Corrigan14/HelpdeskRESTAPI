@@ -90,16 +90,28 @@ class CommentRepository extends EntityRepository
     {
         $response = [];
         $processedCommentIds = [];
-        $childrenArray = [];
 
         /** @var Comment $comment */
         foreach ($paginatorData as $comment) {
             if (in_array($comment->getId(), $processedCommentIds)) {
                 continue;
             }
-            $this->buildCommentTree($response, $processedCommentIds, $comment, $childrenArray);
+            $this->buildCommentTree($response, $processedCommentIds, $comment);
         }
 
+//        dump($response);
+//
+//        foreach ($response as $dataKey => $dataValue) {
+//            if (false !== $dataValue['children']) {
+//                foreach ($dataValue['children'] as $childKey => $childValue) {
+//                    $childData = $response[$childValue];
+//                    $response[$dataKey]['children'][$childKey] = $childData;
+//                    unset($response[$childValue]);
+//                }
+//            }
+//        }
+//
+//        dump($response);
         return $response;
     }
 
@@ -107,30 +119,24 @@ class CommentRepository extends EntityRepository
      * @param $response
      * @param $processedCommentIds
      * @param Comment $comment
-     * @param  $childrenArray
      */
-    private function buildCommentTree(&$response, &$processedCommentIds, Comment $comment, &$childrenArray)
+    private function buildCommentTree(&$response, &$processedCommentIds, Comment $comment)
     {
-        $processedCommentIds[] = $comment->getId();
-//        dump($comment->getId());
-//        dump($processedCommentIds);
+        $commentId = $comment->getId();
 
-        $response[$comment->getId()] = $this->fillArray($comment);
-        $children = $comment->getInversedComment();
-        if (count($children) > 0) {
-//            dump('children');
-//            dump(count($children));
-            foreach ($children as $child) {
-                $childrenArray[] = $this->fillArray($child);
-                $processedCommentIds[] = $comment->getId();
-                $this->buildCommentTree($response, $processedCommentIds, $child, $childrenArray);
+        if (!in_array($commentId, $processedCommentIds)) {
+            $processedCommentIds[] = $commentId;
+            $children = $comment->getInversedComment();
+            if (count($children) > 0) {
+                $response[$commentId] = $this->fillArray($comment);
+                foreach ($children as $child) {
+                    $response[$commentId]['children'][$child->getId()] = $child->getId();
+                }
+            } else {
+                $response[$commentId] = $this->fillArray($comment);
+                $response[$commentId]['children'] = false;
             }
-            $response[$comment->getId()]['children'] = $childrenArray;
-        } else {
-            $childrenArray = [];
         }
-
-
     }
 
     /**

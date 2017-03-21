@@ -102,7 +102,8 @@ class StatusController extends ApiBaseController implements ControllerInterface
         }
 
         $pageNum = $request->get('page');
-        $page = (is_integer($pageNum)) ? $pageNum : 1;
+        $pageNum = intval($pageNum);
+        $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $orderString = $request->get('order');
         $orderString = strtolower($orderString);

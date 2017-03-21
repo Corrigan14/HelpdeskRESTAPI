@@ -91,7 +91,8 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
         }
 
         $pageNum = $request->get('page');
-        $page = (is_integer($pageNum)) ? $pageNum : 1;
+        $pageNum = intval($pageNum);
+        $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $isActive = $request->get('isActive');
         $filtersForUrl = [];

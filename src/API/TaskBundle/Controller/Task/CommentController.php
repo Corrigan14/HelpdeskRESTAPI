@@ -208,7 +208,10 @@ class CommentController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
-        $page = $request->get('page') ?: 1;
+        $pageNum = $request->get('page');
+        $pageNum = intval($pageNum);
+        $page = ($pageNum === 0) ? 1 : $pageNum;
+
         $internal = $request->get('internal') ?: 'all';
 
         $options = [

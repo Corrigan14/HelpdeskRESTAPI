@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Repository;
 
 use API\TaskBundle\Entity\Comment;
+use API\TaskBundle\Entity\CommentHasAttachment;
 use API\TaskBundle\Entity\Task;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
@@ -79,7 +80,7 @@ class CommentRepository extends EntityRepository
             ->where('comment.id = :id')
             ->setParameter('id', $id);
 
-        return $this->fillArray($query->getQuery()->getSingleResult());
+        return $this->fillArray($query->getQuery()->getSingleResult(), true);
     }
 
     /**
@@ -98,20 +99,6 @@ class CommentRepository extends EntityRepository
             }
             $this->buildCommentTree($response, $processedCommentIds, $comment);
         }
-
-//        dump($response);
-//
-//        foreach ($response as $dataKey => $dataValue) {
-//            if (false !== $dataValue['children']) {
-//                foreach ($dataValue['children'] as $childKey => $childValue) {
-//                    $childData = $response[$childValue];
-//                    $response[$dataKey]['children'][$childKey] = $childData;
-//                    unset($response[$childValue]);
-//                }
-//            }
-//        }
-//
-//        dump($response);
         return $response;
     }
 
@@ -141,10 +128,22 @@ class CommentRepository extends EntityRepository
 
     /**
      * @param Comment $comment
+     * @param bool $single
      * @return array
      */
-    private function fillArray(Comment $comment)
+    private function fillArray(Comment $comment, $single = false)
     {
+        $attachments = $comment->getCommentHasAttachments();
+        $attachmentArray = [];
+        if (count($attachments) > 0) {
+            /** @var CommentHasAttachment $attachment */
+            foreach ($attachments as $attachment) {
+                $attachmentArray[] = [
+                    'id' => $attachment->getId(),
+                    'slug' => $attachment->getSlug()
+                ];
+            }
+        }
         $array = [
             'id' => $comment->getId(),
             'title' => $comment->getTitle(),
@@ -160,8 +159,23 @@ class CommentRepository extends EntityRepository
                 'id' => $comment->getCreatedBy()->getId(),
                 'username' => $comment->getCreatedBy()->getUsername(),
                 'email' => $comment->getCreatedBy()->getEmail()
-            ]
+            ],
+            'commentHasAttachments' => $attachmentArray
         ];
+
+        if ($single) {
+            $childrenComments = $comment->getInversedComment();
+            $childrenCommentsArray = [];
+            if (count($childrenComments) > 0) {
+                /** @var Comment $comment */
+                foreach ($childrenComments as $comment) {
+                    $childrenCommentsArray[] = [
+                        $comment->getId() => $comment->getId()
+                    ];
+                }
+            }
+            $array['children'] = $childrenCommentsArray;
+        }
 
         return $array;
     }

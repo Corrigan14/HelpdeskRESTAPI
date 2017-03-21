@@ -52,7 +52,7 @@ class EmailService
                 ->setPassword($smtpSettings->getPassword());
 
             $this->mailer = \Swift_Mailer::newInstance($transport);
-        }else{
+        } else {
             return 'Problem with SMTP settings! Please contact admin!';
         }
 
@@ -63,11 +63,25 @@ class EmailService
 
         try {
             foreach ($addressesTo as $to) {
-                $message = \Swift_Message::newInstance()
-                    ->setSubject($subject)
-                    ->setFrom($from)
-                    ->setTo($to)
-                    ->setBody($body, 'text/html');
+                if (!$params['attachment']) {
+                    $message = \Swift_Message::newInstance()
+                        ->setSubject($subject)
+                        ->setFrom($from)
+                        ->setTo($to)
+                        ->setBody($body, 'text/html');
+                } else {
+                    $message = \Swift_Message::newInstance()
+                        ->setSubject($subject)
+                        ->setFrom($from)
+                        ->setTo($to)
+                        ->setBody($body, 'text/html');
+                    foreach ($params['attachment'] as $attachment) {
+                        $attachmentDir = $attachment['dir'];
+                        $attachmentFile = $attachment['name'];
+                        $path = __DIR__ . '/../../../../app/uploads/' . $attachmentDir . '/' . $attachmentFile;
+                        $message->attach(\Swift_Attachment::fromPath($path));
+                    }
+                }
 
                 $this->mailer->send($message);
             }

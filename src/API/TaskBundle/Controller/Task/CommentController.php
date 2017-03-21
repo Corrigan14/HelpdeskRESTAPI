@@ -2,9 +2,11 @@
 
 namespace API\TaskBundle\Controller\Task;
 
+use API\CoreBundle\Entity\File;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
 use API\TaskBundle\Entity\Comment;
+use API\TaskBundle\Entity\CommentHasAttachment;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
 use API\TaskBundle\Security\VoteOptions;
@@ -384,6 +386,9 @@ class CommentController extends ApiBaseController
      *     }
      *  },
      *  input={"class"="API\TaskBundle\Entity\Comment"},
+     *  parameters={
+     *      {"name"="slug", "dataType"="string", "required"=false, "description"="The slug of attachment"}
+     *  },
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -493,6 +498,9 @@ class CommentController extends ApiBaseController
      *     }
      *  },
      *  input={"class"="API\TaskBundle\Entity\Comment"},
+     *  parameters={
+     *      {"name"="slug", "dataType"="string", "required"=false, "description"="The slug of attachment"}
+     *  },
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -615,7 +623,8 @@ class CommentController extends ApiBaseController
             'email',
             'email_to',
             'email_cc',
-            'email_bcc'
+            'email_bcc',
+            'slug'
         ];
 
         if (array_key_exists('_format', $requestData)) {
@@ -629,6 +638,45 @@ class CommentController extends ApiBaseController
                     StatusCodesHelper::INVALID_PARAMETERS_CODE
                 );
             }
+        }
+
+        // Add attachment to comment
+        $attachment = false;
+        if (array_key_exists('slug', $requestData)) {
+            $slugArray = $requestData['slug'];
+            if (!is_array($slugArray)) {
+                $slugArray = explode(',', $slugArray);
+            }
+
+            if (count($slugArray) > 0) {
+                $attachment = [];
+                foreach ($slugArray as $slug) {
+                    $file = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
+                        'slug' => $slug
+                    ]);
+
+                    if (!$file instanceof File) {
+                        return $this->createApiResponse([
+                            'message' => 'Attachment with requested Slug: ' . $slug . ' does not exist! Attachment has to be uploaded before added to comment!',
+                        ], StatusCodesHelper::BAD_REQUEST_CODE);
+                    }
+
+                    if ($this->canAddAttachmentToComment($comment, $slug)) {
+                        $commentHasAttachment = new CommentHasAttachment();
+                        $commentHasAttachment->setComment($comment);
+                        $commentHasAttachment->setSlug($slug);
+                        $comment->addCommentHasAttachment($commentHasAttachment);
+                        $this->getDoctrine()->getManager()->persist($commentHasAttachment);
+                    }
+
+                    $attachment[] = [
+                        'dir' => $file->getUploadDir(),
+                        'name' => $file->getTempName()
+                    ];
+                }
+            }
+
+            unset($requestData['slug']);
         }
 
         // Comment marked like Email - validation of email addresses
@@ -673,7 +721,7 @@ class CommentController extends ApiBaseController
 
             // If Comment is an Email - send Email
             if ($isEmail) {
-                $templateParams = $this->getTemplateParams($task->getId(), $requestData, $emailAddresses);
+                $templateParams = $this->getTemplateParams($task->getId(), $requestData, $emailAddresses, $attachment);
                 $sendingError = $this->get('email_service')->sendEmail($templateParams);
                 if (true !== $sendingError) {
                     $data = [
@@ -687,7 +735,7 @@ class CommentController extends ApiBaseController
             // Notification about creation of Comment to task REQUESTER, ASSIGNED USERS, FOLLOWERS
             $notificationEmailAddresses = $this->getEmailForAddCommentNotification($task, $loggedUserEmail, $emailAddresses);
             if (count($notificationEmailAddresses) > 0) {
-                $templateParams = $this->getTemplateParams($task->getId(), $requestData, $notificationEmailAddresses);
+                $templateParams = $this->getTemplateParams($task->getId(), $requestData, $notificationEmailAddresses, $attachment);
                 $sendingError = $this->get('email_service')->sendEmail($templateParams);
                 if (true !== $sendingError) {
                     $data = [
@@ -788,9 +836,10 @@ class CommentController extends ApiBaseController
      * @param int $taskId
      * @param array $requestData
      * @param array $emailAddresses
+     * @param array|bool $attachmentParams
      * @return array
      */
-    private function getTemplateParams(int $taskId, array $requestData, array $emailAddresses):array
+    private function getTemplateParams(int $taskId, array $requestData, array $emailAddresses, $attachmentParams):array
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -821,7 +870,8 @@ class CommentController extends ApiBaseController
             'subject' => 'LanHelpdesk - ' . '[#' . $taskId . ']' . ' ' . $requestData['title'],
             'from' => $email,
             'to' => $emailAddresses,
-            'body' => $this->renderView('@APITask/Emails/comment.html.twig', $templateParams)
+            'body' => $this->renderView('@APITask/Emails/comment.html.twig', $templateParams),
+            'attachment' => $attachmentParams
         ];
 
         return $params;
@@ -865,6 +915,22 @@ class CommentController extends ApiBaseController
         }
 
         return $notificationEmailAddresses;
+    }
+
+    /**
+     * @param Comment $comment
+     * @param string $slug
+     * @return bool
+     * @throws \LogicException
+     */
+    private function canAddAttachmentToComment(Comment $comment, string $slug): bool
+    {
+        $commentHasAttachment = $this->getDoctrine()->getRepository('APITaskBundle:CommentHasAttachment')->findOneBy([
+            'slug' => $slug,
+            'comment' => $comment
+        ]);
+
+        return (!$commentHasAttachment instanceof CommentHasAttachment);
     }
 }
 

@@ -63,13 +63,7 @@ class EmailService
 
         try {
             foreach ($addressesTo as $to) {
-                if (!$params['attachment']) {
-                    $message = \Swift_Message::newInstance()
-                        ->setSubject($subject)
-                        ->setFrom($from)
-                        ->setTo($to)
-                        ->setBody($body, 'text/html');
-                } else {
+                if (isset($params['attachment']) && false !== $params['attachment']) {
                     $message = \Swift_Message::newInstance()
                         ->setSubject($subject)
                         ->setFrom($from)
@@ -81,8 +75,13 @@ class EmailService
                         $path = __DIR__ . '/../../../../app/uploads/' . $attachmentDir . '/' . $attachmentFile;
                         $message->attach(\Swift_Attachment::fromPath($path));
                     }
+                } else {
+                    $message = \Swift_Message::newInstance()
+                        ->setSubject($subject)
+                        ->setFrom($from)
+                        ->setTo($to)
+                        ->setBody($body, 'text/html');
                 }
-
                 $this->mailer->send($message);
             }
             return true;

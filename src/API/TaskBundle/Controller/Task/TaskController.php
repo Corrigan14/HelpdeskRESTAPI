@@ -2862,7 +2862,8 @@ class TaskController extends ApiBaseController
         // Sent Notification Emails about updating of Task to task REQUESTER, ASSIGNED USERS, FOLLOWERS
         if (count($changedParams) > 0) {
             $loggedUser = $this->getUser();
-            $notificationEmailAddresses = $this->getEmailForUpdateTaskNotification($task, $loggedUser->getEmail());
+//            $notificationEmailAddresses = $this->getEmailForUpdateTaskNotification($task, $loggedUser->getEmail());
+            $notificationEmailAddresses = [];
             if (count($notificationEmailAddresses) > 0) {
                 $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $notificationEmailAddresses, $loggedUser, $changedParams);
                 $sendingError = $this->get('email_service')->sendEmail($templateParams);
@@ -3202,7 +3203,8 @@ class TaskController extends ApiBaseController
 
             // Sent Notification Emails about updating of Task to task REQUESTER, ASSIGNED USERS, FOLLOWERS
             if (count($changedParams) > 0) {
-                $notificationEmailAddresses = $this->getEmailForUpdateTaskNotification($task, $user->getEmail());
+//                $notificationEmailAddresses = $this->getEmailForUpdateTaskNotification($task, $user->getEmail());
+                $notificationEmailAddresses = [];
                 if (count($notificationEmailAddresses) > 0) {
                     $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $notificationEmailAddresses, $user, $changedParams);
                     $sendingError = $this->get('email_service')->sendEmail($templateParams);

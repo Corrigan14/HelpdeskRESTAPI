@@ -140,14 +140,14 @@ class TaskRepository extends EntityRepository
 
         foreach ($isNullFilter as $value) {
             // check if query is allowed
-            if (in_array($value, VariableHelper::$allowedKeysInFilter)) {
+            if (in_array($value, VariableHelper::$allowedKeysInFilter, true)) {
                 $query->andWhere($value . ' IS NULL');
             }
         }
 
         foreach ($inFilter as $key => $value) {
             // check if query is allowed
-            if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
+            if (in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
                 $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
                 $paramArray['parameters' . $paramNum] = $value;
 
@@ -156,7 +156,7 @@ class TaskRepository extends EntityRepository
         }
 
         foreach ($equalFilter as $key => $value) {
-            if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
+            if (in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
                 $query->andWhere($key . ' = :parameter' . $paramNum);
                 $paramArray['parameter' . $paramNum] = $value;
 
@@ -165,14 +165,14 @@ class TaskRepository extends EntityRepository
         }
 
         foreach ($notAndCurrentFilter as $filter) {
-            if (in_array($filter['not'], VariableHelper::$allowedKeysInFilter) && in_array($filter['equal']['key'], VariableHelper::$allowedKeysInFilter)) {
+            if (in_array($filter['not'], VariableHelper::$allowedKeysInFilter, true) && in_array($filter['equal']['key'], VariableHelper::$allowedKeysInFilter, true)) {
                 $query->andWhere($filter['not'] . ' IS NULL' . ' OR ' . $filter['equal']['key'] . ' = :parameter' . $paramNum);
                 $paramArray['parameter' . $paramNum] = $filter['equal']['value'];
             }
         }
 
         foreach ($dateFilter as $key => $value) {
-            if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
+            if (in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
                 if (isset($value['from']) && isset($value['to'])) {
                     $query->andWhere($query->expr()->between($key, ':FROM' . $paramNum, ':TO' . $paramNum));
                     $paramArray['FROM' . $paramNum] = $value['from'];
@@ -279,20 +279,6 @@ class TaskRepository extends EntityRepository
 
         $query = $this->createQueryBuilder('task')
             ->select('task')
-            ->addSelect('taskData')
-            ->addSelect('taskAttribute')
-            ->addSelect('project')
-            ->addSelect('projectCreator')
-            ->addSelect('createdBy')
-            ->addSelect('creatorDetailData')
-            ->addSelect('company')
-            ->addSelect('requestedBy')
-            ->addSelect('requesterDetailData')
-            ->addSelect('thau')
-            ->addSelect('status')
-            ->addSelect('assignedUser')
-            ->addSelect('tags')
-            ->addSelect('taskCompany')
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')
@@ -519,11 +505,13 @@ class TaskRepository extends EntityRepository
     /**
      * @param int $taskId
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getTask(int $taskId)
     {
         $query = $this->createQueryBuilder('task')
-            ->select('task, taskData, taskAttribute, project, createdBy, company, requestedBy, thau, status, assignedUser, creatorDetailData, requesterDetailData, tags, taskCompany, attachments, invoiceableItems, unit')
+            ->select('task')
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')

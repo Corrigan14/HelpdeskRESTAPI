@@ -111,110 +111,6 @@ class TaskController extends ApiBaseController
      *            "taskHasAssignedUsers": [],
      *            "taskHasAttachments": [],
      *            "comments":
-     *               *          "188":
-     *          {
-     *             "id": 188,
-     *             "title": "test",
-     *             "body": "gggg 222",
-     *             "createdAt":
-     *             {
-     *                "date": "2017-03-16 11:23:43.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *                "date": "2017-03-16 11:23:43.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
-     *             "internal": true,
-     *             "email": true,
-     *             "email_to":
-     *             [
-     *                "mb@web-solutions.sk"
-     *             ],
-     *             "email_cc": null,
-     *             "email_bcc": null,
-     *             "createdBy":
-     *             {
-     *                "id": 4031,
-     *                "username": "admin",
-     *                "email": "admin@admin.sk"
-     *             },
-     *             "children":
-     *             {
-     *                "189": 189,
-     *                "190": 190
-     *              }
-     *           },
-     *           "189":
-     *           {
-     *              "id": 189,
-     *              "title": "test",
-     *              "body": "gggg 222 222",
-     *              "createdAt":
-     *              {
-     *                 "date": "2017-03-16 11:23:43.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "updatedAt":
-     *              {
-     *                 "date": "2017-03-16 11:23:43.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "internal": true,
-     *              "email": true,
-     *              "email_to":
-     *              [
-     *                 "mb@web-solutions.sk"
-     *              ],
-     *              "email_cc": null,
-     *              "email_bcc": null,
-     *              "createdBy":
-     *              {
-     *                 "id": 4031,
-     *                 "username": "admin",
-     *                 "email": "admin@admin.sk"
-     *               },
-     *               "children": false
-     *             },
-     *             "190":
-     *             {
-     *                "id": 190,
-     *                "title": "test",
-     *                "body": "gggg 222 222 555",
-     *                "createdAt":
-     *                {
-     *                   "date": "2017-03-16 11:23:43.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
-     *                },
-     *                "updatedAt":
-     *                {
-     *                   "date": "2017-03-16 11:23:43.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
-     *                },
-     *                "internal": true,
-     *                "email": true,
-     *                "email_to":
-     *                [
-     *                   "mb@web-solutions.sk"
-     *                ],
-     *                "email_cc": null,
-     *                "email_bcc": null,
-     *                "createdBy":
-     *                {
-     *                   "id": 4031,
-     *                   "username": "admin",
-     *                   "email": "admin@admin.sk"
-     *                 },
-     *                 "children": false
-     *               }
-     *            },
      *            "invoiceableItems": []
      *          }
      *       ],
@@ -360,7 +256,7 @@ class TaskController extends ApiBaseController
         $filterData = $this->getFilterData($request);
 
         $pageNum = $request->get('page');
-        $pageNum = intval($pageNum);
+        $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $orderString = $request->get('order');

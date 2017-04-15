@@ -62,8 +62,18 @@ class CommentController extends ApiBaseController
      *             {
      *                "id": 4031,
      *                "username": "admin",
-     *                "email": "admin@admin.sk"
+     *                "email": "admin@admin.sk",
+     *                "name": "Admin",
+     *                "surname": "Adminovic",
+     *                "avatarSlug": "slug-15-15-2014"
      *             },
+     *             "commentHasAttachments":
+     *             [
+     *                {
+     *                   "id": 3,
+     *                   "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                }
+     *             ],
      *             "children":
      *             {
      *                "189": 189,
@@ -99,9 +109,19 @@ class CommentController extends ApiBaseController
      *              {
      *                 "id": 4031,
      *                 "username": "admin",
-     *                 "email": "admin@admin.sk"
-     *               },
-     *               "children": false
+     *                 "email": "admin@admin.sk",
+     *                 "name": "Admin",
+     *                 "surname": "Adminovic",
+     *                 "avatarSlug": "slug-15-15-2014"
+     *              },
+     *              "commentHasAttachments":
+     *              [
+     *                {
+     *                   "id": 3,
+     *                   "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                }
+     *              ],
+     *              "children": false
      *             },
      *             "190":
      *             {
@@ -132,9 +152,19 @@ class CommentController extends ApiBaseController
      *                {
      *                   "id": 4031,
      *                   "username": "admin",
-     *                   "email": "admin@admin.sk"
-     *                 },
-     *                 "children": false
+     *                   "email": "admin@admin.sk",
+     *                   "name": "Admin",
+     *                   "surname": "Adminovic",
+     *                   "avatarSlug": "slug-15-15-2014"
+     *                },
+     *                "commentHasAttachments":
+     *                [
+     *                  {
+     *                     "id": 3,
+     *                     "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                  }
+     *                ],
+     *                "children": false
      *               }
      *            }
      *       }
@@ -209,7 +239,7 @@ class CommentController extends ApiBaseController
         }
 
         $pageNum = $request->get('page');
-        $pageNum = intval($pageNum);
+        $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $internal = $request->get('internal') ?: 'all';
@@ -254,23 +284,21 @@ class CommentController extends ApiBaseController
      *          },
      *          "createdBy":
      *          {
-     *             "id": 1846,
+     *             "id": 4031,
      *             "username": "admin",
-     *             "password": "$2y$13$elpnHhCe/zvKZeezL8CkS.5.GgBwXYev/32i1AcTqEH2Vg6WzGHz6",
      *             "email": "admin@admin.sk",
-     *             "roles": "[\"ROLE_ADMIN\"]",
-     *             "is_active": true,
-     *             "language": "AJ",
-     *             "image": null
+     *             "name": "Admin",
+     *             "surname": "Adminovic",
+     *             "avatarSlug": "slug-15-15-2014"
      *          },
-     *          "comment": null,
      *          "commentHasAttachments":
      *          [
      *             {
      *                 "id": 3,
      *                 "slug": "zsskcd-jpg-2016-12-17-15-36"
      *             }
-     *          ]
+     *          ],
+     *          "children": false
      *        },
      *        "_links":
      *        {
@@ -353,23 +381,21 @@ class CommentController extends ApiBaseController
      *          },
      *          "createdBy":
      *          {
-     *             "id": 1846,
+     *             "id": 4031,
      *             "username": "admin",
-     *             "password": "$2y$13$elpnHhCe/zvKZeezL8CkS.5.GgBwXYev/32i1AcTqEH2Vg6WzGHz6",
      *             "email": "admin@admin.sk",
-     *             "roles": "[\"ROLE_ADMIN\"]",
-     *             "is_active": true,
-     *             "language": "AJ",
-     *             "image": null
+     *             "name": "Admin",
+     *             "surname": "Adminovic",
+     *             "avatarSlug": "slug-15-15-2014"
      *          },
-     *          "comment": null,
      *          "commentHasAttachments":
      *          [
      *             {
      *                 "id": 3,
      *                 "slug": "zsskcd-jpg-2016-12-17-15-36"
      *             }
-     *          ]
+     *          ],
+     *          "children": false
      *        },
      *        "_links":
      *        {
@@ -465,23 +491,21 @@ class CommentController extends ApiBaseController
      *          },
      *          "createdBy":
      *          {
-     *             "id": 1846,
+     *             "id": 4031,
      *             "username": "admin",
-     *             "password": "$2y$13$elpnHhCe/zvKZeezL8CkS.5.GgBwXYev/32i1AcTqEH2Vg6WzGHz6",
      *             "email": "admin@admin.sk",
-     *             "roles": "[\"ROLE_ADMIN\"]",
-     *             "is_active": true,
-     *             "language": "AJ",
-     *             "image": null
+     *             "name": "Admin",
+     *             "surname": "Adminovic",
+     *             "avatarSlug": "slug-15-15-2014"
      *          },
-     *          "comment": null,
      *          "commentHasAttachments":
      *          [
      *             {
      *                 "id": 3,
      *                 "slug": "zsskcd-jpg-2016-12-17-15-36"
      *             }
-     *          ]
+     *          ],
+     *          "children": false
      *        },
      *        "_links":
      *        {

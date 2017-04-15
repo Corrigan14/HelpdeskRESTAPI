@@ -69,6 +69,8 @@ class CommentRepository extends EntityRepository
     /**
      * @param $id
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getCommentEntity($id):array
     {
@@ -95,7 +97,7 @@ class CommentRepository extends EntityRepository
 
         /** @var Comment $comment */
         foreach ($paginatorData as $comment) {
-            if (in_array($comment->getId(), $processedCommentIds)) {
+            if (in_array($comment->getId(), $processedCommentIds, true)) {
                 continue;
             }
             $this->buildCommentTree($response, $processedCommentIds, $comment);
@@ -112,13 +114,14 @@ class CommentRepository extends EntityRepository
     {
         $commentId = $comment->getId();
 
-        if (!in_array($commentId, $processedCommentIds)) {
+        if (!in_array($commentId, $processedCommentIds, true)) {
             $processedCommentIds[] = $commentId;
             $children = $comment->getInversedComment();
             if (count($children) > 0) {
                 $response[$commentId] = $this->fillArray($comment);
                 foreach ($children as $child) {
-                    $response[$commentId]['children'][$child->getId()] = $child->getId();
+                    $childId = $child->getId();
+                    $response[$commentId]['children'][$childId] = $childId;
                 }
             } else {
                 $response[$commentId] = $this->fillArray($comment);
@@ -136,7 +139,6 @@ class CommentRepository extends EntityRepository
     {
         $attachments = $comment->getCommentHasAttachments();
         $attachmentArray = [];
-        $array = [];
 
         if (count($attachments) > 0) {
             /** @var CommentHasAttachment $attachment */
@@ -181,7 +183,7 @@ class CommentRepository extends EntityRepository
 
         if ($single) {
             $childrenComments = $comment->getInversedComment();
-            $childrenCommentsArray = [];
+            $childrenCommentsArray = false;
             if (count($childrenComments) > 0) {
                 /** @var Comment $comment */
                 foreach ($childrenComments as $commentN) {

@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Repository;
 
+use API\CoreBundle\Entity\UserData;
 use API\TaskBundle\Entity\Comment;
 use API\TaskBundle\Entity\CommentHasAttachment;
 use API\TaskBundle\Entity\Task;
@@ -135,6 +136,8 @@ class CommentRepository extends EntityRepository
     {
         $attachments = $comment->getCommentHasAttachments();
         $attachmentArray = [];
+        $array = [];
+
         if (count($attachments) > 0) {
             /** @var CommentHasAttachment $attachment */
             foreach ($attachments as $attachment) {
@@ -144,6 +147,16 @@ class CommentRepository extends EntityRepository
                 ];
             }
         }
+
+        $detailData = $comment->getCreatedBy()->getDetailData();
+        if($detailData instanceof UserData){
+            $nameOfCreator = $detailData->getName();
+            $surnameOfCreator = $detailData->getSurname();
+        }else{
+            $nameOfCreator = null;
+            $surnameOfCreator = null;
+        }
+
         $array = [
             'id' => $comment->getId(),
             'title' => $comment->getTitle(),
@@ -158,7 +171,10 @@ class CommentRepository extends EntityRepository
             'createdBy' => [
                 'id' => $comment->getCreatedBy()->getId(),
                 'username' => $comment->getCreatedBy()->getUsername(),
-                'email' => $comment->getCreatedBy()->getEmail()
+                'email' => $comment->getCreatedBy()->getEmail(),
+                'name' => $nameOfCreator,
+                'surname' => $surnameOfCreator,
+                'avatarSlug' => $comment->getCreatedBy()->getImage()
             ],
             'commentHasAttachments' => $attachmentArray
         ];
@@ -168,9 +184,9 @@ class CommentRepository extends EntityRepository
             $childrenCommentsArray = [];
             if (count($childrenComments) > 0) {
                 /** @var Comment $comment */
-                foreach ($childrenComments as $comment) {
+                foreach ($childrenComments as $commentN) {
                     $childrenCommentsArray[] = [
-                        $comment->getId() => $comment->getId()
+                        $commentN->getId() => $commentN->getId()
                     ];
                 }
             }

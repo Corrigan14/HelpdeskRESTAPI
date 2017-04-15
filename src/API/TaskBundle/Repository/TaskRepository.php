@@ -246,7 +246,6 @@ class TaskRepository extends EntityRepository
 
         $query->setMaxResults(self::LIMIT);
 
-        dump($query->getQuery());
         $paginator = new Paginator($query, $fetchJoinCollection = true);
         $count = $paginator->count();
 
@@ -734,7 +733,7 @@ class TaskRepository extends EntityRepository
 
         /** @var Comment $comment */
         foreach ($paginatorData as $comment) {
-            if (in_array($comment->getId(), $processedCommentIds)) {
+            if (in_array($comment->getId(), $processedCommentIds, true)) {
                 continue;
             }
             $this->buildCommentTree($response, $processedCommentIds, $comment);

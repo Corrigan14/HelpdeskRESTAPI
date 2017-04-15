@@ -9,7 +9,6 @@ use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\UserHasProject;
 use API\TaskBundle\Repository\TaskRepository;
 use API\TaskBundle\Security\ProjectAclOptions;
-use API\TaskBundle\Security\VoteOptions;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
@@ -72,6 +71,8 @@ class TaskService
     /**
      * @param array $ids
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getTaskResponse(array $ids)
     {
@@ -88,6 +89,8 @@ class TaskService
      * @param bool $canEdit
      * @param int $loggedUserId
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getFullTaskEntity(Task $task, bool $canEdit, int $loggedUserId):array
     {
@@ -107,7 +110,7 @@ class TaskService
             foreach ($followers as $follower) {
                 $followersId[] = $follower->getId();
             }
-            if (in_array($loggedUserId, $followersId)) {
+            if (in_array($loggedUserId, $followersId, true)) {
                 $followTask = true;
             } else {
                 $followTask = false;

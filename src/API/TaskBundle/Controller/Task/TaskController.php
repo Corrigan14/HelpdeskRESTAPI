@@ -111,6 +111,98 @@ class TaskController extends ApiBaseController
      *            "taskHasAssignedUsers": [],
      *            "taskHasAttachments": [],
      *            "comments":
+     *            {
+     *              "188":
+     *              {
+     *                  "id": 188,
+     *                  "title": "test",
+     *                  "body": "gggg 222",
+     *                  "createdAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                       "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "internal": true,
+     *                  "email": true,
+     *                  "email_to":
+     *                  [
+     *                      "mb@web-solutions.sk"
+     *                  ],
+     *                  "email_cc": null,
+     *                  "email_bcc": null,
+     *                  "createdBy":
+     *                  {
+     *                      "id": 4031,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic",
+     *                      "avatarSlug": "slug-15-15-2014"
+     *                  },
+     *                  "commentHasAttachments":
+     *                  [
+     *                      {
+     *                          "id": 3,
+     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                      }
+     *                  ],
+     *                  "children":
+     *                  {
+     *                      "189": 189,
+     *                      "190": 190
+     *                   }
+     *                },
+     *              "189":
+     *              {
+     *                  "id": 189,
+     *                  "title": "test",
+     *                  "body": "gggg 222 222",
+     *                  "createdAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "internal": true,
+     *                  "email": true,
+     *                  "email_to":
+     *                  [
+     *                      "mb@web-solutions.sk"
+     *                  ],
+     *                  "email_cc": null,
+     *                  "email_bcc": null,
+     *                  "createdBy":
+     *                  {
+     *                      "id": 4031,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic",
+     *                      "avatarSlug": "slug-15-15-2014"
+     *                  },
+     *                  "commentHasAttachments":
+     *                  [
+     *                      {
+     *                          "id": 3,
+     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                      }
+     *                  ],
+     *                  "children": false
+     *              },
+     *            },
      *            "invoiceableItems": []
      *          }
      *       ],
@@ -404,110 +496,98 @@ class TaskController extends ApiBaseController
      *                   "slug": "Slug-of-image-12-14-2015",
      *               }
      *            ],
-     *            "comments":
-     *               *          "188":
-     *          {
-     *             "id": 188,
-     *             "title": "test",
-     *             "body": "gggg 222",
-     *             "createdAt":
-     *             {
-     *                "date": "2017-03-16 11:23:43.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *                "date": "2017-03-16 11:23:43.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
-     *             "internal": true,
-     *             "email": true,
-     *             "email_to":
-     *             [
-     *                "mb@web-solutions.sk"
-     *             ],
-     *             "email_cc": null,
-     *             "email_bcc": null,
-     *             "createdBy":
-     *             {
-     *                "id": 4031,
-     *                "username": "admin",
-     *                "email": "admin@admin.sk"
-     *             },
-     *             "children":
-     *             {
-     *                "189": 189,
-     *                "190": 190
-     *              }
-     *           },
-     *           "189":
-     *           {
-     *              "id": 189,
-     *              "title": "test",
-     *              "body": "gggg 222 222",
-     *              "createdAt":
+     *           "comments":
+     *            {
+     *              "188":
      *              {
-     *                 "date": "2017-03-16 11:23:43.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "updatedAt":
-     *              {
-     *                 "date": "2017-03-16 11:23:43.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "internal": true,
-     *              "email": true,
-     *              "email_to":
-     *              [
-     *                 "mb@web-solutions.sk"
-     *              ],
-     *              "email_cc": null,
-     *              "email_bcc": null,
-     *              "createdBy":
-     *              {
-     *                 "id": 4031,
-     *                 "username": "admin",
-     *                 "email": "admin@admin.sk"
-     *               },
-     *               "children": false
-     *             },
-     *             "190":
-     *             {
-     *                "id": 190,
-     *                "title": "test",
-     *                "body": "gggg 222 222 555",
-     *                "createdAt":
-     *                {
-     *                   "date": "2017-03-16 11:23:43.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
+     *                  "id": 188,
+     *                  "title": "test",
+     *                  "body": "gggg 222",
+     *                  "createdAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                       "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "internal": true,
+     *                  "email": true,
+     *                  "email_to":
+     *                  [
+     *                      "mb@web-solutions.sk"
+     *                  ],
+     *                  "email_cc": null,
+     *                  "email_bcc": null,
+     *                  "createdBy":
+     *                  {
+     *                      "id": 4031,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic",
+     *                      "avatarSlug": "slug-15-15-2014"
+     *                  },
+     *                  "commentHasAttachments":
+     *                  [
+     *                      {
+     *                          "id": 3,
+     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                      }
+     *                  ],
+     *                  "children":
+     *                  {
+     *                      "189": 189,
+     *                      "190": 190
+     *                   }
      *                },
-     *                "updatedAt":
-     *                {
-     *                   "date": "2017-03-16 11:23:43.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
-     *                },
-     *                "internal": true,
-     *                "email": true,
-     *                "email_to":
-     *                [
-     *                   "mb@web-solutions.sk"
-     *                ],
-     *                "email_cc": null,
-     *                "email_bcc": null,
-     *                "createdBy":
-     *                {
-     *                   "id": 4031,
-     *                   "username": "admin",
-     *                   "email": "admin@admin.sk"
-     *                 },
-     *                 "children": false
-     *               }
+     *              "189":
+     *              {
+     *                  "id": 189,
+     *                  "title": "test",
+     *                  "body": "gggg 222 222",
+     *                  "createdAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "internal": true,
+     *                  "email": true,
+     *                  "email_to":
+     *                  [
+     *                      "mb@web-solutions.sk"
+     *                  ],
+     *                  "email_cc": null,
+     *                  "email_bcc": null,
+     *                  "createdBy":
+     *                  {
+     *                      "id": 4031,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic",
+     *                      "avatarSlug": "slug-15-15-2014"
+     *                  },
+     *                  "commentHasAttachments":
+     *                  [
+     *                      {
+     *                          "id": 3,
+     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                      }
+     *                  ],
+     *                  "children": false
+     *              },
      *            },
      *            "invoiceableItems":
      *            [
@@ -612,7 +692,7 @@ class TaskController extends ApiBaseController
         }
 
         $pageNum = $request->get('page');
-        $pageNum = intval($pageNum);
+        $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $orderString = $request->get('order');
@@ -762,110 +842,98 @@ class TaskController extends ApiBaseController
      *               }
      *            ],
      *            "comments":
-     *               *          "188":
-     *          {
-     *             "id": 188,
-     *             "title": "test",
-     *             "body": "gggg 222",
-     *             "createdAt":
-     *             {
-     *                "date": "2017-03-16 11:23:43.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *                "date": "2017-03-16 11:23:43.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
-     *             "internal": true,
-     *             "email": true,
-     *             "email_to":
-     *             [
-     *                "mb@web-solutions.sk"
-     *             ],
-     *             "email_cc": null,
-     *             "email_bcc": null,
-     *             "createdBy":
-     *             {
-     *                "id": 4031,
-     *                "username": "admin",
-     *                "email": "admin@admin.sk"
-     *             },
-     *             "children":
-     *             {
-     *                "189": 189,
-     *                "190": 190
-     *              }
-     *           },
-     *           "189":
-     *           {
-     *              "id": 189,
-     *              "title": "test",
-     *              "body": "gggg 222 222",
-     *              "createdAt":
+     *            {
+     *              "188":
      *              {
-     *                 "date": "2017-03-16 11:23:43.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "updatedAt":
-     *              {
-     *                 "date": "2017-03-16 11:23:43.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "internal": true,
-     *              "email": true,
-     *              "email_to":
-     *              [
-     *                 "mb@web-solutions.sk"
-     *              ],
-     *              "email_cc": null,
-     *              "email_bcc": null,
-     *              "createdBy":
-     *              {
-     *                 "id": 4031,
-     *                 "username": "admin",
-     *                 "email": "admin@admin.sk"
-     *               },
-     *               "children": false
-     *             },
-     *             "190":
-     *             {
-     *                "id": 190,
-     *                "title": "test",
-     *                "body": "gggg 222 222 555",
-     *                "createdAt":
-     *                {
-     *                   "date": "2017-03-16 11:23:43.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
+     *                  "id": 188,
+     *                  "title": "test",
+     *                  "body": "gggg 222",
+     *                  "createdAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                       "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "internal": true,
+     *                  "email": true,
+     *                  "email_to":
+     *                  [
+     *                      "mb@web-solutions.sk"
+     *                  ],
+     *                  "email_cc": null,
+     *                  "email_bcc": null,
+     *                  "createdBy":
+     *                  {
+     *                      "id": 4031,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic",
+     *                      "avatarSlug": "slug-15-15-2014"
+     *                  },
+     *                  "commentHasAttachments":
+     *                  [
+     *                      {
+     *                          "id": 3,
+     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                      }
+     *                  ],
+     *                  "children":
+     *                  {
+     *                      "189": 189,
+     *                      "190": 190
+     *                   }
      *                },
-     *                "updatedAt":
-     *                {
-     *                   "date": "2017-03-16 11:23:43.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
-     *                },
-     *                "internal": true,
-     *                "email": true,
-     *                "email_to":
-     *                [
-     *                   "mb@web-solutions.sk"
-     *                ],
-     *                "email_cc": null,
-     *                "email_bcc": null,
-     *                "createdBy":
-     *                {
-     *                   "id": 4031,
-     *                   "username": "admin",
-     *                   "email": "admin@admin.sk"
-     *                 },
-     *                 "children": false
-     *               }
-     *             },
+     *              "189":
+     *              {
+     *                  "id": 189,
+     *                  "title": "test",
+     *                  "body": "gggg 222 222",
+     *                  "createdAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "internal": true,
+     *                  "email": true,
+     *                  "email_to":
+     *                  [
+     *                      "mb@web-solutions.sk"
+     *                  ],
+     *                  "email_cc": null,
+     *                  "email_bcc": null,
+     *                  "createdBy":
+     *                  {
+     *                      "id": 4031,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic",
+     *                      "avatarSlug": "slug-15-15-2014"
+     *                  },
+     *                  "commentHasAttachments":
+     *                  [
+     *                      {
+     *                          "id": 3,
+     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                      }
+     *                  ],
+     *                  "children": false
+     *              },
+     *            },
      *             "invoiceableItems":
      *             [
      *                {
@@ -1085,110 +1153,98 @@ class TaskController extends ApiBaseController
      *               }
      *            ],
      *            "comments":
-     *               *          "188":
-     *          {
-     *             "id": 188,
-     *             "title": "test",
-     *             "body": "gggg 222",
-     *             "createdAt":
-     *             {
-     *                "date": "2017-03-16 11:23:43.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *                "date": "2017-03-16 11:23:43.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
-     *             "internal": true,
-     *             "email": true,
-     *             "email_to":
-     *             [
-     *                "mb@web-solutions.sk"
-     *             ],
-     *             "email_cc": null,
-     *             "email_bcc": null,
-     *             "createdBy":
-     *             {
-     *                "id": 4031,
-     *                "username": "admin",
-     *                "email": "admin@admin.sk"
-     *             },
-     *             "children":
-     *             {
-     *                "189": 189,
-     *                "190": 190
-     *              }
-     *           },
-     *           "189":
-     *           {
-     *              "id": 189,
-     *              "title": "test",
-     *              "body": "gggg 222 222",
-     *              "createdAt":
+     *            {
+     *              "188":
      *              {
-     *                 "date": "2017-03-16 11:23:43.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "updatedAt":
-     *              {
-     *                 "date": "2017-03-16 11:23:43.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "internal": true,
-     *              "email": true,
-     *              "email_to":
-     *              [
-     *                 "mb@web-solutions.sk"
-     *              ],
-     *              "email_cc": null,
-     *              "email_bcc": null,
-     *              "createdBy":
-     *              {
-     *                 "id": 4031,
-     *                 "username": "admin",
-     *                 "email": "admin@admin.sk"
-     *               },
-     *               "children": false
-     *             },
-     *             "190":
-     *             {
-     *                "id": 190,
-     *                "title": "test",
-     *                "body": "gggg 222 222 555",
-     *                "createdAt":
-     *                {
-     *                   "date": "2017-03-16 11:23:43.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
+     *                  "id": 188,
+     *                  "title": "test",
+     *                  "body": "gggg 222",
+     *                  "createdAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                       "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "internal": true,
+     *                  "email": true,
+     *                  "email_to":
+     *                  [
+     *                      "mb@web-solutions.sk"
+     *                  ],
+     *                  "email_cc": null,
+     *                  "email_bcc": null,
+     *                  "createdBy":
+     *                  {
+     *                      "id": 4031,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic",
+     *                      "avatarSlug": "slug-15-15-2014"
+     *                  },
+     *                  "commentHasAttachments":
+     *                  [
+     *                      {
+     *                          "id": 3,
+     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                      }
+     *                  ],
+     *                  "children":
+     *                  {
+     *                      "189": 189,
+     *                      "190": 190
+     *                   }
      *                },
-     *                "updatedAt":
-     *                {
-     *                   "date": "2017-03-16 11:23:43.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
-     *                },
-     *                "internal": true,
-     *                "email": true,
-     *                "email_to":
-     *                [
-     *                   "mb@web-solutions.sk"
-     *                ],
-     *                "email_cc": null,
-     *                "email_bcc": null,
-     *                "createdBy":
-     *                {
-     *                   "id": 4031,
-     *                   "username": "admin",
-     *                   "email": "admin@admin.sk"
-     *                 },
-     *                 "children": false
-     *               }
-     *             },
+     *              "189":
+     *              {
+     *                  "id": 189,
+     *                  "title": "test",
+     *                  "body": "gggg 222 222",
+     *                  "createdAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "internal": true,
+     *                  "email": true,
+     *                  "email_to":
+     *                  [
+     *                      "mb@web-solutions.sk"
+     *                  ],
+     *                  "email_cc": null,
+     *                  "email_bcc": null,
+     *                  "createdBy":
+     *                  {
+     *                      "id": 4031,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic",
+     *                      "avatarSlug": "slug-15-15-2014"
+     *                  },
+     *                  "commentHasAttachments":
+     *                  [
+     *                      {
+     *                          "id": 3,
+     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                      }
+     *                  ],
+     *                  "children": false
+     *              },
+     *            },
      *             "invoiceableItems":
      *             [
      *                {
@@ -1483,109 +1539,97 @@ class TaskController extends ApiBaseController
      *               }
      *            ],
      *            "comments":
-     *               *          "188":
-     *          {
-     *             "id": 188,
-     *             "title": "test",
-     *             "body": "gggg 222",
-     *             "createdAt":
-     *             {
-     *                "date": "2017-03-16 11:23:43.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *                "date": "2017-03-16 11:23:43.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
-     *             "internal": true,
-     *             "email": true,
-     *             "email_to":
-     *             [
-     *                "mb@web-solutions.sk"
-     *             ],
-     *             "email_cc": null,
-     *             "email_bcc": null,
-     *             "createdBy":
-     *             {
-     *                "id": 4031,
-     *                "username": "admin",
-     *                "email": "admin@admin.sk"
-     *             },
-     *             "children":
-     *             {
-     *                "189": 189,
-     *                "190": 190
-     *              }
-     *           },
-     *           "189":
-     *           {
-     *              "id": 189,
-     *              "title": "test",
-     *              "body": "gggg 222 222",
-     *              "createdAt":
+     *            {
+     *              "188":
      *              {
-     *                 "date": "2017-03-16 11:23:43.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "updatedAt":
-     *              {
-     *                 "date": "2017-03-16 11:23:43.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "internal": true,
-     *              "email": true,
-     *              "email_to":
-     *              [
-     *                 "mb@web-solutions.sk"
-     *              ],
-     *              "email_cc": null,
-     *              "email_bcc": null,
-     *              "createdBy":
-     *              {
-     *                 "id": 4031,
-     *                 "username": "admin",
-     *                 "email": "admin@admin.sk"
-     *               },
-     *               "children": false
-     *             },
-     *             "190":
-     *             {
-     *                "id": 190,
-     *                "title": "test",
-     *                "body": "gggg 222 222 555",
-     *                "createdAt":
-     *                {
-     *                   "date": "2017-03-16 11:23:43.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
+     *                  "id": 188,
+     *                  "title": "test",
+     *                  "body": "gggg 222",
+     *                  "createdAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                       "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "internal": true,
+     *                  "email": true,
+     *                  "email_to":
+     *                  [
+     *                      "mb@web-solutions.sk"
+     *                  ],
+     *                  "email_cc": null,
+     *                  "email_bcc": null,
+     *                  "createdBy":
+     *                  {
+     *                      "id": 4031,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic",
+     *                      "avatarSlug": "slug-15-15-2014"
+     *                  },
+     *                  "commentHasAttachments":
+     *                  [
+     *                      {
+     *                          "id": 3,
+     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                      }
+     *                  ],
+     *                  "children":
+     *                  {
+     *                      "189": 189,
+     *                      "190": 190
+     *                   }
      *                },
-     *                "updatedAt":
-     *                {
-     *                   "date": "2017-03-16 11:23:43.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
-     *                },
-     *                "internal": true,
-     *                "email": true,
-     *                "email_to":
-     *                [
-     *                   "mb@web-solutions.sk"
-     *                ],
-     *                "email_cc": null,
-     *                "email_bcc": null,
-     *                "createdBy":
-     *                {
-     *                   "id": 4031,
-     *                   "username": "admin",
-     *                   "email": "admin@admin.sk"
-     *                 },
-     *                 "children": false
-     *               }
+     *              "189":
+     *              {
+     *                  "id": 189,
+     *                  "title": "test",
+     *                  "body": "gggg 222 222",
+     *                  "createdAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "internal": true,
+     *                  "email": true,
+     *                  "email_to":
+     *                  [
+     *                      "mb@web-solutions.sk"
+     *                  ],
+     *                  "email_cc": null,
+     *                  "email_bcc": null,
+     *                  "createdBy":
+     *                  {
+     *                      "id": 4031,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic",
+     *                      "avatarSlug": "slug-15-15-2014"
+     *                  },
+     *                  "commentHasAttachments":
+     *                  [
+     *                      {
+     *                          "id": 3,
+     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                      }
+     *                  ],
+     *                  "children": false
+     *              },
      *            },
      *            "invoiceableItems":
      *             [
@@ -1859,110 +1903,98 @@ class TaskController extends ApiBaseController
      *               }
      *            ],
      *            "comments":
-     *               *          "188":
-     *          {
-     *             "id": 188,
-     *             "title": "test",
-     *             "body": "gggg 222",
-     *             "createdAt":
-     *             {
-     *                "date": "2017-03-16 11:23:43.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *                "date": "2017-03-16 11:23:43.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
-     *             "internal": true,
-     *             "email": true,
-     *             "email_to":
-     *             [
-     *                "mb@web-solutions.sk"
-     *             ],
-     *             "email_cc": null,
-     *             "email_bcc": null,
-     *             "createdBy":
-     *             {
-     *                "id": 4031,
-     *                "username": "admin",
-     *                "email": "admin@admin.sk"
-     *             },
-     *             "children":
-     *             {
-     *                "189": 189,
-     *                "190": 190
-     *              }
-     *           },
-     *           "189":
-     *           {
-     *              "id": 189,
-     *              "title": "test",
-     *              "body": "gggg 222 222",
-     *              "createdAt":
+     *            {
+     *              "188":
      *              {
-     *                 "date": "2017-03-16 11:23:43.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "updatedAt":
-     *              {
-     *                 "date": "2017-03-16 11:23:43.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "internal": true,
-     *              "email": true,
-     *              "email_to":
-     *              [
-     *                 "mb@web-solutions.sk"
-     *              ],
-     *              "email_cc": null,
-     *              "email_bcc": null,
-     *              "createdBy":
-     *              {
-     *                 "id": 4031,
-     *                 "username": "admin",
-     *                 "email": "admin@admin.sk"
-     *               },
-     *               "children": false
-     *             },
-     *             "190":
-     *             {
-     *                "id": 190,
-     *                "title": "test",
-     *                "body": "gggg 222 222 555",
-     *                "createdAt":
-     *                {
-     *                   "date": "2017-03-16 11:23:43.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
+     *                  "id": 188,
+     *                  "title": "test",
+     *                  "body": "gggg 222",
+     *                  "createdAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                       "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "internal": true,
+     *                  "email": true,
+     *                  "email_to":
+     *                  [
+     *                      "mb@web-solutions.sk"
+     *                  ],
+     *                  "email_cc": null,
+     *                  "email_bcc": null,
+     *                  "createdBy":
+     *                  {
+     *                      "id": 4031,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic",
+     *                      "avatarSlug": "slug-15-15-2014"
+     *                  },
+     *                  "commentHasAttachments":
+     *                  [
+     *                      {
+     *                          "id": 3,
+     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                      }
+     *                  ],
+     *                  "children":
+     *                  {
+     *                      "189": 189,
+     *                      "190": 190
+     *                   }
      *                },
-     *                "updatedAt":
-     *                {
-     *                   "date": "2017-03-16 11:23:43.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
-     *                },
-     *                "internal": true,
-     *                "email": true,
-     *                "email_to":
-     *                [
-     *                   "mb@web-solutions.sk"
-     *                ],
-     *                "email_cc": null,
-     *                "email_bcc": null,
-     *                "createdBy":
-     *                {
-     *                   "id": 4031,
-     *                   "username": "admin",
-     *                   "email": "admin@admin.sk"
-     *                 },
-     *                 "children": false
-     *               }
-     *             },
+     *              "189":
+     *              {
+     *                  "id": 189,
+     *                  "title": "test",
+     *                  "body": "gggg 222 222",
+     *                  "createdAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "internal": true,
+     *                  "email": true,
+     *                  "email_to":
+     *                  [
+     *                      "mb@web-solutions.sk"
+     *                  ],
+     *                  "email_cc": null,
+     *                  "email_bcc": null,
+     *                  "createdBy":
+     *                  {
+     *                      "id": 4031,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic",
+     *                      "avatarSlug": "slug-15-15-2014"
+     *                  },
+     *                  "commentHasAttachments":
+     *                  [
+     *                      {
+     *                          "id": 3,
+     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                      }
+     *                  ],
+     *                  "children": false
+     *              },
+     *            },
      *             "invoiceableItems":
      *             [
      *                {
@@ -2286,110 +2318,98 @@ class TaskController extends ApiBaseController
      *               }
      *            ],
      *            "comments":
-     *              *          "188":
-     *          {
-     *             "id": 188,
-     *             "title": "test",
-     *             "body": "gggg 222",
-     *             "createdAt":
-     *             {
-     *                "date": "2017-03-16 11:23:43.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *                "date": "2017-03-16 11:23:43.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
-     *             "internal": true,
-     *             "email": true,
-     *             "email_to":
-     *             [
-     *                "mb@web-solutions.sk"
-     *             ],
-     *             "email_cc": null,
-     *             "email_bcc": null,
-     *             "createdBy":
-     *             {
-     *                "id": 4031,
-     *                "username": "admin",
-     *                "email": "admin@admin.sk"
-     *             },
-     *             "children":
-     *             {
-     *                "189": 189,
-     *                "190": 190
-     *              }
-     *           },
-     *           "189":
-     *           {
-     *              "id": 189,
-     *              "title": "test",
-     *              "body": "gggg 222 222",
-     *              "createdAt":
+     *            {
+     *              "188":
      *              {
-     *                 "date": "2017-03-16 11:23:43.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "updatedAt":
-     *              {
-     *                 "date": "2017-03-16 11:23:43.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "internal": true,
-     *              "email": true,
-     *              "email_to":
-     *              [
-     *                 "mb@web-solutions.sk"
-     *              ],
-     *              "email_cc": null,
-     *              "email_bcc": null,
-     *              "createdBy":
-     *              {
-     *                 "id": 4031,
-     *                 "username": "admin",
-     *                 "email": "admin@admin.sk"
-     *               },
-     *               "children": false
-     *             },
-     *             "190":
-     *             {
-     *                "id": 190,
-     *                "title": "test",
-     *                "body": "gggg 222 222 555",
-     *                "createdAt":
-     *                {
-     *                   "date": "2017-03-16 11:23:43.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
+     *                  "id": 188,
+     *                  "title": "test",
+     *                  "body": "gggg 222",
+     *                  "createdAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                       "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "internal": true,
+     *                  "email": true,
+     *                  "email_to":
+     *                  [
+     *                      "mb@web-solutions.sk"
+     *                  ],
+     *                  "email_cc": null,
+     *                  "email_bcc": null,
+     *                  "createdBy":
+     *                  {
+     *                      "id": 4031,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic",
+     *                      "avatarSlug": "slug-15-15-2014"
+     *                  },
+     *                  "commentHasAttachments":
+     *                  [
+     *                      {
+     *                          "id": 3,
+     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                      }
+     *                  ],
+     *                  "children":
+     *                  {
+     *                      "189": 189,
+     *                      "190": 190
+     *                   }
      *                },
-     *                "updatedAt":
-     *                {
-     *                   "date": "2017-03-16 11:23:43.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
-     *                },
-     *                "internal": true,
-     *                "email": true,
-     *                "email_to":
-     *                [
-     *                   "mb@web-solutions.sk"
-     *                ],
-     *                "email_cc": null,
-     *                "email_bcc": null,
-     *                "createdBy":
-     *                {
-     *                   "id": 4031,
-     *                   "username": "admin",
-     *                   "email": "admin@admin.sk"
-     *                 },
-     *                 "children": false
-     *               }
-     *             },
+     *              "189":
+     *              {
+     *                  "id": 189,
+     *                  "title": "test",
+     *                  "body": "gggg 222 222",
+     *                  "createdAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "updatedAt":
+     *                  {
+     *                      "date": "2017-03-16 11:23:43.000000",
+     *                      "timezone_type": 3,
+     *                      "timezone": "Europe/Berlin"
+     *                  },
+     *                  "internal": true,
+     *                  "email": true,
+     *                  "email_to":
+     *                  [
+     *                      "mb@web-solutions.sk"
+     *                  ],
+     *                  "email_cc": null,
+     *                  "email_bcc": null,
+     *                  "createdBy":
+     *                  {
+     *                      "id": 4031,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic",
+     *                      "avatarSlug": "slug-15-15-2014"
+     *                  },
+     *                  "commentHasAttachments":
+     *                  [
+     *                      {
+     *                          "id": 3,
+     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                      }
+     *                  ],
+     *                  "children": false
+     *              },
+     *            },
      *             "invoiceableItems":
      *             [
      *                {
@@ -2583,7 +2603,7 @@ class TaskController extends ApiBaseController
                         if (!in_array($uid, $assignedUsersIds)) {
                             $this->getDoctrine()->getManager()->remove($userAssignedToTask);
                         } else {
-                            $key = array_search($uid, $assignedUsersIds);
+                            $key = array_search($uid, $assignedUsersIds, true);
                             unset($assignedUsersIds[$key]);
                         }
                     }
@@ -3508,6 +3528,7 @@ class TaskController extends ApiBaseController
      * @param TaskHasAssignedUser $entity
      * @param Project $project
      * @return bool
+     * @throws \LogicException
      */
     private function checkIfUserHasResolveTaskAclPermission(TaskHasAssignedUser $entity, Project $project):bool
     {
@@ -3530,6 +3551,7 @@ class TaskController extends ApiBaseController
     /**
      * @param string|null $orderString
      * @return array|Response
+     * @throws \InvalidArgumentException
      */
     private function processOrderData($orderString)
     {
@@ -3544,7 +3566,8 @@ class TaskController extends ApiBaseController
                         'message' => 'Requested filter parameter ' . $orderArrayKeyValue[0] . ' is not allowed!',
                     ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 }
-                if (!(strtolower($orderArrayKeyValue[1]) === 'asc' || strtolower($orderArrayKeyValue[1]) === 'desc')) {
+                $orderArrayKeyValueLowwer = strtolower($orderArrayKeyValue[1]);
+                if (!( $orderArrayKeyValueLowwer=== 'asc' || $orderArrayKeyValueLowwer === 'desc')) {
                     return $this->createApiResponse([
                         'message' => $orderArrayKeyValue[1] . ' Is not allowed! You can order data only ASC or DESC!',
                     ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
@@ -3569,7 +3592,7 @@ class TaskController extends ApiBaseController
         $notificationEmailAddresses = [];
 
         $requesterEmail = $task->getRequestedBy()->getEmail();
-        if ($loggedUserEmail !== $requesterEmail && !in_array($requesterEmail, $notificationEmailAddresses)) {
+        if ($loggedUserEmail !== $requesterEmail && !in_array($requesterEmail, $notificationEmailAddresses, true)) {
             $notificationEmailAddresses[] = $requesterEmail;
         }
 
@@ -3589,7 +3612,7 @@ class TaskController extends ApiBaseController
             /** @var TaskHasAssignedUser $item */
             foreach ($assignedUsers as $item) {
                 $assignedUserEmail = $item->getUser()->getEmail();
-                if ($loggedUserEmail !== $assignedUserEmail && !in_array($assignedUserEmail, $notificationEmailAddresses)) {
+                if ($loggedUserEmail !== $assignedUserEmail && !in_array($assignedUserEmail, $notificationEmailAddresses, true)) {
                     $notificationEmailAddresses[] = $assignedUserEmail;
                 }
             }
@@ -3605,6 +3628,7 @@ class TaskController extends ApiBaseController
      * @param User $user
      * @param array $changedParams
      * @return array
+     * @throws \LogicException
      */
     private function getTemplateParams(int $taskId, string $title, array $emailAddresses, User $user, array $changedParams):array
     {

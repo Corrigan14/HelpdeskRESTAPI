@@ -3,7 +3,9 @@
 namespace API\TaskBundle\Repository;
 
 use API\CoreBundle\Entity\User;
+use API\CoreBundle\Entity\UserData;
 use API\TaskBundle\Entity\Comment;
+use API\TaskBundle\Entity\CommentHasAttachment;
 use API\TaskBundle\Entity\InvoiceableItem;
 use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
@@ -244,6 +246,7 @@ class TaskRepository extends EntityRepository
 
         $query->setMaxResults(self::LIMIT);
 
+        dump($query->getQuery());
         $paginator = new Paginator($query, $fetchJoinCollection = true);
         $count = $paginator->count();
 
@@ -279,6 +282,21 @@ class TaskRepository extends EntityRepository
 
         $query = $this->createQueryBuilder('task')
             ->select('task')
+            ->addSelect('taskData')
+            ->addSelect('taskAttribute')
+            ->addSelect('project')
+            ->addSelect('projectCreator')
+            ->addSelect('createdBy')
+            ->addSelect('creatorDetailData')
+            ->addSelect('company')
+            ->addSelect('requestedBy')
+            ->addSelect('requesterDetailData')
+            ->addSelect('thau')
+            ->addSelect('status')
+            ->addSelect('assignedUser')
+            ->addSelect('tags')
+            ->addSelect('taskCompany')
+            ->addSelect('followers')
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')
@@ -633,6 +651,7 @@ class TaskRepository extends EntityRepository
         }
         $comments = $data->getComments();
         $commentsArray = $this->formatCommentData($comments);
+
         $invoiceableItems = $data->getInvoiceableItems();
         $invoiceableItemsArray = [];
         if (count($invoiceableItems) > 0) {
@@ -733,13 +752,14 @@ class TaskRepository extends EntityRepository
     {
         $commentId = $comment->getId();
 
-        if (!in_array($commentId, $processedCommentIds)) {
+        if (!in_array($commentId, $processedCommentIds, true)) {
             $processedCommentIds[] = $commentId;
             $children = $comment->getInversedComment();
             if (count($children) > 0) {
                 $response[$commentId] = $this->fillArray($comment);
                 foreach ($children as $child) {
-                    $response[$commentId]['children'][$child->getId()] = $child->getId();
+                    $childId = $child->getId();
+                    $response[$commentId]['children'][$childId] = $childId;
                 }
             } else {
                 $response[$commentId] = $this->fillArray($comment);
@@ -750,10 +770,33 @@ class TaskRepository extends EntityRepository
 
     /**
      * @param Comment $comment
+     * @param bool $single
      * @return array
      */
-    private function fillArray(Comment $comment)
+    private function fillArray(Comment $comment, $single = false)
     {
+        $attachments = $comment->getCommentHasAttachments();
+        $attachmentArray = [];
+
+        if (count($attachments) > 0) {
+            /** @var CommentHasAttachment $attachment */
+            foreach ($attachments as $attachment) {
+                $attachmentArray[] = [
+                    'id' => $attachment->getId(),
+                    'slug' => $attachment->getSlug()
+                ];
+            }
+        }
+
+        $detailData = $comment->getCreatedBy()->getDetailData();
+        if($detailData instanceof UserData){
+            $nameOfCreator = $detailData->getName();
+            $surnameOfCreator = $detailData->getSurname();
+        }else{
+            $nameOfCreator = null;
+            $surnameOfCreator = null;
+        }
+
         $array = [
             'id' => $comment->getId(),
             'title' => $comment->getTitle(),
@@ -768,9 +811,27 @@ class TaskRepository extends EntityRepository
             'createdBy' => [
                 'id' => $comment->getCreatedBy()->getId(),
                 'username' => $comment->getCreatedBy()->getUsername(),
-                'email' => $comment->getCreatedBy()->getEmail()
-            ]
+                'email' => $comment->getCreatedBy()->getEmail(),
+                'name' => $nameOfCreator,
+                'surname' => $surnameOfCreator,
+                'avatarSlug' => $comment->getCreatedBy()->getImage()
+            ],
+            'commentHasAttachments' => $attachmentArray
         ];
+
+        if ($single) {
+            $childrenComments = $comment->getInversedComment();
+            $childrenCommentsArray = false;
+            if (count($childrenComments) > 0) {
+                /** @var Comment $comment */
+                foreach ($childrenComments as $commentN) {
+                    $childrenCommentsArray[] = [
+                        $commentN->getId() => $commentN->getId()
+                    ];
+                }
+            }
+            $array['children'] = $childrenCommentsArray;
+        }
 
         return $array;
     }

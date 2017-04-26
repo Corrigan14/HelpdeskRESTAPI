@@ -2468,14 +2468,19 @@ class TaskController extends ApiBaseController
      *     }
      *  },
      *  parameters={
-     *      {"name"="project", "dataType"="int", "required"=false, "description"="id of Project"},
-     *      {"name"="requester", "dataType"="int", "required"=false,  "description"="id of User"},
-     *      {"name"="company", "dataType"="int", "required"=false,  "description"="id of Company"},
-     *      {"name"="assigned", "dataType"="array", "required"=false,  "description"="array of Users assigned to task: [userId => 12, statusId => 5]"},
+     *      {"name"="project", "dataType"="int", "required"=false, "description"="id of the Project"},
+     *      {"name"="requester", "dataType"="int", "required"=false,  "description"="id of the User"},
+     *      {"name"="company", "dataType"="int", "required"=false,  "description"="id of the Company"},
+     *      {"name"="assigned", "dataType"="array", "required"=false,  "description"="array of the Users assigned to the task: [userId => 12, statusId => 5]"},
      *      {"name"="startedAt", "dataType"="datetime", "required"=false,  "description"="the date of planned start"},
      *      {"name"="deadline", "dataType"="datetime", "required"=false,  "description"="the date of deadline"},
      *      {"name"="closedAt", "dataType"="datetime", "required"=false,  "description"="the date of closure"},
-     *      {"name"="tag", "dataType"="array", "required"=false,  "description"="array of Tag titles: [tag1, tag2]"}
+     *      {"name"="tag", "dataType"="array", "required"=false,  "description"="array of the Tag titles: [tag1, tag2]"},
+     *      {"name"="title", "dataType"="string", "required"=false,  "description"="tile of the Task"},
+     *      {"name"="description", "dataType"="string", "required"=false,  "description"="description of the Task"},
+     *      {"name"="important", "dataType"="boolean", "required"=false,  "description"="set TRUE if the Task should be checked as IMPORTANT"},
+     *      {"name"="work", "dataType"="string", "required"=false,  "description"="work"},
+     *      {"name"="workTime", "dataType"="string", "required"=false,  "description"="work time"}
      *  },
      *  headers={
      *     {
@@ -2519,6 +2524,42 @@ class TaskController extends ApiBaseController
         $requestData = json_decode($request->getContent(), true);
 
         $changedParams = [];
+
+        if (isset($requestData['title'])) {
+            $title = $requestData['title'];
+            if (strlen($title) > 0) {
+                $task->setTitle($title);
+                $changedParams[] = 'title';
+            } else {
+                return $this->createApiResponse([
+                    'message' => 'Title of the task can not be empty!',
+                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            }
+        }
+
+        if (isset($requestData['description'])) {
+            $desc = $requestData['description'];
+            $task->setDescription($desc);
+            $changedParams[] = 'description';
+        }
+
+        if (isset($requestData['work'])) {
+            $work = $requestData['work'];
+            $task->setWork($work);
+            $changedParams[] = 'work';
+        }
+
+        if (isset($requestData['workTime'])) {
+            $workTime = $requestData['workTime'];
+            $task->setWorkTime($workTime);
+            $changedParams[] = 'workTime';
+        }
+
+        if (isset($requestData['important'])) {
+            $important = $requestData['important'];
+            $task->setImportant($important);
+            $changedParams[] = 'important';
+        }
 
         if (isset($requestData['project'])) {
             $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($requestData['project']);
@@ -3530,7 +3571,7 @@ class TaskController extends ApiBaseController
      * @return bool
      * @throws \LogicException
      */
-    private function checkIfUserHasResolveTaskAclPermission(TaskHasAssignedUser $entity, Project $project):bool
+    private function checkIfUserHasResolveTaskAclPermission(TaskHasAssignedUser $entity, Project $project): bool
     {
         $user = $entity->getUser();
         $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
@@ -3567,7 +3608,7 @@ class TaskController extends ApiBaseController
                     ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 }
                 $orderArrayKeyValueLowwer = strtolower($orderArrayKeyValue[1]);
-                if (!( $orderArrayKeyValueLowwer=== 'asc' || $orderArrayKeyValueLowwer === 'desc')) {
+                if (!($orderArrayKeyValueLowwer === 'asc' || $orderArrayKeyValueLowwer === 'desc')) {
                     return $this->createApiResponse([
                         'message' => $orderArrayKeyValue[1] . ' Is not allowed! You can order data only ASC or DESC!',
                     ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
@@ -3587,7 +3628,7 @@ class TaskController extends ApiBaseController
      * @param string $loggedUserEmail
      * @return array
      */
-    private function getEmailForUpdateTaskNotification(Task $task, string $loggedUserEmail):array
+    private function getEmailForUpdateTaskNotification(Task $task, string $loggedUserEmail): array
     {
         $notificationEmailAddresses = [];
 
@@ -3630,7 +3671,7 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private function getTemplateParams(int $taskId, string $title, array $emailAddresses, User $user, array $changedParams):array
+    private function getTemplateParams(int $taskId, string $title, array $emailAddresses, User $user, array $changedParams): array
     {
         $userDetailData = $user->getDetailData();
         if ($userDetailData instanceof UserData) {
@@ -3667,7 +3708,7 @@ class TaskController extends ApiBaseController
      * @param array $changedParams
      * @return array
      */
-    private function getChangedParams(array &$requestData, array &$changedParams):array
+    private function getChangedParams(array &$requestData, array &$changedParams): array
     {
         if (count($requestData) > 0) {
             foreach ($requestData as $key => $value) {

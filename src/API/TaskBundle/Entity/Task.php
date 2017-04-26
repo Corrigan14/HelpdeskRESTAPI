@@ -287,7 +287,7 @@ class Task
     /**
      * Set important
      *
-     * @param boolean $important
+     * @param $important
      *
      * @return Task
      */

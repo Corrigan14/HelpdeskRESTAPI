@@ -73,3 +73,10 @@ project_process_users_acl:
     methods: [POST]
     requirements:
             projectId: '\d+'
+
+project_assigners:
+    path:     /project/assigners/{projectId}
+    defaults: { _controller: APITaskBundle:Project:getProjectAssigners }
+    methods: [GET]
+    requirements:
+        projectId: '\d+'

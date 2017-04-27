@@ -1524,4 +1524,93 @@ class ProjectController extends ApiBaseController implements ControllerInterface
 
         return false;
     }
+
+
+
+    /**
+     *  ### Response ###
+     *      {
+     *
+     *          "assigner":
+     *          [
+     *            {
+     *               "id": 1014,
+     *               "username": "admin"
+     *            }
+     *          ],
+     *
+     *      }
+     * @ApiDoc(
+     *  description="Get all possible assigners for project",
+     *  requirements={
+     *     {
+     *       "name"="projectId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of project"
+     *     },
+     *
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity"
+     *  })
+     *
+     * @param int $projectId
+     *
+     * @return JsonResponse|Response
+     * @throws \LogicException
+     */
+    public function getProjectAssignersAction(int $projectId)
+    {
+        $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
+
+        if (!$project instanceof Project) {
+            return $this->createApiResponse([
+                'message' => 'Project with requested id does not exist!',
+            ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        // Check if user can view requested Project
+        if (!$this->get('project_voter')->isGranted(VoteOptions::VIEW_PROJECT, $project)) {
+            return $this->accessDeniedResponse();
+        }
+
+
+        // Available projects are where logged user have CREATE_TASK ACL
+        // If task is moved to project where assigned user has not permission to RESOLVE_TASK, this assigned user will be removed
+        // Admin can use All existed projects
+        $isAdmin = $this->get('task_voter')->isAdmin();
+        $projectsArray = $this->get('project_service')->getListOfAvailableProjects($this->getUser(), $isAdmin, ProjectAclOptions::CREATE_TASK);
+
+        // Available assigners are based on project of task
+        // If task has project, assigner has to have RESOLVE_TASK ACL in user_has_project
+        // If task has not project, just creator of task can be assigned to it
+
+        $assignArray = [];
+            $assignArray = $this->get('api_user.service')->getListOfAvailableProjectAssigners($project, ProjectAclOptions::RESOLVE_TASK);
+
+        if (!count($assignArray) > 0) {
+            $assignArray = [
+//                [
+//                    'id' => $task->getCreatedBy()->getId(),
+//                    'username' => $task->getCreatedBy()->getUsername()
+//                ]
+            ];
+        }
+
+        $response = [
+            'assigner' => $assignArray,
+        ];
+        return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
+    }
 }

@@ -89,9 +89,8 @@ class CdnController extends ApiBaseController
             'projectId'   => false ,
             'requesterId' => false ,
         ];
-
         $response = $this->get('task_service')->getTaskResponse($ids);
-        $responseData['data'] = $response['data'][0];
+        $responseData['data'] = $response['data'];//[0];
         $responseLinks['_links'] = $response['_links'];
 
         return $this->json(array_merge($responseData , $responseLinks) , StatusCodesHelper::CREATED_CODE);

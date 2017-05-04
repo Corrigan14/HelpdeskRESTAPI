@@ -2525,6 +2525,14 @@ class TaskController extends ApiBaseController
 
         $changedParams = [];
 
+
+        $requestDetailData = false;
+        if (isset($requestData['task_data']) && count($requestData['task_data']) > 0) {
+            $requestDetailData = $requestData['task_data'];
+            unset($requestData['task_data']);
+        }
+
+
         if (isset($requestData['title'])) {
             $title = $requestData['title'];
             if (strlen($title) > 0) {
@@ -2815,6 +2823,57 @@ class TaskController extends ApiBaseController
 
         $this->getDoctrine()->getManager()->persist($task);
         $this->getDoctrine()->getManager()->flush();
+
+
+
+
+
+
+        // Fill TaskData Entity if some of its parameters were sent
+        if ($requestDetailData) {dump($requestDetailData);
+            /** @var array $taskData */
+            $taskData = $requestDetailData;
+            foreach ($taskData as $key => $value) {
+                $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($key);
+                if ($taskAttribute instanceof TaskAttribute) {
+                    $cd = $this->getDoctrine()->getRepository('APITaskBundle:TaskData')->findOneBy([
+                        'taskAttribute' => $taskAttribute,
+                        'task' => $task,
+                    ]);
+
+                    if (!$cd instanceof TaskData) {
+                        $cd = new TaskData();
+                        $cd->setTask($task);
+                        $cd->setTaskAttribute($taskAttribute);
+                    }
+
+                    $cdErrors = $this->get('entity_processor')->processEntity($cd, ['value' => $value]);
+                    if (false === $cdErrors) {
+                        $task->addTaskDatum($cd);
+                        $this->getDoctrine()->getManager()->persist($task);
+                        $this->getDoctrine()->getManager()->persist($cd);
+
+//                        // Notification
+//                        if (false === $create) {
+//                            $changedParams[] = $taskAttribute->getTitle();
+//                        }
+                    } else {
+                        $this->createApiResponse([
+                            'message' => 'The value of task_data with key: ' . $key . ' is invalid',
+                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    }
+                } else {
+                    return $this->createApiResponse([
+                        'message' => 'The key: ' . $key . ' of Task Attribute is not valid (Task Attribute with this ID doesn\'t exist)',
+                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                }
+            }
+            $this->getDoctrine()->getManager()->flush();
+        }
+
+
+
+
 
         // Sent Notification Emails about updating of Task to task REQUESTER, ASSIGNED USERS, FOLLOWERS
         if (count($changedParams) > 0) {

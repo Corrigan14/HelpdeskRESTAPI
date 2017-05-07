@@ -1379,7 +1379,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      *      }
      * @ApiDoc(
-     *  description="Get all possible assigners for project",
+     *  description="Get all possible assigners for project/task",
      *  requirements={
      *     {
      *       "name"="projectId",

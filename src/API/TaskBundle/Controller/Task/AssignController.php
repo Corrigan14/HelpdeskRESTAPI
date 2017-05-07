@@ -405,7 +405,13 @@ class AssignController extends ApiBaseController
      *       "name"="userId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
-     *       "description"="The id of tag"
+     *       "description"="The id of the user"
+     *     },
+     *     {
+     *       "name"="statusId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of the status"
      *     }
      *  },
      *  input={"class"="API\TaskBundle\Entity\TaskHasAssignedUser"},
@@ -431,6 +437,8 @@ class AssignController extends ApiBaseController
      * @param int $userId
      * @param int|bool $statusId
      * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -1114,6 +1122,9 @@ class AssignController extends ApiBaseController
      * @param int $taskId
      * @param int $userId
      * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
     public function removeAssignUserFromTaskAction(int $taskId, int $userId)
@@ -1184,6 +1195,8 @@ class AssignController extends ApiBaseController
      * @param array $requestData
      * @param bool $create
      * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \InvalidArgumentException
      * @throws \LogicException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -1200,6 +1213,7 @@ class AssignController extends ApiBaseController
             $task->addTaskHasAssignedUser($taskHasAssignedUser);
             $user = $taskHasAssignedUser->getUser();
             $user->addTaskHasAssignedUser($taskHasAssignedUser);
+
             $this->getDoctrine()->getManager()->persist($taskHasAssignedUser);
             $this->getDoctrine()->getManager()->persist($task);
             $this->getDoctrine()->getManager()->persist($user);

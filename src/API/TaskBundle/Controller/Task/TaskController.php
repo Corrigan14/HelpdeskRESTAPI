@@ -2643,43 +2643,24 @@ class TaskController extends ApiBaseController
             $this->getDoctrine()->getConnection()->beginTransaction();
             try {
                 $assignedUsersArray = $requestData['assigned'];
-                $assignedUsersIds = [];
-                foreach ($assignedUsersArray as $item) {
-                    $assignedUsersIds[] = $item['userId'];
-                }
-
-                // Remove all users assigned to task
-                $usersAssignedToTask = $task->getTaskHasAssignedUsers();
-                if (count($usersAssignedToTask) > 0) {
-                    /** @var TaskHasAssignedUser $userAssignedToTask */
-                    foreach ($usersAssignedToTask as $userAssignedToTask) {
-                        $uid = $userAssignedToTask->getUser()->getId();
-                        if (!in_array($uid, $assignedUsersIds, true)) {
-                            $this->getDoctrine()->getManager()->remove($userAssignedToTask);
-                        } else {
-                            $key = array_search($uid, $assignedUsersIds, true);
-                            unset($assignedUsersIds[$key]);
-                        }
-                    }
-                    $this->getDoctrine()->getManager()->flush();
-                }
 
                 // Add new requested users to the task
-                foreach ($assignedUsersIds as $id) {
-                    $assignedUserId = $id;
+                foreach ($assignedUsersArray as $key => $value) {
+                    $assignedUserId = $value['userId'];
+                    $assignedUserStatusId = $value['statusId'];
 
+                    // USER
                     $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($assignedUserId);
-
                     if (!$user instanceof User) {
                         return $this->createApiResponse([
                             'message' => 'User with requested Id does not exist!',
                         ], StatusCodesHelper::NOT_FOUND_CODE);
                     }
 
-                    // Check if user is already assigned to task
+                    // Or check if user is already assigned to the task
                     $userIsAssignedToTask = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy([
-                        'user' => $user,
-                        'task' => $task
+                        'task' => $task,
+                        'user' => $user
                     ]);
 
                     if (!$userIsAssignedToTask instanceof TaskHasAssignedUser) {
@@ -2694,18 +2675,32 @@ class TaskController extends ApiBaseController
                                 'message' => 'User with id: ' . $assignedUserId . 'has not permission to be assigned to requested task!',
                             ], StatusCodesHelper::NOT_FOUND_CODE);
                         }
-                        $userIsAssignedToTask = new TaskHasAssignedUser();
+
+                        // Or check if task already has another one assigned user - if yes, just replace this data - added just
+                        // because system temporary support ONLY ONE assigned USER
+                        $taskHasOtherAssignedUser = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy([
+                            'task' => $task
+                        ]);
+
+                        if (!$taskHasOtherAssignedUser instanceof TaskHasAssignedUser) {
+                            $userIsAssignedToTask = new TaskHasAssignedUser();
+                        } else {
+                            $userIsAssignedToTask = $taskHasOtherAssignedUser;
+                        }
                     }
 
-                    $newStatus = $this->getDoctrine()->getRepository('APITaskBundle:Status')->findOneBy([
-                        'title' => StatusOptions::NEW,
-                    ]);
-                    if (!$newStatus instanceof Status) {
-                        return $this->createApiResponse([
-                            'message' => 'New Status Entity does not exist!',
-                        ], StatusCodesHelper::NOT_FOUND_CODE);
+                    // STATUS
+                    if (null !== $assignedUserStatusId) {
+                        $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($assignedUserStatusId);
                     } else {
-                        $status = $newStatus;
+                        $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->findOneBy([
+                            'title' => StatusOptions::NEW,
+                        ]);
+                    }
+                    if (!$status instanceof Status) {
+                        return $this->createApiResponse([
+                            'message' => 'New Status or your requested Status does not exist!',
+                        ], StatusCodesHelper::NOT_FOUND_CODE);
                     }
 
                     $userIsAssignedToTask->setTask($task);
@@ -2714,6 +2709,7 @@ class TaskController extends ApiBaseController
                     $this->getDoctrine()->getManager()->persist($userIsAssignedToTask);
                 }
                 $this->getDoctrine()->getConnection()->commit();
+                $this->getDoctrine()->getManager()->flush();
                 $changedParams[] = 'assigned user/s';
             } catch (\Exception $e) {
                 $this->getDoctrine()->getConnection()->rollBack();

@@ -4,6 +4,7 @@ namespace API\TaskBundle\Controller;
 
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Project;
+use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\UserHasProject;
 use API\TaskBundle\Security\ProjectAclOptions;
 use API\TaskBundle\Security\UserRoleAclOptions;
@@ -128,7 +129,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
         }
 
         $pageNum = $request->get('page');
-        $pageNum = intval($pageNum);
+        $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $isActive = $request->get('isActive') ?: 'all';
@@ -333,6 +334,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -447,6 +450,9 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
     public function updateAction(int $id, Request $request)
@@ -1288,6 +1294,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @param Request $request
      * @param int $projectId
      * @return Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function processProjectAclForUsersAction(Request $request, int $projectId)
     {
@@ -1354,6 +1362,115 @@ class ProjectController extends ApiBaseController implements ControllerInterface
         }
         $canEdit = true;
         $response = $this->get('project_service')->getEntityResponse($project->getId(), $canEdit);
+        return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
+    }
+
+    /**
+     *  ### Response ###
+     *      {
+     *
+     *          "assigner":
+     *          [
+     *            {
+     *               "id": 1014,
+     *               "username": "admin"
+     *            }
+     *          ],
+     *
+     *      }
+     * @ApiDoc(
+     *  description="Get all possible assigners for project",
+     *  requirements={
+     *     {
+     *       "name"="projectId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of the project"
+     *     },
+     *     {
+     *       "name"="taskId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of the task"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity"
+     *  })
+     *
+     * @param int|bool $projectId
+     * @param int|bool $taskId
+     *
+     * @return JsonResponse|Response
+     * @throws \LogicException
+     */
+    public function getProjectAssignersAction($projectId = false, $taskId = false)
+    {
+        $assignArray = [];
+
+        if ($taskId) {
+            $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+
+            if (!$task instanceof Task) {
+                return $this->createApiResponse([
+                    'message' => 'Task with requested id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+
+            // Check if user can update selected task
+            if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+                return $this->accessDeniedResponse();
+            }
+
+            // Available assigners are based on project of the task
+            $projectOfTask = $task->getProject();
+
+            if (!$projectOfTask instanceof Project) {
+                // If task has not project, just creator of the task can be assigned to it
+                $assignArray = [
+                    [
+                        'id' => $task->getCreatedBy()->getId(),
+                        'username' => $task->getCreatedBy()->getUsername()
+                    ]
+                ];
+            } else {
+                // If task has project, assigner has to have RESOLVE_TASK ACL in user_has_project
+                $assignArray = $this->get('api_user.service')->getListOfAvailableProjectAssigners($projectOfTask, ProjectAclOptions::RESOLVE_TASK);
+            }
+        }
+
+        if ($projectId) {
+            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
+
+            if (!$project instanceof Project) {
+                return $this->createApiResponse([
+                    'message' => 'Project with requested id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+
+            // Check if user can view requested Project
+            if (!$this->get('project_voter')->isGranted(VoteOptions::VIEW_PROJECT, $project)) {
+                return $this->accessDeniedResponse();
+            }
+
+            // Available assigners are based on project of the task
+            // If task has project, assigner has to have RESOLVE_TASK ACL in user_has_project
+            $assignArray = $this->get('api_user.service')->getListOfAvailableProjectAssigners($project, ProjectAclOptions::RESOLVE_TASK);
+        }
+
+        $response = [
+            'assigner' => $assignArray,
+        ];
         return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
@@ -1472,6 +1589,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
     /**
      * @param Project $project
      * @return array
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     private function addProjectAclPermmisionToCreatorOfProject(Project $project)
     {
@@ -1508,8 +1627,9 @@ class ProjectController extends ApiBaseController implements ControllerInterface
     /**
      * @param Project $project
      * @return bool
+     * @throws \LogicException
      */
-    private function canEditProject(Project $project):bool
+    private function canEditProject(Project $project): bool
     {
         $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
             'user' => $this->getUser(),
@@ -1523,94 +1643,5 @@ class ProjectController extends ApiBaseController implements ControllerInterface
         }
 
         return false;
-    }
-
-
-
-    /**
-     *  ### Response ###
-     *      {
-     *
-     *          "assigner":
-     *          [
-     *            {
-     *               "id": 1014,
-     *               "username": "admin"
-     *            }
-     *          ],
-     *
-     *      }
-     * @ApiDoc(
-     *  description="Get all possible assigners for project",
-     *  requirements={
-     *     {
-     *       "name"="projectId",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of project"
-     *     },
-     *
-     *  },
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity"
-     *  })
-     *
-     * @param int $projectId
-     *
-     * @return JsonResponse|Response
-     * @throws \LogicException
-     */
-    public function getProjectAssignersAction(int $projectId)
-    {
-        $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
-
-        if (!$project instanceof Project) {
-            return $this->createApiResponse([
-                'message' => 'Project with requested id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
-        }
-
-        // Check if user can view requested Project
-        if (!$this->get('project_voter')->isGranted(VoteOptions::VIEW_PROJECT, $project)) {
-            return $this->accessDeniedResponse();
-        }
-
-
-        // Available projects are where logged user have CREATE_TASK ACL
-        // If task is moved to project where assigned user has not permission to RESOLVE_TASK, this assigned user will be removed
-        // Admin can use All existed projects
-        $isAdmin = $this->get('task_voter')->isAdmin();
-        $projectsArray = $this->get('project_service')->getListOfAvailableProjects($this->getUser(), $isAdmin, ProjectAclOptions::CREATE_TASK);
-
-        // Available assigners are based on project of task
-        // If task has project, assigner has to have RESOLVE_TASK ACL in user_has_project
-        // If task has not project, just creator of task can be assigned to it
-
-        $assignArray = [];
-            $assignArray = $this->get('api_user.service')->getListOfAvailableProjectAssigners($project, ProjectAclOptions::RESOLVE_TASK);
-
-        if (!count($assignArray) > 0) {
-            $assignArray = [
-//                [
-//                    'id' => $task->getCreatedBy()->getId(),
-//                    'username' => $task->getCreatedBy()->getUsername()
-//                ]
-            ];
-        }
-
-        $response = [
-            'assigner' => $assignArray,
-        ];
-        return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 }

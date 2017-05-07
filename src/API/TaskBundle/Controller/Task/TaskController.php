@@ -2503,6 +2503,8 @@ class TaskController extends ApiBaseController
      * @param Request $request
      *
      * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -3074,6 +3076,9 @@ class TaskController extends ApiBaseController
         ];
         return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
     }
+
+
+
 
     /**
      * @param Task $task

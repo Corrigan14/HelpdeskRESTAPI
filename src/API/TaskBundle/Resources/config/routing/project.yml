@@ -80,3 +80,10 @@ project_assigners:
     methods: [GET]
     requirements:
         projectId: '\d+'
+
+task_without_project_assigners:
+    path:     /project/assigners/task/{taskId}
+    defaults: { _controller: APITaskBundle:Project:getProjectAssigners }
+    methods: [GET]
+    requirements:
+        taskId: '\d+'

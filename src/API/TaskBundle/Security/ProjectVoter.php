@@ -27,6 +27,7 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
      * @param UserHasProject|Project|bool $project
      *
      * @return bool
+     * @throws \InvalidArgumentException
      */
     public function isGranted($action, $project = false)
     {

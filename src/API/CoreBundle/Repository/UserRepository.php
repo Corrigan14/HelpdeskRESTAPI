@@ -38,7 +38,7 @@ class UserRepository extends EntityRepository
                 $isActiveParam = 0;
             }
             $query = $this->createQueryBuilder('u')
-                ->select('u,d,userRole,company,companyData,companyAttribute')
+                ->select('u')
                 ->leftJoin('u.detailData', 'd')
                 ->leftJoin('u.user_role', 'userRole')
                 ->leftJoin('u.company', 'company')
@@ -50,14 +50,14 @@ class UserRepository extends EntityRepository
                 ->setParameter('isActive', $isActiveParam);
         } else {
             $query = $this->createQueryBuilder('u')
-                ->select('u,d,userRole,company,companyData,companyAttribute')
+                ->select('u')
                 ->leftJoin('u.detailData', 'd')
                 ->leftJoin('u.user_role', 'userRole')
                 ->leftJoin('u.company', 'company')
                 ->leftJoin('company.companyData', 'companyData')
                 ->leftJoin('companyData.companyAttribute', 'companyAttribute')
-                ->orderBy('u.username', $order)
-                ->distinct();
+                ->distinct()
+                ->orderBy('u.username', $order);
         }
 
         // Pagination
@@ -95,7 +95,7 @@ class UserRepository extends EntityRepository
                 $isActiveParam = 0;
             }
             $query = $this->createQueryBuilder('u')
-                ->select('u,d,userRole,company,companyData,companyAttribute')
+                ->select('u')
                 ->leftJoin('u.detailData', 'd')
                 ->leftJoin('u.user_role', 'userRole')
                 ->leftJoin('u.company', 'company')
@@ -107,7 +107,7 @@ class UserRepository extends EntityRepository
             $parameters['isActive'] = $isActiveParam;
         } else {
             $query = $this->createQueryBuilder('u')
-                ->select('u,d,userRole,company,companyData,companyAttribute')
+                ->select('u')
                 ->leftJoin('u.detailData', 'd')
                 ->leftJoin('u.user_role', 'userRole')
                 ->leftJoin('u.company', 'company')
@@ -148,7 +148,7 @@ class UserRepository extends EntityRepository
     public function getUserResponse(int $userId): array
     {
         $query = $this->createQueryBuilder('u')
-            ->select('u,d,userRole,company,companyData,companyAttribute')
+            ->select('u')
             ->leftJoin('u.detailData', 'd')
             ->leftJoin('u.user_role', 'userRole')
             ->leftJoin('u.company', 'company')

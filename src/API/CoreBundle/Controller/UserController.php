@@ -142,7 +142,7 @@ class UserController extends ApiBaseController
         }
 
         $pageNum = $request->get('page');
-        $page = (is_integer($pageNum)) ? $pageNum : 1;
+        $page = (int)$pageNum ? $pageNum : 1;
 
         $orderString = $request->get('order');
         $orderString = strtolower($orderString);
@@ -1155,6 +1155,8 @@ class UserController extends ApiBaseController
      *
      * @param Request $request
      * @return JsonResponse|Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function searchAction(Request $request)
     {
@@ -1178,7 +1180,7 @@ class UserController extends ApiBaseController
         }
 
         $pageNum = $request->get('page');
-        $pageNum = intval($pageNum);
+        $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $orderString = $request->get('order');
@@ -1231,6 +1233,8 @@ class UserController extends ApiBaseController
      * @param Request $request
      * @param int $id
      * @return Response|bool
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function resetPasswordAction(Request $request, int $id)
     {

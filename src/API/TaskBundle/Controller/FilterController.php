@@ -174,7 +174,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
     public function listAction(Request $request)
     {
         $pageNum = $request->get('page');
-        $pageNum = intval($pageNum);
+        $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $orderString = $request->get('order');

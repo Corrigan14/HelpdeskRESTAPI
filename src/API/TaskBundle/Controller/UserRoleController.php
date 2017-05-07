@@ -165,7 +165,7 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
         }
 
         $pageNum = $request->get('page');
-        $pageNum = intval($pageNum);
+        $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $orderString = $request->get('order');

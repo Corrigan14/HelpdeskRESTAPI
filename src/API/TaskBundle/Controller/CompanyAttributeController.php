@@ -96,7 +96,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
         }
 
         $pageNum = $request->get('page');
-        $pageNum = intval($pageNum);
+        $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $orderString = $request->get('order');

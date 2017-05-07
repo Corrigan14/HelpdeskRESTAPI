@@ -96,7 +96,7 @@ class AttachmentController extends ApiBaseController
         }
 
         $pageNum = $request->get('page');
-        $pageNum = intval($pageNum);
+        $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $options['task'] = $taskId;

@@ -1007,6 +1007,9 @@ class TaskController extends ApiBaseController
      * @param int $id
      *
      * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
     public function getAction(int $id)
@@ -2503,6 +2506,8 @@ class TaskController extends ApiBaseController
      * @param Request $request
      *
      * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
@@ -2527,13 +2532,11 @@ class TaskController extends ApiBaseController
 
         $changedParams = [];
 
-
         $requestDetailData = false;
         if (isset($requestData['task_data']) && count($requestData['task_data']) > 0) {
             $requestDetailData = $requestData['task_data'];
             unset($requestData['task_data']);
         }
-
 
         if (isset($requestData['title'])) {
             $title = $requestData['title'];
@@ -2651,7 +2654,7 @@ class TaskController extends ApiBaseController
                     /** @var TaskHasAssignedUser $userAssignedToTask */
                     foreach ($usersAssignedToTask as $userAssignedToTask) {
                         $uid = $userAssignedToTask->getUser()->getId();
-                        if (!in_array($uid, $assignedUsersIds)) {
+                        if (!in_array($uid, $assignedUsersIds, true)) {
                             $this->getDoctrine()->getManager()->remove($userAssignedToTask);
                         } else {
                             $key = array_search($uid, $assignedUsersIds, true);
@@ -2827,12 +2830,8 @@ class TaskController extends ApiBaseController
         $this->getDoctrine()->getManager()->flush();
 
 
-
-
-
-
         // Fill TaskData Entity if some of its parameters were sent
-        if ($requestDetailData) {dump($requestDetailData);
+        if ($requestDetailData) {
             /** @var array $taskData */
             $taskData = $requestDetailData;
             foreach ($taskData as $key => $value) {
@@ -2854,11 +2853,7 @@ class TaskController extends ApiBaseController
                         $task->addTaskDatum($cd);
                         $this->getDoctrine()->getManager()->persist($task);
                         $this->getDoctrine()->getManager()->persist($cd);
-
-//                        // Notification
-//                        if (false === $create) {
-//                            $changedParams[] = $taskAttribute->getTitle();
-//                        }
+                        $changedParams[] = 'task attribute:' . $taskAttribute->getTitle();
                     } else {
                         $this->createApiResponse([
                             'message' => 'The value of task_data with key: ' . $key . ' is invalid',
@@ -2872,10 +2867,6 @@ class TaskController extends ApiBaseController
             }
             $this->getDoctrine()->getManager()->flush();
         }
-
-
-
-
 
         // Sent Notification Emails about updating of Task to task REQUESTER, ASSIGNED USERS, FOLLOWERS
         if (count($changedParams) > 0) {
@@ -3078,8 +3069,6 @@ class TaskController extends ApiBaseController
     }
 
 
-
-
     /**
      * @param Task $task
      * @param array $requestData
@@ -3087,6 +3076,8 @@ class TaskController extends ApiBaseController
      * @param bool|array $changedParams
      *
      * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException

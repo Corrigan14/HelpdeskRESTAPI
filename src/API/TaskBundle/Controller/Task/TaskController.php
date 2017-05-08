@@ -3027,14 +3027,19 @@ class TaskController extends ApiBaseController
         // Admin can use All existed projects
         $isAdmin = $this->get('task_voter')->isAdmin();
         $projectsArray = $this->get('project_service')->getListOfAvailableProjects($this->getUser(), $isAdmin, ProjectAclOptions::CREATE_TASK);
+
         // Every user can be requester
         $requesterArray = $this->get('api_user.service')->getListOfAllUsers();
+
         // Every company is available
         $companyArray = $this->get('api_company.service')->getListOfAllCompanies();
+
         // Public and logged user's tags are available
         $tagArray = $this->get('tag_service')->getListOfUsersTags($this->getUser()->getId());
+
         // Every unit is available
         $unitArray = $this->get('unit_service')->getListOfAllUnits();
+
         // Available assigners are based on project of task
         // If task has project, assigner has to have RESOLVE_TASK ACL in user_has_project
         // If task has not project, just creator of task can be assigned to it
@@ -3052,6 +3057,9 @@ class TaskController extends ApiBaseController
             ];
         }
 
+        // Task attributes - the list of active task attributes with TITLE, TYPE and OPTIONS
+        $taskAttributes = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->getAllActiveEntitiesWithTypeOptions();
+
         $response = [
             'status' => $statusesArray,
             'project' => $projectsArray,
@@ -3059,7 +3067,8 @@ class TaskController extends ApiBaseController
             'company' => $companyArray,
             'tag' => $tagArray,
             'assigner' => $assignArray,
-            'unit' => $unitArray
+            'unit' => $unitArray,
+            'taskAttributes' => $taskAttributes
         ];
         return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
     }

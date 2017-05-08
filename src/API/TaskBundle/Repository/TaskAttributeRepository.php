@@ -66,8 +66,10 @@ class TaskAttributeRepository extends EntityRepository
     /**
      * @param int $id
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
-    public function getEntity(int $id):array
+    public function getEntity(int $id): array
     {
         $query = $this->createQueryBuilder('taskAttribute')
             ->where('taskAttribute.id = :id')
@@ -78,10 +80,39 @@ class TaskAttributeRepository extends EntityRepository
     }
 
     /**
+     * @return array
+     */
+    public function getAllActiveEntitiesWithTypeOptions()
+    {
+        $query = $this->createQueryBuilder('ca')
+            ->select()
+            ->where('ca.is_active = :isActive')
+            ->setParameter('isActive', true)
+            ->getQuery()
+            ->getArrayResult();
+
+        $response = [];
+
+        if (count($query) > 0) {
+            /** @var TaskAttribute $data */
+            foreach ($query as $data) {
+                $response[] = [
+                    'title' => $data['title'],
+                    'type' => $data['type'],
+                    'options' => json_decode($data['options'])
+                ];
+            }
+        }
+
+
+        return $response;
+    }
+
+    /**
      * @param $paginatorData
      * @return array
      */
-    private function formatData($paginatorData):array
+    private function formatData($paginatorData): array
     {
         $response = [];
         /** @var TaskAttribute $data */
@@ -96,7 +127,7 @@ class TaskAttributeRepository extends EntityRepository
      * @param TaskAttribute $data
      * @return array
      */
-    private function processData(TaskAttribute $data):array
+    private function processData(TaskAttribute $data): array
     {
         $response = [
             'id' => $data->getId(),

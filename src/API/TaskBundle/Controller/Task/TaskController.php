@@ -2972,8 +2972,30 @@ class TaskController extends ApiBaseController
      *               "username": "admin"
      *            }
      *          ],
-     *          "unit":[]
-     *
+     *          "unit":[],
+     *          "taskAttributes":
+     *          [
+     *            {
+     *               "title": "input task additional attribute",
+     *               "type": "input",
+     *               "options": null
+     *             },
+     *             {
+     *                "title": "select task additional attribute",
+     *                "type": "simple_select",
+     *                "options":
+     *                {
+     *                   "select1": "select1",
+     *                   "select2": "select2",
+     *                   "select3": "select3"
+     *                }
+     *             },
+     *             {
+     *                "title": "integer number task additional attribute",
+     *                "type": "integer_number",
+     *                "options": null
+     *             }
+     *          ]
      *      }
      * @ApiDoc(
      *  description="Get all options for task: statuses, available projects, available requesters, available companies, available assigners, available tags",

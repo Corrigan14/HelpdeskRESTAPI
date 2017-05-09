@@ -2647,7 +2647,11 @@ class TaskController extends ApiBaseController
                 // Add new requested users to the task
                 foreach ($assignedUsersArray as $key => $value) {
                     $assignedUserId = $value['userId'];
-                    $assignedUserStatusId = $value['statusId'];
+
+                    $assignedUserStatusId=null;
+                    if(isset($value['statusId'])) {
+                        $assignedUserStatusId = $value['statusId'];
+                    }
 
                     // USER
                     $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($assignedUserId);

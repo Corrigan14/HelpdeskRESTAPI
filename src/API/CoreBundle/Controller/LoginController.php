@@ -90,8 +90,10 @@ class LoginController extends Controller
         $userImage = $user->getImage();
         if (null !== $userImage) {
             $imageLink = $this->generateUrl('file_load', ['slug' => $userImage]);
+            $imageSlug = $userImage;
         } else {
             $imageLink = null;
+            $imageSlug = null;
         }
 
         $userBaseArray = [
@@ -101,6 +103,7 @@ class LoginController extends Controller
             'language' => $user->getLanguage(),
             'isActive' => $user->getIsActive(),
             'profileImage' => $imageLink,
+            'image' => $imageSlug,
         ];
 
         $userRole = [];

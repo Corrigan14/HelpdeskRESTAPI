@@ -1389,14 +1389,17 @@ class UserController extends ApiBaseController
                 $inboxProject = $this->getDoctrine()->getRepository('APITaskBundle:Project')->findOneBy([
                     'title' => 'INBOX'
                 ]);
-                $acl = [];
-                $acl[] = ProjectAclOptions::VIEW_OWN_TASKS;
-                $userHasProject = new UserHasProject();
-                $userHasProject->setUser($user);
-                $userHasProject->setProject($inboxProject);
-                $userHasProject->setAcl($acl);
-                $this->getDoctrine()->getManager()->persist($userHasProject);
-                $this->getDoctrine()->getManager()->flush();
+
+                if(null!==$inboxProject) {
+                    $acl = [];
+                    $acl[] = ProjectAclOptions::VIEW_OWN_TASKS;
+                    $userHasProject = new UserHasProject();
+                    $userHasProject->setUser($user);
+                    $userHasProject->setProject($inboxProject);
+                    $userHasProject->setAcl($acl);
+                    $this->getDoctrine()->getManager()->persist($userHasProject);
+                    $this->getDoctrine()->getManager()->flush();
+                }
             }
 
             $userId = $user->getId();

@@ -308,7 +308,30 @@ class FollowerController extends ApiBaseController
      *                },
      *             ],
      *             "canEdit": true,
-     *             "follow": true
+     *             "follow": true,
+     *             "loggedUserAcl":
+     *             [
+     *                "login_to_system",
+     *                "share_filters",
+     *                "project_shared_filters",
+     *                "report_filters",
+     *                "share_tags",
+     *                "create_projects",
+     *                "sent_emails_from_comments",
+     *                "create_tasks",
+     *                "create_tasks_in_all_projects",
+     *                "update_all_tasks",
+     *                "user_settings",
+     *                "user_role_settings",
+     *                "company_attribute_settings",
+     *                "company_settings",
+     *                "status_settings",
+     *                "task_attribute_settings",
+     *                "unit_settings",
+     *                "system_settings",
+     *                "smtp_settings",
+     *                "imap_settings"
+     *              ]
      *           }
      *       "_links":
      *       {
@@ -358,6 +381,8 @@ class FollowerController extends ApiBaseController
      * @param int $taskId
      * @param int $userId
      * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -402,7 +427,7 @@ class FollowerController extends ApiBaseController
             $canEdit = false;
         }
 
-        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser()->getId());
+        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser());
         return $this->json($taskArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
@@ -620,7 +645,30 @@ class FollowerController extends ApiBaseController
      *                },
      *             ],
      *             "canEdit": true,
-     *             "follow": true
+     *             "follow": true,
+     *             "loggedUserAcl":
+     *             [
+     *                "login_to_system",
+     *                "share_filters",
+     *                "project_shared_filters",
+     *                "report_filters",
+     *                "share_tags",
+     *                "create_projects",
+     *                "sent_emails_from_comments",
+     *                "create_tasks",
+     *                "create_tasks_in_all_projects",
+     *                "update_all_tasks",
+     *                "user_settings",
+     *                "user_role_settings",
+     *                "company_attribute_settings",
+     *                "company_settings",
+     *                "status_settings",
+     *                "task_attribute_settings",
+     *                "unit_settings",
+     *                "system_settings",
+     *                "smtp_settings",
+     *                "imap_settings"
+     *              ]
      *           }
      *       "_links":
      *       {
@@ -670,6 +718,9 @@ class FollowerController extends ApiBaseController
      * @param int $taskId
      * @param int $userId
      * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
     public function removeFollowerFromTaskAction(int $taskId, int $userId)
@@ -713,7 +764,7 @@ class FollowerController extends ApiBaseController
                 $canEdit = false;
             }
 
-            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser()->getId());
+            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser());
             return $this->json($taskArray, StatusCodesHelper::SUCCESSFUL_CODE);
         }
 

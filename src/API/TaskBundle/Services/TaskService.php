@@ -7,6 +7,7 @@ use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\UserHasProject;
+use API\TaskBundle\Entity\UserRole;
 use API\TaskBundle\Repository\TaskRepository;
 use API\TaskBundle\Security\ProjectAclOptions;
 use Doctrine\ORM\EntityManager;
@@ -87,12 +88,12 @@ class TaskService
     /**
      * @param Task $task
      * @param bool $canEdit
-     * @param int $loggedUserId
+     * @param  User $loggedUser
      * @return array
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function getFullTaskEntity(Task $task, bool $canEdit, int $loggedUserId):array
+    public function getFullTaskEntity(Task $task, bool $canEdit, User $loggedUser): array
     {
         $responseData = [];
         $responseLinks = [];
@@ -110,7 +111,7 @@ class TaskService
             foreach ($followers as $follower) {
                 $followersId[] = $follower->getId();
             }
-            if (in_array($loggedUserId, $followersId, true)) {
+            if (in_array($loggedUser->getId(), $followersId, true)) {
                 $followTask = true;
             } else {
                 $followTask = false;
@@ -123,10 +124,14 @@ class TaskService
             'requesterId' => $task->getRequestedBy()->getId(),
         ];
 
+        /** @var UserRole $userRole */
+        $userRole = $loggedUser->getUserRole();
+
         $response = $this->getTaskResponse($ids);
         $responseData['data'] = $response['data'];
         $responseData['data']['canEdit'] = $canEdit;
         $responseData['data']['follow'] = $followTask;
+        $responseData['data']['loggedUserAcl'] = $userRole->getAcl();
         $responseLinks['_links'] = $response['_links'];
 
         return array_merge($responseData, $responseLinks);

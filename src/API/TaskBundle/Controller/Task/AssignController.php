@@ -374,7 +374,30 @@ class AssignController extends ApiBaseController
      *                },
      *             ],
      *             "canEdit": true,
-     *             "follow": true
+     *             "follow": true,
+     *             "loggedUserAcl":
+     *             [
+     *                "login_to_system",
+     *                "share_filters",
+     *                "project_shared_filters",
+     *                "report_filters",
+     *                "share_tags",
+     *                "create_projects",
+     *                "sent_emails_from_comments",
+     *                "create_tasks",
+     *                "create_tasks_in_all_projects",
+     *                "update_all_tasks",
+     *                "user_settings",
+     *                "user_role_settings",
+     *                "company_attribute_settings",
+     *                "company_settings",
+     *                "status_settings",
+     *                "task_attribute_settings",
+     *                "unit_settings",
+     *                "system_settings",
+     *                "smtp_settings",
+     *                "imap_settings"
+     *              ]
      *           }
      *       "_links":
      *       {
@@ -721,7 +744,30 @@ class AssignController extends ApiBaseController
      *                },
      *             ],
      *             "canEdit": true,
-     *             "follow": true
+     *             "follow": true,
+     *             "loggedUserAcl":
+     *             [
+     *                "login_to_system",
+     *                "share_filters",
+     *                "project_shared_filters",
+     *                "report_filters",
+     *                "share_tags",
+     *                "create_projects",
+     *                "sent_emails_from_comments",
+     *                "create_tasks",
+     *                "create_tasks_in_all_projects",
+     *                "update_all_tasks",
+     *                "user_settings",
+     *                "user_role_settings",
+     *                "company_attribute_settings",
+     *                "company_settings",
+     *                "status_settings",
+     *                "task_attribute_settings",
+     *                "unit_settings",
+     *                "system_settings",
+     *                "smtp_settings",
+     *                "imap_settings"
+     *              ]
      *           }
      *       "_links":
      *       {
@@ -782,6 +828,8 @@ class AssignController extends ApiBaseController
      * @param int $userId
      * @param int $statusId
      * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -847,7 +895,7 @@ class AssignController extends ApiBaseController
                 $canEdit = false;
             }
 
-            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser()->getId());
+            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser());
             return $this->json($taskArray, StatusCodesHelper::SUCCESSFUL_CODE);
         }
 
@@ -1072,7 +1120,30 @@ class AssignController extends ApiBaseController
      *                },
      *             ],
      *             "canEdit": true,
-     *             "follow": true
+     *             "follow": true,
+     *             "loggedUserAcl":
+     *             [
+     *                "login_to_system",
+     *                "share_filters",
+     *                "project_shared_filters",
+     *                "report_filters",
+     *                "share_tags",
+     *                "create_projects",
+     *                "sent_emails_from_comments",
+     *                "create_tasks",
+     *                "create_tasks_in_all_projects",
+     *                "update_all_tasks",
+     *                "user_settings",
+     *                "user_role_settings",
+     *                "company_attribute_settings",
+     *                "company_settings",
+     *                "status_settings",
+     *                "task_attribute_settings",
+     *                "unit_settings",
+     *                "system_settings",
+     *                "smtp_settings",
+     *                "imap_settings"
+     *              ]
      *           }
      *       "_links":
      *       {
@@ -1170,7 +1241,7 @@ class AssignController extends ApiBaseController
             $canEdit = false;
         }
 
-        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser()->getId());
+        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser());
         return $this->json($taskArray, StatusCodesHelper::DELETED_CODE);
     }
 
@@ -1226,7 +1297,7 @@ class AssignController extends ApiBaseController
                 $canEdit = false;
             }
 
-            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser()->getId());
+            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser());
             return $this->json($taskArray, $statusCode);
         }
 

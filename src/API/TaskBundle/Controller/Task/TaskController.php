@@ -14,6 +14,7 @@ use API\TaskBundle\Entity\TaskAttribute;
 use API\TaskBundle\Entity\TaskData;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
 use API\TaskBundle\Entity\UserHasProject;
+use API\TaskBundle\Entity\UserRole;
 use API\TaskBundle\Security\ProjectAclOptions;
 use API\TaskBundle\Security\StatusOptions;
 use API\TaskBundle\Security\UserRoleAclOptions;
@@ -962,7 +963,30 @@ class TaskController extends ApiBaseController
      *                },
      *             ],
      *             "canEdit": true,
-     *             "follow": true
+     *             "follow": true,
+     *             "loggedUserAcl":
+     *             [
+     *                "login_to_system",
+     *                "share_filters",
+     *                "project_shared_filters",
+     *                "report_filters",
+     *                "share_tags",
+     *                "create_projects",
+     *                "sent_emails_from_comments",
+     *                "create_tasks",
+     *                "create_tasks_in_all_projects",
+     *                "update_all_tasks",
+     *                "user_settings",
+     *                "user_role_settings",
+     *                "company_attribute_settings",
+     *                "company_settings",
+     *                "status_settings",
+     *                "task_attribute_settings",
+     *                "unit_settings",
+     *                "system_settings",
+     *                "smtp_settings",
+     *                "imap_settings"
+     *              ]
      *           }
      *       "_links":
      *       {
@@ -1031,7 +1055,7 @@ class TaskController extends ApiBaseController
             $canEdit = false;
         }
 
-        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser()->getId());
+        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser());
         return $this->json($taskArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
@@ -1276,7 +1300,30 @@ class TaskController extends ApiBaseController
      *                },
      *             ],
      *             "canEdit": true,
-     *             "follow": true
+     *             "follow": true,
+     *             "loggedUserAcl":
+     *             [
+     *                "login_to_system",
+     *                "share_filters",
+     *                "project_shared_filters",
+     *                "report_filters",
+     *                "share_tags",
+     *                "create_projects",
+     *                "sent_emails_from_comments",
+     *                "create_tasks",
+     *                "create_tasks_in_all_projects",
+     *                "update_all_tasks",
+     *                "user_settings",
+     *                "user_role_settings",
+     *                "company_attribute_settings",
+     *                "company_settings",
+     *                "status_settings",
+     *                "task_attribute_settings",
+     *                "unit_settings",
+     *                "system_settings",
+     *                "smtp_settings",
+     *                "imap_settings"
+     *              ]
      *           }
      *       "_links":
      *       {
@@ -1342,6 +1389,8 @@ class TaskController extends ApiBaseController
      * @param bool|int $companyId
      *
      * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -1662,7 +1711,30 @@ class TaskController extends ApiBaseController
      *                },
      *             ],
      *             "canEdit": true,
-     *             "follow": true
+     *             "follow": true,
+     *             "loggedUserAcl":
+     *             [
+     *                "login_to_system",
+     *                "share_filters",
+     *                "project_shared_filters",
+     *                "report_filters",
+     *                "share_tags",
+     *                "create_projects",
+     *                "sent_emails_from_comments",
+     *                "create_tasks",
+     *                "create_tasks_in_all_projects",
+     *                "update_all_tasks",
+     *                "user_settings",
+     *                "user_role_settings",
+     *                "company_attribute_settings",
+     *                "company_settings",
+     *                "status_settings",
+     *                "task_attribute_settings",
+     *                "unit_settings",
+     *                "system_settings",
+     *                "smtp_settings",
+     *                "imap_settings"
+     *              ]
      *           }
      *       "_links":
      *       {
@@ -1727,6 +1799,8 @@ class TaskController extends ApiBaseController
      * @param bool|int $requestedUserId
      *
      * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -2026,7 +2100,30 @@ class TaskController extends ApiBaseController
      *                },
      *             ],
      *             "canEdit": true,
-     *             "follow": true
+     *             "follow": true,
+     *             "loggedUserAcl":
+     *             [
+     *                "login_to_system",
+     *                "share_filters",
+     *                "project_shared_filters",
+     *                "report_filters",
+     *                "share_tags",
+     *                "create_projects",
+     *                "sent_emails_from_comments",
+     *                "create_tasks",
+     *                "create_tasks_in_all_projects",
+     *                "update_all_tasks",
+     *                "user_settings",
+     *                "user_role_settings",
+     *                "company_attribute_settings",
+     *                "company_settings",
+     *                "status_settings",
+     *                "task_attribute_settings",
+     *                "unit_settings",
+     *                "system_settings",
+     *                "smtp_settings",
+     *                "imap_settings"
+     *              ]
      *           }
      *       "_links":
      *       {
@@ -2091,6 +2188,8 @@ class TaskController extends ApiBaseController
      * @param bool|int $requestedUserId
      *
      * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -2441,7 +2540,30 @@ class TaskController extends ApiBaseController
      *                },
      *             ],
      *             "canEdit": true,
-     *             "follow": true
+     *             "follow": true,
+     *             "loggedUserAcl":
+     *             [
+     *                "login_to_system",
+     *                "share_filters",
+     *                "project_shared_filters",
+     *                "report_filters",
+     *                "share_tags",
+     *                "create_projects",
+     *                "sent_emails_from_comments",
+     *                "create_tasks",
+     *                "create_tasks_in_all_projects",
+     *                "update_all_tasks",
+     *                "user_settings",
+     *                "user_role_settings",
+     *                "company_attribute_settings",
+     *                "company_settings",
+     *                "status_settings",
+     *                "task_attribute_settings",
+     *                "unit_settings",
+     *                "system_settings",
+     *                "smtp_settings",
+     *                "imap_settings"
+     *              ]
      *           }
      *       "_links":
      *       {
@@ -2648,8 +2770,8 @@ class TaskController extends ApiBaseController
                 foreach ($assignedUsersArray as $key => $value) {
                     $assignedUserId = $value['userId'];
 
-                    $assignedUserStatusId=null;
-                    if(isset($value['statusId'])) {
+                    $assignedUserStatusId = null;
+                    if (isset($value['statusId'])) {
                         $assignedUserStatusId = $value['statusId'];
                     }
 
@@ -2868,9 +2990,13 @@ class TaskController extends ApiBaseController
             $this->getDoctrine()->getManager()->flush();
         }
 
+        /** @var User $loggedUser */
+        $loggedUser = $this->getUser();
+        /** @var UserRole $loggedUserRole */
+        $loggedUserRole = $loggedUser->getUserRole();
+
         // Sent Notification Emails about updating of Task to task REQUESTER, ASSIGNED USERS, FOLLOWERS
         if (count($changedParams) > 0) {
-            $loggedUser = $this->getUser();
 //            $notificationEmailAddresses = $this->getEmailForUpdateTaskNotification($task, $loggedUser->getEmail());
             $notificationEmailAddresses = [];
             if (count($notificationEmailAddresses) > 0) {
@@ -2903,6 +3029,7 @@ class TaskController extends ApiBaseController
         $response = $this->get('task_service')->getTaskResponse($ids);
         $responseData['data'] = $response['data'];
         $responseData['data']['canEdit'] = $canEdit;
+        $responseData['data']['loggedUserAcl'] = $loggedUserRole->getAcl();
         $responseLinks['_links'] = $response['_links'];
         return $this->json(array_merge($responseData, $responseLinks), StatusCodesHelper::SUCCESSFUL_CODE);
     }
@@ -3268,7 +3395,7 @@ class TaskController extends ApiBaseController
                 $canEdit = false;
             }
 
-            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser()->getId());
+            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser());
             return $this->json($taskArray, $statusCode);
         }
 

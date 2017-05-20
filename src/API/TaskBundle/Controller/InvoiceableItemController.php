@@ -180,6 +180,8 @@ class InvoiceableItemController extends ApiBaseController
      * @param int $taskId
      * @param int $invoiceableItemId
      * @return Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function getAction(int $taskId, int $invoiceableItemId)
     {
@@ -422,7 +424,30 @@ class InvoiceableItemController extends ApiBaseController
      *                },
      *             ],
      *             "canEdit": true,
-     *             "follow": true
+     *             "follow": true,
+     *             "loggedUserAcl":
+     *             [
+     *                "login_to_system",
+     *                "share_filters",
+     *                "project_shared_filters",
+     *                "report_filters",
+     *                "share_tags",
+     *                "create_projects",
+     *                "sent_emails_from_comments",
+     *                "create_tasks",
+     *                "create_tasks_in_all_projects",
+     *                "update_all_tasks",
+     *                "user_settings",
+     *                "user_role_settings",
+     *                "company_attribute_settings",
+     *                "company_settings",
+     *                "status_settings",
+     *                "task_attribute_settings",
+     *                "unit_settings",
+     *                "system_settings",
+     *                "smtp_settings",
+     *                "imap_settings"
+     *              ]
      *           }
      *       "_links":
      *       {
@@ -476,6 +501,12 @@ class InvoiceableItemController extends ApiBaseController
      * @param int $taskId
      * @param int $unitId
      * @return Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function createAction(Request $request, int $taskId, int $unitId)
     {
@@ -722,7 +753,30 @@ class InvoiceableItemController extends ApiBaseController
      *                },
      *             ],
      *             "canEdit": true,
-     *             "follow": true
+     *             "follow": true,
+     *             "loggedUserAcl":
+     *             [
+     *                "login_to_system",
+     *                "share_filters",
+     *                "project_shared_filters",
+     *                "report_filters",
+     *                "share_tags",
+     *                "create_projects",
+     *                "sent_emails_from_comments",
+     *                "create_tasks",
+     *                "create_tasks_in_all_projects",
+     *                "update_all_tasks",
+     *                "user_settings",
+     *                "user_role_settings",
+     *                "company_attribute_settings",
+     *                "company_settings",
+     *                "status_settings",
+     *                "task_attribute_settings",
+     *                "unit_settings",
+     *                "system_settings",
+     *                "smtp_settings",
+     *                "imap_settings"
+     *              ]
      *           }
      *       "_links":
      *       {
@@ -777,6 +831,12 @@ class InvoiceableItemController extends ApiBaseController
      * @param int|bool $unitId
      * @param Request $request
      * @return Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function updateAction(int $taskId, int $invoiceableItemId, Request $request, $unitId = false)
     {
@@ -1028,7 +1088,30 @@ class InvoiceableItemController extends ApiBaseController
      *                },
      *             ],
      *             "canEdit": true,
-     *             "follow": true
+     *             "follow": true,
+     *             "loggedUserAcl":
+     *             [
+     *                "login_to_system",
+     *                "share_filters",
+     *                "project_shared_filters",
+     *                "report_filters",
+     *                "share_tags",
+     *                "create_projects",
+     *                "sent_emails_from_comments",
+     *                "create_tasks",
+     *                "create_tasks_in_all_projects",
+     *                "update_all_tasks",
+     *                "user_settings",
+     *                "user_role_settings",
+     *                "company_attribute_settings",
+     *                "company_settings",
+     *                "status_settings",
+     *                "task_attribute_settings",
+     *                "unit_settings",
+     *                "system_settings",
+     *                "smtp_settings",
+     *                "imap_settings"
+     *              ]
      *           }
      *       "_links":
      *       {
@@ -1083,6 +1166,12 @@ class InvoiceableItemController extends ApiBaseController
      * @param int|boolean $unitId
      * @param Request $request
      * @return Response
+     * @throws \LogicException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \InvalidArgumentException
      */
     public function updatePartialAction(int $taskId, int $invoiceableItemId, Request $request, $unitId = false)
     {
@@ -1154,6 +1243,8 @@ class InvoiceableItemController extends ApiBaseController
      * @param int $taskId
      * @param int $invoiceableItemId
      * @return Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function deleteAction(int $taskId, int $invoiceableItemId)
     {
@@ -1191,6 +1282,8 @@ class InvoiceableItemController extends ApiBaseController
      * @param bool $create
      *
      * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -1235,7 +1328,7 @@ class InvoiceableItemController extends ApiBaseController
                 $canEdit = false;
             }
 
-            $fullTaskEntity = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser()->getId());
+            $fullTaskEntity = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser());
             return $this->json($fullTaskEntity, $statusCode);
         }
 

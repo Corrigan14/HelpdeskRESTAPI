@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Repository;
 
+use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\UserHasProject;
 use Doctrine\ORM\EntityRepository;
@@ -136,7 +137,7 @@ class ProjectRepository extends EntityRepository
     /**
      * @return array
      */
-    public function getAllProjectEntitiesWithIdAndTitle():array
+    public function getAllProjectEntitiesWithIdAndTitle(): array
     {
         $query = $this->createQueryBuilder('project')
             ->select('project.id, project.title')
@@ -150,7 +151,7 @@ class ProjectRepository extends EntityRepository
      * @param $paginatorData
      * @return array
      */
-    private function formatData($paginatorData):array
+    private function formatData($paginatorData): array
     {
         $response = [];
         /** @var Project $data */
@@ -166,7 +167,7 @@ class ProjectRepository extends EntityRepository
      * @param Project $data
      * @return array
      */
-    private function processData(Project $data):array
+    private function processData(Project $data): array
     {
         $userHasProjects = $data->getUserHasProjects();
         $userHasProjectsArray = [];

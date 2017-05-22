@@ -119,6 +119,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -141,6 +143,118 @@ class ProjectController extends ApiBaseController implements ControllerInterface
         ];
 
         return $this->json($this->get('project_service')->getProjectsResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);
+    }
+
+
+    /**
+     *  ### Response ###
+     *     {
+     *       [
+     *          {
+     *             "id": "1",
+     *             "title": "Project 1",
+     *             "description": "Description of Project 1",
+     *             "createdAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "updatedAt":
+     *             {
+     *               "date": "2016-11-26 21:49:04.000000",
+     *               "timezone_type": 3,
+     *               "timezone": "Europe/Berlin"
+     *             },
+     *             "is_active" => true,
+     *          },
+     *          {
+     *             "id": 38,
+     *             "title": "INBOX",
+     *             "description": "INBOX - main project",
+     *             "createdAt":
+     *             {
+     *                "date": "2017-05-07 09:30:05.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
+     *             },
+     *             "updatedAt":
+     *             {
+     *                "date": "2017-05-07 09:30:05.000000",
+     *                "timezone_type": 3,
+     *                "timezone": "Europe/Berlin"
+     *             },
+     *             "is_active": true
+     *          },
+     *       ]
+     *     }
+     *
+     *
+     * @ApiDoc(
+     *  description="Returns a list of logged User's Active Projects: based on ACL (user_has_project: CREATE_TASK ACL)",
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied"
+     *  }
+     * )
+     *
+     * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     */
+    public function listOfProjectsWhereCanCreateTasksLoggedUserAction()
+    {
+        /** @var User $loggedUser */
+        $loggedUser = $this->getUser();
+        $loggedUsersProjects = $loggedUser->getUserHasProjects();
+        $isAdmin = $this->get('project_voter')->isAdmin();
+
+        $projectWhereLoggedUserCanCreateTasks = [];
+        if (!$isAdmin) {
+            if (count($loggedUsersProjects) > 0) {
+                /** @var UserHasProject $userHasProject */
+                foreach ($loggedUsersProjects as $userHasProject) {
+                    $projectAcl = $userHasProject->getAcl();
+                    $project = $userHasProject->getProject();
+                    if (in_array(ProjectAclOptions::CREATE_TASK, $projectAcl, true) && $project->getIsActive() === true) {
+                        $projectWhereLoggedUserCanCreateTasks[] = [
+                            'id' => $project->getId(),
+                            'title' => $project->getTitle(),
+                            'description' => $project->getDescription(),
+                            'createdAt' => $project->getCreatedAt(),
+                            'updatedAt' => $project->getUpdatedAt(),
+                            'is_active' => $project->getIsActive()
+                        ];
+                    }
+                }
+            }
+        } else {
+            $existedActiveProjects = $this->getDoctrine()->getRepository('APITaskBundle:Project')->findBy([
+                'is_active' => true
+            ]);
+            foreach ($existedActiveProjects as $project) {
+                $projectWhereLoggedUserCanCreateTasks[] = [
+                    'id' => $project->getId(),
+                    'title' => $project->getTitle(),
+                    'description' => $project->getDescription(),
+                    'createdAt' => $project->getCreatedAt(),
+                    'updatedAt' => $project->getUpdatedAt(),
+                    'is_active' => $project->getIsActive()
+                ];
+            }
+        }
+
+        return $this->json($projectWhereLoggedUserCanCreateTasks, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -566,6 +680,9 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
     public function updatePartialAction(int $id, Request $request)

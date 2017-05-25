@@ -964,6 +964,19 @@ class TaskController extends ApiBaseController
      *             ],
      *             "canEdit": true,
      *             "follow": true,
+     *             "hasProject": true,
+     *             "loggedUserIsAdmin": false,
+     *             "loggedUserProjectAcl":
+     *             [
+     *                "edit_project",
+     *                "create_task",
+     *                "resolve_task",
+     *                "delete_task",
+     *                "view_internal_note",
+     *                "view_all_tasks",
+     *                "view_own_tasks",
+     *                "view_tasks_from_users_company"
+     *             ],
      *             "loggedUserAcl":
      *             [
      *                "login_to_system",
@@ -1055,7 +1068,10 @@ class TaskController extends ApiBaseController
             $canEdit = false;
         }
 
-        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser());
+        // Check if logged user Is ADMIN
+        $isAdmin = $this->get('task_voter')->isAdmin();
+
+        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser(), $isAdmin);
         return $this->json($taskArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
@@ -1301,6 +1317,19 @@ class TaskController extends ApiBaseController
      *             ],
      *             "canEdit": true,
      *             "follow": true,
+     *             "hasProject": true,
+     *             "loggedUserIsAdmin": false,
+     *             "loggedUserProjectAcl":
+     *             [
+     *                "edit_project",
+     *                "create_task",
+     *                "resolve_task",
+     *                "delete_task",
+     *                "view_internal_note",
+     *                "view_all_tasks",
+     *                "view_own_tasks",
+     *                "view_tasks_from_users_company"
+     *             ],
      *             "loggedUserAcl":
      *             [
      *                "login_to_system",
@@ -1712,6 +1741,19 @@ class TaskController extends ApiBaseController
      *             ],
      *             "canEdit": true,
      *             "follow": true,
+     *             "hasProject": true,
+     *             "loggedUserIsAdmin": false,
+     *             "loggedUserProjectAcl":
+     *             [
+     *                "edit_project",
+     *                "create_task",
+     *                "resolve_task",
+     *                "delete_task",
+     *                "view_internal_note",
+     *                "view_all_tasks",
+     *                "view_own_tasks",
+     *                "view_tasks_from_users_company"
+     *             ],
      *             "loggedUserAcl":
      *             [
      *                "login_to_system",
@@ -2101,6 +2143,19 @@ class TaskController extends ApiBaseController
      *             ],
      *             "canEdit": true,
      *             "follow": true,
+     *             "hasProject": true,
+     *             "loggedUserIsAdmin": false,
+     *             "loggedUserProjectAcl":
+     *             [
+     *                "edit_project",
+     *                "create_task",
+     *                "resolve_task",
+     *                "delete_task",
+     *                "view_internal_note",
+     *                "view_all_tasks",
+     *                "view_own_tasks",
+     *                "view_tasks_from_users_company"
+     *             ],
      *             "loggedUserAcl":
      *             [
      *                "login_to_system",
@@ -2541,6 +2596,19 @@ class TaskController extends ApiBaseController
      *             ],
      *             "canEdit": true,
      *             "follow": true,
+     *             "hasProject": true,
+     *             "loggedUserIsAdmin": false,
+     *             "loggedUserProjectAcl":
+     *             [
+     *                "edit_project",
+     *                "create_task",
+     *                "resolve_task",
+     *                "delete_task",
+     *                "view_internal_note",
+     *                "view_all_tasks",
+     *                "view_own_tasks",
+     *                "view_tasks_from_users_company"
+     *             ],
      *             "loggedUserAcl":
      *             [
      *                "login_to_system",
@@ -2992,8 +3060,6 @@ class TaskController extends ApiBaseController
 
         /** @var User $loggedUser */
         $loggedUser = $this->getUser();
-        /** @var UserRole $loggedUserRole */
-        $loggedUserRole = $loggedUser->getUserRole();
 
         // Sent Notification Emails about updating of Task to task REQUESTER, ASSIGNED USERS, FOLLOWERS
         if (count($changedParams) > 0) {
@@ -3012,13 +3078,6 @@ class TaskController extends ApiBaseController
             }
         }
 
-        $ids = [
-            'id' => $taskId,
-            'projectId' => $taskProjectId,
-            'requesterId' => $requesterTaskId,
-            'companyId' => $companyTaskId
-        ];
-
         // Check if user can update selected task
         if ($this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
             $canEdit = true;
@@ -3026,12 +3085,11 @@ class TaskController extends ApiBaseController
             $canEdit = false;
         }
 
-        $response = $this->get('task_service')->getTaskResponse($ids);
-        $responseData['data'] = $response['data'];
-        $responseData['data']['canEdit'] = $canEdit;
-        $responseData['data']['loggedUserAcl'] = $loggedUserRole->getAcl();
-        $responseLinks['_links'] = $response['_links'];
-        return $this->json(array_merge($responseData, $responseLinks), StatusCodesHelper::SUCCESSFUL_CODE);
+        // Check if logged user Is ADMIN
+        $isAdmin = $this->get('task_voter')->isAdmin();
+
+        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser(), $isAdmin);
+        return $this->json($taskArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -3395,7 +3453,10 @@ class TaskController extends ApiBaseController
                 $canEdit = false;
             }
 
-            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser());
+            // Check if logged user Is ADMIN
+            $isAdmin = $this->get('task_voter')->isAdmin();
+
+            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser(), $isAdmin);
             return $this->json($taskArray, $statusCode);
         }
 

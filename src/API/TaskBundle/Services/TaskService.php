@@ -89,19 +89,34 @@ class TaskService
      * @param Task $task
      * @param bool $canEdit
      * @param  User $loggedUser
+     * @param  bool $isAdmin
      * @return array
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function getFullTaskEntity(Task $task, bool $canEdit, User $loggedUser): array
+    public function getFullTaskEntity(Task $task, bool $canEdit, User $loggedUser, bool $isAdmin): array
     {
         $responseData = [];
         $responseLinks = [];
+        $projectAcl = [];
 
-        if ($task->getProject() instanceof Project) {
-            $projectId = $task->getProject()->getId();
+        $project = $task->getProject();
+        if ($project instanceof Project) {
+            $projectId = $project->getId();
+
+            // Return Project Acl
+            $userHasProject = $this->em->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+                'user' => $loggedUser,
+                'project' => $project
+            ]);
+
+            if ($userHasProject instanceof UserHasProject) {
+                $projectAcl = $userHasProject->getAcl();
+            }
+            $hasProject = true;
         } else {
             $projectId = false;
+            $hasProject = false;
         }
 
         $followers = $task->getFollowers();
@@ -124,14 +139,18 @@ class TaskService
             'requesterId' => $task->getRequestedBy()->getId(),
         ];
 
-        /** @var UserRole $userRole */
-        $userRole = $loggedUser->getUserRole();
+        /** @var UserRole $loggedUserRole */
+        $loggedUserRole = $loggedUser->getUserRole();
 
         $response = $this->getTaskResponse($ids);
+
         $responseData['data'] = $response['data'];
         $responseData['data']['canEdit'] = $canEdit;
         $responseData['data']['follow'] = $followTask;
-        $responseData['data']['loggedUserAcl'] = $userRole->getAcl();
+        $responseData['data']['hasProject'] = $hasProject;
+        $responseData['data']['loggedUserIsAdmin'] = $isAdmin;
+        $responseData['data']['loggedUserProjectAcl'] = $projectAcl;
+        $responseData['data']['loggedUserRoleAcl'] = $loggedUserRole->getAcl();
         $responseLinks['_links'] = $response['_links'];
 
         return array_merge($responseData, $responseLinks);

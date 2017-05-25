@@ -311,6 +311,19 @@ class TagController extends ApiBaseController
      *             ],
      *             "canEdit": true,
      *             "follow": true,
+     *             "hasProject": true,
+     *             "loggedUserIsAdmin": false,
+     *             "loggedUserProjectAcl":
+     *             [
+     *                "edit_project",
+     *                "create_task",
+     *                "resolve_task",
+     *                "delete_task",
+     *                "view_internal_note",
+     *                "view_all_tasks",
+     *                "view_own_tasks",
+     *                "view_tasks_from_users_company"
+     *             ],
      *             "loggedUserAcl":
      *             [
      *                "login_to_system",
@@ -430,7 +443,10 @@ class TagController extends ApiBaseController
             $canEdit = false;
         }
 
-        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser());
+        // Check if logged user Is ADMIN
+        $isAdmin = $this->get('task_voter')->isAdmin();
+
+        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser(), $isAdmin);
         return $this->json($taskArray, StatusCodesHelper::CREATED_CODE);
     }
 
@@ -649,6 +665,19 @@ class TagController extends ApiBaseController
      *             ],
      *             "canEdit": true,
      *             "follow": true,
+     *             "hasProject": true,
+     *             "loggedUserIsAdmin": false,
+     *             "loggedUserProjectAcl":
+     *             [
+     *                "edit_project",
+     *                "create_task",
+     *                "resolve_task",
+     *                "delete_task",
+     *                "view_internal_note",
+     *                "view_all_tasks",
+     *                "view_own_tasks",
+     *                "view_tasks_from_users_company"
+     *             ],
      *             "loggedUserAcl":
      *             [
      *                "login_to_system",
@@ -767,7 +796,10 @@ class TagController extends ApiBaseController
                 $canEdit = false;
             }
 
-            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser());
+            // Check if logged user Is ADMIN
+            $isAdmin = $this->get('task_voter')->isAdmin();
+
+            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser(), $isAdmin);
             return $this->json($taskArray, StatusCodesHelper::SUCCESSFUL_CODE);
         }
 

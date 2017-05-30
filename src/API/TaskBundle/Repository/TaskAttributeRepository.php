@@ -97,6 +97,7 @@ class TaskAttributeRepository extends EntityRepository
             /** @var TaskAttribute $data */
             foreach ($query as $data) {
                 $response[] = [
+                    'id'=>$data['id'],
                     'title' => $data['title'],
                     'type' => $data['type'],
                     'options' => json_decode($data['options'])

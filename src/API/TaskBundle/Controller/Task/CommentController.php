@@ -891,7 +891,7 @@ class CommentController extends ApiBaseController
             'subject' => $requestData['title'],
             'commentBody' => $requestData['body'],
             'signature' => $usersSignature,
-            'taskLink' => $baseFrontURL->getValue() . '/tasks/' . $taskId
+            'taskLink' => $baseFrontURL?$baseFrontURL->getValue():'' . '/tasks/' . $taskId
         ];
         $params = [
             'subject' => 'LanHelpdesk - ' . '[#' . $taskId . ']' . ' ' . $requestData['title'],

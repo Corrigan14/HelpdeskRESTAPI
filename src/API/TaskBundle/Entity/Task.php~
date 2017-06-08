@@ -121,7 +121,7 @@ class Task
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskData", mappedBy="task")
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskData", mappedBy="task", cascade={"persist", "remove"})
      * @Serializer\ReadOnly()
      */
     private $taskData;
@@ -129,7 +129,7 @@ class Task
     /**
      * @var ArrayCollection
      *
-     * @ORM\ManyToMany(targetEntity="API\CoreBundle\Entity\User", inversedBy="followedTasks")
+     * @ORM\ManyToMany(targetEntity="API\CoreBundle\Entity\User", inversedBy="followedTasks", cascade={"persist", "remove"})
      * @ORM\JoinTable(name="task_has_follower")
      * @Serializer\ReadOnly()
      */
@@ -138,7 +138,7 @@ class Task
     /**
      * @var ArrayCollection
      *
-     * @ORM\ManyToMany(targetEntity="API\TaskBundle\Entity\Tag", inversedBy="tasks")
+     * @ORM\ManyToMany(targetEntity="API\TaskBundle\Entity\Tag", inversedBy="tasks", cascade={"persist", "remove"})
      * @ORM\JoinTable(name="task_has_tag",
      *      joinColumns={@ORM\JoinColumn(name="task_id", referencedColumnName="id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="tag_id", referencedColumnName="id")}
@@ -150,7 +150,7 @@ class Task
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskHasAssignedUser", mappedBy="task")
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskHasAssignedUser", mappedBy="task", cascade={"persist", "remove"})
      * @Serializer\Exclude()
      */
     private $taskHasAssignedUsers;
@@ -158,7 +158,7 @@ class Task
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskHasAttachment", mappedBy="task")
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskHasAttachment", mappedBy="task", cascade={"persist", "remove"})
      * @Serializer\ReadOnly()
      */
     private $taskHasAttachments;
@@ -166,7 +166,7 @@ class Task
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Comment", mappedBy="task")
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Comment", mappedBy="task", cascade={"persist", "remove"})
      * @Serializer\ReadOnly()
      */
     private $comments;
@@ -183,7 +183,7 @@ class Task
     /**
      * @var
      *
-     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\InvoiceableItem", mappedBy="task")
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\InvoiceableItem", mappedBy="task", cascade={"persist", "remove"})
      * @Serializer\ReadOnly()
      */
     private $invoiceableItems;
@@ -287,14 +287,14 @@ class Task
     /**
      * Set important
      *
-     * @param boolean $important
+     * @param $important
      *
      * @return Task
      */
     public function setImportant($important)
     {
         if (is_string($important)) {
-            $important = $important === 'true' ? true : false;
+            $important = ($important === 'true' || $important == 1) ? true : false;
         }
 
         $this->important = $important;

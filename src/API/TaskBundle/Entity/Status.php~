@@ -130,7 +130,7 @@ class Status
     public function setIsActive($isActive)
     {
         if (is_string($isActive)) {
-            $isActive = $isActive === 'true' ? true : false;
+            $isActive = ($isActive === 'true' || $isActive == 1) ? true : false;
         }
 
         $this->is_active = $isActive;
@@ -228,5 +228,29 @@ class Status
     public function getColor()
     {
         return $this->color;
+    }
+
+    /**
+     * Set order
+     *
+     * @param integer $order
+     *
+     * @return Status
+     */
+    public function setOrder($order)
+    {
+        $this->order = $order;
+
+        return $this;
+    }
+
+    /**
+     * Get order
+     *
+     * @return integer
+     */
+    public function getOrder()
+    {
+        return $this->order;
     }
 }

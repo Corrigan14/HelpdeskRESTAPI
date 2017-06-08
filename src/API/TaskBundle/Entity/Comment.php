@@ -96,7 +96,7 @@ class Comment
     /**
      * Mapping entity
      *
-     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Comment", mappedBy="comment")
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Comment", mappedBy="comment", cascade={"persist", "remove"})
      * @Serializer\Exclude()
      */
     private $inversedComment;
@@ -122,7 +122,7 @@ class Comment
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\CommentHasAttachment", mappedBy="comment")
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\CommentHasAttachment", mappedBy="comment", cascade={"persist", "remove"})
      * @Serializer\ReadOnly()
      */
     private $commentHasAttachments;

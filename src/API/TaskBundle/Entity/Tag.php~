@@ -141,7 +141,7 @@ class Tag
     public function setPublic($public)
     {
         if (is_string($public)) {
-            $public = $public === 'true' ? true : false;
+            $public = ($public === 'true' || $public == 1) ? true : false;
         }
 
         $this->public = $public;

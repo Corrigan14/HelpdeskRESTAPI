@@ -1440,6 +1440,10 @@ class TaskController extends ApiBaseController
         $task = new Task();
         $requestData = $request->request->all();
 
+        if($requestData['projectId']){
+            $projectId=$requestData['projectId'];
+        }
+
         if ($projectId) {
             $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
             if (!$project instanceof Project) {

@@ -383,9 +383,6 @@ class TaskVoter implements VoterInterface
 
         $canUser = false;
 
-        // User Can assign User to the Task if he can UPDATE_TASK
-        $canUpdate = $this->canUpdate($task);
-
         $project = $task->getProject();
 
         if (null === $project) {
@@ -396,11 +393,11 @@ class TaskVoter implements VoterInterface
         }
 
         if ($project instanceof Project) {
-            // User be assigned to the task if he has RESOLVE_TASK access in projects ACL
+            // User can be assigned to the task if he has RESOLVE_TASK access in projects ACL
             $canUser = $this->hasProjectAclRight(ProjectAclOptions::RESOLVE_TASK, $project->getId());
         }
 
-        return ($canUpdate && $canUser);
+        return ($canUser);
     }
 
     /**

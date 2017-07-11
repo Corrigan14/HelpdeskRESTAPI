@@ -1433,6 +1433,16 @@ class TaskController extends ApiBaseController
 
         $requestData = $request->request->all();
 
+//<<<<<<< HEAD
+//        if($requestData['projectId']){
+//            $projectId=$requestData['projectId'];
+//        }
+//
+//        if ($projectId) {
+//            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
+//=======
+
+
         $requestDetailData = false;
         if (isset($requestData['task_data']) && count($requestData['task_data']) > 0) {
             $requestDetailData = $requestData['task_data'];
@@ -1450,6 +1460,8 @@ class TaskController extends ApiBaseController
             ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
         }
 
+
+
         if (isset($requestData['requester'])) {
             $requestedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requestData['requester']);
             if (!$requestedUser instanceof User) {
@@ -1459,9 +1471,12 @@ class TaskController extends ApiBaseController
             }
             $task->setRequestedBy($requestedUser);
         } else {
-            return $this->createApiResponse([
-                'message' => 'The Requester of the task is required!',
-            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+
+            $task->setRequestedBy($this->getUser());
+            
+//            return $this->createApiResponse([
+//                'message' => 'The Requester of the task is required!',
+//            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
         }
 
         if (isset($requestData['important'])) {
@@ -1507,6 +1522,9 @@ class TaskController extends ApiBaseController
 
         if (isset($requestData['project'])) {
             $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($requestData['project']);
+//>>>>>>> origin/master
+
+
             if (!$project instanceof Project) {
                 return $this->createApiResponse([
                     'message' => 'Project with requested Id does not exist!',
@@ -1583,6 +1601,9 @@ class TaskController extends ApiBaseController
 
         // OPTIONAL PARAMETERS - ANOTHER NEW ENTITY IS REQUIRED
         if (isset($requestData['assigned'])) {
+            dump($requestData['assigned']);
+            $requestData['assigned']=json_decode($requestData['assigned'], true);
+            dump($requestData['assigned']);
             // Add new requested users to the task
             foreach ($requestData['assigned'] as $key => $value) {
                 $assignedUserId = $value['userId'];

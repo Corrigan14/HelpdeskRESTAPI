@@ -674,7 +674,8 @@ class TaskRepository extends EntityRepository
         if ($project) {
             $projectArray = [
                 'id' => $data->getProject()->getId(),
-                'title' => $data->getProject()->getTitle()
+                'title' => $data->getProject()->getTitle(),
+                'is_active'=>$data->getProject()->getIsActive()
             ];
         }
         $company = $data->getCompany();

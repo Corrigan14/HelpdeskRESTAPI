@@ -1202,7 +1202,7 @@ class UserController extends ApiBaseController
 
     /**
      * @ApiDoc(
-     *  description="Restore User Entity",
+     *  description="Reset User's Password - Admin or logged user",
      *  requirements={
      *     {
      *       "name"="id",
@@ -1238,18 +1238,18 @@ class UserController extends ApiBaseController
      */
     public function resetPasswordAction(Request $request, int $id)
     {
-        // Only admin can reset password
-        if (!$this->get('acl_helper')->isAdmin()) {
-            return $this->createApiResponse([
-                'message' => 'Only admin can reset password!',
-            ], StatusCodesHelper::ACCESS_DENIED_CODE);
-        }
-
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (!$user instanceof User) {
             return $this->createApiResponse([
                 'message' => 'User with requested Id does not exist!',
             ], StatusCodesHelper::NOT_FOUND_CODE);
+        }
+
+        // Only admin can reset password - for all users
+        if (!$this->get('acl_helper')->isAdmin() && $this->getUser()->getId() !== $id) {
+            return $this->createApiResponse([
+                'message' => 'Only admin can reset password of every user. Logged User can change his own password!',
+            ], StatusCodesHelper::ACCESS_DENIED_CODE);
         }
 
         $password = $request->get('password');

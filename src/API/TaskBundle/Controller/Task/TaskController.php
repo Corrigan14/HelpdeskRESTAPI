@@ -2027,8 +2027,6 @@ class TaskController extends ApiBaseController
      *
      * @param int $id
      * @param Request $request
-     * @param bool|int $projectId
-     * @param bool|int $requestedUserId
      *
      * @return JsonResponse|Response
      * @throws \Doctrine\ORM\NonUniqueResultException
@@ -2038,7 +2036,7 @@ class TaskController extends ApiBaseController
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function updateAction(int $id, Request $request, $projectId = false, $requestedUserId = false)
+    public function updateAction(int $id, Request $request)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
 
@@ -2054,41 +2052,7 @@ class TaskController extends ApiBaseController
         $requestData = $request->request->all();
         $changedParams = [];
 
-        // Check if project and requested user exists
-        if ($projectId) {
-            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
-            if (!$project instanceof Project) {
-                return $this->createApiResponse([
-                    'message' => 'Project with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
-            }
-
-            // Check if user can create task in selected project
-            if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT, $project)) {
-                return $this->createApiResponse([
-                    'message' => 'Permission denied! Can not create task in selected project!',
-                ], StatusCodesHelper::ACCESS_DENIED_CODE);
-            }
-            $task->setProject($project);
-            unset($requestData['projectId']);
-            $changedParams[] = 'project';
-        }
-
-        if ($requestedUserId) {
-            $requestedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requestedUserId);
-
-            if (!$requestedUser instanceof User) {
-                return $this->createApiResponse([
-                    'message' => 'Requested user with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
-            }
-
-            $task->setRequestedBy($requestedUser);
-            unset($requestData['requestedUserId']);
-            $changedParams[] = 'requested user';
-        }
-
-        return $this->updateTaskEntity($task, $requestData, false, $changedParams);
+        return [];
     }
 
     /**
@@ -3108,7 +3072,7 @@ class TaskController extends ApiBaseController
                         ], StatusCodesHelper::NOT_FOUND_CODE);
                     }
 
-                    if (null === $task->getStartedAt()) {
+                    if (null === $task->getStartedAt() && $status->getTitle() !== StatusOptions::NEW) {
                         $task->setStartedAt(new \DateTime());
                     }
 

@@ -22,9 +22,9 @@ class TaskHasAssignedUserRepository extends EntityRepository
     public function getTasksAssignedUsers(int $taskId, int $page): array
     {
         $query = $this->createQueryBuilder('tau')
-            ->select('tau, user')
+            ->select('tau')
             ->leftJoin('tau.user', 'user')
-            ->orderBy('tau.id')
+            ->orderBy('tau.id','DESC')
             ->distinct()
             ->where('tau.task = :taskId')
             ->setParameter('taskId', $taskId);

@@ -25,8 +25,8 @@ class TaskHasAttachmentRepository extends EntityRepository
     {
         $query = $this->createQueryBuilder('tha')
             ->select('tha')
-            ->leftJoin('tha.task','task')
-            ->orderBy('tha.id')
+            ->leftJoin('tha.task', 'task')
+            ->orderBy('tha.id', 'DESC')
             ->where('task.id = :taskId')
             ->setParameter('taskId', $taskId);
 
@@ -52,7 +52,7 @@ class TaskHasAttachmentRepository extends EntityRepository
      * @param $paginatorData
      * @return array
      */
-    private function formatData($paginatorData):array
+    private function formatData($paginatorData): array
     {
         $response = [];
         /** @var TaskHasAttachment $data */
@@ -68,12 +68,10 @@ class TaskHasAttachmentRepository extends EntityRepository
      * @param TaskHasAttachment $data
      * @return array
      */
-    private function processData(TaskHasAttachment $data):array
+    private function processData(TaskHasAttachment $data): array
     {
-        $response = [
+        return [
             'slug' => $data->getSlug()
         ];
-
-        return $response;
     }
 }

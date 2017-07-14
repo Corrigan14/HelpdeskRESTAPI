@@ -69,11 +69,9 @@ class CommentHasAttachmentRepository extends EntityRepository
      */
     private function processData(CommentHasAttachment $data):array
     {
-        $response = [
+        return [
             'slug' => $data->getSlug()
         ];
-
-        return $response;
     }
 
 }

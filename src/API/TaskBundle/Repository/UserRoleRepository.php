@@ -33,13 +33,13 @@ class UserRoleRepository extends EntityRepository
 
         if ('true' === $isActive || 'false' === $isActive) {
             $query = $this->createQueryBuilder('userRole')
-                ->select()
+                ->select('userRole')
                 ->orderBy('userRole.order', $order)
                 ->where('userRole.is_active = :isActiveParam')
                 ->setParameter('isActiveParam', $isActiveParam);
         } else {
             $query = $this->createQueryBuilder('userRole')
-                ->select()
+                ->select('userRole')
                 ->orderBy('userRole.order', $order);
         }
 
@@ -68,7 +68,7 @@ class UserRoleRepository extends EntityRepository
     public function getEntity(int $id):array
     {
         $query = $this->createQueryBuilder('userRole')
-            ->select('userRole, users')
+            ->select('userRole')
             ->leftJoin('userRole.users', 'users')
             ->where('userRole.id = :id')
             ->setParameter('id', $id)

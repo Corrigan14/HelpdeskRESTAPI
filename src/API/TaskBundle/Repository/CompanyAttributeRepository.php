@@ -35,14 +35,14 @@ class CompanyAttributeRepository extends EntityRepository
                 $isActiveParam = 0;
             }
             $query = $this->createQueryBuilder('ca')
-                ->select()
+                ->select('ca')
                 ->orderBy('ca.title', $order)
                 ->where('ca.is_active = :isActiveParam')
                 ->setParameter('isActiveParam', $isActiveParam)
                 ->getQuery();
         } else {
             $query = $this->createQueryBuilder('ca')
-                ->select()
+                ->select('ca')
                 ->orderBy('ca.title', $order)
                 ->getQuery();
         }

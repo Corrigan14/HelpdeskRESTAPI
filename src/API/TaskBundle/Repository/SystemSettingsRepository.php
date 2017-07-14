@@ -29,14 +29,15 @@ class SystemSettingsRepository extends EntityRepository
                 $isActiveParam = 0;
             }
             $query = $this->createQueryBuilder('systemSettings')
+                ->select('systemSettings')
                 ->where('systemSettings.is_active = :isActiveParam')
-                ->orderBy('systemSettings.id')
+                ->orderBy('systemSettings.id','DESC')
                 ->setParameter('isActiveParam', $isActiveParam)
                 ->getQuery();
         } else {
             $query = $this->createQueryBuilder('systemSettings')
                 ->select()
-                ->orderBy('systemSettings.id')
+                ->orderBy('systemSettings.id','DESC')
                 ->getQuery();
         }
 

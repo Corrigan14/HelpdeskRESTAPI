@@ -33,14 +33,14 @@ class TaskAttributeRepository extends EntityRepository
 
         if ('true' === $isActive || 'false' === $isActive) {
             $query = $this->createQueryBuilder('ca')
-                ->select()
+                ->select('ca')
                 ->where('ca.is_active = :isActive')
                 ->orderBy('ca.title', $order)
                 ->setParameter('isActive', $isActiveParam)
                 ->getQuery();
         } else {
             $query = $this->createQueryBuilder('ca')
-                ->select()
+                ->select('ca')
                 ->orderBy('ca.title', $order)
                 ->getQuery();
         }
@@ -72,6 +72,7 @@ class TaskAttributeRepository extends EntityRepository
     public function getEntity(int $id): array
     {
         $query = $this->createQueryBuilder('taskAttribute')
+            ->select('taskAttribute')
             ->where('taskAttribute.id = :id')
             ->setParameter('id', $id)
             ->getQuery();
@@ -85,7 +86,7 @@ class TaskAttributeRepository extends EntityRepository
     public function getAllActiveEntitiesWithTypeOptions()
     {
         $query = $this->createQueryBuilder('ca')
-            ->select()
+            ->select('ca')
             ->where('ca.is_active = :isActive')
             ->setParameter('isActive', true)
             ->getQuery()

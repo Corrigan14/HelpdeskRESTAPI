@@ -1633,11 +1633,16 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             $this->getDoctrine()->getManager()->flush();
 
             if ($create) {
+                // Every creator has full Project ACL automatically added
                 $addedAcl = [];
                 $addedAcl[] = $this->addProjectAclPermmisionToCreatorOfProject($project);
+
+                // Admin has full Project ACL automatically added and his ACL is not possible to delete
+                $addedAdminAcl = $this->addProjectAclPermissionToAdmin($project);
+
                 $canEdit = true;
                 $response = $this->get('project_service')->getEntityResponse($project->getId(), $canEdit);
-                $response['data']['userHasProjects'] = $addedAcl;
+                $response['data']['userHasProjects'] = array_merge($addedAcl, $addedAdminAcl);
                 return $this->json($response, $statusCode);
             } else {
                 $canEdit = true;
@@ -1739,6 +1744,62 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             ],
             'acl' => $userHasProject->getAcl()
         ];
+    }
+
+    /**
+     * @param Project $project
+     * @return array
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     */
+    private function addProjectAclPermissionToAdmin(Project $project)
+    {
+        $addedAdminAcl = [];
+        $adminArray = [];
+
+        //Find All ADMIN User(s)
+        $admins = $this->getDoctrine()->getRepository('APICoreBundle:User')->findAll();
+        foreach ($admins as $admin) {
+            $roles = $admin->getRoles();
+            if (in_array('ROLE_ADMIN', $roles, true)) {
+                $adminArray [] = $admin;
+            }
+        }
+
+        $acl = [
+            ProjectAclOptions::VIEW_OWN_TASKS,
+            ProjectAclOptions::VIEW_TASKS_FROM_USERS_COMPANY,
+            ProjectAclOptions::VIEW_ALL_TASKS,
+            ProjectAclOptions::CREATE_TASK,
+            ProjectAclOptions::RESOLVE_TASK,
+            ProjectAclOptions::DELETE_TASK,
+            ProjectAclOptions::VIEW_INTERNAL_NOTE,
+            ProjectAclOptions::EDIT_INTERNAL_NOTE,
+            ProjectAclOptions::EDIT_PROJECT,
+        ];
+
+        if (count($adminArray) > 0) {
+            /** @var User $admin */
+            foreach ($adminArray as $admin) {
+                $userHasProject = new UserHasProject();
+                $userHasProject->setProject($project);
+                $userHasProject->setUser($admin);
+                $userHasProject->setAcl($acl);
+                $this->getDoctrine()->getManager()->persist($userHasProject);
+                $this->getDoctrine()->getManager()->persist($project);
+                $this->getDoctrine()->getManager()->flush();
+                $addedAdminAcl[] = [
+                    'id' => $userHasProject->getId(),
+                    'user' => [
+                        'id' => $admin->getId(),
+                        'username' => $admin->getUsername(),
+                        'email' => $admin->getEmail()
+                    ],
+                    'acl' => $acl
+                ];
+            }
+        }
+        return $addedAdminAcl;
     }
 
     /**

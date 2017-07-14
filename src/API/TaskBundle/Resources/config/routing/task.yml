@@ -32,7 +32,7 @@ tasks_create:
 tasks_update:
     path:     /tasks/{id}
     defaults: { _controller: APITaskBundle:Task/Task:update }
-    methods: [PUT]
+    methods: [PATCH]
     requirements:
             id: '\d+'
 
@@ -42,63 +42,6 @@ tasks_quick_update:
     methods: [PATCH]
     requirements:
             taskId: '\d+'
-
-tasks_update_project:
-    path:     /tasks/{id}/project/{projectId}
-    defaults: { _controller: APITaskBundle:Task/Task:update }
-    methods: [PUT]
-    requirements:
-            id: '\d+'
-            projectId: '\d+'
-
-tasks_update_requester:
-    path:     /tasks/{id}/requester/{requestedUserId}
-    defaults: { _controller: APITaskBundle:Task/Task:update }
-    methods: [PUT]
-    requirements:
-            id: '\d+'
-            requestedUserId: '\d+'
-
-tasks_update_project_and_requester:
-    path:     /tasks/{id}/project/{projectId}/requester/{requestedUserId}
-    defaults: { _controller: APITaskBundle:Task/Task:update }
-    methods: [PUT]
-    requirements:
-            id: '\d+'
-            projectId: '\d+'
-            requestedUserId: '\d+'
-
-tasks_partial_update:
-    path:     /tasks/{id}
-    defaults: { _controller: APITaskBundle:Task/Task:updatePartial }
-    methods: [PATCH]
-    requirements:
-            id: '\d+'
-
-tasks_partial_update_project:
-    path:     /tasks/{id}/project/{projectId}
-    defaults: { _controller: APITaskBundle:Task/Task:updatePartial }
-    methods: [PATCH]
-    requirements:
-            id: '\d+'
-            projectId: '\d+'
-
-tasks_partial_update_requester:
-    path:     /tasks/{id}/requester/{requestedUserId}
-    defaults: { _controller: APITaskBundle:Task/Task:updatePartial }
-    methods: [PATCH]
-    requirements:
-            id: '\d+'
-            requestedUserId: '\d+'
-
-tasks_partial_update_project_and_requester:
-    path:     /tasks/{id}/project/{projectId}/requester/{requestedUserId}
-    defaults: { _controller: APITaskBundle:Task/Task:updatePartial }
-    methods: [PATCH]
-    requirements:
-            id: '\d+'
-            projectId: '\d+'
-            requestedUserId: '\d+'
 
 tasks_delete:
     path:     /tasks/{id}

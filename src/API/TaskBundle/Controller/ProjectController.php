@@ -1454,6 +1454,16 @@ class ProjectController extends ApiBaseController implements ControllerInterface
                         }
                     }
 
+                    // Check if requested user is ADMIN. If yes, his EDIT_PROJECT permission can't be changed
+                    $userRoles = $user->getRoles();
+                    if (in_array('ROLE_ADMIN', $userRoles, true)) {
+                        if (!in_array(ProjectAclOptions::EDIT_PROJECT, $aclArray)) {
+                            return $this->createApiResponse([
+                                'message' => 'EDIT_RPOJECT ACL is for ADMIN required!',
+                            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        }
+                    }
+
                     // Check if it is an UPDATE of existed user's ACL
                     $userHasProjectNew = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
                         'user' => $user,

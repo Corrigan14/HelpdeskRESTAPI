@@ -26,6 +26,7 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
  * Class TaskController
@@ -1433,16 +1434,6 @@ class TaskController extends ApiBaseController
 
         $requestData = $request->request->all();
 
-//<<<<<<< HEAD
-//        if($requestData['projectId']){
-//            $projectId=$requestData['projectId'];
-//        }
-//
-//        if ($projectId) {
-//            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
-//=======
-
-
         $requestDetailData = false;
         if (isset($requestData['task_data']) && count($requestData['task_data']) > 0) {
             $requestDetailData = $requestData['task_data'];
@@ -1460,8 +1451,6 @@ class TaskController extends ApiBaseController
             ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
         }
 
-
-
         if (isset($requestData['requester'])) {
             $requestedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requestData['requester']);
             if (!$requestedUser instanceof User) {
@@ -1471,12 +1460,7 @@ class TaskController extends ApiBaseController
             }
             $task->setRequestedBy($requestedUser);
         } else {
-
             $task->setRequestedBy($this->getUser());
-            
-//            return $this->createApiResponse([
-//                'message' => 'The Requester of the task is required!',
-//            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
         }
 
         if (isset($requestData['important'])) {
@@ -1522,8 +1506,6 @@ class TaskController extends ApiBaseController
 
         if (isset($requestData['project'])) {
             $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($requestData['project']);
-//>>>>>>> origin/master
-
 
             if (!$project instanceof Project) {
                 return $this->createApiResponse([
@@ -1601,9 +1583,7 @@ class TaskController extends ApiBaseController
 
         // OPTIONAL PARAMETERS - ANOTHER NEW ENTITY IS REQUIRED
         if (isset($requestData['assigned'])) {
-            dump($requestData['assigned']);
-            $requestData['assigned']=json_decode($requestData['assigned'], true);
-            dump($requestData['assigned']);
+            $requestData['assigned'] = json_decode($requestData['assigned'], true);
             // Add new requested users to the task
             foreach ($requestData['assigned'] as $key => $value) {
                 $assignedUserId = $value['userId'];
@@ -2932,6 +2912,13 @@ class TaskController extends ApiBaseController
 
         $changedParams = [];
 
+//        $requestData['assigned'] = [
+//            [
+//                'userId' => 736,
+//                'statusId' => 33
+//            ]
+//        ];
+
         $requestDetailData = false;
         if (isset($requestData['task_data']) && count($requestData['task_data']) > 0) {
             $requestDetailData = $requestData['task_data'];
@@ -3083,6 +3070,33 @@ class TaskController extends ApiBaseController
                     // STATUS
                     if (null !== $assignedUserStatusId) {
                         $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($assignedUserStatusId);
+
+                        // ONLY TASK WITH PROJECT, REQUESTER AND COMPANY CAN BE CLOSED
+                        if ($status->getTitle() === StatusOptions::CLOSED) {
+
+                            $tasksProject = $task->getProject();
+                            if (!$tasksProject instanceof Project) {
+                                return $this->createApiResponse([
+                                    'message' => 'Task without PROJECT can not be closed!',
+                                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                            }
+
+                            $tasksRequester = $task->getRequestedBy();
+                            if (!$tasksRequester instanceof User) {
+                                return $this->createApiResponse([
+                                    'message' => 'Task without REQUESTER can not be closed!',
+                                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                            }
+
+                            $tasksCompany = $task->getCompany();
+                            if (!$tasksCompany instanceof Company) {
+                                return $this->createApiResponse([
+                                    'message' => 'Task without COMPANY can not be closed!',
+                                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                            }
+
+                            $task->setClosedAt(new \DateTime());
+                        }
                     } else {
                         $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->findOneBy([
                             'title' => StatusOptions::NEW,
@@ -3092,6 +3106,10 @@ class TaskController extends ApiBaseController
                         return $this->createApiResponse([
                             'message' => 'New Status or your requested Status does not exist!',
                         ], StatusCodesHelper::NOT_FOUND_CODE);
+                    }
+
+                    if (null === $task->getStartedAt()) {
+                        $task->setStartedAt(new \DateTime());
                     }
 
                     $userIsAssignedToTask->setTask($task);

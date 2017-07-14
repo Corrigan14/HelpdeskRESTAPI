@@ -3489,9 +3489,8 @@ class TaskController extends ApiBaseController
             }
         }
         if (count($order) === 0) {
-            $order['id'] = 'ASC';
+            $order[FilterAttributeOptions::ID] = 'DESC';
         }
-
         return $order;
     }
 

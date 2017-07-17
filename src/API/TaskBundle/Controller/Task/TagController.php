@@ -348,17 +348,12 @@ class TagController extends ApiBaseController
      *                "imap_settings"
      *              ]
      *           }
+     *       },
      *       "_links":
      *       {
-     *         "put: task": "/api/v1/task-bundle/tasks/11970",
-     *         "patch: task": "/api/v1/task-bundle/tasks/11970",
-     *         "delete": "/api/v1/task-bundle/tasks/11970",
-     *         "put: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
-     *         "patch: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
-     *         "put: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
-     *         "patch: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
-     *         "put: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313",
-     *         "patch: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313"
+     *          "quick update: task": "/api/v1/task-bundle/tasks/quick-update/23996",
+     *          "patch: task": "/api/v1/task-bundle/tasks/23996",
+     *          "delete": "/api/v1/task-bundle/tasks/23996"
      *       }
      *    }
      *
@@ -702,17 +697,12 @@ class TagController extends ApiBaseController
      *                "imap_settings"
      *              ]
      *           }
+     *       },
      *       "_links":
      *       {
-     *         "put: task": "/api/v1/task-bundle/tasks/11970",
-     *         "patch: task": "/api/v1/task-bundle/tasks/11970",
-     *         "delete": "/api/v1/task-bundle/tasks/11970",
-     *         "put: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
-     *         "patch: tasks requester": "/api/v1/task-bundle/tasks/11970/requester/313",
-     *         "put: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
-     *         "patch: tasks project": "/api/v1/task-bundle/tasks/11970/project/18",
-     *         "put: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313",
-     *         "patch: tasks project and requester": "/api/v1/task-bundle/tasks/11970/project/18/requester/313"
+     *          "quick update: task": "/api/v1/task-bundle/tasks/quick-update/23996",
+     *          "patch: task": "/api/v1/task-bundle/tasks/23996",
+     *          "delete": "/api/v1/task-bundle/tasks/23996"
      *       }
      *    }
      *

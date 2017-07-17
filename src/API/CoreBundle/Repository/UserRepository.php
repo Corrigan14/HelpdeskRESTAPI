@@ -85,7 +85,7 @@ class UserRepository extends EntityRepository
      * @param string $order
      * @return array
      */
-    public function getUsersSearch($term, int $page, $isActive, string $order):array
+    public function getUsersSearch($term, int $page, $isActive, string $order): array
     {
         $parameters = [];
         if ('true' === $isActive || 'false' === $isActive) {
@@ -164,7 +164,7 @@ class UserRepository extends EntityRepository
     /**
      * @return array
      */
-    public function getAllUserEntitiesWithIdAndTitle():array
+    public function getAllUserEntitiesWithIdAndTitle(): array
     {
         $query = $this->createQueryBuilder('user')
             ->select('user.id, user.username')
@@ -175,10 +175,28 @@ class UserRepository extends EntityRepository
     }
 
     /**
+     * @return array
+     */
+    public function findAllActiveAdmins(): array
+    {
+        $query = $this->createQueryBuilder('user')
+            ->select()
+            ->where('user.is_active = :isActive')
+            ->andWhere('user.roles LIKE :adminRole')
+            ->setParameters([
+                'isActive' => true,
+                'adminRole' => 'ROLE_ADMIN'
+            ]);
+
+        dump($query->getQuery()->getArrayResult());
+        return $query->getQuery()->getArrayResult();
+    }
+
+    /**
      * @param $paginator
      * @return array
      */
-    private function formatData($paginator):array
+    private function formatData($paginator): array
     {
         $response = [];
         /** @var User $data */
@@ -193,7 +211,7 @@ class UserRepository extends EntityRepository
      * @param User $data
      * @return array
      */
-    private function processData(User $data):array
+    private function processData(User $data): array
     {
         $detailData = $data->getDetailData();
         $detailDataArray = [];

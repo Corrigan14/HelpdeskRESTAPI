@@ -25,9 +25,9 @@ class TagRepository extends EntityRepository
         $userId = $options['loggedUserId'];
 
         $query = $this->createQueryBuilder('t')
-            ->select('t, createdBy')
+            ->select('t')
             ->leftJoin('t.createdBy', 'createdBy')
-            ->orderBy('t.id')
+            ->orderBy('t.id','DESC')
             ->distinct()
             ->where('t.createdBy = :userId')
             ->orWhere('t.public = :public')
@@ -61,6 +61,7 @@ class TagRepository extends EntityRepository
     public function getEntity(int $id):array
     {
         $query = $this->createQueryBuilder('tag')
+            ->select('tag')
             ->where('tag.id = :tagId')
             ->setParameter('tagId', $id)
             ->getQuery();
@@ -77,6 +78,7 @@ class TagRepository extends EntityRepository
     public function getUsersTags(int $userId)
     {
         $query = $this->createQueryBuilder('t')
+            ->select('t')
             ->where('t.createdBy = :userId')
             ->setParameter('userId', $userId);
 

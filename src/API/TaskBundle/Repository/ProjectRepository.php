@@ -40,30 +40,30 @@ class ProjectRepository extends EntityRepository
         if ($isAdmin) {
             if ('true' === $isActive || 'false' === $isActive) {
                 $query = $this->createQueryBuilder('p')
-                    ->select('p, userHasProjects, uhpUser')
+                    ->select('p')
                     ->leftJoin('p.userHasProjects', 'userHasProjects')
                     ->leftJoin('userHasProjects.user', 'uhpUser')
-                    ->orderBy('p.id')
+                    ->orderBy('p.id', 'DESC')
                     ->distinct()
                     ->where('p.is_active = :isActive')
                     ->setParameter('isActive', $isActiveParam)
                     ->getQuery();
             } else {
                 $query = $this->createQueryBuilder('p')
-                    ->select('p, userHasProjects, uhpUser')
+                    ->select('p')
                     ->leftJoin('p.userHasProjects', 'userHasProjects')
                     ->leftJoin('userHasProjects.user', 'uhpUser')
-                    ->orderBy('p.id')
+                    ->orderBy('p.id', 'DESC')
                     ->distinct()
                     ->getQuery();
             }
         } else {
             if ('true' === $isActive || 'false' === $isActive) {
                 $query = $this->createQueryBuilder('p')
-                    ->select('p, uhp, uhpUser')
+                    ->select('p')
                     ->leftJoin('p.userHasProjects', 'uhp')
                     ->leftJoin('uhp.user', 'uhpUser')
-                    ->orderBy('p.id')
+                    ->orderBy('p.id', 'DESC')
                     ->distinct()
                     ->where('p.createdBy = :loggedUser OR uhp.user = :loggedUser')
                     ->andWhere('p.is_active = :isActive')
@@ -71,10 +71,10 @@ class ProjectRepository extends EntityRepository
                     ->getQuery();
             } else {
                 $query = $this->createQueryBuilder('p')
-                    ->select('p, uhp, uhpUser')
+                    ->select('p')
                     ->leftJoin('p.userHasProjects', 'uhp')
                     ->leftJoin('uhp.user', 'uhpUser')
-                    ->orderBy('p.id')
+                    ->orderBy('p.id','DESC')
                     ->distinct()
                     ->where('p.createdBy = :loggedUser OR uhp.user = :loggedUser')
                     ->setParameter('loggedUser', $loggedUser)
@@ -124,7 +124,7 @@ class ProjectRepository extends EntityRepository
     public function getEntity($id)
     {
         $query = $this->createQueryBuilder('project')
-            ->select('project, userHasProjects, uhpUser')
+            ->select('project')
             ->leftJoin('project.userHasProjects', 'userHasProjects')
             ->leftJoin('userHasProjects.user', 'uhpUser')
             ->where('project.id = :id')

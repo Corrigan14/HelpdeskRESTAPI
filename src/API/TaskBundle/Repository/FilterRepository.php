@@ -30,7 +30,7 @@ class FilterRepository extends EntityRepository
         $order = $options['order'];
 
         $query = $this->createQueryBuilder('f')
-            ->select('f, createdBy,project')
+            ->select('f')
             ->leftJoin('f.createdBy', 'createdBy')
             ->leftJoin('f.project', 'project')
             ->leftJoin('project.createdBy', 'projectCreator')
@@ -112,7 +112,7 @@ class FilterRepository extends EntityRepository
     public function getFilterEntity(int $id):array
     {
         $query = $this->createQueryBuilder('filter')
-            ->select('filter, project')
+            ->select('filter')
             ->leftJoin('filter.project', 'project')
             ->where('filter.id = :id')
             ->setParameter('id', $id)

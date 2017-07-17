@@ -107,7 +107,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
 
         $orderString = $request->get('order');
         $orderString = strtolower($orderString);
-        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
+        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'DESC';
 
         $isActive = $request->get('isActive');
         $filtersForUrl = [];

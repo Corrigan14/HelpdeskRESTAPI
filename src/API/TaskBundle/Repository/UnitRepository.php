@@ -35,7 +35,7 @@ class UnitRepository extends EntityRepository
                 $isActiveParam = 0;
             }
             $query = $this->createQueryBuilder('unit')
-                ->select()
+                ->select('unit')
                 ->where('unit.is_active = :isActiveParam')
                 ->orderBy('unit.title', $order)
                 ->setParameter('isActiveParam', $isActiveParam);
@@ -70,7 +70,7 @@ class UnitRepository extends EntityRepository
     public function getEntity(int $id): array
     {
         $query = $this->createQueryBuilder('unit')
-            ->select()
+            ->select('unit')
             ->where('unit.id = :unitId')
             ->setParameter('unitId', $id)
             ->getQuery();

@@ -80,6 +80,9 @@ class TaskRepository extends EntityRepository
 
         foreach ($order as $key => $value) {
             switch ($key) {
+                case FilterAttributeOptions::ID:
+                    $query->addOrderBy('task.id', $value);
+                    break;
                 case FilterAttributeOptions::TITLE:
                     $query->addOrderBy('task.title', $value);
                     break;
@@ -126,7 +129,7 @@ class TaskRepository extends EntityRepository
                     $query->addOrderBy('project.is_active', $value);
                     break;
                 default:
-                    $query->addOrderBy('task.id', 'ASC');
+                    $query->addOrderBy('task.id', 'DESC');
             }
         }
 
@@ -315,6 +318,9 @@ class TaskRepository extends EntityRepository
 
         foreach ($order as $key => $value) {
             switch ($key) {
+                case FilterAttributeOptions::ID:
+                    $query->addOrderBy('task.id', $value);
+                    break;
                 case FilterAttributeOptions::TITLE:
                     $query->addOrderBy('task.title', $value);
                     break;
@@ -361,7 +367,7 @@ class TaskRepository extends EntityRepository
                     $query->addOrderBy('project.is_active', $value);
                     break;
                 default:
-                    $query->addOrderBy('task.id', 'ASC');
+                    $query->addOrderBy('task.id', 'DESC');
             }
         }
 

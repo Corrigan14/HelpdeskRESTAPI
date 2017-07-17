@@ -29,64 +29,10 @@ tasks_create:
     defaults: { _controller: APITaskBundle:Task/Task:create }
     methods: [POST]
 
-tasks_create_in_project:
-    path:     /tasks/project/{projectId}
-    defaults: { _controller: APITaskBundle:Task/Task:create }
-    methods: [POST]
-    requirements:
-        projectId: '\d+'
-
-tasks_create_with_requester:
-    path:     /tasks/requester/{requestedUserId}
-    defaults: { _controller: APITaskBundle:Task/Task:create }
-    methods: [POST]
-    requirements:
-        requestedUserId: '\d+'
-
-tasks_create_in_project_with_requester:
-    path:     /tasks/project/{projectId}/requester/{requestedUserId}
-    defaults: { _controller: APITaskBundle:Task/Task:create }
-    methods: [POST]
-    requirements:
-        projectId: '\d+'
-        requestedUserId: '\d+'
-
-tasks_create_with_company:
-    path:     /tasks/company/{companyId}
-    defaults: { _controller: APITaskBundle:Task/Task:create }
-    methods: [POST]
-    requirements:
-        companyId: '\d+'
-
-tasks_create_with_company_in_project:
-    path:     /tasks/project/{projectId}/company/{companyId}
-    defaults: { _controller: APITaskBundle:Task/Task:create }
-    methods: [POST]
-    requirements:
-        projectId: '\d+'
-        companyId: '\d+'
-
-tasks_create_with_company_and_requester:
-    path:     /tasks/requester/{requestedUserId}/company/{companyId}
-    defaults: { _controller: APITaskBundle:Task/Task:create }
-    methods: [POST]
-    requirements:
-        requestedUserId: '\d+'
-        companyId: '\d+'
-
-tasks_create_in_project_with_company_and_requester:
-    path:     /tasks/project/{projectId}/requester/{requestedUserId}/company/{companyId}
-    defaults: { _controller: APITaskBundle:Task/Task:create }
-    methods: [POST]
-    requirements:
-        projectId: '\d+'
-        requestedUserId: '\d+'
-        companyId: '\d+'
-
 tasks_update:
     path:     /tasks/{id}
     defaults: { _controller: APITaskBundle:Task/Task:update }
-    methods: [PUT]
+    methods: [PATCH]
     requirements:
             id: '\d+'
 
@@ -96,63 +42,6 @@ tasks_quick_update:
     methods: [PATCH]
     requirements:
             taskId: '\d+'
-
-tasks_update_project:
-    path:     /tasks/{id}/project/{projectId}
-    defaults: { _controller: APITaskBundle:Task/Task:update }
-    methods: [PUT]
-    requirements:
-            id: '\d+'
-            projectId: '\d+'
-
-tasks_update_requester:
-    path:     /tasks/{id}/requester/{requestedUserId}
-    defaults: { _controller: APITaskBundle:Task/Task:update }
-    methods: [PUT]
-    requirements:
-            id: '\d+'
-            requestedUserId: '\d+'
-
-tasks_update_project_and_requester:
-    path:     /tasks/{id}/project/{projectId}/requester/{requestedUserId}
-    defaults: { _controller: APITaskBundle:Task/Task:update }
-    methods: [PUT]
-    requirements:
-            id: '\d+'
-            projectId: '\d+'
-            requestedUserId: '\d+'
-
-tasks_partial_update:
-    path:     /tasks/{id}
-    defaults: { _controller: APITaskBundle:Task/Task:updatePartial }
-    methods: [PATCH]
-    requirements:
-            id: '\d+'
-
-tasks_partial_update_project:
-    path:     /tasks/{id}/project/{projectId}
-    defaults: { _controller: APITaskBundle:Task/Task:updatePartial }
-    methods: [PATCH]
-    requirements:
-            id: '\d+'
-            projectId: '\d+'
-
-tasks_partial_update_requester:
-    path:     /tasks/{id}/requester/{requestedUserId}
-    defaults: { _controller: APITaskBundle:Task/Task:updatePartial }
-    methods: [PATCH]
-    requirements:
-            id: '\d+'
-            requestedUserId: '\d+'
-
-tasks_partial_update_project_and_requester:
-    path:     /tasks/{id}/project/{projectId}/requester/{requestedUserId}
-    defaults: { _controller: APITaskBundle:Task/Task:updatePartial }
-    methods: [PATCH]
-    requirements:
-            id: '\d+'
-            projectId: '\d+'
-            requestedUserId: '\d+'
 
 tasks_delete:
     path:     /tasks/{id}

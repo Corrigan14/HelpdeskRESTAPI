@@ -188,7 +188,6 @@ class UserRepository extends EntityRepository
                 'adminRole' => 'ROLE_ADMIN'
             ]);
 
-        dump($query->getQuery()->getArrayResult());
         return $query->getQuery()->getArrayResult();
     }
 

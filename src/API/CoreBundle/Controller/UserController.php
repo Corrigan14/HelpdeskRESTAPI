@@ -210,7 +210,7 @@ class UserController extends ApiBaseController
      *
      * @return JsonResponse
      */
-    public function listOfAllUsersAction():JsonResponse
+    public function listOfAllUsersAction(): JsonResponse
     {
         $allUsers = $this->get('api_user.service')->getListOfAllUsers();
         return $this->json($allUsers, StatusCodesHelper::SUCCESSFUL_CODE);
@@ -280,7 +280,30 @@ class UserController extends ApiBaseController
      *           "put: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41",
      *           "patch: company": "/api/v1/core-bundle/users/85/company/41",
      *           "patch: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41"
-     *         }
+     *         },
+     *         "allowedUserRoles":
+     *         [
+     *            [
+     *               {
+     *                  "id": 31,
+     *                  "title": "MANAGER",
+     *                  "description": null,
+     *                  "homepage": "/",
+     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                  "is_active": true,
+     *                  "order": 2
+     *               },
+     *              {
+     *                  "id": 32,
+     *                  "title": "AGENT",
+     *                  "description": null,
+     *                  "homepage": "/",
+     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"sent_emails_from_comments\"]",
+     *                  "is_active": true,
+     *                  "order": 3
+     *              }
+     *           ]
+     *        ]
      *      }
      *
      * @ApiDoc(
@@ -348,7 +371,10 @@ class UserController extends ApiBaseController
         ];
 
         $userArray = $this->get('api_user.service')->getUserResponse($ids);
-        return $this->json($userArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $userRoles = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->getAllowedUserRoles($user->getUserRole()->getOrder());
+        $allowedRolesArray['allowedUserRoles'] = [$userRoles];
+
+        return $this->json(array_merge($userArray, $allowedRolesArray), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -415,7 +441,30 @@ class UserController extends ApiBaseController
      *           "put: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41",
      *           "patch: company": "/api/v1/core-bundle/users/85/company/41",
      *           "patch: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41"
-     *         }
+     *         },
+     *         "allowedUserRoles":
+     *         [
+     *            [
+     *               {
+     *                  "id": 31,
+     *                  "title": "MANAGER",
+     *                  "description": null,
+     *                  "homepage": "/",
+     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                  "is_active": true,
+     *                  "order": 2
+     *               },
+     *              {
+     *                  "id": 32,
+     *                  "title": "AGENT",
+     *                  "description": null,
+     *                  "homepage": "/",
+     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"sent_emails_from_comments\"]",
+     *                  "is_active": true,
+     *                  "order": 3
+     *              }
+     *           ]
+     *        ]
      *      }
      *
      * @ApiDoc(
@@ -574,7 +623,30 @@ class UserController extends ApiBaseController
      *           "put: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41",
      *           "patch: company": "/api/v1/core-bundle/users/85/company/41",
      *           "patch: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41"
-     *         }
+     *         },
+     *         "allowedUserRoles":
+     *         [
+     *            [
+     *               {
+     *                  "id": 31,
+     *                  "title": "MANAGER",
+     *                  "description": null,
+     *                  "homepage": "/",
+     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                  "is_active": true,
+     *                  "order": 2
+     *               },
+     *              {
+     *                  "id": 32,
+     *                  "title": "AGENT",
+     *                  "description": null,
+     *                  "homepage": "/",
+     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"sent_emails_from_comments\"]",
+     *                  "is_active": true,
+     *                  "order": 3
+     *              }
+     *           ]
+     *        ]
      *      }
      *
      * @ApiDoc(
@@ -756,7 +828,30 @@ class UserController extends ApiBaseController
      *           "put: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41",
      *           "patch: company": "/api/v1/core-bundle/users/85/company/41",
      *           "patch: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41"
-     *         }
+     *         },
+     *         "allowedUserRoles":
+     *         [
+     *            [
+     *               {
+     *                  "id": 31,
+     *                  "title": "MANAGER",
+     *                  "description": null,
+     *                  "homepage": "/",
+     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                  "is_active": true,
+     *                  "order": 2
+     *               },
+     *              {
+     *                  "id": 32,
+     *                  "title": "AGENT",
+     *                  "description": null,
+     *                  "homepage": "/",
+     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"sent_emails_from_comments\"]",
+     *                  "is_active": true,
+     *                  "order": 3
+     *              }
+     *           ]
+     *        ]
      *      }
      *
      * @ApiDoc(
@@ -984,7 +1079,30 @@ class UserController extends ApiBaseController
      *           "put: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41",
      *           "patch: company": "/api/v1/core-bundle/users/85/company/41",
      *           "patch: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41"
-     *         }
+     *         },
+     *         "allowedUserRoles":
+     *         [
+     *            [
+     *               {
+     *                  "id": 31,
+     *                  "title": "MANAGER",
+     *                  "description": null,
+     *                  "homepage": "/",
+     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
+     *                  "is_active": true,
+     *                  "order": 2
+     *               },
+     *              {
+     *                  "id": 32,
+     *                  "title": "AGENT",
+     *                  "description": null,
+     *                  "homepage": "/",
+     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"sent_emails_from_comments\"]",
+     *                  "is_active": true,
+     *                  "order": 3
+     *              }
+     *           ]
+     *        ]
      *      }
      *
      * @ApiDoc(
@@ -1051,7 +1169,10 @@ class UserController extends ApiBaseController
             'userCompanyId' => $userCompanyId
         ];
         $userArray = $this->get('api_user.service')->getUserResponse($ids);
-        return $this->json($userArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $userRoles = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->getAllowedUserRoles($user->getUserRole()->getOrder());
+        $allowedRolesArray['allowedUserRoles'] = [$userRoles];
+
+        return $this->json(array_merge($userArray,$userRoles), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -1390,7 +1511,7 @@ class UserController extends ApiBaseController
                     'title' => 'INBOX'
                 ]);
 
-                if(null!==$inboxProject) {
+                if (null !== $inboxProject) {
                     $acl = [];
                     $acl[] = ProjectAclOptions::VIEW_OWN_TASKS;
                     $userHasProject = new UserHasProject();
@@ -1438,7 +1559,10 @@ class UserController extends ApiBaseController
                 }
             } else {
                 $userArray = $this->get('api_user.service')->getUserResponse($ids);
-                return $this->json($userArray, $statusCode);
+                $userRoles = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->getAllowedUserRoles($user->getUserRole()->getOrder());
+                $allowedRolesArray['allowedUserRoles'] = [$userRoles];
+
+                return $this->json(array_merge($userArray, $allowedRolesArray), $statusCode);
             }
         }
 

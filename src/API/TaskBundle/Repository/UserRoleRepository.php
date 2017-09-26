@@ -65,7 +65,7 @@ class UserRoleRepository extends EntityRepository
      * @param int $id
      * @return array
      */
-    public function getEntity(int $id):array
+    public function getEntity(int $id): array
     {
         $query = $this->createQueryBuilder('userRole')
             ->select('userRole')
@@ -78,10 +78,25 @@ class UserRoleRepository extends EntityRepository
     }
 
     /**
+     * @param int $order
+     * @return array
+     */
+    public function getAllowedUserRoles(int $order): array
+    {
+        $query = $this->createQueryBuilder('userRole')
+            ->select('userRole')
+            ->where('userRole.order >= :order')
+            ->setParameter('order', $order)
+            ->getQuery();
+
+        return $query->getArrayResult();
+    }
+
+    /**
      * @param $paginatorData
      * @return array
      */
-    private function formatListData($paginatorData):array
+    private function formatListData($paginatorData): array
     {
         $response = [];
 
@@ -105,7 +120,7 @@ class UserRoleRepository extends EntityRepository
      * @param $data
      * @return array
      */
-    private function formatSingleData(UserRole $data):array
+    private function formatSingleData(UserRole $data): array
     {
         $users = $data->getUsers();
         $usersArray = [];

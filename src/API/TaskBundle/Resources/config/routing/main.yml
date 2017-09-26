@@ -1,4 +1,4 @@
 left_menu_param_list:
     path:     /left-menu-params
-    defaults: { _controller: APITaskBundle: }
+    defaults: { _controller: APITaskBundle:Main:getLeftNavigationParams }
     methods: [GET]

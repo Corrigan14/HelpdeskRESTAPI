@@ -27,7 +27,7 @@ class TagRepository extends EntityRepository
         $query = $this->createQueryBuilder('t')
             ->select('t')
             ->leftJoin('t.createdBy', 'createdBy')
-            ->orderBy('t.id','DESC')
+            ->orderBy('t.id', 'DESC')
             ->distinct()
             ->where('t.createdBy = :userId')
             ->orWhere('t.public = :public')
@@ -55,10 +55,47 @@ class TagRepository extends EntityRepository
     }
 
     /**
+     * Return's all entities without pagination
+     *
+     * @param int $loggedUserId
+     * @return array
+     */
+    public function getAllUsersTagsWithoutPagination(int $loggedUserId):array
+    {
+        $query = $this->createQueryBuilder('t')
+            ->select('t, createdBy')
+            ->leftJoin('t.createdBy', 'createdBy')
+            ->orderBy('t.id', 'DESC')
+            ->distinct()
+            ->where('t.createdBy = :userId')
+            ->orWhere('t.public = :public')
+            ->setParameters(['userId' => $loggedUserId, 'public' => true])
+            ->getQuery();
+
+        $query = $query->getArrayResult();
+
+        $arrayProcessed = [];
+        foreach ($query as $data) {
+            $arrayProcessed [] = [
+                'id' => $data['id'],
+                'title' => $data['title'],
+                'color' => $data['color'],
+                'public' => $data['public'],
+                'createdBy' => [
+                    'id' => $data['createdBy']['id'],
+                    'username' =>$data['createdBy']['username'],
+                    'email' => $data['createdBy']['email']
+                ]
+            ];
+        }
+        return $arrayProcessed;
+    }
+
+    /**
      * @param int $id
      * @return array
      */
-    public function getEntity(int $id):array
+    public function getEntity(int $id): array
     {
         $query = $this->createQueryBuilder('tag')
             ->select('tag')
@@ -89,7 +126,7 @@ class TagRepository extends EntityRepository
      * @param int $userId
      * @return array
      */
-    public function getAllTagEntitiesWithIdAndTitle(int $userId):array
+    public function getAllTagEntitiesWithIdAndTitle(int $userId): array
     {
         $query = $this->createQueryBuilder('tag')
             ->select('tag.id, tag.title')
@@ -104,7 +141,7 @@ class TagRepository extends EntityRepository
      * @param $paginatorData
      * @return array
      */
-    private function formatData($paginatorData):array
+    private function formatData($paginatorData): array
     {
         $response = [];
         /** @var Tag $data */
@@ -119,7 +156,7 @@ class TagRepository extends EntityRepository
      * @param Tag $data
      * @return array
      */
-    private function processData(Tag $data):array
+    private function processData(Tag $data): array
     {
         $response = [
             'id' => $data->getId(),

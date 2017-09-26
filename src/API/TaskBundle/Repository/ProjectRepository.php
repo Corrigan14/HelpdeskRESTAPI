@@ -74,7 +74,7 @@ class ProjectRepository extends EntityRepository
                     ->select('p')
                     ->leftJoin('p.userHasProjects', 'uhp')
                     ->leftJoin('uhp.user', 'uhpUser')
-                    ->orderBy('p.id','DESC')
+                    ->orderBy('p.id', 'DESC')
                     ->distinct()
                     ->where('p.createdBy = :loggedUser OR uhp.user = :loggedUser')
                     ->setParameter('loggedUser', $loggedUser)
@@ -98,6 +98,97 @@ class ProjectRepository extends EntityRepository
             'count' => $count,
             'array' => $this->formatData($paginator)
         ];
+    }
+
+    /**
+     * Return's all entities without pagination
+     *
+     * @param array $options
+     * @return array
+     */
+    public function getAllUsersProjectsWithoutPagination(array $options)
+    {
+        $loggedUser = $options['loggedUser'];
+        $isAdmin = $options['isAdmin'];
+        $isActive = $options['isActive'];
+
+        if ($isAdmin) {
+            if (true === $isActive || false === $isActive) {
+                $query = $this->createQueryBuilder('p')
+                    ->select('p, uhp, uhpUser')
+                    ->leftJoin('p.userHasProjects', 'uhp')
+                    ->leftJoin('uhp.user', 'uhpUser')
+                    ->orderBy('p.id', 'DESC')
+                    ->distinct()
+                    ->where('p.is_active = :isActive')
+                    ->setParameter('isActive', $isActive)
+                    ->getQuery();
+            } else {
+                $query = $this->createQueryBuilder('p')
+                    ->select('p, uhp,uhpUser')
+                    ->leftJoin('p.userHasProjects', 'uhp')
+                    ->leftJoin('uhp.user', 'uhpUser')
+                    ->orderBy('p.id', 'DESC')
+                    ->distinct()
+                    ->getQuery();
+            }
+        } else {
+            if (true === $isActive || false === $isActive) {
+                $query = $this->createQueryBuilder('p')
+                    ->select('p, uhp, uhpUser')
+                    ->leftJoin('p.userHasProjects', 'uhp')
+                    ->leftJoin('uhp.user', 'uhpUser')
+                    ->orderBy('p.id', 'DESC')
+                    ->distinct()
+                    ->where('p.createdBy = :loggedUser OR uhp.user = :loggedUser')
+                    ->andWhere('p.is_active = :isActive')
+                    ->setParameters(['loggedUser' => $loggedUser, 'isActive' => $isActive])
+                    ->getQuery();
+            } else {
+                $query = $this->createQueryBuilder('p')
+                    ->select('p, uhp, uhpUser')
+                    ->leftJoin('p.userHasProjects', 'uhp')
+                    ->leftJoin('uhp.user', 'uhpUser')
+                    ->orderBy('p.id', 'DESC')
+                    ->distinct()
+                    ->where('p.createdBy = :loggedUser OR uhp.user = :loggedUser')
+                    ->setParameter('loggedUser', $loggedUser)
+                    ->getQuery();
+            }
+        }
+
+        $query = $query->getArrayResult();
+
+        $arrayProcessed = [];
+        foreach ($query as $data) {
+            $userHasProjects = $data['userHasProjects'];
+            $userHasProjectsArray = [];
+            if ($userHasProjects) {
+                /** @var UserHasProject $item */
+                foreach ($userHasProjects as $item) {
+                    $userHasProjectsArray[] = [
+                        'id' => $item['id'],
+                        'user' => [
+                            'id' => $item['user']['id'],
+                            'username' => $item['user']['username'],
+                            'email' => $item['user']['email']
+                        ],
+                        'acl' => $item['acl']
+                    ];
+                }
+            }
+            $arrayProcessed [] = [
+                'id' => $data['id'],
+                'title' => $data['title'],
+                'description' => $data['description'],
+                'createdAt' => $data['createdAt'],
+                'updatedAt' => $data['updatedAt'],
+                'is_active' => $data['is_active'],
+                'userHasProjects' => $userHasProjectsArray
+            ];
+        }
+
+        return $arrayProcessed;
     }
 
     /**

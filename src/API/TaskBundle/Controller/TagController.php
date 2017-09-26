@@ -99,6 +99,8 @@ class TagController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return JsonResponse
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
     public function listAction(Request $request)

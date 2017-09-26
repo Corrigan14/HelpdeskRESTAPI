@@ -106,10 +106,101 @@ class FilterRepository extends EntityRepository
     }
 
     /**
+     * Return's all entities without pagination
+     *
+     * @param array $options
+     * @return mixed
+     */
+    public function getAllUsersFiltersWithoutPagination(array $options = [])
+    {
+        $isActive = $options['isActive'];
+        $public = $options['public'];
+        $report = $options['report'];
+        $loggedUserId = $options['loggedUserId'];
+
+        $query = $this->createQueryBuilder('f')
+            ->select('f, createdBy, project')
+            ->leftJoin('f.createdBy', 'createdBy')
+            ->leftJoin('f.project', 'project')
+            ->leftJoin('project.createdBy', 'projectCreator')
+            ->orderBy('f.id', 'DESC')
+            ->distinct()
+            ->where('f.id is not NULL');
+
+        $paramArray = [];
+        if (true === $isActive) {
+            $query->andWhere('f.is_active = :isActiveParam');
+            $paramArray['isActiveParam'] = true;
+        } elseif (false === $isActive) {
+            $query->andWhere('f.is_active = :isActiveParam');
+            $paramArray['isActiveParam'] = false;
+        }
+
+        if (true === $public) {
+            $query->andWhere('f.public = :publicParam');
+            $paramArray['publicParam'] = true;
+        } elseif (false === $public) {
+            $query->andWhere('createdBy.id = :loggedUserId');
+            $paramArray['loggedUserId'] = $loggedUserId;
+        } else {
+            $query->andWhere('f.public = :publicParam')
+                ->orWhere('createdBy.id = :loggedUserId');
+            $paramArray['publicParam'] = true;
+            $paramArray['loggedUserId'] = $loggedUserId;
+        }
+
+        if (true === $report) {
+            $query->andWhere('f.report = :reportParam');
+            $paramArray['reportParam'] = true;
+        } elseif (false === $report) {
+            $query->andWhere('f.report = :reportParam');
+            $paramArray['reportParam'] = false;
+        }
+
+        if (!empty($paramArray)) {
+            $query->setParameters($paramArray);
+        }
+
+        $query = $query->getQuery()->getArrayResult();
+
+        $arrayProcessed = [];
+
+        foreach ($query as $data) {
+            $projectArray = null;
+            if (isset($data['project'])) {
+                $projectArray = [
+                    'id' => $data['project']['id'],
+                    'title' => $data['project']['title'],
+                ];
+            }
+            $arrayProcessed [] = [
+                'id' => $data['id'],
+                'title' => $data['title'],
+                'public' => $data['public'],
+                'filter' => $data['filter'],
+                'report' => $data['report'],
+                'is_active' => $data['is_active'],
+                'default' => $data['default'],
+                'icon_class' => $data['icon_class'],
+                'order' => $data['order'],
+                'createdBy' => [
+                    'id' => $data['createdBy']['id'],
+                    'username' => $data['createdBy']['username'],
+                    'email' => $data['createdBy']['email']
+                ],
+                'project' => $projectArray,
+                'columns' => $data['columns']
+            ];
+        }
+
+        return $arrayProcessed;
+    }
+
+    /**
      * @param int $id
      * @return array
      */
-    public function getFilterEntity(int $id):array
+    public function getFilterEntity(int $id): array
     {
         $query = $this->createQueryBuilder('filter')
             ->select('filter')
@@ -125,7 +216,7 @@ class FilterRepository extends EntityRepository
      * @param $paginatorData
      * @return array
      */
-    private function formatData($paginatorData):array
+    private function formatData($paginatorData): array
     {
         $response = [];
         /** @var Filter $data */
@@ -140,7 +231,7 @@ class FilterRepository extends EntityRepository
      * @param $data
      * @return array
      */
-    private function processData(Filter $data):array
+    private function processData(Filter $data): array
     {
         $project = $data->getProject();
         $projectArray = null;

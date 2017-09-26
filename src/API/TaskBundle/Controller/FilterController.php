@@ -396,25 +396,26 @@ class FilterController extends ApiBaseController implements ControllerInterface
     {
         $filter = new Filter();
         $requestData = $request->request->all();
-
         // Check if user can create PUBLIC filter (it's role has SHARE_FILTER ACL)
-        if (isset($requestData['public']) && true === $requestData['public']) {
-            $aclOptions = [
-                'acl' => UserRoleAclOptions::SHARE_FILTERS,
-                'user' => $this->getUser()
-            ];
+        if (isset($requestData['public'])) {
+            if (true === $requestData['public'] || 1 === (int)$requestData['public']) {
+                $aclOptions = [
+                    'acl' => UserRoleAclOptions::SHARE_FILTERS,
+                    'user' => $this->getUser()
+                ];
 
-            if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-                $filter->setPublic(false);
-                return $this->createApiResponse([
-                    'message' => 'You have not permission to create PUBLIC filter!',
-                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+                if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+                    $filter->setPublic(false);
+                    return $this->createApiResponse([
+                        'message' => 'You have not permission to create a PUBLIC filter!',
+                    ], StatusCodesHelper::ACCESS_DENIED_CODE);
+                } else {
+                    $filter->setPublic(true);
+                }
+                unset($requestData['public']);
             } else {
-                $filter->setPublic(true);
+                $filter->setPublic(false);
             }
-            unset($requestData['public']);
-        } else {
-            $filter->setPublic(false);
         }
 
         $filter->setIsActive(true);
@@ -504,7 +505,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \InvalidArgumentException
      */
-    public function createProjectsFilterAction(Request $request, int $projectId)
+    public
+    function createProjectsFilterAction(Request $request, int $projectId)
     {
         $filter = new Filter();
         $requestData = $request->request->all();
@@ -631,7 +633,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \InvalidArgumentException
      */
-    public function updateAction(int $id, Request $request)
+    public
+    function updateAction(int $id, Request $request)
     {
         $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
         $requestData = $request->request->all();
@@ -758,7 +761,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \InvalidArgumentException
      */
-    public function updateProjectFilterAction(int $id, int $projectId, Request $request)
+    public
+    function updateProjectFilterAction(int $id, int $projectId, Request $request)
     {
         $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
         $requestData = $request->request->all();
@@ -898,7 +902,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \InvalidArgumentException
      */
-    public function updatePartialAction(int $id, Request $request)
+    public
+    function updatePartialAction(int $id, Request $request)
     {
         $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
         $requestData = $request->request->all();
@@ -964,7 +969,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @return Response
      * @throws \LogicException
      */
-    public function deleteAction(int $id)
+    public
+    function deleteAction(int $id)
     {
         $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
 
@@ -1084,7 +1090,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *
      * @return JsonResponse
      */
-    public function getFilterOptionsAction()
+    public
+    function getFilterOptionsAction()
     {
         // Return arrays of options
         $statusesArray = $this->get('status_service')->getListOfExistedStatuses();
@@ -1133,7 +1140,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @return Response
      * @throws \LogicException
      */
-    private function updateEntity(Filter $filter, array $data, $create = false)
+    private
+    function updateEntity(Filter $filter, array $data, $create = false)
     {
         $allowedUnitEntityParams = [
             'title',
@@ -1249,8 +1257,18 @@ class FilterController extends ApiBaseController implements ControllerInterface
             unset($data['columns_task_attributes']);
         }
 
+
         $errors = $this->get('entity_processor')->processEntity($filter, $data);
-        if (false === $errors) {
+        // Check manually if icon_class parameter is not NULL. If yes - return error
+        $iconError = [];
+        if (!isset($data['icon_class'])) {
+            $iconError[] = [
+                'field' => 'icon_class',
+                'message' => 'Icon class is required!'
+            ];
+        }
+
+        if (false === $errors && false !== $iconError) {
             $this->getDoctrine()->getManager()->persist($filter);
             $this->getDoctrine()->getManager()->flush();
 
@@ -1259,7 +1277,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
         }
 
         $data = [
-            'errors' => $errors,
+            'errors' => array_merge($errors, $iconError),
             'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
         ];
         return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);

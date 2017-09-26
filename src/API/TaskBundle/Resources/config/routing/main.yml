@@ -1,0 +1,4 @@
+left_menu_param_list:
+    path:     /left-menu-params
+    defaults: { _controller: APITaskBundle: }
+    methods: [GET]

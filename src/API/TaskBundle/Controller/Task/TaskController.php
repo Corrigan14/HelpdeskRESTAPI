@@ -14,7 +14,6 @@ use API\TaskBundle\Entity\TaskAttribute;
 use API\TaskBundle\Entity\TaskData;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
 use API\TaskBundle\Entity\UserHasProject;
-use API\TaskBundle\Entity\UserRole;
 use API\TaskBundle\Security\ProjectAclOptions;
 use API\TaskBundle\Security\StatusOptions;
 use API\TaskBundle\Security\UserRoleAclOptions;
@@ -26,7 +25,6 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
  * Class TaskController

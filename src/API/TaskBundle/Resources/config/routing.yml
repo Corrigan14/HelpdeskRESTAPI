@@ -1,3 +1,6 @@
+api_task_main:
+    resource: "@APITaskBundle/Resources/config/routing/main.yml"
+    prefix: /
 api_task_task:
     resource: "@APITaskBundle/Resources/config/routing/task.yml"
     prefix: /

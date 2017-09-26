@@ -499,7 +499,17 @@ class TaskVoter implements VoterInterface
     public function canAddCommentToTask(Task $task): bool
     {
         // User Can Add Comment to Task if he can UPDATE this task
-        return $this->canUpdate($task);
+        $canUpdate = $this->canUpdate($task);
+
+        // User Can Add Comment if the Task in the Project where User has VIEW_OWN_TASKS, VIEW_TASKS_FROM_USERS_COMPANY or VIEW_ALL_TASKS project ACL
+        $project = $task->getProject();
+        $viewAcl = [ProjectAclOptions::VIEW_OWN_TASKS, ProjectAclOptions::VIEW_TASKS_FROM_USERS_COMPANY, ProjectAclOptions::VIEW_ALL_TASKS];
+        $canViewTask = false;
+        if ($project instanceof Project) {
+            $canViewTask = $this->hasOneOfProjectAclRights($viewAcl, $project->getId());
+        }
+
+        return ($canUpdate or $canViewTask);
     }
 
     /**
@@ -589,6 +599,33 @@ class TaskVoter implements VoterInterface
 
             if (in_array($action, $usersProjectAcl, true)) {
                 return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Every User have a custom array of access rights to every project
+     *
+     * @param array $actions
+     * @param int $projectId
+     * @return bool
+     */
+    private function hasOneOfProjectAclRights(array $actions, int $projectId): bool
+    {
+        $userHasProject = $this->em->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+            'project' => $projectId,
+            'user' => $this->user,
+        ]);
+
+        if ($userHasProject instanceof UserHasProject) {
+            $usersProjectAcl = $userHasProject->getAcl();
+
+            foreach ($actions as $action) {
+                if (in_array($action, $usersProjectAcl, true)) {
+                    return true;
+                }
             }
         }
 

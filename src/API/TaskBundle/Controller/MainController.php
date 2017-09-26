@@ -238,6 +238,8 @@ class MainController extends ApiBaseController
             'archived' => $loggedUserArchivedProjects,
             'tags' => $loggedUserTags,
         ];
+
+        // Returns a list of admin's Reports
         if ($isAdmin) {
             $reportOptions = [
                 'loggedUserId' => $loggedUser->getId(),

@@ -76,7 +76,7 @@ class Filter
     /**
      * @var string
      *
-     * @ORM\Column(name="icon_class", type="string", length=255)
+     * @ORM\Column(name="icon_class", type="string", length=255, nullable=false)
      * @Assert\Type("string")
      */
     private $icon_class;

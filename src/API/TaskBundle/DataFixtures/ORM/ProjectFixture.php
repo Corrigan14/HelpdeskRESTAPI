@@ -53,12 +53,6 @@ class ProjectFixture implements FixtureInterface, ContainerAwareInterface, Order
 
         if ($userAdmin instanceof User) {
             $project = new Project();
-            $project->setTitle('INBOX');
-            $project->setCreatedBy($userAdmin);
-            $project->setDescription('INBOX - main project');
-            $manager->persist($project);
-
-            $project = new Project();
             $project->setTitle('Project of admin');
             $project->setCreatedBy($userAdmin);
             $project->setDescription('Description of project of admin.');

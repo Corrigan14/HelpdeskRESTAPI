@@ -1457,6 +1457,29 @@ class TaskController extends ApiBaseController
             $task->setImportant(false);
         }
 
+        if (isset($requestData['project'])) {
+            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($requestData['project']);
+
+            if (!$project instanceof Project) {
+                return $this->createApiResponse([
+                    'message' => 'Project with requested Id does not exist!',
+                ], StatusCodesHelper::NOT_FOUND_CODE);
+            }
+
+            // Check if user can create task in selected project
+            if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT, $project)) {
+                return $this->createApiResponse([
+                    'message' => 'Permission denied! Can not create task in selected project!',
+                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            }
+            $task->setProject($project);
+        } else {
+            // If Task doesn't have project - the system returns error
+            return $this->createApiResponse([
+                'message' => 'Project is Required!',
+            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        }
+
         // OPTIONAL PARAMETERS
         if (isset($requestData['description'])) {
             if (is_string($requestData['description'])) {
@@ -1489,36 +1512,6 @@ class TaskController extends ApiBaseController
                     'message' => 'The Work Time parameter has to be a STRING!',
                 ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
             }
-        }
-
-        if (isset($requestData['project'])) {
-            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($requestData['project']);
-
-            if (!$project instanceof Project) {
-                return $this->createApiResponse([
-                    'message' => 'Project with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
-            }
-
-            // Check if user can create task in selected project
-            if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT, $project)) {
-                return $this->createApiResponse([
-                    'message' => 'Permission denied! Can not create task in selected project!',
-                ], StatusCodesHelper::ACCESS_DENIED_CODE);
-            }
-            $task->setProject($project);
-        } else {
-            // If Task doesn't have project - it's project is set up to INBOX - main project
-            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->findOneBy([
-                'title' => 'INBOX'
-            ]);
-
-            if (!$project instanceof Project) {
-                return $this->createApiResponse([
-                    'message' => 'System ERROR: Project INBOX does not exist in the system!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
-            }
-            $task->setProject($project);
         }
 
         if (isset($requestData['company'])) {

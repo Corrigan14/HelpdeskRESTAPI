@@ -36,10 +36,6 @@ class UserHasProjectFixture implements FixtureInterface, ContainerAwareInterface
             'username' => 'admin'
         ]);
 
-        $inbox = $manager->getRepository('APITaskBundle:Project')->findOneBy([
-            'title' => 'INBOX'
-        ]);
-
         $usersProject = $manager->getRepository('APITaskBundle:Project')->findOneBy([
             'title' => 'Project of user 1'
         ]);
@@ -47,23 +43,6 @@ class UserHasProjectFixture implements FixtureInterface, ContainerAwareInterface
         $adminsProject = $manager->getRepository('APITaskBundle:Project')->findOneBy([
             'title' => 'Project of admin'
         ]);
-
-        $allUsers = $manager->getRepository('APICoreBundle:User')->findAll();
-
-        foreach ($allUsers as $user) {
-            $acl = [];
-            $acl[] = ProjectAclOptions::VIEW_OWN_TASKS;
-            if ($inbox instanceof Project) {
-                $userHasProject = new UserHasProject();
-                $userHasProject->setUser($user);
-                $userHasProject->setProject($inbox);
-                $userHasProject->setAcl($acl);
-                $manager->persist($userHasProject);
-
-                $manager->persist($userHasProject);
-                $manager->flush();
-            }
-        }
 
         if ($userUser instanceof User && $adminsProject instanceof Project) {
             $userHasProjectExist = $manager->getRepository('APITaskBundle:UserHasProject')->findOneBy([

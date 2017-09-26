@@ -505,8 +505,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \InvalidArgumentException
      */
-    public
-    function createProjectsFilterAction(Request $request, int $projectId)
+    public function createProjectsFilterAction(Request $request, int $projectId)
     {
         $filter = new Filter();
         $requestData = $request->request->all();
@@ -633,8 +632,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \InvalidArgumentException
      */
-    public
-    function updateAction(int $id, Request $request)
+    public function updateAction(int $id, Request $request)
     {
         $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
         $requestData = $request->request->all();
@@ -761,8 +759,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \InvalidArgumentException
      */
-    public
-    function updateProjectFilterAction(int $id, int $projectId, Request $request)
+    public function updateProjectFilterAction(int $id, int $projectId, Request $request)
     {
         $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
         $requestData = $request->request->all();
@@ -902,8 +899,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \InvalidArgumentException
      */
-    public
-    function updatePartialAction(int $id, Request $request)
+    public function updatePartialAction(int $id, Request $request)
     {
         $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
         $requestData = $request->request->all();
@@ -969,8 +965,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @return Response
      * @throws \LogicException
      */
-    public
-    function deleteAction(int $id)
+    public function deleteAction(int $id)
     {
         $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
 
@@ -1090,16 +1085,15 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *
      * @return JsonResponse
      */
-    public
-    function getFilterOptionsAction()
+    public function getFilterOptionsAction()
     {
         // Return arrays of options
         $statusesArray = $this->get('status_service')->getListOfExistedStatuses();
 
-        // Available projects are where logged user have CREATE_TASK ACL
+        // Available projects are where logged user have any ACL
         // Admin can use All existed projects
         $isAdmin = $this->get('task_voter')->isAdmin();
-        $projectsArray = $this->get('project_service')->getListOfAvailableProjects($this->getUser(), $isAdmin, ProjectAclOptions::CREATE_TASK);
+        $projectsArray = $this->get('project_service')->getListOfAvailableProjectsWhereUsersACLExists($this->getUser(), $isAdmin);
 
         // Every user can be creator
         $creatorArray = $this->get('api_user.service')->getListOfAllUsers();
@@ -1140,8 +1134,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @return Response
      * @throws \LogicException
      */
-    private
-    function updateEntity(Filter $filter, array $data, $create = false)
+    private function updateEntity(Filter $filter, array $data, $create = false)
     {
         $allowedUnitEntityParams = [
             'title',

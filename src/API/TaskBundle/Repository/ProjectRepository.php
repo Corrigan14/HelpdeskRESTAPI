@@ -120,6 +120,8 @@ class ProjectRepository extends EntityRepository
     /**
      * @param $id
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getEntity($id)
     {

@@ -34,6 +34,23 @@ class UserHasProjectRepository extends EntityRepository
     }
 
     /**
+     * @param User $user
+     * @return array
+     */
+    public function getAllProjectEntitiesWithIdAndTitleWhereUsersACLExists(User $user):array
+    {
+        $query = $this->createQueryBuilder('uhp')
+            ->select('project.id, project.title')
+            ->leftJoin('uhp.project', 'project')
+            ->where('uhp.user = :user')
+            ->andWhere('project.is_active = :isActive')
+            ->distinct()
+            ->setParameters(['user' => $user, 'isActive' => true]);
+
+        return $query->getQuery()->getArrayResult();
+    }
+
+    /**
      * @param Project $project
      * @param string $rule
      * @return array

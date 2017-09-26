@@ -84,6 +84,20 @@ class ProjectService
     }
 
     /**
+     * @param User $user
+     * @param bool $isAdmin
+     * @return array
+     */
+    public function getListOfAvailableProjectsWhereUsersACLExists(User $user, bool $isAdmin):array
+    {
+        if ($isAdmin) {
+            return $this->em->getRepository('APITaskBundle:Project')->getAllProjectEntitiesWithIdAndTitle();
+        } else {
+            return $this->em->getRepository('APITaskBundle:UserHasProject')->getAllProjectEntitiesWithIdAndTitleWhereUsersACLExists($user);
+        }
+    }
+
+    /**
      * Return Project Response which includes all data about Project Entity and Links to update/partialUpdate/delete
      * @param Project $project
      * @return array

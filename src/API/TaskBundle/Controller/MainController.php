@@ -84,7 +84,9 @@ class MainController extends ApiBaseController
      *                },
      *                "acl": "[\"view_own_tasks\",\"view_tasks_from_users_company\",\"view_all_tasks\",\"create_task\",\"resolve_task\",\"delete_task\",\"view_internal_note\",\"edit_internal_note\",\"edit_project\"]"
      *              }
-     *            ]
+     *            ],
+     *            "canEdit": false,
+     *            "numberOfTasks": 3
      *         ],
      *         "archived":
      *          [
@@ -126,7 +128,9 @@ class MainController extends ApiBaseController
      *                },
      *                "acl": "[\"view_own_tasks\",\"view_tasks_from_users_company\",\"view_all_tasks\",\"create_task\",\"resolve_task\",\"delete_task\",\"view_internal_note\",\"edit_internal_note\",\"edit_project\"]"
      *              }
-     *            ]
+     *            ],
+     *            "canEdit": false,
+     *            "numberOfTasks": 3
      *         ],
      *         "tags":
      *         [
@@ -197,6 +201,8 @@ class MainController extends ApiBaseController
      * )
      *
      * @return JsonResponse
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
     public function getLeftNavigationParamsAction()
@@ -214,15 +220,17 @@ class MainController extends ApiBaseController
         ];
         $loggedUserProjects = $doctrine->getRepository('APITaskBundle:Project')->getAllUsersProjectsWithoutPagination($options);
         // Add to every project canEdit value based on logged user's project ACL. ADMIN can edit every project
+        // Add to every project the number of Tasks
         $modifiedLoggedUserProjects = [];
         foreach ($loggedUserProjects as $project) {
+            $projectEntityFromDb = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($project['id']);
             if ($isAdmin) {
                 $canEditProject = true;
             } else {
-                $projectEntityFromDb = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($project['id']);
                 $canEditProject = $this->canEditProject($projectEntityFromDb);
             }
             $project['canEdit'] = $canEditProject;
+            $project['numberOfTasks'] = $this->getDoctrine()->getRepository('APITaskBundle:Task')->getNumberOfTasksFromProject($projectEntityFromDb);
             $modifiedLoggedUserProjects[] = $project;
         }
 
@@ -236,13 +244,14 @@ class MainController extends ApiBaseController
         // Add to every project canEdit value based on logged user's project ACL. ADMIN can edit every project
         $modifiedLoggedUserNotActiveProjects = [];
         foreach ($loggedUserArchivedProjects as $project) {
+            $projectEntityFromDb = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($project['id']);
             if ($isAdmin) {
                 $canEditProject = true;
             } else {
-                $projectEntityFromDb = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($project['id']);
                 $canEditProject = $this->canEditProject($projectEntityFromDb);
             }
             $project['canEdit'] = $canEditProject;
+            $project['numberOfTasks'] = $this->getDoctrine()->getRepository('APITaskBundle:Task')->getNumberOfTasksFromProject($projectEntityFromDb);
             $modifiedLoggedUserNotActiveProjects[] = $project;
         }
 

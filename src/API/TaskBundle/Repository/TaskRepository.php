@@ -7,6 +7,7 @@ use API\CoreBundle\Entity\UserData;
 use API\TaskBundle\Entity\Comment;
 use API\TaskBundle\Entity\CommentHasAttachment;
 use API\TaskBundle\Entity\InvoiceableItem;
+use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskData;
@@ -560,10 +561,27 @@ class TaskRepository extends EntityRepository
     }
 
     /**
+     * @param Project $project
+     * @return int
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     */
+    public function getNumberOfTasksFromProject(Project $project): int
+    {
+        $query = $this->createQueryBuilder('task')
+            ->select('COUNT(task)')
+            ->where('task.project = :project')
+            ->setParameter('project', $project)
+            ->getQuery();
+
+        return $query->getSingleScalarResult();
+    }
+
+    /**
      * @param $paginatorData
      * @return array
      */
-    private function formatData($paginatorData):array
+    private function formatData($paginatorData): array
     {
         $response = [];
         /** @var Task $data */
@@ -578,7 +596,7 @@ class TaskRepository extends EntityRepository
      * @param Task $data
      * @return array
      */
-    private function processData(Task $data):array
+    private function processData(Task $data): array
     {
         $taskData = $data->getTaskData();
         $taskDataArray = [];
@@ -681,7 +699,7 @@ class TaskRepository extends EntityRepository
             $projectArray = [
                 'id' => $data->getProject()->getId(),
                 'title' => $data->getProject()->getTitle(),
-                'is_active'=>$data->getProject()->getIsActive()
+                'is_active' => $data->getProject()->getIsActive()
             ];
         }
         $company = $data->getCompany();
@@ -733,7 +751,7 @@ class TaskRepository extends EntityRepository
      * @param $paginatorData
      * @return array
      */
-    private function formatCommentData($paginatorData):array
+    private function formatCommentData($paginatorData): array
     {
         $response = [];
         $processedCommentIds = [];
@@ -795,10 +813,10 @@ class TaskRepository extends EntityRepository
         }
 
         $detailData = $comment->getCreatedBy()->getDetailData();
-        if($detailData instanceof UserData){
+        if ($detailData instanceof UserData) {
             $nameOfCreator = $detailData->getName();
             $surnameOfCreator = $detailData->getSurname();
-        }else{
+        } else {
             $nameOfCreator = null;
             $surnameOfCreator = null;
         }

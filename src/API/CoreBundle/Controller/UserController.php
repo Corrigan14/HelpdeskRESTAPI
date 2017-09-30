@@ -105,6 +105,10 @@ class UserController extends ApiBaseController
      *     {
      *       "name"="order",
      *       "description"="ASC or DESC order by Username"
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
      *     }
      *  },
      *  headers={
@@ -144,6 +148,9 @@ class UserController extends ApiBaseController
         $pageNum = $request->get('page');
         $page = (int)$pageNum ? $pageNum : 1;
 
+        $limitNum = $request->get('limit');
+        $limit = (int)$limitNum ? $limitNum : 10;
+
         $orderString = $request->get('order');
         $orderString = strtolower($orderString);
         $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
@@ -151,10 +158,11 @@ class UserController extends ApiBaseController
         $isActive = $request->get('isActive') ?: 'all';
         $filtersForUrl = [
             'isActive' => '&isActive=' . $isActive,
-            'order' => '&order=' . $order
+            'order' => '&order=' . $order,
+            'limit' => '&limit=' . $limit
         ];
 
-        return $this->json($this->get('api_user.service')->getUsersResponse($page, $isActive, $order, $filtersForUrl), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json($this->get('api_user.service')->getUsersResponse($page, $isActive, $order, $filtersForUrl, $limit), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -1172,7 +1180,7 @@ class UserController extends ApiBaseController
         $userRoles = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->getAllowedUserRoles($user->getUserRole()->getOrder());
         $allowedRolesArray['allowedUserRoles'] = [$userRoles];
 
-        return $this->json(array_merge($userArray,$userRoles), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $this->json(array_merge($userArray, $userRoles), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -1259,6 +1267,10 @@ class UserController extends ApiBaseController
      *     {
      *       "name"="order",
      *       "description"="ASC or DESC order by Username"
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
      *     }
      *  },
      *  headers={
@@ -1304,6 +1316,9 @@ class UserController extends ApiBaseController
         $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
+        $limitNum = $request->get('limit');
+        $limit = (int)$limitNum ? $limitNum : 10;
+
         $orderString = $request->get('order');
         $orderString = strtolower($orderString);
         $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
@@ -1316,8 +1331,9 @@ class UserController extends ApiBaseController
         }
 
         $filtersForUrl['order'] = '&order=' . $order;
+        $filtersForUrl['limit'] = '&limit=' . $limit;
 
-        $usersArray = $this->get('api_user.service')->getUsersSearchResponse($term, $page, $isActive, $filtersForUrl, $order);
+        $usersArray = $this->get('api_user.service')->getUsersSearchResponse($term, $page, $isActive, $filtersForUrl, $order, $limit);
         return $this->json($usersArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 

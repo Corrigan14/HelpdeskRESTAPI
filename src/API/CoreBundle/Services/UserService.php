@@ -44,20 +44,26 @@ class UserService
      * @param string $isActive
      * @param string $order
      * @param array $filtersForUrl
+     * @param int $limit
      * @return array
      */
-    public function getUsersResponse(int $page, $isActive, string $order, array $filtersForUrl)
+    public function getUsersResponse(int $page, $isActive, string $order, array $filtersForUrl, int $limit)
     {
-        $responseData = $this->em->getRepository('APICoreBundle:User')->getCustomUsers($page, $isActive, $order);
+        $responseData = $this->em->getRepository('APICoreBundle:User')->getCustomUsers($page, $isActive, $order, $limit);
 
         $response = [
             'data' => $responseData['array'],
         ];
 
-        $url = $this->router->generate('users_list');
-        $limit = UserRepository::LIMIT;
+        if (999 !== $limit) {
+            $count = $responseData['count'];
+        } else {
+            $count = count($responseData['array']);
+        }
 
-        $pagination = PaginationHelper::getPagination($url, $limit, $page, $responseData['count'], $filtersForUrl);
+        $url = $this->router->generate('users_list');
+
+        $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filtersForUrl);
 
         return array_merge($response, $pagination);
     }
@@ -67,6 +73,8 @@ class UserService
      *
      * @param array $ids
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getUserResponse(array $ids)
     {
@@ -85,19 +93,24 @@ class UserService
      * @param string|bool $isActive
      * @param array $filtersForUrl
      * @param string $order
+     * @param int $limit
      * @return array
      */
-    public function getUsersSearchResponse($term, int $page, $isActive, array $filtersForUrl, string $order):array
+    public function getUsersSearchResponse($term, int $page, $isActive, array $filtersForUrl, string $order, int $limit): array
     {
-        $responseData = $this->em->getRepository('APICoreBundle:User')->getUsersSearch($term, $page, $isActive, $order);
+        $responseData = $this->em->getRepository('APICoreBundle:User')->getUsersSearch($term, $page, $isActive, $order, $limit);
 
         $response = [
             'data' => $responseData['array'],
         ];
 
         $url = $this->router->generate('user_search');
-        $limit = UserRepository::LIMIT;
-        $count = $responseData['count'];
+
+        if (999 !== $limit) {
+            $count = $responseData['count'];
+        } else {
+            $count = count($responseData['array']);
+        }
 
         $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filtersForUrl);
 
@@ -107,7 +120,7 @@ class UserService
     /**
      * @return array
      */
-    public function getListOfAllUsers():array
+    public function getListOfAllUsers(): array
     {
         return $this->em->getRepository('APICoreBundle:User')->getAllUserEntitiesWithIdAndTitle();
     }
@@ -117,7 +130,7 @@ class UserService
      * @param string $rule
      * @return array
      */
-    public function getListOfAvailableProjectAssigners(Project $project, string $rule):array
+    public function getListOfAvailableProjectAssigners(Project $project, string $rule): array
     {
         return $this->em->getRepository('APITaskBundle:UserHasProject')->getAllUserEntitiesWithIdAndTitle($project, $rule);
     }

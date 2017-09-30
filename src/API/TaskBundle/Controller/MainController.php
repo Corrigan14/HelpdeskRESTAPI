@@ -3,6 +3,9 @@
 namespace API\TaskBundle\Controller;
 
 use API\CoreBundle\Entity\User;
+use API\TaskBundle\Entity\Project;
+use API\TaskBundle\Entity\UserHasProject;
+use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -210,6 +213,18 @@ class MainController extends ApiBaseController
             'isActive' => true,
         ];
         $loggedUserProjects = $doctrine->getRepository('APITaskBundle:Project')->getAllUsersProjectsWithoutPagination($options);
+        // Add to every project canEdit value based on logged user's project ACL. ADMIN can edit every project
+        $modifiedLoggedUserProjects = [];
+        foreach ($loggedUserProjects as $project) {
+            if ($isAdmin) {
+                $canEditProject = true;
+            } else {
+                $projectEntityFromDb = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($project['id']);
+                $canEditProject = $this->canEditProject($projectEntityFromDb);
+            }
+            $project['canEdit'] = $canEditProject;
+            $modifiedLoggedUserProjects[] = $project;
+        }
 
         // Returns a list of Logged user's not-active Projects
         $optionsArchived = [
@@ -218,6 +233,18 @@ class MainController extends ApiBaseController
             'isActive' => false,
         ];
         $loggedUserArchivedProjects = $doctrine->getRepository('APITaskBundle:Project')->getAllUsersProjectsWithoutPagination($optionsArchived);
+        // Add to every project canEdit value based on logged user's project ACL. ADMIN can edit every project
+        $modifiedLoggedUserNotActiveProjects = [];
+        foreach ($loggedUserArchivedProjects as $project) {
+            if ($isAdmin) {
+                $canEditProject = true;
+            } else {
+                $projectEntityFromDb = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($project['id']);
+                $canEditProject = $this->canEditProject($projectEntityFromDb);
+            }
+            $project['canEdit'] = $canEditProject;
+            $modifiedLoggedUserNotActiveProjects[] = $project;
+        }
 
         // Returns a list of Logged User's Tags + public tags
         $loggedUserTags = $doctrine->getRepository('APITaskBundle:Tag')->getAllUsersTagsWithoutPagination($loggedUser->getId());
@@ -234,8 +261,8 @@ class MainController extends ApiBaseController
 
         $response = [
             'filters' => $loggedUserFilters,
-            'projects' => $loggedUserProjects,
-            'archived' => $loggedUserArchivedProjects,
+            'projects' => $modifiedLoggedUserProjects,
+            'archived' => $modifiedLoggedUserNotActiveProjects,
             'tags' => $loggedUserTags,
         ];
 
@@ -252,5 +279,26 @@ class MainController extends ApiBaseController
         }
 
         return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
+    }
+
+    /**
+     * @param Project $project
+     * @return bool
+     * @throws \LogicException
+     */
+    private function canEditProject(Project $project): bool
+    {
+        $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+            'user' => $this->getUser(),
+            'project' => $project
+        ]);
+
+        if ($userHasProject instanceof UserHasProject) {
+            if ($this->get('project_voter')->isGranted(VoteOptions::EDIT_PROJECT, $userHasProject)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

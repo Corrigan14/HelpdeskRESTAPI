@@ -274,7 +274,8 @@ class ProjectRepository extends EntityRepository
                         'username' => $item->getUser()->getUsername(),
                         'email' => $item->getUser()->getEmail()
                     ],
-                    'acl' => json_decode($item->getAcl())
+//                    'acl' => json_decode($item->getAcl())
+                    'acl' =>$item->getAcl()
                 ];
             }
         }

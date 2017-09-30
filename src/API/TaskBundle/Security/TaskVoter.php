@@ -248,7 +248,7 @@ class TaskVoter implements VoterInterface
             // User can update task if he has RESOLVE_TASK access in projects ACL
             return $this->hasProjectAclRight(ProjectAclOptions::RESOLVE_TASK, $project->getId());
         } else {
-            // User can update task without project if he created ar requested this task
+            // User can update task without project if he created or requested this task
             return ($this->user->getId() === $task->getRequestedBy()->getId() || $this->user->getId() === $task->getCreatedBy()->getId());
         }
     }

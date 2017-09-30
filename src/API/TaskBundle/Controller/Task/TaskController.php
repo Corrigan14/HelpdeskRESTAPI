@@ -203,7 +203,8 @@ class TaskController extends ApiBaseController
      *                  "children": false
      *              },
      *            },
-     *            "invoiceableItems": []
+     *            "invoiceableItems": [],
+     *            "canEdit": true
      *          }
      *       ],
      *       "_links":
@@ -372,7 +373,10 @@ class TaskController extends ApiBaseController
 
         $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);
 
-        return $this->json($tasksArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        // Every Task need an additional canEdit Value
+        $tasksModified = $this->addCanEditParamToEveryTask($tasksArray);
+
+        return $this->json($tasksModified, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -615,7 +619,8 @@ class TaskController extends ApiBaseController
      *                      "shortcut": "Ks"
      *                    }
      *                 },
-     *             ]
+     *             ],
+     *             "canEdit": true
      *           }
      *       ],
      *       "_links":
@@ -718,7 +723,10 @@ class TaskController extends ApiBaseController
 
         $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);
 
-        return $this->json($tasksArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        // Every Task need an additional canEdit Value
+        $tasksModified = $this->addCanEditParamToEveryTask($tasksArray);
+
+        return $this->json($tasksModified, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -3579,5 +3587,37 @@ class TaskController extends ApiBaseController
         }
 
         return $changedParams;
+    }
+
+    /**
+     * @param array $tasksArray
+     * @return array
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     */
+    private function addCanEditParamToEveryTask(array $tasksArray): array
+    {
+        $tasksModified = [];
+        if (count($tasksArray['data']) > 0) {
+            foreach ($tasksArray['data'] as $task) {
+                $taskEntityFromDb = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($task['id']);
+                // Check if user can update selected task
+                if ($this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $taskEntityFromDb)) {
+                    $canEditArray = ['canEdit' => true];
+                } else {
+                    $canEditArray = ['canEdit' => false];
+                }
+                $task = array_merge($task, $canEditArray);
+                $tasksModified['data'][] = $task;
+            }
+            $tasksModified['_links'] = $tasksArray['_links'];
+            $tasksModified['total'] = $tasksArray['total'];
+            $tasksModified['page'] = $tasksArray['page'];
+            $tasksModified['numberOfPages'] = $tasksArray['numberOfPages'];
+        } else {
+            $tasksModified = $tasksArray;
+        }
+
+        return $tasksModified;
     }
 }

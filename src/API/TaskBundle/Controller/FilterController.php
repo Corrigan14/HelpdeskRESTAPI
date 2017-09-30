@@ -1084,6 +1084,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *
      *
      * @return JsonResponse
+     * @throws \LogicException
      */
     public function getFilterOptionsAction()
     {
@@ -1095,11 +1096,18 @@ class FilterController extends ApiBaseController implements ControllerInterface
         $isAdmin = $this->get('task_voter')->isAdmin();
         $projectsArray = $this->get('project_service')->getListOfAvailableProjectsWhereUsersACLExists($this->getUser(), $isAdmin);
 
+        $currentUser [] = [
+            'id' => 'current-user',
+            'username' => 'Current User'
+        ];
+
         // Every user can be creator
+        // The current-user option is added to the returned array
         $creatorArray = $this->get('api_user.service')->getListOfAllUsers();
+        $creatorModifiedArray = array_merge($currentUser, $creatorArray);
 
         // Every user can be requester
-        $requesterArray = $creatorArray;
+        $requesterArray = $creatorModifiedArray;
 
         // Every company is available
         $companyArray = $this->get('api_company.service')->getListOfAllCompanies();
@@ -1108,12 +1116,12 @@ class FilterController extends ApiBaseController implements ControllerInterface
         $tagArray = $this->get('tag_service')->getListOfUsersTags($this->getUser()->getId());
 
         // Every user can have assigned tasks
-        $assignArray = $creatorArray;
+        $assignArray = $creatorModifiedArray;
 
         $response = [
             'status' => $statusesArray,
             'project' => $projectsArray,
-            'created' => $requesterArray,
+            'created' => $creatorModifiedArray,
             'requester' => $requesterArray,
             'company' => $companyArray,
             'tag' => $tagArray,

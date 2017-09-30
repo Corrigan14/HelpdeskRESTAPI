@@ -177,7 +177,7 @@ class FilterRepository extends EntityRepository
                 'id' => $data['id'],
                 'title' => $data['title'],
                 'public' => $data['public'],
-                'filter' => $data['filter'],
+                'filter' => json_decode($data['filter']),
                 'report' => $data['report'],
                 'is_active' => $data['is_active'],
                 'default' => $data['default'],
@@ -189,7 +189,7 @@ class FilterRepository extends EntityRepository
                     'email' => $data['createdBy']['email']
                 ],
                 'project' => $projectArray,
-                'columns' => $data['columns']
+                'columns' => json_decode($data['columns'])
             ];
         }
 
@@ -199,6 +199,8 @@ class FilterRepository extends EntityRepository
     /**
      * @param int $id
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getFilterEntity(int $id): array
     {

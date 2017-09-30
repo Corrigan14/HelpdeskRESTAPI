@@ -173,7 +173,7 @@ class ProjectRepository extends EntityRepository
                             'username' => $item['user']['username'],
                             'email' => $item['user']['email']
                         ],
-                        'acl' => $item['acl']
+                        'acl' => json_decode($item['acl'])
                     ];
                 }
             }
@@ -274,7 +274,7 @@ class ProjectRepository extends EntityRepository
                         'username' => $item->getUser()->getUsername(),
                         'email' => $item->getUser()->getEmail()
                     ],
-                    'acl' => $item->getAcl()
+                    'acl' => json_decode($item->getAcl())
                 ];
             }
         }

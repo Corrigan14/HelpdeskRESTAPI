@@ -27,7 +27,11 @@ class MainController extends ApiBaseController
      *                  "id": 39,
      *                  "title": "Test",
      *                  "public": true,
-     *                  "filter": "{\"status\":\"new\"}",
+     *                  "filter":
+     *                  {
+     *                     "status": "1,2",
+     *                     "assigned": "not,current-user"
+     *                  },
      *                  "report": false,
      *                  "is_active": true,
      *                  "default": false,
@@ -40,7 +44,16 @@ class MainController extends ApiBaseController
      *                    "email": "admin@admin.sk"
      *                  },
      *                  "project": null,
-     *                  "columns": null
+     *                  "columns":
+     *                  [
+     *                     "title",
+     *                     "creator",
+     *                     "company",
+     *                     "assigned",
+     *                     "createdTime",
+     *                     "deadlineTime",
+     *                     "status"
+     *                   ]
      *                },
      *            }
      *         ],
@@ -72,7 +85,17 @@ class MainController extends ApiBaseController
      *                   "username": "admin",
      *                   "email": "admin@admin.sk"
      *                },
-     *                "acl": "[\"view_own_tasks\",\"view_tasks_from_users_company\",\"view_all_tasks\",\"create_task\",\"resolve_task\",\"delete_task\",\"view_internal_note\",\"edit_internal_note\",\"edit_project\"]"
+     *                "acl":
+     *                [
+     *                   "edit_project",
+     *                   "create_task",
+     *                   "resolve_task",
+     *                   "delete_task",
+     *                   "view_internal_note",
+     *                   "view_all_tasks",
+     *                   "view_own_tasks",
+     *                   "view_tasks_from_users_company"
+     *                ]
      *              },
      *              {
      *                "id": 359,
@@ -82,7 +105,17 @@ class MainController extends ApiBaseController
      *                   "username": "customer5",
      *                   "email": "customer@customer5.sk"
      *                },
-     *                "acl": "[\"view_own_tasks\",\"view_tasks_from_users_company\",\"view_all_tasks\",\"create_task\",\"resolve_task\",\"delete_task\",\"view_internal_note\",\"edit_internal_note\",\"edit_project\"]"
+     *                "acl":
+     *                [
+     *                   "edit_project",
+     *                   "create_task",
+     *                   "resolve_task",
+     *                   "delete_task",
+     *                   "view_internal_note",
+     *                   "view_all_tasks",
+     *                   "view_own_tasks",
+     *                   "view_tasks_from_users_company"
+     *                 ]
      *              }
      *            ],
      *            "canEdit": false,
@@ -116,7 +149,17 @@ class MainController extends ApiBaseController
      *                   "username": "admin",
      *                   "email": "admin@admin.sk"
      *                },
-     *                "acl": "[\"view_own_tasks\",\"view_tasks_from_users_company\",\"view_all_tasks\",\"create_task\",\"resolve_task\",\"delete_task\",\"view_internal_note\",\"edit_internal_note\",\"edit_project\"]"
+     *                "acl":
+     *                [
+     *                   "edit_project",
+     *                   "create_task",
+     *                   "resolve_task",
+     *                   "delete_task",
+     *                   "view_internal_note",
+     *                   "view_all_tasks",
+     *                   "view_own_tasks",
+     *                   "view_tasks_from_users_company"
+     *                 ]
      *              },
      *              {
      *                "id": 359,
@@ -126,7 +169,17 @@ class MainController extends ApiBaseController
      *                   "username": "customer5",
      *                   "email": "customer@customer5.sk"
      *                },
-     *                "acl": "[\"view_own_tasks\",\"view_tasks_from_users_company\",\"view_all_tasks\",\"create_task\",\"resolve_task\",\"delete_task\",\"view_internal_note\",\"edit_internal_note\",\"edit_project\"]"
+     *                "acl":
+     *                [
+     *                   "edit_project",
+     *                   "create_task",
+     *                   "resolve_task",
+     *                   "delete_task",
+     *                   "view_internal_note",
+     *                   "view_all_tasks",
+     *                   "view_own_tasks",
+     *                   "view_tasks_from_users_company"
+     *                 ]
      *              }
      *            ],
      *            "canEdit": false,
@@ -166,7 +219,11 @@ class MainController extends ApiBaseController
      *                  "id": 39,
      *                  "title": "Test",
      *                  "public": true,
-     *                  "filter": "{\"status\":\"new\"}",
+     *                  "filter":
+     *                  {
+     *                     "status": "1,2",
+     *                     "assigned": "not,current-user"
+     *                  },
      *                  "report": true,
      *                  "is_active": true,
      *                  "default": false,

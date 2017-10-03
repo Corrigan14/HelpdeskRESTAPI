@@ -2526,7 +2526,7 @@ class TaskController extends ApiBaseController
 //                'statusId' => 33
 //            ]
 //        ];
-//        $requestData['description'] = 'la lal ';
+//        $requestData['startedAt'] = 'lll';
 //        $requestData['project'] = 258;
 
         $requestDetailData = false;
@@ -2739,38 +2739,53 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestData['startedAt'])) {
-            try {
-                $startedAtDateTimeObject = new \Datetime($requestData['startedAt']);
-                $task->setStartedAt($startedAtDateTimeObject);
+            if (null === $requestData['startedAt'] OR 'null' === $requestData['startedAt']) {
+                $task->setStartedAt(null);
                 $changedParams[] = 'started at';
-            } catch (\Exception $e) {
-                return $this->createApiResponse([
-                    'message' => 'startedAt parameter is not in a valid format! Expected format: Unix',
-                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            } else {
+                try {
+                    $startedAtDateTimeObject = new \Datetime($requestData['startedAt']);
+                    $task->setStartedAt($startedAtDateTimeObject);
+                    $changedParams[] = 'started at';
+                } catch (\Exception $e) {
+                    return $this->createApiResponse([
+                        'message' => 'startedAt parameter is not in a valid format! Expected format: Unix',
+                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                }
             }
         }
 
         if (isset($requestData['deadline'])) {
-            try {
-                $startedAtDateTimeObject = new \Datetime($requestData['deadline']);
-                $task->setDeadline($startedAtDateTimeObject);
+            if (null === $requestData['deadline'] OR 'null' === $requestData['deadline']) {
+                $task->setDeadline(null);
                 $changedParams[] = 'deadline';
-            } catch (\Exception $e) {
-                return $this->createApiResponse([
-                    'message' => 'deadline parameter is not in a valid format! Expected format: Unix',
-                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            } else {
+                try {
+                    $startedAtDateTimeObject = new \Datetime($requestData['deadline']);
+                    $task->setDeadline($startedAtDateTimeObject);
+                    $changedParams[] = 'deadline';
+                } catch (\Exception $e) {
+                    return $this->createApiResponse([
+                        'message' => 'deadline parameter is not in a valid format! Expected format: Unix',
+                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                }
             }
         }
 
         if (isset($requestData['closedAt'])) {
-            try {
-                $startedAtDateTimeObject = new \Datetime($requestData['closedAt']);
-                $task->setClosedAt($startedAtDateTimeObject);
+            if (null === $requestData['closedAt'] OR 'null' === $requestData['closedAt']) {
+                $task->setClosedAt(null);
                 $changedParams[] = 'closed At';
-            } catch (\Exception $e) {
-                return $this->createApiResponse([
-                    'message' => 'closedAt parameter is not in a valid format! Expected format: Unix',
-                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            } else {
+                try {
+                    $startedAtDateTimeObject = new \Datetime($requestData['closedAt']);
+                    $task->setClosedAt($startedAtDateTimeObject);
+                    $changedParams[] = 'closed At';
+                } catch (\Exception $e) {
+                    return $this->createApiResponse([
+                        'message' => 'closedAt parameter is not in a valid format! Expected format: Unix',
+                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                }
             }
         }
 

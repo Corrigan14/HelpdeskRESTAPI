@@ -25,7 +25,7 @@ class VariableHelper
         'project.id',
         'createdBy.id',
         'requestedBy.id',
-        'company.id',
+        'taskCompany.id',
         'assignedUser.id',
         'tags.id',
         'followers.id',

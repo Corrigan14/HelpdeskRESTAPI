@@ -16,7 +16,7 @@ class FilterAttributeOptions
     const PROJECT = 'project';
     const CREATOR = 'creator';
     const REQUESTER = 'requester';
-    const COMPANY = 'company';
+    const COMPANY = 'taskCompany';
     const ASSIGNED = 'assigned';
     const TAG = 'tag';
     const FOLLOWER = 'follower';

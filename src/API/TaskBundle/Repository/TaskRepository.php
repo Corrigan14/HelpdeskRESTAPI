@@ -618,10 +618,19 @@ class TaskRepository extends EntityRepository
         if (count($followers) > 0) {
             /** @var User $item */
             foreach ($followers as $item) {
+                $userDetailData = $item->getDetailData();
+                $userName = null;
+                $userSurname = null;
+                if($userDetailData){
+                    $userName = $userDetailData->getName();
+                    $userSurname = $userDetailData->getSurname();
+                }
                 $followersArray[] = [
                     'id' => $item->getId(),
                     'username' => $item->getUsername(),
-                    'email' => $item->getEmail()
+                    'email' => $item->getEmail(),
+                    'name' => $userName,
+                    'surname' => $userSurname,
                 ];
             }
         }
@@ -642,6 +651,13 @@ class TaskRepository extends EntityRepository
         if (count($taskHasAssignedUsers) > 0) {
             /** @var TaskHasAssignedUser $item */
             foreach ($taskHasAssignedUsers as $item) {
+                $userDetailData = $item->getUser()->getDetailData();
+                $userName = null;
+                $userSurname = null;
+                if($userDetailData){
+                    $userName = $userDetailData->getName();
+                    $userSurname = $userDetailData->getSurname();
+                }
                 $taskHasAssignedUsersArray[] = [
                     'id' => $item->getId(),
                     'status_date' => $item->getStatusDate(),
@@ -656,7 +672,9 @@ class TaskRepository extends EntityRepository
                     'user' => [
                         'id' => $item->getUser()->getId(),
                         'username' => $item->getUser()->getUsername(),
-                        'email' => $item->getUser()->getEmail()
+                        'email' => $item->getUser()->getEmail(),
+                        'name' =>$userName,
+                        'surname' => $userSurname,
                     ]
                 ];
             }
@@ -711,6 +729,21 @@ class TaskRepository extends EntityRepository
             ];
         }
 
+        $userCreatorDetailData = $data->getCreatedBy()->getDetailData();
+        $userCreatorName = null;
+        $userCreatorSurname = null;
+        if($userCreatorDetailData){
+            $userCreatorName = $userCreatorDetailData->getName();
+            $userCreatorSurname = $userCreatorDetailData->getSurname();
+        }
+
+        $userRequesterDetailData = $data->getRequestedBy()->getDetailData();
+        $userRequesterName = null;
+        $userRequesterSurname = null;
+        if($userRequesterDetailData){
+            $userRequesterName = $userRequesterDetailData->getName();
+            $userRequesterSurname = $userRequesterDetailData->getSurname();
+        }
         $response = [
             'id' => $data->getId(),
             'title' => $data->getTitle(),
@@ -726,12 +759,16 @@ class TaskRepository extends EntityRepository
             'createdBy' => [
                 'id' => $data->getCreatedBy()->getId(),
                 'username' => $data->getCreatedBy()->getUsername(),
-                'email' => $data->getCreatedBy()->getEmail()
+                'email' => $data->getCreatedBy()->getEmail(),
+                'name' => $userCreatorName,
+                'surname' => $userCreatorSurname,
             ],
             'requestedBy' => [
                 'id' => $data->getRequestedBy()->getId(),
                 'username' => $data->getRequestedBy()->getUsername(),
-                'email' => $data->getRequestedBy()->getEmail()
+                'email' => $data->getRequestedBy()->getEmail(),
+                'name' => $userRequesterName,
+                'surname' => $userRequesterSurname,
             ],
             'project' => $projectArray,
             'company' => $companyArray,

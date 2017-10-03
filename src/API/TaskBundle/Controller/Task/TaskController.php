@@ -64,13 +64,17 @@ class TaskController extends ApiBaseController
      *            {
      *               "id": 2575,
      *               "username": "admin",
-     *               "email": "admin@admin.sk"
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
      *            },
      *            "requestedBy":
      *            {
      *               "id": 2575,
      *               "username": "admin",
-     *               "email": "admin@admin.sk"
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
      *            },
      *            "project":
      *            {
@@ -410,13 +414,17 @@ class TaskController extends ApiBaseController
      *            {
      *               "id": 2575,
      *               "username": "admin",
-     *               "email": "admin@admin.sk"
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
      *            },
      *            "requestedBy":
      *            {
      *               "id": 2575,
      *               "username": "admin",
-     *               "email": "admin@admin.sk"
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
      *            },
      *            "project":
      *            {
@@ -445,7 +453,9 @@ class TaskController extends ApiBaseController
      *              {
      *                 "id": 2575,
      *                 "username": "admin",
-     *                 "email": "admin@admin.sk"
+     *                 "email": "admin@admin.sk",
+     *                 "name": null,
+     *                 "surname": null
      *               }
      *            ],
      *            "tags":
@@ -489,7 +499,9 @@ class TaskController extends ApiBaseController
      *                  {
      *                      "id": 2579,
      *                      "username": "user",
-     *                      "email": "user@user.sk"
+     *                      "email": "user@user.sk",
+     *                      "name": null,
+     *                      "surname": null
      *                   }
      *                }
      *            ],
@@ -759,13 +771,17 @@ class TaskController extends ApiBaseController
      *            {
      *               "id": 2575,
      *               "username": "admin",
-     *               "email": "admin@admin.sk"
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
      *            },
      *            "requestedBy":
      *            {
      *               "id": 2575,
      *               "username": "admin",
-     *               "email": "admin@admin.sk"
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
      *            },
      *            "project":
      *            {
@@ -794,7 +810,9 @@ class TaskController extends ApiBaseController
      *              {
      *                 "id": 2575,
      *                 "username": "admin",
-     *                 "email": "admin@admin.sk"
+     *                 "email": "admin@admin.sk",
+     *                 "name": null,
+     *                 "surname": null
      *               }
      *            ],
      *            "tags":
@@ -838,7 +856,9 @@ class TaskController extends ApiBaseController
      *                  {
      *                      "id": 2579,
      *                      "username": "user",
-     *                      "email": "user@user.sk"
+     *                      "email": "user@user.sk",
+     *                      "name": null,
+     *                      "surname": null
      *                   }
      *                }
      *            ],
@@ -1107,13 +1127,17 @@ class TaskController extends ApiBaseController
      *            {
      *               "id": 2575,
      *               "username": "admin",
-     *               "email": "admin@admin.sk"
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
      *            },
      *            "requestedBy":
      *            {
      *               "id": 2575,
      *               "username": "admin",
-     *               "email": "admin@admin.sk"
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
      *            },
      *            "project":
      *            {
@@ -1142,7 +1166,9 @@ class TaskController extends ApiBaseController
      *              {
      *                 "id": 2575,
      *                 "username": "admin",
-     *                 "email": "admin@admin.sk"
+     *                 "email": "admin@admin.sk",
+     *                 "name": null,
+     *                 "surname": null
      *               }
      *            ],
      *            "tags":
@@ -1186,7 +1212,9 @@ class TaskController extends ApiBaseController
      *                  {
      *                      "id": 2579,
      *                      "username": "user",
-     *                      "email": "user@user.sk"
+     *                      "email": "user@user.sk",
+     *                      "name": null,
+     *                      "surname": null
      *                   }
      *                }
      *            ],
@@ -1745,13 +1773,17 @@ class TaskController extends ApiBaseController
      *            {
      *               "id": 2575,
      *               "username": "admin",
-     *               "email": "admin@admin.sk"
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
      *            },
      *            "requestedBy":
      *            {
      *               "id": 2575,
      *               "username": "admin",
-     *               "email": "admin@admin.sk"
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
      *            },
      *            "project":
      *            {
@@ -1780,7 +1812,9 @@ class TaskController extends ApiBaseController
      *              {
      *                 "id": 2575,
      *                 "username": "admin",
-     *                 "email": "admin@admin.sk"
+     *                 "email": "admin@admin.sk",
+     *                 "name": null,
+     *                 "surname": null
      *               }
      *            ],
      *            "tags":
@@ -1824,7 +1858,9 @@ class TaskController extends ApiBaseController
      *                  {
      *                      "id": 2579,
      *                      "username": "user",
-     *                      "email": "user@user.sk"
+     *                      "email": "user@user.sk",
+     *                      "name": null,
+     *                      "surname": null
      *                   }
      *                }
      *            ],
@@ -2144,13 +2180,17 @@ class TaskController extends ApiBaseController
      *            {
      *               "id": 2575,
      *               "username": "admin",
-     *               "email": "admin@admin.sk"
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
      *            },
      *            "requestedBy":
      *            {
      *               "id": 2575,
      *               "username": "admin",
-     *               "email": "admin@admin.sk"
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
      *            },
      *            "project":
      *            {
@@ -2179,7 +2219,9 @@ class TaskController extends ApiBaseController
      *              {
      *                 "id": 2575,
      *                 "username": "admin",
-     *                 "email": "admin@admin.sk"
+     *                 "email": "admin@admin.sk",
+     *                 "name": null,
+     *                 "surname": null
      *               }
      *            ],
      *            "tags":
@@ -2224,6 +2266,8 @@ class TaskController extends ApiBaseController
      *                      "id": 2579,
      *                      "username": "user",
      *                      "email": "user@user.sk"
+     *                      "name": null,
+     *                      "surname": null
      *                   }
      *                }
      *            ],
@@ -2902,11 +2946,15 @@ class TaskController extends ApiBaseController
      *         [
      *            {
      *               "id": 1014,
-     *               "username": "admin"
+     *               "username": "admin",
+     *               "name": null,
+     *               "surname": null
      *            },
      *            {
      *               "id": 1015,
-     *               "username": "manager"
+     *               "username": "manager",
+     *               "name": null,
+     *               "surname": null
      *            },
      *         ],
      *         "company":
@@ -2939,7 +2987,9 @@ class TaskController extends ApiBaseController
      *          [
      *            {
      *               "id": 1014,
-     *               "username": "admin"
+     *               "username": "admin",
+     *               "name": null,
+     *               "surname": null
      *            }
      *          ],
      *          "unit":[],
@@ -3041,10 +3091,19 @@ class TaskController extends ApiBaseController
             $assignArray = $this->get('api_user.service')->getListOfAvailableProjectAssigners($project, ProjectAclOptions::RESOLVE_TASK);
         }
         if (!count($assignArray) > 0) {
+            $assignerDetailData = $task->getCreatedBy()->getDetailData();
+            $assignerName = null;
+            $assignerSurname = null;
+            if ($assignerDetailData) {
+                $assignerName = $assignerDetailData->getName();
+                $assignerSurname = $assignerDetailData->getSurname();
+            }
             $assignArray = [
                 [
                     'id' => $task->getCreatedBy()->getId(),
-                    'username' => $task->getCreatedBy()->getUsername()
+                    'username' => $task->getCreatedBy()->getUsername(),
+                    'name' => $assignerName,
+                    'surname' => $assignerSurname
                 ]
             ];
         }

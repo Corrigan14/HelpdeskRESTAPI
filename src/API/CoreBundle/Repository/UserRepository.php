@@ -186,7 +186,8 @@ class UserRepository extends EntityRepository
     public function getAllUserEntitiesWithIdAndTitle(): array
     {
         $query = $this->createQueryBuilder('user')
-            ->select('user.id, user.username')
+            ->select('user.id, user.username, detailData.name, detailData.surname')
+            ->leftJoin('user.detailData', 'detailData')
             ->where('user.is_active = :isActive')
             ->setParameter('isActive', true);
 

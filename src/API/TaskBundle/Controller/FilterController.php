@@ -1016,22 +1016,30 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *         [
      *            {
      *               "id": 1014,
-     *               "username": "admin"
+     *               "username": "admin",
+     *               "name": "Customer2",
+     *               "surname": "Customerovic2"
      *            },
      *            {
      *               "id": 1015,
-     *               "username": "manager"
+     *               "username": "manager",
+     *               "name": "Customer2",
+     *               "surname": "Customerovic2"
      *            },
      *         ],
      *         "created":
      *         [
      *            {
      *               "id": 1014,
-     *               "username": "admin"
+     *               "username": "admin",
+     *               "name": "Customer2",
+     *               "surname": "Customerovic2"
      *            },
      *            {
      *               "id": 1015,
-     *               "username": "manager"
+     *               "username": "manager",
+     *               "name": "Customer2",
+     *               "surname": "Customerovic2"
      *            },
      *         ],
      *         "company":
@@ -1064,7 +1072,9 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *          [
      *            {
      *               "id": 1014,
-     *               "username": "admin"
+     *               "username": "admin",
+     *               "name": "Customer2",
+     *               "surname": "Customerovic2"
      *            }
      *          ]
      *      }

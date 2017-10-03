@@ -156,7 +156,6 @@ class TaskRepository extends EntityRepository
             if (in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
                 $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
                 $paramArray['parameters' . $paramNum] = $value;
-
                 $paramNum++;
             }
         }

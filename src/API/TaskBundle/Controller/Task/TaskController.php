@@ -3329,7 +3329,7 @@ class TaskController extends ApiBaseController
         if (isset($data[FilterAttributeOptions::COMPANY])) {
             $company = $data[FilterAttributeOptions::COMPANY];
             if ('current-user' === strtolower($company)) {
-                $equalFilter['company.id'] = $this->getUser()->getId();
+                $equalFilter['company.id'] = $this->getUser()->getCompany()->getId();
             } else {
                 $inFilter['company.id'] = explode(',', $company);
             }

@@ -59,6 +59,7 @@ class TaskRepository extends EntityRepository
             ->addSelect('thau')
             ->addSelect('status')
             ->addSelect('assignedUser')
+            ->addSelect('assigneeDetailData')
             ->addSelect('tags')
             ->addSelect('taskCompany')
             ->addSelect('followers')
@@ -74,6 +75,7 @@ class TaskRepository extends EntityRepository
             ->leftJoin('task.taskHasAssignedUsers', 'thau')
             ->leftJoin('thau.status', 'status')
             ->leftJoin('thau.user', 'assignedUser')
+            ->leftJoin('assignedUser.detailData', 'assigneeDetailData')
             ->leftJoin('task.tags', 'tags')
             ->leftJoin('task.company', 'taskCompany')
             ->leftJoin('task.followers', 'followers')
@@ -139,11 +141,22 @@ class TaskRepository extends EntityRepository
         $paramArray = [];
         $paramNum = 0;
         if (null !== $searchFilter) {
-            $query->andWhere('task.id LIKE :taskIdParam OR task.title LIKE :taskTitleParam');
+            $query->andWhere('task.id LIKE :taskIdParam OR task.title LIKE :taskTitleParam OR requestedBy.email LIKE :taskRequesterEmailParam OR requestedBy.username LIKE :taskRequesterUsernameParam OR requesterDetailData.name LIKE :taskRequesterNameParam OR requesterDetailData.surname LIKE :taskRequesterSurnameParam OR taskCompany.title LIKE :taskCompanyParam OR assignedUser.email LIKE :taskAssigneeEmailParam OR assignedUser.username LIKE :taskAssigneeUsernameParam OR assigneeDetailData.name LIKE :taskAssigneeNameParam OR assigneeDetailData.surname LIKE :taskAssigneeSurnameParam OR task.deadline LIKE :taskDeadline OR task.createdAt LIKE :taskCreatedAt OR status.title LIKE :statusTitle');
             $paramArray['taskIdParam'] = '%' . $searchFilter . '%';
             $paramArray['taskTitleParam'] = '%' . $searchFilter . '%';
+            $paramArray['taskRequesterUsernameParam'] = '%' . $searchFilter . '%';
+            $paramArray['taskRequesterEmailParam'] = '%' . $searchFilter . '%';
+            $paramArray['taskRequesterNameParam'] = '%' . $searchFilter . '%';
+            $paramArray['taskRequesterSurnameParam'] = '%' . $searchFilter . '%';
+            $paramArray['taskCompanyParam'] = '%' . $searchFilter . '%';
+            $paramArray['taskAssigneeUsernameParam'] = '%' . $searchFilter . '%';
+            $paramArray['taskAssigneeEmailParam'] = '%' . $searchFilter . '%';
+            $paramArray['taskAssigneeNameParam'] = '%' . $searchFilter . '%';
+            $paramArray['taskAssigneeSurnameParam'] = '%' . $searchFilter . '%';
+            $paramArray['taskDeadline'] = '%' . $searchFilter . '%';
+            $paramArray['taskCreatedAt'] = '%' . $searchFilter . '%';
+            $paramArray['statusTitle'] = '%' . $searchFilter . '%';
         }
-
         foreach ($isNullFilter as $value) {
             // check if query is allowed
             if (in_array($value, VariableHelper::$allowedKeysInFilter, true)) {

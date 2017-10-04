@@ -238,7 +238,7 @@ class TaskController extends ApiBaseController
      *     },
      *     {
      *       "name"="search",
-     *       "description"="Search string - system is searching in ID and TITLE"
+     *       "description"="Search string - system is searching in ID and TITLE and Requester, Company, Assignee, Created, Deadline, Status"
      *     },
      *     {
      *       "name"="status",

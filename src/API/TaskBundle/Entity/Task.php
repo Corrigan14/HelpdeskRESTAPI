@@ -277,11 +277,15 @@ class Task
     /**
      * Get deadline
      *
-     * @return \DateTime
+     * @return \DateTime|int
      */
     public function getDeadline()
     {
-        return $this->deadline;
+        if ($this->deadline) {
+            return $this->deadline->getTimestamp();
+        } else {
+            return $this->deadline;
+        }
     }
 
     /**
@@ -605,11 +609,16 @@ class Task
     /**
      * Get startedAt
      *
-     * @return \DateTime
+     * @return \DateTime|int
      */
     public function getStartedAt()
     {
-        return $this->startedAt;
+        if ($this->startedAt) {
+            return $this->startedAt->getTimestamp();
+        } else {
+            return $this->startedAt;
+        }
+
     }
 
     /**
@@ -629,11 +638,15 @@ class Task
     /**
      * Get closedAt
      *
-     * @return \DateTime
+     * @return \DateTime|int
      */
     public function getClosedAt()
     {
-        return $this->closedAt;
+        if ($this->closedAt) {
+            return $this->closedAt->getTimestamp();
+        } else {
+            return $this->closedAt;
+        }
     }
 
     /**
@@ -740,5 +753,37 @@ class Task
     public function getInvoiceableItems()
     {
         return $this->invoiceableItems;
+    }
+
+    /**
+     * EXTENSION TO TIMESTAMP TRAIT - RETURNS TIMESTAMP DATE FORMAT
+     */
+
+    /**
+     * Returns createdAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getCreatedAt()
+    {
+        if ($this->createdAt) {
+            return $this->createdAt->getTimestamp();
+        } else {
+            return $this->createdAt;
+        }
+    }
+
+    /**
+     * Returns updatedAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getUpdatedAt()
+    {
+        if ($this->updatedAt) {
+            return $this->updatedAt->getTimestamp();
+        }else{
+            return $this->updatedAt;
+        }
     }
 }

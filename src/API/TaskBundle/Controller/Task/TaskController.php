@@ -2715,8 +2715,14 @@ class TaskController extends ApiBaseController
             } else {
                 try {
                     $startedAtDateTimeObject = new \Datetime($requestData['startedAt']);
-                    $task->setStartedAt($startedAtDateTimeObject);
+//                    $task->setStartedAt($startedAtDateTimeObject);
                     $changedParams[] = 'started at';
+//                    dump($startedAtDateTimeObject);
+//                    dump($startedAtDateTimeObject->getTimestamp());
+                    $date = new \DateTime();
+                    $date->setTimestamp($startedAtDateTimeObject->getTimestamp());
+                    $task->setStartedAt($date);
+//                    dump($date);
                 } catch (\Exception $e) {
                     return $this->createApiResponse([
                         'message' => 'startedAt parameter is not in a valid format! Expected format: Unix',
@@ -2734,6 +2740,11 @@ class TaskController extends ApiBaseController
                     $startedAtDateTimeObject = new \Datetime($requestData['deadline']);
                     $task->setDeadline($startedAtDateTimeObject);
                     $changedParams[] = 'deadline';
+//                    dump($startedAtDateTimeObject);
+//                    dump($startedAtDateTimeObject->getTimestamp());
+                    $date = new \DateTime();
+                    $date->setTimestamp($startedAtDateTimeObject->getTimestamp());
+                    $task->setStartedAt($date);
                 } catch (\Exception $e) {
                     return $this->createApiResponse([
                         'message' => 'deadline parameter is not in a valid format! Expected format: Unix',
@@ -2751,6 +2762,9 @@ class TaskController extends ApiBaseController
                     $startedAtDateTimeObject = new \Datetime($requestData['closedAt']);
                     $task->setClosedAt($startedAtDateTimeObject);
                     $changedParams[] = 'closed At';
+                    $date = new \DateTime();
+                    $date->setTimestamp($startedAtDateTimeObject->getTimestamp());
+                    $task->setStartedAt($date);
                 } catch (\Exception $e) {
                     return $this->createApiResponse([
                         'message' => 'closedAt parameter is not in a valid format! Expected format: Unix',

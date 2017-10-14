@@ -29,6 +29,14 @@ class TaskHasAssignedUser
     private $id;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="gps", type="string", length=255, nullable=true)
+     * @Assert\Type("string")
+     */
+    private $gps;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="status_date", type="datetime", nullable=true)
@@ -101,11 +109,15 @@ class TaskHasAssignedUser
     /**
      * Get statusDate
      *
-     * @return \DateTime
+     * @return \DateTime|int
      */
     public function getStatusDate()
     {
-        return $this->status_date;
+        if ($this->status_date) {
+            return $this->status_date->getTimestamp();
+        }else{
+            return $this->status_date;
+        }
     }
 
     /**
@@ -202,5 +214,57 @@ class TaskHasAssignedUser
     public function getUser()
     {
         return $this->user;
+    }
+
+    /**
+     * Set gps
+     *
+     * @param string $gps
+     *
+     * @return TaskHasAssignedUser
+     */
+    public function setGps($gps)
+    {
+        $this->gps = $gps;
+
+        return $this;
+    }
+
+    /**
+     * Get gps
+     *
+     * @return string
+     */
+    public function getGps()
+    {
+        return $this->gps;
+    }
+
+    /**
+     * Returns createdAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getCreatedAt()
+    {
+        if ($this->createdAt) {
+            return $this->createdAt->getTimestamp();
+        } else {
+            return $this->createdAt;
+        }
+    }
+
+    /**
+     * Returns updatedAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getUpdatedAt()
+    {
+        if ($this->updatedAt) {
+            return $this->updatedAt->getTimestamp();
+        }else{
+            return $this->updatedAt;
+        }
     }
 }

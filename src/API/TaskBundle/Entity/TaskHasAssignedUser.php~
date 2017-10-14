@@ -29,6 +29,14 @@ class TaskHasAssignedUser
     private $id;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="gps", type="string", length=255, nullable=true)
+     * @Assert\Type("string")
+     */
+    private $gps;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="status_date", type="datetime", nullable=true)

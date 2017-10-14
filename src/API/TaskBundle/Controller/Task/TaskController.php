@@ -15,6 +15,7 @@ use API\TaskBundle\Entity\TaskData;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
 use API\TaskBundle\Entity\UserHasProject;
 use API\TaskBundle\Security\ProjectAclOptions;
+use API\TaskBundle\Security\StatusFunctionOptions;
 use API\TaskBundle\Security\StatusOptions;
 use API\TaskBundle\Security\UserRoleAclOptions;
 use API\TaskBundle\Security\VoteOptions;
@@ -447,18 +448,8 @@ class TaskController extends ApiBaseController
      *                  "id": 69,
      *                  "status_date": null,
      *                  "time_spent": null,
-     *                  "createdAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
      *                  "status":
      *                  {
      *                     "id": 240,
@@ -804,18 +795,8 @@ class TaskController extends ApiBaseController
      *                  "id": 69,
      *                  "status_date": null,
      *                  "time_spent": null,
-     *                  "createdAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
      *                  "status":
      *                  {
      *                     "id": 240,
@@ -1160,18 +1141,8 @@ class TaskController extends ApiBaseController
      *                  "id": 69,
      *                  "status_date": null,
      *                  "time_spent": null,
-     *                  "createdAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
      *                  "status":
      *                  {
      *                     "id": 240,
@@ -1380,7 +1351,7 @@ class TaskController extends ApiBaseController
      *      {"name"="important", "dataType"="boolean", "required"=false,  "description"="set TRUE if the Task should be checked as IMPORTANT"},
      *      {"name"="work", "dataType"="string", "required"=false,  "description"="work"},
      *      {"name"="workTime", "dataType"="string", "required"=false,  "description"="work time"},
-     *      {"name"="assigned", "dataType"="array", "required"=false,  "description"="array of the Users assigned to the task: [userId => 12, statusId => 5]"},
+     *      {"name"="assigned", "dataType"="array", "required"=false,  "description"="array of the Users assigned to the task: [userId => 12, statusId => 5]. Format: $json array - http://php.net/manual/en/function.json-decode.php"},
      *  },
      *  headers={
      *     {
@@ -1555,14 +1526,7 @@ class TaskController extends ApiBaseController
         $this->getDoctrine()->getManager()->persist($task);
         $this->getDoctrine()->getManager()->flush();
 
-//        $requestData['assigned'] = [
-//            [
-//                'userId' => 740
-//            ],
-//            [
-//                'userId' => 741
-//            ]
-//        ];
+//        $requestData['assigned'] = '[{"userId": 209, "statusId": 8}]';
 
         // OPTIONAL PARAMETERS - ANOTHER NEW ENTITY IS REQUIRED
         if (isset($requestData['assigned'])) {
@@ -1600,22 +1564,22 @@ class TaskController extends ApiBaseController
 
                 // Or check if task already has another one assigned user - if yes, just replace this data - added just
                 // because system temporary support ONLY ONE assigned USER
-                $taskHasOtherAssignedUser = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy([
-                    'task' => $task
-                ]);
+                $taskHasOtherAssignedUserArray = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOtherUsersAssignedToTask($options);
 
-                if (!$taskHasOtherAssignedUser instanceof TaskHasAssignedUser) {
-                    $userIsAssignedToTask = new TaskHasAssignedUser();
-                } else {
-                    $userIsAssignedToTask = $taskHasOtherAssignedUser;
+                if (count($taskHasOtherAssignedUserArray) !== 0) {
+                    foreach ($taskHasOtherAssignedUserArray as $tau) {
+                        $this->getDoctrine()->getManager()->remove($tau);
+                    }
+                    $this->getDoctrine()->getManager()->flush();
                 }
+                $userIsAssignedToTask = new TaskHasAssignedUser();
 
                 // STATUS
                 if (null !== $assignedUserStatusId) {
                     $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($assignedUserStatusId);
 
                     // ONLY TASK WITH PROJECT, REQUESTER AND COMPANY CAN BE CLOSED
-                    if ($status->getTitle() === StatusOptions::CLOSED) {
+                    if ($status->getDefault() === TRUE && $status->getFunction() === StatusFunctionOptions::CLOSED_TASK) {
 
                         $tasksProject = $task->getProject();
                         if (!$tasksProject instanceof Project) {
@@ -1642,7 +1606,8 @@ class TaskController extends ApiBaseController
                     }
                 } else {
                     $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->findOneBy([
-                        'title' => StatusOptions::NEW,
+                        'title' => StatusFunctionOptions::NEW_TASK,
+                        'default' => true
                     ]);
                 }
                 if (!$status instanceof Status) {
@@ -1651,7 +1616,7 @@ class TaskController extends ApiBaseController
                     ], StatusCodesHelper::NOT_FOUND_CODE);
                 }
 
-                if (null === $task->getStartedAt() && $status->getTitle() !== StatusOptions::NEW) {
+                if (null === $task->getStartedAt() && $status->getDefault() === true && $status->getFunction() !== StatusFunctionOptions::NEW_TASK) {
                     $task->setStartedAt(new \DateTime());
                 }
 
@@ -1806,18 +1771,8 @@ class TaskController extends ApiBaseController
      *                  "id": 69,
      *                  "status_date": null,
      *                  "time_spent": null,
-     *                  "createdAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
      *                  "status":
      *                  {
      *                     "id": 240,
@@ -2213,18 +2168,8 @@ class TaskController extends ApiBaseController
      *                  "id": 69,
      *                  "status_date": null,
      *                  "time_spent": null,
-     *                  "createdAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
      *                  "status":
      *                  {
      *                     "id": 240,
@@ -2487,17 +2432,10 @@ class TaskController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
+//        $requestData = '{"assigned":[{"userId": 212, "statusId": 8}],"company":202}';
+//        $requestData = json_decode($requestData, true);
         $requestData = json_decode($request->getContent(), true);
         $changedParams = [];
-//
-//        $requestData['assigned'] = [
-//            [
-//                'userId' => 736,
-//                'statusId' => 33
-//            ]
-//        ];
-//        $requestData['startedAt'] = 'lll';
-//        $requestData['project'] = 258;
 
         $requestDetailData = false;
         if (isset($requestData['task_data']) && count($requestData['task_data']) > 0) {
@@ -2599,7 +2537,7 @@ class TaskController extends ApiBaseController
                 $assignedUsersArray = $requestData['assigned'];
 
                 // Add new requested users to the task
-                foreach ($assignedUsersArray as $key => $value) {
+                foreach ($assignedUsersArray as $value) {
                     $assignedUserId = $value['userId'];
 
                     $assignedUserStatusId = null;
@@ -2615,44 +2553,36 @@ class TaskController extends ApiBaseController
                         ], StatusCodesHelper::NOT_FOUND_CODE);
                     }
 
-                    // Or check if user is already assigned to the task
-                    $userIsAssignedToTask = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy([
+                    // Check if user can be assigned to task
+                    $options = [
                         'task' => $task,
                         'user' => $user
-                    ]);
+                    ];
 
-                    if (!$userIsAssignedToTask instanceof TaskHasAssignedUser) {
-                        // Check if user can be assigned to task
-                        $options = [
-                            'task' => $task,
-                            'user' => $user
-                        ];
-
-                        if (!$this->get('task_voter')->isGranted(VoteOptions::ASSIGN_USER_TO_TASK, $options)) {
-                            return $this->createApiResponse([
-                                'message' => 'User with id: ' . $assignedUserId . 'has not permission to be assigned to requested task!',
-                            ], StatusCodesHelper::NOT_FOUND_CODE);
-                        }
-
-                        // Or check if task already has another one assigned user - if yes, just replace this data - added just
-                        // because system temporary support ONLY ONE assigned USER
-                        $taskHasOtherAssignedUser = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy([
-                            'task' => $task
-                        ]);
-
-                        if (!$taskHasOtherAssignedUser instanceof TaskHasAssignedUser) {
-                            $userIsAssignedToTask = new TaskHasAssignedUser();
-                        } else {
-                            $userIsAssignedToTask = $taskHasOtherAssignedUser;
-                        }
+                    if (!$this->get('task_voter')->isGranted(VoteOptions::ASSIGN_USER_TO_TASK, $options)) {
+                        return $this->createApiResponse([
+                            'message' => 'User with id: ' . $assignedUserId . 'has not permission to be assigned to requested task!',
+                        ], StatusCodesHelper::NOT_FOUND_CODE);
                     }
+
+                    // Or check if task already has another one assigned user - if yes, just replace this data - added just
+                    // because system temporary support ONLY ONE assigned USER
+                    $taskHasOtherAssignedUserArray = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOtherUsersAssignedToTask($options);
+
+                    if (count($taskHasOtherAssignedUserArray) !== 0) {
+                        foreach ($taskHasOtherAssignedUserArray as $tau) {
+                           $this->getDoctrine()->getManager()->remove($tau);
+                        }
+                        $this->getDoctrine()->getManager()->flush();
+                    }
+                    $userIsAssignedToTask = new TaskHasAssignedUser();
 
                     // STATUS
                     if (null !== $assignedUserStatusId) {
                         $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($assignedUserStatusId);
 
                         // ONLY TASK WITH PROJECT, REQUESTER AND COMPANY CAN BE CLOSED
-                        if ($status->getTitle() === StatusOptions::CLOSED) {
+                        if ($status->getDefault() === TRUE && $status->getFunction() === StatusFunctionOptions::CLOSED_TASK) {
 
                             $tasksProject = $task->getProject();
                             if (!$tasksProject instanceof Project) {
@@ -2675,11 +2605,16 @@ class TaskController extends ApiBaseController
                                 ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
                             }
 
-                            $task->setClosedAt(new \DateTime());
+                            $startedAtDateTimeObject = new \Datetime();
+                            $task->setClosedAt($startedAtDateTimeObject);
+                            $date = new \DateTime();
+                            $date->setTimestamp($startedAtDateTimeObject->getTimestamp());
+                            $task->setClosedAt($date);
                         }
                     } else {
                         $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->findOneBy([
-                            'title' => StatusOptions::NEW,
+                            'title' => StatusFunctionOptions::NEW_TASK,
+                            'default' => true
                         ]);
                     }
                     if (!$status instanceof Status) {
@@ -2688,8 +2623,11 @@ class TaskController extends ApiBaseController
                         ], StatusCodesHelper::NOT_FOUND_CODE);
                     }
 
-                    if (null === $task->getStartedAt() && $status->getTitle() !== StatusOptions::NEW) {
-                        $task->setStartedAt(new \DateTime());
+                    if (null === $task->getStartedAt() && $status->getDefault() === true && $status->getFunction() !== StatusFunctionOptions::NEW_TASK) {
+                        $startedAtDateTimeObject = new \Datetime();
+                        $date = new \DateTime();
+                        $date->setTimestamp($startedAtDateTimeObject->getTimestamp());
+                        $task->setStartedAt($date);
                     }
 
                     $userIsAssignedToTask->setTask($task);
@@ -2715,14 +2653,10 @@ class TaskController extends ApiBaseController
             } else {
                 try {
                     $startedAtDateTimeObject = new \Datetime($requestData['startedAt']);
-//                    $task->setStartedAt($startedAtDateTimeObject);
                     $changedParams[] = 'started at';
-//                    dump($startedAtDateTimeObject);
-//                    dump($startedAtDateTimeObject->getTimestamp());
                     $date = new \DateTime();
                     $date->setTimestamp($startedAtDateTimeObject->getTimestamp());
                     $task->setStartedAt($date);
-//                    dump($date);
                 } catch (\Exception $e) {
                     return $this->createApiResponse([
                         'message' => 'startedAt parameter is not in a valid format! Expected format: Unix',
@@ -2740,11 +2674,9 @@ class TaskController extends ApiBaseController
                     $startedAtDateTimeObject = new \Datetime($requestData['deadline']);
                     $task->setDeadline($startedAtDateTimeObject);
                     $changedParams[] = 'deadline';
-//                    dump($startedAtDateTimeObject);
-//                    dump($startedAtDateTimeObject->getTimestamp());
                     $date = new \DateTime();
                     $date->setTimestamp($startedAtDateTimeObject->getTimestamp());
-                    $task->setStartedAt($date);
+                    $task->setDeadline($date);
                 } catch (\Exception $e) {
                     return $this->createApiResponse([
                         'message' => 'deadline parameter is not in a valid format! Expected format: Unix',
@@ -2764,7 +2696,7 @@ class TaskController extends ApiBaseController
                     $changedParams[] = 'closed At';
                     $date = new \DateTime();
                     $date->setTimestamp($startedAtDateTimeObject->getTimestamp());
-                    $task->setStartedAt($date);
+                    $task->setClosedAt($date);
                 } catch (\Exception $e) {
                     return $this->createApiResponse([
                         'message' => 'closedAt parameter is not in a valid format! Expected format: Unix',

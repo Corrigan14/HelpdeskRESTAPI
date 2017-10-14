@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Repository;
 
+use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
@@ -24,7 +25,7 @@ class TaskHasAssignedUserRepository extends EntityRepository
         $query = $this->createQueryBuilder('tau')
             ->select('tau')
             ->leftJoin('tau.user', 'user')
-            ->orderBy('tau.id','DESC')
+            ->orderBy('tau.id', 'DESC')
             ->distinct()
             ->where('tau.task = :taskId')
             ->setParameter('taskId', $taskId);
@@ -47,11 +48,31 @@ class TaskHasAssignedUserRepository extends EntityRepository
         ];
     }
 
+    public function findOtherUsersAssignedToTask(array $data)
+    {
+        $task = $data['task'];
+        $user = $data['user'];
+
+        $query = $this->createQueryBuilder('tau')
+            ->select('tau')
+            ->leftJoin('tau.user', 'user')
+            ->orderBy('tau.id', 'DESC')
+            ->distinct()
+            ->where('tau.task = :task')
+            ->andWhere('tau.user != :user')
+            ->setParameters([
+                'user' => $user,
+                'task' => $task
+            ]);
+
+        return $query->getQuery()->getResult();
+    }
+
     /**
      * @param $paginatorData
      * @return array
      */
-    private function formatData($paginatorData):array
+    private function formatData($paginatorData): array
     {
         $response = [];
         /** @var TaskHasAssignedUser $data */
@@ -66,7 +87,7 @@ class TaskHasAssignedUserRepository extends EntityRepository
      * @param TaskHasAssignedUser $data
      * @return array
      */
-    private function processData(TaskHasAssignedUser $data):array
+    private function processData(TaskHasAssignedUser $data): array
     {
         $response = [
             'id' => $data->getId(),

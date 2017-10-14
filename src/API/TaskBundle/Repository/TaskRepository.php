@@ -633,7 +633,7 @@ class TaskRepository extends EntityRepository
                 $userDetailData = $item->getDetailData();
                 $userName = null;
                 $userSurname = null;
-                if($userDetailData){
+                if ($userDetailData) {
                     $userName = $userDetailData->getName();
                     $userSurname = $userDetailData->getSurname();
                 }
@@ -661,34 +661,70 @@ class TaskRepository extends EntityRepository
         $taskHasAssignedUsers = $data->getTaskHasAssignedUsers();
         $taskHasAssignedUsersArray = [];
         if (count($taskHasAssignedUsers) > 0) {
+            $processedUsers = [];
             /** @var TaskHasAssignedUser $item */
             foreach ($taskHasAssignedUsers as $item) {
-                $userDetailData = $item->getUser()->getDetailData();
-                $userName = null;
-                $userSurname = null;
-                if($userDetailData){
-                    $userName = $userDetailData->getName();
-                    $userSurname = $userDetailData->getSurname();
+                $processedUsersDates[$item->getUser()->getId()] = null;
+                if (!in_array($item->getUser()->getId(), $processedUsers, true)) {
+                    $processedUsersDates[$item->getUser()->getId()] = $item->getCreatedAt();
+                    $userDetailData = $item->getUser()->getDetailData();
+                    $userName = null;
+                    $userSurname = null;
+                    if ($userDetailData) {
+                        $userName = $userDetailData->getName();
+                        $userSurname = $userDetailData->getSurname();
+                    }
+                    $taskHasAssignedUsersArray[$item->getUser()->getId()] = [
+                        'id' => $item->getId(),
+                        'status_date' => $item->getStatusDate(),
+                        'time_spent' => $item->getTimeSpent(),
+                        'createdAt' => $item->getCreatedAt(),
+                        'updatedAt' => $item->getUpdatedAt(),
+                        'status' => [
+                            'id' => $item->getStatus()->getId(),
+                            'title' => $item->getStatus()->getTitle(),
+                            'color' => $item->getStatus()->getColor(),
+                        ],
+                        'user' => [
+                            'id' => $item->getUser()->getId(),
+                            'username' => $item->getUser()->getUsername(),
+                            'email' => $item->getUser()->getEmail(),
+                            'name' => $userName,
+                            'surname' => $userSurname,
+                        ]
+                    ];
+                    $processedUsers [] = $item->getUser()->getId();
+                } else {
+                    if ($processedUsersDates[$item->getUser()->getId()] < $item->getCreatedAt()) {
+                        $processedUsersDates[$item->getUser()->getId()] = $item->getCreatedAt();
+                        $userDetailData = $item->getUser()->getDetailData();
+                        $userName = null;
+                        $userSurname = null;
+                        if ($userDetailData) {
+                            $userName = $userDetailData->getName();
+                            $userSurname = $userDetailData->getSurname();
+                        }
+                        $taskHasAssignedUsersArray[$item->getUser()->getId()] = [
+                            'id' => $item->getId(),
+                            'status_date' => $item->getStatusDate(),
+                            'time_spent' => $item->getTimeSpent(),
+                            'createdAt' => $item->getCreatedAt(),
+                            'updatedAt' => $item->getUpdatedAt(),
+                            'status' => [
+                                'id' => $item->getStatus()->getId(),
+                                'title' => $item->getStatus()->getTitle(),
+                                'color' => $item->getStatus()->getColor(),
+                            ],
+                            'user' => [
+                                'id' => $item->getUser()->getId(),
+                                'username' => $item->getUser()->getUsername(),
+                                'email' => $item->getUser()->getEmail(),
+                                'name' => $userName,
+                                'surname' => $userSurname,
+                            ]
+                        ];
+                    }
                 }
-                $taskHasAssignedUsersArray[] = [
-                    'id' => $item->getId(),
-                    'status_date' => $item->getStatusDate(),
-                    'time_spent' => $item->getTimeSpent(),
-                    'createdAt' => $item->getCreatedAt(),
-                    'updatedAt' => $item->getUpdatedAt(),
-                    'status' => [
-                        'id' => $item->getStatus()->getId(),
-                        'title' => $item->getStatus()->getTitle(),
-                        'color' => $item->getStatus()->getColor(),
-                    ],
-                    'user' => [
-                        'id' => $item->getUser()->getId(),
-                        'username' => $item->getUser()->getUsername(),
-                        'email' => $item->getUser()->getEmail(),
-                        'name' =>$userName,
-                        'surname' => $userSurname,
-                    ]
-                ];
             }
         }
         $taskHasAttachments = $data->getTaskHasAttachments();
@@ -744,7 +780,7 @@ class TaskRepository extends EntityRepository
         $userCreatorDetailData = $data->getCreatedBy()->getDetailData();
         $userCreatorName = null;
         $userCreatorSurname = null;
-        if($userCreatorDetailData){
+        if ($userCreatorDetailData) {
             $userCreatorName = $userCreatorDetailData->getName();
             $userCreatorSurname = $userCreatorDetailData->getSurname();
         }
@@ -752,7 +788,7 @@ class TaskRepository extends EntityRepository
         $userRequesterDetailData = $data->getRequestedBy()->getDetailData();
         $userRequesterName = null;
         $userRequesterSurname = null;
-        if($userRequesterDetailData){
+        if ($userRequesterDetailData) {
             $userRequesterName = $userRequesterDetailData->getName();
             $userRequesterSurname = $userRequesterDetailData->getSurname();
         }

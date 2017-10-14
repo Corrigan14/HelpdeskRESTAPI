@@ -3,6 +3,7 @@
 namespace API\TaskBundle\DataFixtures\ORM;
 
 use API\TaskBundle\Entity\Status;
+use API\TaskBundle\Security\StatusFunctionOptions;
 use API\TaskBundle\Security\StatusOptions;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
@@ -41,6 +42,8 @@ class StatusFixture implements FixtureInterface, ContainerAwareInterface, Ordere
         $status->setDescription('New task');
         $status->setColor('#1E90FF');
         $status->setOrder(1);
+        $status->setDefault(true);
+        $status->setFunction(StatusFunctionOptions::NEW_TASK);
         $manager->persist($status);
 
         $status = new Status();
@@ -48,6 +51,8 @@ class StatusFixture implements FixtureInterface, ContainerAwareInterface, Ordere
         $status->setDescription('In progress task');
         $status->setColor('#32CD32');
         $status->setOrder(2);
+        $status->setDefault(true);
+        $status->setFunction(StatusFunctionOptions::IN_PROGRESS_TASK);
         $manager->persist($status);
 
         $status = new Status();
@@ -55,6 +60,8 @@ class StatusFixture implements FixtureInterface, ContainerAwareInterface, Ordere
         $status->setDescription('Completed task');
         $status->setColor('#FF4500');
         $status->setOrder(3);
+        $status->setDefault(true);
+        $status->setFunction(StatusFunctionOptions::COMPLETED_TASK);
         $manager->persist($status);
 
         $status = new Status();
@@ -62,6 +69,8 @@ class StatusFixture implements FixtureInterface, ContainerAwareInterface, Ordere
         $status->setDescription('Closed task');
         $status->setColor('#A9A9A9');
         $status->setOrder(4);
+        $status->setDefault(true);
+        $status->setFunction(StatusFunctionOptions::CLOSED_TASK);
         $manager->persist($status);
 
         $manager->flush();

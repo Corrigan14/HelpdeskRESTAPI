@@ -71,6 +71,23 @@ class Status
     private $order;
 
     /**
+     * @ORM\Column(name="default", type="boolean", options={"default":0})
+     * @ReadOnly()
+     *
+     * @var bool
+     */
+    private $default = false;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="function", type="string", length=255, nullable=true)
+     * @Assert\Type("string")
+     * @ReadOnly()
+     */
+    private $function;
+
+    /**
      * @var ArrayCollection
      *
      * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskHasAssignedUser", mappedBy="status")

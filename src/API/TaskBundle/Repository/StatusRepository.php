@@ -121,7 +121,9 @@ class StatusRepository extends EntityRepository
             'color' => $data->getColor(),
             'description' => $data->getDescription(),
             'order' => $data->getOrder(),
-            'is_active' => $data->getIsActive()
+            'is_active' => $data->getIsActive(),
+            'default' => $data->getDefault(),
+            'function' => $data->getFunction()
         ];
 
         return $response;

@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Controller;
 
 use API\TaskBundle\Entity\Status;
+use API\TaskBundle\Security\StatusFunctionOptions;
 use API\TaskBundle\Security\UserRoleAclOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
@@ -29,14 +30,18 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *            "title": "New",
      *            "description": "New task",
      *            "color": "#1E90FF",
-     *            "is_active": true
+     *            "is_active": true,
+     *            "default": true,
+     *            "function": "new_task"
      *          },
      *          {
      *            "id": 6,
      *            "title": "In Progress",
      *            "description": "In progress task",
      *            "color": "#32CD32",
-     *            "is_active": true
+     *            "is_active": true,
+     *            "default": true,
+     *            "function": "inprogress_task"
      *          }
      *       ],
      *       "_links":
@@ -134,7 +139,9 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *            "title": "New",
      *            "description": "New task",
      *            "color": "#1E90FF",
-     *            "is_active": true
+     *            "is_active": true,
+     *            "default": true,
+     *            "function": "new_task"
      *        },
      *        "_links":
      *        {
@@ -204,7 +211,9 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *            "title": "New",
      *            "description": "New task",
      *            "color": "#1E90FF",
-     *            "is_active": true
+     *            "is_active": true,
+     *            "default": true,
+     *            "function": "new_task"
      *        },
      *        "_links":
      *        {
@@ -268,7 +277,9 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *            "title": "New",
      *            "description": "New task",
      *            "color": "#1E90FF",
-     *            "is_active": true
+     *            "is_active": true,
+     *            "default": true,
+     *            "function": "new_task"
      *        },
      *        "_links":
      *        {
@@ -345,7 +356,9 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *            "title": "New",
      *            "description": "New task",
      *            "color": "#1E90FF",
-     *            "is_active": true
+     *            "is_active": true,
+     *            "default": true,
+     *            "function": "new_task"
      *        },
      *        "_links":
      *        {
@@ -478,7 +491,9 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *            "title": "New",
      *            "description": "New task",
      *            "color": "#1E90FF",
-     *            "is_active": true
+     *            "is_active": true,
+     *            "default": true,
+     *            "function": "new_task"
      *        },
      *        "_links":
      *        {
@@ -565,7 +580,8 @@ class StatusController extends ApiBaseController implements ControllerInterface
             'color',
             'description',
             'is_active',
-            'order'
+            'order',
+            'function'
         ];
 
         if (array_key_exists('_format', $requestData)) {
@@ -579,6 +595,14 @@ class StatusController extends ApiBaseController implements ControllerInterface
                     StatusCodesHelper::INVALID_PARAMETERS_CODE
                 );
             }
+        }
+
+        // Controll, if function is allowed
+        if (isset($requestData['function']) && !in_array($requestData['function'], StatusFunctionOptions::getConstants(), true)) {
+            return $this->createApiResponse(
+                ['message' => $requestData['function'] . ' is not allowed parameter for Function of Status Entity!'],
+                StatusCodesHelper::INVALID_PARAMETERS_CODE
+            );
         }
 
         $statusCode = $this->getCreateUpdateStatusCode($create);

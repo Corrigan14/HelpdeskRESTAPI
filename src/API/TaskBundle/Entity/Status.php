@@ -71,6 +71,22 @@ class Status
     private $order;
 
     /**
+     * @ORM\Column(name="`default`", type="boolean", options={"default":0})
+     * @ReadOnly()
+     *
+     * @var bool
+     */
+    private $default = false;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="`function`", type="string", length=255, nullable=true)
+     * @Assert\Type("string")
+     */
+    private $function;
+
+    /**
      * @var ArrayCollection
      *
      * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskHasAssignedUser", mappedBy="status")
@@ -252,5 +268,53 @@ class Status
     public function getOrder()
     {
         return $this->order;
+    }
+
+    /**
+     * Set default
+     *
+     * @param boolean $default
+     *
+     * @return Status
+     */
+    public function setDefault($default)
+    {
+        $this->default = $default;
+
+        return $this;
+    }
+
+    /**
+     * Get default
+     *
+     * @return boolean
+     */
+    public function getDefault()
+    {
+        return $this->default;
+    }
+
+    /**
+     * Set function
+     *
+     * @param string $function
+     *
+     * @return Status
+     */
+    public function setFunction($function)
+    {
+        $this->function = $function;
+
+        return $this;
+    }
+
+    /**
+     * Get function
+     *
+     * @return string
+     */
+    public function getFunction()
+    {
+        return $this->function;
     }
 }

@@ -150,6 +150,10 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *        Another options:
      *          NOT - just filters without projects are returned,
      *          CURRENT-USER - just filters for actually logged user's projects are returned."
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
      *     }
      *  },
      *  headers={
@@ -176,6 +180,9 @@ class FilterController extends ApiBaseController implements ControllerInterface
         $pageNum = $request->get('page');
         $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
+
+        $limitNum = $request->get('limit');
+        $limit = (int)$limitNum ? (int)$limitNum : 10;
 
         $orderString = $request->get('order');
         $orderString = strtolower($orderString);
@@ -207,7 +214,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
             'report' => strtolower($report),
             'project' => strtolower($project),
             'order' => $order,
-            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order])
+            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order]),
+            'limit' => $limit
         ];
 
         return $this->json($this->get('filter_service')->getFiltersResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);

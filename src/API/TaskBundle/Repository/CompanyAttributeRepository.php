@@ -27,6 +27,7 @@ class CompanyAttributeRepository extends EntityRepository
     {
         $isActive = $options['isActive'];
         $order = $options['order'];
+        $limit = $options['limit'];
 
         if ('true' === $isActive || 'false' === $isActive) {
             if ($isActive === 'true') {
@@ -47,22 +48,29 @@ class CompanyAttributeRepository extends EntityRepository
                 ->getQuery();
         }
 
-        // Pagination
-        if (1 < $page) {
-            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
+        if (999 !== $limit) {
+            // Pagination
+            if (1 < $page) {
+                $query->setFirstResult($limit * $page - $limit);
+            } else {
+                $query->setFirstResult(0);
+            }
+
+            $query->setMaxResults($limit);
+
+            $paginator = new Paginator($query, $fetchJoinCollection = true);
+            $count = $paginator->count();
+
+            return [
+                'count' => $count,
+                'array' => $this->formatData($paginator)
+            ];
         } else {
-            $query->setFirstResult(0);
+            // Return all entities
+            return [
+                'array' => $this->formatData($query->getArrayResult(), true)
+            ];
         }
-
-        $query->setMaxResults(self::LIMIT);
-
-        $paginator = new Paginator($query, $fetchJoinCollection = true);
-        $count = $paginator->count();
-
-        return [
-            'count' => $count,
-            'array' => $this->formatData($paginator)
-        ];
     }
 
     /**
@@ -82,14 +90,18 @@ class CompanyAttributeRepository extends EntityRepository
 
     /**
      * @param $paginatorData
+     * @param bool $array
      * @return array
      */
-    private function formatData($paginatorData):array
+    private function formatData($paginatorData, $array = false): array
     {
         $response = [];
-        /** @var CompanyAttribute $data */
         foreach ($paginatorData as $data) {
-            $response[] = $this->processData($data);
+            if ($array) {
+                $response[] = $this->processArrayData($data);
+            } else {
+                $response[] = $this->processData($data);
+            }
         }
 
         return $response;
@@ -99,7 +111,7 @@ class CompanyAttributeRepository extends EntityRepository
      * @param CompanyAttribute $data
      * @return array
      */
-    private function processData(CompanyAttribute $data):array
+    private function processData(CompanyAttribute $data): array
     {
         $response = [
             'id' => $data->getId(),
@@ -107,6 +119,23 @@ class CompanyAttributeRepository extends EntityRepository
             'type' => $data->getType(),
             'options' => $data->getOptions(),
             'is_active' => $data->getIsActive()
+        ];
+
+        return $response;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function processArrayData(array $data): array
+    {
+        $response = [
+            'id' => $data['id'],
+            'title' => $data['title'],
+            'type' => $data['type'],
+            'options' => $data['options'],
+            'is_active' => $data['is_active']
         ];
 
         return $response;

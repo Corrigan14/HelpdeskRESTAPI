@@ -60,6 +60,10 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      *     {
      *       "name"="isActive",
      *       "description"="Return's only ACTIVE statuses if this param is TRUE, only INACTIVE statuses if param is FALSE"
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
      *     }
      *  },
      *  headers={
@@ -78,6 +82,8 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      *
      * @param Request $request
      * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function listAction(Request $request)
     {
@@ -94,6 +100,9 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
         $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
+        $limitNum = $request->get('limit');
+        $limit = (int)$limitNum ? (int)$limitNum : 10;
+
         $isActive = $request->get('isActive');
         $filtersForUrl = [];
         if (null !== $isActive) {
@@ -102,7 +111,8 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
 
         $options = [
             'isActive' => strtolower($isActive),
-            'filtersForUrl' => $filtersForUrl
+            'filtersForUrl' => $filtersForUrl,
+            'limit' => $limit
         ];
 
         $systemSettingsArray = $this->get('system_settings_service')->getAttributesResponse($page, $options);

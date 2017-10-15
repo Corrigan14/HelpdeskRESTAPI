@@ -30,6 +30,7 @@ class ProjectRepository extends EntityRepository
         $loggedUser = $options['loggedUser'];
         $isAdmin = $options['isAdmin'];
         $isActive = $options['isActive'];
+        $limit = $options['limit'];
 
         if ('true' === $isActive) {
             $isActiveParam = 1;
@@ -82,22 +83,29 @@ class ProjectRepository extends EntityRepository
             }
         }
 
-        // Pagination
-        if (1 < $page) {
-            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
-        } else {
-            $query->setFirstResult(0);
+        if (999 !== $limit) {
+            // Pagination
+            if (1 < $page) {
+                $query->setFirstResult($limit * $page - $limit);
+            } else {
+                $query->setFirstResult(0);
+            }
+
+            $query->setMaxResults($limit);
+
+            $paginator = new Paginator($query, $fetchJoinCollection = true);
+            $count = $paginator->count();
+
+            return [
+                'count' => $count,
+                'array' => $this->formatData($paginator)
+            ];
+        }else {
+            // Return all entities
+            return [
+                'array' => $this->formatData($query->getArrayResult(), true)
+            ];
         }
-
-        $query->setMaxResults(self::LIMIT);
-
-        $paginator = new Paginator($query, $fetchJoinCollection = true);
-        $count = $paginator->count();
-
-        return [
-            'count' => $count,
-            'array' => $this->formatData($paginator)
-        ];
     }
 
     /**
@@ -242,14 +250,18 @@ class ProjectRepository extends EntityRepository
 
     /**
      * @param $paginatorData
+     * @param bool $array
      * @return array
      */
-    private function formatData($paginatorData): array
+    private function formatData($paginatorData, $array = false): array
     {
         $response = [];
-        /** @var Project $data */
         foreach ($paginatorData as $data) {
-            $response[] = $this->processData($data);
+            if ($array) {
+                $response[] = $this->processArrayData($data);
+            } else {
+                $response[] = $this->processData($data);
+            }
         }
 
         return $response;
@@ -288,6 +300,19 @@ class ProjectRepository extends EntityRepository
             'updatedAt' => $data->getUpdatedAt(),
             'is_active' => $data->getIsActive(),
             'userHasProjects' => $userHasProjectsArray
+        ];
+
+        return $response;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function processArrayData(array $data): array
+    {
+        $response = [
+
         ];
 
         return $response;

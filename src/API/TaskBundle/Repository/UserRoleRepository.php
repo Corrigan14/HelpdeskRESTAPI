@@ -28,6 +28,7 @@ class UserRoleRepository extends EntityRepository
     {
         $isActive = $options['isActive'];
         $order = $options['order'];
+        $limit = $options['limit'];
 
         $isActiveParam = ('true' === $isActive) ? 1 : 0;
 
@@ -43,22 +44,29 @@ class UserRoleRepository extends EntityRepository
                 ->orderBy('userRole.order', $order);
         }
 
-        // Pagination
-        if (1 < $page) {
-            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
+        if (999 !== $limit) {
+            // Pagination
+            if (1 < $page) {
+                $query->setFirstResult($limit * $page - $limit);
+            } else {
+                $query->setFirstResult(0);
+            }
+
+            $query->setMaxResults($limit);
+
+            $paginator = new Paginator($query, $fetchJoinCollection = true);
+            $count = $paginator->count();
+
+            return [
+                'count' => $count,
+                'array' => $this->formatListData($paginator)
+            ];
         } else {
-            $query->setFirstResult(0);
+            // Return all entities
+            return [
+                'array' => $this->formatListData($query->getQuery()->getArrayResult(), true)
+            ];
         }
-
-        $query->setMaxResults(self::LIMIT);
-
-        $paginator = new Paginator($query, $fetchJoinCollection = true);
-        $count = $paginator->count();
-
-        return [
-            'count' => $count,
-            'array' => $this->formatListData($paginator)
-        ];
     }
 
     /**
@@ -94,24 +102,51 @@ class UserRoleRepository extends EntityRepository
 
     /**
      * @param $paginatorData
+     * @param bool $array
      * @return array
      */
-    private function formatListData($paginatorData): array
+    private function formatListData($paginatorData, $array = false): array
     {
         $response = [];
 
-        /** @var UserRole $data */
         foreach ($paginatorData as $data) {
-            $response[] = [
-                'id' => $data->getId(),
-                'title' => $data->getTitle(),
-                'description' => $data->getDescription(),
-                'homepage' => $data->getHomepage(),
-                'acl' => $data->getAcl(),
-                'order' => $data->getOrder(),
-                'is_active' => $data->getIsActive(),
-            ];
+            if ($array) {
+                $response[] = $this->processArrayData($data);
+            } else {
+                $response[] = $this->processData($data);
+            }
+
         }
+
+        return $response;
+    }
+
+    /**
+     * @param UserRole $data
+     * @return array
+     */
+    private function processData(UserRole $data): array
+    {
+        return [
+            'id' => $data->getId(),
+            'title' => $data->getTitle(),
+            'description' => $data->getDescription(),
+            'homepage' => $data->getHomepage(),
+            'acl' => $data->getAcl(),
+            'order' => $data->getOrder(),
+            'is_active' => $data->getIsActive(),
+        ];
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function processArrayData(array $data): array
+    {
+        $response = [
+
+        ];
 
         return $response;
     }

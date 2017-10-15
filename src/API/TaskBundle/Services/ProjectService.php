@@ -49,18 +49,26 @@ class ProjectService
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function getProjectsResponse(int $page, array $options):array
+    public function getProjectsResponse(int $page, array $options): array
     {
         $responseData = $this->em->getRepository('APITaskBundle:Project')->getAllEntities($page, $options);
 
         $response = [
             'data' => $responseData['array'],
         ];
+
+        $limit = $options['limit'];
+        if (999 !== $limit) {
+            $count = $responseData['count'];
+        } else {
+            $count = count($responseData['array']);
+        }
+
         $pagination = HateoasHelper::getPagination(
             $this->router->generate('projects_list'),
             $page,
-            $responseData['count'],
-            ProjectRepository::LIMIT,
+            $count,
+            $limit,
             $fields = [],
             $options['isActive']
         );
@@ -74,7 +82,7 @@ class ProjectService
      * @param string $rule
      * @return array
      */
-    public function getListOfAvailableProjects(User $user, bool $isAdmin, string $rule):array
+    public function getListOfAvailableProjects(User $user, bool $isAdmin, string $rule): array
     {
         if ($isAdmin) {
             return $this->em->getRepository('APITaskBundle:Project')->getAllProjectEntitiesWithIdAndTitle();
@@ -88,7 +96,7 @@ class ProjectService
      * @param bool $isAdmin
      * @return array
      */
-    public function getListOfAvailableProjectsWhereUsersACLExists(User $user, bool $isAdmin):array
+    public function getListOfAvailableProjectsWhereUsersACLExists(User $user, bool $isAdmin): array
     {
         if ($isAdmin) {
             return $this->em->getRepository('APITaskBundle:Project')->getAllProjectEntitiesWithIdAndTitle();
@@ -102,7 +110,7 @@ class ProjectService
      * @param Project $project
      * @return array
      */
-    public function getProjectResponse(Project $project):array
+    public function getProjectResponse(Project $project): array
     {
         return [
             'data' => $project,
@@ -114,7 +122,7 @@ class ProjectService
      * @param int $id
      * @return array
      */
-    public function getEntityWithTaskResponse(int $id):array
+    public function getEntityWithTaskResponse(int $id): array
     {
         $project = $this->em->getRepository('APITaskBundle:Project')->getEntityWithTasks($id);
 
@@ -129,7 +137,7 @@ class ProjectService
      * @param bool $canEdit
      * @return array
      */
-    public function getEntityResponse(int $id, bool $canEdit):array
+    public function getEntityResponse(int $id, bool $canEdit): array
     {
         $responseData['data'] = $this->em->getRepository('APITaskBundle:Project')->getEntity($id);
         $responseData['data']['canEdit'] = $canEdit;
@@ -145,7 +153,7 @@ class ProjectService
      * @param int $userId
      * @return array
      */
-    public function getUserHasProjectResponse(UserHasProject $userHasProject, int $projectId, int $userId):array
+    public function getUserHasProjectResponse(UserHasProject $userHasProject, int $projectId, int $userId): array
     {
         return [
             'data' => $userHasProject,
@@ -159,7 +167,7 @@ class ProjectService
      * @param int $userId
      * @return array
      */
-    private function getUserHasProjectLinks(int $projectId, int $userId):array
+    private function getUserHasProjectLinks(int $projectId, int $userId): array
     {
         return [
             'put' => $this->router->generate('project_update_user_acl', ['projectId' => $projectId, 'userId' => $userId]),
@@ -172,7 +180,7 @@ class ProjectService
      *
      * @return array
      */
-    private function getProjectLinks(int $id):array
+    private function getProjectLinks(int $id): array
     {
         return [
             'put' => $this->router->generate('projects_update', ['id' => $id]),

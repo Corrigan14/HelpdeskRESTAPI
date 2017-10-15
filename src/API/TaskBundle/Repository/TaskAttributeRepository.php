@@ -24,6 +24,7 @@ class TaskAttributeRepository extends EntityRepository
     {
         $isActive = $options['isActive'];
         $order = $options['order'];
+        $limit = $options['limit'];
 
         if ('true' === $isActive) {
             $isActiveParam = 1;
@@ -45,22 +46,29 @@ class TaskAttributeRepository extends EntityRepository
                 ->getQuery();
         }
 
-        // Pagination
-        if (1 < $page) {
-            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
-        } else {
-            $query->setFirstResult(0);
+        if (999 !== $limit) {
+            // Pagination
+            if (1 < $page) {
+                $query->setFirstResult($limit * $page - $limit);
+            } else {
+                $query->setFirstResult(0);
+            }
+
+            $query->setMaxResults($limit);
+
+            $paginator = new Paginator($query, $fetchJoinCollection = true);
+            $count = $paginator->count();
+
+            return [
+                'count' => $count,
+                'array' => $this->formatData($paginator)
+            ];
+        }else {
+            // Return all entities
+            return [
+                'array' => $this->formatData($query->getArrayResult(), true)
+            ];
         }
-
-        $query->setMaxResults(self::LIMIT);
-
-        $paginator = new Paginator($query, $fetchJoinCollection = true);
-        $count = $paginator->count();
-
-        return [
-            'count' => $count,
-            'array' => $this->formatData($paginator)
-        ];
     }
 
     /**
@@ -112,14 +120,18 @@ class TaskAttributeRepository extends EntityRepository
 
     /**
      * @param $paginatorData
+     * @param bool $array
      * @return array
      */
-    private function formatData($paginatorData): array
+    private function formatData($paginatorData, $array = false): array
     {
         $response = [];
-        /** @var TaskAttribute $data */
         foreach ($paginatorData as $data) {
-            $response[] = $this->processData($data);
+            if ($array) {
+                $response[] = $this->processArrayData($data);
+            } else {
+                $response[] = $this->processData($data);
+            }
         }
 
         return $response;
@@ -137,6 +149,19 @@ class TaskAttributeRepository extends EntityRepository
             'type' => $data->getType(),
             'options' => $data->getOptions(),
             'is_active' => $data->getIsActive(),
+        ];
+
+        return $response;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function processArrayData(array $data): array
+    {
+        $response = [
+
         ];
 
         return $response;

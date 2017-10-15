@@ -82,6 +82,10 @@ class TagController extends ApiBaseController implements ControllerInterface
      *     {
      *       "name"="page",
      *       "description"="Pagination, limit is set to 10 records"
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
      *     }
      *  },
      *  headers={
@@ -109,12 +113,16 @@ class TagController extends ApiBaseController implements ControllerInterface
         $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
+        $limitNum = $request->get('limit');
+        $limit = (int)$limitNum ? (int)$limitNum : 10;
+
         $filtersForUrl = [];
 
         $options = [
             'loggedUserId' => $this->getUser()->getId(),
             'isActive' => false,
-            'filtersForUrl' => $filtersForUrl
+            'filtersForUrl' => $filtersForUrl,
+            'limit' => $limit
         ];
 
         $tagArray = $this->get('tag_service')->getAttributesResponse($page, $options);

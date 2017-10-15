@@ -23,6 +23,7 @@ class TagRepository extends EntityRepository
     public function getAllEntities(int $page, array $options = [])
     {
         $userId = $options['loggedUserId'];
+        $limit = $options['limit'];
 
         $query = $this->createQueryBuilder('t')
             ->select('t')
@@ -34,24 +35,30 @@ class TagRepository extends EntityRepository
             ->setParameters(['userId' => $userId, 'public' => true])
             ->getQuery();
 
-        $query->setMaxResults(self::LIMIT);
 
-        // Pagination
-        if (1 < $page) {
-            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
-        } else {
-            $query->setFirstResult(0);
+        if (999 !== $limit) {
+            // Pagination
+            if (1 < $page) {
+                $query->setFirstResult($limit * $page - $limit);
+            } else {
+                $query->setFirstResult(0);
+            }
+
+            $query->setMaxResults($limit);
+
+            $paginator = new Paginator($query, $fetchJoinCollection = true);
+            $count = $paginator->count();
+
+            return [
+                'count' => $count,
+                'array' => $this->formatData($paginator)
+            ];
+        }else {
+            // Return all entities
+            return [
+                'array' => $this->formatData($query->getArrayResult(), true)
+            ];
         }
-
-        $query->setMaxResults(self::LIMIT);
-
-        $paginator = new Paginator($query, $fetchJoinCollection = true);
-        $count = $paginator->count();
-
-        return [
-            'count' => $count,
-            'array' => $this->formatData($paginator)
-        ];
     }
 
     /**
@@ -139,14 +146,18 @@ class TagRepository extends EntityRepository
 
     /**
      * @param $paginatorData
+     * @param bool $array
      * @return array
      */
-    private function formatData($paginatorData): array
+    private function formatData($paginatorData, $array = false): array
     {
         $response = [];
-        /** @var Tag $data */
         foreach ($paginatorData as $data) {
-            $response[] = $this->processData($data);
+            if ($array) {
+                $response[] = $this->processArrayData($data);
+            } else {
+                $response[] = $this->processData($data);
+            }
         }
 
         return $response;
@@ -168,6 +179,19 @@ class TagRepository extends EntityRepository
                 'username' => $data->getCreatedBy()->getUsername(),
                 'email' => $data->getCreatedBy()->getEmail()
             ]
+        ];
+
+        return $response;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function processArrayData(array $data): array
+    {
+        $response = [
+
         ];
 
         return $response;

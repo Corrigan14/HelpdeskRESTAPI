@@ -101,6 +101,10 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *     {
      *       "name"="isActive",
      *       "description"="Return's only ACTIVE project if this param is TRUE, only INACTIVE projects if param is FALSE"
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
      *     }
      *  },
      *  headers={
@@ -134,12 +138,16 @@ class ProjectController extends ApiBaseController implements ControllerInterface
         $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
+        $limitNum = $request->get('limit');
+        $limit = (int)$limitNum ? (int)$limitNum : 10;
+
         $isActive = $request->get('isActive') ?: 'all';
 
         $options = [
             'isAdmin' => $this->get('project_voter')->isAdmin(),
             'loggedUser' => $this->getUser(),
             'isActive' => strtolower($isActive),
+            'limit' => $limit
         ];
 
         return $this->json($this->get('project_service')->getProjectsResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);

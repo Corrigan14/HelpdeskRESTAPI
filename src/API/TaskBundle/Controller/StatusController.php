@@ -72,6 +72,10 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *     {
      *       "name"="isActive",
      *       "description"="Return's only ACTIVE statuses if this param is TRUE, only INACTIVE statuses if param is FALSE"
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
      *     }
      *  },
      *  headers={
@@ -110,6 +114,9 @@ class StatusController extends ApiBaseController implements ControllerInterface
         $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
+        $limitNum = $request->get('limit');
+        $limit = (int)$limitNum ? (int)$limitNum : 10;
+
         $orderString = $request->get('order');
         $orderString = strtolower($orderString);
         $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'DESC';
@@ -124,7 +131,8 @@ class StatusController extends ApiBaseController implements ControllerInterface
             'loggedUserId' => $this->getUser()->getId(),
             'isActive' => strtolower($isActive),
             'order' => $order,
-            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order])
+            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order]),
+            'limit' => $limit
         ];
 
         return $this->json($this->get('status_service')->getAttributesResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);

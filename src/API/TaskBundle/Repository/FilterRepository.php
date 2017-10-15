@@ -28,9 +28,10 @@ class FilterRepository extends EntityRepository
         $project = $options['project'];
         $loggedUserId = $options['loggedUserId'];
         $order = $options['order'];
+        $limit = $options['limit'];
 
         $query = $this->createQueryBuilder('f')
-            ->select('f')
+            ->select('f, createdBy')
             ->leftJoin('f.createdBy', 'createdBy')
             ->leftJoin('f.project', 'project')
             ->leftJoin('project.createdBy', 'projectCreator')
@@ -87,22 +88,29 @@ class FilterRepository extends EntityRepository
             $query->setParameters($paramArray);
         }
 
-        // Pagination
-        if (1 < $page) {
-            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
+        if (999 !== $limit) {
+            // Pagination
+            if (1 < $page) {
+                $query->setFirstResult($limit * $page - $limit);
+            } else {
+                $query->setFirstResult(0);
+            }
+
+            $query->setMaxResults($limit);
+
+            $paginator = new Paginator($query, $fetchJoinCollection = true);
+            $count = $paginator->count();
+
+            return [
+                'count' => $count,
+                'array' => $this->formatData($paginator)
+            ];
         } else {
-            $query->setFirstResult(0);
+            // Return all entities
+            return [
+                'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
+            ];
         }
-
-        $query->setMaxResults(self::LIMIT);
-
-        $paginator = new Paginator($query, $fetchJoinCollection = true);
-        $count = $paginator->count();
-
-        return [
-            'count' => $count,
-            'array' => $this->formatData($paginator)
-        ];
     }
 
     /**
@@ -216,14 +224,18 @@ class FilterRepository extends EntityRepository
 
     /**
      * @param $paginatorData
+     * @param bool $array
      * @return array
      */
-    private function formatData($paginatorData): array
+    private function formatData($paginatorData, $array = false): array
     {
         $response = [];
-        /** @var Filter $data */
         foreach ($paginatorData as $data) {
-            $response[] = $this->processData($data);
+            if ($array) {
+                $response[] = $this->processArrayData($data);
+            } else {
+                $response[] = $this->processData($data);
+            }
         }
 
         return $response;
@@ -262,6 +274,44 @@ class FilterRepository extends EntityRepository
             'project' => $projectArray,
             'columns' => $data->getColumns(),
             'columns_task_attributes' => $data->getColumnsTaskAttributes()
+        ];
+
+        return $response;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function processArrayData(array $data): array
+    {
+        $projectArray = null;
+        if (isset($data['project'])) {
+            $project = $data['project'];
+            $projectArray = [
+                'id' => $project['id'],
+                'title' => $project['title']
+            ];
+        }
+
+        $response = [
+            'id' => $data['id'],
+            'title' => $data['title'],
+            'public' => $data['public'],
+            'filter' => json_decode($data['filter']),
+            'report' => $data['report'],
+            'is_active' => $data['is_active'],
+            'default' => $data['default'],
+            'icon_class' => $data['icon_class'],
+            'order' => $data['order'],
+            'createdBy' => [
+                'id' => $data['createdBy']['id'],
+                'username' => $data['createdBy']['username'],
+                'email' => $data['createdBy']['email']
+            ],
+            'project' => $projectArray,
+            'columns' => json_decode($data['columns']),
+            'columns_task_attributes' => $data['columns_task_attributes']
         ];
 
         return $response;

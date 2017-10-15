@@ -61,6 +61,10 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *     {
      *       "name"="isActive",
      *       "description"="Return's only ACTIVE company attributes if this param is TRUE, only INACTIVE company attributes if param is FALSE"
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
      *     }
      *  },
      *  headers={
@@ -99,6 +103,9 @@ class CompanyAttributeController extends ApiBaseController implements Controller
         $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
+        $limitNum = $request->get('limit');
+        $limit = (int)$limitNum ? (int)$limitNum : 10;
+
         $orderString = $request->get('order');
         $orderString = strtolower($orderString);
         $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
@@ -114,7 +121,8 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             'loggedUserId' => $this->getUser()->getId(),
             'isActive' => strtolower($isActive),
             'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order]),
-            'order' => $order
+            'order' => $order,
+            'limit' => $limit
         ];
 
         return $this->json($this->get('company_attribute_service')->getAttributesResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);

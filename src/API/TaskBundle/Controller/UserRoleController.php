@@ -133,6 +133,10 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *     {
      *       "name"="isActive",
      *       "description"="Return's only ACTIVE user roles if this param is TRUE, only INACTIVE user roles if param is FALSE"
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
      *     }
      *  },
      *  headers={
@@ -168,6 +172,9 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
         $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
+        $limitNum = $request->get('limit');
+        $limit = (int)$limitNum ? (int)$limitNum : 10;
+
         $orderString = $request->get('order');
         $orderString = strtolower($orderString);
         $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
@@ -178,7 +185,8 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
         $options = [
             'isActive' => $isActive,
             'order' => $order,
-            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order])
+            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order]),
+            'limit' => $limit
         ];
 
         $userRolesArray = $this->get('user_role_service')->getUserRolesResponse($page, $options);

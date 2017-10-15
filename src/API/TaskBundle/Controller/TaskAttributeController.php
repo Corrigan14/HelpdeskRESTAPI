@@ -80,6 +80,10 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *     {
      *       "name"="order",
      *       "description"="ASC or DESC order by Title"
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
      *     }
      *  },
      *  headers={
@@ -121,6 +125,9 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
         $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
+        $limitNum = $request->get('limit');
+        $limit = (int)$limitNum ? (int)$limitNum : 10;
+
         $orderString = $request->get('order');
         $orderString = strtolower($orderString);
         $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
@@ -135,7 +142,8 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
             'loggedUserId' => $this->getUser()->getId(),
             'isActive' => strtolower($isActive),
             'order' => $order,
-            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order])
+            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order]),
+            'limit' => $limit
         ];
 
         return $this->json($this->get('task_attribute_service')->getTaskAttributesResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);

@@ -57,10 +57,16 @@ class TaskAttributeService
         ];
 
         $url = $this->router->generate('task_attribute_list');
-        $limit = TaskAttributeRepository::LIMIT;
+        $limit = $options['limit'];
         $filters = $options['filtersForUrl'];
 
-        $pagination = PaginationHelper::getPagination($url, $limit, $page, $responseData['count'], $filters);
+        if (999 !== $limit) {
+            $count = $responseData['count'];
+        } else {
+            $count = count($responseData['array']);
+        }
+
+        $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);
 
         return array_merge($response, $pagination);
     }

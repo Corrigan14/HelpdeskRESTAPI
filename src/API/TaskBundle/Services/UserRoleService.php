@@ -44,10 +44,15 @@ class UserRoleService
             'data' => $responseData['array'],
         ];
 
-        $count = $responseData['count'];
         $url = $this->router->generate('user_role_list');
-        $limit = UserRoleRepository::LIMIT;
+        $limit = $options['limit'];
         $filters = $options['filtersForUrl'];
+
+        if (999 !== $limit) {
+            $count = $responseData['count'];
+        } else {
+            $count = count($responseData['array']);
+        }
 
         $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);
 

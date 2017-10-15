@@ -52,7 +52,7 @@ class CompanyService
         ];
 
         $url = $this->router->generate('company_list');
-        $limit = CompanyRepository::LIMIT;
+        $limit = $options['limit'];
         $filters = $options['filtersForUrl'];
 
         $pagination = PaginationHelper::getPagination($url, $limit, $page, $responseData['count'], $filters);

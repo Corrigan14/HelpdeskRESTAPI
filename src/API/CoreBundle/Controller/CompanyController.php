@@ -102,6 +102,10 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *       "name"="isActive",
      *       "description"="Return's only ACTIVE users if this param is TRUE, only INACTIVE users if param is FALSE"
      *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
+     *     }
      *  },
      *  headers={
      *     {
@@ -144,16 +148,21 @@ class CompanyController extends ApiBaseController implements ControllerInterface
 
         $isActive = $request->get('isActive');
 
+        $limitNum = $request->get('limit');
+        $limit = (int)$limitNum ? $limitNum : 10;
+
         $filtersForUrl = [];
         if (null !== $isActive) {
             $filtersForUrl['isActive'] = '&isActive=' . $isActive;
+            $filtersForUrl['limit'] = '&limit=' . $limit;
         }
 
         $options = [
             'loggedUserId' => $this->getUser()->getId(),
             'isActive' => strtolower($isActive),
             'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order]),
-            'order' => $order
+            'order' => $order,
+            'limit' => $limit
         ];
 
         return $this->json($this->get('api_company.service')->getCompaniesResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);

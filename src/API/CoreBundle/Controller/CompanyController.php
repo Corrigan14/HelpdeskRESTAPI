@@ -149,7 +149,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
         $isActive = $request->get('isActive');
 
         $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ? $limitNum : 10;
+        $limit = (int)$limitNum ? (int)$limitNum : 10;
 
         $filtersForUrl = [];
         if (null !== $isActive) {
@@ -807,6 +807,10 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *       "name"="order",
      *       "description"="ASC or DESC order by title"
      *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
+     *     }
      *  },
      *  headers={
      *     {
@@ -823,6 +827,8 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return JsonResponse|Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function searchAction(Request $request)
     {
@@ -846,7 +852,10 @@ class CompanyController extends ApiBaseController implements ControllerInterface
         }
 
         $pageNum = $request->get('page');
-        $page = (int)$pageNum ? $pageNum : 1;
+        $page = (int)$pageNum ? (int)$pageNum : 1;
+
+        $limitNum = $request->get('limit');
+        $limit = (int)$limitNum ? (int)$limitNum : 10;
 
         $orderString = $request->get('order');
         $orderString = strtolower($orderString);
@@ -861,7 +870,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
         }
         $filtersForUrl = array_merge($filtersForUrl, ['order' => '&order=' . $order]);
 
-        $companiesArray = $this->get('api_company.service')->getCompaniesSearchResponse($term, $page, $isActive, $filtersForUrl, $order);
+        $companiesArray = $this->get('api_company.service')->getCompaniesSearchResponse($term, $page, $isActive, $filtersForUrl, $order, $limit);
         return $this->json($companiesArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 

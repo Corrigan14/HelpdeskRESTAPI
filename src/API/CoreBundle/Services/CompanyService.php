@@ -55,7 +55,13 @@ class CompanyService
         $limit = $options['limit'];
         $filters = $options['filtersForUrl'];
 
-        $pagination = PaginationHelper::getPagination($url, $limit, $page, $responseData['count'], $filters);
+        if (999 !== $limit) {
+            $count = $responseData['count'];
+        } else {
+            $count = count($responseData['array']);
+        }
+
+        $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);
 
         return array_merge($response, $pagination);
     }
@@ -80,19 +86,23 @@ class CompanyService
      * @param string|bool $isActive
      * @param array $filtersForUrl
      * @param string $order
+     * @param int $limit
      * @return array
      */
-    public function getCompaniesSearchResponse($term, int $page, $isActive, array $filtersForUrl, string $order):array
+    public function getCompaniesSearchResponse($term, int $page, $isActive, array $filtersForUrl, string $order, int $limit):array
     {
-        $responseData = $this->em->getRepository('APICoreBundle:Company')->getCompaniesSearch($term, $page, $isActive, $order);
+        $responseData = $this->em->getRepository('APICoreBundle:Company')->getCompaniesSearch($term, $page, $isActive, $order, $limit);
 
         $response = [
             'data' => $responseData['array'],
         ];
 
         $url = $this->router->generate('company_search');
-        $limit = CompanyRepository::LIMIT;
-        $count = $responseData['count'];
+        if (999 !== $limit) {
+            $count = $responseData['count'];
+        } else {
+            $count = count($responseData['array']);
+        }
 
         $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filtersForUrl);
 

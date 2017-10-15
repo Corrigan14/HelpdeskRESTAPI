@@ -146,10 +146,10 @@ class UserController extends ApiBaseController
         }
 
         $pageNum = $request->get('page');
-        $page = (int)$pageNum ? $pageNum : 1;
+        $page = (int)$pageNum ? (int)$pageNum : 1;
 
         $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ? $limitNum : 10;
+        $limit = (int)$limitNum ? (int)$limitNum : 10;
 
         $orderString = $request->get('order');
         $orderString = strtolower($orderString);
@@ -159,7 +159,6 @@ class UserController extends ApiBaseController
         $filtersForUrl = [
             'isActive' => '&isActive=' . $isActive,
             'order' => '&order=' . $order,
-            'limit' => '&limit=' . $limit
         ];
 
         return $this->json($this->get('api_user.service')->getUsersResponse($page, $isActive, $order, $filtersForUrl, $limit), StatusCodesHelper::SUCCESSFUL_CODE);
@@ -1317,7 +1316,7 @@ class UserController extends ApiBaseController
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ? $limitNum : 10;
+        $limit = (int)$limitNum ? (int)$limitNum : 10;
 
         $orderString = $request->get('order');
         $orderString = strtolower($orderString);

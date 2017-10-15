@@ -35,8 +35,6 @@ class CompanyRepository extends EntityRepository
         $order = $options['order'];
         $limit = $options['limit'];
 
-        dump($limit);
-
         if ('true' === $isActive || 'false' === $isActive) {
             if ($isActive === 'true') {
                 $isActiveParam = 1;
@@ -111,9 +109,10 @@ class CompanyRepository extends EntityRepository
      * @param int $page
      * @param string|bool $isActive
      * @param string $order
+     * @param int $limit
      * @return array
      */
-    public function getCompaniesSearch($term, int $page, $isActive, string $order): array
+    public function getCompaniesSearch($term, int $page, $isActive, string $order, int $limit): array
     {
         $parameters = [];
         if ('true' === $isActive || 'false' === $isActive) {
@@ -147,22 +146,29 @@ class CompanyRepository extends EntityRepository
         $query->setParameters($parameters);
         $query->getQuery();
 
-        // Pagination
-        if (1 < $page) {
-            $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
+        if (999 !== $limit) {
+            // Pagination
+            if (1 < $page) {
+                $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
+            } else {
+                $query->setFirstResult(0);
+            }
+
+            $query->setMaxResults(self::LIMIT);
+
+            $paginator = new Paginator($query, $fetchJoinCollection = true);
+            $count = $paginator->count();
+
+            return [
+                'count' => $count,
+                'array' => $this->formatData($paginator)
+            ];
         } else {
-            $query->setFirstResult(0);
+            // Return all entities
+            return [
+                'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
+            ];
         }
-
-        $query->setMaxResults(self::LIMIT);
-
-        $paginator = new Paginator($query, $fetchJoinCollection = true);
-        $count = $paginator->count();
-
-        return [
-            'count' => $count,
-            'array' => $this->formatData($paginator)
-        ];
     }
 
     /**
@@ -186,7 +192,6 @@ class CompanyRepository extends EntityRepository
     private function formatData($paginatorData, $array = false): array
     {
         $response = [];
-        /** @var User $data */
         foreach ($paginatorData as $data) {
             if ($array) {
                 $response[] = $this->processArrayData($data);
@@ -243,8 +248,35 @@ class CompanyRepository extends EntityRepository
      */
     private function processArrayData(array $data): array
     {
+        $companyData = $data['companyData'];
+        $companyDataArray = [];
+        if ($companyData) {
+            /** @var CompanyData $item */
+            foreach ($companyData as $item) {
+                $companyDataArray[] = [
+                    'id' => $item['id'],
+                    'value' =>  $item['value'],
+                    'companyAttribute' => [
+                        'id' => $item['companyAttribute']['id'],
+                        'title' =>  $item['companyAttribute']['title'],
+                    ]
+                ];
+            }
+        }
 
-        $response = [];
+        $response = [
+            'id' => $data['id'],
+            'title' =>  $data['title'],
+            'ico' =>  $data['ico'],
+            'dic' =>  $data['dic'],
+            'ic_dph' =>  $data['ic_dph'],
+            'street' =>  $data['street'],
+            'city' =>  $data['city'],
+            'zip' =>  $data['zip'],
+            'country' =>  $data['country'],
+            'is_active' =>  $data['is_active'],
+            'companyData' => $companyDataArray
+        ];
 
         return $response;
     }

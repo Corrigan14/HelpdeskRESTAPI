@@ -1606,7 +1606,7 @@ class TaskController extends ApiBaseController
                     }
                 } else {
                     $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->findOneBy([
-                        'title' => StatusFunctionOptions::NEW_TASK,
+                        'function' => StatusFunctionOptions::NEW_TASK,
                         'default' => true
                     ]);
                 }

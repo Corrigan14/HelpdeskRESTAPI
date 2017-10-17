@@ -26,7 +26,7 @@ class TagRepository extends EntityRepository
         $limit = $options['limit'];
 
         $query = $this->createQueryBuilder('t')
-            ->select('t')
+            ->select('t, createdBy')
             ->leftJoin('t.createdBy', 'createdBy')
             ->orderBy('t.id', 'DESC')
             ->distinct()
@@ -59,43 +59,6 @@ class TagRepository extends EntityRepository
                 'array' => $this->formatData($query->getArrayResult(), true)
             ];
         }
-    }
-
-    /**
-     * Return's all entities without pagination
-     *
-     * @param int $loggedUserId
-     * @return array
-     */
-    public function getAllUsersTagsWithoutPagination(int $loggedUserId):array
-    {
-        $query = $this->createQueryBuilder('t')
-            ->select('t, createdBy')
-            ->leftJoin('t.createdBy', 'createdBy')
-            ->orderBy('t.id', 'DESC')
-            ->distinct()
-            ->where('t.createdBy = :userId')
-            ->orWhere('t.public = :public')
-            ->setParameters(['userId' => $loggedUserId, 'public' => true])
-            ->getQuery();
-
-        $query = $query->getArrayResult();
-
-        $arrayProcessed = [];
-        foreach ($query as $data) {
-            $arrayProcessed [] = [
-                'id' => $data['id'],
-                'title' => $data['title'],
-                'color' => $data['color'],
-                'public' => $data['public'],
-                'createdBy' => [
-                    'id' => $data['createdBy']['id'],
-                    'username' =>$data['createdBy']['username'],
-                    'email' => $data['createdBy']['email']
-                ]
-            ];
-        }
-        return $arrayProcessed;
     }
 
     /**
@@ -191,7 +154,15 @@ class TagRepository extends EntityRepository
     private function processArrayData(array $data): array
     {
         $response = [
-
+            'id' => $data['id'],
+            'title' => $data['title'],
+            'color' => $data['color'],
+            'public' => $data['public'],
+            'createdBy' => [
+                'id' => $data['createdBy']['id'],
+                'username' => $data['createdBy']['username'],
+                'email' => $data['createdBy']['email']
+            ]
         ];
 
         return $response;

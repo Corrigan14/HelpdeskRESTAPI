@@ -140,7 +140,10 @@ class UnitRepository extends EntityRepository
     private function processArrayData(array $data): array
     {
         $response = [
-
+            'id' => $data['id'],
+            'title' => $data['title'],
+            'shortcut' => $data['shortcut'],
+            'is_active' => $data['is_active']
         ];
 
         return $response;

@@ -161,7 +161,11 @@ class TaskAttributeRepository extends EntityRepository
     private function processArrayData(array $data): array
     {
         $response = [
-
+            'id' => $data['id'],
+            'title' => $data['title'],
+            'type' => $data['type'],
+            'options' => $data['options'],
+            'is_active' => $data['is_active'],
         ];
 
         return $response;

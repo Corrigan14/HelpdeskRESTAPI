@@ -124,7 +124,10 @@ class SystemSettingsRepository extends EntityRepository
     private function processArrayData(array $data): array
     {
         $response = [
-
+            'id' => $data['id'],
+            'title' => $data['title'],
+            'value' => $data['value'],
+            'is_active' => $data['is_active']
         ];
 
         return $response;

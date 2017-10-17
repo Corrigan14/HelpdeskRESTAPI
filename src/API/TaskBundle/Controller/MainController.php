@@ -300,7 +300,7 @@ class MainController extends ApiBaseController
             'isActive' => false,
             'limit' => 999
         ];
-        $loggedUserArchivedProjectsArray = $doctrine->getRepository('APITaskBundle:Project')->getAllEntities(1,$optionsArchived);
+        $loggedUserArchivedProjectsArray = $doctrine->getRepository('APITaskBundle:Project')->getAllEntities(1, $optionsArchived);
         $loggedUserArchivedProjects = $loggedUserArchivedProjectsArray['array'];
         // Add to every project canEdit value based on logged user's project ACL. ADMIN can edit every project
         $modifiedLoggedUserNotActiveProjects = [];
@@ -317,8 +317,12 @@ class MainController extends ApiBaseController
         }
 
         // Returns a list of Logged User's Tags + public tags
-        $loggedUserTags = $doctrine->getRepository('APITaskBundle:Tag')->getAllUsersTagsWithoutPagination($loggedUser->getId());
-
+        $tagOptions = [
+            'loggedUserId' => $loggedUser->getId(),
+            'limit' => 999
+        ];
+        $loggedUserTagsArray = $doctrine->getRepository('APITaskBundle:Tag')->getAllEntities(1, $tagOptions);
+        $loggedUserTags = $loggedUserTagsArray['array'];
 
         // Returns a list of Logged user's Filters
         $filterOptions = [

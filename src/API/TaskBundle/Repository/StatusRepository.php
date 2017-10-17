@@ -148,7 +148,14 @@ class StatusRepository extends EntityRepository
     private function processArrayData(array $data): array
     {
         $response = [
-
+            'id' => $data['id'],
+            'title' => $data['title'],
+            'color' => $data['color'],
+            'description' => $data['description'],
+            'order' => $data['order'],
+            'is_active' => $data['is_active'],
+            'default' => $data['default'],
+            'function' => $data['function']
         ];
 
         return $response;

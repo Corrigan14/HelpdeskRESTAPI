@@ -274,8 +274,10 @@ class MainController extends ApiBaseController
             'isAdmin' => $this->get('project_voter')->isAdmin(),
             'loggedUser' => $loggedUser,
             'isActive' => true,
+            'limit' => 999
         ];
-        $loggedUserProjects = $doctrine->getRepository('APITaskBundle:Project')->getAllUsersProjectsWithoutPagination($options);
+        $loggedUserProjectsEntities = $doctrine->getRepository('APITaskBundle:Project')->getAllEntities(1, $options);
+        $loggedUserProjects = $loggedUserProjectsEntities['array'];
         // Add to every project canEdit value based on logged user's project ACL. ADMIN can edit every project
         // Add to every project the number of Tasks
         $modifiedLoggedUserProjects = [];
@@ -296,8 +298,10 @@ class MainController extends ApiBaseController
             'isAdmin' => $isAdmin,
             'loggedUser' => $loggedUser,
             'isActive' => false,
+            'limit' => 999
         ];
-        $loggedUserArchivedProjects = $doctrine->getRepository('APITaskBundle:Project')->getAllUsersProjectsWithoutPagination($optionsArchived);
+        $loggedUserArchivedProjectsArray = $doctrine->getRepository('APITaskBundle:Project')->getAllEntities(1,$optionsArchived);
+        $loggedUserArchivedProjects = $loggedUserArchivedProjectsArray['array'];
         // Add to every project canEdit value based on logged user's project ACL. ADMIN can edit every project
         $modifiedLoggedUserNotActiveProjects = [];
         foreach ($loggedUserArchivedProjects as $project) {

@@ -17,9 +17,10 @@ class CommentRepository extends EntityRepository
     /**
      * @param array $options
      * @param int $page
+     * @param int $limit
      * @return array
      */
-    public function getTaskComments(array $options, int $page): array
+    public function getTaskComments(array $options, int $page, int $limit): array
     {
         /** @var Task $task */
         $task = $options['task'];
@@ -48,22 +49,29 @@ class CommentRepository extends EntityRepository
                 ->getQuery();
         }
 
-        // Pagination
-        if (1 < $page) {
-            $query->setFirstResult(TaskRepository::LIMIT * $page - TaskRepository::LIMIT);
+        if (999 !== $limit) {
+            // Pagination
+            if (1 < $page) {
+                $query->setFirstResult($limit * $page - $limit);
+            } else {
+                $query->setFirstResult(0);
+            }
+
+            $query->setMaxResults($limit);
+
+            $paginator = new Paginator($query, $fetchJoinCollection = true);
+            $count = $paginator->count();
+
+            return [
+                'count' => $count,
+                'array' => $this->formatData($paginator)
+            ];
         } else {
-            $query->setFirstResult(0);
+            // Return all entities
+            return [
+                'array' => $this->formatData($query->getArrayResult(), true)
+            ];
         }
-
-        $query->setMaxResults(TaskRepository::LIMIT);
-
-        $paginator = new Paginator($query, $fetchJoinCollection = true);
-        $count = $paginator->count();
-
-        return [
-            'count' => $count,
-            'array' => $this->formatData($paginator)
-        ];
     }
 
     /**
@@ -72,7 +80,7 @@ class CommentRepository extends EntityRepository
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function getCommentEntity($id):array
+    public function getCommentEntity($id): array
     {
         $query = $this->createQueryBuilder('comment')
             ->select('comment')
@@ -88,9 +96,10 @@ class CommentRepository extends EntityRepository
 
     /**
      * @param $paginatorData
+     * @param bool $array
      * @return array
      */
-    private function formatData($paginatorData):array
+    private function formatData($paginatorData, $array = false): array
     {
         $response = [];
         $processedCommentIds = [];
@@ -100,7 +109,11 @@ class CommentRepository extends EntityRepository
             if (in_array($comment->getId(), $processedCommentIds, true)) {
                 continue;
             }
-            $this->buildCommentTree($response, $processedCommentIds, $comment);
+            if (!$array) {
+                $this->buildCommentTree($response, $processedCommentIds, $comment);
+            }else{
+
+            }
         }
         return $response;
     }
@@ -151,10 +164,10 @@ class CommentRepository extends EntityRepository
         }
 
         $detailData = $comment->getCreatedBy()->getDetailData();
-        if($detailData instanceof UserData){
+        if ($detailData instanceof UserData) {
             $nameOfCreator = $detailData->getName();
             $surnameOfCreator = $detailData->getSurname();
-        }else{
+        } else {
             $nameOfCreator = null;
             $surnameOfCreator = null;
         }

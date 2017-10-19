@@ -61,7 +61,7 @@ class TaskService
         ];
 
         $url = $this->router->generate('tasks_list');
-        $limit = $limit;
+        $limit = $options['limit'];
         $filters = $options['filtersForUrl'];
 
         $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);

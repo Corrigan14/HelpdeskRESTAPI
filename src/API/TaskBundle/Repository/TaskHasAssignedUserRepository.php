@@ -18,9 +18,10 @@ class TaskHasAssignedUserRepository extends EntityRepository
     /**
      * @param int $taskId
      * @param int $page
+     * @param int $limit
      * @return array
      */
-    public function getTasksAssignedUsers(int $taskId, int $page): array
+    public function getTasksAssignedUsers(int $taskId, int $page, int $limit): array
     {
         $query = $this->createQueryBuilder('tau')
             ->select('tau')
@@ -30,22 +31,29 @@ class TaskHasAssignedUserRepository extends EntityRepository
             ->where('tau.task = :taskId')
             ->setParameter('taskId', $taskId);
 
-        // Pagination
-        if (1 < $page) {
-            $query->setFirstResult(TaskRepository::LIMIT * $page - TaskRepository::LIMIT);
+        if (999 !== $limit) {
+            // Pagination
+            if (1 < $page) {
+                $query->setFirstResult($limit * $page - $limit);
+            } else {
+                $query->setFirstResult(0);
+            }
+
+            $query->setMaxResults($limit);
+
+            $paginator = new Paginator($query, $fetchJoinCollection = true);
+            $count = $paginator->count();
+
+            return [
+                'count' => $count,
+                'array' => $this->formatData($paginator)
+            ];
         } else {
-            $query->setFirstResult(0);
+            // Return all entities
+            return [
+                'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
+            ];
         }
-
-        $query->setMaxResults(TaskRepository::LIMIT);
-
-        $paginator = new Paginator($query, $fetchJoinCollection = true);
-        $count = $paginator->count();
-
-        return [
-            'count' => $count,
-            'array' => $this->formatData($paginator)
-        ];
     }
 
     public function findOtherUsersAssignedToTask(array $data)
@@ -70,14 +78,18 @@ class TaskHasAssignedUserRepository extends EntityRepository
 
     /**
      * @param $paginatorData
+     * @param bool $array
      * @return array
      */
-    private function formatData($paginatorData): array
+    private function formatData($paginatorData, $array = false): array
     {
         $response = [];
-        /** @var TaskHasAssignedUser $data */
         foreach ($paginatorData as $data) {
-            $response[] = $this->processData($data);
+            if ($array) {
+                $response[] = $this->processArrayData($data);
+            } else {
+                $response[] = $this->processData($data);
+            }
         }
 
         return $response;
@@ -105,6 +117,19 @@ class TaskHasAssignedUserRepository extends EntityRepository
                 'title' => $data->getStatus()->getTitle(),
                 'color' => $data->getStatus()->getColor(),
             ]
+        ];
+
+        return $response;
+    }
+
+    /**
+     * @param  array $data
+     * @return array
+     */
+    private function processArrayData(array $data): array
+    {
+        $response = [
+
         ];
 
         return $response;

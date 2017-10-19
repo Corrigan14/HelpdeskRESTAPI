@@ -51,14 +51,13 @@ class TaskAdditionalService
     public function getTaskAttachmentsResponse(array $options, int $page, array $routeOptions): array
     {
         $taskId = $options['task'];
+        $limit = $options['limit'];
 
-        $responseData = $this->em->getRepository('APITaskBundle:TaskHasAttachment')->getAllAttachmentSlugs($taskId, $page);
+        $responseData = $this->em->getRepository('APITaskBundle:TaskHasAttachment')->getAllAttachmentSlugs($taskId, $page, $limit);
 
         $response = [
             'data' => $responseData['array'],
         ];
-
-        $limit = $options['limit'];
 
         if (999 !== $limit) {
             $count = $responseData['count'];
@@ -66,7 +65,7 @@ class TaskAdditionalService
             $count = count($responseData['array']);
         }
 
-        $pagination = $this->getPagination($page, $limit, $routeOptions);
+        $pagination = $this->getPagination($page, $count, $routeOptions);
 
         return array_merge($response, $pagination);
     }
@@ -147,9 +146,9 @@ class TaskAdditionalService
     {
         /** @var Task $task */
         $task = $options['task'];
-        $responseData = $this->em->getRepository('APITaskBundle:TaskHasAssignedUser')->getTasksAssignedUsers($task->getId(), $page);
-
         $limit = $options['limit'];
+        $responseData = $this->em->getRepository('APITaskBundle:TaskHasAssignedUser')->getTasksAssignedUsers($task->getId(), $page, $limit);
+
 
         if (999 !== $limit) {
             $count = $responseData['count'];
@@ -176,13 +175,13 @@ class TaskAdditionalService
      */
     public function getCommentsOfTaskResponse(array $options, int $page, array $routeOptions): array
     {
-        $responseData = $this->em->getRepository('APITaskBundle:Comment')->getTaskComments($options, $page);
+        $limit = $options['limit'];
+        $responseData = $this->em->getRepository('APITaskBundle:Comment')->getTaskComments($options, $page, $limit);
 
         $response = [
             'data' => $responseData['array']
         ];
 
-        $limit = $options['limit'];
 
         if (999 !== $limit) {
             $count = $responseData['count'];
@@ -228,14 +227,14 @@ class TaskAdditionalService
     public function getCommentAttachmentsResponse(array $options, int $page, array $routeOptions): array
     {
         $commentId = $options['comment'];
+        $limit = $options['limit'];
 
-        $responseData = $this->em->getRepository('APITaskBundle:CommentHasAttachment')->getAllAttachmentSlugs($commentId, $page);
+        $responseData = $this->em->getRepository('APITaskBundle:CommentHasAttachment')->getAllAttachmentSlugs($commentId, $page, $limit);
 
         $response = [
             'data' => $responseData['array'],
         ];
 
-        $limit = $options['limit'];
 
         if (999 !== $limit) {
             $count = $responseData['count'];

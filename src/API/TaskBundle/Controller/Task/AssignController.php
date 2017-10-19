@@ -102,6 +102,10 @@ class AssignController extends ApiBaseController
      *     {
      *       "name"="page",
      *       "description"="Pagination, limit is set to 10 records"
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
      *     }
      *  },
      *  requirements={
@@ -150,7 +154,13 @@ class AssignController extends ApiBaseController
         $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
-        $options['task'] = $task;
+        $limitNum = $request->get('limit');
+        $limit = (int)$limitNum ? (int)$limitNum : 10;
+
+        $options = [
+            'task' => $task,
+            'limit' => $limit
+        ];
         $routeOptions = [
             'routeName' => 'tasks_list_of_tasks_assigned_users',
             'routeParams' => ['taskId' => $taskId]

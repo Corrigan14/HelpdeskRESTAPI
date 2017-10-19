@@ -200,6 +200,10 @@ class CommentController extends ApiBaseController
      *     {
      *       "name"="internal",
      *       "description"="Return NO Internal comments (internal = FALSE) if value is FALSE, else returns ALL comments"
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
      *     }
      *  },
      *  headers={
@@ -242,11 +246,15 @@ class CommentController extends ApiBaseController
         $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
+        $limitNum = $request->get('limit');
+        $limit = (int)$limitNum ? (int)$limitNum : 10;
+
         $internal = $request->get('internal') ?: 'all';
 
         $options = [
             'task' => $task,
-            'internal' => $internal
+            'internal' => $internal,
+            'limit' => $limit
         ];
         $routeOptions = [
             'routeName' => 'tasks_list_of_tasks_comments',

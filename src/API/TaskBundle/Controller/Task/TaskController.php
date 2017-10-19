@@ -204,6 +204,10 @@ class TaskController extends ApiBaseController
      *       "description"="Pagination, limit is set to 10 records"
      *     },
      *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
+     *     },
+     *     {
      *       "name"="order",
      *       "description"="Array of key=>value values, where KEY is column to sort by, VALUE is ASC or DESC order chart"
      *     },
@@ -327,6 +331,9 @@ class TaskController extends ApiBaseController
         $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
+        $limitNum = $request->get('limit');
+        $limit = (int)$limitNum ? (int)$limitNum : 10;
+
         $orderString = $request->get('order');
         $order = $this->processOrderData($orderString);
 
@@ -343,7 +350,8 @@ class TaskController extends ApiBaseController
             'equalFilterAddedParams' => $filterData['equalFilterAddedParams'],
             'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
             'filtersForUrl' => array_merge($filterData['filterForUrl'], ['order' => '&order=' . $orderString]),
-            'order' => $order
+            'order' => $order,
+            'limit' => $limit
         ];
 
         $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);
@@ -628,6 +636,10 @@ class TaskController extends ApiBaseController
      *     {
      *       "name"="order",
      *       "description"="Array of key=>value values, where KEY is column to sort by, VALUE is ASC or DESC order chart"
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
      *     }
      *  },
      *  headers={
@@ -673,6 +685,9 @@ class TaskController extends ApiBaseController
         $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
+        $limitNum = $request->get('limit');
+        $limit = (int)$limitNum ? (int)$limitNum : 10;
+
         $orderString = $request->get('order');
         $order = $this->processOrderData($orderString);
 
@@ -691,7 +706,8 @@ class TaskController extends ApiBaseController
             'equalFilterAddedParams' => $filterData['equalFilterAddedParams'],
             'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
             'filtersForUrl' => array_merge($filterData['filterForUrl'], ['order' => '&order=' . $orderString]),
-            'order' => $order
+            'order' => $order,
+            'limit' => $limit
         ];
 
         $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);

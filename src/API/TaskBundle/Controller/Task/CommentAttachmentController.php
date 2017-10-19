@@ -47,6 +47,10 @@ class CommentAttachmentController extends ApiBaseController
      *     {
      *       "name"="page",
      *       "description"="Pagination, limit is set to 10 records"
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
      *     }
      *  },
      *  requirements={
@@ -98,7 +102,13 @@ class CommentAttachmentController extends ApiBaseController
         $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
-        $options['comment'] = $commentId;
+        $limitNum = $request->get('limit');
+        $limit = (int)$limitNum ? (int)$limitNum : 10;
+
+        $options = [
+            'comment' => $commentId,
+            'limit' => $limit
+        ];
         $routeOptions = [
             'routeName' => 'tasks_list_of_comments_attachments',
             'routeParams' => ['commentId' => $commentId]

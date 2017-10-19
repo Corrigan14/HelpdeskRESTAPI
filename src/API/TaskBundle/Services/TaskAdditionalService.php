@@ -58,7 +58,15 @@ class TaskAdditionalService
             'data' => $responseData['array'],
         ];
 
-        $pagination = $this->getPagination($page, $responseData['count'], $routeOptions);
+        $limit = $options['limit'];
+
+        if (999 !== $limit) {
+            $count = $responseData['count'];
+        } else {
+            $count = count($responseData['array']);
+        }
+
+        $pagination = $this->getPagination($page, $limit, $routeOptions);
 
         return array_merge($response, $pagination);
     }
@@ -141,11 +149,19 @@ class TaskAdditionalService
         $task = $options['task'];
         $responseData = $this->em->getRepository('APITaskBundle:TaskHasAssignedUser')->getTasksAssignedUsers($task->getId(), $page);
 
+        $limit = $options['limit'];
+
+        if (999 !== $limit) {
+            $count = $responseData['count'];
+        } else {
+            $count = count($responseData['array']);
+        }
+
         $response = [
             'data' => $responseData['array']
         ];
 
-        $pagination = $this->getPagination($page, $responseData['count'], $routeOptions);
+        $pagination = $this->getPagination($page, $count, $routeOptions);
 
         return array_merge($response, $pagination);
     }
@@ -166,7 +182,15 @@ class TaskAdditionalService
             'data' => $responseData['array']
         ];
 
-        $pagination = $this->getPagination($page, $responseData['count'], $routeOptions);
+        $limit = $options['limit'];
+
+        if (999 !== $limit) {
+            $count = $responseData['count'];
+        } else {
+            $count = count($responseData['array']);
+        }
+
+        $pagination = $this->getPagination($page, $count, $routeOptions);
 
         return array_merge($response, $pagination);
     }
@@ -211,7 +235,15 @@ class TaskAdditionalService
             'data' => $responseData['array'],
         ];
 
-        $pagination = $this->getPagination($page, $responseData['count'], $routeOptions);
+        $limit = $options['limit'];
+
+        if (999 !== $limit) {
+            $count = $responseData['count'];
+        } else {
+            $count = count($responseData['array']);
+        }
+
+        $pagination = $this->getPagination($page, $count, $routeOptions);
 
         return array_merge($response, $pagination);
     }

@@ -48,6 +48,10 @@ class AttachmentController extends ApiBaseController
      *     {
      *       "name"="page",
      *       "description"="Pagination, limit is set to 10 records"
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
      *     }
      *  },
      *  requirements={
@@ -99,7 +103,13 @@ class AttachmentController extends ApiBaseController
         $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
-        $options['task'] = $taskId;
+        $limitNum = $request->get('limit');
+        $limit = (int)$limitNum ? (int)$limitNum : 10;
+
+        $options = [
+            'task' => $taskId,
+            'limit' => $limit
+        ];
         $routeOptions = [
             'routeName' => 'tasks_list_of_tasks_attachments',
             'routeParams' => ['taskId' => $taskId]

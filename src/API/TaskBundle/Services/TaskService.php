@@ -61,7 +61,7 @@ class TaskService
         ];
 
         $url = $this->router->generate('tasks_list');
-        $limit = TaskRepository::LIMIT;
+        $limit = $limit;
         $filters = $options['filtersForUrl'];
 
         $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);
@@ -183,13 +183,21 @@ class TaskService
         /** @var User $loggedUser */
         $loggedUser = $options['loggedUser'];
         $isAdmin = $options['isAdmin'];
+        $limit = $options['limit'];
 
         // Return's all Tasks - logged user is ADMIN
         if ($isAdmin) {
             $response = $this->em->getRepository('APITaskBundle:Task')->getAllAdminTasks($page, $options);
+
+            if (999 !== $limit) {
+                $count = $response['count'];
+            } else {
+                $count = count($response['array']);
+            }
+
             return [
                 'tasks' => $response['array'],
-                'count' => $response['count']
+                'count' => $count
             ];
         }
 
@@ -241,9 +249,15 @@ class TaskService
 
         $response = $this->em->getRepository('APITaskBundle:Task')->getAllUsersTasks($page, $loggedUser->getId(), $companyId, $dividedProjects, $options);
 
+        if (999 !== $limit) {
+            $count = $response['count'];
+        } else {
+            $count = count($response['array']);
+        }
+
         return [
             'tasks' => $response['array'],
-            'count' => $response['count']
+            'count' => $count
         ];
     }
 }

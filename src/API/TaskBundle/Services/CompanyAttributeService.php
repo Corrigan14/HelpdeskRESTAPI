@@ -52,8 +52,8 @@ class CompanyAttributeService
         ];
 
         $url = $this->router->generate('company_attribute_list');
-        $limit = $options['limit'];
         $filters = $options['filtersForUrl'];
+        $limit = $options['limit'];
 
         if (999 !== $limit) {
             $count = $responseData['count'];

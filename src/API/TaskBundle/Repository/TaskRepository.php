@@ -753,7 +753,10 @@ class TaskRepository extends EntityRepository
          * TODO tuto skaredost zmazat, ked niekedy nikdy bude viac userov
          */
 //        dump($taskHasAssignedUsersArray);
-        $taskHasAssignedUsersArray=[reset($taskHasAssignedUsersArray)];
+        $taskHasAssignedUsersArray = [reset($taskHasAssignedUsersArray)];
+        if (false === $taskHasAssignedUsersArray[0]) {
+            $taskHasAssignedUsersArray = [];
+        }
         /**
          * TODO tuto skaredost zmazat, ked niekedy nikdy bude viac userov
          */

@@ -24,8 +24,9 @@ class TaskHasAssignedUserRepository extends EntityRepository
     public function getTasksAssignedUsers(int $taskId, int $page, int $limit): array
     {
         $query = $this->createQueryBuilder('tau')
-            ->select('tau')
+            ->select('tau, user, status')
             ->leftJoin('tau.user', 'user')
+            ->leftJoin('tau.status', 'status')
             ->orderBy('tau.id', 'DESC')
             ->distinct()
             ->where('tau.task = :taskId')
@@ -116,7 +117,8 @@ class TaskHasAssignedUserRepository extends EntityRepository
                 'id' => $data->getStatus()->getId(),
                 'title' => $data->getStatus()->getTitle(),
                 'color' => $data->getStatus()->getColor(),
-            ]
+            ],
+            'gps' => $data->getGps()
         ];
 
         return $response;
@@ -129,7 +131,22 @@ class TaskHasAssignedUserRepository extends EntityRepository
     private function processArrayData(array $data): array
     {
         $response = [
-
+            'id' => $data['id'],
+            'createdAt' => $data['createdAt'],
+            'updatedAt' => $data['updatedAt'],
+            'status_date' => $data['status_date'],
+            'time_spent' => $data['time_spent'],
+            'user' => [
+                'id' => $data['user']['id'],
+                'username' => $data['user']['username'],
+                'email' => $data['user']['email']
+            ],
+            'status' => [
+                'id' => $data['status']['id'],
+                'title' => $data['status']['title'],
+                'color' => $data['status']['color'],
+            ],
+            'gps' => $data['gps']
         ];
 
         return $response;

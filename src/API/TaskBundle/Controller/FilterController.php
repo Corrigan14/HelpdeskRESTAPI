@@ -12,6 +12,7 @@ use API\TaskBundle\Services\FilterAttributeOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
 use Igsem\APIBundle\Services\StatusCodesHelper;
+use phpDocumentor\Reflection\Types\Boolean;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -430,6 +431,113 @@ class FilterController extends ApiBaseController implements ControllerInterface
         $filter->setCreatedBy($this->getUser());
 
         return $this->updateEntity($filter, $requestData, true);
+    }
+
+    /**
+     * ### Response ###
+     *      {
+     *        "data":
+     *         {
+     *             "id": 145,
+     *             "title": 145,
+     *             "public": true,
+     *             "filter":
+     *             {
+     *                "status": "238,239",
+     *                "assigned": "not,current-user"
+     *             },
+     *             "report": false,
+     *             "is_active": true,
+     *             "default": true,
+     *             "icon_class": "&#xE88A;"
+     *             "createdBy":
+     *             {
+     *                "id": 2575,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             },
+     *             "project":
+     *             {
+     *                "id": 2575,
+     *                "title": "INBOX",
+     *             },
+     *             "columns":
+     *             [
+     *                "title",
+     *                "creator",
+     *                "company",
+     *                "assigned",
+     *                "createdTime",
+     *                "deadlineTime",
+     *                "status"
+     *             ],
+     *             "columns_task_attributes":
+     *             [
+     *                205,
+     *                206
+     *             ]
+     *         },
+     *        "_links":
+     *        {
+     *           "put": "/api/v1/task-bundle/filters/2",
+     *           "patch": "/api/v1/task-bundle/filters/2",
+     *           "delete": "/api/v1/task-bundle/filters/2"
+     *         }
+     *      }
+     *
+     * @ApiDoc(
+     *  resource = true,
+     *  description="Create/Update Filter For user which should be remembered after the Log off. The Entity is rewritten after the next save.
+     *  Filter field is expected an array with key = filter option, value = requested data id/val/... (look at task list filters)
+     *  Allowed filter options are saved in FilterAttributeOptions file.",
+     *  input={"class"="API\TaskBundle\Entity\Filter"},
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  output={"class"="API\TaskBundle\Entity\Filter"},
+     *  statusCodes={
+     *      201 ="The entity was successfully created",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      409 ="Invalid parameters",
+     *  }
+     * )
+     *
+     * @param Request $request
+     * @return Response
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     */
+    public function setUsersRememberedFilterAction(Request $request)
+    {
+        $loggedUser = $this->getUser();
+        $requestData = $request->request->all();
+
+        // Check if logged user already has its remembered filter. If no, create the new entity.
+        $existedRememberedFilter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->findOneBy([
+            'createdBy' => $loggedUser,
+            'users_remembered' => true
+        ]);
+
+        if ($existedRememberedFilter instanceof Filter) {
+            $filter = $existedRememberedFilter;
+            $create = false;
+        } else {
+            $filter = new Filter();
+            $filter->setIsActive(true);
+            $filter->setCreatedBy($loggedUser);
+            $filter->setUsersRemembered(true);
+            $filter->setPublic(false);
+            $create = true;
+        }
+
+        return $this->updateEntity($filter, $requestData, $create, true);
     }
 
 
@@ -1153,6 +1261,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @param Filter $filter
      * @param array $data
      * @param bool $create
+     * @param bool $usersRemembered
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \InvalidArgumentException
@@ -1160,7 +1269,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @return Response
      * @throws \LogicException
      */
-    private function updateEntity(Filter $filter, array $data, $create = false)
+    private function updateEntity(Filter $filter, array $data, $create = false, $usersRemembered = false)
     {
         $allowedUnitEntityParams = [
             'title',
@@ -1182,7 +1291,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
         foreach ($data as $key => $value) {
             if (!in_array($key, $allowedUnitEntityParams, true)) {
                 return $this->createApiResponse(
-                    ['message' => $key . ' is not allowed parameter for Tag Entity!'],
+                    ['message' => $key . ' is not allowed parameter for Filter Entity!'],
                     StatusCodesHelper::INVALID_PARAMETERS_CODE
                 );
             }
@@ -1190,17 +1299,26 @@ class FilterController extends ApiBaseController implements ControllerInterface
 
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
-        // Check if every key sent in filter array is allowed in FilterOptions
+        // Check if every key sent in filter array is allowed in FilterOptions and decode data correctly
+        // Possilbe ways how to send Filter data:
+        // 1. array [assigned => "210,211", taskCompany => "202"]
+        // 2. json: e.g {"assigned":"210,211","taskCompany":"202"}
+        // 3. string in a specific format: assigned=>210,taskCompany=>202
         if (isset($data['filter'])) {
             $filters = $data['filter'];
             if (!is_array($filters)) {
-                $filtersArray = explode(',', $filters);
-                $filtersExplodedArray = [];
-                foreach ($filtersArray as $array) {
-                    $keyValue = explode('=>', $array);
-                    $filtersExplodedArray[$keyValue[0]] = $keyValue[1];
+                //Try Json decode or Array Exploding
+                $filtersArray = json_decode($filters, true);
+                // Not very nice to use the third post data option
+                if (!is_array($filtersArray)) {
+                    $filtersArray = explode(',', $filters);
+                    $filtersExplodedArray = [];
+                    foreach ($filtersArray as $array) {
+                        $keyValue = explode('=>', $array);
+                        $filtersExplodedArray[$keyValue[0]] = $keyValue[1];
+                    }
+                    $filtersArray = $filtersExplodedArray;
                 }
-                $filtersArray = $filtersExplodedArray;
             } else {
                 $filtersArray = $filters;
             }
@@ -1243,8 +1361,17 @@ class FilterController extends ApiBaseController implements ControllerInterface
         }
 
         // Check if user set some Columns and if these columns are allowed (exists)
+        // The data format shoul be
+        // 1. JSON ARRAY: ["title","status"]
+        // 2. Arrray separated by ,: title, status
         if (isset($data['columns'])) {
-            $dataColumnsArray = (!is_array($data['columns'])) ? explode(',', $data['columns']) : $data['columns'];
+            $dataColumnsArray = $data['columns'];
+            if (!is_array($dataColumnsArray)) {
+                $dataColumnsArray = json_decode($data['columns'], true);
+                if (!is_array($dataColumnsArray)) {
+                    $dataColumnsArray = explode(',', $data['columns']);
+                }
+            }
 
             foreach ($dataColumnsArray as $col) {
                 if (!in_array($col, FilterAttributeOptions::getConstants(), true)) {
@@ -1258,9 +1385,19 @@ class FilterController extends ApiBaseController implements ControllerInterface
             unset($data['columns']);
         }
 
+        // Check if user set some Columns and if these columns are allowed (exists)
+        // The data format shoul be
+        // 1. JSON ARRAY: ["title","status"]
+        // 2. Arrray separated by ,: title, status
         // Check if user set some Columns_task_attributes and if these columns are allowed (exists)
         if (isset($data['columns_task_attributes'])) {
-            $dataColumnsArray = (!is_array($data['columns_task_attributes'])) ? explode(',', $data['columns_task_attributes']) : $data['columns_task_attributes'];
+            $dataColumnsArray = $data['columns_task_attributes'];
+            if (!is_array($dataColumnsArray)) {
+                $dataColumnsArray = json_decode($data['columns_task_attributes'], true);
+                if (!is_array($dataColumnsArray)) {
+                    $dataColumnsArray = explode(',', $data['columns_task_attributes']);
+                }
+            }
 
             foreach ($dataColumnsArray as $col) {
                 $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($col);
@@ -1278,16 +1415,32 @@ class FilterController extends ApiBaseController implements ControllerInterface
 
 
         $errors = $this->get('entity_processor')->processEntity($filter, $data);
-        // Check manually if icon_class parameter is not NULL. If yes - return error
+
+        // Check manually if icon_class parameter is not NULL. It's not required for UsersRemembered filter.
+        // It is required in other case.
         $iconError = [];
-        if (!isset($data['icon_class'])) {
-            $iconError[] = [
-                'field' => 'icon_class',
-                'message' => 'Icon class is required!'
-            ];
+        if (!$usersRemembered) {
+            if (!isset($data['icon_class'])) {
+                $iconError = [
+                    'field' => 'icon_class',
+                    'message' => 'Icon class is required!'
+                ];
+            }
         }
 
-        if (false === $errors && false !== $iconError) {
+        // Check manually if order parameter is not NULL. It's not required for UsersRemembered filter.
+        // It is required in other case.
+        $orderError = [];
+        if (!$usersRemembered) {
+            if (!isset($data['order'])) {
+                $iconError = [
+                    'field' => 'order',
+                    'message' => 'Order is required!'
+                ];
+            }
+        }
+
+        if (false === $errors && 0 === count($iconError) && 0 === count($orderError)) {
             $this->getDoctrine()->getManager()->persist($filter);
             $this->getDoctrine()->getManager()->flush();
 
@@ -1296,7 +1449,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
         }
 
         $data = [
-            'errors' => array_merge($errors, $iconError),
+            'errors' => array_merge($errors, $iconError, $orderError),
             'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
         ];
         return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);

@@ -104,6 +104,13 @@ class Filter
     private $columns_task_attributes;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="users_remembered", type="boolean", options={"default":0})
+     */
+    private $users_remembered;
+
+    /**
      * @var User
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="filters")

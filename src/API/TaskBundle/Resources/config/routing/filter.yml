@@ -15,6 +15,11 @@ filter_create:
     defaults: { _controller: APITaskBundle:Filter:create }
     methods: [POST]
 
+filter_create_user_remembered:
+    path:     /filters/user-remembered
+    defaults: { _controller: APITaskBundle:Filter:setUsersRememberedFilter }
+    methods: [POST]
+
 filter_project_create:
     path:     /filters/project/{projectId}
     defaults: { _controller: APITaskBundle:Filter:createProjectsFilter }

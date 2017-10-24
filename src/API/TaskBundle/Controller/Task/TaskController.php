@@ -710,6 +710,7 @@ class TaskController extends ApiBaseController
             'limit' => $limit
         ];
 
+        dump($filterData);
         $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);
 
         // Every Task need an additional canEdit Value

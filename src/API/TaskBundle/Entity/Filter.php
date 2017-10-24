@@ -76,7 +76,7 @@ class Filter
     /**
      * @var string
      *
-     * @ORM\Column(name="icon_class", type="string", length=255, nullable=false)
+     * @ORM\Column(name="icon_class", type="string", length=255, nullable=true)
      * @Assert\Type("string")
      */
     private $icon_class;
@@ -84,8 +84,7 @@ class Filter
     /**
      * @var int
      *
-     * @ORM\Column(name="`order`", type="integer")
-     * @Assert\NotBlank(message="Order number is required!")
+     * @ORM\Column(name="`order`", type="integer", nullable=true)
      */
     private $order;
 
@@ -102,6 +101,14 @@ class Filter
      * @ORM\Column(name="columns_task_attributes", type="text", nullable = true)
      */
     private $columns_task_attributes;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="users_remembered", type="boolean", options={"default":0})
+     * @Serializer\ReadOnly()
+     */
+    private $users_remembered;
 
     /**
      * @var User
@@ -434,5 +441,29 @@ class Filter
     public function getColumnsTaskAttributes()
     {
         return json_decode($this->columns_task_attributes);
+    }
+
+    /**
+     * Set usersRemembered
+     *
+     * @param boolean $usersRemembered
+     *
+     * @return Filter
+     */
+    public function setUsersRemembered($usersRemembered)
+    {
+        $this->users_remembered = $usersRemembered;
+
+        return $this;
+    }
+
+    /**
+     * Get usersRemembered
+     *
+     * @return boolean
+     */
+    public function getUsersRemembered()
+    {
+        return $this->users_remembered;
     }
 }

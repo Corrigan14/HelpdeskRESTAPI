@@ -31,15 +31,18 @@ class FilterRepository extends EntityRepository
         $limit = $options['limit'];
 
         $query = $this->createQueryBuilder('f')
-            ->select('f, createdBy')
+            ->select('f, createdBy, project, projectCreator')
             ->leftJoin('f.createdBy', 'createdBy')
             ->leftJoin('f.project', 'project')
             ->leftJoin('project.createdBy', 'projectCreator')
             ->orderBy('f.order', $order)
             ->distinct()
-            ->where('f.id is not NULL');
+            ->where('f.id is not NULL')
+            ->andWhere('f.users_remembered = :usersRememberedParam');
 
         $paramArray = [];
+        $paramArray ['usersRememberedParam'] = false;
+
         if ('true' === $isActive) {
             $query->andWhere('f.is_active = :isActiveParam');
             $paramArray['isActiveParam'] = true;
@@ -55,10 +58,10 @@ class FilterRepository extends EntityRepository
             $query->andWhere('createdBy.id = :loggedUserId');
             $paramArray['loggedUserId'] = $loggedUserId;
         } else {
-            $query->andWhere('f.public = :publicParam')
-                ->orWhere('createdBy.id = :loggedUserId');
-            $paramArray['publicParam'] = true;
-            $paramArray['loggedUserId'] = $loggedUserId;
+            $query->andWhere($query->expr()->orX(
+                $query->expr()->eq('f.public', true),
+                $query->expr()->eq('createdBy.id', $loggedUserId)
+            ));
         }
 
         if ('true' === $report) {
@@ -100,7 +103,6 @@ class FilterRepository extends EntityRepository
 
             $paginator = new Paginator($query, $fetchJoinCollection = true);
             $count = $paginator->count();
-
             return [
                 'count' => $count,
                 'array' => $this->formatData($paginator)
@@ -133,9 +135,12 @@ class FilterRepository extends EntityRepository
             ->leftJoin('project.createdBy', 'projectCreator')
             ->orderBy('f.id', 'DESC')
             ->distinct()
-            ->where('f.id is not NULL');
+            ->where('f.id is not NULL')
+            ->andWhere('f.users_remembered = :usersRememberedParam');
 
         $paramArray = [];
+        $paramArray ['usersRememberedParam'] = false;
+
         if (true === $isActive) {
             $query->andWhere('f.is_active = :isActiveParam');
             $paramArray['isActiveParam'] = true;

@@ -15,10 +15,20 @@ filter_create:
     defaults: { _controller: APITaskBundle:Filter:create }
     methods: [POST]
 
-filter_create_user_remembered:
+filter_set_user_remembered:
     path:     /filters/user-remembered
     defaults: { _controller: APITaskBundle:Filter:setUsersRememberedFilter }
     methods: [POST]
+
+filter_get_user_remembered:
+    path:     /filters/user-remembered
+    defaults: { _controller: APITaskBundle:Filter:getUsersRememberedFilter }
+    methods: [GET]
+
+filter_reset_user_remembered:
+    path:     /filters/user-remembered/reset
+    defaults: { _controller: APITaskBundle:Filter:resetUsersRememberedFilter }
+    methods: [DELETE]
 
 filter_project_create:
     path:     /filters/project/{projectId}

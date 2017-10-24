@@ -122,7 +122,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *
      *
      * @ApiDoc(
-     *  description="Returns a list of Logged user's Filters",
+     *  description="Returns a list of Logged user's Filters (without remembered default filter)",
      *  filters={
      *     {
      *       "name"="page",
@@ -302,6 +302,9 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
     public function getAction(int $id)
@@ -538,6 +541,129 @@ class FilterController extends ApiBaseController implements ControllerInterface
         }
 
         return $this->updateEntity($filter, $requestData, $create, true);
+    }
+
+    /**
+     *  ### Response ###
+     *      {
+     *         "data":
+     *         {
+     *             "id": 145,
+     *             "title": 145,
+     *             "public": true,
+     *             "filter":
+     *             {
+     *                "status": "238,239",
+     *                "assigned": "not,current-user"
+     *             },
+     *             "report": false,
+     *             "is_active": true,
+     *             "default": true,
+     *             "icon_class": "&#xE88A;"
+     *             "createdBy":
+     *             {
+     *                "id": 2575,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             },
+     *             "project":
+     *             {
+     *                "id": 2575,
+     *                "title": "INBOX",
+     *             },
+     *             "columns":
+     *             [
+     *                "title",
+     *                "creator",
+     *                "company",
+     *                "assigned",
+     *                "createdTime",
+     *                "deadlineTime",
+     *                "status"
+     *             ],
+     *             "columns_task_attributes":
+     *             [
+     *                205,
+     *                206
+     *             ]
+     *         },
+     *        "_links":
+     *        {
+     *           "put": "/api/v1/task-bundle/filters/2",
+     *           "patch": "/api/v1/task-bundle/filters/2",
+     *           "delete": "/api/v1/task-bundle/filters/2"
+     *         }
+     *      }
+     *
+     * @ApiDoc(
+     *  description="Returns Logged User's Remembered Filter. If he does not have one, EMPTY value is returned.",
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  output="API\TaskBundle\Entity\Filter",
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request"
+     *  }
+     * )
+     *
+     * @return bool|Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \LogicException
+     */
+    public function getUsersRememberedFilterAction()
+    {
+        $savedFilter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->findOneBy([
+            'createdBy' => $this->getUser(),
+            'users_remembered' => true
+        ]);
+
+        if ($savedFilter instanceof Filter) {
+            $filterArray = $this->get('filter_service')->getFilterResponse($savedFilter->getId());
+            return $this->json($filterArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        } else {
+            return $this->json(null, StatusCodesHelper::SUCCESSFUL_CODE);
+        }
+    }
+
+    /**
+     * @ApiDoc(
+     *  description="Delete Users remembered filter",
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="The Entity does not exist - no action was done",
+     *      204 ="The Entity was successfully deleted",
+     *      401 ="Unauthorized request"
+     *  })
+     *
+     * @return Response
+     * @throws \LogicException
+     */
+    public function resetUsersRememberedFilterAction()
+    {
+        $savedFilter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->findOneBy([
+            'createdBy' => $this->getUser(),
+            'users_remembered' => true
+        ]);
+
+        if ($savedFilter instanceof Filter) {
+            $this->getDoctrine()->getManager()->remove($savedFilter);
+            $this->getDoctrine()->getManager()->flush();
+            return $this->json(null, StatusCodesHelper::DELETED_CODE);
+        }else{
+            return $this->json(null, StatusCodesHelper::SUCCESSFUL_CODE);
+        }
     }
 
 

@@ -71,6 +71,8 @@ class FilterService
     /**
      * @param int $id
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getFilterResponse(int $id): array
     {

@@ -122,7 +122,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *
      *
      * @ApiDoc(
-     *  description="Returns a list of Logged user's Filters (without remembered default filter)",
+     *  description="Returns a list of Logged user's Filters.",
      *  filters={
      *     {
      *       "name"="page",

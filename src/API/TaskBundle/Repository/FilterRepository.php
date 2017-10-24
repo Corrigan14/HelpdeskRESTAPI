@@ -86,6 +86,12 @@ class FilterRepository extends EntityRepository
             }
         }
 
+        // Return also logged users Remembered filter
+        $query->orWhere($query->expr()->andX(
+            $query->expr()->eq('f.users_remembered', true),
+            $query->expr()->eq('createdBy.id', $loggedUserId)
+        ));
+
 
         if (!empty($paramArray)) {
             $query->setParameters($paramArray);
@@ -170,6 +176,12 @@ class FilterRepository extends EntityRepository
             $paramArray['reportParam'] = false;
         }
 
+        // Return also logged users Remembered filter
+        $query->orWhere($query->expr()->andX(
+            $query->expr()->eq('f.users_remembered', true),
+            $query->expr()->eq('createdBy.id', $loggedUserId)
+        ));
+
         if (!empty($paramArray)) {
             $query->setParameters($paramArray);
         }
@@ -202,7 +214,8 @@ class FilterRepository extends EntityRepository
                     'email' => $data['createdBy']['email']
                 ],
                 'project' => $projectArray,
-                'columns' => json_decode($data['columns'])
+                'columns' => json_decode($data['columns']),
+                'remembered' => $data['users_remembered']
             ];
         }
 
@@ -278,7 +291,8 @@ class FilterRepository extends EntityRepository
             ],
             'project' => $projectArray,
             'columns' => $data->getColumns(),
-            'columns_task_attributes' => $data->getColumnsTaskAttributes()
+            'columns_task_attributes' => $data->getColumnsTaskAttributes(),
+            'remembered'=> $data->getUsersRemembered()
         ];
 
         return $response;
@@ -316,7 +330,8 @@ class FilterRepository extends EntityRepository
             ],
             'project' => $projectArray,
             'columns' => json_decode($data['columns']),
-            'columns_task_attributes' => $data['columns_task_attributes']
+            'columns_task_attributes' => $data['columns_task_attributes'],
+            'remembered' => $data['users_remembered']
         ];
 
         return $response;

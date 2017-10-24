@@ -47,7 +47,6 @@ class Filter
      * @var string
      *
      * @ORM\Column(name="filter", type="text")
-     * @Assert\NotBlank(message="Filter is required!")
      */
     private $filter;
 

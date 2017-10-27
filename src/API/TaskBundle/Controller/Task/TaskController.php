@@ -89,7 +89,16 @@ class TaskController extends ApiBaseController
      *                  }
      *               }
      *            ],
-     *            "followers": [],
+     *            "followers":
+     *            [
+     *               {
+     *                  "id": 209,
+     *                  "username": "admin",
+     *                  "email": "admin@admin.sk",
+     *                  "name": "Admin",
+     *                  "surname": "Adminovic"
+     *                }
+     *            ],
      *            "tags":
      *            [
      *               {
@@ -103,82 +112,47 @@ class TaskController extends ApiBaseController
      *                  "color": "DFD112"
      *                }
      *            ],
-     *            "taskHasAssignedUsers": [],
+     *             "taskHasAssignedUsers":
+     *             [
+     *                 {
+     *                      "id": 23,
+     *                      "status_date": null,
+     *                      "time_spent": null,
+     *                      "createdAt": 1508768644,
+     *                      "updatedAt": 1508768644,
+     *                      "status":
+     *                      {
+     *                          "id": 7,
+     *                          "title": "Completed",
+     *                          "color": "#FF4500"
+     *                      },
+     *                      "user":
+     *                      {
+     *                          "id": 212,
+     *                          "username": "customer",
+     *                          "email": "customer@customer.sk",
+     *                          "name": null,
+     *                          "surname": null
+     *                      }
+     *                  }
+     *            ],
      *            "taskHasAttachments": [],
-     *            "comments":
-     *            {
-     *              "188":
+     *            "comments": [],
+     *            "invoiceableItems":
+     *            [
      *              {
-     *                  "id": 188,
-     *                  "title": "test",
-     *                  "body": "gggg 222",
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
-     *                  "internal": true,
-     *                  "email": true,
-     *                  "email_to":
-     *                  [
-     *                      "mb@web-solutions.sk"
-     *                  ],
-     *                  "email_cc": null,
-     *                  "email_bcc": null,
-     *                  "createdBy":
+     *                  "id": 4,
+     *                  "title": "Keyboard",
+     *                  "amount": 2.00,
+     *                  "unit_price": 50.00,
+     *                  "unit":
      *                  {
-     *                      "id": 4031,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk",
-     *                      "name": "Admin",
-     *                      "surname": "Adminovic",
-     *                      "avatarSlug": "slug-15-15-2014"
-     *                  },
-     *                  "commentHasAttachments":
-     *                  [
-     *                      {
-     *                          "id": 3,
-     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                      }
-     *                  ],
-     *                  "children":
-     *                  {
-     *                      "189": 189,
-     *                      "190": 190
-     *                   }
-     *                },
-     *              "189":
-     *              {
-     *                  "id": 189,
-     *                  "title": "test",
-     *                  "body": "gggg 222 222",
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
-     *                  "internal": true,
-     *                  "email": true,
-     *                  "email_to":
-     *                  [
-     *                      "mb@web-solutions.sk"
-     *                  ],
-     *                  "email_cc": null,
-     *                  "email_bcc": null,
-     *                  "createdBy":
-     *                  {
-     *                      "id": 4031,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk",
-     *                      "name": "Admin",
-     *                      "surname": "Adminovic",
-     *                      "avatarSlug": "slug-15-15-2014"
-     *                  },
-     *                  "commentHasAttachments":
-     *                  [
-     *                      {
-     *                          "id": 3,
-     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                      }
-     *                  ],
-     *                  "children": false
-     *              },
-     *            },
-     *            "invoiceableItems": [],
+     *                      "id": 10,
+     *                      "title": "Kus",
+     *                      "shortcut": "Ks"
+     *                  }
+     *               },
+     *            ],
      *            "canEdit": true
      *          }
      *       ],
@@ -377,18 +351,8 @@ class TaskController extends ApiBaseController
      *            "important": false,
      *            "work": null,
      *            "work_time": null,
-     *            "createdAt":
-     *            {
-     *               "date": "2017-02-27 15:55:15.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
-     *            "updatedAt":
-     *            {
-     *               "date": "2017-02-27 15:55:15.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
+     *            "createdAt": 1506434914,
+     *            "updatedAt": 1506434914,
      *            "createdBy":
      *            {
      *               "id": 2575,
@@ -429,13 +393,13 @@ class TaskController extends ApiBaseController
      *            ],
      *            "followers":
      *            [
-     *              {
-     *                 "id": 2575,
-     *                 "username": "admin",
-     *                 "email": "admin@admin.sk",
-     *                 "name": null,
-     *                 "surname": null
-     *               }
+     *               {
+     *                  "id": 209,
+     *                  "username": "admin",
+     *                  "email": "admin@admin.sk",
+     *                  "name": "Admin",
+     *                  "surname": "Adminovic"
+     *                }
      *            ],
      *            "tags":
      *            [
@@ -450,158 +414,48 @@ class TaskController extends ApiBaseController
      *                  "color": "DFD112"
      *                }
      *            ],
-     *            "taskHasAssignedUsers":
-     *            [
-     *               {
-     *                  "id": 69,
-     *                  "status_date": null,
-     *                  "time_spent": null,
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
-     *                  "status":
-     *                  {
-     *                     "id": 240,
-     *                     "title": "Completed",
-     *                     "color": "#FF4500"
-     *                  },
-     *                  "user":
-     *                  {
-     *                      "id": 2579,
-     *                      "username": "user",
-     *                      "email": "user@user.sk",
-     *                      "name": null,
-     *                      "surname": null
-     *                   }
-     *                }
-     *            ],
-     *            "taskHasAttachments":
-     *            [
-     *               {
-     *                   "id": 240,
-     *                   "slug": "Slug-of-image-12-14-2015",
-     *               }
-     *            ],
-     *           "comments":
-     *            {
-     *              "188":
-     *              {
-     *                  "id": 188,
-     *                  "title": "test",
-     *                  "body": "gggg 222",
-     *                  "createdAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                       "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
-     *                  "internal": true,
-     *                  "email": true,
-     *                  "email_to":
-     *                  [
-     *                      "mb@web-solutions.sk"
-     *                  ],
-     *                  "email_cc": null,
-     *                  "email_bcc": null,
-     *                  "createdBy":
-     *                  {
-     *                      "id": 4031,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk",
-     *                      "name": "Admin",
-     *                      "surname": "Adminovic",
-     *                      "avatarSlug": "slug-15-15-2014"
-     *                  },
-     *                  "commentHasAttachments":
-     *                  [
+     *             "taskHasAssignedUsers":
+     *             [
+     *                 {
+     *                      "id": 23,
+     *                      "status_date": null,
+     *                      "time_spent": null,
+     *                      "createdAt": 1508768644,
+     *                      "updatedAt": 1508768644,
+     *                      "status":
      *                      {
-     *                          "id": 3,
-     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                      }
-     *                  ],
-     *                  "children":
-     *                  {
-     *                      "189": 189,
-     *                      "190": 190
-     *                   }
-     *                },
-     *              "189":
-     *              {
-     *                  "id": 189,
-     *                  "title": "test",
-     *                  "body": "gggg 222 222",
-     *                  "createdAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
-     *                  "internal": true,
-     *                  "email": true,
-     *                  "email_to":
-     *                  [
-     *                      "mb@web-solutions.sk"
-     *                  ],
-     *                  "email_cc": null,
-     *                  "email_bcc": null,
-     *                  "createdBy":
-     *                  {
-     *                      "id": 4031,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk",
-     *                      "name": "Admin",
-     *                      "surname": "Adminovic",
-     *                      "avatarSlug": "slug-15-15-2014"
-     *                  },
-     *                  "commentHasAttachments":
-     *                  [
+     *                          "id": 7,
+     *                          "title": "Completed",
+     *                          "color": "#FF4500"
+     *                      },
+     *                      "user":
      *                      {
-     *                          "id": 3,
-     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                          "id": 212,
+     *                          "username": "customer",
+     *                          "email": "customer@customer.sk",
+     *                          "name": null,
+     *                          "surname": null
      *                      }
-     *                  ],
-     *                  "children": false
-     *              },
-     *            },
+     *                  }
+     *            ],
+     *            "taskHasAttachments": [],
+     *            "comments": [],
      *            "invoiceableItems":
      *            [
-     *                {
-     *                   "id": 30,
-     *                   "title": "Keyboard",
-     *                   "amount": "2.00",
-     *                   "unit_price": "50.00",
-     *                   "unit":
-     *                   {
-     *                      "id": 54,
+     *              {
+     *                  "id": 4,
+     *                  "title": "Keyboard",
+     *                  "amount": 2.00,
+     *                  "unit_price": 50.00,
+     *                  "unit":
+     *                  {
+     *                      "id": 10,
      *                      "title": "Kus",
      *                      "shortcut": "Ks"
-     *                   }
-     *                },
-     *                {
-     *                   "id": 31,
-     *                   "title": "Mouse",
-     *                   "amount": "5.00",
-     *                   "unit_price": "10.00",
-     *                   "unit":
-     *                   {
-     *                      "id": 54,
-     *                      "title": "Kus",
-     *                      "shortcut": "Ks"
-     *                    }
-     *                 },
-     *             ],
-     *             "canEdit": true
+     *                  }
+     *               },
+     *            ],
+     *            "canEdit": true
      *           }
      *       ],
      *       "_links":
@@ -710,7 +564,6 @@ class TaskController extends ApiBaseController
             'limit' => $limit
         ];
 
-        dump($filterData);
         $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);
 
         // Every Task need an additional canEdit Value
@@ -2588,7 +2441,7 @@ class TaskController extends ApiBaseController
 
                     if (count($taskHasOtherAssignedUserArray) !== 0) {
                         foreach ($taskHasOtherAssignedUserArray as $tau) {
-                           $this->getDoctrine()->getManager()->remove($tau);
+                            $this->getDoctrine()->getManager()->remove($tau);
                         }
                         $this->getDoctrine()->getManager()->flush();
                     }

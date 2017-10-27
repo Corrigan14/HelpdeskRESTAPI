@@ -28,9 +28,10 @@ class CommentRepository extends EntityRepository
 
         if ('false' === strtolower($internal)) {
             $query = $this->createQueryBuilder('c')
-                ->select('c,createdby,commenthasattachments')
-                ->leftJoin('c.createdBy', 'createdby')
-                ->leftJoin('c.commentHasAttachments', 'commenthasattachments')
+                ->select('c,createdBy,detailData,commentHasAttachments')
+                ->leftJoin('c.createdBy', 'createdBy')
+                ->leftJoin('createdBy.detailData', 'detailData')
+                ->leftJoin('c.commentHasAttachments', 'commentHasAttachments')
                 ->orderBy('c.id')
                 ->distinct()
                 ->where('c.task = :taskId')
@@ -39,9 +40,10 @@ class CommentRepository extends EntityRepository
                 ->getQuery();
         } else {
             $query = $this->createQueryBuilder('c')
-                ->select('c,createdby,commenthasattachments')
-                ->leftJoin('c.createdBy', 'createdby')
-                ->leftJoin('c.commentHasAttachments', 'commenthasattachments')
+                ->select('c,createdBy,detailData,commentHasAttachments')
+                ->leftJoin('c.createdBy', 'createdBy')
+                ->leftJoin('createdBy.detailData', 'detailData')
+                ->leftJoin('c.commentHasAttachments', 'commentHasAttachments')
                 ->orderBy('c.id')
                 ->distinct()
                 ->where('c.task = :taskId')
@@ -104,15 +106,19 @@ class CommentRepository extends EntityRepository
         $response = [];
         $processedCommentIds = [];
 
-        /** @var Comment $comment */
-        foreach ($paginatorData as $comment) {
-            if (in_array($comment->getId(), $processedCommentIds, true)) {
-                continue;
-            }
-            if (!$array) {
+        if (!$array) {
+            /** @var Comment $comment */
+            foreach ($paginatorData as $comment) {
+                if (in_array($comment->getId(), $processedCommentIds, true)) {
+                    continue;
+                }
                 $this->buildCommentTree($response, $processedCommentIds, $comment);
-            }else{
-
+            }
+        } else {
+            // If we ask for a whole list of comments, comment tree is not built
+            // The list just contains all comment
+            foreach ($paginatorData as $data) {
+                $response[] = $this->processArrayData($data);
             }
         }
         return $response;
@@ -207,6 +213,58 @@ class CommentRepository extends EntityRepository
             }
             $array['children'] = $childrenCommentsArray;
         }
+
+        return $array;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function processArrayData(array $data): array
+    {
+        $attachments = $data['commentHasAttachments'];
+        $attachmentArray = [];
+
+        if (count($attachments) > 0) {
+            foreach ($attachments as $attachment) {
+                $attachmentArray[] = [
+                    'id' => $attachment['id'],
+                    'slug' => $attachment['slug']
+                ];
+            }
+        }
+
+        $detailData = $data['createdBy']['detailData'];
+        if ($detailData instanceof UserData) {
+            $nameOfCreator = $detailData['name'];
+            $surnameOfCreator = $detailData['surname'];
+        } else {
+            $nameOfCreator = null;
+            $surnameOfCreator = null;
+        }
+
+        $array = [
+            'id' => $data['id'],
+            'title' => $data['title'],
+            'body' => $data['body'],
+            'createdAt' => isset($data['createdAt']) ? date_timestamp_get($data['createdAt']) : null,
+            'updatedAt' => isset($data['updatedAt']) ? date_timestamp_get($data['updatedAt']) : null,
+            'internal' => $data['internal'],
+            'email' => $data['email'],
+            'email_to' => json_decode($data['email_to']),
+            'email_cc' => json_decode($data['email_cc']),
+            'email_bcc' => json_decode($data['email_bcc']),
+            'createdBy' => [
+                'id' => $data['createdBy']['id'],
+                'username' => $data['createdBy']['username'],
+                'email' => $data['createdBy']['email'],
+                'name' => $nameOfCreator,
+                'surname' => $surnameOfCreator,
+                'avatarSlug' => $data['createdBy']['image']
+            ],
+            'commentHasAttachments' => $attachmentArray
+        ];
 
         return $array;
     }

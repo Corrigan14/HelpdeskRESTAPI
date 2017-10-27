@@ -64,7 +64,6 @@ class TaskHasAttachmentRepository extends EntityRepository
     private function formatData($paginatorData, $array = false): array
     {
         $response = [];
-        /** @var TaskHasAttachment $data */
         foreach ($paginatorData as $data) {
             if ($array) {
                 $response[] = $this->processArrayData($data);
@@ -94,6 +93,8 @@ class TaskHasAttachmentRepository extends EntityRepository
      */
     private function processArrayData(array $data): array
     {
-
+        return [
+            'slug' => $data['slug']
+        ];
     }
 }

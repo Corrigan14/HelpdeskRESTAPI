@@ -4,8 +4,8 @@ namespace API\TaskBundle\Repository;
 
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
+use API\TaskBundle\Controller\Task\AttachmentController;
 use API\TaskBundle\Entity\Comment;
-use API\TaskBundle\Entity\CommentHasAttachment;
 use API\TaskBundle\Entity\InvoiceableItem;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Tag;
@@ -57,13 +57,19 @@ class TaskRepository extends EntityRepository
             ->addSelect('company')
             ->addSelect('requestedBy')
             ->addSelect('requesterDetailData')
-            ->addSelect('thau')
+            ->addSelect('taskHasAttachments')
             ->addSelect('status')
             ->addSelect('assignedUser')
             ->addSelect('assigneeDetailData')
             ->addSelect('tags')
             ->addSelect('taskCompany')
             ->addSelect('followers')
+            ->addSelect('followersDetailData')
+            ->addSelect('invoiceableItems')
+            ->addSelect('unit')
+            ->addSelect('taskHasAssignedUsers')
+            ->addSelect('status')
+            ->addSelect('assignedUser')
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')
@@ -73,13 +79,17 @@ class TaskRepository extends EntityRepository
             ->leftJoin('createdBy.company', 'company')
             ->leftJoin('task.requestedBy', 'requestedBy')
             ->leftJoin('requestedBy.detailData', 'requesterDetailData')
-            ->leftJoin('task.taskHasAssignedUsers', 'thau')
-            ->leftJoin('thau.status', 'status')
-            ->leftJoin('thau.user', 'assignedUser')
+            ->leftJoin('task.taskHasAssignedUsers', 'taskHasAssignedUsers')
+            ->leftJoin('task.taskHasAttachments', 'taskHasAttachments')
+            ->leftJoin('taskHasAssignedUsers.status', 'status')
+            ->leftJoin('taskHasAssignedUsers.user', 'assignedUser')
             ->leftJoin('assignedUser.detailData', 'assigneeDetailData')
             ->leftJoin('task.tags', 'tags')
             ->leftJoin('task.company', 'taskCompany')
             ->leftJoin('task.followers', 'followers')
+            ->leftJoin('followers.detailData', 'followersDetailData')
+            ->leftJoin('task.invoiceableItems', 'invoiceableItems')
+            ->leftJoin('invoiceableItems.unit', 'unit')
             ->distinct();
 
         foreach ($order as $key => $value) {
@@ -315,12 +325,19 @@ class TaskRepository extends EntityRepository
             ->addSelect('company')
             ->addSelect('requestedBy')
             ->addSelect('requesterDetailData')
-            ->addSelect('thau')
+            ->addSelect('taskHasAttachments')
             ->addSelect('status')
             ->addSelect('assignedUser')
+            ->addSelect('assigneeDetailData')
             ->addSelect('tags')
             ->addSelect('taskCompany')
             ->addSelect('followers')
+            ->addSelect('followersDetailData')
+            ->addSelect('invoiceableItems')
+            ->addSelect('unit')
+            ->addSelect('taskHasAssignedUsers')
+            ->addSelect('status')
+            ->addSelect('assignedUser')
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')
@@ -330,12 +347,17 @@ class TaskRepository extends EntityRepository
             ->leftJoin('createdBy.company', 'company')
             ->leftJoin('task.requestedBy', 'requestedBy')
             ->leftJoin('requestedBy.detailData', 'requesterDetailData')
-            ->leftJoin('task.taskHasAssignedUsers', 'thau')
-            ->leftJoin('thau.status', 'status')
-            ->leftJoin('thau.user', 'assignedUser')
+            ->leftJoin('task.taskHasAssignedUsers', 'taskHasAssignedUsers')
+            ->leftJoin('task.taskHasAttachments', 'taskHasAttachments')
+            ->leftJoin('taskHasAssignedUsers.status', 'status')
+            ->leftJoin('taskHasAssignedUsers.user', 'assignedUser')
+            ->leftJoin('assignedUser.detailData', 'assigneeDetailData')
             ->leftJoin('task.tags', 'tags')
             ->leftJoin('task.company', 'taskCompany')
             ->leftJoin('task.followers', 'followers')
+            ->leftJoin('followers.detailData', 'followersDetailData')
+            ->leftJoin('task.invoiceableItems', 'invoiceableItems')
+            ->leftJoin('invoiceableItems.unit', 'unit')
             ->distinct();
 
         foreach ($order as $key => $value) {
@@ -585,7 +607,7 @@ class TaskRepository extends EntityRepository
             ->setParameter('taskId', $taskId)
             ->getQuery();
 
-        return $this->processData($query->getSingleResult());
+        return $this->processData($query->getSingleResult(), true);
     }
 
     /**
@@ -613,7 +635,6 @@ class TaskRepository extends EntityRepository
     private function formatData($paginatorData, $array = false): array
     {
         $response = [];
-        /** @var Task $data */
         foreach ($paginatorData as $data) {
             if ($array) {
                 $response[] = $this->processArrayData($data);
@@ -627,9 +648,10 @@ class TaskRepository extends EntityRepository
 
     /**
      * @param Task $data
+     * @param bool $single
      * @return array
      */
-    private function processData(Task $data): array
+    private function processData(Task $data, $single = false): array
     {
         $taskData = $data->getTaskData();
         $taskDataArray = [];
@@ -750,15 +772,14 @@ class TaskRepository extends EntityRepository
         }
 
         /**
-         * TODO tuto skaredost zmazat, ked niekedy nikdy bude viac userov
+         * TODO tuto skaredost zmazat, ked niekedy bude viac userov
          */
-//        dump($taskHasAssignedUsersArray);
         $taskHasAssignedUsersArray = [reset($taskHasAssignedUsersArray)];
         if (false === $taskHasAssignedUsersArray[0]) {
             $taskHasAssignedUsersArray = [];
         }
         /**
-         * TODO tuto skaredost zmazat, ked niekedy nikdy bude viac userov
+         * TODO tuto skaredost zmazat, ked niekedy bude viac userov
          */
 
         $taskHasAttachments = $data->getTaskHasAttachments();
@@ -772,8 +793,6 @@ class TaskRepository extends EntityRepository
                 ];
             }
         }
-        $comments = $data->getComments();
-        $commentsArray = $this->formatCommentData($comments);
 
         $invoiceableItems = $data->getInvoiceableItems();
         $invoiceableItemsArray = [];
@@ -826,6 +845,60 @@ class TaskRepository extends EntityRepository
             $userRequesterName = $userRequesterDetailData->getName();
             $userRequesterSurname = $userRequesterDetailData->getSurname();
         }
+
+        $commentsArray = [];
+        if ($single) {
+            // If we ask for a whole list of comments, comment tree is not built
+            // The list just contains all comment
+            $comments = $data->getComments();
+            /** @var Comment $comment */
+            foreach ($comments as $comment) {
+                $attachments = $comment->getCommentHasAttachments();
+                $attachmentArray = [];
+
+                if (count($attachments) > 0) {
+                    foreach ($attachments as $attachment) {
+                        $attachmentArray[] = [
+                            'id' => $attachment->getId(),
+                            'slug' => $attachment->getSlug()
+                        ];
+                    }
+                }
+
+                $detailData = $comment->getCreatedBy()->getDetailData();
+                if ($detailData instanceof UserData) {
+                    $nameOfCreator = $detailData->getName();
+                    $surnameOfCreator = $detailData->getSurname();
+                } else {
+                    $nameOfCreator = null;
+                    $surnameOfCreator = null;
+                }
+
+                $array = [
+                    'id' => $comment->getId(),
+                    'title' => $comment->getTitle(),
+                    'body' => $comment->getBody(),
+                    'createdAt' => $comment->getCreatedAt(),
+                    'updatedAt' => $comment->getUpdatedAt(),
+                    'internal' => $comment->getInternal(),
+                    'email' => $comment->getEmail(),
+                    'email_to' => $comment->getEmailTo(),
+                    'email_cc' => $comment->getEmailCc(),
+                    'email_bcc' => $comment->getEmailBcc(),
+                    'createdBy' => [
+                        'id' => $comment->getCreatedBy()->getId(),
+                        'username' => $comment->getCreatedBy()->getUsername(),
+                        'email' => $comment->getCreatedBy()->getEmail(),
+                        'name' => $nameOfCreator,
+                        'surname' => $surnameOfCreator,
+                        'avatarSlug' => $comment->getCreatedBy()->getImage()
+                    ],
+                    'commentHasAttachments' => $attachmentArray
+                ];
+                $commentsArray[] = $array;
+            }
+        }
+
         $response = [
             'id' => $data->getId(),
             'title' => $data->getTitle(),
@@ -873,123 +946,231 @@ class TaskRepository extends EntityRepository
      */
     private function processArrayData(array $data): array
     {
-        $response = [
-
-        ];
-
-        return $response;
-    }
-
-    /**
-     * @param $paginatorData
-     * @return array
-     */
-    private function formatCommentData($paginatorData): array
-    {
-        $response = [];
-        $processedCommentIds = [];
-
-        /** @var Comment $comment */
-        foreach ($paginatorData as $comment) {
-            if (in_array($comment->getId(), $processedCommentIds, true)) {
-                continue;
+        $taskData = $data['taskData'];
+        $taskDataArray = [];
+        if (count($taskData) > 0) {
+            foreach ($taskData as $item) {
+                $taskDataArray[] = [
+                    'id' => $item['id'],
+                    'value' => $item['value'],
+                    'taskAttribute' => [
+                        'id' => $item['taskAttribute']['id'],
+                        'title' => $item['taskAttribute']['title'],
+                    ]
+                ];
             }
-            $this->buildCommentTree($response, $processedCommentIds, $comment);
         }
-
-        return $response;
-    }
-
-    /**
-     * @param $response
-     * @param $processedCommentIds
-     * @param Comment $comment
-     */
-    private function buildCommentTree(&$response, &$processedCommentIds, Comment $comment)
-    {
-        $commentId = $comment->getId();
-
-        if (!in_array($commentId, $processedCommentIds, true)) {
-            $processedCommentIds[] = $commentId;
-            $children = $comment->getInversedComment();
-            if (count($children) > 0) {
-                $response[$commentId] = $this->fillArray($comment);
-                foreach ($children as $child) {
-                    $childId = $child->getId();
-                    $response[$commentId]['children'][$childId] = $childId;
+        $followers = $data['followers'];
+        $followersArray = [];
+        if (count($followers) > 0) {
+            foreach ($followers as $item) {
+                $userDetailData = $item['detailData'];
+                $userName = null;
+                $userSurname = null;
+                if ($userDetailData) {
+                    $userName = $userDetailData['name'];
+                    $userSurname = $userDetailData['surname'];
                 }
-            } else {
-                $response[$commentId] = $this->fillArray($comment);
-                $response[$commentId]['children'] = false;
+                $followersArray[] = [
+                    'id' => $item['id'],
+                    'username' => $item['username'],
+                    'email' => $item['email'],
+                    'name' => $userName,
+                    'surname' => $userSurname,
+                ];
             }
         }
-    }
-
-    /**
-     * @param Comment $comment
-     * @param bool $single
-     * @return array
-     */
-    private function fillArray(Comment $comment, $single = false)
-    {
-        $attachments = $comment->getCommentHasAttachments();
-        $attachmentArray = [];
-
-        if (count($attachments) > 0) {
-            /** @var CommentHasAttachment $attachment */
-            foreach ($attachments as $attachment) {
-                $attachmentArray[] = [
-                    'id' => $attachment->getId(),
-                    'slug' => $attachment->getSlug()
+        $tags = $data['tags'];
+        $tagsArray = [];
+        if (count($tags) > 0) {
+            /** @var Tag $item */
+            foreach ($tags as $item) {
+                $tagsArray[] = [
+                    'id' => $item['id'],
+                    'title' => $item['title'],
+                    'color' => $item['color']
                 ];
             }
         }
 
-        $detailData = $comment->getCreatedBy()->getDetailData();
-        if ($detailData instanceof UserData) {
-            $nameOfCreator = $detailData->getName();
-            $surnameOfCreator = $detailData->getSurname();
-        } else {
-            $nameOfCreator = null;
-            $surnameOfCreator = null;
-        }
-
-        $array = [
-            'id' => $comment->getId(),
-            'title' => $comment->getTitle(),
-            'body' => $comment->getBody(),
-            'createdAt' => $comment->getCreatedAt(),
-            'updatedAt' => $comment->getUpdatedAt(),
-            'internal' => $comment->getInternal(),
-            'email' => $comment->getEmail(),
-            'email_to' => $comment->getEmailTo(),
-            'email_cc' => $comment->getEmailCc(),
-            'email_bcc' => $comment->getEmailBcc(),
-            'createdBy' => [
-                'id' => $comment->getCreatedBy()->getId(),
-                'username' => $comment->getCreatedBy()->getUsername(),
-                'email' => $comment->getCreatedBy()->getEmail(),
-                'name' => $nameOfCreator,
-                'surname' => $surnameOfCreator,
-                'avatarSlug' => $comment->getCreatedBy()->getImage()
-            ],
-            'commentHasAttachments' => $attachmentArray
-        ];
-
-        if ($single) {
-            $childrenComments = $comment->getInversedComment();
-            $childrenCommentsArray = false;
-            if (count($childrenComments) > 0) {
-                /** @var Comment $comment */
-                foreach ($childrenComments as $commentN) {
-                    $childrenCommentsArray[] = [
-                        $commentN->getId() => $commentN->getId()
+        $taskHasAssignedUsers = $data['taskHasAssignedUsers'];
+        $taskHasAssignedUsersArray = [];
+        if (count($taskHasAssignedUsers) > 0) {
+            $processedUsers = [];
+            foreach ($taskHasAssignedUsers as $item) {
+                $processedUsersDates[$item['user']['id']] = null;
+                if (!in_array($item['user']['id'], $processedUsers, true)) {
+                    $processedUsersDates[$item['user']['id']] = $item['createdAt'];
+                    $userDetailData = $item['user']['detailData'];
+                    $userName = null;
+                    $userSurname = null;
+                    if ($userDetailData) {
+                        $userName = $userDetailData['name'];
+                        $userSurname = $userDetailData['surname'];
+                    }
+                    $taskHasAssignedUsersArray[$item['user']['id']] = [
+                        'id' => $item['id'],
+                        'status_date' => isset($item['status_date']) ? date_timestamp_get($item['status_date']) : null,
+                        'time_spent' => $item['time_spent'],
+                        'createdAt' => isset($item['createdAt']) ? date_timestamp_get($item['createdAt']) : null,
+                        'updatedAt' => isset($item['updatedAt']) ? date_timestamp_get($item['updatedAt']) : null,
+                        'status' => [
+                            'id' => $item['status']['id'],
+                            'title' => $item['status']['title'],
+                            'color' => $item['status']['color']
+                        ],
+                        'user' => [
+                            'id' => $item['user']['id'],
+                            'username' => $item['user']['username'],
+                            'email' => $item['user']['email'],
+                            'name' => $userName,
+                            'surname' => $userSurname,
+                        ]
                     ];
+                    $processedUsers [] = $item['user']['id'];
+                } else {
+                    if ($processedUsersDates[$item['user']['id']] < $item['createdAt']) {
+                        $processedUsersDates[$item['user']['id']] = $item['createdAt'];
+                        $userDetailData = $item['user']['detailData'];
+                        $userName = null;
+                        $userSurname = null;
+                        if ($userDetailData) {
+                            $userName = $userDetailData['name'];
+                            $userSurname = $userDetailData['surname'];
+                        }
+                        $taskHasAssignedUsersArray[$item['user']['id']] = [
+                            'id' => $item['id'],
+                            'status_date' => isset($item['status_date']) ? date_timestamp_get($item['status_date']) : null,
+                            'time_spent' => $item['time_spent'],
+                            'createdAt' => isset($item['createdAt']) ? date_timestamp_get($item['createdAt']) : null,
+                            'updatedAt' => isset($item['updatedAt']) ? date_timestamp_get($item['updatedAt']) : null,
+                            'status' => [
+                                'id' => $item['status']['id'],
+                                'title' => $item['status']['title'],
+                                'color' => $item['status']['color']
+                            ],
+                            'user' => [
+                                'id' => $item['user']['id'],
+                                'username' => $item['user']['username'],
+                                'email' => $item['user']['email'],
+                                'name' => $userName,
+                                'surname' => $userSurname,
+                            ]
+                        ];
+                    }
                 }
             }
-            $array['children'] = $childrenCommentsArray;
         }
 
-        return $array;
+        /**
+         * TODO tuto skaredost zmazat, ked niekedy bude viac userov
+         */
+        $taskHasAssignedUsersArray = [reset($taskHasAssignedUsersArray)];
+        if (false === $taskHasAssignedUsersArray[0]) {
+            $taskHasAssignedUsersArray = [];
+        }
+        /**
+         * TODO tuto skaredost zmazat, ked niekedy bude viac userov
+         */
+
+        $taskHasAttachments = $data['taskHasAttachments'];
+        $taskHasAttachmentsArray = [];
+        if (count($taskHasAttachments) > 0) {
+            foreach ($taskHasAttachments as $item) {
+                $taskHasAttachmentsArray[] = [
+                    'id' => $item['id'],
+                    'slug' => $item['slug']
+                ];
+            }
+        }
+        $invoiceableItems = $data['invoiceableItems'];
+        $invoiceableItemsArray = [];
+        if (count($invoiceableItems) > 0) {
+            foreach ($invoiceableItems as $item) {
+                $invoiceableItemsArray[] = [
+                    'id' => $item['id'],
+                    'title' => $item['title'],
+                    'amount' => (int)$item['amount'],
+                    'unit_price' => (int)$item['unit_price'],
+                    'unit' => [
+                        'id' => $item['unit']['id'],
+                        'title' => $item['unit']['title'],
+                        'shortcut' => $item['unit']['shortcut'],
+                    ]
+                ];
+            }
+        };
+        $project = $data['project'];
+        $projectArray = [];
+        if ($project) {
+            $projectArray = [
+                'id' => $data['project']['id'],
+                'title' => $data['project']['title'],
+                'is_active' => $data['project']['is_active']
+            ];
+        }
+        $company = $data['company'];
+        $companyArray = [];
+        if ($company) {
+            $companyArray = [
+                'id' => $data['company']['id'],
+                'title' => $data['company']['title']
+            ];
+        }
+
+        $userCreatorDetailData = $data['createdBy']['detailData'];
+        $userCreatorName = null;
+        $userCreatorSurname = null;
+        if ($userCreatorDetailData) {
+            $userCreatorName = $userCreatorDetailData['name'];
+            $userCreatorSurname = $userCreatorDetailData['surname'];
+        }
+
+        $userRequesterDetailData = $data['requestedBy']['detailData'];
+        $userRequesterName = null;
+        $userRequesterSurname = null;
+        if ($userRequesterDetailData) {
+            $userRequesterName = $userRequesterDetailData['name'];
+            $userRequesterSurname = $userRequesterDetailData['surname'];
+        }
+
+        $response = [
+            'id' => $data['id'],
+            'title' => $data['title'],
+            'description' => $data['description'],
+            'deadline' => isset($data['deadline']) ? date_timestamp_get($data['deadline']) : null,
+            'startedAt' => isset($data['startedAt']) ? date_timestamp_get($data['startedAt']) : null,
+            'closedAt' => isset($data['closedAt']) ? date_timestamp_get($data['closedAt']) : null,
+            'important' => $data['important'],
+            'work' => $data['work'],
+            'work_time' => isset($data['work_time']) ? (int)$data['work_time'] : null,
+            'createdAt' => isset($data['createdAt']) ? date_timestamp_get($data['createdAt']) : null,
+            'updatedAt' => isset($data['updatedAt']) ? date_timestamp_get($data['updatedAt']) : null,
+            'createdBy' => [
+                'id' => $data['createdBy']['id'],
+                'username' => $data['createdBy']['username'],
+                'email' => $data['createdBy']['email'],
+                'name' => $userCreatorName,
+                'surname' => $userCreatorSurname,
+            ],
+            'requestedBy' => [
+                'id' => $data['requestedBy']['id'],
+                'username' => $data['requestedBy']['username'],
+                'email' => $data['requestedBy']['email'],
+                'name' => $userRequesterName,
+                'surname' => $userRequesterSurname,
+            ],
+            'project' => $projectArray,
+            'company' => $companyArray,
+            'taskData' => $taskDataArray,
+            'followers' => $followersArray,
+            'tags' => $tagsArray,
+            'taskHasAssignedUsers' => $taskHasAssignedUsersArray,
+            'taskHasAttachments' => $taskHasAttachmentsArray,
+            'comments' => [],
+            'invoiceableItems' => $invoiceableItemsArray
+        ];
+
+        return $response;
     }
 }

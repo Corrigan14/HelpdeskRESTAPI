@@ -49,6 +49,7 @@ class ProcessEntity
 
         /** @var ConstraintViolationList $errors */
         $errors = $this->validator->validate($entity);
+        dump($errors);
         if (count($errors) > 0) {
             return $this->getErrorsFromValidation($errors);
         }

@@ -68,7 +68,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *             [
      *                205,
      *                206
-     *             ]
+     *             ],
+     *             "remembered": false
      *          },
      *          {
      *             "id": 146,
@@ -104,7 +105,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *             [
      *                205,
      *                206
-     *             ]
+     *             ],
+     *             "remembered": false
      *           },
      *       ],
      *       "_links":
@@ -264,7 +266,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *             [
      *                205,
      *                206
-     *             ]
+     *             ],
+     *             "remembered": false
      *         },
      *        "_links":
      *        {
@@ -365,7 +368,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *             [
      *                205,
      *                206
-     *             ]
+     *             ],
+     *             "remembered": false
      *         },
      *        "_links":
      *        {
@@ -432,6 +436,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
 
         $filter->setIsActive(true);
         $filter->setCreatedBy($this->getUser());
+        $filter->setUsersRemembered(false);
 
         return $this->updateEntity($filter, $requestData, true);
     }
@@ -478,7 +483,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *             [
      *                205,
      *                206
-     *             ]
+     *             ],
+     *             "remembered": true
      *         },
      *        "_links":
      *        {
@@ -585,7 +591,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *             [
      *                205,
      *                206
-     *             ]
+     *             ],
+     *             "remembered": true
      *         },
      *        "_links":
      *        {
@@ -661,7 +668,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
             $this->getDoctrine()->getManager()->remove($savedFilter);
             $this->getDoctrine()->getManager()->flush();
             return $this->json(null, StatusCodesHelper::DELETED_CODE);
-        }else{
+        } else {
             return $this->json(null, StatusCodesHelper::SUCCESSFUL_CODE);
         }
     }
@@ -709,7 +716,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *             [
      *                205,
      *                206
-     *             ]
+     *             ],
+     *             "remembered": false
      *         },
      *        "_links":
      *        {
@@ -828,7 +836,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *             [
      *                205,
      *                206
-     *             ]
+     *             ],
+     *             "remembered": false
      *         },
      *        "_links":
      *        {
@@ -954,7 +963,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *             [
      *                205,
      *                206
-     *             ]
+     *             ],
+     *             "remembered": false
      *         },
      *        "_links":
      *        {
@@ -1095,7 +1105,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *             [
      *                205,
      *                206
-     *             ]
+     *             ],
+     *             "remembered": false
      *         },
      *        "_links":
      *        {
@@ -1393,6 +1404,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @throws \InvalidArgumentException
      *
      * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
     private function updateEntity(Filter $filter, array $data, $create = false, $usersRemembered = false)
@@ -1542,31 +1555,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
 
         $errors = $this->get('entity_processor')->processEntity($filter, $data);
 
-        // Check manually if icon_class parameter is not NULL. It's not required for UsersRemembered filter.
-        // It is required in other case.
-        $iconError = [];
-        if (!$usersRemembered) {
-            if (!isset($data['icon_class'])) {
-                $iconError = [
-                    'field' => 'icon_class',
-                    'message' => 'Icon class is required!'
-                ];
-            }
-        }
-
-        // Check manually if order parameter is not NULL. It's not required for UsersRemembered filter.
-        // It is required in other case.
-        $orderError = [];
-        if (!$usersRemembered) {
-            if (!isset($data['order'])) {
-                $iconError = [
-                    'field' => 'order',
-                    'message' => 'Order is required!'
-                ];
-            }
-        }
-
-        if (false === $errors && 0 === count($iconError) && 0 === count($orderError)) {
+        if (false === $errors) {
             $this->getDoctrine()->getManager()->persist($filter);
             $this->getDoctrine()->getManager()->flush();
 
@@ -1574,8 +1563,9 @@ class FilterController extends ApiBaseController implements ControllerInterface
             return $this->json($filterArray, $statusCode);
         }
 
+
         $data = [
-            'errors' => array_merge($errors, $iconError, $orderError),
+            'errors' => $errors,
             'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
         ];
         return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);

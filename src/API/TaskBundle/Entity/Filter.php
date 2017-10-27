@@ -29,7 +29,7 @@ class Filter
      * @var string
      *
      * @ORM\Column(name="title", type="string", length=255)
-     * @Assert\NotBlank(message="Title of task is required")
+     * @Assert\NotBlank(message="Title of filter is required")
      * @Assert\Type("string")
      */
     private $title;
@@ -75,15 +75,17 @@ class Filter
     /**
      * @var string
      *
-     * @ORM\Column(name="icon_class", type="string", length=255, nullable=true)
+     * @ORM\Column(name="icon_class", type="string", length=255, nullable=false)
      * @Assert\Type("string")
+     * @Assert\NotBlank(message="Icon class of filter is required")
      */
     private $icon_class;
 
     /**
      * @var int
      *
-     * @ORM\Column(name="`order`", type="integer", nullable=true)
+     * @ORM\Column(name="`order`", type="integer", nullable=false)
+     * @Assert\NotBlank(message="Order of filter is required")
      */
     private $order;
 
@@ -379,7 +381,7 @@ class Filter
      */
     public function setOrder($order)
     {
-        $this->order = $order;
+        $this->order = (int)$order;
 
         return $this;
     }

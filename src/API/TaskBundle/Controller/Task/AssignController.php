@@ -260,43 +260,6 @@ class AssignController extends ApiBaseController
      *            ],
      *            "comments":
      *            {
-     *              "188":
-     *              {
-     *                  "id": 188,
-     *                  "title": "test",
-     *                  "body": "gggg 222",
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
-     *                  "internal": true,
-     *                  "email": true,
-     *                  "email_to":
-     *                  [
-     *                      "mb@web-solutions.sk"
-     *                  ],
-     *                  "email_cc": null,
-     *                  "email_bcc": null,
-     *                  "createdBy":
-     *                  {
-     *                      "id": 4031,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk",
-     *                      "name": "Admin",
-     *                      "surname": "Adminovic",
-     *                      "avatarSlug": "slug-15-15-2014"
-     *                  },
-     *                  "commentHasAttachments":
-     *                  [
-     *                      {
-     *                          "id": 3,
-     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                      }
-     *                  ],
-     *                  "children":
-     *                  {
-     *                      "189": 189,
-     *                      "190": 190
-     *                   }
-     *                },
      *              "189":
      *              {
      *                  "id": 189,
@@ -633,43 +596,6 @@ class AssignController extends ApiBaseController
      *            ],
      *            "comments":
      *            {
-     *              "188":
-     *              {
-     *                  "id": 188,
-     *                  "title": "test",
-     *                  "body": "gggg 222",
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
-     *                  "internal": true,
-     *                  "email": true,
-     *                  "email_to":
-     *                  [
-     *                      "mb@web-solutions.sk"
-     *                  ],
-     *                  "email_cc": null,
-     *                  "email_bcc": null,
-     *                  "createdBy":
-     *                  {
-     *                      "id": 4031,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk",
-     *                      "name": "Admin",
-     *                      "surname": "Adminovic",
-     *                      "avatarSlug": "slug-15-15-2014"
-     *                  },
-     *                  "commentHasAttachments":
-     *                  [
-     *                      {
-     *                          "id": 3,
-     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                      }
-     *                  ],
-     *                  "children":
-     *                  {
-     *                      "189": 189,
-     *                      "190": 190
-     *                   }
-     *                },
      *              "189":
      *              {
      *                  "id": 189,
@@ -1015,43 +941,6 @@ class AssignController extends ApiBaseController
      *            ],
      *            "comments":
      *            {
-     *              "188":
-     *              {
-     *                  "id": 188,
-     *                  "title": "test",
-     *                  "body": "gggg 222",
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
-     *                  "internal": true,
-     *                  "email": true,
-     *                  "email_to":
-     *                  [
-     *                      "mb@web-solutions.sk"
-     *                  ],
-     *                  "email_cc": null,
-     *                  "email_bcc": null,
-     *                  "createdBy":
-     *                  {
-     *                      "id": 4031,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk",
-     *                      "name": "Admin",
-     *                      "surname": "Adminovic",
-     *                      "avatarSlug": "slug-15-15-2014"
-     *                  },
-     *                  "commentHasAttachments":
-     *                  [
-     *                      {
-     *                          "id": 3,
-     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                      }
-     *                  ],
-     *                  "children":
-     *                  {
-     *                      "189": 189,
-     *                      "190": 190
-     *                   }
-     *                },
      *              "189":
      *              {
      *                  "id": 189,

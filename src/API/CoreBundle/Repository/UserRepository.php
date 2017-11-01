@@ -188,6 +188,7 @@ class UserRepository extends EntityRepository
         $query = $this->createQueryBuilder('user')
             ->select('user.id, user.username, detailData.name, detailData.surname')
             ->leftJoin('user.detailData', 'detailData')
+            ->orderBy('user.username','ASC')
             ->where('user.is_active = :isActive')
             ->setParameter('isActive', true);
 

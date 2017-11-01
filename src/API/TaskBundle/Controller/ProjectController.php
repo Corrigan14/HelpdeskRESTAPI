@@ -1536,11 +1536,11 @@ class ProjectController extends ApiBaseController implements ControllerInterface
                 $addedAcl[] = $this->addProjectAclPermmisionToCreatorOfProject($project);
 
                 // Admin has full Project ACL automatically added and his ACL is not possible to delete
-                $addedAdminAcl = $this->addProjectAclPermissionToAdmin($project);
+//                $addedAdminAcl = $this->addProjectAclPermissionToAdmin($project);
 
                 $canEdit = true;
                 $response = $this->get('project_service')->getEntityResponse($project->getId(), $canEdit);
-                $response['data']['userHasProjects'] = array_merge($addedAcl, $addedAdminAcl);
+                $response['data']['userHasProjects'] = $addedAcl;
                 return $this->json($response, $statusCode);
             } else {
                 $canEdit = true;

@@ -65,7 +65,7 @@ class TaskAdditionalService
             $count = count($responseData['array']);
         }
 
-        $pagination = $this->getPagination($page, $count, $routeOptions);
+        $pagination = $this->getPagination($page, $count, $routeOptions, $limit);
 
         return array_merge($response, $pagination);
     }
@@ -160,7 +160,7 @@ class TaskAdditionalService
             'data' => $responseData['array']
         ];
 
-        $pagination = $this->getPagination($page, $count, $routeOptions);
+        $pagination = $this->getPagination($page, $count, $routeOptions, $limit);
 
         return array_merge($response, $pagination);
     }
@@ -189,7 +189,7 @@ class TaskAdditionalService
             $count = count($responseData['array']);
         }
 
-        $pagination = $this->getPagination($page, $count, $routeOptions);
+        $pagination = $this->getPagination($page, $count, $routeOptions, $limit);
 
         return array_merge($response, $pagination);
     }
@@ -242,7 +242,7 @@ class TaskAdditionalService
             $count = count($responseData['array']);
         }
 
-        $pagination = $this->getPagination($page, $count, $routeOptions);
+        $pagination = $this->getPagination($page, $count, $routeOptions, $limit);
 
         return array_merge($response, $pagination);
     }
@@ -251,12 +251,11 @@ class TaskAdditionalService
      * @param int $page
      * @param int $count
      * @param array $routeOptions
+     * @param int $limit
      * @return array
      */
-    private function getPagination(int $page, int $count, array $routeOptions)
+    private function getPagination(int $page, int $count, array $routeOptions, $limit)
     {
-        $limit = TaskRepository::LIMIT;
-
         $routeName = $routeOptions['routeName'];
         $routeParams = $routeOptions['routeParams'];
         $url = $this->router->generate($routeName, $routeParams);

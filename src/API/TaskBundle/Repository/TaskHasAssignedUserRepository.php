@@ -132,9 +132,9 @@ class TaskHasAssignedUserRepository extends EntityRepository
     {
         $response = [
             'id' => $data['id'],
-            'createdAt' => $data['createdAt'],
-            'updatedAt' => $data['updatedAt'],
-            'status_date' => $data['status_date'],
+            'createdAt' => isset($data['createdAt']) ? date_timestamp_get($data['createdAt']) : null,
+            'updatedAt' => isset($data['updatedAt']) ? date_timestamp_get($data['updatedAt']) : null,
+            'status_date' => isset($data['status_date']) ? date_timestamp_get($data['status_date']) : null,
             'time_spent' => $data['time_spent'],
             'user' => [
                 'id' => $data['user']['id'],

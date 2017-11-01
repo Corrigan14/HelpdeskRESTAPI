@@ -38,18 +38,8 @@ class CommentController extends ApiBaseController
      *             "id": 188,
      *             "title": "test",
      *             "body": "gggg 222",
-     *             "createdAt":
-     *             {
-     *                "date": "2017-03-16 11:23:43.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *                "date": "2017-03-16 11:23:43.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
+     *             "createdAt": 1507968484,
+     *             "updatedAt": 1507968484,
      *             "internal": true,
      *             "email": true,
      *             "email_to":
@@ -75,28 +65,18 @@ class CommentController extends ApiBaseController
      *                }
      *             ],
      *             "children":
-     *             {
-     *                "189": 189,
-     *                "190": 190
-     *              }
+     *             [
+     *              6,
+     *              9
+     *             ]
      *           },
      *           "189":
      *           {
      *              "id": 189,
      *              "title": "test",
      *              "body": "gggg 222 222",
-     *              "createdAt":
-     *              {
-     *                 "date": "2017-03-16 11:23:43.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "updatedAt":
-     *              {
-     *                 "date": "2017-03-16 11:23:43.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
+     *             "createdAt": 1507968484,
+     *             "updatedAt": 1507968484,
      *              "internal": true,
      *              "email": true,
      *              "email_to":
@@ -128,18 +108,8 @@ class CommentController extends ApiBaseController
      *                "id": 190,
      *                "title": "test",
      *                "body": "gggg 222 222 555",
-     *                "createdAt":
-     *                {
-     *                   "date": "2017-03-16 11:23:43.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
-     *                },
-     *                "updatedAt":
-     *                {
-     *                   "date": "2017-03-16 11:23:43.000000",
-     *                   "timezone_type": 3,
-     *                   "timezone": "Europe/Berlin"
-     *                },
+     *                "createdAt": 1507968484,
+     *                "updatedAt": 1507968484,
      *                "internal": true,
      *                "email": true,
      *                "email_to":
@@ -270,43 +240,40 @@ class CommentController extends ApiBaseController
      *      {
      *       "data":
      *       {
-     *          "id": 1,
-     *          "title": "Koment - public",
-     *          "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *          "internal": false,
-     *          "email": false,
-     *          "email_to": null,
-     *          "email_cc": null,
-     *          "email_bcc": null,
-     *          "createdAt":
-     *          {
-     *             "date": "2017-02-10 15:47:50.000000",
-     *             "timezone_type": 3,
-     *             "timezone": "Europe/Berlin"
-     *          },
-     *          "updatedAt":
-     *          {
-     *             "date": "2017-02-10 15:47:50.000000",
-     *             "timezone_type": 3,
-     *             "timezone": "Europe/Berlin"
-     *          },
-     *          "createdBy":
-     *          {
-     *             "id": 4031,
-     *             "username": "admin",
-     *             "email": "admin@admin.sk",
-     *             "name": "Admin",
-     *             "surname": "Adminovic",
-     *             "avatarSlug": "slug-15-15-2014"
-     *          },
-     *          "commentHasAttachments":
-     *          [
+     *             "id": 188,
+     *             "title": "test",
+     *             "body": "gggg 222",
+     *             "createdAt": 1507968484,
+     *             "updatedAt": 1507968484,
+     *             "internal": true,
+     *             "email": true,
+     *             "email_to":
+     *             [
+     *                "mb@web-solutions.sk"
+     *             ],
+     *             "email_cc": null,
+     *             "email_bcc": null,
+     *             "createdBy":
      *             {
-     *                 "id": 3,
-     *                 "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *             }
-     *          ],
-     *          "children": false
+     *                "id": 4031,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk",
+     *                "name": "Admin",
+     *                "surname": "Adminovic",
+     *                "avatarSlug": "slug-15-15-2014"
+     *             },
+     *             "commentHasAttachments":
+     *             [
+     *                {
+     *                   "id": 3,
+     *                   "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                }
+     *             ],
+     *             "children":
+     *             [
+     *              6,
+     *              9
+     *             ]
      *        },
      *        "_links":
      *        {
@@ -366,44 +333,41 @@ class CommentController extends ApiBaseController
      * ### Response ###
      *      {
      *        "data":
-     *       {
-     *          "id": 1,
-     *          "title": "Koment - public",
-     *          "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *          "internal": false,
-     *          "email": false,
-     *          "email_to": null,
-     *          "email_cc": null,
-     *          "email_bcc": null,
-     *          "createdAt":
-     *          {
-     *             "date": "2017-02-10 15:47:50.000000",
-     *             "timezone_type": 3,
-     *             "timezone": "Europe/Berlin"
-     *          },
-     *          "updatedAt":
-     *          {
-     *             "date": "2017-02-10 15:47:50.000000",
-     *             "timezone_type": 3,
-     *             "timezone": "Europe/Berlin"
-     *          },
-     *          "createdBy":
-     *          {
-     *             "id": 4031,
-     *             "username": "admin",
-     *             "email": "admin@admin.sk",
-     *             "name": "Admin",
-     *             "surname": "Adminovic",
-     *             "avatarSlug": "slug-15-15-2014"
-     *          },
-     *          "commentHasAttachments":
-     *          [
+     *        {
+     *             "id": 188,
+     *             "title": "test",
+     *             "body": "gggg 222",
+     *             "createdAt": 1507968484,
+     *             "updatedAt": 1507968484,
+     *             "internal": true,
+     *             "email": true,
+     *             "email_to":
+     *             [
+     *                "mb@web-solutions.sk"
+     *             ],
+     *             "email_cc": null,
+     *             "email_bcc": null,
+     *             "createdBy":
      *             {
-     *                 "id": 3,
-     *                 "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *             }
-     *          ],
-     *          "children": false
+     *                "id": 4031,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk",
+     *                "name": "Admin",
+     *                "surname": "Adminovic",
+     *                "avatarSlug": "slug-15-15-2014"
+     *             },
+     *             "commentHasAttachments":
+     *             [
+     *                {
+     *                   "id": 3,
+     *                   "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                }
+     *             ],
+     *             "children":
+     *             [
+     *              6,
+     *              9
+     *             ]
      *        },
      *        "_links":
      *        {
@@ -476,44 +440,41 @@ class CommentController extends ApiBaseController
      * ### Response ###
      *      {
      *        "data":
-     *       {
-     *          "id": 1,
-     *          "title": "Koment - public",
-     *          "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *          "internal": false,
-     *          "email": false,
-     *          "email_to": null,
-     *          "email_cc": null,
-     *          "email_bcc": null,
-     *          "createdAt":
-     *          {
-     *             "date": "2017-02-10 15:47:50.000000",
-     *             "timezone_type": 3,
-     *             "timezone": "Europe/Berlin"
-     *          },
-     *          "updatedAt":
-     *          {
-     *             "date": "2017-02-10 15:47:50.000000",
-     *             "timezone_type": 3,
-     *             "timezone": "Europe/Berlin"
-     *          },
-     *          "createdBy":
-     *          {
-     *             "id": 4031,
-     *             "username": "admin",
-     *             "email": "admin@admin.sk",
-     *             "name": "Admin",
-     *             "surname": "Adminovic",
-     *             "avatarSlug": "slug-15-15-2014"
-     *          },
-     *          "commentHasAttachments":
-     *          [
+     *        {
+     *             "id": 188,
+     *             "title": "test",
+     *             "body": "gggg 222",
+     *             "createdAt": 1507968484,
+     *             "updatedAt": 1507968484,
+     *             "internal": true,
+     *             "email": true,
+     *             "email_to":
+     *             [
+     *                "mb@web-solutions.sk"
+     *             ],
+     *             "email_cc": null,
+     *             "email_bcc": null,
+     *             "createdBy":
      *             {
-     *                 "id": 3,
-     *                 "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *             }
-     *          ],
-     *          "children": false
+     *                "id": 4031,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk",
+     *                "name": "Admin",
+     *                "surname": "Adminovic",
+     *                "avatarSlug": "slug-15-15-2014"
+     *             },
+     *             "commentHasAttachments":
+     *             [
+     *                {
+     *                   "id": 3,
+     *                   "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                }
+     *             ],
+     *             "children":
+     *             [
+     *              6,
+     *              9
+     *             ]
      *        },
      *        "_links":
      *        {
@@ -874,7 +835,7 @@ class CommentController extends ApiBaseController
      * @param array|bool $attachmentParams
      * @return array
      */
-    private function getTemplateParams(int $taskId, array $requestData, array $emailAddresses, $attachmentParams):array
+    private function getTemplateParams(int $taskId, array $requestData, array $emailAddresses, $attachmentParams): array
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -899,7 +860,7 @@ class CommentController extends ApiBaseController
             'subject' => $requestData['title'],
             'commentBody' => $requestData['body'],
             'signature' => $usersSignature,
-            'taskLink' => $baseFrontURL?$baseFrontURL->getValue():'' . '/tasks/' . $taskId
+            'taskLink' => $baseFrontURL ? $baseFrontURL->getValue() : '' . '/tasks/' . $taskId
         ];
         $params = [
             'subject' => 'LanHelpdesk - ' . '[#' . $taskId . ']' . ' ' . $requestData['title'],
@@ -918,7 +879,7 @@ class CommentController extends ApiBaseController
      * @param array $emailAddresses
      * @return array
      */
-    private function getEmailForAddCommentNotification(Task $task, string $loggedUserEmail, array $emailAddresses):array
+    private function getEmailForAddCommentNotification(Task $task, string $loggedUserEmail, array $emailAddresses): array
     {
         $notificationEmailAddresses = [];
 

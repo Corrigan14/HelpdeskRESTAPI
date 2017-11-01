@@ -138,10 +138,12 @@ class CommentRepository extends EntityRepository
             $children = $comment->getInversedComment();
             if (count($children) > 0) {
                 $response[$commentId] = $this->fillArray($comment);
+                $childArray = [];
                 foreach ($children as $child) {
                     $childId = $child->getId();
-                    $response[$commentId]['children'][$childId] = $childId;
+                    $childArray[] = $childId;
                 }
+                $response[$commentId]['children'] = $childArray;
             } else {
                 $response[$commentId] = $this->fillArray($comment);
                 $response[$commentId]['children'] = false;
@@ -206,9 +208,7 @@ class CommentRepository extends EntityRepository
             if (count($childrenComments) > 0) {
                 /** @var Comment $comment */
                 foreach ($childrenComments as $commentN) {
-                    $childrenCommentsArray[] = [
-                        $commentN->getId() => $commentN->getId()
-                    ];
+                    $childrenCommentsArray[] = $commentN->getId();
                 }
             }
             $array['children'] = $childrenCommentsArray;

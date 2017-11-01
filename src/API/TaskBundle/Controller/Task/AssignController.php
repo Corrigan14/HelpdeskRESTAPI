@@ -27,18 +27,8 @@ class AssignController extends ApiBaseController
      *        "data":
      *         {
      *            "id": 69,
-     *            "createdAt":
-     *            {
-     *               "date": "2017-02-27 15:55:17.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
-     *            "updatedAt":
-     *            {
-     *               "date": "2017-02-27 15:55:17.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
+     *            "createdAt": 1508768644,
+     *            "updatedAt": 1508768644,
      *            "status_date": null,
      *            "time_spent": null,
      *            "user":
@@ -56,18 +46,8 @@ class AssignController extends ApiBaseController
      *         },
      *        {
      *            "id": 70,
-     *            "createdAt":
-     *            {
-     *               "date": "2017-02-27 15:55:17.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
-     *            "updatedAt":
-     *            {
-     *               "date": "2017-02-27 15:55:17.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
+     *            "createdAt": 1508768644,
+     *            "updatedAt": 1508768644,
      *            "status_date": null,
      *            "time_spent": null,
      *            "user":

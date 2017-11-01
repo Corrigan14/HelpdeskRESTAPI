@@ -261,16 +261,17 @@ class Task
     }
 
     /**
-     * Set deadline
-     *
-     * @param \DateTime $deadline
-     *
-     * @return Task
+     * @param int|\DateTime $deadline
+     * @return $this
      */
     public function setDeadline($deadline)
     {
-        $this->deadline = $deadline;
-
+        if (is_int($deadline) && null !== $deadline) {
+            $dateTimeUnix = new \DateTime("@$deadline");
+            $this->deadline = $dateTimeUnix;
+        } else {
+            $this->deadline = $deadline;
+        }
         return $this;
     }
 
@@ -593,16 +594,17 @@ class Task
     }
 
     /**
-     * Set startedAt
-     *
-     * @param \DateTime $startedAt
-     *
-     * @return Task
+     * @param int|\DateTime $startedAt
+     * @return $this
      */
     public function setStartedAt($startedAt)
     {
-        $this->startedAt = $startedAt;
-
+        if (is_int($startedAt) && null !== $startedAt) {
+            $dateTimeUnix = new \DateTime("@$startedAt");
+            $this->startedAt = $dateTimeUnix;
+        } else {
+            $this->startedAt = $startedAt;
+        }
         return $this;
     }
 
@@ -622,16 +624,17 @@ class Task
     }
 
     /**
-     * Set closedAt
-     *
-     * @param \DateTime $closedAt
-     *
-     * @return Task
+     * @param int|\DateTime $closedAt
+     * @return $this
      */
     public function setClosedAt($closedAt)
     {
-        $this->closedAt = $closedAt;
-
+        if (is_int($closedAt) && null !== $closedAt) {
+            $dateTimeUnix = new \DateTime("@$closedAt");
+            $this->closedAt = $dateTimeUnix;
+        } else {
+            $this->closedAt = $closedAt;
+        }
         return $this;
     }
 
@@ -782,7 +785,7 @@ class Task
     {
         if ($this->updatedAt) {
             return $this->updatedAt->getTimestamp();
-        }else{
+        } else {
             return $this->updatedAt;
         }
     }

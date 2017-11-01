@@ -401,6 +401,8 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
@@ -1498,7 +1500,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
         }
 
         // Check if user set some Columns and if these columns are allowed (exists)
-        // The data format shoul be
+        // The data format should be
         // 1. JSON ARRAY: ["title","status"]
         // 2. Arrray separated by ,: title, status
         if (isset($data['columns'])) {

@@ -489,7 +489,7 @@ class Comment
     {
         if ($this->updatedAt) {
             return $this->updatedAt->getTimestamp();
-        }else{
+        } else {
             return $this->updatedAt;
         }
     }

@@ -1238,24 +1238,36 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestData['startedAt'])) {
-            try {
-                $startedAtDateTimeObject = new \Datetime($requestData['startedAt']);
-                $task->setStartedAt($startedAtDateTimeObject);
-            } catch (\Exception $e) {
-                return $this->createApiResponse([
-                    'message' => 'The startedAt parameter is not in a valid format! Expected format: Unix',
-                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $intDateData = (int)$requestData['startedAt'];
+            if (null === $requestData['startedAt'] || 'null' === $requestData['startedAt']) {
+                $task->setStartedAt(null);
+            } else {
+                try {
+                    $startedAtDateTimeObject = new \DateTime("@$intDateData");
+                    $task->setStartedAt($startedAtDateTimeObject);
+                    $changedParams[] = 'started at';
+                } catch (\Exception $e) {
+                    return $this->createApiResponse([
+                        'message' => 'startedAt parameter is not in a valid format! Expected format: Timestamp',
+                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                }
             }
         }
 
         if (isset($requestData['deadline'])) {
-            try {
-                $startedAtDateTimeObject = new \Datetime($requestData['deadline']);
-                $task->setDeadline($startedAtDateTimeObject);
-            } catch (\Exception $e) {
-                return $this->createApiResponse([
-                    'message' => 'The deadline parameter is not in a valid format! Expected format: Unix',
-                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $intDateData = (int)$requestData['deadline'];
+            if (null === $requestData['deadline'] || 'null' === $requestData['deadline']) {
+                $task->setDeadline(null);
+            } else {
+                try {
+                    $deadlineDateTimeObject = new \Datetime("@$intDateData");
+                    $task->setDeadline($deadlineDateTimeObject);
+                    $changedParams[] = 'deadline';
+                } catch (\Exception $e) {
+                    return $this->createApiResponse([
+                        'message' => 'deadline parameter is not in a valid format! Expected format: Timestamp',
+                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                }
             }
         }
 
@@ -2248,51 +2260,54 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestData['startedAt'])) {
+            $intDateData = (int)$requestData['startedAt'];
             if (null === $requestData['startedAt'] || 'null' === $requestData['startedAt']) {
                 $task->setStartedAt(null);
                 $changedParams[] = 'started at';
             } else {
                 try {
-                    $startedAtDateTimeObject = new \Datetime($requestData['startedAt']);
+                    $startedAtDateTimeObject = new \DateTime("@$intDateData");
                     $task->setStartedAt($startedAtDateTimeObject);
                     $changedParams[] = 'started at';
                 } catch (\Exception $e) {
                     return $this->createApiResponse([
-                        'message' => 'startedAt parameter is not in a valid format! Expected format: Unix',
+                        'message' => 'startedAt parameter is not in a valid format! Expected format: Timestamp',
                     ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 }
             }
         }
 
         if (isset($requestData['deadline'])) {
+            $intDateData = (int)$requestData['deadline'];
             if (null === $requestData['deadline'] || 'null' === $requestData['deadline']) {
                 $task->setDeadline(null);
                 $changedParams[] = 'deadline';
             } else {
                 try {
-                    $deadlineDateTimeObject = new \Datetime($requestData['deadline']);
+                    $deadlineDateTimeObject = new \Datetime("@$intDateData");
                     $task->setDeadline($deadlineDateTimeObject);
                     $changedParams[] = 'deadline';
                 } catch (\Exception $e) {
                     return $this->createApiResponse([
-                        'message' => 'deadline parameter is not in a valid format! Expected format: Unix',
+                        'message' => 'deadline parameter is not in a valid format! Expected format: Timestamp',
                     ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 }
             }
         }
 
         if (isset($requestData['closedAt'])) {
+            $intDateData = (int)$requestData['deadline'];
             if (null === $requestData['closedAt'] || 'null' === $requestData['closedAt']) {
                 $task->setClosedAt(null);
                 $changedParams[] = 'closed At';
             } else {
                 try {
-                    $closedAtDateTimeObject = new \Datetime($requestData['closedAt']);
+                    $closedAtDateTimeObject = new \Datetime("@$intDateData");
                     $task->setClosedAt($closedAtDateTimeObject);
                     $changedParams[] = 'closed At';
                 } catch (\Exception $e) {
                     return $this->createApiResponse([
-                        'message' => 'closedAt parameter is not in a valid format! Expected format: Unix',
+                        'message' => 'closedAt parameter is not in a valid format! Expected format: Timestamp',
                     ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 }
             }

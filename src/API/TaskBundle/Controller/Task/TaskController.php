@@ -586,18 +586,8 @@ class TaskController extends ApiBaseController
      *            "important": false,
      *            "work": null,
      *            "work_time": null,
-     *            "createdAt":
-     *            {
-     *               "date": "2017-02-27 15:55:15.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
-     *            "updatedAt":
-     *            {
-     *               "date": "2017-02-27 15:55:15.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
+     *            "createdAt":1506434914,
+     *            "updatedAt":1506434914
      *            "createdBy":
      *            {
      *               "id": 2575,
@@ -697,18 +687,8 @@ class TaskController extends ApiBaseController
      *                  "id": 188,
      *                  "title": "test",
      *                  "body": "gggg 222",
-     *                  "createdAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                       "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
      *                  "internal": true,
      *                  "email": true,
      *                  "email_to":
@@ -744,18 +724,8 @@ class TaskController extends ApiBaseController
      *                  "id": 189,
      *                  "title": "test",
      *                  "body": "gggg 222 222",
-     *                  "createdAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
      *                  "internal": true,
      *                  "email": true,
      *                  "email_to":
@@ -932,18 +902,8 @@ class TaskController extends ApiBaseController
      *            "important": false,
      *            "work": null,
      *            "work_time": null,
-     *            "createdAt":
-     *            {
-     *               "date": "2017-02-27 15:55:15.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
-     *            "updatedAt":
-     *            {
-     *               "date": "2017-02-27 15:55:15.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
+     *            "createdAt":1506434914,
+     *            "updatedAt":1506434914
      *            "createdBy":
      *            {
      *               "id": 2575,
@@ -1043,18 +1003,8 @@ class TaskController extends ApiBaseController
      *                  "id": 188,
      *                  "title": "test",
      *                  "body": "gggg 222",
-     *                  "createdAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                       "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
      *                  "internal": true,
      *                  "email": true,
      *                  "email_to":
@@ -1090,18 +1040,8 @@ class TaskController extends ApiBaseController
      *                  "id": 189,
      *                  "title": "test",
      *                  "body": "gggg 222 222",
-     *                  "createdAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
      *                  "internal": true,
      *                  "email": true,
      *                  "email_to":
@@ -1562,18 +1502,8 @@ class TaskController extends ApiBaseController
      *            "important": false,
      *            "work": null,
      *            "work_time": null,
-     *            "createdAt":
-     *            {
-     *               "date": "2017-02-27 15:55:15.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
-     *            "updatedAt":
-     *            {
-     *               "date": "2017-02-27 15:55:15.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
+     *            "createdAt":1506434914,
+     *            "updatedAt":1506434914
      *            "createdBy":
      *            {
      *               "id": 2575,
@@ -1673,18 +1603,8 @@ class TaskController extends ApiBaseController
      *                  "id": 188,
      *                  "title": "test",
      *                  "body": "gggg 222",
-     *                  "createdAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                       "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
      *                  "internal": true,
      *                  "email": true,
      *                  "email_to":
@@ -1720,18 +1640,8 @@ class TaskController extends ApiBaseController
      *                  "id": 189,
      *                  "title": "test",
      *                  "body": "gggg 222 222",
-     *                  "createdAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
      *                  "internal": true,
      *                  "email": true,
      *                  "email_to":
@@ -1759,7 +1669,7 @@ class TaskController extends ApiBaseController
      *                  "children": false
      *              },
      *            },
-     *            "invoiceableItems":
+     *             "invoiceableItems":
      *             [
      *                {
      *                   "id": 30,
@@ -1959,18 +1869,8 @@ class TaskController extends ApiBaseController
      *            "important": false,
      *            "work": null,
      *            "work_time": null,
-     *            "createdAt":
-     *            {
-     *               "date": "2017-02-27 15:55:15.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
-     *            "updatedAt":
-     *            {
-     *               "date": "2017-02-27 15:55:15.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
+     *            "createdAt":1506434914,
+     *            "updatedAt":1506434914
      *            "createdBy":
      *            {
      *               "id": 2575,
@@ -2050,7 +1950,7 @@ class TaskController extends ApiBaseController
      *                  {
      *                      "id": 2579,
      *                      "username": "user",
-     *                      "email": "user@user.sk"
+     *                      "email": "user@user.sk",
      *                      "name": null,
      *                      "surname": null
      *                   }
@@ -2070,18 +1970,8 @@ class TaskController extends ApiBaseController
      *                  "id": 188,
      *                  "title": "test",
      *                  "body": "gggg 222",
-     *                  "createdAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                       "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
      *                  "internal": true,
      *                  "email": true,
      *                  "email_to":
@@ -2117,18 +2007,8 @@ class TaskController extends ApiBaseController
      *                  "id": 189,
      *                  "title": "test",
      *                  "body": "gggg 222 222",
-     *                  "createdAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                      "date": "2017-03-16 11:23:43.000000",
-     *                      "timezone_type": 3,
-     *                      "timezone": "Europe/Berlin"
-     *                  },
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
      *                  "internal": true,
      *                  "email": true,
      *                  "email_to":
@@ -2306,7 +2186,7 @@ class TaskController extends ApiBaseController
         $requestDataFromContent = json_decode($request->getContent(), true);
         if (null === $requestDataFromContent) {
             $requestData = $request->request->all();
-        }else{
+        } else {
             $requestData = $requestDataFromContent;
         }
         $changedParams = [];

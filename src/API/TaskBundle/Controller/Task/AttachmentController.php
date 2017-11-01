@@ -133,29 +133,23 @@ class AttachmentController extends ApiBaseController
      *            "important": false,
      *            "work": null,
      *            "work_time": null,
-     *            "createdAt":
-     *            {
-     *               "date": "2017-02-27 15:55:15.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
-     *            "updatedAt":
-     *            {
-     *               "date": "2017-02-27 15:55:15.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
+     *            "createdAt":1506434914,
+     *            "updatedAt":1506434914
      *            "createdBy":
      *            {
      *               "id": 2575,
      *               "username": "admin",
-     *               "email": "admin@admin.sk"
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
      *            },
      *            "requestedBy":
      *            {
      *               "id": 2575,
      *               "username": "admin",
-     *               "email": "admin@admin.sk"
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
      *            },
      *            "project":
      *            {
@@ -184,7 +178,9 @@ class AttachmentController extends ApiBaseController
      *              {
      *                 "id": 2575,
      *                 "username": "admin",
-     *                 "email": "admin@admin.sk"
+     *                 "email": "admin@admin.sk",
+     *                 "name": null,
+     *                 "surname": null
      *               }
      *            ],
      *            "tags":
@@ -206,18 +202,8 @@ class AttachmentController extends ApiBaseController
      *                  "id": 69,
      *                  "status_date": null,
      *                  "time_spent": null,
-     *                  "createdAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
      *                  "status":
      *                  {
      *                     "id": 240,
@@ -228,7 +214,9 @@ class AttachmentController extends ApiBaseController
      *                  {
      *                      "id": 2579,
      *                      "username": "user",
-     *                      "email": "user@user.sk"
+     *                      "email": "user@user.sk",
+     *                      "name": null,
+     *                      "surname": null
      *                   }
      *                }
      *            ],
@@ -241,70 +229,77 @@ class AttachmentController extends ApiBaseController
      *            ],
      *            "comments":
      *            {
-     *               "0":
-     *               {
-     *                  "parent": true,
-     *                  "id": 30,
-     *                  "title": "Koment - public",
-     *                  "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                  "createdAt":
+     *              "188":
+     *              {
+     *                  "id": 188,
+     *                  "title": "test",
+     *                  "body": "gggg 222",
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
+     *                  "internal": true,
+     *                  "email": true,
+     *                  "email_to":
+     *                  [
+     *                      "mb@web-solutions.sk"
+     *                  ],
+     *                  "email_cc": null,
+     *                  "email_bcc": null,
+     *                  "createdBy":
      *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                   },
-     *                   "internal": false,
-     *                   "email": false,
-     *                   "email_to": false,
-     *                   "email_cc": false,
-     *                   "email_bcc": false,
-     *                   "createdBy":
-     *                   {
-     *                      "id": 2575,
+     *                      "id": 4031,
      *                      "username": "admin",
-     *                      "email": "admin@admin.sk"
-     *                   }
-     *               },
-     *               "30":
-     *               [
-     *                  {
-     *                      "child": true,
-     *                      "parentId": 30,
-     *                      "id": 30,
-     *                      "title": "Koment - public",
-     *                      "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                      "createdAt":
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic",
+     *                      "avatarSlug": "slug-15-15-2014"
+     *                  },
+     *                  "commentHasAttachments":
+     *                  [
      *                      {
-     *                         "date": "2017-02-27 15:55:17.000000",
-     *                         "timezone_type": 3,
-     *                         "timezone": "Europe/Berlin"
-     *                       },
-     *                      "updatedAt":
-     *                      {
-     *                         "date": "2017-02-27 15:55:17.000000",
-     *                         "timezone_type": 3,
-     *                         "timezone": "Europe/Berlin"
-     *                      },
-     *                      "internal": false,
-     *                      "email": false,
-     *                      "email_to": false,
-     *                      "email_cc": false,
-     *                      "email_bcc": false,
-     *                      "createdBy":
-     *                      {
-     *                         "id": 2575,
-     *                         "username": "admin",
-     *                         "email": "admin@admin.sk"
+     *                          "id": 3,
+     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
      *                      }
+     *                  ],
+     *                  "children":
+     *                  {
+     *                      "189": 189,
+     *                      "190": 190
      *                   }
-     *                ]
-     *             },
+     *                },
+     *              "189":
+     *              {
+     *                  "id": 189,
+     *                  "title": "test",
+     *                  "body": "gggg 222 222",
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
+     *                  "internal": true,
+     *                  "email": true,
+     *                  "email_to":
+     *                  [
+     *                      "mb@web-solutions.sk"
+     *                  ],
+     *                  "email_cc": null,
+     *                  "email_bcc": null,
+     *                  "createdBy":
+     *                  {
+     *                      "id": 4031,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic",
+     *                      "avatarSlug": "slug-15-15-2014"
+     *                  },
+     *                  "commentHasAttachments":
+     *                  [
+     *                      {
+     *                          "id": 3,
+     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                      }
+     *                  ],
+     *                  "children": false
+     *              },
+     *            },
      *             "invoiceableItems":
      *             [
      *                {
@@ -482,29 +477,23 @@ class AttachmentController extends ApiBaseController
      *            "important": false,
      *            "work": null,
      *            "work_time": null,
-     *            "createdAt":
-     *            {
-     *               "date": "2017-02-27 15:55:15.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
-     *            "updatedAt":
-     *            {
-     *               "date": "2017-02-27 15:55:15.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
+     *            "createdAt":1506434914,
+     *            "updatedAt":1506434914
      *            "createdBy":
      *            {
      *               "id": 2575,
      *               "username": "admin",
-     *               "email": "admin@admin.sk"
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
      *            },
      *            "requestedBy":
      *            {
      *               "id": 2575,
      *               "username": "admin",
-     *               "email": "admin@admin.sk"
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
      *            },
      *            "project":
      *            {
@@ -533,7 +522,9 @@ class AttachmentController extends ApiBaseController
      *              {
      *                 "id": 2575,
      *                 "username": "admin",
-     *                 "email": "admin@admin.sk"
+     *                 "email": "admin@admin.sk",
+     *                 "name": null,
+     *                 "surname": null
      *               }
      *            ],
      *            "tags":
@@ -555,18 +546,8 @@ class AttachmentController extends ApiBaseController
      *                  "id": 69,
      *                  "status_date": null,
      *                  "time_spent": null,
-     *                  "createdAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
      *                  "status":
      *                  {
      *                     "id": 240,
@@ -577,7 +558,9 @@ class AttachmentController extends ApiBaseController
      *                  {
      *                      "id": 2579,
      *                      "username": "user",
-     *                      "email": "user@user.sk"
+     *                      "email": "user@user.sk",
+     *                      "name": null,
+     *                      "surname": null
      *                   }
      *                }
      *            ],
@@ -590,70 +573,77 @@ class AttachmentController extends ApiBaseController
      *            ],
      *            "comments":
      *            {
-     *               "0":
-     *               {
-     *                  "parent": true,
-     *                  "id": 30,
-     *                  "title": "Koment - public",
-     *                  "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                  "createdAt":
+     *              "188":
+     *              {
+     *                  "id": 188,
+     *                  "title": "test",
+     *                  "body": "gggg 222",
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
+     *                  "internal": true,
+     *                  "email": true,
+     *                  "email_to":
+     *                  [
+     *                      "mb@web-solutions.sk"
+     *                  ],
+     *                  "email_cc": null,
+     *                  "email_bcc": null,
+     *                  "createdBy":
      *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                  },
-     *                  "updatedAt":
-     *                  {
-     *                     "date": "2017-02-27 15:55:17.000000",
-     *                     "timezone_type": 3,
-     *                     "timezone": "Europe/Berlin"
-     *                   },
-     *                   "internal": false,
-     *                   "email": false,
-     *                   "email_to": false,
-     *                   "email_cc": false,
-     *                   "email_bcc": false,
-     *                   "createdBy":
-     *                   {
-     *                      "id": 2575,
+     *                      "id": 4031,
      *                      "username": "admin",
-     *                      "email": "admin@admin.sk"
-     *                   }
-     *               },
-     *               "30":
-     *               [
-     *                  {
-     *                      "child": true,
-     *                      "parentId": 30,
-     *                      "id": 30,
-     *                      "title": "Koment - public",
-     *                      "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
-     *                      "createdAt":
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic",
+     *                      "avatarSlug": "slug-15-15-2014"
+     *                  },
+     *                  "commentHasAttachments":
+     *                  [
      *                      {
-     *                         "date": "2017-02-27 15:55:17.000000",
-     *                         "timezone_type": 3,
-     *                         "timezone": "Europe/Berlin"
-     *                       },
-     *                      "updatedAt":
-     *                      {
-     *                         "date": "2017-02-27 15:55:17.000000",
-     *                         "timezone_type": 3,
-     *                         "timezone": "Europe/Berlin"
-     *                      },
-     *                      "internal": false,
-     *                      "email": false,
-     *                      "email_to": false,
-     *                      "email_cc": false,
-     *                      "email_bcc": false,
-     *                      "createdBy":
-     *                      {
-     *                         "id": 2575,
-     *                         "username": "admin",
-     *                         "email": "admin@admin.sk"
+     *                          "id": 3,
+     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
      *                      }
+     *                  ],
+     *                  "children":
+     *                  {
+     *                      "189": 189,
+     *                      "190": 190
      *                   }
-     *                ]
-     *             },
+     *                },
+     *              "189":
+     *              {
+     *                  "id": 189,
+     *                  "title": "test",
+     *                  "body": "gggg 222 222",
+     *                  "createdAt": 1506434914,
+     *                  "updatedAt": 1506434914,
+     *                  "internal": true,
+     *                  "email": true,
+     *                  "email_to":
+     *                  [
+     *                      "mb@web-solutions.sk"
+     *                  ],
+     *                  "email_cc": null,
+     *                  "email_bcc": null,
+     *                  "createdBy":
+     *                  {
+     *                      "id": 4031,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic",
+     *                      "avatarSlug": "slug-15-15-2014"
+     *                  },
+     *                  "commentHasAttachments":
+     *                  [
+     *                      {
+     *                          "id": 3,
+     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                      }
+     *                  ],
+     *                  "children": false
+     *              },
+     *            },
      *             "invoiceableItems":
      *             [
      *                {

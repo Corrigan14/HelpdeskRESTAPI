@@ -3017,21 +3017,35 @@ class TaskController extends ApiBaseController
         $fromPosition = strpos($created, 'FROM=');
         $toPosition = strpos($created, 'TO=');
 
-        $toData = null;
-        $fromData = null;
+        $toDataDate = null;
+        $fromDataDate = null;
         if (false !== $fromPosition && false !== $toPosition) {
             $fromData = substr($created, $fromPosition + 5, $toPosition - 6);
             $toData = substr($created, $toPosition + 3);
+            $fromDataTimestamp = (int)$fromData;
+            $fromDataDate = new \DateTime("@$fromDataTimestamp");
+            $fromDataDate = $fromDataDate->format('d/m/Y');
+            $toDataTimestamp = (int)$toData;
+            $toDataDate = new \DateTime("@$toDataTimestamp");
+            $toDataDate = $toDataDate->format('d/m/Y');
         } elseif (false !== $fromPosition && false === $toPosition) {
             $fromData = substr($created, $fromPosition + 5);
+            $fromDataTimestamp = (int)$fromData;
+            $fromDataDate = new \DateTime("@$fromDataTimestamp");
+            $fromDataDate = $fromDataDate->format('d/m/Y');
         } elseif (false !== $toPosition && false === $fromPosition) {
             $toData = substr($created, $toPosition + 3);
+            $toDataTimestamp = (int)$toData;
+            $toDataDate = new \DateTime("@$toDataTimestamp");
+            $toDataDate = $toDataDate->format('d/m/Y');
         }
 
-        return [
-            'from' => $fromData,
-            'to' => $toData,
+        $response = [
+            'from' => $fromDataDate,
+            'to' => $toDataDate,
         ];
+
+        return $response;
     }
 
     /**

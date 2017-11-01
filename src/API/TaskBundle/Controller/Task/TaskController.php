@@ -2303,9 +2303,12 @@ class TaskController extends ApiBaseController
         }
 
 //        $requestData = '{"assigned":[{"userId": 212, "statusId": 8}],"company":202}';
-//        $requestData = json_decode($requestData, true);
-//        $requestData = json_decode($request->getContent(), true);
-        $requestData =  $request->request->all();
+        $requestDataFromContent = json_decode($request->getContent(), true);
+        if (null === $requestDataFromContent) {
+            $requestData = $request->request->all();
+        }else{
+            $requestData = $requestDataFromContent;
+        }
         $changedParams = [];
 
         $requestDetailData = false;
@@ -2476,11 +2479,8 @@ class TaskController extends ApiBaseController
                                 ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
                             }
 
-                            $startedAtDateTimeObject = new \Datetime();
-                            $task->setClosedAt($startedAtDateTimeObject);
-                            $date = new \DateTime();
-                            $date->setTimestamp($startedAtDateTimeObject->getTimestamp());
-                            $task->setClosedAt($date);
+                            $closedAtDateTimeObject = new \Datetime();
+                            $task->setClosedAt($closedAtDateTimeObject);
                         }
                     } else {
                         $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->findOneBy([
@@ -2496,9 +2496,7 @@ class TaskController extends ApiBaseController
 
                     if (null === $task->getStartedAt() && $status->getDefault() === true && $status->getFunction() !== StatusFunctionOptions::NEW_TASK) {
                         $startedAtDateTimeObject = new \Datetime();
-                        $date = new \DateTime();
-                        $date->setTimestamp($startedAtDateTimeObject->getTimestamp());
-                        $task->setStartedAt($date);
+                        $task->setStartedAt($startedAtDateTimeObject);
                     }
 
                     $userIsAssignedToTask->setTask($task);
@@ -2518,17 +2516,14 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestData['startedAt'])) {
-            if (null === $requestData['startedAt'] OR 'null' === $requestData['startedAt']) {
+            if (null === $requestData['startedAt'] || 'null' === $requestData['startedAt']) {
                 $task->setStartedAt(null);
                 $changedParams[] = 'started at';
             } else {
                 try {
                     $startedAtDateTimeObject = new \Datetime($requestData['startedAt']);
-                    $changedParams[] = 'started at';
-                    dump($startedAtDateTimeObject->getTimestamp());
-//                    $date = new \DateTime();
-//                    $date->setTimestamp($startedAtDateTimeObject->getTimestamp());
                     $task->setStartedAt($startedAtDateTimeObject);
+                    $changedParams[] = 'started at';
                 } catch (\Exception $e) {
                     return $this->createApiResponse([
                         'message' => 'startedAt parameter is not in a valid format! Expected format: Unix',
@@ -2538,17 +2533,14 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestData['deadline'])) {
-            if (null === $requestData['deadline'] OR 'null' === $requestData['deadline']) {
+            if (null === $requestData['deadline'] || 'null' === $requestData['deadline']) {
                 $task->setDeadline(null);
                 $changedParams[] = 'deadline';
             } else {
                 try {
-                    $startedAtDateTimeObject = new \Datetime($requestData['deadline']);
-                    $task->setDeadline($startedAtDateTimeObject);
+                    $deadlineDateTimeObject = new \Datetime($requestData['deadline']);
+                    $task->setDeadline($deadlineDateTimeObject);
                     $changedParams[] = 'deadline';
-                    $date = new \DateTime();
-                    $date->setTimestamp($startedAtDateTimeObject->getTimestamp());
-                    $task->setDeadline($date);
                 } catch (\Exception $e) {
                     return $this->createApiResponse([
                         'message' => 'deadline parameter is not in a valid format! Expected format: Unix',
@@ -2558,17 +2550,14 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestData['closedAt'])) {
-            if (null === $requestData['closedAt'] OR 'null' === $requestData['closedAt']) {
+            if (null === $requestData['closedAt'] || 'null' === $requestData['closedAt']) {
                 $task->setClosedAt(null);
                 $changedParams[] = 'closed At';
             } else {
                 try {
-                    $startedAtDateTimeObject = new \Datetime($requestData['closedAt']);
-                    $task->setClosedAt($startedAtDateTimeObject);
+                    $closedAtDateTimeObject = new \Datetime($requestData['closedAt']);
+                    $task->setClosedAt($closedAtDateTimeObject);
                     $changedParams[] = 'closed At';
-                    $date = new \DateTime();
-                    $date->setTimestamp($startedAtDateTimeObject->getTimestamp());
-                    $task->setClosedAt($date);
                 } catch (\Exception $e) {
                     return $this->createApiResponse([
                         'message' => 'closedAt parameter is not in a valid format! Expected format: Unix',
@@ -2717,8 +2706,6 @@ class TaskController extends ApiBaseController
         $isAdmin = $this->get('task_voter')->isAdmin();
 
         $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser(), $isAdmin);
-
-        dump($task->getStartedAt());
         return $this->json($taskArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 

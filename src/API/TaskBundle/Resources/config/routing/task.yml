@@ -39,7 +39,7 @@ tasks_update:
 tasks_quick_update:
     path:     /tasks/quick-update/{taskId}
     defaults: { _controller: APITaskBundle:Task/Task:quickUpdateTask}
-    methods: [PUT]
+    methods: [PATCH]
     requirements:
             taskId: '\d+'
 

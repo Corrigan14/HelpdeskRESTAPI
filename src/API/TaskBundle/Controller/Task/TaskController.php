@@ -2304,7 +2304,8 @@ class TaskController extends ApiBaseController
 
 //        $requestData = '{"assigned":[{"userId": 212, "statusId": 8}],"company":202}';
 //        $requestData = json_decode($requestData, true);
-        $requestData = json_decode($request->getContent(), true);
+//        $requestData = json_decode($request->getContent(), true);
+        $requestData =  $request->request->all();
         $changedParams = [];
 
         $requestDetailData = false;
@@ -2524,9 +2525,10 @@ class TaskController extends ApiBaseController
                 try {
                     $startedAtDateTimeObject = new \Datetime($requestData['startedAt']);
                     $changedParams[] = 'started at';
-                    $date = new \DateTime();
-                    $date->setTimestamp($startedAtDateTimeObject->getTimestamp());
-                    $task->setStartedAt($date);
+                    dump($startedAtDateTimeObject->getTimestamp());
+//                    $date = new \DateTime();
+//                    $date->setTimestamp($startedAtDateTimeObject->getTimestamp());
+                    $task->setStartedAt($startedAtDateTimeObject);
                 } catch (\Exception $e) {
                     return $this->createApiResponse([
                         'message' => 'startedAt parameter is not in a valid format! Expected format: Unix',
@@ -2715,6 +2717,8 @@ class TaskController extends ApiBaseController
         $isAdmin = $this->get('task_voter')->isAdmin();
 
         $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser(), $isAdmin);
+
+        dump($task->getStartedAt());
         return $this->json($taskArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 

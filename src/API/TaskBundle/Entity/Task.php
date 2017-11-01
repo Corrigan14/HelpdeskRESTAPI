@@ -614,7 +614,7 @@ class Task
     public function getStartedAt()
     {
         if ($this->startedAt) {
-            return $this->startedAt->getTimestamp();
+            return $this->startedAt;
         } else {
             return $this->startedAt;
         }

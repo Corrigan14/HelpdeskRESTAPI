@@ -62,18 +62,8 @@ class MainController extends ApiBaseController
      *            "id": 54,
      *            "title": "Test 77",
      *            "description": "just test 2",
-     *            "createdAt":
-     *            {
-     *               "date": "2017-07-14 03:05:28.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
-     *            "updatedAt":
-     *            {
-     *               "date": "2017-07-14 03:05:28.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
+     *            "createdAt":1507968483,
+     *            "updatedAt":1507968483,
      *            "is_active": true,
      *            "userHasProjects":
      *            [
@@ -126,18 +116,8 @@ class MainController extends ApiBaseController
      *            "id": 54,
      *            "title": "Test 77",
      *            "description": "just test 2",
-     *            "createdAt":
-     *            {
-     *               "date": "2017-07-14 03:05:28.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
-     *            "updatedAt":
-     *            {
-     *               "date": "2017-07-14 03:05:28.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *            },
+     *            "createdAt":1507968483,
+     *            "updatedAt":1507968483,
      *            "is_active": false,
      *            "userHasProjects":
      *            [

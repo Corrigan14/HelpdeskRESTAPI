@@ -33,18 +33,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *             "id": "1",
      *             "title": "Project 1",
      *             "description": "Description of Project 1",
-     *             "createdAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
+     *             "createdAt": 1507968483,
+     *             "updatedAt": 1507968483,
      *             "is_active" => true,
      *             "userHasProjects":
      *             [
@@ -162,36 +152,16 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *             "id": "1",
      *             "title": "Project 1",
      *             "description": "Description of Project 1",
-     *             "createdAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
+     *             "createdAt": 1507968483,
+     *             "updatedAt": 1507968483,
      *             "is_active" => true,
      *          },
      *          {
      *             "id": 38,
      *             "title": "INBOX",
      *             "description": "INBOX - main project",
-     *             "createdAt":
-     *             {
-     *                "date": "2017-05-07 09:30:05.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *                "date": "2017-05-07 09:30:05.000000",
-     *                "timezone_type": 3,
-     *                "timezone": "Europe/Berlin"
-     *             },
+     *             "createdAt": 1507968483,
+     *             "updatedAt": 1507968483,
      *             "is_active": true
      *          },
      *       ]
@@ -273,18 +243,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *             "id": "1",
      *             "title": "Project 1",
      *             "description": "Description of Project 1",
-     *             "createdAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
+     *             "createdAt": 1507968483,
+     *             "updatedAt": 1507968483,
      *             "is_active" => true,
      *             "userHasProjects":
      *             [
@@ -381,18 +341,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *             "id": "1",
      *             "title": "Project 1",
      *             "description": "Description of Project 1",
-     *             "createdAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
+     *             "createdAt": 1507968483,
+     *             "updatedAt": 1507968483,
      *             "is_active" => true,
      *             "userHasProjects":
      *             [
@@ -489,18 +439,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *             "id": "1",
      *             "title": "Project 1",
      *             "description": "Description of Project 1",
-     *             "createdAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
+     *             "createdAt": 1507968483,
+     *             "updatedAt": 1507968483,
      *             "is_active" => true,
      *             "userHasProjects":
      *             [
@@ -605,18 +545,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *             "id": "1",
      *             "title": "Project 1",
      *             "description": "Description of Project 1",
-     *             "createdAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
+     *             "createdAt": 1507968483,
+     *             "updatedAt": 1507968483,
      *             "is_active" => true,
      *             "userHasProjects":
      *             [
@@ -775,18 +705,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *             "id": "1",
      *             "title": "Project 1",
      *             "description": "Description of Project 1",
-     *             "createdAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
+     *             "createdAt": 1507968483,
+     *             "updatedAt": 1507968483,
      *             "is_active" => true,
      *             "userHasProjects":
      *             [
@@ -890,18 +810,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *             "id": "1",
      *             "title": "Project 1",
      *             "description": "Description of Project 1",
-     *             "createdAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
+     *             "createdAt": 1507968483,
+     *             "updatedAt": 1507968483,
      *             "is_active" => true,
      *             "userHasProjects":
      *             [
@@ -1040,18 +950,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *             "id": "1",
      *             "title": "Project 1",
      *             "description": "Description of Project 1",
-     *             "createdAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
+     *             "createdAt": 1507968483,
+     *             "updatedAt": 1507968483,
      *             "is_active" => true,
      *             "userHasProjects":
      *             [
@@ -1188,18 +1088,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *             "id": "1",
      *             "title": "Project 1",
      *             "description": "Description of Project 1",
-     *             "createdAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
+     *             "createdAt": 1507968483,
+     *             "updatedAt": 1507968483,
      *             "is_active" => true,
      *             "userHasProjects":
      *             [
@@ -1332,18 +1222,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *             "id": "1",
      *             "title": "Project 1",
      *             "description": "Description of Project 1",
-     *             "createdAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
-     *             "updatedAt":
-     *             {
-     *               "date": "2016-11-26 21:49:04.000000",
-     *               "timezone_type": 3,
-     *               "timezone": "Europe/Berlin"
-     *             },
+     *             "createdAt": 1507968483,
+     *             "updatedAt": 1507968483,
      *             "is_active" => true,
      *             "userHasProjects":
      *             [

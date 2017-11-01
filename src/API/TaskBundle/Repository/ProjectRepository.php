@@ -63,10 +63,10 @@ class ProjectRepository extends EntityRepository
                 $query = $this->createQueryBuilder('p')
                     ->select('p, userHasProjects, uhpUser')
                     ->leftJoin('p.userHasProjects', 'userHasProjects')
-                    ->leftJoin('uhp.user', 'uhpUser')
+                    ->leftJoin('userHasProjects.user', 'uhpUser')
                     ->orderBy('p.id', 'DESC')
                     ->distinct()
-                    ->where('p.createdBy = :loggedUser OR uhp.user = :loggedUser')
+                    ->where('p.createdBy = :loggedUser OR userHasProjects.user = :loggedUser')
                     ->andWhere('p.is_active = :isActive')
                     ->setParameters(['loggedUser' => $loggedUser, 'isActive' => $isActiveParam])
                     ->getQuery();
@@ -74,10 +74,10 @@ class ProjectRepository extends EntityRepository
                 $query = $this->createQueryBuilder('p')
                     ->select('p, userHasProjects, uhpUser')
                     ->leftJoin('p.userHasProjects', 'userHasProjects')
-                    ->leftJoin('uhp.user', 'uhpUser')
+                    ->leftJoin('userHasProjects.user', 'uhpUser')
                     ->orderBy('p.id', 'DESC')
                     ->distinct()
-                    ->where('p.createdBy = :loggedUser OR uhp.user = :loggedUser')
+                    ->where('p.createdBy = :loggedUser OR userHasProjects.user = :loggedUser')
                     ->setParameter('loggedUser', $loggedUser)
                     ->getQuery();
             }
@@ -240,8 +240,8 @@ class ProjectRepository extends EntityRepository
             'id' => $data['id'],
             'title' => $data['title'],
             'description' => $data['description'],
-            'createdAt' => $data['createdAt'],
-            'updatedAt' => $data['updatedAt'],
+            'createdAt' => isset($data['createdAt']) ? date_timestamp_get($data['createdAt']) : null,
+            'updatedAt' => isset($data['updatedAt']) ? date_timestamp_get($data['updatedAt']) : null,
             'is_active' => $data['is_active'],
             'userHasProjects' => $userHasProjectsArray
         ];

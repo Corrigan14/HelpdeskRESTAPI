@@ -35,9 +35,9 @@ class TaskAttributeFixture implements FixtureInterface, ContainerAwareInterface,
         $ta->setType(VariableHelper::SIMPLE_SELECT);
         $ta->setDescription('Test description of Simple select');
         $options = [
-            'select1' => 'select1',
-            'select2' => 'select2',
-            'select3' => 'select3',
+           'select1',
+           'select2',
+           'select3',
         ];
         $ta->setOptions($options);
         $manager->persist($ta);

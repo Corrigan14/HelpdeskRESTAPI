@@ -20,6 +20,7 @@ use API\TaskBundle\Security\StatusOptions;
 use API\TaskBundle\Security\UserRoleAclOptions;
 use API\TaskBundle\Security\VoteOptions;
 use API\TaskBundle\Services\FilterAttributeOptions;
+use API\TaskBundle\Services\VariableHelper;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -1074,7 +1075,7 @@ class TaskController extends ApiBaseController
      * @ApiDoc(
      *  resource = true,
      *  description="Create a new Task Entity with extra Task Data.
-     *  This can be added by attributes: task_data[task_attribute_id] = value,
+     *  This can be added by the json array of attributes: task_data[task_attribute_id] = value,
      *  attributes must be defined in the TaskAttribute Entity.",
      *  parameters={
      *      {"name"="title", "dataType"="string", "required"=true,  "description"="tile of the Task"},
@@ -1088,6 +1089,7 @@ class TaskController extends ApiBaseController
      *      {"name"="work", "dataType"="string", "required"=false,  "description"="work"},
      *      {"name"="workTime", "dataType"="string", "required"=false,  "description"="work time"},
      *      {"name"="assigned", "dataType"="array", "required"=false,  "description"="array of the Users assigned to the task: [userId => 12, statusId => 5]. Format: $json array - http://php.net/manual/en/function.json-decode.php"},
+     *      {"name"="task_data", "dataType"="array", "required"=false,  "description"="array of the additional task attributes: [task_attribute_id => value, task_attribute_id2 => values]. Format: $json array - http://php.net/manual/en/function.json-decode.php"},
      *  },
      *  headers={
      *     {
@@ -1135,8 +1137,8 @@ class TaskController extends ApiBaseController
         $requestData = $request->request->all();
 
         $requestDetailData = false;
-        if (isset($requestData['task_data']) && count($requestData['task_data']) > 0) {
-            $requestDetailData = $requestData['task_data'];
+        if (isset($requestData['task_data'])) {
+            $requestDetailData = json_decode($requestData['task_data'], true);
             unset($requestData['task_data']);
         }
 
@@ -1152,7 +1154,8 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestData['requester'])) {
-            $requestedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requestData['requester']);
+            $requestedUserId = (int)$requestData['requester'];
+            $requestedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requestedUserId);
             if (!$requestedUser instanceof User) {
                 return $this->createApiResponse([
                     'message' => 'Requested user with requested Id does not exist!',
@@ -1171,7 +1174,7 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestData['project'])) {
-            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($requestData['project']);
+            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find((int)$requestData['project']);
 
             if (!$project instanceof Project) {
                 return $this->createApiResponse([
@@ -1217,7 +1220,7 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestData['workTime'])) {
-            if (is_string($requestData['work'])) {
+            if (is_string($requestData['workTime'])) {
                 $workTime = $requestData['workTime'];
                 $task->setWorkTime($workTime);
             } else {
@@ -1228,7 +1231,7 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestData['company'])) {
-            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($requestData['company']);
+            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find((int)$requestData['company']);
             if (!$company instanceof Company) {
                 return $this->createApiResponse([
                     'message' => 'Company with requested Id does not exist!',
@@ -1278,8 +1281,7 @@ class TaskController extends ApiBaseController
 
         // OPTIONAL PARAMETERS - ANOTHER NEW ENTITY IS REQUIRED
         if (isset($requestData['assigned'])) {
-            $requestData['assigned'] = json_decode($requestData['assigned'], true);
-            $assignedUsersArray = $requestData['assigned'];
+            $assignedUsersArray = json_decode($requestData['assigned'], true);
 
             // Add new requested users to the task
             foreach ($assignedUsersArray as $key => $value) {
@@ -1373,15 +1375,14 @@ class TaskController extends ApiBaseController
                 $userIsAssignedToTask->setUser($user);
                 $this->getDoctrine()->getManager()->persist($userIsAssignedToTask);
                 $this->getDoctrine()->getManager()->persist($task);
-                $this->getDoctrine()->getManager()->flush();
             }
         }
 
         // Fill TaskData Entity if some of its parameters were sent
+        // Expected json objects: {"10": "value 1", "12": "value 2"}
         if ($requestDetailData) {
-            /** @var array $taskData */
-            $taskData = $requestDetailData;
-            foreach ($taskData as $key => $value) {
+            /** @var array $requestDetailData */
+            foreach ($requestDetailData as $key => $value) {
                 $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($key);
                 if ($taskAttribute instanceof TaskAttribute) {
                     $cd = $this->getDoctrine()->getRepository('APITaskBundle:TaskData')->findOneBy(['taskAttribute' => $taskAttribute,
@@ -1395,11 +1396,66 @@ class TaskController extends ApiBaseController
 
                     $cdErrors = $this->get('entity_processor')->processEntity($cd, ['value' => $value]);
                     if (false === $cdErrors) {
+                        //Check the data format
+                        $taskAttributeDataFormat = $taskAttribute->getType();
+                        switch ($taskAttributeDataFormat) {
+                            case VariableHelper::INTEGER_NUMBER:
+                                if (!is_int($value)) {
+                                    return $this->createApiResponse([
+                                        'message' => 'The value format of task_data with key: ' . $key . ' is invalid. Expected format: INTEGER',
+                                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                }
+                                break;
+                            case VariableHelper::DECIMAL_NUMBER:
+                                if (!is_float($value)) {
+                                    return $this->createApiResponse([
+                                        'message' => 'The value format of task_data with key: ' . $key . ' is invalid. Expected format: DECIMAL NUMBER',
+                                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                }
+                                break;
+                            case VariableHelper::SIMPLE_SELECT:
+                                $selectionOptions = $taskAttribute->getOptions();
+                                if (!in_array($value, $selectionOptions, true)) {
+                                    return $this->createApiResponse([
+                                        'message' => 'The value of task_data with key: ' . $key . ' is invalid. Expected is value from ATTRIBUTE OPTIONS',
+                                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                }
+                                break;
+                            case VariableHelper::MULTI_SELECT:
+                                $selectionOptions = $taskAttribute->getOptions();
+                                $sentOptions = json_decode($value);
+                                foreach ($sentOptions as $option) {
+                                    if (!in_array($option, $selectionOptions, true)) {
+                                        return $this->createApiResponse([
+                                            'message' => 'The value of task_data with key: ' . $key . ' is invalid. Expected is value from ATTRIBUTE OPTIONS',
+                                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                    }
+                                }
+                                break;
+                            case VariableHelper::DATE:
+                                $intDateData = (int)$value;
+                                try {
+                                    $timeObject = new \DateTime("@$intDateData");
+                                    $cd->setValue($timeObject);
+                                } catch (\Exception $e) {
+                                    return $this->createApiResponse([
+                                        'message' => 'The value of task_data with key: ' . $key . ' is invalid. Expected is TIMESTAMP',
+                                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                }
+
+                                break;
+                            default:
+                                break;
+                        }
+
+                        if (null === $value || 'null' === $value) {
+                            $cd->setValue(null);
+                        }
                         $task->addTaskDatum($cd);
                         $this->getDoctrine()->getManager()->persist($task);
                         $this->getDoctrine()->getManager()->persist($cd);
                     } else {
-                        $this->createApiResponse([
+                        return $this->createApiResponse([
                             'message' => 'The value of task_data with key: ' . $key . ' is invalid',
                         ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
                     }
@@ -1409,8 +1465,8 @@ class TaskController extends ApiBaseController
                     ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 }
             }
-            $this->getDoctrine()->getManager()->flush();
         }
+        $this->getDoctrine()->getManager()->flush();
 
 // Check if user can update selected task
         if ($this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
@@ -1701,7 +1757,8 @@ class TaskController extends ApiBaseController
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function updateAction(int $id, Request $request)
+    public
+    function updateAction(int $id, Request $request)
     {
         return $this->quickUpdateTaskAction($id, $request);
     }
@@ -1736,7 +1793,8 @@ class TaskController extends ApiBaseController
      * @return JsonResponse|Response
      * @throws \LogicException
      */
-    public function deleteAction(int $id)
+    public
+    function deleteAction(int $id)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
 
@@ -2031,7 +2089,8 @@ class TaskController extends ApiBaseController
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function quickUpdateTaskAction(int $taskId, Request $request)
+    public
+    function quickUpdateTaskAction(int $taskId, Request $request)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
@@ -2585,7 +2644,8 @@ class TaskController extends ApiBaseController
      * @return JsonResponse|Response
      * @throws \LogicException
      */
-    public function getTaskOptionsAction(int $taskId)
+    public
+    function getTaskOptionsAction(int $taskId)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
@@ -2669,7 +2729,8 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private function getFilterData(Request $request): array
+    private
+    function getFilterData(Request $request): array
     {
         $data = [];
 
@@ -2748,7 +2809,8 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private function getFilterDataFromSavedFilterArray(array $filterDataArray): array
+    private
+    function getFilterDataFromSavedFilterArray(array $filterDataArray): array
     {
         $data = [];
 
@@ -2810,7 +2872,8 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private function processFilterData(array $data): array
+    private
+    function processFilterData(array $data): array
     {
         // Ina-beznejsia moznost ako zadavat pole hodnot v URL adrese, ktora vracia priamo pole: index.php?id[]=1&id[]=2&id[]=3&name=john
         // na zakodovanie dat do URL je mozne pouzit encodeURIComponent
@@ -3012,7 +3075,8 @@ class TaskController extends ApiBaseController
      *
      * @return array
      */
-    private function separateFromToDateData(string $created): array
+    private
+    function separateFromToDateData(string $created): array
     {
         $fromPosition = strpos($created, 'FROM=');
         $toPosition = strpos($created, 'TO=');
@@ -3054,7 +3118,8 @@ class TaskController extends ApiBaseController
      * @return bool
      * @throws \LogicException
      */
-    private function checkIfUserHasResolveTaskAclPermission(TaskHasAssignedUser $entity, Project $project): bool
+    private
+    function checkIfUserHasResolveTaskAclPermission(TaskHasAssignedUser $entity, Project $project): bool
     {
         $user = $entity->getUser();
         $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
@@ -3077,7 +3142,8 @@ class TaskController extends ApiBaseController
      * @return array|Response
      * @throws \InvalidArgumentException
      */
-    private function processOrderData($orderString)
+    private
+    function processOrderData($orderString)
     {
         $order = [];
         if (null !== $orderString) {
@@ -3110,7 +3176,8 @@ class TaskController extends ApiBaseController
      * @param string $loggedUserEmail
      * @return array
      */
-    private function getEmailForUpdateTaskNotification(Task $task, string $loggedUserEmail): array
+    private
+    function getEmailForUpdateTaskNotification(Task $task, string $loggedUserEmail): array
     {
         $notificationEmailAddresses = [];
 
@@ -3153,7 +3220,8 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private function getTemplateParams(int $taskId, string $title, array $emailAddresses, User $user, array $changedParams): array
+    private
+    function getTemplateParams(int $taskId, string $title, array $emailAddresses, User $user, array $changedParams): array
     {
         $userDetailData = $user->getDetailData();
         if ($userDetailData instanceof UserData) {
@@ -3190,7 +3258,8 @@ class TaskController extends ApiBaseController
      * @param array $changedParams
      * @return array
      */
-    private function getChangedParams(array &$requestData, array &$changedParams): array
+    private
+    function getChangedParams(array &$requestData, array &$changedParams): array
     {
         if (count($requestData) > 0) {
             foreach ($requestData as $key => $value) {
@@ -3207,7 +3276,8 @@ class TaskController extends ApiBaseController
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    private function addCanEditParamToEveryTask(array $tasksArray): array
+    private
+    function addCanEditParamToEveryTask(array $tasksArray): array
     {
         $tasksModified = [];
         if (count($tasksArray['data']) > 0) {

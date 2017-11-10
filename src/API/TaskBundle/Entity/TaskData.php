@@ -28,8 +28,6 @@ class TaskData
      * @var string
      *
      * @ORM\Column(name="value", type="string", length=255)
-     * @Assert\NotBlank()
-     * @Assert\Type("string")
      */
     private $value;
 

@@ -768,38 +768,6 @@ class Task
     }
 
     /**
-     * EXTENSION TO TIMESTAMP TRAIT - RETURNS TIMESTAMP DATE FORMAT
-     */
-
-    /**
-     * Returns createdAt.
-     *
-     * @return \DateTime|int
-     */
-    public function getCreatedAt()
-    {
-        if ($this->createdAt) {
-            return $this->createdAt->getTimestamp();
-        } else {
-            return $this->createdAt;
-        }
-    }
-
-    /**
-     * Returns updatedAt.
-     *
-     * @return \DateTime|int
-     */
-    public function getUpdatedAt()
-    {
-        if ($this->updatedAt) {
-            return $this->updatedAt->getTimestamp();
-        } else {
-            return $this->updatedAt;
-        }
-    }
-
-    /**
      * Add notification
      *
      * @param Notification $notification
@@ -832,4 +800,38 @@ class Task
     {
         return $this->notifications;
     }
+
+
+    /**
+     * EXTENSION TO TIMESTAMP TRAIT - RETURNS TIMESTAMP DATE FORMAT
+     */
+
+    /**
+     * Returns createdAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getCreatedAt()
+    {
+        if ($this->createdAt) {
+            return $this->createdAt->getTimestamp();
+        } else {
+            return $this->createdAt;
+        }
+    }
+
+    /**
+     * Returns updatedAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getUpdatedAt()
+    {
+        if ($this->updatedAt) {
+            return $this->updatedAt->getTimestamp();
+        } else {
+            return $this->updatedAt;
+        }
+    }
+
 }

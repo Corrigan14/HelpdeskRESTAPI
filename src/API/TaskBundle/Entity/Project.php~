@@ -98,6 +98,14 @@ class Project
     private $imaps;
 
     /**
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Notification", mappedBy="task", cascade={"persist", "remove"})
+     * @Serializer\Exclude()
+     *
+     * @var ArrayCollection
+     */
+    private $notifications;
+
+    /**
      * Project constructor.
      */
     public function __construct()
@@ -352,5 +360,37 @@ class Project
     public function getImaps()
     {
         return $this->imaps;
+    }
+
+    /**
+     * EXTENSION TO TIMESTAMP TRAIT - RETURNS TIMESTAMP DATE FORMAT
+     */
+
+    /**
+     * Returns createdAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getCreatedAt()
+    {
+        if ($this->createdAt) {
+            return $this->createdAt->getTimestamp();
+        } else {
+            return $this->createdAt;
+        }
+    }
+
+    /**
+     * Returns updatedAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getUpdatedAt()
+    {
+        if ($this->updatedAt) {
+            return $this->updatedAt->getTimestamp();
+        }else{
+            return $this->updatedAt;
+        }
     }
 }

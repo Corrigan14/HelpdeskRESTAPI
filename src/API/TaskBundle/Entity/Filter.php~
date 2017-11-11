@@ -29,7 +29,7 @@ class Filter
      * @var string
      *
      * @ORM\Column(name="title", type="string", length=255)
-     * @Assert\NotBlank(message="Title of task is required")
+     * @Assert\NotBlank(message="Title of filter is required")
      * @Assert\Type("string")
      */
     private $title;
@@ -47,7 +47,6 @@ class Filter
      * @var string
      *
      * @ORM\Column(name="filter", type="text")
-     * @Assert\NotBlank(message="Filter is required!")
      */
     private $filter;
 
@@ -78,14 +77,15 @@ class Filter
      *
      * @ORM\Column(name="icon_class", type="string", length=255, nullable=false)
      * @Assert\Type("string")
+     * @Assert\NotBlank(message="Icon class of filter is required")
      */
     private $icon_class;
 
     /**
      * @var int
      *
-     * @ORM\Column(name="`order`", type="integer")
-     * @Assert\NotBlank(message="Order number is required!")
+     * @ORM\Column(name="`order`", type="integer", nullable=false)
+     * @Assert\NotBlank(message="Order of filter is required")
      */
     private $order;
 
@@ -107,6 +107,7 @@ class Filter
      * @var bool
      *
      * @ORM\Column(name="users_remembered", type="boolean", options={"default":0})
+     * @Serializer\ReadOnly()
      */
     private $users_remembered;
 
@@ -380,7 +381,7 @@ class Filter
      */
     public function setOrder($order)
     {
-        $this->order = $order;
+        $this->order = (int)$order;
 
         return $this;
     }
@@ -441,5 +442,29 @@ class Filter
     public function getColumnsTaskAttributes()
     {
         return json_decode($this->columns_task_attributes);
+    }
+
+    /**
+     * Set usersRemembered
+     *
+     * @param boolean $usersRemembered
+     *
+     * @return Filter
+     */
+    public function setUsersRemembered($usersRemembered)
+    {
+        $this->users_remembered = $usersRemembered;
+
+        return $this;
+    }
+
+    /**
+     * Get usersRemembered
+     *
+     * @return boolean
+     */
+    public function getUsersRemembered()
+    {
+        return $this->users_remembered;
     }
 }

@@ -20,12 +20,34 @@ class NotificationController extends ApiBaseController
      *     {
      *        "data":
      *        [
-     *          {
-     *
-     *          }
+     *           {
+     *              "id": 4,
+     *              "title": "User assigned you a Project",
+     *              "body": null,
+     *              "checked": false,
+     *              "createdAt": 1510407878,
+     *              "createdBy":
+     *              {
+     *                  "id": 521,
+     *                  "username": "admin",
+     *                  "email": "admin@admin.sk",
+     *                  "name": "Admin",
+     *                  "surname": "Adminovic"
+     *              },
+     *              "project":
+     *              {
+     *                  "id": 23,
+     *                  "title": "Project of admin"
+     *              },
+     *              "task":
+     *              {
+     *                  "id": 23,
+     *                  "title": "Project of admin"
+     *              },
+     *           }
      *        ],
      *        "not read": 10,
-     *        "total": 15
+     *        "read": 0
      *     }
      *
      * @ApiDoc(
@@ -51,10 +73,12 @@ class NotificationController extends ApiBaseController
      *
      * @param Request $request
      * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function getLoggedUsersNotificationAction(Request $request)
+    public function getLoggedUsersNotificationAction(Request $request): Response
     {
         $user = $this->getUser();
 
@@ -68,7 +92,7 @@ class NotificationController extends ApiBaseController
         }
 
         $options = [
-            'loggedUser' => $user,
+            'loggedUserId' => $user->getId(),
             'read' => $read
         ];
 

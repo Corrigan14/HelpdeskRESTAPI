@@ -36,18 +36,20 @@ class NotificationService
     /**
      * @param $options
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getLoggedUserNotifications($options): array
     {
-        $loggedUser = $options['loggedUser'];
+        $loggedUserId = $options['loggedUserId'];
         $read = $options['read'];
 
-        $notifications = [];
+        $allNotifications = $this->em->getRepository('APITaskBundle:Notification')->getLoggedUserNotifications($loggedUserId, $read);
 
         return [
-            'data' => $notifications,
-            'not read' => 10,
-            'total' => 15
+            'data' => $allNotifications,
+            'not read' => $this->em->getRepository('APITaskBundle:Notification')->countLoggedUserNotifications($loggedUserId,false),
+            'read' => $this->em->getRepository('APITaskBundle:Notification')->countLoggedUserNotifications($loggedUserId,true)
         ];
     }
 

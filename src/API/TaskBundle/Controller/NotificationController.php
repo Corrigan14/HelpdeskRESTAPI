@@ -2,7 +2,6 @@
 
 namespace API\TaskBundle\Controller;
 
-use API\CoreBundle\Entity\User;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;

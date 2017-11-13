@@ -73,6 +73,7 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
         $filter->setIconClass('&#xE88A;');
         $filter->setOrder(1);
         $filter->setColumns($doItColumns);
+        $filter->setUsersRemembered(false);
 
         $manager->persist($filter);
 
@@ -106,6 +107,7 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
         $filter->setOrder(2);
         $filter->setColumns($importantColumns);
         $filter->setColumnsTaskAttributes($importantColumnsTaskAttr);
+        $filter->setUsersRemembered(false);
 
         $manager->persist($filter);
 
@@ -132,6 +134,7 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
         $filter->setIconClass('&#xE858;');
         $filter->setOrder(3);
         $filter->setColumns($scheduledColumns);
+        $filter->setUsersRemembered(false);
 
         $manager->persist($filter);
 
@@ -158,6 +161,7 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
         $filter->setIconClass('&#xE7EF;');
         $filter->setOrder(4);
         $filter->setColumns($requestedColumns);
+        $filter->setUsersRemembered(false);
 
 
         $manager->persist($filter);

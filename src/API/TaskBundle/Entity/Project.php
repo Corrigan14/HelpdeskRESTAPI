@@ -98,6 +98,14 @@ class Project
     private $imaps;
 
     /**
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Notification", mappedBy="task", cascade={"persist", "remove"})
+     * @Serializer\Exclude()
+     *
+     * @var ArrayCollection
+     */
+    private $notifications;
+
+    /**
      * Project constructor.
      */
     public function __construct()
@@ -384,5 +392,39 @@ class Project
         }else{
             return $this->updatedAt;
         }
+    }
+
+    /**
+     * Add notification
+     *
+     * @param Notification $notification
+     *
+     * @return Project
+     */
+    public function addNotification(Notification $notification)
+    {
+        $this->notifications[] = $notification;
+
+        return $this;
+    }
+
+    /**
+     * Remove notification
+     *
+     * @param Notification $notification
+     */
+    public function removeNotification(Notification $notification)
+    {
+        $this->notifications->removeElement($notification);
+    }
+
+    /**
+     * Get notifications
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getNotifications()
+    {
+        return $this->notifications;
     }
 }

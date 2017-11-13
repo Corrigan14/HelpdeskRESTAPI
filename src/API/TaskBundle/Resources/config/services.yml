@@ -61,3 +61,6 @@ services:
     system_settings_service:
             class: API\TaskBundle\Services\SystemSettingsService
             arguments: ["@doctrine.orm.entity_manager", "@router"]
+    notifications_service:
+            class: API\TaskBundle\Services\NotificationService
+            arguments: ["@doctrine.orm.entity_manager", "@router"]

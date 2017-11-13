@@ -1,0 +1,18 @@
+users_notifications:
+    path:     /notification
+    defaults: { _controller: APITaskBundle:Notification:getLoggedUsersNotification}
+    methods: [GET]
+
+notification_set_as_read:
+    path:     /notification/{notificationId}/read
+    defaults: { _controller: APITaskBundle:Notification:setAsReadNotification }
+    methods: [PATCH]
+    requirements:
+        notificationId: '\d+'
+
+notification_delete:
+    path:     /notification/{notificationId}
+    defaults: { _controller: APITaskBundle:Notification:deleteNotification }
+    methods: [DELETE]
+    requirements:
+            notificationId: '\d+'

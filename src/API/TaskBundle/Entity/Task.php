@@ -113,7 +113,7 @@ class Task
      * @var Project
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Project", inversedBy="tasks")
-     * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=false)
+     * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=true)
      * @Serializer\ReadOnly()
      */
     private $project;
@@ -189,6 +189,14 @@ class Task
     private $invoiceableItems;
 
     /**
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Notification", mappedBy="task", cascade={"persist", "remove"})
+     * @Serializer\Exclude()
+     *
+     * @var ArrayCollection
+     */
+    private $notifications;
+
+    /**
      * Task constructor.
      */
     public function __construct()
@@ -200,6 +208,7 @@ class Task
         $this->taskHasAttachments = new ArrayCollection();
         $this->comments = new ArrayCollection();
         $this->invoiceableItems = new ArrayCollection();
+        $this->notifications = new ArrayCollection();
     }
 
     /**
@@ -759,6 +768,41 @@ class Task
     }
 
     /**
+     * Add notification
+     *
+     * @param Notification $notification
+     *
+     * @return Task
+     */
+    public function addNotification(Notification $notification)
+    {
+        $this->notifications[] = $notification;
+
+        return $this;
+    }
+
+    /**
+     * Remove notification
+     *
+     * @param Notification $notification
+     */
+    public function removeNotification(Notification $notification)
+    {
+        $this->notifications->removeElement($notification);
+    }
+
+    /**
+     * Get notifications
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getNotifications()
+    {
+        return $this->notifications;
+    }
+
+
+    /**
      * EXTENSION TO TIMESTAMP TRAIT - RETURNS TIMESTAMP DATE FORMAT
      */
 
@@ -789,4 +833,5 @@ class Task
             return $this->updatedAt;
         }
     }
+
 }

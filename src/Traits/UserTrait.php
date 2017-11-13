@@ -5,6 +5,7 @@ namespace Traits;
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Comment;
 use API\TaskBundle\Entity\Filter;
+use API\TaskBundle\Entity\Notification;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
@@ -103,6 +104,22 @@ trait UserTrait
      * @Serializer\ReadOnly()
      */
     private $user_role;
+
+    /**
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Notification", mappedBy="createdBy")
+     * @Exclude()
+     *
+     * @var ArrayCollection
+     */
+    private $createdNotifications;
+
+    /**
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Notification", mappedBy="user")
+     * @Exclude()
+     *
+     * @var ArrayCollection
+     */
+    private $notifications;
 
 
     /**
@@ -427,5 +444,73 @@ trait UserTrait
     public function getUserRole()
     {
         return $this->user_role;
+    }
+
+    /**
+     * Add createdNotification
+     *
+     * @param $notification
+     *
+     * @return User
+     */
+    public function addCreatedNotification(Notification $notification)
+    {
+        $this->createdNotifications[] = $notification;
+
+        return $this;
+    }
+
+    /**
+     * Remove createdNotification
+     *
+     * @param Notification $notification
+     */
+    public function removeCreatedNotification(Notification $notification)
+    {
+        $this->createdNotifications->removeElement($notification);
+    }
+
+    /**
+     * Get createdNotifications
+     *
+     * @return Collection
+     */
+    public function getCreatedNotifications()
+    {
+        return $this->createdNotifications;
+    }
+
+    /**
+     * Add notification
+     *
+     * @param $notification
+     *
+     * @return User
+     */
+    public function addNotification(Notification $notification)
+    {
+        $this->notifications[] = $notification;
+
+        return $this;
+    }
+
+    /**
+     * Remove Notification
+     *
+     * @param Notification $notification
+     */
+    public function removeNotification(Notification $notification)
+    {
+        $this->notifications->removeElement($notification);
+    }
+
+    /**
+     * Get Notifications
+     *
+     * @return Collection
+     */
+    public function getNotifications()
+    {
+        return $this->notifications;
     }
 }

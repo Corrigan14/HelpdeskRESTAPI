@@ -113,7 +113,7 @@ class Task
      * @var Project
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Project", inversedBy="tasks")
-     * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=false)
+     * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=true)
      * @Serializer\ReadOnly()
      */
     private $project;

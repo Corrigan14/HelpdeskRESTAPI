@@ -414,31 +414,47 @@ class TaskRepository extends EntityRepository
             /** @var array $allTasksInProject */
             $allTasksInProject = $dividedProjects['VIEW_ALL_TASKS_IN_PROJECT'];
         } else {
-            $allTasksInProject = [];
+            $allTasksInProject = [1];
         }
 
         if (array_key_exists('VIEW_COMPANY_TASKS_IN_PROJECT', $dividedProjects)) {
             /** @var array $companyTasksInProject */
             $companyTasksInProject = $dividedProjects['VIEW_COMPANY_TASKS_IN_PROJECT'];
         } else {
-            $companyTasksInProject = [];
+            $companyTasksInProject = [1];
         }
 
         if (array_key_exists('VIEW_OWN_TASKS', $dividedProjects)) {
             /** @var array $companyTasksInProject */
             $ownTasksInProject = $dividedProjects['VIEW_OWN_TASKS'];
         } else {
-            $ownTasksInProject = [];
+            $ownTasksInProject = [1];
         }
 
-        $query->where('project.id IN (:allTasksInProject) ')
-            ->orWhere('project.id IN (:companyTasksInProject) AND taskCompany.id = :loggedUserCompanyId')
-            ->orWhere('project.id IN (:ownTasksInProject) AND (requestedBy.id = :loggedUserId OR createdBy.id = :loggedUserId)');
-        $paramArray['allTasksInProject'] = $allTasksInProject;
-        $paramArray['companyTasksInProject'] = $companyTasksInProject;
-        $paramArray['loggedUserCompanyId'] = $companyId;
-        $paramArray['ownTasksInProject'] = $ownTasksInProject;
-        $paramArray['loggedUserId'] = $userId;
+        // Select only in Allowed users projects
+        $query->andWhere($query->expr()->orX(
+            $query->expr()->in('project.id', $allTasksInProject),
+            $query->expr()->andX(
+                $query->expr()->in('project.id', $companyTasksInProject),
+                $query->expr()->eq('taskCompany.id', $companyId)
+            ),
+            $query->expr()->andX(
+                $query->expr()->in('project.id', $ownTasksInProject),
+                $query->expr()->orX(
+                    $query->expr()->eq('requestedBy.id', $userId),
+                    $query->expr()->eq('createdBy.id', $userId)
+                )
+            )
+        ));
+
+//        $query->where('project.id IN (:allTasksInProject) ')
+//            ->orWhere('project.id IN (:companyTasksInProject) AND taskCompany.id = :loggedUserCompanyId')
+//            ->orWhere('project.id IN (:ownTasksInProject) AND (requestedBy.id = :loggedUserId OR createdBy.id = :loggedUserId)');
+//        $paramArray['allTasksInProject'] = $allTasksInProject;
+//        $paramArray['companyTasksInProject'] = $companyTasksInProject;
+//        $paramArray['loggedUserCompanyId'] = $companyId;
+//        $paramArray['ownTasksInProject'] = $ownTasksInProject;
+//        $paramArray['loggedUserId'] = $userId;
 
         //Check and apply filters
         $paramNum = 0;

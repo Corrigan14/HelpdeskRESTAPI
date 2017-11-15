@@ -56,6 +56,14 @@ class TaskHasAssignedUser
     private $time_spent;
 
     /**
+     * @ORM\Column(name="actual", type="boolean", options={"default":0})
+     * @Serializer\ReadOnly()
+     *
+     * @var bool
+     */
+    private $actual = false;
+
+    /**
      * @var Status
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Status", inversedBy="taskHasAssignedUsers")
@@ -115,7 +123,7 @@ class TaskHasAssignedUser
     {
         if ($this->status_date) {
             return $this->status_date->getTimestamp();
-        }else{
+        } else {
             return $this->status_date;
         }
     }
@@ -263,7 +271,7 @@ class TaskHasAssignedUser
     {
         if ($this->updatedAt) {
             return $this->updatedAt->getTimestamp();
-        }else{
+        } else {
             return $this->updatedAt;
         }
     }

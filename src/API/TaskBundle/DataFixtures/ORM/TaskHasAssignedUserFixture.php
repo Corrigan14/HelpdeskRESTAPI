@@ -54,6 +54,7 @@ class TaskHasAssignedUserFixture implements FixtureInterface, ContainerAwareInte
             $taskHasAssignedUser->setTask($task);
             $taskHasAssignedUser->setStatus($status);
             $taskHasAssignedUser->setUser($userUser);
+            $taskHasAssignedUser->setActual(true);
             $manager->persist($taskHasAssignedUser);
             $manager->flush();
         }

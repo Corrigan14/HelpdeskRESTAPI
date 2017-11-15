@@ -238,31 +238,31 @@ class TaskController extends ApiBaseController
      *     },
      *     {
      *       "name"="createdTime",
-     *       "description"="A coma separated dates in format
-     *       FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30
-     *        Another option:
-     *          TO=NOW - just tasks created to NOW datetime are returned."
+     *       "description"="A coma separated dates in TIMESTAMP format
+     *       FROM=1510531232,TO=1510531232
+     *       Another option:
+     *       TO=NOW - just tasks started to NOW datetime are returned."
      *     },
      *     {
      *       "name"="startedTime",
-     *       "description"="A coma separated dates in format
-     *       FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30
-     *        Another option:
-     *          TO=NOW - just tasks started to NOW datetime are returned."
+     *       "description"="A coma separated dates in TIMESTAMP format
+     *       FROM=1510531232,TO=1510531232
+     *       Another option:
+     *       TO=NOW - just tasks started to NOW datetime are returned."
      *     },
      *     {
      *       "name"="deadlineTime",
-     *       "description"="A coma separated dates in format
-     *       FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30
+     *       "description"="A coma separated dates in TIMESTAMP format
+     *       FROM=1510531232,TO=1510531232
      *       Another option:
-     *          TO=NOW - just tasks with deadline to NOW datetime are returned."
+     *       TO=NOW - just tasks started to NOW datetime are returned."
      *     },
      *     {
      *       "name"="closedTime",
-     *       "description"="A coma separated dates in format
-     *       FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30
+     *       "description"="A coma separated dates in TIMESTAMP format
+     *       FROM=1510531232,TO=1510531232
      *       Another option:
-     *          TO=NOW - just tasks closed to NOW datetime are returned."
+     *       TO=NOW - just tasks started to NOW datetime are returned."
      *     },
      *     {
      *       "name"="archived",
@@ -2751,8 +2751,7 @@ class TaskController extends ApiBaseController
      * @return JsonResponse|Response
      * @throws \LogicException
      */
-    public
-    function getTaskOptionsAction(int $taskId)
+    public function getTaskOptionsAction(int $taskId)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
@@ -2796,7 +2795,7 @@ class TaskController extends ApiBaseController
             $project = $task->getProject();
             $assignArray = $this->get('api_user.service')->getListOfAvailableProjectAssigners($project, ProjectAclOptions::RESOLVE_TASK);
         }
-        if (!count($assignArray) > 0) {
+        if (\count($assignArray) > 0) {
             $assignerDetailData = $task->getCreatedBy()->getDetailData();
             $assignerName = null;
             $assignerSurname = null;
@@ -2836,8 +2835,7 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private
-    function getFilterData(Request $request): array
+    private function getFilterData(Request $request): array
     {
         $data = [];
 
@@ -2916,8 +2914,7 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private
-    function getFilterDataFromSavedFilterArray(array $filterDataArray): array
+    private function getFilterDataFromSavedFilterArray(array $filterDataArray): array
     {
         $data = [];
 
@@ -2979,8 +2976,7 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private
-    function processFilterData(array $data): array
+    private function processFilterData(array $data): array
     {
         // Ina-beznejsia moznost ako zadavat pole hodnot v URL adrese, ktora vracia priamo pole: index.php?id[]=1&id[]=2&id[]=3&name=john
         // na zakodovanie dat do URL je mozne pouzit encodeURIComponent
@@ -3048,7 +3044,7 @@ class TaskController extends ApiBaseController
             $assigned = $data[FilterAttributeOptions::ASSIGNED];
             $assignedArray = explode(',', $assigned);
 
-            if (in_array('not', $assignedArray, true) && in_array('current-user', $assignedArray, true)) {
+            if (\in_array('not', $assignedArray, true) && \in_array('current-user', $assignedArray, true)) {
                 $notAndCurrentFilter[] = [
                     'not' => 'thau.user',
                     'equal' => [
@@ -3182,8 +3178,7 @@ class TaskController extends ApiBaseController
      *
      * @return array
      */
-    private
-    function separateFromToDateData(string $created): array
+    private function separateFromToDateData(string $created): array
     {
         $fromPosition = strpos($created, 'FROM=');
         $toPosition = strpos($created, 'TO=');
@@ -3193,22 +3188,28 @@ class TaskController extends ApiBaseController
         if (false !== $fromPosition && false !== $toPosition) {
             $fromData = substr($created, $fromPosition + 5, $toPosition - 6);
             $toData = substr($created, $toPosition + 3);
+
             $fromDataTimestamp = (int)$fromData;
             $fromDataDate = new \DateTime("@$fromDataTimestamp");
-            $fromDataDate = $fromDataDate->format('d/m/Y');
-            $toDataTimestamp = (int)$toData;
-            $toDataDate = new \DateTime("@$toDataTimestamp");
-            $toDataDate = $toDataDate->format('d/m/Y');
+
+            if ('now' === $toData) {
+                $toDataDate = new \DateTime();
+            } else {
+                $toDataTimestamp = (int)$toData;
+                $toDataDate = new \DateTime("@$toDataTimestamp");
+            }
         } elseif (false !== $fromPosition && false === $toPosition) {
             $fromData = substr($created, $fromPosition + 5);
             $fromDataTimestamp = (int)$fromData;
             $fromDataDate = new \DateTime("@$fromDataTimestamp");
-            $fromDataDate = $fromDataDate->format('d/m/Y');
         } elseif (false !== $toPosition && false === $fromPosition) {
             $toData = substr($created, $toPosition + 3);
-            $toDataTimestamp = (int)$toData;
-            $toDataDate = new \DateTime("@$toDataTimestamp");
-            $toDataDate = $toDataDate->format('d/m/Y');
+            if ('now' === $toData) {
+                $toDataDate = new \DateTime();
+            } else {
+                $toDataTimestamp = (int)$toData;
+                $toDataDate = new \DateTime("@$toDataTimestamp");
+            }
         }
 
         $response = [
@@ -3225,8 +3226,7 @@ class TaskController extends ApiBaseController
      * @return bool
      * @throws \LogicException
      */
-    private
-    function checkIfUserHasResolveTaskAclPermission(TaskHasAssignedUser $entity, Project $project): bool
+    private function checkIfUserHasResolveTaskAclPermission(TaskHasAssignedUser $entity, Project $project): bool
     {
         $user = $entity->getUser();
         $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
@@ -3249,8 +3249,7 @@ class TaskController extends ApiBaseController
      * @return array|Response
      * @throws \InvalidArgumentException
      */
-    private
-    function processOrderData($orderString)
+    private function processOrderData($orderString)
     {
         $order = [];
         if (null !== $orderString) {
@@ -3283,8 +3282,7 @@ class TaskController extends ApiBaseController
      * @param string $loggedUserEmail
      * @return array
      */
-    private
-    function getEmailForUpdateTaskNotification(Task $task, string $loggedUserEmail): array
+    private function getEmailForUpdateTaskNotification(Task $task, string $loggedUserEmail): array
     {
         $notificationEmailAddresses = [];
 
@@ -3386,7 +3384,7 @@ class TaskController extends ApiBaseController
     private function addCanEditParamToEveryTask(array $tasksArray): array
     {
         $tasksModified = [];
-        if (count($tasksArray['data']) > 0) {
+        if (\count($tasksArray['data']) > 0) {
             foreach ($tasksArray['data'] as $task) {
                 $taskEntityFromDb = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($task['id']);
                 // Check if user can update selected task

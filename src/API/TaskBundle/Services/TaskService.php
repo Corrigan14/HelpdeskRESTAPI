@@ -178,7 +178,7 @@ class TaskService
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    private function getRequiredTasks(int $page, array $options)
+    private function getRequiredTasks(int $page, array $options):array
     {
         /** @var User $loggedUser */
         $loggedUser = $options['loggedUser'];
@@ -192,7 +192,7 @@ class TaskService
             if (999 !== $limit) {
                 $count = $response['count'];
             } else {
-                $count = count($response['array']);
+                $count = \count($response['array']);
             }
 
             return [
@@ -210,7 +210,7 @@ class TaskService
         // 1. User can view all tasks in projects which he created
         $usersProjects = $loggedUser->getProjects();
         $dividedProjects = [];
-        if (count($usersProjects) > 0) {
+        if (\count($usersProjects) > 0) {
             /** @var Project $up */
             foreach ($usersProjects as $up) {
                 $dividedProjects['VIEW_ALL_TASKS_IN_PROJECT'][] = $up->getId();
@@ -219,22 +219,22 @@ class TaskService
 
         // 2. User can view projects tasks based on userHasProject ACL
         $userHasProjects = $loggedUser->getUserHasProjects();
-        if (count($userHasProjects) > 0) {
+        if (\count($userHasProjects) > 0) {
             /** @var UserHasProject $uhp */
             foreach ($userHasProjects as $uhp) {
                 $acl = $uhp->getAcl();
                 if (null === $acl) {
                     continue;
                 }
-                if (in_array(ProjectAclOptions::VIEW_ALL_TASKS, $acl, true)) {
+                if (\in_array(ProjectAclOptions::VIEW_ALL_TASKS, $acl, true)) {
                     $dividedProjects['VIEW_ALL_TASKS_IN_PROJECT'][] = $uhp->getProject()->getId();
                     continue;
                 }
-                if (in_array(ProjectAclOptions::VIEW_TASKS_FROM_USERS_COMPANY, $acl, true)) {
+                if (\in_array(ProjectAclOptions::VIEW_TASKS_FROM_USERS_COMPANY, $acl, true)) {
                     $dividedProjects['VIEW_COMPANY_TASKS_IN_PROJECT'][] = $uhp->getProject()->getId();
                     continue;
                 }
-                if (in_array(ProjectAclOptions::VIEW_OWN_TASKS, $acl, true)) {
+                if (\in_array(ProjectAclOptions::VIEW_OWN_TASKS, $acl, true)) {
                     $dividedProjects['VIEW_OWN_TASKS'][] = $uhp->getProject()->getId();
                     continue;
                 }
@@ -252,7 +252,7 @@ class TaskService
         if (999 !== $limit) {
             $count = $response['count'];
         } else {
-            $count = count($response['array']);
+            $count = \count($response['array']);
         }
 
         return [

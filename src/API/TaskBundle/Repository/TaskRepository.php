@@ -170,14 +170,14 @@ class TaskRepository extends EntityRepository
         }
         foreach ($isNullFilter as $value) {
             // check if query is allowed
-            if (in_array($value, VariableHelper::$allowedKeysInFilter, true)) {
+            if (\in_array($value, VariableHelper::$allowedKeysInFilter, true)) {
                 $query->andWhere($value . ' IS NULL');
             }
         }
 
         foreach ($inFilter as $key => $value) {
             // check if query is allowed
-            if (in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
+            if (\in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
                 $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
                 $paramArray['parameters' . $paramNum] = $value;
                 $paramNum++;
@@ -185,7 +185,7 @@ class TaskRepository extends EntityRepository
         }
 
         foreach ($equalFilter as $key => $value) {
-            if (in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
+            if (\in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
                 $query->andWhere($key . ' = :parameter' . $paramNum);
                 $paramArray['parameter' . $paramNum] = $value;
 
@@ -194,14 +194,14 @@ class TaskRepository extends EntityRepository
         }
 
         foreach ($notAndCurrentFilter as $filter) {
-            if (in_array($filter['not'], VariableHelper::$allowedKeysInFilter, true) && in_array($filter['equal']['key'], VariableHelper::$allowedKeysInFilter, true)) {
+            if (\in_array($filter['not'], VariableHelper::$allowedKeysInFilter, true) && \in_array($filter['equal']['key'], VariableHelper::$allowedKeysInFilter, true)) {
                 $query->andWhere($filter['not'] . ' IS NULL' . ' OR ' . $filter['equal']['key'] . ' = :parameter' . $paramNum);
                 $paramArray['parameter' . $paramNum] = $filter['equal']['value'];
             }
         }
 
         foreach ($dateFilter as $key => $value) {
-            if (in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
+            if (\in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
                 if (isset($value['from']) && isset($value['to'])) {
                     $query->andWhere($query->expr()->between($key, ':FROM' . $paramNum, ':TO' . $paramNum));
                     $paramArray['FROM' . $paramNum] = $value['from'];
@@ -456,14 +456,14 @@ class TaskRepository extends EntityRepository
 
         foreach ($isNullFilter as $value) {
             // check if query is allowed
-            if (in_array($value, VariableHelper::$allowedKeysInFilter)) {
+            if (\in_array($value, VariableHelper::$allowedKeysInFilter, true)) {
                 $query->andWhere($value . ' IS NULL');
             }
         }
 
         foreach ($inFilter as $key => $value) {
             // check if query is allowed
-            if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
+            if (\in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
                 $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
                 $paramArray['parameters' . $paramNum] = $value;
 
@@ -472,7 +472,7 @@ class TaskRepository extends EntityRepository
         }
 
         foreach ($equalFilter as $key => $value) {
-            if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
+            if (\in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
                 $query->andWhere($key . ' = :parameter' . $paramNum);
                 $paramArray['parameter' . $paramNum] = $value;
 
@@ -481,14 +481,14 @@ class TaskRepository extends EntityRepository
         }
 
         foreach ($notAndCurrentFilter as $filter) {
-            if (in_array($filter['not'], VariableHelper::$allowedKeysInFilter) && in_array($filter['equal']['key'], VariableHelper::$allowedKeysInFilter)) {
+            if (\in_array($filter['not'], VariableHelper::$allowedKeysInFilter, true) && in_array(\$filter['equal']['key'], VariableHelper::$allowedKeysInFilter, true)) {
                 $query->andWhere($filter['not'] . ' IS NULL' . ' OR ' . $filter['equal']['key'] . ' = :parameter' . $paramNum);
                 $paramArray['parameter' . $paramNum] = $filter['equal']['value'];
             }
         }
 
         foreach ($dateFilter as $key => $value) {
-            if (in_array($key, VariableHelper::$allowedKeysInFilter)) {
+            if (\in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
                 if (isset($value['from']) && isset($value['to'])) {
                     $query->andWhere($query->expr()->between($key, ':FROM' . $paramNum, ':TO' . $paramNum));
                     $paramArray['FROM' . $paramNum] = $value['from'];
@@ -655,7 +655,7 @@ class TaskRepository extends EntityRepository
     {
         $taskData = $data->getTaskData();
         $taskDataArray = [];
-        if (count($taskData) > 0) {
+        if (\count($taskData) > 0) {
             /** @var TaskData $item */
             foreach ($taskData as $item) {
                 $taskDataArray[] = [
@@ -670,7 +670,7 @@ class TaskRepository extends EntityRepository
         }
         $followers = $data->getFollowers();
         $followersArray = [];
-        if (count($followers) > 0) {
+        if (\count($followers) > 0) {
             /** @var User $item */
             foreach ($followers as $item) {
                 $userDetailData = $item->getDetailData();
@@ -691,7 +691,7 @@ class TaskRepository extends EntityRepository
         }
         $tags = $data->getTags();
         $tagsArray = [];
-        if (count($tags) > 0) {
+        if (\count($tags) > 0) {
             /** @var Tag $item */
             foreach ($tags as $item) {
                 $tagsArray[] = [
@@ -703,12 +703,12 @@ class TaskRepository extends EntityRepository
         }
         $taskHasAssignedUsers = $data->getTaskHasAssignedUsers();
         $taskHasAssignedUsersArray = [];
-        if (count($taskHasAssignedUsers) > 0) {
+        if (\count($taskHasAssignedUsers) > 0) {
             $processedUsers = [];
             /** @var TaskHasAssignedUser $item */
             foreach ($taskHasAssignedUsers as $item) {
                 $processedUsersDates[$item->getUser()->getId()] = null;
-                if (!in_array($item->getUser()->getId(), $processedUsers, true)) {
+                if (!\in_array($item->getUser()->getId(), $processedUsers, true)) {
                     $processedUsersDates[$item->getUser()->getId()] = $item->getCreatedAt();
                     $userDetailData = $item->getUser()->getDetailData();
                     $userName = null;
@@ -784,7 +784,7 @@ class TaskRepository extends EntityRepository
 
         $taskHasAttachments = $data->getTaskHasAttachments();
         $taskHasAttachmentsArray = [];
-        if (count($taskHasAttachments) > 0) {
+        if (\count($taskHasAttachments) > 0) {
             /** @var TaskHasAttachment $item */
             foreach ($taskHasAttachments as $item) {
                 $taskHasAttachmentsArray[] = [
@@ -796,7 +796,7 @@ class TaskRepository extends EntityRepository
 
         $invoiceableItems = $data->getInvoiceableItems();
         $invoiceableItemsArray = [];
-        if (count($invoiceableItems) > 0) {
+        if (\count($invoiceableItems) > 0) {
             /** @var InvoiceableItem $item */
             foreach ($invoiceableItems as $item) {
                 $invoiceableItemsArray[] = [
@@ -856,7 +856,7 @@ class TaskRepository extends EntityRepository
                 $attachments = $comment->getCommentHasAttachments();
                 $attachmentArray = [];
 
-                if (count($attachments) > 0) {
+                if (\count($attachments) > 0) {
                     foreach ($attachments as $attachment) {
                         $attachmentArray[] = [
                             'id' => $attachment->getId(),
@@ -948,7 +948,7 @@ class TaskRepository extends EntityRepository
     {
         $taskData = $data['taskData'];
         $taskDataArray = [];
-        if (count($taskData) > 0) {
+        if (\count($taskData) > 0) {
             foreach ($taskData as $item) {
                 $taskDataArray[] = [
                     'id' => $item['id'],
@@ -962,7 +962,7 @@ class TaskRepository extends EntityRepository
         }
         $followers = $data['followers'];
         $followersArray = [];
-        if (count($followers) > 0) {
+        if (\count($followers) > 0) {
             foreach ($followers as $item) {
                 $userDetailData = $item['detailData'];
                 $userName = null;
@@ -982,7 +982,7 @@ class TaskRepository extends EntityRepository
         }
         $tags = $data['tags'];
         $tagsArray = [];
-        if (count($tags) > 0) {
+        if (\count($tags) > 0) {
             /** @var Tag $item */
             foreach ($tags as $item) {
                 $tagsArray[] = [
@@ -995,11 +995,11 @@ class TaskRepository extends EntityRepository
 
         $taskHasAssignedUsers = $data['taskHasAssignedUsers'];
         $taskHasAssignedUsersArray = [];
-        if (count($taskHasAssignedUsers) > 0) {
+        if (\count($taskHasAssignedUsers) > 0) {
             $processedUsers = [];
             foreach ($taskHasAssignedUsers as $item) {
                 $processedUsersDates[$item['user']['id']] = null;
-                if (!in_array($item['user']['id'], $processedUsers, true)) {
+                if (!\in_array($item['user']['id'], $processedUsers, true)) {
                     $processedUsersDates[$item['user']['id']] = $item['createdAt'];
                     $userDetailData = $item['user']['detailData'];
                     $userName = null;
@@ -1075,7 +1075,7 @@ class TaskRepository extends EntityRepository
 
         $taskHasAttachments = $data['taskHasAttachments'];
         $taskHasAttachmentsArray = [];
-        if (count($taskHasAttachments) > 0) {
+        if (\count($taskHasAttachments) > 0) {
             foreach ($taskHasAttachments as $item) {
                 $taskHasAttachmentsArray[] = [
                     'id' => $item['id'],
@@ -1085,7 +1085,7 @@ class TaskRepository extends EntityRepository
         }
         $invoiceableItems = $data['invoiceableItems'];
         $invoiceableItemsArray = [];
-        if (count($invoiceableItems) > 0) {
+        if (\count($invoiceableItems) > 0) {
             foreach ($invoiceableItems as $item) {
                 $invoiceableItemsArray[] = [
                     'id' => $item['id'],

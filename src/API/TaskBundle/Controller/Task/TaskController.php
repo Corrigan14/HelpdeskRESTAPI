@@ -2149,9 +2149,9 @@ class TaskController extends ApiBaseController
         // Check if user can update selected task
         if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
             return $this->accessDeniedResponse();
-        } else {
-            $canEdit = true;
         }
+
+        $canEdit = true;
 
 //      $requestData = '{"assigned":[{"userId": 212, "statusId": 8}],"company":202}';
         $requestDataFromContent = json_decode($request->getContent(), true);
@@ -2164,7 +2164,7 @@ class TaskController extends ApiBaseController
 
         if (isset($requestData['title'])) {
             $title = $requestData['title'];
-            if (strlen($title) > 0) {
+            if (\strlen($title) > 0) {
                 $task->setTitle($title);
                 $changedParams[] = 'title';
             } else {
@@ -2254,7 +2254,7 @@ class TaskController extends ApiBaseController
             $this->getDoctrine()->getConnection()->beginTransaction();
             try {
                 $assignedUsersArray = $requestData['assigned'];
-                if (is_string($assignedUsersArray)) {
+                if (\is_string($assignedUsersArray)) {
                     $assignedUsersArray = json_decode($assignedUsersArray, true);
                 }
 
@@ -2287,16 +2287,18 @@ class TaskController extends ApiBaseController
                         ], StatusCodesHelper::NOT_FOUND_CODE);
                     }
 
-                    // Or check if task already has another one assigned user - if yes, just replace this data - added just
+                    // Or check if task already has another one assigned user - if yes, delete that user
                     // because system temporary support ONLY ONE assigned USER
                     $taskHasOtherAssignedUserArray = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOtherUsersAssignedToTask($options);
 
-                    if (count($taskHasOtherAssignedUserArray) !== 0) {
+                    if (\count($taskHasOtherAssignedUserArray) !== 0) {
                         foreach ($taskHasOtherAssignedUserArray as $tau) {
                             $this->getDoctrine()->getManager()->remove($tau);
                         }
                         $this->getDoctrine()->getManager()->flush();
                     }
+
+                    // Create new task has assigned entity
                     $userIsAssignedToTask = new TaskHasAssignedUser();
 
                     // STATUS
@@ -2423,7 +2425,7 @@ class TaskController extends ApiBaseController
             try {
                 // Remove all task's tags
                 $taskHasTags = $task->getTags();
-                if (count($taskHasTags) > 0) {
+                if (\count($taskHasTags) > 0) {
                     /** @var Tag $taskTag */
                     foreach ($taskHasTags as $taskTag) {
                         $task->removeTag($taskTag);
@@ -2436,7 +2438,7 @@ class TaskController extends ApiBaseController
 
                 // Add tags to task
                 $tagsArray = $requestData['tag'];
-                if (is_string($tagsArray)) {
+                if (\is_string($tagsArray)) {
                     $tagsArray = json_decode($tagsArray, true);
                 }
 
@@ -2597,10 +2599,10 @@ class TaskController extends ApiBaseController
         $loggedUser = $this->getUser();
 
         // Sent Notification Emails about updating of Task to task REQUESTER, ASSIGNED USERS, FOLLOWERS
-        if (count($changedParams) > 0) {
+        if (\count($changedParams) > 0) {
 //            $notificationEmailAddresses = $this->getEmailForUpdateTaskNotification($task, $loggedUser->getEmail());
             $notificationEmailAddresses = [];
-            if (count($notificationEmailAddresses) > 0) {
+            if (\count($notificationEmailAddresses) > 0) {
                 $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $notificationEmailAddresses, $loggedUser, $changedParams);
                 $sendingError = $this->get('email_service')->sendEmail($templateParams);
                 if (true !== $sendingError) {
@@ -3381,8 +3383,7 @@ class TaskController extends ApiBaseController
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    private
-    function addCanEditParamToEveryTask(array $tasksArray): array
+    private function addCanEditParamToEveryTask(array $tasksArray): array
     {
         $tasksModified = [];
         if (count($tasksArray['data']) > 0) {

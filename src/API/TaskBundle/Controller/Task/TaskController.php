@@ -238,31 +238,31 @@ class TaskController extends ApiBaseController
      *     },
      *     {
      *       "name"="createdTime",
-     *       "description"="A coma separated dates in format
-     *       FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30
-     *        Another option:
-     *          TO=NOW - just tasks created to NOW datetime are returned."
+     *       "description"="A coma separated dates in TIMESTAMP format
+     *       FROM=1510531232,TO=1510531232
+     *       Another option:
+     *       TO=NOW - just tasks started to NOW datetime are returned."
      *     },
      *     {
      *       "name"="startedTime",
-     *       "description"="A coma separated dates in format
-     *       FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30
-     *        Another option:
-     *          TO=NOW - just tasks started to NOW datetime are returned."
+     *       "description"="A coma separated dates in TIMESTAMP format
+     *       FROM=1510531232,TO=1510531232
+     *       Another option:
+     *       TO=NOW - just tasks started to NOW datetime are returned."
      *     },
      *     {
      *       "name"="deadlineTime",
-     *       "description"="A coma separated dates in format
-     *       FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30
+     *       "description"="A coma separated dates in TIMESTAMP format
+     *       FROM=1510531232,TO=1510531232
      *       Another option:
-     *          TO=NOW - just tasks with deadline to NOW datetime are returned."
+     *       TO=NOW - just tasks started to NOW datetime are returned."
      *     },
      *     {
      *       "name"="closedTime",
-     *       "description"="A coma separated dates in format
-     *       FROM=2015-02-04T05:10:58+05:30,TO=2015-02-04T05:10:58+05:30
+     *       "description"="A coma separated dates in TIMESTAMP format
+     *       FROM=1510531232,TO=1510531232
      *       Another option:
-     *          TO=NOW - just tasks closed to NOW datetime are returned."
+     *       TO=NOW - just tasks started to NOW datetime are returned."
      *     },
      *     {
      *       "name"="archived",
@@ -1145,7 +1145,7 @@ class TaskController extends ApiBaseController
 
         // REQUIRED PARAMETERS
         if (isset($requestData['title'])) {
-            if (strlen($requestData['title']) > 0) {
+            if (\strlen($requestData['title']) > 0) {
                 $task->setTitle($requestData['title']);
             }
         } else {
@@ -1199,7 +1199,7 @@ class TaskController extends ApiBaseController
 
         // OPTIONAL PARAMETERS
         if (isset($requestData['description'])) {
-            if (is_string($requestData['description'])) {
+            if (\is_string($requestData['description'])) {
                 $desc = $requestData['description'];
                 $task->setDescription($desc);
             } else {
@@ -1210,7 +1210,7 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestData['work'])) {
-            if (is_string($requestData['work'])) {
+            if (\is_string($requestData['work'])) {
                 $work = $requestData['work'];
                 $task->setWork($work);
             } else {
@@ -1221,7 +1221,7 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestData['workTime'])) {
-            if (is_string($requestData['workTime'])) {
+            if (\is_string($requestData['workTime'])) {
                 $workTime = $requestData['workTime'];
                 $task->setWorkTime($workTime);
             } else {
@@ -1360,6 +1360,7 @@ class TaskController extends ApiBaseController
                 $userIsAssignedToTask->setTask($task);
                 $userIsAssignedToTask->setStatus($status);
                 $userIsAssignedToTask->setUser($user);
+                $userIsAssignedToTask->setActual(true);
                 $this->getDoctrine()->getManager()->persist($userIsAssignedToTask);
                 $this->getDoctrine()->getManager()->flush();
 
@@ -1373,7 +1374,7 @@ class TaskController extends ApiBaseController
         //$requestData = '{"tag":["tag1"."tag2"]}';
         if (isset($requestData['tag'])) {
             $tagsArray = $requestData['tag'];
-            if (is_string($tagsArray)) {
+            if (\is_string($tagsArray)) {
                 $tagsArray = json_decode($tagsArray, true);
             }
 
@@ -1447,14 +1448,14 @@ class TaskController extends ApiBaseController
                         $taskAttributeDataFormat = $taskAttribute->getType();
                         switch ($taskAttributeDataFormat) {
                             case VariableHelper::INTEGER_NUMBER:
-                                if (!is_int($value)) {
+                                if (!\is_int($value)) {
                                     return $this->createApiResponse([
                                         'message' => 'The value format of task_data with key: ' . $key . ' is invalid. Expected format: INTEGER',
                                     ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
                                 }
                                 break;
                             case VariableHelper::DECIMAL_NUMBER:
-                                if (!is_float($value)) {
+                                if (!\is_float($value)) {
                                     return $this->createApiResponse([
                                         'message' => 'The value format of task_data with key: ' . $key . ' is invalid. Expected format: DECIMAL NUMBER',
                                     ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
@@ -1462,7 +1463,7 @@ class TaskController extends ApiBaseController
                                 break;
                             case VariableHelper::SIMPLE_SELECT:
                                 $selectionOptions = $taskAttribute->getOptions();
-                                if (!in_array($value, $selectionOptions, true)) {
+                                if (!\in_array($value, $selectionOptions, true)) {
                                     return $this->createApiResponse([
                                         'message' => 'The value of task_data with key: ' . $key . ' is invalid. Expected is value from ATTRIBUTE OPTIONS',
                                     ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
@@ -1472,7 +1473,7 @@ class TaskController extends ApiBaseController
                                 $selectionOptions = $taskAttribute->getOptions();
                                 $sentOptions = json_decode($value);
                                 foreach ($sentOptions as $option) {
-                                    if (!in_array($option, $selectionOptions, true)) {
+                                    if (!\in_array($option, $selectionOptions, true)) {
                                         return $this->createApiResponse([
                                             'message' => 'The value of task_data with key: ' . $key . ' is invalid. Expected is value from ATTRIBUTE OPTIONS',
                                         ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
@@ -2149,9 +2150,9 @@ class TaskController extends ApiBaseController
         // Check if user can update selected task
         if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
             return $this->accessDeniedResponse();
-        } else {
-            $canEdit = true;
         }
+
+        $canEdit = true;
 
 //      $requestData = '{"assigned":[{"userId": 212, "statusId": 8}],"company":202}';
         $requestDataFromContent = json_decode($request->getContent(), true);
@@ -2164,7 +2165,7 @@ class TaskController extends ApiBaseController
 
         if (isset($requestData['title'])) {
             $title = $requestData['title'];
-            if (strlen($title) > 0) {
+            if (\strlen($title) > 0) {
                 $task->setTitle($title);
                 $changedParams[] = 'title';
             } else {
@@ -2254,7 +2255,7 @@ class TaskController extends ApiBaseController
             $this->getDoctrine()->getConnection()->beginTransaction();
             try {
                 $assignedUsersArray = $requestData['assigned'];
-                if (is_string($assignedUsersArray)) {
+                if (\is_string($assignedUsersArray)) {
                     $assignedUsersArray = json_decode($assignedUsersArray, true);
                 }
 
@@ -2287,17 +2288,33 @@ class TaskController extends ApiBaseController
                         ], StatusCodesHelper::NOT_FOUND_CODE);
                     }
 
-                    // Or check if task already has another one assigned user - if yes, just replace this data - added just
+                    // Check if task already has another one assigned user - if yes, delete that user
                     // because system temporary support ONLY ONE assigned USER
                     $taskHasOtherAssignedUserArray = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOtherUsersAssignedToTask($options);
 
-                    if (count($taskHasOtherAssignedUserArray) !== 0) {
+                    if (\count($taskHasOtherAssignedUserArray) !== 0) {
                         foreach ($taskHasOtherAssignedUserArray as $tau) {
                             $this->getDoctrine()->getManager()->remove($tau);
                         }
                         $this->getDoctrine()->getManager()->flush();
                     }
+
+                    // Set all other Users previous statuses to NOT ACTUAL
+                    $taskHasAlreadyAssignedUser = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findAssignedUsersEntities($options);
+
+                    if (\count($taskHasAlreadyAssignedUser) !== 0) {
+                        /** @var TaskHasAssignedUser $tau */
+                        foreach ($taskHasAlreadyAssignedUser as $tau) {
+                            $tau->setActual(false);
+                            $this->getDoctrine()->getManager()->persist($tau);
+                        }
+                        $this->getDoctrine()->getManager()->flush();
+                    }
+
+                    // Create new task has assigned entity and set it as ACTUAL
                     $userIsAssignedToTask = new TaskHasAssignedUser();
+                    $userIsAssignedToTask->setActual(true);
+
 
                     // STATUS
                     if (null !== $assignedUserStatusId) {
@@ -2423,7 +2440,7 @@ class TaskController extends ApiBaseController
             try {
                 // Remove all task's tags
                 $taskHasTags = $task->getTags();
-                if (count($taskHasTags) > 0) {
+                if (\count($taskHasTags) > 0) {
                     /** @var Tag $taskTag */
                     foreach ($taskHasTags as $taskTag) {
                         $task->removeTag($taskTag);
@@ -2436,7 +2453,7 @@ class TaskController extends ApiBaseController
 
                 // Add tags to task
                 $tagsArray = $requestData['tag'];
-                if (is_string($tagsArray)) {
+                if (\is_string($tagsArray)) {
                     $tagsArray = json_decode($tagsArray, true);
                 }
 
@@ -2597,10 +2614,10 @@ class TaskController extends ApiBaseController
         $loggedUser = $this->getUser();
 
         // Sent Notification Emails about updating of Task to task REQUESTER, ASSIGNED USERS, FOLLOWERS
-        if (count($changedParams) > 0) {
+        if (\count($changedParams) > 0) {
 //            $notificationEmailAddresses = $this->getEmailForUpdateTaskNotification($task, $loggedUser->getEmail());
             $notificationEmailAddresses = [];
-            if (count($notificationEmailAddresses) > 0) {
+            if (\count($notificationEmailAddresses) > 0) {
                 $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $notificationEmailAddresses, $loggedUser, $changedParams);
                 $sendingError = $this->get('email_service')->sendEmail($templateParams);
                 if (true !== $sendingError) {
@@ -2749,8 +2766,7 @@ class TaskController extends ApiBaseController
      * @return JsonResponse|Response
      * @throws \LogicException
      */
-    public
-    function getTaskOptionsAction(int $taskId)
+    public function getTaskOptionsAction(int $taskId)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
@@ -2794,7 +2810,7 @@ class TaskController extends ApiBaseController
             $project = $task->getProject();
             $assignArray = $this->get('api_user.service')->getListOfAvailableProjectAssigners($project, ProjectAclOptions::RESOLVE_TASK);
         }
-        if (!count($assignArray) > 0) {
+        if (\count($assignArray) > 0) {
             $assignerDetailData = $task->getCreatedBy()->getDetailData();
             $assignerName = null;
             $assignerSurname = null;
@@ -2834,8 +2850,7 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private
-    function getFilterData(Request $request): array
+    private function getFilterData(Request $request): array
     {
         $data = [];
 
@@ -2914,8 +2929,7 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private
-    function getFilterDataFromSavedFilterArray(array $filterDataArray): array
+    private function getFilterDataFromSavedFilterArray(array $filterDataArray): array
     {
         $data = [];
 
@@ -2977,8 +2991,7 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private
-    function processFilterData(array $data): array
+    private function processFilterData(array $data): array
     {
         // Ina-beznejsia moznost ako zadavat pole hodnot v URL adrese, ktora vracia priamo pole: index.php?id[]=1&id[]=2&id[]=3&name=john
         // na zakodovanie dat do URL je mozne pouzit encodeURIComponent
@@ -3002,6 +3015,7 @@ class TaskController extends ApiBaseController
         }
         if (isset($data[FilterAttributeOptions::STATUS])) {
             $inFilter['status.id'] = explode(',', $data[FilterAttributeOptions::STATUS]);
+            $equalFilter['taskHasAssignedUsers.actual'] = 1;
             $filterForUrl['status'] = '&status=' . $data[FilterAttributeOptions::STATUS];
         }
         if (isset($data[FilterAttributeOptions::PROJECT])) {
@@ -3046,7 +3060,7 @@ class TaskController extends ApiBaseController
             $assigned = $data[FilterAttributeOptions::ASSIGNED];
             $assignedArray = explode(',', $assigned);
 
-            if (in_array('not', $assignedArray, true) && in_array('current-user', $assignedArray, true)) {
+            if (\in_array('not', $assignedArray, true) && \in_array('current-user', $assignedArray, true)) {
                 $notAndCurrentFilter[] = [
                     'not' => 'thau.user',
                     'equal' => [
@@ -3180,8 +3194,7 @@ class TaskController extends ApiBaseController
      *
      * @return array
      */
-    private
-    function separateFromToDateData(string $created): array
+    private function separateFromToDateData(string $created): array
     {
         $fromPosition = strpos($created, 'FROM=');
         $toPosition = strpos($created, 'TO=');
@@ -3191,22 +3204,28 @@ class TaskController extends ApiBaseController
         if (false !== $fromPosition && false !== $toPosition) {
             $fromData = substr($created, $fromPosition + 5, $toPosition - 6);
             $toData = substr($created, $toPosition + 3);
+
             $fromDataTimestamp = (int)$fromData;
             $fromDataDate = new \DateTime("@$fromDataTimestamp");
-            $fromDataDate = $fromDataDate->format('d/m/Y');
-            $toDataTimestamp = (int)$toData;
-            $toDataDate = new \DateTime("@$toDataTimestamp");
-            $toDataDate = $toDataDate->format('d/m/Y');
+
+            if ('now' === $toData) {
+                $toDataDate = new \DateTime();
+            } else {
+                $toDataTimestamp = (int)$toData;
+                $toDataDate = new \DateTime("@$toDataTimestamp");
+            }
         } elseif (false !== $fromPosition && false === $toPosition) {
             $fromData = substr($created, $fromPosition + 5);
             $fromDataTimestamp = (int)$fromData;
             $fromDataDate = new \DateTime("@$fromDataTimestamp");
-            $fromDataDate = $fromDataDate->format('d/m/Y');
         } elseif (false !== $toPosition && false === $fromPosition) {
             $toData = substr($created, $toPosition + 3);
-            $toDataTimestamp = (int)$toData;
-            $toDataDate = new \DateTime("@$toDataTimestamp");
-            $toDataDate = $toDataDate->format('d/m/Y');
+            if ('now' === $toData) {
+                $toDataDate = new \DateTime();
+            } else {
+                $toDataTimestamp = (int)$toData;
+                $toDataDate = new \DateTime("@$toDataTimestamp");
+            }
         }
 
         $response = [
@@ -3223,8 +3242,7 @@ class TaskController extends ApiBaseController
      * @return bool
      * @throws \LogicException
      */
-    private
-    function checkIfUserHasResolveTaskAclPermission(TaskHasAssignedUser $entity, Project $project): bool
+    private function checkIfUserHasResolveTaskAclPermission(TaskHasAssignedUser $entity, Project $project): bool
     {
         $user = $entity->getUser();
         $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
@@ -3233,7 +3251,7 @@ class TaskController extends ApiBaseController
         ]);
         if ($userHasProject instanceof UserHasProject) {
             $acl = $userHasProject->getAcl();
-            if (in_array(ProjectAclOptions::RESOLVE_TASK, $acl, true)) {
+            if (\in_array(ProjectAclOptions::RESOLVE_TASK, $acl, true)) {
                 return true;
             } else {
                 false;
@@ -3247,8 +3265,7 @@ class TaskController extends ApiBaseController
      * @return array|Response
      * @throws \InvalidArgumentException
      */
-    private
-    function processOrderData($orderString)
+    private function processOrderData($orderString)
     {
         $order = [];
         if (null !== $orderString) {
@@ -3281,8 +3298,7 @@ class TaskController extends ApiBaseController
      * @param string $loggedUserEmail
      * @return array
      */
-    private
-    function getEmailForUpdateTaskNotification(Task $task, string $loggedUserEmail): array
+    private function getEmailForUpdateTaskNotification(Task $task, string $loggedUserEmail): array
     {
         $notificationEmailAddresses = [];
 
@@ -3381,11 +3397,10 @@ class TaskController extends ApiBaseController
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    private
-    function addCanEditParamToEveryTask(array $tasksArray): array
+    private function addCanEditParamToEveryTask(array $tasksArray): array
     {
         $tasksModified = [];
-        if (count($tasksArray['data']) > 0) {
+        if (\count($tasksArray['data']) > 0) {
             foreach ($tasksArray['data'] as $task) {
                 $taskEntityFromDb = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($task['id']);
                 // Check if user can update selected task

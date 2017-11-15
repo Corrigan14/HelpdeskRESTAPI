@@ -56,6 +56,14 @@ class TaskHasAssignedUser
     private $time_spent;
 
     /**
+     * @ORM\Column(name="actual", type="boolean", options={"default":1})
+     * @Serializer\ReadOnly()
+     *
+     * @var bool
+     */
+    private $actual = true;
+
+    /**
      * @var Status
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Status", inversedBy="taskHasAssignedUsers")
@@ -115,7 +123,7 @@ class TaskHasAssignedUser
     {
         if ($this->status_date) {
             return $this->status_date->getTimestamp();
-        }else{
+        } else {
             return $this->status_date;
         }
     }
@@ -263,8 +271,32 @@ class TaskHasAssignedUser
     {
         if ($this->updatedAt) {
             return $this->updatedAt->getTimestamp();
-        }else{
+        } else {
             return $this->updatedAt;
         }
+    }
+
+    /**
+     * Set actual
+     *
+     * @param boolean $actual
+     *
+     * @return TaskHasAssignedUser
+     */
+    public function setActual($actual)
+    {
+        $this->actual = $actual;
+
+        return $this;
+    }
+
+    /**
+     * Get actual
+     *
+     * @return boolean
+     */
+    public function getActual()
+    {
+        return $this->actual;
     }
 }

@@ -22,6 +22,7 @@ class VariableHelper
     // Allowed keys in filter array
     public static $allowedKeysInFilter = [
         'status.id',
+        'taskHasAssignedUsers.actual',
         'project.id',
         'createdBy.id',
         'requestedBy.id',

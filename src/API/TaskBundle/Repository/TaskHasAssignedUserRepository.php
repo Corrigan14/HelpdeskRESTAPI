@@ -57,7 +57,11 @@ class TaskHasAssignedUserRepository extends EntityRepository
         }
     }
 
-    public function findOtherUsersAssignedToTask(array $data)
+    /**
+     * @param array $data
+     * @return array
+     */
+    public function findOtherUsersAssignedToTask(array $data):array
     {
         $task = $data['task'];
         $user = $data['user'];
@@ -69,6 +73,30 @@ class TaskHasAssignedUserRepository extends EntityRepository
             ->distinct()
             ->where('tau.task = :task')
             ->andWhere('tau.user != :user')
+            ->setParameters([
+                'user' => $user,
+                'task' => $task
+            ]);
+
+        return $query->getQuery()->getResult();
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    public function findAssignedUsersEntities(array $data): array
+    {
+        $task = $data['task'];
+        $user = $data['user'];
+
+        $query = $this->createQueryBuilder('tau')
+            ->select('tau')
+            ->leftJoin('tau.user', 'user')
+            ->orderBy('tau.id', 'DESC')
+            ->distinct()
+            ->where('tau.task = :task')
+            ->andWhere('tau.user = :user')
             ->setParameters([
                 'user' => $user,
                 'task' => $task

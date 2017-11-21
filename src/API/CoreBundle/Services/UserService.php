@@ -58,7 +58,7 @@ class UserService
         if (999 !== $limit) {
             $count = $responseData['count'];
         } else {
-            $count = count($responseData['array']);
+            $count = \count($responseData['array']);
         }
 
         $url = $this->router->generate('users_list');

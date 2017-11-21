@@ -82,6 +82,8 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      *
      * @param Request $request
      * @return Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
@@ -101,7 +103,11 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ? (int)$limitNum : 10;
+        $limit = (int)$limitNum ?: 10;
+
+        if(999 === $limit){
+            $page = 1;
+        }
 
         $isActive = $request->get('isActive');
         $filtersForUrl = [];

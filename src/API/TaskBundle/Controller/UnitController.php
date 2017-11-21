@@ -92,6 +92,7 @@ class UnitController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response
+     * @throws \LogicException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \InvalidArgumentException
@@ -112,7 +113,11 @@ class UnitController extends ApiBaseController implements ControllerInterface
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ? (int)$limitNum : 10;
+        $limit = (int)$limitNum ?: 10;
+
+        if(999 === $limit){
+            $page = 1;
+        }
 
         $orderString = $request->get('order');
         $orderString = strtolower($orderString);

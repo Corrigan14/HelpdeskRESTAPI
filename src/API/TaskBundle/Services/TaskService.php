@@ -118,12 +118,12 @@ class TaskService
 
         $followers = $task->getFollowers();
         $followTask = false;
-        if (count($followers) > 0) {
+        if (\count($followers) > 0) {
             $followersId = [];
             foreach ($followers as $follower) {
                 $followersId[] = $follower->getId();
             }
-            if (in_array($loggedUser->getId(), $followersId, true)) {
+            if (\in_array($loggedUser->getId(), $followersId, true)) {
                 $followTask = true;
             } else {
                 $followTask = false;

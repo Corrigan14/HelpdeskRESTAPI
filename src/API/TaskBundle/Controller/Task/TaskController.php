@@ -307,10 +307,18 @@ class TaskController extends ApiBaseController
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ? (int)$limitNum : 10;
+        $limit = (int)$limitNum ?: 10;
+
+        if(999 === $limit){
+            $page = 1;
+        }
 
         $orderString = $request->get('order');
         $order = $this->processOrderData($orderString);
+
+        if(null === $orderString){
+            $orderString = 'DESC';
+        }
 
         $options = [
             'loggedUser' => $this->getUser(),
@@ -541,10 +549,18 @@ class TaskController extends ApiBaseController
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ? (int)$limitNum : 10;
+        $limit = (int)$limitNum ?: 10;
+
+        if(999 === $limit){
+            $page = 1;
+        }
 
         $orderString = $request->get('order');
         $order = $this->processOrderData($orderString);
+
+        if(null === $orderString){
+            $orderString = 'DESC';
+        }
 
         $filterDataArray = $filter->getFilter();
         $filterData = $this->getFilterDataFromSavedFilterArray($filterDataArray);
@@ -1840,8 +1856,7 @@ class TaskController extends ApiBaseController
      * @return JsonResponse|Response
      * @throws \LogicException
      */
-    public
-    function deleteAction(int $id)
+    public function deleteAction(int $id)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
 
@@ -2485,7 +2500,7 @@ class TaskController extends ApiBaseController
 
                         //Check if tag is already added to task
                         $taskHasTags = $task->getTags();
-                        if (in_array($tag, $taskHasTags->toArray(), true)) {
+                        if (\in_array($tag, $taskHasTags->toArray(), true)) {
                             continue;
                         }
                     } else {
@@ -3253,8 +3268,6 @@ class TaskController extends ApiBaseController
             $acl = $userHasProject->getAcl();
             if (\in_array(ProjectAclOptions::RESOLVE_TASK, $acl, true)) {
                 return true;
-            } else {
-                false;
             }
         }
         return false;
@@ -3273,7 +3286,7 @@ class TaskController extends ApiBaseController
             foreach ($orderArray as $item) {
                 $orderArrayKeyValue = explode('=>', $item);
                 //Check if param to order by is allowed
-                if (!in_array($orderArrayKeyValue[0], FilterAttributeOptions::getConstants(), true)) {
+                if (!\in_array($orderArrayKeyValue[0], FilterAttributeOptions::getConstants(), true)) {
                     return $this->createApiResponse([
                         'message' => 'Requested filter parameter ' . $orderArrayKeyValue[0] . ' is not allowed!',
                     ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
@@ -3287,7 +3300,7 @@ class TaskController extends ApiBaseController
                 $order[$orderArrayKeyValue[0]] = $orderArrayKeyValue[1];
             }
         }
-        if (count($order) === 0) {
+        if (\count($order) === 0) {
             $order[FilterAttributeOptions::ID] = 'DESC';
         }
         return $order;
@@ -3382,7 +3395,7 @@ class TaskController extends ApiBaseController
     private
     function getChangedParams(array &$requestData, array &$changedParams): array
     {
-        if (count($requestData) > 0) {
+        if (\count($requestData) > 0) {
             foreach ($requestData as $key => $value) {
                 $changedParams[] = $key;
             }

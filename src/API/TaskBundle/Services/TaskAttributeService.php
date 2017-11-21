@@ -63,7 +63,7 @@ class TaskAttributeService
         if (999 !== $limit) {
             $count = $responseData['count'];
         } else {
-            $count = count($responseData['array']);
+            $count = \count($responseData['array']);
         }
 
         $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);
@@ -74,6 +74,11 @@ class TaskAttributeService
     /**
      * @param int $id
      * @return array
+     * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
+     * @throws \Symfony\Component\Routing\Exception\MissingMandatoryParametersException
+     * @throws \Symfony\Component\Routing\Exception\InvalidParameterException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getTaskAttributeResponse(int $id): array
     {

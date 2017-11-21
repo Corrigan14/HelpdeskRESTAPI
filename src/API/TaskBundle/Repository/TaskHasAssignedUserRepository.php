@@ -30,7 +30,11 @@ class TaskHasAssignedUserRepository extends EntityRepository
             ->orderBy('tau.id', 'DESC')
             ->distinct()
             ->where('tau.task = :taskId')
-            ->setParameter('taskId', $taskId);
+            ->andWhere('tau.actual = :actual')
+            ->setParameters([
+                'taskId' => $taskId,
+                'actual' => true
+            ]);
 
         if (999 !== $limit) {
             // Pagination
@@ -61,7 +65,7 @@ class TaskHasAssignedUserRepository extends EntityRepository
      * @param array $data
      * @return array
      */
-    public function findOtherUsersAssignedToTask(array $data):array
+    public function findOtherUsersAssignedToTask(array $data): array
     {
         $task = $data['task'];
         $user = $data['user'];

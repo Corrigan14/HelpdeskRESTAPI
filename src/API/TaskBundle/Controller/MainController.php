@@ -242,7 +242,7 @@ class MainController extends ApiBaseController
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    public function getLeftNavigationParamsAction()
+    public function getLeftNavigationParamsAction():JsonResponse
     {
         $doctrine = $this->getDoctrine();
         /** @var User $loggedUser */

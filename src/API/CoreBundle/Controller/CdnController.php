@@ -48,9 +48,11 @@ class CdnController extends ApiBaseController
      *  }
      * )
      * @param Request $request
-     * @param Task    $task
+     * @param Task $task
      *
      * @return \Symfony\Component\HttpFoundation\JsonResponse|Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */

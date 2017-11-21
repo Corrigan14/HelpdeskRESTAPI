@@ -19,9 +19,15 @@ class PaginationHelper
      */
     public static function getPagination(string $url, int $limit, int $page, int $count, array $filters): array
     {
-        $totalNumberOfPages = ceil($count / $limit);
-        $previousPage = $page > 1 ? $page - 1 : false;
-        $nextPage = $page < $totalNumberOfPages ? $page + 1 : false;
+        if (999 !== $limit) {
+            $totalNumberOfPages = ceil($count / $limit);
+            $previousPage = $page > 1 ? $page - 1 : false;
+            $nextPage = $page < $totalNumberOfPages ? $page + 1 : false;
+        }else{
+            $totalNumberOfPages = 1;
+            $previousPage = false;
+            $nextPage = false;
+        }
 
         $params = '';
         foreach ($filters as $filter) {

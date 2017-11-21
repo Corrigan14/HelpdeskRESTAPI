@@ -173,7 +173,11 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ? (int)$limitNum : 10;
+        $limit = (int)$limitNum ?: 10;
+
+        if(999 === $limit){
+            $page = 1;
+        }
 
         $orderString = $request->get('order');
         $orderString = strtolower($orderString);
@@ -183,7 +187,7 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
 
         $filtersForUrl['isActive'] = '&isActive=' . $isActive;
         $options = [
-            'isActive' => $isActive,
+            'isActive' => strtolower($isActive),
             'order' => $order,
             'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order]),
             'limit' => $limit

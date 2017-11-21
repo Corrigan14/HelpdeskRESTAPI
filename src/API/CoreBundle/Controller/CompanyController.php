@@ -123,6 +123,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response
+     * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
@@ -149,7 +150,11 @@ class CompanyController extends ApiBaseController implements ControllerInterface
         $isActive = $request->get('isActive');
 
         $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ? (int)$limitNum : 10;
+        $limit = (int)$limitNum ?: 10;
+
+        if(999 === $limit){
+            $page = 1;
+        }
 
         $filtersForUrl = [];
         if (null !== $isActive) {

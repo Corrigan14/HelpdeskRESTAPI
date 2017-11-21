@@ -129,15 +129,25 @@ class ProjectController extends ApiBaseController implements ControllerInterface
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ? (int)$limitNum : 10;
+        $limit = (int)$limitNum ?: 10;
+
+        if(999 === $limit){
+            $page = 1;
+        }
 
         $isActive = $request->get('isActive') ?: 'all';
+
+        $filtersForUrl = [];
+        if (null !== $isActive) {
+            $filtersForUrl['isActive'] = '&isActive=' . $isActive;
+        }
 
         $options = [
             'isAdmin' => $this->get('project_voter')->isAdmin(),
             'loggedUser' => $this->getUser(),
             'isActive' => strtolower($isActive),
-            'limit' => $limit
+            'limit' => $limit,
+            'filtersForUrl'=> $filtersForUrl
         ];
 
         return $this->json($this->get('project_service')->getProjectsResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);

@@ -176,14 +176,18 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request):JsonResponse
     {
         $pageNum = $request->get('page');
         $pageNum = (int)$pageNum;
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ? (int)$limitNum : 10;
+        $limit = (int)$limitNum ?: 10;
+
+        if(999 === $limit){
+            $page = 1;
+        }
 
         $orderString = $request->get('order');
         $orderString = strtolower($orderString);
@@ -202,7 +206,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
             $filtersForUrl['isActive'] = '&isActive=' . $isActive;
         }
         if (null !== $report) {
-            $filtersForUrl['isActive'] = '&report=' . $report;
+            $filtersForUrl['report'] = '&report=' . $report;
         }
         if (null !== $project) {
             $filtersForUrl['project'] = '&project=' . $project;

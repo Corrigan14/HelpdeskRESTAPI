@@ -146,10 +146,14 @@ class UserController extends ApiBaseController
         }
 
         $pageNum = $request->get('page');
-        $page = (int)$pageNum ? (int)$pageNum : 1;
+        $page = (int)$pageNum ?: 1;
 
         $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ? (int)$limitNum : 10;
+        $limit = (int)$limitNum ?: 10;
+
+        if(999 === $limit){
+            $page = 1;
+        }
 
         $orderString = $request->get('order');
         $orderString = strtolower($orderString);
@@ -342,6 +346,8 @@ class UserController extends ApiBaseController
      * @param int $id
      *
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException

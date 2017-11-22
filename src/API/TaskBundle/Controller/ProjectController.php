@@ -1591,7 +1591,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
 
             // Check if all ACL are from allowed options
             foreach ($acl as $key => $value) {
-                if (!in_array($value, ProjectAclOptions::getConstants(), true)) {
+                if (!\in_array($value, ProjectAclOptions::getConstants(), true)) {
                     return $this->createApiResponse([
                         'message' => $value . ' ACL is not allowed!',
                     ], StatusCodesHelper::INVALID_PARAMETERS_CODE);

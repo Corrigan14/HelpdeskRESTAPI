@@ -59,7 +59,6 @@ class ProjectRepository extends EntityRepository
                     ->getQuery();
             }
         } else {
-            // User can see project where he has a permission  EDIT_PROJECT
             if ('true' === $isActive || 'false' === $isActive || true === $isActive || false === $isActive) {
                 $query = $this->createQueryBuilder('p')
                     ->select('p, userHasProjects, uhpUser')
@@ -135,7 +134,7 @@ class ProjectRepository extends EntityRepository
     public function getEntity($id)
     {
         $query = $this->createQueryBuilder('project')
-            ->select('project')
+            ->select('project, userHasProjects, uhpUser')
             ->leftJoin('project.userHasProjects', 'userHasProjects')
             ->leftJoin('userHasProjects.user', 'uhpUser')
             ->where('project.id = :id')
@@ -186,6 +185,7 @@ class ProjectRepository extends EntityRepository
     {
         $userHasProjects = $data->getUserHasProjects();
         $userHasProjectsArray = [];
+        dump($userHasProjects);
         if ($userHasProjects) {
             /** @var UserHasProject $item */
             foreach ($userHasProjects as $item) {

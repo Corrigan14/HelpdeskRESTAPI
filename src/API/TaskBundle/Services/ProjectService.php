@@ -128,6 +128,8 @@ class ProjectService
      * @param int $id
      * @param bool $canEdit
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getEntityResponse(int $id, bool $canEdit): array
     {

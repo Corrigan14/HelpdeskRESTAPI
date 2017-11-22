@@ -59,6 +59,7 @@ class ProjectRepository extends EntityRepository
                     ->getQuery();
             }
         } else {
+            // User can see project where he has a permission  EDIT_PROJECT
             if ('true' === $isActive || 'false' === $isActive || true === $isActive || false === $isActive) {
                 $query = $this->createQueryBuilder('p')
                     ->select('p, userHasProjects, uhpUser')

@@ -65,7 +65,7 @@ class UserHasProjectRepository extends EntityRepository
             ->andWhere('uhp.acl LIKE :rule')
             ->andWhere('user.is_active = :isActive')
             ->distinct()
-            ->setParameters(['project' => $project, 'rule' => '%' . $rule . '%', 'isActive' => true]);
+            ->setParameters(['project' => $project->getId(), 'rule' => '%' . $rule . '%', 'isActive' => true]);
 
         return $query->getQuery()->getArrayResult();
     }

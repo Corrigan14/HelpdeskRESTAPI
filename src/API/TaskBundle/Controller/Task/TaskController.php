@@ -2818,29 +2818,18 @@ class TaskController extends ApiBaseController
         $unitArray = $this->get('unit_service')->getListOfAllUnits();
 
         // Available assigners are based on project of task
-        // If task has project, assigner has to have RESOLVE_TASK ACL in user_has_project
-        // If task has not project, just creator of task can be assigned to it
-        $assignArray = [];
-        if ($task->getProject()) {
-            $project = $task->getProject();
-            $assignArray = $this->get('api_user.service')->getListOfAvailableProjectAssigners($project, ProjectAclOptions::RESOLVE_TASK);
-        }
-        if (\count($assignArray) > 0) {
-            $assignerDetailData = $task->getCreatedBy()->getDetailData();
-            $assignerName = null;
-            $assignerSurname = null;
-            if ($assignerDetailData) {
-                $assignerName = $assignerDetailData->getName();
-                $assignerSurname = $assignerDetailData->getSurname();
-            }
+        $project = $task->getProject();
+        if (!$project instanceof Project) {
+            // If task has not project, just creator of the task can be assigned to it
             $assignArray = [
                 [
                     'id' => $task->getCreatedBy()->getId(),
-                    'username' => $task->getCreatedBy()->getUsername(),
-                    'name' => $assignerName,
-                    'surname' => $assignerSurname
+                    'username' => $task->getCreatedBy()->getUsername()
                 ]
             ];
+        } else {
+            // If task has project, assigner has to have RESOLVE_TASK ACL in user_has_project
+            $assignArray = $this->get('api_user.service')->getListOfAvailableProjectAssigners($project, ProjectAclOptions::RESOLVE_TASK);
         }
 
         // Task attributes - the list of active task attributes with TITLE, TYPE and OPTIONS

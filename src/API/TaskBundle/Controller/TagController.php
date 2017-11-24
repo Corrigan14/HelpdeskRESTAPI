@@ -339,7 +339,8 @@ class TagController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
-        // User can update just it's own tags
+        // User can update just it's own tags AND
+        // User can update PUBLIC tags if he has general ACL SHARE_TAGS
         if (!$this->get('tag_voter')->isGranted(VoteOptions::UPDATE_TAG, $tag)) {
             return $this->accessDeniedResponse();
         }
@@ -419,7 +420,8 @@ class TagController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
-        // User can update just it's own tags
+        // User can update just it's own tags AND
+        // User can update PUBLIC tags if he has general ACL SHARE_TAGS
         if (!$this->get('tag_voter')->isGranted(VoteOptions::UPDATE_TAG, $tag)) {
             return $this->accessDeniedResponse();
         }
@@ -467,8 +469,9 @@ class TagController extends ApiBaseController implements ControllerInterface
             return $this->notFoundResponse();
         }
 
-        // User can delete just it's own tags
-        if (!$this->get('tag_voter')->isGranted(VoteOptions::DELETE_TAG, $tag)) {
+        // User can update just it's own tags AND
+        // User can update PUBLIC tags if he has general ACL SHARE_TAGS
+        if (!$this->get('tag_voter')->isGranted(VoteOptions::UPDATE_TAG, $tag)) {
             return $this->accessDeniedResponse();
         }
 
@@ -521,7 +524,7 @@ class TagController extends ApiBaseController implements ControllerInterface
         }
 
         foreach ($requestData as $key => $value) {
-            if (!in_array($key, $allowedUnitEntityParams, true)) {
+            if (!\in_array($key, $allowedUnitEntityParams, true)) {
                 return $this->createApiResponse(
                     ['message' => $key . ' is not allowed parameter for Tag Entity!'],
                     StatusCodesHelper::INVALID_PARAMETERS_CODE
@@ -531,7 +534,7 @@ class TagController extends ApiBaseController implements ControllerInterface
 
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
-        if (isset($requestData['public']) && $requestData['public']) {
+        if (isset($requestData['public'])) {
             $aclOptions = [
                 'acl' => UserRoleAclOptions::SHARE_TAGS,
                 'user' => $this->getUser()

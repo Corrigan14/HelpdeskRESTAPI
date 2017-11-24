@@ -6,6 +6,7 @@ use API\CoreBundle\Entity\User;
 use API\CoreBundle\Security\ApiBaseVoter;
 use API\CoreBundle\Security\VoterInterface;
 use API\TaskBundle\Entity\Tag;
+use API\TaskBundle\Entity\UserRole;
 
 /**
  * Class TagVoter
@@ -42,8 +43,6 @@ class TagVoter extends ApiBaseVoter implements VoterInterface
                 return $this->canReadTag($tag);
             case VoteOptions::UPDATE_TAG:
                 return $this->canUpdateTag($tag);
-            case VoteOptions::DELETE_TAG:
-                return $this->canDeleteTag($tag);
             default:
                 return false;
         }
@@ -68,17 +67,20 @@ class TagVoter extends ApiBaseVoter implements VoterInterface
      */
     private function canUpdateTag(Tag $tag): bool
     {
-        return ($this->user->getId() === $tag->getCreatedBy()->getId());
-    }
+        $createdTag = false;
+        if ($this->user->getId() === $tag->getCreatedBy()->getId()) {
+            $createdTag = true;
+        }
 
-    /**
-     * @param Tag $tag
-     * @return bool
-     * @internal param int $tagId
-     *
-     */
-    private function canDeleteTag(Tag $tag): bool
-    {
-        return ($this->user->getId() === $tag->getCreatedBy()->getId());
+        /** @var UserRole $loggedUserRole */
+        $loggedUserRole = $this->user->getUserRole();
+        $loggedUserRoleACL = $loggedUserRole->getAcl();
+
+        $shareTagACL = false;
+        if (true === $tag->getPublic() && \in_array(UserRoleAclOptions::SHARE_TAGS, $loggedUserRoleACL, true)) {
+            $shareTagACL = true;
+        }
+
+        return ($createdTag || $shareTagACL);
     }
 }

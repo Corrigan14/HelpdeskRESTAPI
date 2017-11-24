@@ -142,12 +142,35 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             $filtersForUrl['isActive'] = '&isActive=' . $isActive;
         }
 
+        // Find projects IDs which user Created OR he has any ACL permission in it
+        $projectIdArray = [];
+
+        $loggedUsersCreatedProjects = $this->getUser()->getProjects();
+        $loggedUsersAvailableProjects = $this->getUser()->getUserHasProjects();
+        if ($loggedUsersCreatedProjects) {
+            /** @var Project $createdProject */
+            foreach ($loggedUsersCreatedProjects as $createdProject) {
+                $projectIdArray[] = $createdProject->getId();
+            }
+        }
+
+        if ($loggedUsersAvailableProjects) {
+            /** @var UserHasProject $availableProject */
+            foreach ($loggedUsersAvailableProjects as $availableProject) {
+                $projectId = $availableProject->getProject()->getId();
+                if (!\in_array($projectId, $projectIdArray, true)) {
+                    $projectIdArray[] = $projectId;
+                }
+            }
+        }
+
         $options = [
             'isAdmin' => $this->get('project_voter')->isAdmin(),
             'loggedUser' => $this->getUser(),
             'isActive' => strtolower($isActive),
             'limit' => $limit,
-            'filtersForUrl'=> $filtersForUrl
+            'filtersForUrl'=> $filtersForUrl,
+            'projectIdArray' => $projectIdArray
         ];
 
         return $this->json($this->get('project_service')->getProjectsResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);

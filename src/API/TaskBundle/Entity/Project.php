@@ -98,7 +98,7 @@ class Project
     private $imaps;
 
     /**
-     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Notification", mappedBy="task", cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Notification", mappedBy="project", cascade={"persist", "remove"})
      * @Serializer\Exclude()
      *
      * @var ArrayCollection

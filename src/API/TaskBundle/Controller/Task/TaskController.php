@@ -309,14 +309,14 @@ class TaskController extends ApiBaseController
         $limitNum = $request->get('limit');
         $limit = (int)$limitNum ?: 10;
 
-        if(999 === $limit){
+        if (999 === $limit) {
             $page = 1;
         }
 
         $orderString = $request->get('order');
         $order = $this->processOrderData($orderString);
 
-        if(null === $orderString){
+        if (null === $orderString) {
             $orderString = 'DESC';
         }
 
@@ -551,14 +551,14 @@ class TaskController extends ApiBaseController
         $limitNum = $request->get('limit');
         $limit = (int)$limitNum ?: 10;
 
-        if(999 === $limit){
+        if (999 === $limit) {
             $page = 1;
         }
 
         $orderString = $request->get('order');
         $order = $this->processOrderData($orderString);
 
-        if(null === $orderString){
+        if (null === $orderString) {
             $orderString = 'DESC';
         }
 
@@ -2306,7 +2306,6 @@ class TaskController extends ApiBaseController
                     // Check if task already has another one assigned user - if yes, delete that user
                     // because system temporary support ONLY ONE assigned USER
                     $taskHasOtherAssignedUserArray = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOtherUsersAssignedToTask($options);
-
                     if (\count($taskHasOtherAssignedUserArray) !== 0) {
                         foreach ($taskHasOtherAssignedUserArray as $tau) {
                             $this->getDoctrine()->getManager()->remove($tau);
@@ -2317,6 +2316,9 @@ class TaskController extends ApiBaseController
                     // Set all other Users previous statuses to NOT ACTUAL
                     $taskHasAlreadyAssignedUser = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findAssignedUsersEntities($options);
 
+                    // If we are only changing user's status, we don't reset StartedAt time
+                    // If we are changing assigner, we hav to reset StartedAt task time
+                    $keepStartedAtDatetime = false;
                     if (\count($taskHasAlreadyAssignedUser) !== 0) {
                         /** @var TaskHasAssignedUser $tau */
                         foreach ($taskHasAlreadyAssignedUser as $tau) {
@@ -2324,12 +2326,16 @@ class TaskController extends ApiBaseController
                             $this->getDoctrine()->getManager()->persist($tau);
                         }
                         $this->getDoctrine()->getManager()->flush();
+                        $keepStartedAtDatetime = true;
+                    }
+
+                    if ($keepStartedAtDatetime) {
+                        $task->setStartedAt(null);
                     }
 
                     // Create new task has assigned entity and set it as ACTUAL
                     $userIsAssignedToTask = new TaskHasAssignedUser();
                     $userIsAssignedToTask->setActual(true);
-
 
                     // STATUS
                     if (null !== $assignedUserStatusId) {
@@ -2361,20 +2367,29 @@ class TaskController extends ApiBaseController
 
                             $closedAtDateTimeObject = new \Datetime();
                             $task->setClosedAt($closedAtDateTimeObject);
+
+                            if (!$task->getStartedAt()) {
+                                $task->setStartedAt($closedAtDateTimeObject);
+                            }
+                        } else {
+                            $task->setClosedAt(null);
                         }
                     } else {
                         $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->findOneBy([
                             'function' => StatusFunctionOptions::NEW_TASK,
                             'default' => true
                         ]);
+                        $task->setStartedAt(null);
+                        $task->setClosedAt(null);
                     }
+
                     if (!$status instanceof Status) {
                         return $this->createApiResponse([
                             'message' => 'New Status or your requested Status does not exist!',
                         ], StatusCodesHelper::NOT_FOUND_CODE);
                     }
 
-                    if (null === $task->getStartedAt() && $status->getDefault() === true && $status->getFunction() !== StatusFunctionOptions::NEW_TASK) {
+                    if ((null === $task->getStartedAt() || false === $keepStartedAtDatetime) && $status->getDefault() === true && $status->getFunction() !== StatusFunctionOptions::NEW_TASK) {
                         $startedAtDateTimeObject = new \Datetime();
                         $task->setStartedAt($startedAtDateTimeObject);
                     }

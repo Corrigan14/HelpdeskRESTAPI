@@ -99,7 +99,7 @@ class InvoiceableItemController extends ApiBaseController
      * @throws \LogicException
      * @internal param Request $request
      */
-    public function listAction(int $taskId)
+    public function listAction(int $taskId):Response
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 

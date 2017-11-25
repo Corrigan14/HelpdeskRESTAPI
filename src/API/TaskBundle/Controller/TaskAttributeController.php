@@ -126,13 +126,18 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ? (int)$limitNum : 10;
+        $limit = (int)$limitNum ?: 10;
+
+        if(999 === $limit){
+            $page = 1;
+        }
 
         $orderString = $request->get('order');
         $orderString = strtolower($orderString);
         $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
 
         $isActive = $request->get('isActive');
+
         $filtersForUrl = [];
         if (null !== $isActive) {
             $filtersForUrl['isActive'] = '&isActive=' . $isActive;

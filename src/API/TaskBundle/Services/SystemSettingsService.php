@@ -59,7 +59,7 @@ class SystemSettingsService
         if (999 !== $limit) {
             $count = $responseData['count'];
         } else {
-            $count = count($responseData['array']);
+            $count = \count($responseData['array']);
         }
 
         $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);

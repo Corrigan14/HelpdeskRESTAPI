@@ -3,11 +3,8 @@
 namespace API\TaskBundle\Services;
 
 use API\CoreBundle\Entity\User;
-use API\CoreBundle\Repository\UserRepository;
-use API\CoreBundle\Services\HateoasHelper;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\UserHasProject;
-use API\TaskBundle\Repository\ProjectRepository;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
@@ -61,17 +58,12 @@ class ProjectService
         if (999 !== $limit) {
             $count = $responseData['count'];
         } else {
-            $count = count($responseData['array']);
+            $count = \count($responseData['array']);
         }
 
-        $pagination = HateoasHelper::getPagination(
-            $this->router->generate('projects_list'),
-            $page,
-            $count,
-            $limit,
-            $fields = [],
-            $options['isActive']
-        );
+        $filters = $options['filtersForUrl'];
+
+        $pagination = PaginationHelper::getPagination($this->router->generate('projects_list'),$limit,$page,$count,$filters);
 
         return array_merge($response, $pagination);
     }
@@ -136,6 +128,8 @@ class ProjectService
      * @param int $id
      * @param bool $canEdit
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getEntityResponse(int $id, bool $canEdit): array
     {

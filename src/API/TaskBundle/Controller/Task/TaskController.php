@@ -307,10 +307,18 @@ class TaskController extends ApiBaseController
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ? (int)$limitNum : 10;
+        $limit = (int)$limitNum ?: 10;
+
+        if (999 === $limit) {
+            $page = 1;
+        }
 
         $orderString = $request->get('order');
         $order = $this->processOrderData($orderString);
+
+        if (null === $orderString) {
+            $orderString = 'DESC';
+        }
 
         $options = [
             'loggedUser' => $this->getUser(),
@@ -541,10 +549,18 @@ class TaskController extends ApiBaseController
         $page = ($pageNum === 0) ? 1 : $pageNum;
 
         $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ? (int)$limitNum : 10;
+        $limit = (int)$limitNum ?: 10;
+
+        if (999 === $limit) {
+            $page = 1;
+        }
 
         $orderString = $request->get('order');
         $order = $this->processOrderData($orderString);
+
+        if (null === $orderString) {
+            $orderString = 'DESC';
+        }
 
         $filterDataArray = $filter->getFilter();
         $filterData = $this->getFilterDataFromSavedFilterArray($filterDataArray);
@@ -1840,8 +1856,7 @@ class TaskController extends ApiBaseController
      * @return JsonResponse|Response
      * @throws \LogicException
      */
-    public
-    function deleteAction(int $id)
+    public function deleteAction(int $id)
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
 
@@ -2291,7 +2306,6 @@ class TaskController extends ApiBaseController
                     // Check if task already has another one assigned user - if yes, delete that user
                     // because system temporary support ONLY ONE assigned USER
                     $taskHasOtherAssignedUserArray = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOtherUsersAssignedToTask($options);
-
                     if (\count($taskHasOtherAssignedUserArray) !== 0) {
                         foreach ($taskHasOtherAssignedUserArray as $tau) {
                             $this->getDoctrine()->getManager()->remove($tau);
@@ -2302,6 +2316,9 @@ class TaskController extends ApiBaseController
                     // Set all other Users previous statuses to NOT ACTUAL
                     $taskHasAlreadyAssignedUser = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findAssignedUsersEntities($options);
 
+                    // If we are only changing user's status, we don't reset StartedAt time
+                    // If we are changing assigner, we hav to reset StartedAt task time
+                    $keepStartedAtDatetime = false;
                     if (\count($taskHasAlreadyAssignedUser) !== 0) {
                         /** @var TaskHasAssignedUser $tau */
                         foreach ($taskHasAlreadyAssignedUser as $tau) {
@@ -2309,12 +2326,16 @@ class TaskController extends ApiBaseController
                             $this->getDoctrine()->getManager()->persist($tau);
                         }
                         $this->getDoctrine()->getManager()->flush();
+                        $keepStartedAtDatetime = true;
+                    }
+
+                    if ($keepStartedAtDatetime) {
+                        $task->setStartedAt(null);
                     }
 
                     // Create new task has assigned entity and set it as ACTUAL
                     $userIsAssignedToTask = new TaskHasAssignedUser();
                     $userIsAssignedToTask->setActual(true);
-
 
                     // STATUS
                     if (null !== $assignedUserStatusId) {
@@ -2346,20 +2367,29 @@ class TaskController extends ApiBaseController
 
                             $closedAtDateTimeObject = new \Datetime();
                             $task->setClosedAt($closedAtDateTimeObject);
+
+                            if (!$task->getStartedAt()) {
+                                $task->setStartedAt($closedAtDateTimeObject);
+                            }
+                        } else {
+                            $task->setClosedAt(null);
                         }
                     } else {
                         $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->findOneBy([
                             'function' => StatusFunctionOptions::NEW_TASK,
                             'default' => true
                         ]);
+                        $task->setStartedAt(null);
+                        $task->setClosedAt(null);
                     }
+
                     if (!$status instanceof Status) {
                         return $this->createApiResponse([
                             'message' => 'New Status or your requested Status does not exist!',
                         ], StatusCodesHelper::NOT_FOUND_CODE);
                     }
 
-                    if (null === $task->getStartedAt() && $status->getDefault() === true && $status->getFunction() !== StatusFunctionOptions::NEW_TASK) {
+                    if ((null === $task->getStartedAt() || false === $keepStartedAtDatetime) && $status->getDefault() === true && $status->getFunction() !== StatusFunctionOptions::NEW_TASK) {
                         $startedAtDateTimeObject = new \Datetime();
                         $task->setStartedAt($startedAtDateTimeObject);
                     }
@@ -2485,7 +2515,7 @@ class TaskController extends ApiBaseController
 
                         //Check if tag is already added to task
                         $taskHasTags = $task->getTags();
-                        if (in_array($tag, $taskHasTags->toArray(), true)) {
+                        if (\in_array($tag, $taskHasTags->toArray(), true)) {
                             continue;
                         }
                     } else {
@@ -2803,29 +2833,18 @@ class TaskController extends ApiBaseController
         $unitArray = $this->get('unit_service')->getListOfAllUnits();
 
         // Available assigners are based on project of task
-        // If task has project, assigner has to have RESOLVE_TASK ACL in user_has_project
-        // If task has not project, just creator of task can be assigned to it
-        $assignArray = [];
-        if ($task->getProject()) {
-            $project = $task->getProject();
-            $assignArray = $this->get('api_user.service')->getListOfAvailableProjectAssigners($project, ProjectAclOptions::RESOLVE_TASK);
-        }
-        if (\count($assignArray) > 0) {
-            $assignerDetailData = $task->getCreatedBy()->getDetailData();
-            $assignerName = null;
-            $assignerSurname = null;
-            if ($assignerDetailData) {
-                $assignerName = $assignerDetailData->getName();
-                $assignerSurname = $assignerDetailData->getSurname();
-            }
+        $project = $task->getProject();
+        if (!$project instanceof Project) {
+            // If task has not project, just creator of the task can be assigned to it
             $assignArray = [
                 [
                     'id' => $task->getCreatedBy()->getId(),
-                    'username' => $task->getCreatedBy()->getUsername(),
-                    'name' => $assignerName,
-                    'surname' => $assignerSurname
+                    'username' => $task->getCreatedBy()->getUsername()
                 ]
             ];
+        } else {
+            // If task has project, assigner has to have RESOLVE_TASK ACL in user_has_project
+            $assignArray = $this->get('api_user.service')->getListOfAvailableProjectAssigners($project, ProjectAclOptions::RESOLVE_TASK);
         }
 
         // Task attributes - the list of active task attributes with TITLE, TYPE and OPTIONS
@@ -3253,8 +3272,6 @@ class TaskController extends ApiBaseController
             $acl = $userHasProject->getAcl();
             if (\in_array(ProjectAclOptions::RESOLVE_TASK, $acl, true)) {
                 return true;
-            } else {
-                false;
             }
         }
         return false;
@@ -3273,7 +3290,7 @@ class TaskController extends ApiBaseController
             foreach ($orderArray as $item) {
                 $orderArrayKeyValue = explode('=>', $item);
                 //Check if param to order by is allowed
-                if (!in_array($orderArrayKeyValue[0], FilterAttributeOptions::getConstants(), true)) {
+                if (!\in_array($orderArrayKeyValue[0], FilterAttributeOptions::getConstants(), true)) {
                     return $this->createApiResponse([
                         'message' => 'Requested filter parameter ' . $orderArrayKeyValue[0] . ' is not allowed!',
                     ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
@@ -3287,7 +3304,7 @@ class TaskController extends ApiBaseController
                 $order[$orderArrayKeyValue[0]] = $orderArrayKeyValue[1];
             }
         }
-        if (count($order) === 0) {
+        if (\count($order) === 0) {
             $order[FilterAttributeOptions::ID] = 'DESC';
         }
         return $order;
@@ -3382,7 +3399,7 @@ class TaskController extends ApiBaseController
     private
     function getChangedParams(array &$requestData, array &$changedParams): array
     {
-        if (count($requestData) > 0) {
+        if (\count($requestData) > 0) {
             foreach ($requestData as $key => $value) {
                 $changedParams[] = $key;
             }

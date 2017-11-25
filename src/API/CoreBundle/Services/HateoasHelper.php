@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: websolutions
- * Date: 10/21/16
- * Time: 1:00 PM
- */
 
 namespace API\CoreBundle\Services;
 
@@ -29,17 +23,24 @@ class HateoasHelper
      */
     public static function getPagination(string $url, int $page, int $count, int $limit, array $fields = [], $isActive = false)
     {
-        $totalNumberOfPages = ceil($count / $limit);
-        $previousPage = $page > 1 ? $page - 1 : false;
-        $nextPage = $page < $totalNumberOfPages ? $page + 1 : false;
+        if (999 !== $limit) {
+            $totalNumberOfPages = ceil($count / $limit);
+            $previousPage = $page > 1 ? $page - 1 : false;
+            $nextPage = $page < $totalNumberOfPages ? $page + 1 : false;
+        } else {
+            $totalNumberOfPages = 1;
+            $previousPage = false;
+            $nextPage = false;
+        }
+
         $fieldsParam = '';
-        if (count($fields) > 0) {
+        if (\count($fields) > 0) {
             $fieldsParam .= '&fields=' . implode(',', $fields);
         }
 
         if ('all' !== $isActive) {
-            $isActiveParam = '&isActive='.$isActive;
-        }else{
+            $isActiveParam = '&isActive=' . $isActive;
+        } else {
             $isActiveParam = false;
         }
 

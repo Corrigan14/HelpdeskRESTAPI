@@ -82,15 +82,9 @@ class FollowerController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
-        $page = 1;
-
         $options['task'] = $task;
-        $routeOptions = [
-            'routeName' => 'tasks_list_of_tasks_followers',
-            'routeParams' => ['taskId' => $taskId]
-        ];
 
-        $followersArray = $this->get('task_additional_service')->getTaskFollowerResponse($options, $page, $routeOptions);
+        $followersArray = $this->get('task_additional_service')->getTaskFollowerResponse($options);
         return $this->json($followersArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 

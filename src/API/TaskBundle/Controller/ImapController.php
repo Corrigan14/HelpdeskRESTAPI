@@ -83,6 +83,8 @@ class ImapController extends ApiBaseController
      *
      * @param Request $request
      * @return Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function listAction(Request $request)
     {
@@ -173,6 +175,8 @@ class ImapController extends ApiBaseController
      *
      * @param int $id
      * @return Response
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
     public function getAction(int $id)
     {

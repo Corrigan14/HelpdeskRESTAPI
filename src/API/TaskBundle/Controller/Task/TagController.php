@@ -84,15 +84,9 @@ class TagController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
-        $page = 1;
-
         $options['task'] = $task;
-        $routeOptions = [
-            'routeName' => 'tasks_list_of_tasks_tags',
-            'routeParams' => ['taskId' => $taskId]
-        ];
 
-        $tagsArray = $this->get('task_additional_service')->getTaskTagsResponse($options, $page, $routeOptions);
+        $tagsArray = $this->get('task_additional_service')->getTaskTagsResponse($options);
         return $this->json($tagsArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 

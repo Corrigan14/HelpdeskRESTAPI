@@ -65,7 +65,7 @@ class AclHelper
 
         if ($userRole instanceof UserRole) {
             $userRoleHasAcl = $userRole->getAcl();
-            if (in_array($acl, $userRoleHasAcl, true)) {
+            if (\in_array($acl, $userRoleHasAcl, true)) {
                 return true;
             }
             return false;

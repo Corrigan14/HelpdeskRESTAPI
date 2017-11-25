@@ -62,7 +62,7 @@ class TaskAdditionalService
         if (999 !== $limit) {
             $count = $responseData['count'];
         } else {
-            $count = count($responseData['array']);
+            $count = \count($responseData['array']);
         }
 
         $pagination = $this->getPagination($page, $count, $routeOptions, $limit);
@@ -72,11 +72,9 @@ class TaskAdditionalService
 
     /**
      * @param array $options
-     * @param int $page
-     * @param array $routeOptions
      * @return array
      */
-    public function getTaskTagsResponse(array $options, int $page, array $routeOptions): array
+    public function getTaskTagsResponse(array $options): array
     {
         /** @var Task $task */
         $task = $options['task'];
@@ -97,7 +95,7 @@ class TaskAdditionalService
 
         $pagination = [
             '_links' => [],
-            'total' => count($taskTagsArray)
+            'total' => \count($taskTagsArray)
         ];
 
         return array_merge($response, $pagination);
@@ -105,11 +103,9 @@ class TaskAdditionalService
 
     /**
      * @param array $options
-     * @param int $page
-     * @param array $routeOptions
      * @return array
      */
-    public function getTaskFollowerResponse(array $options, int $page, array $routeOptions): array
+    public function getTaskFollowerResponse(array $options): array
     {
         /** @var Task $task */
         $task = $options['task'];
@@ -130,7 +126,7 @@ class TaskAdditionalService
 
         $pagination = [
             '_links' => [],
-            'total' => count($followersArray)
+            'total' => \count($followersArray)
         ];
 
         return array_merge($response, $pagination);
@@ -149,11 +145,10 @@ class TaskAdditionalService
         $limit = $options['limit'];
         $responseData = $this->em->getRepository('APITaskBundle:TaskHasAssignedUser')->getTasksAssignedUsers($task->getId(), $page, $limit);
 
-
         if (999 !== $limit) {
             $count = $responseData['count'];
         } else {
-            $count = count($responseData['array']);
+            $count = \count($responseData['array']);
         }
 
         $response = [
@@ -186,7 +181,7 @@ class TaskAdditionalService
         if (999 !== $limit) {
             $count = $responseData['count'];
         } else {
-            $count = count($responseData['array']);
+            $count = \count($responseData['array']);
         }
 
         $pagination = $this->getPagination($page, $count, $routeOptions, $limit);
@@ -200,6 +195,8 @@ class TaskAdditionalService
      * @param int $id
      *
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getCommentOfTaskResponse(int $id): array
     {
@@ -239,7 +236,7 @@ class TaskAdditionalService
         if (999 !== $limit) {
             $count = $responseData['count'];
         } else {
-            $count = count($responseData['array']);
+            $count = \count($responseData['array']);
         }
 
         $pagination = $this->getPagination($page, $count, $routeOptions, $limit);
@@ -254,15 +251,21 @@ class TaskAdditionalService
      * @param int $limit
      * @return array
      */
-    private function getPagination(int $page, int $count, array $routeOptions, $limit)
+    private function getPagination(int $page, int $count, array $routeOptions, $limit):array
     {
         $routeName = $routeOptions['routeName'];
         $routeParams = $routeOptions['routeParams'];
         $url = $this->router->generate($routeName, $routeParams);
 
-        $totalNumberOfPages = ceil($count / $limit);
-        $previousPage = $page > 1 ? $page - 1 : false;
-        $nextPage = $page < $totalNumberOfPages ? $page + 1 : false;
+        if (999 !== $limit) {
+            $totalNumberOfPages = ceil($count / $limit);
+            $previousPage = $page > 1 ? $page - 1 : false;
+            $nextPage = $page < $totalNumberOfPages ? $page + 1 : false;
+        } else {
+            $totalNumberOfPages = 1;
+            $previousPage = false;
+            $nextPage = false;
+        }
 
         return [
             '_links' => [

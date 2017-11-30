@@ -108,6 +108,21 @@ class TagRepository extends EntityRepository
     }
 
     /**
+     * @param int $userId
+     * @return array
+     */
+    public function getAllTagEntitiesWithIdAndTitleAndColor(int $userId): array
+    {
+        $query = $this->createQueryBuilder('tag')
+            ->select('tag.id, tag.title, tag.color')
+            ->where('tag.public = :public')
+            ->orWhere('tag.createdBy = :userId')
+            ->setParameters(['public' => true, 'userId' => $userId]);
+
+        return $query->getQuery()->getArrayResult();
+    }
+
+    /**
      * @param $paginatorData
      * @param bool $array
      * @return array

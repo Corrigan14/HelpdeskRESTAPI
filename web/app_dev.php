@@ -21,7 +21,7 @@ use Symfony\Component\Debug\Debug;
 /** @var \Composer\Autoload\ClassLoader $loader */
 $loader = require __DIR__.'/../app/autoload.php';
 Debug::enable();
-
+date_default_timezone_set('UTC');
 $kernel = new AppKernel('dev', true);
 $kernel->loadClassCache();
 $request = Request::createFromGlobals();

@@ -85,7 +85,7 @@ class TagService
      */
     public function getListOfUsersTags(int $userId):array
     {
-        return $this->em->getRepository('APITaskBundle:Tag')->getAllTagEntitiesWithIdAndTitle($userId);
+        return $this->em->getRepository('APITaskBundle:Tag')->getAllTagEntitiesWithIdAndTitleAndColor($userId);
     }
 
     /**

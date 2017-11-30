@@ -2549,93 +2549,141 @@ class TaskController extends ApiBaseController
         // Fill TaskData Entity if some of its parameters were sent
         // Expected json objects: {"10": "value 1", "12": "value 2"}
         if (isset($requestData['task_data'])) {
-//            $requestDetailData = json_decode($requestData['task_data'], true);
-//            unset($requestData['task_data']);
-//
-//            /** @var array $requestDetailData */
-//            foreach ($requestDetailData as $key => $value) {
-//                $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($key);
-//                if ($taskAttribute instanceof TaskAttribute) {
-//                    $cd = $this->getDoctrine()->getRepository('APITaskBundle:TaskData')->findOneBy(['taskAttribute' => $taskAttribute,
-//                        'task' => $task,]);
-//
-//                    if (!$cd instanceof TaskData) {
-//                        $cd = new TaskData();
-//                        $cd->setTask($task);
-//                        $cd->setTaskAttribute($taskAttribute);
-//                    }
-//
-//                    $cdErrors = $this->get('entity_processor')->processEntity($cd, ['value' => $value]);
-//                    if (false === $cdErrors) {
-//                        //Check the data format
-//                        $taskAttributeDataFormat = $taskAttribute->getType();
-//                        switch ($taskAttributeDataFormat) {
-//                            case VariableHelper::INTEGER_NUMBER:
+            // json decode only if task_data is string
+            $requestDetailData = is_string($requestData['task_data']) ? json_decode($requestData['task_data'], true) : $requestData['task_data'];
+            unset($requestData['task_data']);
+
+
+            /** @var array $requestDetailData */
+            foreach ($requestDetailData as $key => $value) {
+                $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($key);
+                if ($taskAttribute instanceof TaskAttribute) {
+                    $cd = $this->getDoctrine()->getRepository('APITaskBundle:TaskData')->findOneBy(['taskAttribute' => $taskAttribute,
+                        'task' => $task,]);
+
+                    if (!$cd instanceof TaskData) {
+                        $cd = new TaskData();
+                        $cd->setTask($task);
+                        $cd->setTaskAttribute($taskAttribute);
+                    }
+
+                    $cdErrors = $this->get('entity_processor')->processEntity($cd, ['value' => $value]);
+                    if (false === $cdErrors) {
+                        //Check the data format
+                        $taskAttributeDataFormat = $taskAttribute->getType();
+                        if (null !== $value && 'null' !== $value) {
+                            switch ($taskAttributeDataFormat) {
+                                case VariableHelper::INTEGER_NUMBER:
 //                                if (!is_int($value)) {
-//                                    return $this->createApiResponse([
-//                                        'message' => 'The value format of task_data with key: ' . $key . ' is invalid. Expected format: INTEGER',
-//                                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-//                                }
-//                                break;
-//                            case VariableHelper::DECIMAL_NUMBER:
+                                    $regexInt = "/^[+-]?[0-9]+$/";
+                                    if (!preg_match($regexInt, $value)) {
+                                        return $this->createApiResponse([
+                                            'message' => 'The value format of task_data with key: ' . $key . ' is invalid. Expected format: INTEGER',
+                                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                    }
+                                    break;
+                                case VariableHelper::DECIMAL_NUMBER:
 //                                if (!is_float($value)) {
-//                                    return $this->createApiResponse([
-//                                        'message' => 'The value format of task_data with key: ' . $key . ' is invalid. Expected format: DECIMAL NUMBER',
-//                                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-//                                }
-//                                break;
-//                            case VariableHelper::SIMPLE_SELECT:
-//                                $selectionOptions = $taskAttribute->getOptions();
-//                                if (!in_array($value, $selectionOptions, true)) {
-//                                    return $this->createApiResponse([
-//                                        'message' => 'The value of task_data with key: ' . $key . ' is invalid. Expected is value from ATTRIBUTE OPTIONS',
-//                                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-//                                }
-//                                break;
-//                            case VariableHelper::MULTI_SELECT:
-//                                $selectionOptions = $taskAttribute->getOptions();
-//                                $sentOptions = json_decode($value);
-//                                foreach ($sentOptions as $option) {
-//                                    if (!in_array($option, $selectionOptions, true)) {
-//                                        return $this->createApiResponse([
-//                                            'message' => 'The value of task_data with key: ' . $key . ' is invalid. Expected is value from ATTRIBUTE OPTIONS',
-//                                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-//                                    }
-//                                }
-//                                break;
-//                            case VariableHelper::DATE:
-//                                $intDateData = (int)$value;
-//                                try {
+                                    $regexFloat = "/^[+-]?[0-9]+[.,]?[0-9]*$/";
+                                    if (!preg_match($regexFloat, $value)) {
+                                        return $this->createApiResponse([
+                                            'message' => 'The value format of task_data with key: ' . $key . ' is invalid. Expected format: DECIMAL NUMBER',
+                                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                    }
+                                    break;
+                                case VariableHelper::SIMPLE_SELECT:
+                                    $selectionOptions = $taskAttribute->getOptions();
+                                    // TODO dat do modelu tento explode? options su v db ako csv
+                                    $selectionOptions = explode(',', $selectionOptions);
+                                    if (!in_array($value, $selectionOptions, true)) {
+                                        return $this->createApiResponse([
+                                            'message' => 'The value of task_data with key: ' . $key . ' is invalid. Expected is value from ATTRIBUTE OPTIONS',
+                                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                    }
+                                    break;
+                                case VariableHelper::MULTI_SELECT:
+                                    $selectionOptions = $taskAttribute->getOptions();
+                                    // TODO dat do modelu tento explode? options su v db ako csv
+                                    $selectionOptions = explode(',', $selectionOptions);
+//                                $sentOptions = explode(',',json_decode($value));
+                                    $sentOptions = explode(',', $value);
+                                    foreach ($sentOptions as $option) {
+                                        if (!in_array($option, $selectionOptions, true)) {
+                                            return $this->createApiResponse([
+                                                'message' => 'The value of task_data with key: ' . $key . ' is invalid. Expected is value from ATTRIBUTE OPTIONS',
+                                            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                        }
+                                    }
+                                    break;
+                                case VariableHelper::DATE:
+
+                                    try {
+
 //                                    $timeObject = new \DateTime("@$intDateData");
+//                                    dump($intDateData);
+//                                    dump($timeObject);
+//                                    $timeObject = $timeObject->format('Y-m-d H:i:s');
 //                                    $cd->setValue($timeObject);
-//                                } catch (\Exception $e) {
-//                                    return $this->createApiResponse([
-//                                        'message' => 'The value of task_data with key: ' . $key . ' is invalid. Expected is TIMESTAMP',
-//                                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-//                                }
-//
-//                                break;
-//                            default:
-//                                break;
+
+                                        if (null !== $value) {
+                                            $timestamp = (int)$value;
+                                            $cd->setValue($timestamp);
+                                        }
+
+                                    } catch (\Exception $e) {
+                                        return $this->createApiResponse([
+                                            'message' => 'The value of task_data with key: ' . $key . ' is invalid. Expected is TIMESTAMP',
+                                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                    }
+
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
+                        if (null === $value || 'null' === $value) {
+                            $cd->setValue(null);
+                        }
+
+
+                        // ak je custom task data
+                        if (null !== $cd->getValue()) {
+                            $task->addTaskDatum($cd);
+                            $this->getDoctrine()->getManager()->persist($task);
+                            $this->getDoctrine()->getManager()->persist($cd);
+                        }
+
+                        // ak je null, tak sa zmaze z db
+                        if (null === $cd->getValue() && null !== $cd->getId()) {
+                            $this->getDoctrine()->getManager()->remove($cd);
+                        }
+
+
+//                        if(null===$cd->getValue()){
+//                            dump($cd);
+//                            dump('removing');
+////                            $this->getDoctrine()->getManager()->remove($cd);
+//                        }else {
+//                            dump('persisting');
+//                            dump($cd);
+//                            $this->getDoctrine()->getManager()->persist($cd);
 //                        }
-//
-//                        if (null === $value || 'null' === $value) {
-//                            $cd->setValue(null);
-//                        }
-//                        $task->addTaskDatum($cd);
-//                        $this->getDoctrine()->getManager()->persist($task);
-//                        $this->getDoctrine()->getManager()->persist($cd);
-//                    } else {
-//                        return $this->createApiResponse([
-//                            'message' => 'The value of task_data with key: ' . $key . ' is invalid',
-//                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-//                    }
-//                } else {
-//                    return $this->createApiResponse([
-//                        'message' => 'The key: ' . $key . ' of Task Attribute is not valid (Task Attribute with this ID doesn\'t exist)',
-//                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-//                }
-//            }
+
+
+                    } else {
+                        return $this->createApiResponse([
+                            'message' => 'The value of task_data with key: ' . $key . ' is invalid',
+                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    }
+                } else {
+                    return $this->createApiResponse([
+                        'message' => 'The key: ' . $key . ' of Task Attribute is not valid (Task Attribute with this ID doesn\'t exist)',
+                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                }
+            }
+
+
         }
         $this->getDoctrine()->getManager()->flush();
 
@@ -3246,12 +3294,10 @@ class TaskController extends ApiBaseController
                 $toDataDate = new \DateTime("@$toDataTimestamp");
             }
         }
-
         $response = [
             'from' => $fromDataDate,
             'to' => $toDataDate,
         ];
-
         return $response;
     }
 

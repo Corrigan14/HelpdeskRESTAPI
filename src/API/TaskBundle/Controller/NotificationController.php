@@ -96,6 +96,8 @@ class NotificationController extends ApiBaseController
             'read' => $read
         ];
 
+//        dump('lll');
+
         $notificationArray = $this->get('notifications_service')->getLoggedUserNotifications($options);
         return $this->json($notificationArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }

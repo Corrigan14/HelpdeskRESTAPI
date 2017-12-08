@@ -66,8 +66,20 @@ class LoginController extends Controller
      */
     public function tokenAuthenticationAction(Request $request)
     {
-        $username = $request->request->get('username');
-        $password = $request->request->get('password');
+        // Data in both: JSON and FORM x-www-form-urlencoded are supported by API
+        $requestBodyContentJson = json_decode($request->getContent(), true);
+        $requestBodyContentCoded = $request->request->all();
+
+        if ($requestBodyContentJson) {
+            $username = $requestBodyContentJson['username'];
+            $password = $requestBodyContentJson['password'];
+        } elseif ($requestBodyContentCoded) {
+            $username = $requestBodyContentCoded['username'];
+            $password = $requestBodyContentCoded['password'];
+        } else {
+            $username = null;
+            $password = null;
+        }
 
         /** @var User $user */
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')

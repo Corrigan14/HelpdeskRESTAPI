@@ -184,6 +184,7 @@ class LoginController extends Controller
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
             $response = $response->setContent('Problem with data coding - requested coding standard and set coding standard are not equal. Supported Content Types: application/json, application/x-www-form-urlencoded');
         }
+        dump($response);
         return $response;
 
     }

@@ -79,8 +79,6 @@ class LoginController extends Controller
         $locationURL = $this->generateUrl('token_authentication');
         $response->headers->set('Location', $locationURL);
 
-        dump($contentType);
-
         // Data in both: JSON and FORM x-www-form-urlencoded are supported by API
         if ('application/json' === $contentType) {
             $requestBody = json_decode($request->getContent(), true);
@@ -184,8 +182,7 @@ class LoginController extends Controller
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
             $response = $response->setContent('Problem with data coding - requested coding standard and set coding standard are not equal. Supported Content Types: application/json, application/x-www-form-urlencoded');
         }
-        dump($response);
-//        $this->json(['token' => $token], StatusCodesHelper::SUCCESSFUL_CODE);
+
         return $response;
 
     }

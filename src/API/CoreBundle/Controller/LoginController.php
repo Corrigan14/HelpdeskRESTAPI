@@ -8,6 +8,7 @@ use Igsem\APIBundle\Services\StatusCodesHelper;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class LoginController
@@ -52,107 +53,136 @@ class LoginController extends Controller
      *  },
      *  statusCodes={
      *      200="The request has succeeded",
+     *      403="Bad request - codding data problem",
      *      403="Incorrect credentials",
      *      404="User not found"
      *  }
      * )
      * @param Request $request
      *
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      * @throws \Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException
      * @throws \Symfony\Component\Security\Core\Exception\AccessDeniedException
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      * @throws \LogicException
      */
-    public function tokenAuthenticationAction(Request $request)
+    public function tokenAuthenticationAction(Request $request): Response
     {
+        $contentType = $request->headers->get('Content-Type');
+        $requestBody = null;
+
+        // JSON API Response - Content type and Location settings
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $locationURL = $this->generateUrl('token_authentication');
+        $response->headers->set('Location', $locationURL);
+
         // Data in both: JSON and FORM x-www-form-urlencoded are supported by API
-        $requestBodyContentJson = json_decode($request->getContent(), true);
-        $requestBodyContentCoded = $request->request->all();
-
-        if ($requestBodyContentJson) {
-            $username = $requestBodyContentJson['username'];
-            $password = $requestBodyContentJson['password'];
-        } elseif ($requestBodyContentCoded) {
-            $username = $requestBodyContentCoded['username'];
-            $password = $requestBodyContentCoded['password'];
+        if ('application/json' === $contentType) {
+            $requestBody = json_decode($request->getContent(), true);
+        } elseif ('application/x-www-form-urlencoded' === $contentType) {
+            $requestBody = $request->request->all();
         } else {
-            $username = null;
-            $password = null;
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent('Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded');
+
+            return $response;
         }
 
-        /** @var User $user */
-        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')
-            ->findOneBy(['username' => $username]);
+        if (null !== $requestBody) {
+            $username = $requestBody['username'];
+            $password = $requestBody['password'];
 
-        if (!$user) {
-            return $this->json(['message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE], StatusCodesHelper::USER_NOT_FOUND_CODE);
-        }
 
-        // password check
-        if (!$this->get('security.password_encoder')->isPasswordValid($user, $password)) {
-            return $this->json(['message' => StatusCodesHelper::INCORRECT_CREDENTIALS_MESSAGE], StatusCodesHelper::INCORRECT_CREDENTIALS_CODE);
-        }
+            /** @var User $user */
+            $user = $this->getDoctrine()->getRepository('APICoreBundle:User')
+                ->findOneBy(['username' => $username]);
 
-        //check if account was not deleted or is not active
-        if (!$user->isEnabled()) {
-            return $this->json(['message' => StatusCodesHelper::ACCOUNT_DISABLED_MESSAGE], StatusCodesHelper::UNAUTHORIZED_CODE);
-        }
+            if (!$user) {
+                $response = $response->setStatusCode(StatusCodesHelper::USER_NOT_FOUND_CODE);
+                $response = $response->setContent(StatusCodesHelper::USER_NOT_FOUND_MESSAGE);
 
-        $userImage = $user->getImage();
-        if (null !== $userImage) {
-            $imageLink = $this->generateUrl('file_load', ['slug' => $userImage]);
-            $imageSlug = $userImage;
-        } else {
-            $imageLink = null;
-            $imageSlug = null;
-        }
+                return $response;
+            }
 
-        $userBaseArray = [
-            'id' => $user->getId(),
-            'username' => $user->getUsername(),
-            'email' => $user->getEmail(),
-            'language' => $user->getLanguage(),
-            'isActive' => $user->getIsActive(),
-            'profileImage' => $imageLink,
-            'image' => $imageSlug,
-        ];
+            // password check
+            if (!$this->get('security.password_encoder')->isPasswordValid($user, $password)) {
+                $response = $response->setStatusCode(StatusCodesHelper::INCORRECT_CREDENTIALS_CODE);
+                $response = $response->setContent(StatusCodesHelper::INCORRECT_CREDENTIALS_MESSAGE);
 
-        $userRole = [];
-        /** @var UserRole $ur */
-        $ur = $user->getUserRole();
-        if ($ur) {
-            $userRole = [
-                'userRoleTitle' => $ur->getTitle(),
-                'userRoleDescription' => $ur->getDescription(),
-                'userRoleHomepage' => $ur->getHomepage(),
-                'userRoleAcl' => $ur->getAcl(),
-                'userRoleOrder' => $ur->getOrder()
+                return $response;
+            }
+
+            //check if account was not deleted or is not active
+            if (!$user->isEnabled()) {
+                $response = $response->setStatusCode(StatusCodesHelper::UNAUTHORIZED_CODE);
+                $response = $response->setContent(StatusCodesHelper::ACCOUNT_DISABLED_MESSAGE);
+
+                return $response;
+              }
+
+            $userImage = $user->getImage();
+            if (null !== $userImage) {
+                $imageLink = $this->generateUrl('file_load', ['slug' => $userImage]);
+                $imageSlug = $userImage;
+            } else {
+                $imageLink = null;
+                $imageSlug = null;
+            }
+
+            $userBaseArray = [
+                'id' => $user->getId(),
+                'username' => $user->getUsername(),
+                'email' => $user->getEmail(),
+                'language' => $user->getLanguage(),
+                'isActive' => $user->getIsActive(),
+                'profileImage' => $imageLink,
+                'image' => $imageSlug,
             ];
+
+            $userRole = [];
+            /** @var UserRole $ur */
+            $ur = $user->getUserRole();
+            if ($ur) {
+                $userRole = [
+                    'userRoleTitle' => $ur->getTitle(),
+                    'userRoleDescription' => $ur->getDescription(),
+                    'userRoleHomepage' => $ur->getHomepage(),
+                    'userRoleAcl' => $ur->getAcl(),
+                    'userRoleOrder' => $ur->getOrder()
+                ];
+            }
+
+            $detailData = [];
+            if ($user->getDetailData()) {
+                $detailData = [
+                    'name' => $user->getDetailData()->getName(),
+                    'surname' => $user->getDetailData()->getSurname(),
+                    'function' => $user->getDetailData()->getFunction(),
+                    'signature' => $user->getDetailData()->getSignature(),
+                    'phone' => $user->getDetailData()->getMobile(),
+                    'facebook' => $user->getDetailData()->getFacebook(),
+                    'twitter' => $user->getDetailData()->getTwitter(),
+                    'linkdin' => $user->getDetailData()->getLinkdin(),
+                    'google' => $user->getDetailData()->getGoogle(),
+                ];
+            }
+
+            $allDetailsAboutUser = array_merge($userBaseArray, $detailData, $userRole);
+
+            // Use LexikJWTAuthenticationBundle to create JWT token that hold only information about user name
+            $token = $this->get('lexik_jwt_authentication.encoder.default')
+                ->encode($allDetailsAboutUser);
+
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+            $response = $response->setContent(json_encode($token));
+        }else{
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent('Problem with data coding - requested coding standard and set coding standard are not equal. Supported Content Types: application/json, application/x-www-form-urlencoded');
         }
+        return $response;
 
-        $detailData = [];
-        if ($user->getDetailData()) {
-            $detailData = [
-                'name' => $user->getDetailData()->getName(),
-                'surname' => $user->getDetailData()->getSurname(),
-                'function' => $user->getDetailData()->getFunction(),
-                'signature' => $user->getDetailData()->getSignature(),
-                'phone' => $user->getDetailData()->getMobile(),
-                'facebook' => $user->getDetailData()->getFacebook(),
-                'twitter' => $user->getDetailData()->getTwitter(),
-                'linkdin' => $user->getDetailData()->getLinkdin(),
-                'google' => $user->getDetailData()->getGoogle(),
-            ];
-        }
-
-        $allDetailsAboutUser = array_merge($userBaseArray, $detailData, $userRole);
-
-        // Use LexikJWTAuthenticationBundle to create JWT token that hold only information about user name
-        $token = $this->get('lexik_jwt_authentication.encoder.default')
-            ->encode($allDetailsAboutUser);
-
-        // Return genereted token
-        return $this->json(['token' => $token], StatusCodesHelper::SUCCESSFUL_CODE);
     }
 }

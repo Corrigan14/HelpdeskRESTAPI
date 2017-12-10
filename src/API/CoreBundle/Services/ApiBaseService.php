@@ -4,6 +4,7 @@ namespace API\CoreBundle\Services;
 
 use API\CoreBundle\Repository\RepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class ApiBaseService
@@ -26,6 +27,43 @@ class ApiBaseService
     public function __construct(Router $router)
     {
         $this->router = $router;
+    }
+
+    /**
+     * @param Request $request
+     * @return array|bool|mixed|null
+     * @throws \LogicException
+     */
+    public function encodeRequest(Request $request)
+    {
+        $contentType = $request->headers->get('Content-Type');
+        $method = $request->getMethod();
+
+        switch ($method) {
+            case 'POST':
+                // Data in both: JSON and FORM x-www-form-urlencoded are supported by API
+                if ('application/json' === $contentType) {
+                    $requestBody = json_decode($request->getContent(), true);
+                    return $requestBody;
+                }
+                if ('application/x-www-form-urlencoded' === $contentType) {
+                    $requestBody = $request->request->all();
+                    return $requestBody;
+                }
+                break;
+            case 'GET':
+                // Method GET contains only parameters in a form of FILTERS which are sent via URL
+                // Data in both: JSON and FORM x-www-form-urlencoded are supported by API
+                if ('application/json' === $contentType || 'application/x-www-form-urlencoded' === $contentType) {
+                    $requestBody = $request->query->all();
+                    return $requestBody;
+                }
+                break;
+            default:
+                return false;
+        }
+
+        return false;
     }
 
     /**

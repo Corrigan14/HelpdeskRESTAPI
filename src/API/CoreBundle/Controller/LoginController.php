@@ -70,8 +70,7 @@ class LoginController extends Controller
      */
     public function tokenAuthenticationAction(Request $request): Response
     {
-        $contentType = $request->headers->get('Content-Type');
-        $requestBody = null;
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
         // JSON API Response - Content type and Location settings
         $response = new Response();
@@ -79,22 +78,9 @@ class LoginController extends Controller
         $locationURL = $this->generateUrl('token_authentication');
         $response->headers->set('Location', $locationURL);
 
-        // Data in both: JSON and FORM x-www-form-urlencoded are supported by API
-        if ('application/json' === $contentType) {
-            $requestBody = json_decode($request->getContent(), true);
-        } elseif ('application/x-www-form-urlencoded' === $contentType) {
-            $requestBody = $request->request->all();
-        } else {
-            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent('Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded');
-
-            return $response;
-        }
-
-        if (null !== $requestBody) {
+        if ($requestBody) {
             $username = $requestBody['username'];
             $password = $requestBody['password'];
-
 
             /** @var User $user */
             $user = $this->getDoctrine()->getRepository('APICoreBundle:User')
@@ -102,7 +88,7 @@ class LoginController extends Controller
 
             if (!$user) {
                 $response = $response->setStatusCode(StatusCodesHelper::USER_NOT_FOUND_CODE);
-                $response = $response->setContent(StatusCodesHelper::USER_NOT_FOUND_MESSAGE);
+                $response = $response->setContent(json_encode(['message' => StatusCodesHelper::USER_NOT_FOUND_MESSAGE]));
 
                 return $response;
             }
@@ -110,7 +96,7 @@ class LoginController extends Controller
             // password check
             if (!$this->get('security.password_encoder')->isPasswordValid($user, $password)) {
                 $response = $response->setStatusCode(StatusCodesHelper::INCORRECT_CREDENTIALS_CODE);
-                $response = $response->setContent(StatusCodesHelper::INCORRECT_CREDENTIALS_MESSAGE);
+                $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INCORRECT_CREDENTIALS_MESSAGE]));
 
                 return $response;
             }
@@ -118,10 +104,10 @@ class LoginController extends Controller
             //check if account was not deleted or is not active
             if (!$user->isEnabled()) {
                 $response = $response->setStatusCode(StatusCodesHelper::UNAUTHORIZED_CODE);
-                $response = $response->setContent(StatusCodesHelper::ACCOUNT_DISABLED_MESSAGE);
+                $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCOUNT_DISABLED_MESSAGE]));
 
                 return $response;
-              }
+            }
 
             $userImage = $user->getImage();
             if (null !== $userImage) {
@@ -178,9 +164,9 @@ class LoginController extends Controller
 
             $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
             $response = $response->setContent(json_encode(['token' => $token]));
-        }else{
+        } else {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent('Problem with data coding - requested coding standard and set coding standard are not equal. Supported Content Types: application/json, application/x-www-form-urlencoded');
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }
 
         return $response;

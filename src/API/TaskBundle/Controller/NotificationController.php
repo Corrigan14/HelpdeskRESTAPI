@@ -73,6 +73,7 @@ class NotificationController extends ApiBaseController
      *
      * @param Request $request
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
@@ -80,26 +81,43 @@ class NotificationController extends ApiBaseController
      */
     public function getLoggedUsersNotificationAction(Request $request): Response
     {
-        $user = $this->getUser();
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        $readString = $request->get('read');
-        if ('true' === strtolower($readString) || true === $readString) {
-            $read = true;
-        } elseif ('false' === strtolower($readString) || false === $readString) {
-            $read = false;
-        } else {
+        // JSON API Response - Content type and Location settings
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $locationURL = $this->generateUrl('token_authentication');
+        $response->headers->set('Location', $locationURL);
+
+        if (false !== $requestBody) {
+            $user = $this->getUser();
             $read = null;
+
+            if (isset($requestBody['read'])) {
+                $readString = $requestBody['read'];
+                if ('true' === strtolower($readString) || true === $readString) {
+                    $read = true;
+                } elseif ('false' === strtolower($readString) || false === $readString) {
+                    $read = false;
+                }
+            }
+
+            $options = [
+                'loggedUserId' => $user->getId(),
+                'read' => $read
+            ];
+
+            $notificationArray = $this->get('notifications_service')->getLoggedUserNotifications($options);
+
+            $response = $response->setContent(json_encode($notificationArray));
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }
 
-        $options = [
-            'loggedUserId' => $user->getId(),
-            'read' => $read
-        ];
+        return $response;
 
-//        dump('lll');
-
-        $notificationArray = $this->get('notifications_service')->getLoggedUserNotifications($options);
-        return $this->json($notificationArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

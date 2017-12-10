@@ -85,6 +85,7 @@ class LoginController extends Controller
         } elseif ('application/x-www-form-urlencoded' === $contentType) {
             $requestBody = $request->request->all();
         } else {
+            dump('No header sent');
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
             $response = $response->setContent('Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded');
 

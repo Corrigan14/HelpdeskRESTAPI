@@ -179,12 +179,13 @@ class LoginController extends Controller
                 ->encode($allDetailsAboutUser);
 
             $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
-            $response = $response->setContent(json_encode($token));
+            $response = $response->setContent(json_encode(['token' => $token]));
         }else{
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
             $response = $response->setContent('Problem with data coding - requested coding standard and set coding standard are not equal. Supported Content Types: application/json, application/x-www-form-urlencoded');
         }
         dump($response);
+//        $this->json(['token' => $token], StatusCodesHelper::SUCCESSFUL_CODE);
         return $response;
 
     }

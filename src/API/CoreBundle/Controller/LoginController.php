@@ -72,7 +72,8 @@ class LoginController extends Controller
     {
 
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
-        dump($request->headers->get('Content-Type'));
+        $request->headers->set('Access-Control-Allow-Origin','*');
+        dump($request->headers);
         dump( $request->getMethod());
 
         // JSON API Response - Content type and Location settings

@@ -51,7 +51,9 @@ class ApiBaseService
             case 'POST':
                 // Data in both: JSON and FORM x-www-form-urlencoded are supported by API
                 if ('application/json' === $contentType) {
+                    dump('I am here in JSON encoder');
                     $requestBody = json_decode($request->getContent(), true);
+                    dump($requestBody);
                     return $requestBody;
                 }
                 if ('application/x-www-form-urlencoded' === $contentType) {
@@ -70,7 +72,7 @@ class ApiBaseService
             default:
                 return false;
         }
-
+dump('I am outside i dont know why');
         return false;
     }
 

@@ -72,7 +72,7 @@ class LoginController extends Controller
     {
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
         dump( $request->headers->get('Content-Type'));
-        dump( $request->getMethod());
+        dump( $request->getMethod());die;
 
         // JSON API Response - Content type and Location settings
         $response = new Response();

@@ -85,13 +85,13 @@ jms_serializer:
     visitors:
         json:
             options: [JSON_FORCE_OBJECT]
-nelmio_cors:
-    paths:
-        '^/':
-            allow_origin: ['*']
-            allow_headers: ['*']
-            allow_methods: ['POST', 'PUT', 'GET', 'DELETE']
-            max_age: 3600
+#nelmio_cors:
+#    paths:
+#        '^/':
+#            allow_origin: ['*']
+#            allow_headers: ['*']
+#            allow_methods: ['POST', 'PUT', 'GET', 'DELETE']
+#            max_age: 3600
 
 stof_doctrine_extensions:
     default_locale: en

@@ -41,6 +41,8 @@ class ApiBaseService
 
         dump('before');
         dump($contentType);
+        dump ($method);
+        dump($request);
 //        $request->headers->set('Content-Type','application/json');
 //        $contentType = $request->headers->get('Content-Type');
 //        dump('after');
@@ -51,7 +53,7 @@ class ApiBaseService
             case 'POST':
                 // Data in both: JSON and FORM x-www-form-urlencoded are supported by API
                 if ('application/json' === $contentType) {
-//                    dump('I am here in JSON encoder');
+                    dump('I am here in JSON encoder');
                     $requestBody = json_decode($request->getContent(), true);
 //                    dump($requestBody);
 //                    die;

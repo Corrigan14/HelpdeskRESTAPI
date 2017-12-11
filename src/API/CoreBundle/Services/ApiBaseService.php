@@ -54,6 +54,7 @@ class ApiBaseService
                     dump('I am here in JSON encoder');
                     $requestBody = json_decode($request->getContent(), true);
                     dump($requestBody);
+                    die;
                     return $requestBody;
                 }
                 if ('application/x-www-form-urlencoded' === $contentType) {
@@ -70,9 +71,12 @@ class ApiBaseService
                 }
                 break;
             default:
+                dump('I am on default part');
+                die;
                 return false;
         }
 dump('I am outside i dont know why');
+        die;
         return false;
     }
 

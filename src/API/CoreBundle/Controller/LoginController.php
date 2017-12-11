@@ -70,12 +70,14 @@ class LoginController extends Controller
      */
     public function tokenAuthenticationAction(Request $request): Response
     {
+
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
         dump($request->headers->get('Content-Type'));
         dump( $request->getMethod());
 
         // JSON API Response - Content type and Location settings
         $response = new Response();
+        $response->headers->set('Access-Control-Allow-Origin', '*');
         $response->headers->set('Content-Type', 'application/json');
         $locationURL = $this->generateUrl('token_authentication');
         $response->headers->set('Location', $locationURL);

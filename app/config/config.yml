@@ -91,13 +91,13 @@ nelmio_cors:
             allow_origin: ['*']
             forced_allow_origin_value: '*'
             allow_headers: ['*']
-            allow_methods: ['POST', 'PUT','PATCH', 'GET', 'DELETE']
+            allow_methods: ['POST', 'PUT','PATCH', 'GET', 'DELETE', 'OPTIONS']
             max_age: 3600
         '^/api/':
             allow_origin: ['*']
             forced_allow_origin_value: '*'
             allow_headers: ['*']
-            allow_methods: ['POST', 'PUT','PATCH', 'GET', 'DELETE']
+            allow_methods: ['POST', 'PUT','PATCH', 'GET', 'DELETE', 'OPTIONS']
             max_age: 3600
 
 stof_doctrine_extensions:

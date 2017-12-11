@@ -89,8 +89,8 @@ nelmio_cors:
     paths:
         '^/':
             allow_origin: ['*']
-            allow_headers: ['Authorization','HTTP_AUTHORIZATION']
-            allow_methods: ['POST', 'PUT','PATCH', 'GET', 'DELETE','OPTIONS']
+            allow_headers: ['*']
+            allow_methods: ['POST', 'PUT','PATCH', 'GET', 'DELETE']
             max_age: 3600
 
 stof_doctrine_extensions:

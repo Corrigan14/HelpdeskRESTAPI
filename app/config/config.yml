@@ -88,7 +88,7 @@ jms_serializer:
 
 nelmio_cors:
     paths:
-        '^/':
+        '^/api':
             allow_origin: ['*']
             allow_headers: ['*']
             allow_methods: ['POST', 'PUT', 'GET', 'DELETE']

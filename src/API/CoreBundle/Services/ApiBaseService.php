@@ -41,11 +41,11 @@ class ApiBaseService
 
         dump('before');
         dump($contentType);
-        $request->headers->set('Content-Type','application/json');
-        $contentType = $request->headers->get('Content-Type');
-        dump('after');
-        dump($contentType);
-        die;
+//        $request->headers->set('Content-Type','application/json');
+//        $contentType = $request->headers->get('Content-Type');
+//        dump('after');
+//        dump($contentType);
+//        die;
 
         switch ($method) {
             case 'POST':

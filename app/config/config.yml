@@ -89,9 +89,9 @@ jms_serializer:
 nelmio_cors:
     paths:
         '^/api':
-            allow_origin: ['http://lanhelpdesk4.lansystems.sk']
+            allow_origin: ['*']
             allow_headers: ['content-type','origin']
-            allow_methods: ['POST', 'PUT', 'PATCH', 'GET', 'DELETE', 'OPTIONS']
+            allow_methods: ['POST', 'PUT', 'GET', 'DELETE']
             max_age: 3600
 
 stof_doctrine_extensions:

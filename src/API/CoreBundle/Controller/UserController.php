@@ -128,13 +128,14 @@ class UserController extends ApiBaseController
      * @param Request $request
      *
      * @return Response|JsonResponse
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request): Response
     {
         $aclOptions = [
             'acl' => UserRoleAclOptions::USER_SETTINGS,
@@ -145,33 +146,66 @@ class UserController extends ApiBaseController
             return $this->accessDeniedResponse();
         }
 
-        $pageNum = $request->get('page');
-        $page = (int)$pageNum ?: 1;
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ?: 10;
+        // JSON API Response - Content type and Location settings
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $locationURL = $this->generateUrl('users_list');
+        $response->headers->set('Location', $locationURL);
 
-        if(999 === $limit){
-            $page = 1;
+        if (false !== $requestBody) {
+            // Filter params processing
+            if (isset($requestBody['page'])) {
+                $pageNum = $requestBody['page'];
+                $page = (int)$pageNum;
+            } else {
+                $page = 1;
+            }
+
+            if (isset($requestBody['limit'])) {
+                $limitNum = $requestBody['limit'];
+                $limit = (int)$limitNum;
+            } else {
+                $limit = 10;
+            }
+
+            if (999 === $limit) {
+                $page = 1;
+            }
+
+            if (isset($requestBody['order'])) {
+                $orderString = $requestBody['order'];
+                $orderString = strtolower($orderString);
+                $order = $orderString === 'asc' || $orderString === 'desc';
+            } else {
+                $order = 'ASC';
+            }
+
+            if (isset($requestBody['isActive'])) {
+                $isActive = $requestBody['isActive'];
+            } else {
+                $isActive = 'all';
+            }
+
+            $filtersForUrl = [
+                'isActive' => '&isActive=' . $isActive,
+                'order' => '&order=' . $order,
+            ];
+
+            $usersArray = $this->get('api_user.service')->getUsersResponse($page, $isActive, $order, $filtersForUrl, $limit);
+            $response = $response->setContent(json_encode($usersArray));
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }
 
-        $orderString = $request->get('order');
-        $orderString = strtolower($orderString);
-        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
-
-        $isActive = $request->get('isActive') ?: 'all';
-        $filtersForUrl = [
-            'isActive' => '&isActive=' . $isActive,
-            'order' => '&order=' . $order,
-        ];
-
-        return $this->json($this->get('api_user.service')->getUsersResponse($page, $isActive, $order, $filtersForUrl, $limit), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
     }
 
     /**
      * ### Response ###
-     *     {
-     *       "data":
      *       [
      *          {
      *             "id": 2581,
@@ -202,7 +236,6 @@ class UserController extends ApiBaseController
      *             "username": "customer8",
      *          },
      *       ]
-     *     }
      *
      * @ApiDoc(
      *  description="Returns a list of All active Users",
@@ -219,12 +252,24 @@ class UserController extends ApiBaseController
      *  },
      * )
      *
-     * @return JsonResponse
+     * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      */
-    public function listOfAllUsersAction(): JsonResponse
+    public function listOfAllUsersAction(): Response
     {
+        // JSON API Response - Content type and Location settings
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $locationURL = $this->generateUrl('users_list_of_all_active');
+        $response->headers->set('Location', $locationURL);
+
         $allUsers = $this->get('api_user.service')->getListOfAllUsers();
-        return $this->json($allUsers, StatusCodesHelper::SUCCESSFUL_CODE);
+
+        $response = $response->setContent(json_encode($allUsers));
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+
+        return $response;
     }
 
     /**
@@ -318,7 +363,7 @@ class UserController extends ApiBaseController
      *      }
      *
      * @ApiDoc(
-     *  description="Returns User (user Entity)",
+     *  description="Return User (user Entity)",
      *  requirements={
      *     {
      *       "name"="id",
@@ -345,18 +390,28 @@ class UserController extends ApiBaseController
      *
      * @param int $id
      *
-     * @return Response|JsonResponse
+     * @return Response
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function getAction(int $id)
+    public function getAction(int $id): Response
     {
+        // JSON API Response - Content type and Location settings
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $locationURL = $this->generateUrl('user', ['id' => $id]);
+        $response->headers->set('Location', $locationURL);
+
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (!$user instanceof User) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::NOT_FOUND_MESSAGE]));
+
+            return $response;
         }
 
         // User can view his own data
@@ -367,7 +422,10 @@ class UserController extends ApiBaseController
             ];
 
             if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-                return $this->accessDeniedResponse();
+                $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+                $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+
+                return $response;
             }
         }
 
@@ -387,7 +445,10 @@ class UserController extends ApiBaseController
         $userRoles = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->getAllowedUserRoles($user->getUserRole()->getOrder());
         $allowedRolesArray['allowedUserRoles'] = [$userRoles];
 
-        return $this->json(array_merge($userArray, $allowedRolesArray), StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode(array_merge($userArray, $allowedRolesArray)));
+
+        return $response;
     }
 
     /**
@@ -505,6 +566,9 @@ class UserController extends ApiBaseController
      * @param int $userRoleId
      * @param bool|int $companyId
      * @return JsonResponse|Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -512,16 +576,28 @@ class UserController extends ApiBaseController
      */
     public function createAction(Request $request, int $userRoleId, $companyId = false)
     {
+        // JSON API Response - Content type and Location settings
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        if ($companyId) {
+            $locationURL = $this->generateUrl('user_create', ['userRoleId' => $userRoleId, 'companyId' => $companyId]);
+        }else{
+            $locationURL = $this->generateUrl('user_create', ['userRoleId' => $userRoleId]);
+        }
+        $response->headers->set('Location', $locationURL);
+
         // Check if user has permission to CRUD User entity
         $aclOptions = [
             'acl' => UserRoleAclOptions::USER_SETTINGS,
             'user' => $this->getUser()
         ];
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        $requestData = $request->request->all();
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
         $user = new User();
         $user->setIsActive(true);
@@ -536,18 +612,18 @@ class UserController extends ApiBaseController
         if ($userRoleId) {
             $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($userRoleId);
             if (!$userRole instanceof UserRole) {
-                return $this->createApiResponse([
-                    'message' => 'User role with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
+                $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                $response = $response->setContent(json_encode(['message' => 'User role with requested Id does not exist!']));
+                return $response;
             }
             // Check if user can create User entity with requested User Role
             $voteOptions = [
                 'userRole' => $userRole
             ];
             if (!$this->get('user_voter')->isGranted(VoteOptions::CREATE_USER_WITH_USER_ROLE, $voteOptions)) {
-                return $this->createApiResponse([
-                    'message' => 'You can not create user with selected User Role!',
-                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+                $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+                $response = $response->setContent(json_encode(['message' => 'You can not create user with selected User Role!']));
+                return $response;
             }
             $user->setUserRole($userRole);
 
@@ -562,14 +638,14 @@ class UserController extends ApiBaseController
             $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
 
             if (!$company instanceof Company) {
-                return $this->createApiResponse([
-                    'message' => 'Company with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
+                $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Company with requested Id does not exist!']));
+                return $response;
             }
             $user->setCompany($company);
         }
 
-        return $this->updateUser($user, $requestData, true);
+        return $this->updateUser($user, $requestBody, true, $locationURL);
     }
 
     /**
@@ -773,200 +849,6 @@ class UserController extends ApiBaseController
         }
 
         $requestData = $request->request->all();
-
-        return $this->updateUser($user, $requestData);
-    }
-
-    /**
-     *  ### Response ###
-     *      ▿{
-     *         "data": ▿
-     *         {
-     *             "id": 2581,
-     *             "username": "customer2",
-     *             "email": "customer@customer2.sk",
-     *             "language": "AJ",
-     *             "is_active": true,
-     *             "image": null,
-     *             "detailData":
-     *             {
-     *                "id": 2306,
-     *                "name": "Customer2",
-     *                "surname": "Customerovic2",
-     *                "title_before": null,
-     *                "title_after": null,
-     *                "function": null,
-     *                "mobile": null,
-     *                "tel": null,
-     *                "fax": null,
-     *                "signature": null,
-     *                "street": null,
-     *                "city": null,
-     *                "zip": null,
-     *                "country": null,
-     *                "facebook": null,
-     *                "twitter": null,
-     *                "linkdin": null,
-     *                "google": null
-     *              },
-     *              "user_role":
-     *              {
-     *                 "id": 157,
-     *                 "title": "CUSTOMER",
-     *                 "description": null,
-     *                 "homepage": "/",
-     *                 "acl":
-     *                 [
-     *                    "login_to_system",
-     *                    "create_tasks"
-     *                 ],
-     *                 "order": 4
-     *              },
-     *              "company":
-     *              {
-     *                 "id": 1802,
-     *                 "title": "Web-Solutions"
-     *              }
-     *           }
-     *         },
-     *         "_links": ▿
-     *         {
-     *           "put": "/api/v1/core-bundle/users/85",
-     *           "put: user-role": "/api/v1/core-bundle/users/85/user-role/32",
-     *           "patch": "/api/v1/core-bundle/users/85",
-     *           "patch: user-role": "/api/v1/core-bundle/users/85/user-role/32",
-     *           "delete": "/api/v1/core-bundle/users/85",
-     *           "restore": "/api/v1/core-bundle/users/85/restore",
-     *           "put: company": "/api/v1/core-bundle/users/85/company/41",
-     *           "put: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41",
-     *           "patch: company": "/api/v1/core-bundle/users/85/company/41",
-     *           "patch: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41"
-     *         },
-     *         "allowedUserRoles":
-     *         [
-     *            [
-     *               {
-     *                  "id": 31,
-     *                  "title": "MANAGER",
-     *                  "description": null,
-     *                  "homepage": "/",
-     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                  "is_active": true,
-     *                  "order": 2
-     *               },
-     *              {
-     *                  "id": 32,
-     *                  "title": "AGENT",
-     *                  "description": null,
-     *                  "homepage": "/",
-     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"sent_emails_from_comments\"]",
-     *                  "is_active": true,
-     *                  "order": 3
-     *              }
-     *           ]
-     *        ]
-     *      }
-     *
-     * @ApiDoc(
-     *  description="Partially update the User",
-     *  input={"class"="API\CoreBundle\Entity\User"},
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\CoreBundle\Entity\User"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found entity",
-     *      409 ="Invalid parameters",
-     *  })
-     *
-     * @param int $id
-     * @param Request $request
-     *
-     * @param bool $userRoleId
-     * @param int|bool $companyId
-     * @return JsonResponse|Response
-     * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \LogicException
-     */
-    public function updatePartialAction(int $id, Request $request, $userRoleId = false, $companyId = false)
-    {
-        // Check if user has permission to CRUD User entity
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::USER_SETTINGS,
-            'user' => $this->getUser()
-        ];
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
-        }
-
-        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
-        if (!$user instanceof User) {
-            return $this->createApiResponse([
-                'message' => 'User with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
-        }
-
-        if ($userRoleId) {
-            $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($userRoleId);
-            if (!$userRole instanceof UserRole) {
-                return $this->createApiResponse([
-                    'message' => 'User role with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
-            }
-            // Check if user can create User entity with requested User Role
-            $voteOptions = [
-                'userRole' => $userRole
-            ];
-            if (!$this->get('user_voter')->isGranted(VoteOptions::CREATE_USER_WITH_USER_ROLE, $voteOptions)) {
-                return $this->createApiResponse([
-                    'message' => 'You can not create user with selected User Role!',
-                ], StatusCodesHelper::ACCESS_DENIED_CODE);
-            }
-            $user->setUserRole($userRole);
-
-            if ($userRole->getTitle() === 'ADMIN') {
-                $user->setRoles(['ROLE_ADMIN']);
-            } else {
-                $user->setRoles(['ROLE_USER']);
-            }
-        }
-
-        if ($companyId) {
-            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
-
-            if (!$company instanceof Company) {
-                return $this->createApiResponse([
-                    'message' => 'Company with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
-            }
-            $user->setCompany($company);
-        }
-
-        // Upload and save avatar
-        $file = $request->files->get('image');
-        if (null !== $file) {
-            $imageSlug = $this->get('upload_helper')->uploadFile($file, true);
-            $user->setImage($imageSlug);
-        }
-
-        $requestData = json_decode($request->getContent(), true);
 
         return $this->updateUser($user, $requestData);
     }
@@ -1426,14 +1308,18 @@ class UserController extends ApiBaseController
      *
      * @param bool $create
      *
-     * @return Response|JsonResponse
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \LogicException
-     * @throws \InvalidArgumentException
+     * @param $locationUrl
+     * @return Response
      * @internal param $id
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \LogicException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      */
-    private function updateUser($user, array $requestData, $create = false)
+    private function updateUser($user, array $requestData, $create = false,  $locationUrl):Response
     {
         $allowedUserEntityParams = [
             'username',
@@ -1464,6 +1350,11 @@ class UserController extends ApiBaseController
             'google'
         ];
 
+        // JSON API Response - Content type and Location settings
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->headers->set('Location', $locationUrl);
+
         $requestDetailData = [];
         if (isset($requestData['detail_data']) && count($requestData['detail_data']) > 0) {
             $requestDetailData = $requestData['detail_data'];
@@ -1486,20 +1377,18 @@ class UserController extends ApiBaseController
         }
 
         foreach ($requestData as $key => $value) {
-            if (!in_array($key, $allowedUserEntityParams, true)) {
-                return $this->createApiResponse(
-                    ['message' => $key . ' is not allowed parameter for User Entity!'],
-                    StatusCodesHelper::INVALID_PARAMETERS_CODE
-                );
+            if (!\in_array($key, $allowedUserEntityParams, true)) {
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for User Entity!']));
+                return $response;
             }
         }
 
         foreach ($requestDetailData as $key => $value) {
-            if (!in_array($key, $alowedUserDetailDataParams, true)) {
-                return $this->createApiResponse(
-                    ['message' => $key . ' is not allowed parameter for Detail Data in User Entity!'],
-                    StatusCodesHelper::INVALID_PARAMETERS_CODE
-                );
+            if (!\in_array($key, $alowedUserDetailDataParams, true)) {
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for Detail Data in User Entity!']));
+                return $response;
             }
         }
 
@@ -1552,7 +1441,7 @@ class UserController extends ApiBaseController
             ];
 
             /**
-             * Fill UserData Entity if some its parameters were sent
+             * Fill UserData Entity if some of its parameters were sent
              */
             if ($requestDetailData) {
                 $userData = $this->getDoctrine()->getRepository('APICoreBundle:UserData')->findOneBy([
@@ -1570,20 +1459,29 @@ class UserController extends ApiBaseController
                     $this->getDoctrine()->getManager()->flush();
 
                     $userArray = $this->get('api_user.service')->getUserResponse($ids);
-                    return $this->json($userArray, $statusCode);
+                    $userRoles = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->getAllowedUserRoles($user->getUserRole()->getOrder());
+                    $allowedRolesArray['allowedUserRoles'] = [$userRoles];
+
+                    $response = $response->setStatusCode($statusCode);
+                    $response = $response->setContent(json_encode(array_merge($userArray, $allowedRolesArray)));
+                    return $response;
                 } else {
                     $data = [
                         'errors' => $errorsUserData,
                         'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
                     ];
-                    return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode($data));
+                    return $response;
                 }
             } else {
                 $userArray = $this->get('api_user.service')->getUserResponse($ids);
                 $userRoles = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->getAllowedUserRoles($user->getUserRole()->getOrder());
                 $allowedRolesArray['allowedUserRoles'] = [$userRoles];
 
-                return $this->json(array_merge($userArray, $allowedRolesArray), $statusCode);
+                $response = $response->setStatusCode($statusCode);
+                $response = $response->setContent(json_encode(array_merge($userArray, $allowedRolesArray)));
+                return $response;
             }
         }
 
@@ -1591,6 +1489,8 @@ class UserController extends ApiBaseController
             'errors' => $errors,
             'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
         ];
-        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        $response = $response->setContent(json_encode($data));
+        return $response;
     }
 }

@@ -62,38 +62,6 @@ user_update_with_company_and_user_role:
         companyId: '\d+'
         userRoleId: '\d+'
 
-user_partial_update:
-    path:     /users/{id}
-    defaults: { _controller: APICoreBundle:User:updatePartial }
-    methods: [PATCH]
-    requirements:
-        id: '\d+'
-
-user_partial_update_with_user_role:
-    path:     /users/{id}/user-role/{userRoleId}
-    defaults: { _controller: APICoreBundle:User:updatePartial }
-    methods: [PATCH]
-    requirements:
-        id: '\d+'
-        userRoleId: '\d+'
-
-user_partial_update_with_company:
-    path:     /users/{id}/company/{companyId}
-    defaults: { _controller: APICoreBundle:User:updatePartial }
-    methods: [PATCH]
-    requirements:
-        id: '\d+'
-        companyId: '\d+'
-
-user_partial_update_with_company_and_user_role:
-    path:     /users/{id}/user-role/{userRoleId}/company/{companyId}
-    defaults: { _controller: APICoreBundle:User:updatePartial }
-    methods: [PATCH]
-    requirements:
-        id: '\d+'
-        companyId: '\d+'
-        userRoleId: '\d+'
-
 user_delete:
     path:     /users/{id}
     defaults: { _controller: APICoreBundle:User:delete }

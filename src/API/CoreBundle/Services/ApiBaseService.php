@@ -42,6 +42,7 @@ class ApiBaseService
         switch ($method) {
             case 'POST':
                 // Data in both: JSON and FORM x-www-form-urlencoded are supported by API
+                // Based on Content-type header we need different encoding standard
                 if ('application/json' === $contentType) {
                     $requestBody = json_decode($request->getContent(), true);
                     return $requestBody;
@@ -52,8 +53,10 @@ class ApiBaseService
                 }
                 break;
             case 'GET':
-                // Method GET contains only parameters in a form of FILTERS which are sent via URL
                 // Data in both: JSON and FORM x-www-form-urlencoded are supported by API
+                // GET Contains only FILTER PARAMETERS and these always go to query string and are sent via URL,
+                // because while they are a part of finding the right data, they are only there to return a subset or modification
+                // of what the Locators return alone
                 if ('application/json' === $contentType || 'application/x-www-form-urlencoded' === $contentType) {
                     $requestBody = $request->query->all();
                     return $requestBody;

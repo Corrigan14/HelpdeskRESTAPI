@@ -91,7 +91,7 @@ nelmio_cors:
         '^/api':
             allow_origin: ['http://lanhelpdesk4.lansystems.sk']
             allow_headers: ['content-type','origin']
-            allow_methods: ['POST', 'PUT', 'PATCH', 'GET', 'DELETE']
+            allow_methods: ['POST', 'PUT', 'PATCH', 'GET', 'DELETE', 'OPTIONS']
             max_age: 3600
 
 stof_doctrine_extensions:

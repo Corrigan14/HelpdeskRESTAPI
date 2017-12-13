@@ -1025,25 +1025,35 @@ class UserController extends ApiBaseController
      *
      * @param int $id
      *
-     * @return Response|JsonResponse
+     * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function restoreAction(int $id)
+    public function restoreAction(int $id):Response
     {
+        $locationURL = $this->generateUrl('user_restore', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         // Check if user has permission to CRUD User entity
         $aclOptions = [
             'acl' => UserRoleAclOptions::USER_SETTINGS,
             'user' => $this->getUser()
         ];
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         /** @var User $user */
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
-        if (null === $user) {
-            return $this->notFoundResponse();
+        if (!$user instanceof User) {
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::NOT_FOUND_MESSAGE]));
+            return $response;
         }
 
         $user->setIsActive(true);
@@ -1056,6 +1066,7 @@ class UserController extends ApiBaseController
         } else {
             $userCompanyId = false;
         }
+
         $ids = [
             'userId' => $user->getId(),
             'userRoleId' => $user->getUserRole()->getId(),
@@ -1065,7 +1076,9 @@ class UserController extends ApiBaseController
         $userRoles = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->getAllowedUserRoles($user->getUserRole()->getOrder());
         $allowedRolesArray['allowedUserRoles'] = [$userRoles];
 
-        return $this->json(array_merge($userArray, $userRoles), StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode(array_merge($userArray, $allowedRolesArray)));
+        return $response;
     }
 
     /**
@@ -1073,7 +1086,7 @@ class UserController extends ApiBaseController
      *     {
      *       "data":
      *       [
-     *             *         {
+     *          {
      *             "id": 2581,
      *             "username": "customer2",
      *             "email": "customer@customer2.sk",

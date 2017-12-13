@@ -63,7 +63,7 @@ user_update_with_company_and_user_role:
         userRoleId: '\d+'
 
 user_delete:
-    path:     /users/{id}
+    path:     /users/{id}/inactivate
     defaults: { _controller: APICoreBundle:User:delete }
     methods: [PUT]
     requirements:

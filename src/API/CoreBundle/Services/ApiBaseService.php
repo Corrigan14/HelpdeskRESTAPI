@@ -5,6 +5,7 @@ namespace API\CoreBundle\Services;
 use API\CoreBundle\Repository\RepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class ApiBaseService
@@ -52,6 +53,18 @@ class ApiBaseService
                     return $requestBody;
                 }
                 break;
+            case 'PUT':
+                // Data in both: JSON and FORM x-www-form-urlencoded are supported by API
+                // Based on Content-type header we need different encoding standard
+                if ('application/json' === $contentType) {
+                    $requestBody = json_decode($request->getContent(), true);
+                    return $requestBody;
+                }
+                if ('application/x-www-form-urlencoded' === $contentType) {
+                    $requestBody = $request->request->all();
+                    return $requestBody;
+                }
+                break;
             case 'GET':
                 // Data in both: JSON and FORM x-www-form-urlencoded are supported by API
                 // GET Contains only FILTER PARAMETERS and these always go to query string and are sent via URL,
@@ -66,6 +79,20 @@ class ApiBaseService
                 return false;
         }
         return false;
+    }
+
+    /**
+     * @param $locationURL
+     * @return Response
+     * @throws \InvalidArgumentException
+     */
+    public function createResponseEntityWithSettings(string $locationURL):Response
+    {
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->headers->set('Location', $locationURL);
+
+        return $response;
     }
 
     /**

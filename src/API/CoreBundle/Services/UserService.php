@@ -149,8 +149,7 @@ class UserService
             $linksForCompany = [
                 'put: company' => $this->router->generate('user_update_with_company', ['id' => $userId, 'companyId' => $userCompanyId]),
                 'put: user-role & company' => $this->router->generate('user_update_with_company_and_user_role', ['id' => $userId, 'userRoleId' => $userRoleId, 'companyId' => $userCompanyId]),
-                'patch: company' => $this->router->generate('user_partial_update_with_company', ['id' => $userId, 'companyId' => $userCompanyId]),
-                'patch: user-role & company' => $this->router->generate('user_partial_update_with_company_and_user_role', ['id' => $userId, 'userRoleId' => $userRoleId, 'companyId' => $userCompanyId]),
+
             ];
         } else {
             $linksForCompany = [];
@@ -159,8 +158,6 @@ class UserService
         $otherLinks = [
             'put' => $this->router->generate('user_update', ['id' => $userId]),
             'put: user-role' => $this->router->generate('user_update_with_user_role', ['id' => $userId, 'userRoleId' => $userRoleId]),
-            'patch' => $this->router->generate('user_partial_update', ['id' => $userId]),
-            'patch: user-role' => $this->router->generate('user_partial_update_with_user_role', ['id' => $userId, 'userRoleId' => $userRoleId]),
             'delete' => $this->router->generate('user_delete', ['id' => $userId]),
             'restore' => $this->router->generate('user_restore', ['id' => $userId]),
         ];

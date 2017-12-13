@@ -65,14 +65,14 @@ user_update_with_company_and_user_role:
 user_delete:
     path:     /users/{id}
     defaults: { _controller: APICoreBundle:User:delete }
-    methods: [DELETE]
+    methods: [PUT]
     requirements:
         id: '\d+'
 
 user_restore:
     path:     /users/{id}/restore
     defaults: { _controller: APICoreBundle:User:restore }
-    methods: [PATCH]
+    methods: [PUT]
     requirements:
         id: '\d+'
 

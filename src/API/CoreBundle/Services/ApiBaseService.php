@@ -68,8 +68,7 @@ class ApiBaseService
             case 'GET':
                 // Data in both: JSON and FORM x-www-form-urlencoded are supported by API
                 // GET Contains only FILTER PARAMETERS and these always go to query string and are sent via URL,
-                // because while they are a part of finding the right data, they are only there to return a subset or modification
-                // of what the Locators return alone
+                // because while they are a part of finding the right data
                 if ('application/json' === $contentType || 'application/x-www-form-urlencoded' === $contentType) {
                     $requestBody = $request->query->all();
                     return $requestBody;

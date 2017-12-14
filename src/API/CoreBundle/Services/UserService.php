@@ -51,9 +51,7 @@ class UserService
     {
         $responseData = $this->em->getRepository('APICoreBundle:User')->getCustomUsers($page, $isActive, $order, $limit);
 
-        $response = [
-            'data' => $responseData['array'],
-        ];
+        $response['data'] = $responseData['array'];
 
         if (999 !== $limit) {
             $count = $responseData['count'];

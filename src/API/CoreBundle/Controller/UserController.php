@@ -174,8 +174,12 @@ class UserController extends ApiBaseController
 
             if (isset($requestBody['order'])) {
                 $orderString = $requestBody['order'];
-                $orderString = strtolower($orderString);
-                $order = $orderString === 'asc' || $orderString === 'desc';
+                $orderString = strtoupper($orderString);
+                if ($orderString === 'ASC' || $orderString === 'DESC') {
+                    $order = $orderString;
+                } else {
+                    $order = 'ASC';
+                }
             } else {
                 $order = 'ASC';
             }
@@ -999,7 +1003,7 @@ class UserController extends ApiBaseController
      *      }
      *
      * @ApiDoc(
-     *  description="Restore User Entity",
+     *  description="Restore (activate) User Entity",
      *  requirements={
      *     {
      *       "name"="id",
@@ -1032,7 +1036,7 @@ class UserController extends ApiBaseController
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function restoreAction(int $id):Response
+    public function restoreAction(int $id): Response
     {
         $locationURL = $this->generateUrl('user_restore', ['id' => $id]);
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
@@ -1185,54 +1189,92 @@ class UserController extends ApiBaseController
      *  })
      *
      * @param Request $request
-     * @return JsonResponse|Response
+     * @return Response
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function searchAction(Request $request)
+    public function searchAction(Request $request): Response
     {
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('user_search');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        // Check the logged users ACL rights
         $aclOptions = [
             'acl' => UserRoleAclOptions::USER_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+
         }
 
-        $filtersForUrl = [];
+        // Filter params processing
+        if (false !== $requestBody) {
+            $filtersForUrl = [];
 
-        $term = $request->get('term');
-        if (null !== $term) {
-            $term = strtolower($term);
-            $filtersForUrl['term'] = '&term=' . $term;
+            if (isset($requestBody['page'])) {
+                $pageNum = $requestBody['page'];
+                $page = (int)$pageNum;
+            } else {
+                $page = 1;
+            }
+
+            if (isset($requestBody['limit'])) {
+                $limitNum = $requestBody['limit'];
+                $limit = (int)$limitNum;
+            } else {
+                $limit = 10;
+            }
+
+            if (999 === $limit) {
+                $page = 1;
+            }
+
+            if (isset($requestBody['order'])) {
+                $orderString = $requestBody['order'];
+                $orderString = strtoupper($orderString);
+                if ($orderString === 'ASC' || $orderString === 'DESC') {
+                    $order = $orderString;
+                } else {
+                    $order = 'ASC';
+                }
+            } else {
+                $order = 'ASC';
+            }
+
+            if (isset($requestBody['isActive'])) {
+                $isActive = $requestBody['isActive'];
+            } else {
+                $isActive = 'all';
+            }
+
+            if (isset($requestBody['term'])) {
+                $term = strtolower($requestBody['term']);
+                $filtersForUrl['term'] = '&term=' . $term;
+            } else {
+                $term = false;
+            }
+
+            $filtersForUrl = [
+                'isActive' => '&isActive=' . $isActive,
+                'order' => '&order=' . $order,
+            ];
+
+            $usersArray = $this->get('api_user.service')->getUsersSearchResponse($term, $page, $isActive, $filtersForUrl, $order, $limit);
+            $response = $response->setContent(json_encode($usersArray));
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
         } else {
-            $term = false;
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }
 
-        $pageNum = $request->get('page');
-        $pageNum = (int)$pageNum;
-        $page = ($pageNum === 0) ? 1 : $pageNum;
-
-        $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ? (int)$limitNum : 10;
-
-        $orderString = $request->get('order');
-        $orderString = strtolower($orderString);
-        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
-
-        $isActive = $request->get('isActive');
-        if (null !== $isActive) {
-            $filtersForUrl['isActive'] = '&isActive=' . $isActive;
-        } else {
-            $isActive = false;
-        }
-
-        $filtersForUrl['order'] = '&order=' . $order;
-        $filtersForUrl['limit'] = '&limit=' . $limit;
-
-        $usersArray = $this->get('api_user.service')->getUsersSearchResponse($term, $page, $isActive, $filtersForUrl, $order, $limit);
-        return $this->json($usersArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
     }
 
     /**
@@ -1268,48 +1310,65 @@ class UserController extends ApiBaseController
      * @param Request $request
      * @param int $id
      * @return Response|bool
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
     public function resetPasswordAction(Request $request, int $id)
     {
+
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('user_reset_password', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (!$user instanceof User) {
-            return $this->createApiResponse([
-                'message' => 'User with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'User with requested Id does not exist!']));
+            return $response;
         }
 
         // Only admin can reset password - for all users
         if (!$this->get('acl_helper')->isAdmin() && $this->getUser()->getId() !== $id) {
-            return $this->createApiResponse([
-                'message' => 'Only admin can reset password of every user. Logged User can change his own password!',
-            ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Only admin can reset password of every user. Logged User can change his own password!']));
+            return $response;
         }
 
-        $password = $request->get('password');
-        $passwordRepeated = $request->get('password_repeat');
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        if (false !== $requestBody) {
+            if (isset($requestBody['password']) && isset($requestBody['password_repeat'])) {
+                $password = $requestBody['password'];
+                $passwordRepeated = $requestBody['password_repeat'];
 
-        if (strlen($password) < 8) {
-            return $this->createApiResponse([
-                'message' => 'Password has to have at least 8 characters!',
-            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                if (\strlen($password) < 8) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'Password has to have at least 8 characters!']));
+                    return $response;
+                }
+
+                if ($password !== $passwordRepeated) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'Password and repeated password are not the same!']));
+                    return $response;
+                }
+
+                $user->setPassword($this->get('security.password_encoder')->encodePassword($user, $password));
+                $this->getDoctrine()->getManager()->persist($user);
+                $this->getDoctrine()->getManager()->flush();
+
+                $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Password was successfully changed!']));
+            }else{
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE]));
+
+            }
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }
-
-        if ($password !== $passwordRepeated) {
-            return $this->createApiResponse([
-                'message' => 'Password and repeated password are not the same!',
-            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-        }
-
-        $user->setPassword($this->get('security.password_encoder')->encodePassword($user, $password));
-        $this->getDoctrine()->getManager()->persist($user);
-        $this->getDoctrine()->getManager()->flush();
-
-        return $this->createApiResponse([
-            'message' => 'Password was successfully changed!',
-        ], StatusCodesHelper::SUCCESSFUL_CODE);
-
+        return $response;
     }
 
     /**
@@ -1364,111 +1423,130 @@ class UserController extends ApiBaseController
         // JSON API Response - Content type and Location settings
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationUrl);
 
-        $requestDetailData = [];
-        if (isset($requestData['detail_data']) && count($requestData['detail_data']) > 0) {
-            $requestDetailData = $requestData['detail_data'];
-            unset($requestData['detail_data']);
-        }
+        if (false !== $requestData) {
 
-        if (array_key_exists('_format', $requestData)) {
-            unset($requestData['_format']);
-        }
-
-        // Set is_active param
-        if (array_key_exists('is_active', $requestData)) {
-            $isActive = strtolower($requestData['is_active']);
-            unset($requestData['is_active']);
-            if ('true' === $isActive || true === $isActive || '1' === $isActive || 1 === $isActive) {
-                $user->setIsActive(true);
-            } elseif ('false' === $isActive || false === $isActive || '0' === $isActive || 0 === $isActive) {
-                $user->setIsActive(false);
-            }
-        }
-
-        foreach ($requestData as $key => $value) {
-            if (!\in_array($key, $allowedUserEntityParams, true)) {
-                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for User Entity!']));
-                return $response;
-            }
-        }
-
-        foreach ($requestDetailData as $key => $value) {
-            if (!\in_array($key, $alowedUserDetailDataParams, true)) {
-                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for Detail Data in User Entity!']));
-                return $response;
-            }
-        }
-
-        $statusCode = $this->getCreateUpdateStatusCode($create);
-
-        if (null === $user || !$user instanceof User) {
-            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::NOT_FOUND_MESSAGE]));
-            return $response;
-        }
-
-        $errors = $this->get('entity_processor')->processEntity($user, $requestData);
-
-        if (false === $errors) {
-            if (isset($requestData['password'])) {
-                $user->setPassword($this->get('security.password_encoder')->encodePassword($user, $requestData['password']));
+            $requestDetailData = [];
+            if (isset($requestData['detail_data']) && count($requestData['detail_data']) > 0) {
+                $requestDetailData = $requestData['detail_data'];
+                unset($requestData['detail_data']);
             }
 
-            $this->getDoctrine()->getManager()->persist($user);
-            $this->getDoctrine()->getManager()->flush();
-
-            $userCompany = $user->getCompany();
-            if ($userCompany instanceof Company) {
-                $userCompanyId = $userCompany->getId();
-            } else {
-                $userCompanyId = false;
+            if (array_key_exists('_format', $requestData)) {
+                unset($requestData['_format']);
             }
 
-            if ($create) {
-                // Every New USER has ACL VIEW_OWN_TASKS to INBOX project
-                $inboxProject = $this->getDoctrine()->getRepository('APITaskBundle:Project')->findOneBy([
-                    'title' => 'INBOX'
-                ]);
-
-                if (null !== $inboxProject) {
-                    $acl = [];
-                    $acl[] = ProjectAclOptions::VIEW_OWN_TASKS;
-                    $userHasProject = new UserHasProject();
-                    $userHasProject->setUser($user);
-                    $userHasProject->setProject($inboxProject);
-                    $userHasProject->setAcl($acl);
-                    $this->getDoctrine()->getManager()->persist($userHasProject);
-                    $this->getDoctrine()->getManager()->flush();
+            // Set is_active param
+            if (array_key_exists('is_active', $requestData)) {
+                $isActive = strtolower($requestData['is_active']);
+                unset($requestData['is_active']);
+                if ('true' === $isActive || true === $isActive || '1' === $isActive || 1 === $isActive) {
+                    $user->setIsActive(true);
+                } elseif ('false' === $isActive || false === $isActive || '0' === $isActive || 0 === $isActive) {
+                    $user->setIsActive(false);
                 }
             }
 
-            $userId = $user->getId();
-            $ids = [
-                'userId' => $userId,
-                'userRoleId' => $user->getUserRole()->getId(),
-                'userCompanyId' => $userCompanyId
-            ];
-
-            /**
-             * Fill UserData Entity if some of its parameters were sent
-             */
-            if ($requestDetailData) {
-                $userData = $this->getDoctrine()->getRepository('APICoreBundle:UserData')->findOneBy([
-                    'user' => $userId
-                ]);
-
-                if (null === $userData) {
-                    $userData = new UserData();
-                    $userData->setUser($user);
-                    $user->setDetailData($userData);
+            foreach ($requestData as $key => $value) {
+                if (!\in_array($key, $allowedUserEntityParams, true)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for User Entity!']));
+                    return $response;
                 }
-                $errorsUserData = $this->get('entity_processor')->processEntity($userData, $requestDetailData);
-                if (false === $errorsUserData) {
-                    $this->getDoctrine()->getManager()->persist($userData);
-                    $this->getDoctrine()->getManager()->flush();
+            }
 
+            foreach ($requestDetailData as $key => $value) {
+                if (!\in_array($key, $alowedUserDetailDataParams, true)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for Detail Data in User Entity!']));
+                    return $response;
+                }
+            }
+
+            $statusCode = $this->getCreateUpdateStatusCode($create);
+
+            if (null === $user || !$user instanceof User) {
+                $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                $response = $response->setContent(json_encode(['message' => StatusCodesHelper::NOT_FOUND_MESSAGE]));
+                return $response;
+            }
+
+            $errors = $this->get('entity_processor')->processEntity($user, $requestData);
+
+            if (false === $errors) {
+                if (isset($requestData['password'])) {
+                    $user->setPassword($this->get('security.password_encoder')->encodePassword($user, $requestData['password']));
+                }
+
+                $this->getDoctrine()->getManager()->persist($user);
+                $this->getDoctrine()->getManager()->flush();
+
+                $userCompany = $user->getCompany();
+                if ($userCompany instanceof Company) {
+                    $userCompanyId = $userCompany->getId();
+                } else {
+                    $userCompanyId = false;
+                }
+
+                if ($create) {
+                    // Every New USER has ACL VIEW_OWN_TASKS to INBOX project
+                    $inboxProject = $this->getDoctrine()->getRepository('APITaskBundle:Project')->findOneBy([
+                        'title' => 'INBOX'
+                    ]);
+
+                    if (null !== $inboxProject) {
+                        $acl = [];
+                        $acl[] = ProjectAclOptions::VIEW_OWN_TASKS;
+                        $userHasProject = new UserHasProject();
+                        $userHasProject->setUser($user);
+                        $userHasProject->setProject($inboxProject);
+                        $userHasProject->setAcl($acl);
+                        $this->getDoctrine()->getManager()->persist($userHasProject);
+                        $this->getDoctrine()->getManager()->flush();
+                    }
+                }
+
+                $userId = $user->getId();
+                $ids = [
+                    'userId' => $userId,
+                    'userRoleId' => $user->getUserRole()->getId(),
+                    'userCompanyId' => $userCompanyId
+                ];
+
+                /**
+                 * Fill UserData Entity if some of its parameters were sent
+                 */
+                if ($requestDetailData) {
+                    $userData = $this->getDoctrine()->getRepository('APICoreBundle:UserData')->findOneBy([
+                        'user' => $userId
+                    ]);
+
+                    if (null === $userData) {
+                        $userData = new UserData();
+                        $userData->setUser($user);
+                        $user->setDetailData($userData);
+                    }
+                    $errorsUserData = $this->get('entity_processor')->processEntity($userData, $requestDetailData);
+                    if (false === $errorsUserData) {
+                        $this->getDoctrine()->getManager()->persist($userData);
+                        $this->getDoctrine()->getManager()->flush();
+
+                        $userArray = $this->get('api_user.service')->getUserResponse($ids);
+                        $userRoles = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->getAllowedUserRoles($user->getUserRole()->getOrder());
+                        $allowedRolesArray['allowedUserRoles'] = [$userRoles];
+
+                        $response = $response->setStatusCode($statusCode);
+                        $response = $response->setContent(json_encode(array_merge($userArray, $allowedRolesArray)));
+                        return $response;
+                    } else {
+                        $data = [
+                            'errors' => $errorsUserData,
+                            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+                        ];
+                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        $response = $response->setContent(json_encode($data));
+                        return $response;
+                    }
+                } else {
                     $userArray = $this->get('api_user.service')->getUserResponse($ids);
                     $userRoles = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->getAllowedUserRoles($user->getUserRole()->getOrder());
                     $allowedRolesArray['allowedUserRoles'] = [$userRoles];
@@ -1476,32 +1554,20 @@ class UserController extends ApiBaseController
                     $response = $response->setStatusCode($statusCode);
                     $response = $response->setContent(json_encode(array_merge($userArray, $allowedRolesArray)));
                     return $response;
-                } else {
-                    $data = [
-                        'errors' => $errorsUserData,
-                        'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-                    ];
-                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                    $response = $response->setContent(json_encode($data));
-                    return $response;
                 }
-            } else {
-                $userArray = $this->get('api_user.service')->getUserResponse($ids);
-                $userRoles = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->getAllowedUserRoles($user->getUserRole()->getOrder());
-                $allowedRolesArray['allowedUserRoles'] = [$userRoles];
-
-                $response = $response->setStatusCode($statusCode);
-                $response = $response->setContent(json_encode(array_merge($userArray, $allowedRolesArray)));
-                return $response;
             }
-        }
 
-        $data = [
-            'errors' => $errors,
-            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-        ];
-        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-        $response = $response->setContent(json_encode($data));
+            $data = [
+                'errors' => $errors,
+                'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+            ];
+            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $response = $response->setContent(json_encode($data));
+        }
+        {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
+        }
         return $response;
     }
 }

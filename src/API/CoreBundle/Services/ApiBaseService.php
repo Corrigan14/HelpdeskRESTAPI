@@ -40,6 +40,10 @@ class ApiBaseService
         $contentType = $request->headers->get('Content-Type');
         $method = $request->getMethod();
 
+        // The content type declared JSON or FORM data is expecting in the content type header
+        $decodeContentType = explode(';',$contentType);
+        $contentType = $decodeContentType[0];
+
         switch ($method) {
             case 'POST':
                 // Data in both: JSON and FORM x-www-form-urlencoded are supported by API

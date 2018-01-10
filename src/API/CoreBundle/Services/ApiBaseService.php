@@ -41,7 +41,7 @@ class ApiBaseService
         $method = $request->getMethod();
 
         // The content type declared JSON or FORM data is expecting in the content type header
-        $decodeContentType = explode(';',$contentType);
+        $decodeContentType = explode(';', $contentType);
         $contentType = $decodeContentType[0];
 
         switch ($method) {
@@ -70,13 +70,12 @@ class ApiBaseService
                 }
                 break;
             case 'GET':
-                // Data in both: JSON and FORM x-www-form-urlencoded are supported by API
+                // GET does not require Content - type, as content is not expected
                 // GET Contains only FILTER PARAMETERS and these always go to query string and are sent via URL,
-                // because while they are a part of finding the right data
-                if ('application/json' === $contentType || 'application/x-www-form-urlencoded' === $contentType) {
-                    $requestBody = $request->query->all();
-                    return $requestBody;
-                }
+                // because they are a part of finding the right data
+                $requestBody = $request->query->all();
+                return $requestBody;
+
                 break;
             default:
                 return false;
@@ -89,7 +88,7 @@ class ApiBaseService
      * @return Response
      * @throws \InvalidArgumentException
      */
-    public function createResponseEntityWithSettings(string $locationURL):Response
+    public function createResponseEntityWithSettings(string $locationURL): Response
     {
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');

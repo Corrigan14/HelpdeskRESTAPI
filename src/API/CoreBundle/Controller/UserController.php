@@ -584,6 +584,8 @@ class UserController extends ApiBaseController
 
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
+//        $requestDumyJsonData = '{"username":"hfhhfs","password":"jjj@dfdsd.sk","email":"jjj@dffsdd.sk","detailData":{"name":"test","surname":"test2"}}';
+
         $user = new User();
         $user->setIsActive(true);
 
@@ -1359,7 +1361,7 @@ class UserController extends ApiBaseController
 
                 $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
                 $response = $response->setContent(json_encode(['message' => 'Password was successfully changed!']));
-            }else{
+            } else {
                 $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE]));
 
@@ -1426,9 +1428,12 @@ class UserController extends ApiBaseController
         if (false !== $requestData) {
 
             $requestDetailData = [];
-            if (isset($requestData['detail_data']) && count($requestData['detail_data']) > 0) {
+            if (isset($requestData['detail_data']) && \count($requestData['detail_data']) > 0) {
                 $requestDetailData = $requestData['detail_data'];
                 unset($requestData['detail_data']);
+            } elseif (isset($requestData['detailData']) && \count($requestData['detailData']) > 0) {
+                $requestDetailData = $requestData['detailData'];
+                unset($requestData['detailData']);
             }
 
             if (array_key_exists('_format', $requestData)) {
@@ -1563,8 +1568,7 @@ class UserController extends ApiBaseController
             ];
             $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
             $response = $response->setContent(json_encode($data));
-        }
-        {
+        } else {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
             $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }

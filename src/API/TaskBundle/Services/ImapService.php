@@ -38,6 +38,7 @@ class ImapService
      *
      * @param string $order
      * @return array
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getAttributesResponse(string $order): array
     {

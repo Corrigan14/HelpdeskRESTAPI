@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityRepository;
 class ImapRepository extends EntityRepository
 {
     /**
+     * @param string $order
      * @return array
      */
     public function getAllEntities(string $order):array
@@ -26,6 +27,8 @@ class ImapRepository extends EntityRepository
 
     /**
      * @return int
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function countEntities():int
     {

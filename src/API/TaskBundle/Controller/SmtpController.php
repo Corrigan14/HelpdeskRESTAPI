@@ -66,28 +66,44 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('smtp_list');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::SMTP_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        $orderString = $request->get('order');
-        $orderString = strtolower($orderString);
-        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        $smtpArray = $this->get('smtp_service')->getAttributesResponse($order);
-        return $this->json($smtpArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        if (false !== $requestBody) {
+            $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody);
+            $order = $processedFilterParams['order'];
+
+            $smtpArray = $this->get('smtp_service')->getAttributesResponse($order);
+            $response = $response->setContent(json_encode($smtpArray));
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
+        }
+
+        return $response;
     }
 
     /**
@@ -140,28 +156,39 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
     public function getAction(int $id)
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('unit_list');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::SMTP_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $smtpEntity = $this->getDoctrine()->getRepository('APITaskBundle:Smtp')->find($id);
 
         if (!$smtpEntity instanceof Smtp) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::NOT_FOUND_MESSAGE]));
+            return $response;
         }
 
         $smtpArray = $this->get('smtp_service')->getAttributeResponse($id);
-        return $this->json($smtpArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($smtpArray));
+        return $response;
     }
 
     /**
@@ -603,7 +630,7 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      * @param array $emailAddresses
      * @return array
      */
-    private function getTemplateParams(string $smtpEmail, string $smtpHost, array $emailAddresses):array
+    private function getTemplateParams(string $smtpEmail, string $smtpHost, array $emailAddresses): array
     {
         $todayDate = new \DateTime();
         $email = $smtpEmail;
@@ -628,7 +655,7 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      * @param $testEmails
      * @return array
      */
-    private function validateEmailAddresses(&$testEmails):array
+    private function validateEmailAddresses(&$testEmails): array
     {
         $notValidEmailAddresses = [];
 

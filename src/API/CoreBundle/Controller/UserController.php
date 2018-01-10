@@ -137,58 +137,30 @@ class UserController extends ApiBaseController
      */
     public function listAction(Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('users_list');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::USER_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        // JSON API Response - Content type and Location settings
-        $locationURL = $this->generateUrl('users_list');
-        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
-
         if (false !== $requestBody) {
-            // Filter params processing
-            if (isset($requestBody['page'])) {
-                $pageNum = $requestBody['page'];
-                $page = (int)$pageNum;
-            } else {
-                $page = 1;
-            }
+            $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody);
 
-            if (isset($requestBody['limit'])) {
-                $limitNum = $requestBody['limit'];
-                $limit = (int)$limitNum;
-            } else {
-                $limit = 10;
-            }
-
-            if (999 === $limit) {
-                $page = 1;
-            }
-
-            if (isset($requestBody['order'])) {
-                $orderString = $requestBody['order'];
-                $orderString = strtoupper($orderString);
-                if ($orderString === 'ASC' || $orderString === 'DESC') {
-                    $order = $orderString;
-                } else {
-                    $order = 'ASC';
-                }
-            } else {
-                $order = 'ASC';
-            }
-
-            if (isset($requestBody['isActive'])) {
-                $isActive = $requestBody['isActive'];
-            } else {
-                $isActive = 'all';
-            }
+            $page = $processedFilterParams['page'];
+            $limit = $processedFilterParams['limit'];
+            $order = $processedFilterParams['order'];
+            $isActive = $processedFilterParams['isActive'];
 
             $filtersForUrl = [
                 'isActive' => '&isActive=' . $isActive,

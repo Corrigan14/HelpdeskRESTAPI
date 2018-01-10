@@ -98,6 +98,59 @@ class ApiBaseService
     }
 
     /**
+     * Filter params: limit, page, order and isActive
+     *
+     * @param array $requestBody
+     * @return array
+     */
+    public function processFilterParams(array $requestBody):array
+    {
+        // Filter params processing
+        if (isset($requestBody['page'])) {
+            $pageNum = $requestBody['page'];
+            $page = (int)$pageNum;
+        } else {
+            $page = 1;
+        }
+
+        if (isset($requestBody['limit'])) {
+            $limitNum = $requestBody['limit'];
+            $limit = (int)$limitNum;
+        } else {
+            $limit = 10;
+        }
+
+        if (999 === $limit) {
+            $page = 1;
+        }
+
+        if (isset($requestBody['order'])) {
+            $orderString = $requestBody['order'];
+            $orderString = strtoupper($orderString);
+            if ($orderString === 'ASC' || $orderString === 'DESC') {
+                $order = $orderString;
+            } else {
+                $order = 'ASC';
+            }
+        } else {
+            $order = 'ASC';
+        }
+
+        if (isset($requestBody['isActive'])) {
+            $isActive = $requestBody['isActive'];
+        } else {
+            $isActive = 'all';
+        }
+
+        return [
+            'page' => $page,
+            'limit' => $limit,
+            'order' => $order,
+            'isActive' => $isActive
+        ];
+    }
+
+    /**
      * Return all Entities which includes Data and Links
      *
      * @param RepositoryInterface $entityRepository

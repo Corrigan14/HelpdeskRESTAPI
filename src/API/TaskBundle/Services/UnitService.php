@@ -47,9 +47,7 @@ class UnitService
     {
         $responseData = $this->em->getRepository('APITaskBundle:Unit')->getAllEntities($page, $options);
 
-        $response = [
-            'data' => $responseData['array'],
-        ];
+        $response['data'] = $responseData['array'];
 
         $url = $this->router->generate('unit_list');
         $limit = $options['limit'];
@@ -58,7 +56,7 @@ class UnitService
         if (999 !== $limit) {
             $count = $responseData['count'];
         } else {
-            $count = count($responseData['array']);
+            $count = \count($responseData['array']);
         }
 
         $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);

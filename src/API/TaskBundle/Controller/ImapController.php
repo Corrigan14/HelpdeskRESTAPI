@@ -195,10 +195,10 @@ class ImapController extends ApiBaseController
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function getAction(int $id):Response
+    public function getAction(int $id): Response
     {
         // JSON API Response - Content type and Location settings
-        $locationURL = $this->generateUrl('unit_list');
+        $locationURL = $this->generateUrl('imap', ['id' => $id]);
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
         $aclOptions = [
@@ -300,31 +300,42 @@ class ImapController extends ApiBaseController
      * @param Request $request
      * @param int $projectId
      * @return Response
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
-    public function createAction(Request $request, int $projectId)
+    public function createAction(Request $request, int $projectId): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('imap_create', ['projectId' => $projectId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::IMAP_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
         if (!$project instanceof Project) {
-            return $this->createApiResponse([
-                'message' => 'Project with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Project with requested Id does not exist!']));
+            return $response;
         }
 
-        $requestData = $request->request->all();
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
         $imap = new Imap();
         $imap->setProject($project);
 
-        return $this->updateImapEntity($imap, $requestData, true);
+        return $this->updateImapEntity($imap, $requestBody, true, $locationURL);
     }
 
     /**
@@ -401,37 +412,52 @@ class ImapController extends ApiBaseController
      * @param Request $request
      * @param int|bool $projectId
      * @return Response
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
-    public function updateAction(int $id, Request $request, $projectId = false)
+    public function updateAction(int $id, Request $request, $projectId = false): Response
     {
+        // JSON API Response - Content type and Location settings
+        if ($projectId) {
+            $locationURL = $this->generateUrl('imap_update_with_project', ['id' => $id, 'projectId' => $projectId]);
+        } else {
+            $locationURL = $this->generateUrl('imap_update', ['id' => $id]);
+        }
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::IMAP_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $imap = $this->getDoctrine()->getRepository('APITaskBundle:Imap')->find($id);
         if (!$imap instanceof Imap) {
-            return $this->createApiResponse([
-                'message' => 'Imap with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Imap with requested Id does not exist!']));
+            return $response;
         }
 
         if ($projectId) {
             $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
             if (!$project instanceof Project) {
-                return $this->createApiResponse([
-                    'message' => 'Project with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
+                $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Project with requested Id does not exist!']));
+                return $response;
             }
             $imap->setProject($project);
         }
 
-        $requestData = $request->request->all();
-        return $this->updateImapEntity($imap, $requestData, false);
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        return $this->updateImapEntity($imap, $requestBody, false, $locationURL);
     }
 
     /**
@@ -600,13 +626,16 @@ class ImapController extends ApiBaseController
      * @param Imap $imap
      * @param array $requestData
      * @param bool $create
-     * @return Response|JsonResponse
+     * @param string $locationUrl
+     *
+     * @return Response
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    private function updateImapEntity(Imap $imap, array $requestData, $create = false)
+    private function updateImapEntity(Imap $imap, array $requestData, $create = false, $locationUrl): Response
     {
         $allowedEntityParams = [
             'host',
@@ -619,45 +648,57 @@ class ImapController extends ApiBaseController
             'ssl',
         ];
 
-        if (array_key_exists('_format', $requestData)) {
-            unset($requestData['_format']);
-        }
+        // JSON API Response - Content type and Location settings
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationUrl);
 
-        foreach ($requestData as $key => $value) {
-            if (!in_array($key, $allowedEntityParams, true)) {
-                return $this->createApiResponse(
-                    ['message' => $key . ' is not allowed parameter for Tag Entity!'],
-                    StatusCodesHelper::INVALID_PARAMETERS_CODE
-                );
+        if (false !== $requestData) {
+            if (array_key_exists('_format', $requestData)) {
+                unset($requestData['_format']);
             }
-        }
 
-        // Check if values for ssl and ignore_certificate are sent. If not, default value = false
-        if ($create) {
-            if (!array_key_exists('ssl', $requestData)) {
-                $imap->setSsl(false);
+            foreach ($requestData as $key => $value) {
+                if (!\in_array($key, $allowedEntityParams, true)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for User Entity!']));
+                    return $response;
+                }
             }
-            if (!array_key_exists('ignore_certificate', $requestData)) {
-                $imap->setIgnoreCertificate(false);
+
+            // Check if values for ssl and ignore_certificate are sent. If not, default value = false
+            if ($create) {
+                if (!array_key_exists('ssl', $requestData)) {
+                    $imap->setSsl(false);
+                }
+                if (!array_key_exists('ignore_certificate', $requestData)) {
+                    $imap->setIgnoreCertificate(false);
+                }
             }
+
+            $statusCode = $this->getCreateUpdateStatusCode($create);
+
+            $errors = $this->get('entity_processor')->processEntity($imap, $requestData);
+
+            if (false === $errors) {
+                $this->getDoctrine()->getManager()->persist($imap);
+                $this->getDoctrine()->getManager()->flush();
+
+                $imapArray = $this->get('imap_service')->getAttributeResponse($imap->getId());
+
+                $response = $response->setStatusCode($statusCode);
+                $response = $response->setContent(json_encode($imapArray));
+            } else {
+                $data = [
+                    'errors' => $errors,
+                    'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+                ];
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode($data));
+            }
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }
 
-        $statusCode = $this->getCreateUpdateStatusCode($create);
-
-        $errors = $this->get('entity_processor')->processEntity($imap, $requestData);
-
-        if (false === $errors) {
-            $this->getDoctrine()->getManager()->persist($imap);
-            $this->getDoctrine()->getManager()->flush();
-
-            $imapArray = $this->get('imap_service')->getAttributeResponse($imap->getId());
-            return $this->json($imapArray, $statusCode);
-        }
-
-        $data = [
-            'errors' => $errors,
-            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-        ];
-        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $response;
     }
 }

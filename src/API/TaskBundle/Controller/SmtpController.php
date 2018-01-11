@@ -160,10 +160,10 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function getAction(int $id)
+    public function getAction(int $id): Response
     {
         // JSON API Response - Content type and Location settings
-        $locationURL = $this->generateUrl('unit_list');
+        $locationURL = $this->generateUrl('smtp', ['id' => $id]);
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
         $aclOptions = [
@@ -235,26 +235,34 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function createAction(Request $request)
+    public function createAction(Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('smtp_create');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::SMTP_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        $smtp = new Smtp();
-        $requestData = $request->request->all();
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        return $this->updateSmtpEntity($smtp, $requestData, true);
+        $smtp = new Smtp();
+
+        return $this->updateSmtpEntity($smtp, $requestBody, true, $locationURL);
     }
 
     /**
@@ -322,30 +330,38 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function updateAction(int $id, Request $request)
+    public function updateAction(int $id, Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('smtp_update', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::SMTP_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $smtp = $this->getDoctrine()->getRepository('APITaskBundle:Smtp')->find($id);
         if (!$smtp instanceof Smtp) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'SMTP with requested Id does not exist!']));
+            return $response;
         }
 
-        $requestData = $request->request->all();
-
-        return $this->updateSmtpEntity($smtp, $requestData, false);
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        return $this->updateSmtpEntity($smtp, $requestBody, false, $locationURL);
     }
 
     /**
@@ -564,13 +580,16 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      * @param Smtp $smtp
      * @param array $requestData
      * @param bool $create
-     * @return Response|JsonResponse
+     * @param string $locationUrl
+     *
+     * @return Response
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    private function updateSmtpEntity(Smtp $smtp, array $requestData, $create = false)
+    private function updateSmtpEntity(Smtp $smtp, array $requestData, $create = false, $locationUrl): Response
     {
         $allowedEntityParams = [
             'host',
@@ -582,46 +601,58 @@ class SmtpController extends ApiBaseController implements ControllerInterface
             'tls'
         ];
 
-        if (array_key_exists('_format', $requestData)) {
-            unset($requestData['_format']);
-        }
+        // JSON API Response - Content type and Location settings
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationUrl);
 
-        foreach ($requestData as $key => $value) {
-            if (!in_array($key, $allowedEntityParams, true)) {
-                return $this->createApiResponse(
-                    ['message' => $key . ' is not allowed parameter for Tag Entity!'],
-                    StatusCodesHelper::INVALID_PARAMETERS_CODE
-                );
+        if (false !== $requestData) {
+            if (array_key_exists('_format', $requestData)) {
+                unset($requestData['_format']);
             }
-        }
 
-        // Check if values for ssl and tls are sent. If not, default value = false
-        if ($create) {
-            if (!array_key_exists('ssl', $requestData)) {
-                $smtp->setSsl(false);
+            foreach ($requestData as $key => $value) {
+                if (!\in_array($key, $allowedEntityParams, true)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for User Entity!']));
+                    return $response;
+                }
             }
-            if (!array_key_exists('tls', $requestData)) {
-                $smtp->setTls(false);
+
+            // Check if values for ssl and tls are sent. If not, default value = false
+            if ($create) {
+                if (!array_key_exists('ssl', $requestData)) {
+                    $smtp->setSsl(false);
+                }
+                if (!array_key_exists('tls', $requestData)) {
+                    $smtp->setTls(false);
+                }
             }
+
+            $statusCode = $this->getCreateUpdateStatusCode($create);
+
+            $errors = $this->get('entity_processor')->processEntity($smtp, $requestData);
+
+            if (false === $errors) {
+                $this->getDoctrine()->getManager()->persist($smtp);
+                $this->getDoctrine()->getManager()->flush();
+
+                $smtpArray = $this->get('smtp_service')->getAttributeResponse($smtp->getId());
+
+                $response = $response->setStatusCode($statusCode);
+                $response = $response->setContent(json_encode($smtpArray));
+            } else {
+                $data = [
+                    'errors' => $errors,
+                    'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+                ];
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode($data));
+            }
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }
 
-        $statusCode = $this->getCreateUpdateStatusCode($create);
-
-        $errors = $this->get('entity_processor')->processEntity($smtp, $requestData);
-
-        if (false === $errors) {
-            $this->getDoctrine()->getManager()->persist($smtp);
-            $this->getDoctrine()->getManager()->flush();
-
-            $tagArray = $this->get('smtp_service')->getAttributeResponse($smtp->getId());
-            return $this->json($tagArray, $statusCode);
-        }
-
-        $data = [
-            'errors' => $errors,
-            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-        ];
-        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $response;
     }
 
     /**
@@ -654,17 +685,20 @@ class SmtpController extends ApiBaseController implements ControllerInterface
     /**
      * @param $testEmails
      * @return array
+     * @throws \Symfony\Component\Validator\Exception\MissingOptionsException
+     * @throws \Symfony\Component\Validator\Exception\InvalidOptionsException
+     * @throws \Symfony\Component\Validator\Exception\ConstraintDefinitionException
      */
     private function validateEmailAddresses(&$testEmails): array
     {
         $notValidEmailAddresses = [];
 
         // Validate Requested Email/s
-        if (!is_array($testEmails)) {
+        if (!\is_array($testEmails)) {
             $testEmails = explode(',', $testEmails);
         }
 
-        if (count($testEmails) > 0) {
+        if (\count($testEmails) > 0) {
             $validator = $this->get('validator');
             $constraints = [
                 new Email(),
@@ -673,7 +707,7 @@ class SmtpController extends ApiBaseController implements ControllerInterface
 
             foreach ($testEmails as $email) {
                 $emailError = $validator->validate($email, $constraints);
-                if (count($emailError)) {
+                if (\count($emailError)) {
                     $notValidEmailAddresses[] = $email;
                 }
             }

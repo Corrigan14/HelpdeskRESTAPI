@@ -1398,7 +1398,6 @@ class UserController extends ApiBaseController
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationUrl);
 
         if (false !== $requestData) {
-
             $requestDetailData = [];
             if (isset($requestData['detail_data']) && \count($requestData['detail_data']) > 0) {
                 $requestDetailData = $requestData['detail_data'];

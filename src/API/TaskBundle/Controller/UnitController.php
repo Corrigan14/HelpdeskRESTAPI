@@ -200,10 +200,10 @@ class UnitController extends ApiBaseController implements ControllerInterface
      * @throws \UnexpectedValueException
      * @throws \LogicException
      */
-    public function getAction(int $id):Response
+    public function getAction(int $id): Response
     {
         // JSON API Response - Content type and Location settings
-        $locationURL = $this->generateUrl('unit_list');
+        $locationURL = $this->generateUrl('unit', ['id' => $id]);
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
         $aclOptions = [
@@ -274,24 +274,35 @@ class UnitController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
-    public function createAction(Request $request)
+    public function createAction(Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('unit_create');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::UNIT_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        $requestData = $request->request->all();
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
         $unit = new Unit();
         $unit->setIsActive(true);
 
-        return $this->updateUnit($unit, $requestData, true);
+        return $this->updateUnit($unit, $requestBody, true, $locationURL);
     }
 
     /**
@@ -344,26 +355,38 @@ class UnitController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
-    public function updateAction(int $id, Request $request)
+    public function updateAction(int $id, Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('unit_update', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::UNIT_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $unit = $this->getDoctrine()->getRepository('APITaskBundle:Unit')->find($id);
-
         if (!$unit instanceof Unit) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Unit with requested Id does not exist!']));
+            return $response;
         }
 
-        $requestData = $request->request->all();
-        return $this->updateUnit($unit, $requestData, false);
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        return $this->updateUnit($unit, $requestBody, false, $locationURL);
     }
 
     /**
@@ -570,14 +593,16 @@ class UnitController extends ApiBaseController implements ControllerInterface
      * @param Unit $unit
      * @param array $requestData
      * @param bool $create
+     * @param string $locationUrl
      *
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    private function updateUnit(Unit $unit, $requestData, $create = false)
+    private function updateUnit(Unit $unit, $requestData, $create = false, $locationUrl): Response
     {
         $allowedUnitEntityParams = [
             'title',
@@ -585,35 +610,46 @@ class UnitController extends ApiBaseController implements ControllerInterface
             'is_active'
         ];
 
-        if (array_key_exists('_format', $requestData)) {
-            unset($requestData['_format']);
-        }
+        // JSON API Response - Content type and Location settings
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationUrl);
 
-        foreach ($requestData as $key => $value) {
-            if (!in_array($key, $allowedUnitEntityParams, true)) {
-                return $this->createApiResponse(
-                    ['message' => $key . ' is not allowed parameter for Invoiceable Item Entity!'],
-                    StatusCodesHelper::INVALID_PARAMETERS_CODE
-                );
+        if (false !== $requestData) {
+            if (array_key_exists('_format', $requestData)) {
+                unset($requestData['_format']);
             }
+
+            foreach ($requestData as $key => $value) {
+                if (!\in_array($key, $allowedUnitEntityParams, true)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for User Entity!']));
+                    return $response;
+                }
+            }
+
+            $statusCode = $this->getCreateUpdateStatusCode($create);
+
+            $errors = $this->get('entity_processor')->processEntity($unit, $requestData);
+
+            if (false === $errors) {
+                $this->getDoctrine()->getManager()->persist($unit);
+                $this->getDoctrine()->getManager()->flush();
+
+                $unitArray = $this->get('unit_service')->getAttributeResponse($unit->getId());
+
+                $response = $response->setStatusCode($statusCode);
+                $response = $response->setContent(json_encode($unitArray));
+            } else {
+                $data = [
+                    'errors' => $errors,
+                    'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+                ];
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode($data));
+            }
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }
-
-        $statusCode = $this->getCreateUpdateStatusCode($create);
-
-        $errors = $this->get('entity_processor')->processEntity($unit, $requestData);
-
-        if (false === $errors) {
-            $this->getDoctrine()->getManager()->persist($unit);
-            $this->getDoctrine()->getManager()->flush();
-
-            $unitArray = $this->get('unit_service')->getAttributeResponse($unit->getId());
-            return $this->json($unitArray, $statusCode);
-        }
-
-        $data = [
-            'errors' => $errors,
-            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-        ];
-        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $response;
     }
 }

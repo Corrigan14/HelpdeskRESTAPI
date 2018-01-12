@@ -48,9 +48,7 @@ class SystemSettingsService
     {
         $responseData = $this->em->getRepository('APITaskBundle:SystemSettings')->getAllEntities($page, $options);
 
-        $response = [
-            'data' => $responseData['array'],
-        ];
+        $response['data'] = $responseData['array'];
 
         $url = $this->router->generate('status_list');
         $limit = $options['limit'];

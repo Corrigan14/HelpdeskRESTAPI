@@ -40,9 +40,7 @@ class UserRoleService
     {
         $responseData = $this->em->getRepository('APITaskBundle:UserRole')->getAllEntities($page, $options);
 
-        $response = [
-            'data' => $responseData['array'],
-        ];
+        $response['data'] = $responseData['array'];
 
         $url = $this->router->generate('user_role_list');
         $limit = $options['limit'];

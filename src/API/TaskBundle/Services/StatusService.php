@@ -47,9 +47,7 @@ class StatusService
     {
         $responseData = $this->em->getRepository('APITaskBundle:Status')->getAllEntities($page, $options);
 
-        $response = [
-            'data' => $responseData['array'],
-        ];
+        $response['data'] = $responseData['array'];
 
         $url = $this->router->generate('status_list');
         $limit = $options['limit'];

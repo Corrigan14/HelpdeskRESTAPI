@@ -82,47 +82,57 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      *
      * @param Request $request
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('system_settings_list');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::SYSTEM_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        $pageNum = $request->get('page');
-        $pageNum = (int)$pageNum;
-        $page = ($pageNum === 0) ? 1 : $pageNum;
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ?: 10;
+        if (false !== $requestBody) {
+            $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody);
 
-        if(999 === $limit){
-            $page = 1;
+            $page = $processedFilterParams['page'];
+            $limit = $processedFilterParams['limit'];
+            $isActive = $processedFilterParams['isActive'];
+
+            $filtersForUrl = [
+                'isActive' => '&isActive=' . $isActive,
+            ];
+
+            $options = [
+                'isActive' => $isActive,
+                'filtersForUrl' => $filtersForUrl,
+                'limit' => $limit
+            ];
+
+            $systemSettingsArray = $this->get('system_settings_service')->getAttributesResponse($page, $options);
+            $response = $response->setContent(json_encode($systemSettingsArray));
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }
 
-        $isActive = $request->get('isActive');
-        $filtersForUrl = [];
-        if (null !== $isActive) {
-            $filtersForUrl['isActive'] = '&isActive=' . $isActive;
-        }
-
-        $options = [
-            'isActive' => strtolower($isActive),
-            'filtersForUrl' => $filtersForUrl,
-            'limit' => $limit
-        ];
-
-        $systemSettingsArray = $this->get('system_settings_service')->getAttributesResponse($page, $options);
-        return $this->json($systemSettingsArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
     }
 
     /**
@@ -172,27 +182,39 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      *
      * @param int $id
      * @return Response
+     * @throws \LogicException
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      */
-    public function getAction(int $id)
+    public function getAction(int $id): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('system_settings', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::SYSTEM_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $systemSettingEntity = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->find($id);
         if (!$systemSettingEntity instanceof SystemSettings) {
-            return $this->createApiResponse([
-                'message' => 'System setting with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'System setting with requested Id does not exist!']));
+            return $response;
         }
 
         $systemSettingArray = $this->get('system_settings_service')->getAttributeResponse($id);
-        return $this->json($systemSettingArray, StatusCodesHelper::SUCCESSFUL_CODE);
+
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($systemSettingArray));
+        return $response;
     }
 
     /**
@@ -236,24 +258,34 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      *
      * @param Request $request
      * @return Response
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
-    public function createAction(Request $request)
+    public function createAction(Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('system_settings_create');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::SYSTEM_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
-
-        $requestData = $request->request->all();
 
         $systemSettings = new SystemSettings();
         $systemSettings->setIsActive(true);
 
-        return $this->updateEntity($systemSettings, $requestData, true);
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        return $this->updateEntity($systemSettings, $requestBody, true, $locationURL);
     }
 
     /**
@@ -538,14 +570,16 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      * @param SystemSettings $status
      * @param array $requestData
      * @param bool $create
+     * @param string $locationUrl
      *
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    private function updateEntity(SystemSettings $status, $requestData, $create = false)
+    private function updateEntity(SystemSettings $status, $requestData, $create = false, $locationUrl): Response
     {
         $allowedUnitEntityParams = [
             'title',
@@ -553,35 +587,43 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
             'is_active'
         ];
 
-        if (array_key_exists('_format', $requestData)) {
-            unset($requestData['_format']);
-        }
+        // JSON API Response - Content type and Location settings
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationUrl);
 
-        foreach ($requestData as $key => $value) {
-            if (!in_array($key, $allowedUnitEntityParams, true)) {
-                return $this->createApiResponse(
-                    ['message' => $key . ' is not allowed parameter for System Setting Entity!'],
-                    StatusCodesHelper::INVALID_PARAMETERS_CODE
-                );
+        if (false !== $requestData) {
+            if (array_key_exists('_format', $requestData)) {
+                unset($requestData['_format']);
             }
+
+            foreach ($requestData as $key => $value) {
+                if (!\in_array($key, $allowedUnitEntityParams, true)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for System-Settings Entity!']));
+                    return $response;
+                }
+            }
+
+            $statusCode = $this->getCreateUpdateStatusCode($create);
+
+            $errors = $this->get('entity_processor')->processEntity($status, $requestData);
+
+            if (false === $errors) {
+                $this->getDoctrine()->getManager()->persist($status);
+                $this->getDoctrine()->getManager()->flush();
+
+                $systemSettingsArray = $this->get('system_settings_service')->getAttributeResponse($status->getId());
+                return $this->json($systemSettingsArray, $statusCode);
+            }
+
+            $data = [
+                'errors' => $errors,
+                'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+            ];
+            return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        }else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }
-
-        $statusCode = $this->getCreateUpdateStatusCode($create);
-
-        $errors = $this->get('entity_processor')->processEntity($status, $requestData);
-
-        if (false === $errors) {
-            $this->getDoctrine()->getManager()->persist($status);
-            $this->getDoctrine()->getManager()->flush();
-
-            $systemSettingsArray = $this->get('system_settings_service')->getAttributeResponse($status->getId());
-            return $this->json($systemSettingsArray, $statusCode);
-        }
-
-        $data = [
-            'errors' => $errors,
-            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-        ];
-        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $response;
     }
 }

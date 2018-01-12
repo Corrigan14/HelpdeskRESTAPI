@@ -155,46 +155,58 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *
      * @param Request $request
      * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('user_role_list');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::USER_ROLE_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        $pageNum = $request->get('page');
-        $pageNum = (int)$pageNum;
-        $page = ($pageNum === 0) ? 1 : $pageNum;
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ?: 10;
+        if (false !== $requestBody) {
+            $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody);
 
-        if(999 === $limit){
-            $page = 1;
+            $page = $processedFilterParams['page'];
+            $limit = $processedFilterParams['limit'];
+            $order = $processedFilterParams['order'];
+            $isActive = $processedFilterParams['isActive'];
+
+            $filtersForUrl = [
+                'isActive' => '&isActive=' . $isActive,
+                'order' => '&order=' . $order,
+            ];
+
+            $options = [
+                'isActive' => $isActive,
+                'order' => $order,
+                'filtersForUrl' => $filtersForUrl,
+                'limit' => $limit
+            ];
+
+            $userRolesArray = $this->get('user_role_service')->getUserRolesResponse($page, $options);
+            $response = $response->setContent(json_encode($userRolesArray));
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }
 
-        $orderString = $request->get('order');
-        $orderString = strtolower($orderString);
-        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
-
-        $isActive = $request->get('isActive');
-
-        $filtersForUrl['isActive'] = '&isActive=' . $isActive;
-        $options = [
-            'isActive' => strtolower($isActive),
-            'order' => $order,
-            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order]),
-            'limit' => $limit
-        ];
-
-        $userRolesArray = $this->get('user_role_service')->getUserRolesResponse($page, $options);
-        return $this->json($userRolesArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
     }
 
     /**
@@ -263,30 +275,40 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *
      * @param int $id
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function getAction(int $id)
+    public function getAction(int $id): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('user_role', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::USER_ROLE_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($id);
 
         if (!$userRole instanceof UserRole) {
-            return $this->createApiResponse([
-                'message' => 'User role with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'User role with requested Id does not exist!']));
+            return $response;
         }
 
         $userRoleArray = $this->get('user_role_service')->getUserRoleResponse($id);
-        return $this->json($userRoleArray, StatusCodesHelper::SUCCESSFUL_CODE);
+
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($userRoleArray));
+        return $response;
     }
 
     /**
@@ -349,27 +371,34 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *
      * @param Request $request
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function createAction(Request $request)
+    public function createAction(Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('user_role_create');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::USER_ROLE_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $userRole = new UserRole();
         $userRole->setIsActive(true);
 
-        $requestData = $request->request->all();
-        return $this->updateEntity($userRole, $requestData, true);
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        return $this->updateEntity($userRole, $requestBody, true, $locationURL);
     }
 
     /**
@@ -738,14 +767,12 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      * @param UserRole $userRole
      * @param $requestData
      * @param bool $create
-     * @throws \InvalidArgumentException
-     * @throws \LogicException
-     *
+     * @param string $locationUrl
      * @return Response
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      */
-    private function updateEntity(UserRole $userRole, $requestData, $create = false)
+    private function updateEntity(UserRole $userRole, $requestData, $create = false, string $locationUrl): Response
     {
         $allowedUnitEntityParams = [
             'title',
@@ -756,75 +783,83 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
             'is_active'
         ];
 
-        if (array_key_exists('_format', $requestData)) {
-            unset($requestData['_format']);
-        }
+        // JSON API Response - Content type and Location settings
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationUrl);
 
-        foreach ($requestData as $key => $value) {
-            if (!in_array($key, $allowedUnitEntityParams, true)) {
-                return $this->createApiResponse(
-                    ['message' => $key . ' is not allowed parameter for Tag Entity!'],
-                    StatusCodesHelper::INVALID_PARAMETERS_CODE
-                );
+        if (false !== $requestData) {
+            if (array_key_exists('_format', $requestData)) {
+                unset($requestData['_format']);
             }
-        }
 
-        $statusCode = $this->getCreateUpdateStatusCode($create);
-
-        /** @var User $loggedUser */
-        $loggedUser = $this->getUser();
-        /** @var UserRole $loggedUserRole */
-        $loggedUserRole = $loggedUser->getUserRole();
-        $loggedUserAcl = $loggedUserRole->getAcl();
-
-        // Check the order of role: this has to be higher compare to logged users role
-        if (isset($requestData['order'])) {
-            $orderNum = (int)$requestData['order'];
-            if ($orderNum <= $loggedUserRole->getOrder()) {
-                return $this->createApiResponse([
-                    'message' => 'Order of created role has to be higher like yours role order: ' . $loggedUserRole->getOrder(),
-                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-            }
-            $requestData['order'] = $orderNum;
-        }
-
-        // Check the ACL of role: this can not contain different ACL rules like logged user has
-        if (isset($requestData['acl'])) {
-            $aclData = $requestData['acl'];
-            if (!is_array($aclData)) {
-                $aclData = explode(',', $aclData);
-            }
-            foreach ($aclData as $acl) {
-                if (!in_array($acl, $loggedUserAcl)) {
-                    return $this->createApiResponse([
-                        'message' => 'The ACL can contains just yours ACL params: ' . implode(',', $loggedUserAcl),
-                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            foreach ($requestData as $key => $value) {
+                if (!\in_array($key, $allowedUnitEntityParams, true)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for User-Role Entity!']));
+                    return $response;
                 }
             }
-            $requestData['acl'] = $aclData;
-        }
 
-        // Check if Homepage is set, if not: "/" will be set as Default
-        if ($create) {
-            if (!isset($requestData['homepage'])) {
-                $userRole->setHomepage(UserRoleFixture::BASE_URL);
+            $statusCode = $this->getCreateUpdateStatusCode($create);
+
+            /** @var User $loggedUser */
+            $loggedUser = $this->getUser();
+            /** @var UserRole $loggedUserRole */
+            $loggedUserRole = $loggedUser->getUserRole();
+            $loggedUserAcl = $loggedUserRole->getAcl();
+
+            // Check the order of role: this has to be higher compare to logged users role
+            if (isset($requestData['order'])) {
+                $orderNum = (int)$requestData['order'];
+                if ($orderNum <= $loggedUserRole->getOrder()) {
+                    return $this->createApiResponse([
+                        'message' => 'Order of created role has to be higher like yours role order: ' . $loggedUserRole->getOrder(),
+                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                }
+                $requestData['order'] = $orderNum;
             }
+
+            // Check the ACL of role: this can not contain different ACL rules like logged user has
+            if (isset($requestData['acl'])) {
+                $aclData = $requestData['acl'];
+                if (!is_array($aclData)) {
+                    $aclData = explode(',', $aclData);
+                }
+                foreach ($aclData as $acl) {
+                    if (!in_array($acl, $loggedUserAcl)) {
+                        return $this->createApiResponse([
+                            'message' => 'The ACL can contains just yours ACL params: ' . implode(',', $loggedUserAcl),
+                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    }
+                }
+                $requestData['acl'] = $aclData;
+            }
+
+            // Check if Homepage is set, if not: "/" will be set as Default
+            if ($create) {
+                if (!isset($requestData['homepage'])) {
+                    $userRole->setHomepage(UserRoleFixture::BASE_URL);
+                }
+            }
+
+            $errors = $this->get('entity_processor')->processEntity($userRole, $requestData);
+
+            if (false === $errors) {
+                $this->getDoctrine()->getManager()->persist($userRole);
+                $this->getDoctrine()->getManager()->flush();
+
+                $userRoleArray = $this->get('user_role_service')->getUserRoleResponse($userRole->getId());
+                return $this->json($userRoleArray, $statusCode);
+            }
+
+            $data = [
+                'errors' => $errors,
+                'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+            ];
+            return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        }else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }
-
-        $errors = $this->get('entity_processor')->processEntity($userRole, $requestData);
-
-        if (false === $errors) {
-            $this->getDoctrine()->getManager()->persist($userRole);
-            $this->getDoctrine()->getManager()->flush();
-
-            $userRoleArray = $this->get('user_role_service')->getUserRoleResponse($userRole->getId());
-            return $this->json($userRoleArray, $statusCode);
-        }
-
-        $data = [
-            'errors' => $errors,
-            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-        ];
-        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $response;
     }
 }

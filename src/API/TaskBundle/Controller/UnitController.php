@@ -16,7 +16,7 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
  *
  * @package API\TaskBundle\Controller
  */
-class UnitController extends ApiBaseController implements ControllerInterface
+class UnitController extends ApiBaseController
 {
     /**
      *  ### Response###
@@ -162,7 +162,6 @@ class UnitController extends ApiBaseController implements ControllerInterface
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/units/7",
-     *           "patch": "/api/v1/task-bundle/units/7",
      *           "delete": "/api/v1/task-bundle/units/7",
      *           "restore": "/api/v1/task-bundle/units/restore/7"
      *         }
@@ -246,7 +245,6 @@ class UnitController extends ApiBaseController implements ControllerInterface
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/units/7",
-     *           "patch": "/api/v1/task-bundle/units/7",
      *           "delete": "/api/v1/task-bundle/units/7",
      *           "restore": "/api/v1/task-bundle/units/restore/7"
      *         }
@@ -318,7 +316,6 @@ class UnitController extends ApiBaseController implements ControllerInterface
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/units/7",
-     *           "patch": "/api/v1/task-bundle/units/7",
      *           "delete": "/api/v1/task-bundle/units/7",
      *           "restore": "/api/v1/task-bundle/units/restore/7"
      *         }
@@ -390,80 +387,8 @@ class UnitController extends ApiBaseController implements ControllerInterface
     }
 
     /**
-     *  ### Response ###
-     *      {
-     *        "data":
-     *        {
-     *           "id": 7,
-     *           "title": "Kilogram",
-     *           "shortcut": "Kg",
-     *           "is_active": true
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/units/7",
-     *           "patch": "/api/v1/task-bundle/units/7",
-     *           "delete": "/api/v1/task-bundle/units/7",
-     *           "restore": "/api/v1/task-bundle/units/restore/7"
-     *         }
-     *      }
-     *
      * @ApiDoc(
-     *  description="Partially update the Unit Entity",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  input={"class"="API\TaskBundle\Entity\Unit"},
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\TaskBundle\Entity\Unit"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     *
-     * @param int $id
-     * @param Request $request
-     * @return Response
-     */
-    public function updatePartialAction(int $id, Request $request)
-    {
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::UNIT_SETTINGS,
-            'user' => $this->getUser()
-        ];
-
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
-        }
-
-        $unit = $this->getDoctrine()->getRepository('APITaskBundle:Unit')->find($id);
-
-        if (!$unit instanceof Unit) {
-            return $this->notFoundResponse();
-        }
-
-        $requestData = $request->request->all();
-        return $this->updateUnit($unit, $requestData, false);
-    }
-
-    /**
-     * @ApiDoc(
-     *  description="Delete Unit Entity",
+     *  description="Inactivate Unit Entity",
      *  requirements={
      *     {
      *       "name"="id",
@@ -489,31 +414,41 @@ class UnitController extends ApiBaseController implements ControllerInterface
      * @param int $id
      *
      * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
-    public function deleteAction(int $id)
+    public function deleteAction(int $id):Response
     {
+        $locationURL = $this->generateUrl('unit_inactivate', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::UNIT_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $unit = $this->getDoctrine()->getRepository('APITaskBundle:Unit')->find($id);
 
         if (!$unit instanceof Unit) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Unit with requested Id does not exist!']));
+            return $response;
         }
 
         $unit->setIsActive(false);
         $this->getDoctrine()->getManager()->persist($unit);
         $this->getDoctrine()->getManager()->flush();
 
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::UNACITVATE_MESSAGE,
-        ], StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode(['message' => StatusCodesHelper::UNACITVATE_MESSAGE]));
+        return $response;
     }
 
     /**
@@ -529,7 +464,6 @@ class UnitController extends ApiBaseController implements ControllerInterface
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/units/7",
-     *           "patch": "/api/v1/task-bundle/units/7",
      *           "delete": "/api/v1/task-bundle/units/7",
      *           "restore": "/api/v1/task-bundle/units/restore/7"
      *         }
@@ -563,22 +497,32 @@ class UnitController extends ApiBaseController implements ControllerInterface
      * @param int $id
      *
      * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
-    public function restoreAction(int $id)
+    public function restoreAction(int $id):Response
     {
+        $locationURL = $this->generateUrl('unit_inactivate', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::UNIT_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $unit = $this->getDoctrine()->getRepository('APITaskBundle:Unit')->find($id);
 
         if (!$unit instanceof Unit) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Unit with requested Id does not exist!']));
+            return $response;
         }
 
         $unit->setIsActive(true);
@@ -586,7 +530,9 @@ class UnitController extends ApiBaseController implements ControllerInterface
         $this->getDoctrine()->getManager()->flush();
 
         $unitArray = $this->get('unit_service')->getAttributeResponse($unit->getId());
-        return $this->json($unitArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($unitArray));
+        return $response;
     }
 
     /**

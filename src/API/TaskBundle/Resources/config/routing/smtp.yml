@@ -22,13 +22,6 @@ smtp_update:
     requirements:
             id: '\d+'
 
-smtp_partial_update:
-    path:     /smtp/{id}
-    defaults: { _controller: APITaskBundle:Smtp:updatePartial }
-    methods: [PATCH]
-    requirements:
-            id: '\d+'
-
 smtp_delete:
     path:     /smtp/{id}
     defaults: { _controller: APITaskBundle:Smtp:delete }

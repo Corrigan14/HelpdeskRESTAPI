@@ -83,6 +83,7 @@ class ImapController extends ApiBaseController
      *
      * @param Request $request
      * @return Response
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
@@ -461,113 +462,6 @@ class ImapController extends ApiBaseController
     }
 
     /**
-     * ### Response ###
-     *     {
-     *        "data":
-     *        {
-     *           "id": 1,
-     *           "host": "test",
-     *           "port": 3306,
-     *           "name": "test",
-     *           "password": "test",
-     *           "ssl": true,
-     *           "inbox_email": "test@test.sk",
-     *           "move_email": "test@test.sk",
-     *           "ignore_certificate": false,
-     *           "project":
-     *           {
-     *              "id": 258,
-     *              "title": "Project of user 1",
-     *              "description": "Description of project 1.",
-     *              "is_active": false,
-     *              "createdAt":
-     *              {
-     *                 "date": "2017-02-20 09:18:42.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *              },
-     *              "updatedAt":
-     *              {
-     *                 "date": "2017-02-20 09:18:42.000000",
-     *                 "timezone_type": 3,
-     *                 "timezone": "Europe/Berlin"
-     *               }
-     *            }
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/imap/1",
-     *           "patch": "/api/v1/task-bundle/imap/1",
-     *           "delete": "/api/v1/task-bundle/imap/1"
-     *         }
-     *      }
-     *
-     * @ApiDoc(
-     *  description="Partially update the IMAP Entity",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  input={"class"="API\TaskBundle\Entity\Imap"},
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\TaskBundle\Entity\Imap"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     *
-     * @param int $id
-     * @param Request $request
-     * @param int|bool $projectId
-     * @return Response
-     */
-    public function updatePartialAction(int $id, Request $request, $projectId = false)
-    {
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::IMAP_SETTINGS,
-            'user' => $this->getUser()
-        ];
-
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
-        }
-
-        $imap = $this->getDoctrine()->getRepository('APITaskBundle:Imap')->find($id);
-        if (!$imap instanceof Imap) {
-            return $this->createApiResponse([
-                'message' => 'Imap with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
-        }
-
-        if ($projectId) {
-            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
-            if (!$project instanceof Project) {
-                return $this->createApiResponse([
-                    'message' => 'Project with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
-            }
-            $imap->setProject($project);
-        }
-
-        $requestData = $request->request->all();
-        return $this->updateImapEntity($imap, $requestData, false);
-    }
-
-    /**
      * @ApiDoc(
      *  description="Delete IMAP Entity",
      *  requirements={
@@ -595,31 +489,39 @@ class ImapController extends ApiBaseController
      * @param int $id
      *
      * @return Response
+     * @throws \LogicException
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      */
-    public function deleteAction(int $id)
+    public function deleteAction(int $id): Response
     {
+        $locationURL = $this->generateUrl('imap_delete', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::IMAP_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $imap = $this->getDoctrine()->getRepository('APITaskBundle:Imap')->find($id);
         if (!$imap instanceof Imap) {
-            return $this->createApiResponse([
-                'message' => 'Imap with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'IMAP Entity with requested Id does not exist!']));
+            return $response;
         }
 
         $this->getDoctrine()->getManager()->remove($imap);
         $this->getDoctrine()->getManager()->flush();
 
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::DELETED_MESSAGE,
-        ], StatusCodesHelper::DELETED_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::DELETED_CODE);
+        $response = $response->setContent(json_encode(['message' => StatusCodesHelper::DELETED_MESSAGE]));
+        return $response;
     }
 
     /**

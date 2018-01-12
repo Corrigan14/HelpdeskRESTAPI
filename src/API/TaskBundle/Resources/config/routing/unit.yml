@@ -22,23 +22,16 @@ unit_update:
     requirements:
             id: '\d+'
 
-unit_partial_update:
-    path:     /units/{id}
-    defaults: { _controller: APITaskBundle:Unit:updatePartial }
-    methods: [PATCH]
-    requirements:
-            id: '\d+'
-
 unit_restore:
-    path:     /units/restore/{id}
+    path:     /units/{id}/restore
     defaults: { _controller: APITaskBundle:Unit:restore }
-    methods: [PATCH]
+    methods: [PUT]
     requirements:
             id: '\d+'
 
-unit_delete:
-    path:     /units/{id}
+unit_inactivate:
+    path:     /units/{id}/inactivate
     defaults: { _controller: APITaskBundle:Unit:delete }
-    methods: [DELETE]
+    methods: [PUT]
     requirements:
             id: '\d+'

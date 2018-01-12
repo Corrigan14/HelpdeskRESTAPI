@@ -19,7 +19,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
  *
  * @package API\TaskBundle\Controller
  */
-class SmtpController extends ApiBaseController implements ControllerInterface
+class SmtpController extends ApiBaseController
 {
     /**
      *  ### Response ###
@@ -365,84 +365,6 @@ class SmtpController extends ApiBaseController implements ControllerInterface
     }
 
     /**
-     *  ### Response ###
-     *      {
-     *          "data":
-     *          {
-     *             "id": 1,
-     *             "host": "Host",
-     *             "port": 3306,
-     *             "email": "mb@web-solutions.sk",
-     *             "name": "test",
-     *             "password": "test",
-     *             "ssl": true,
-     *             "tls": false
-     *          },
-     *          "_links":
-     *          {
-     *             "put": "/api/v1/task-bundle/smtp/1",
-     *             "patch": "/api/v1/task-bundle/smtp/1",
-     *             "delete": "/api/v1/task-bundle/smtp/1"
-     *          }
-     *      }
-     *
-     * @ApiDoc(
-     *  description="Partially update the SMTP Entity",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  input={"class"="API\TaskBundle\Entity\Smtp"},
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\TaskBundle\Entity\Smtp"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     *
-     * @param int $id
-     * @param Request $request
-     * @return Response
-     * @throws \LogicException
-     * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     */
-    public function updatePartialAction(int $id, Request $request)
-    {
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::SMTP_SETTINGS,
-            'user' => $this->getUser()
-        ];
-
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
-        }
-
-        $smtp = $this->getDoctrine()->getRepository('APITaskBundle:Smtp')->find($id);
-        if (!$smtp instanceof Smtp) {
-            return $this->notFoundResponse();
-        }
-
-        $requestData = json_decode($request->getContent(), true);
-        return $this->updateSmtpEntity($smtp, $requestData, false);
-    }
-
-    /**
      * @ApiDoc(
      *  description="Delete SMTP Entity",
      *  requirements={
@@ -470,38 +392,47 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      * @param int $id
      *
      * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      */
-    public function deleteAction(int $id)
+    public function deleteAction(int $id): Response
     {
+        $locationURL = $this->generateUrl('smtp_delete', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::SMTP_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $smtp = $this->getDoctrine()->getRepository('APITaskBundle:Smtp')->find($id);
 
         if (!$smtp instanceof Smtp) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'SMTP Entity with requested Id does not exist!']));
+            return $response;
         }
 
         $this->getDoctrine()->getManager()->remove($smtp);
         $this->getDoctrine()->getManager()->flush();
 
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::DELETED_MESSAGE,
-        ], StatusCodesHelper::DELETED_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::DELETED_CODE);
+        $response = $response->setContent(json_encode(['message' => StatusCodesHelper::DELETED_MESSAGE]));
+        return $response;
     }
 
     /**
      * @ApiDoc(
-     *  description="Test SMTP Connection",
+     *  description="SMTP Connection Test",
      *  parameters={
-     *      {"name"="emails", "dataType"="string", "required"=true, "description"="Array or coma separated Email addresses - on these Emails will be delivered testing message!"}
+     *      {"name"="emails", "dataType"="string", "required"=true, "description"="Coma separated Email addresses - on these Emails will be delivered testing message!"}
      *  },
      *  headers={
      *     {
@@ -520,60 +451,78 @@ class SmtpController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response
+     * @throws \Symfony\Component\Validator\Exception\MissingOptionsException
+     * @throws \Symfony\Component\Validator\Exception\InvalidOptionsException
+     * @throws \Symfony\Component\Validator\Exception\ConstraintDefinitionException
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
-    public function testSMTPConnectionAction(Request $request)
+    public function testSMTPConnectionAction(Request $request): Response
     {
+        $locationURL = $this->generateUrl('smtp_test_connection');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::SMTP_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        // Load SMTP settings
+        // Load SMTP settings - there should be only one in the DB
         $smtpSettings = $this->getDoctrine()->getRepository('APITaskBundle:Smtp')->findOneBy([]);
 
         if ($smtpSettings instanceof Smtp) {
-            $testEmails = $request->request->get('emails');
+            $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-            if (isset($testEmails)) {
-                // Validate requested Email addresses
-                $notValidEmailAddresses = $this->validateEmailAddresses($testEmails);
-                if (count($notValidEmailAddresses) > 0) {
-                    return $this->createApiResponse(
-                        ['message' => 'Not valid email address: ' . implode(";", $notValidEmailAddresses)],
-                        StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            if (false !== $requestBody) {
+                if (isset($requestBody['emails'])) {
+                    $testEmails = $requestBody['emails'];
+
+                    // Validate requested Email addresses
+                    $notValidEmailAddresses = $this->validateEmailAddresses($testEmails);
+                    if (\count($notValidEmailAddresses) > 0) {
+                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'Not valid email address: ' . implode(";", $notValidEmailAddresses)]));
+                        return $response;
+                    }
+
+                    // Prepare params
+                    $templateParams = $this->getTemplateParams($smtpSettings->getEmail(), $smtpSettings->getHost(), $testEmails);
+
+                    // Send emails
+                    $sendingError = $this->get('email_service')->sendEmail($templateParams);
+                    if (true !== $sendingError) {
+                        $data = [
+                            'errors' => $sendingError,
+                            'message' => 'Error with sending email!'
+                        ];
+                        $response = $response->setStatusCode(StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
+                        $response = $response->setContent(json_encode($data));
+                        return $response;
+                    }
+                    $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'Email/s was/were successfully sent!']));
+                    return $response;
+                } else {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'At least one Email address is required!']));
                 }
-
-                // Prepare params
-                $templateParams = $this->getTemplateParams($smtpSettings->getEmail(), $smtpSettings->getHost(), $testEmails);
-
-                // Send emails
-                $sendingError = $this->get('email_service')->sendEmail($templateParams);
-                if (true !== $sendingError) {
-                    $data = [
-                        'errors' => $sendingError,
-                        'message' => 'Error with sending email!'
-                    ];
-                    return $this->createApiResponse($data, StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
-                }
-
-                return $this->createApiResponse(
-                    ['message' => 'Email/s was/were successfully sent!'],
-                    StatusCodesHelper::SUCCESSFUL_CODE);
+            } else {
+                $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
             }
-
-            return $this->createApiResponse(
-                ['message' => 'At least one Email address is required!'],
-                StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'SMTP Settings are not correctly set in Database!']));
         }
 
-        return $this->createApiResponse([
-            'message' => 'SMTP Settings are not correctly set in Database!',
-        ], StatusCodesHelper::NOT_FOUND_CODE);
-
+        return $response;
     }
 
     /**

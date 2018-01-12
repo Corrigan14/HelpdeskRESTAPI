@@ -78,7 +78,10 @@ class UnitService
         ];
     }
 
-    public function getListOfAllUnits()
+    /**
+     * @return array
+     */
+    public function getListOfAllUnits():array
     {
         return $this->em->getRepository('APITaskBundle:Unit')->getListOfUnitsWithShortcutAndId();
     }
@@ -88,12 +91,11 @@ class UnitService
      *
      * @return array
      */
-    private function getEntityLinks(int $id)
+    private function getEntityLinks(int $id): array
     {
         return [
             'put' => $this->router->generate('unit_update', ['id' => $id]),
-            'patch' => $this->router->generate('unit_partial_update', ['id' => $id]),
-            'delete' => $this->router->generate('unit_delete', ['id' => $id]),
+            'delete' => $this->router->generate('unit_inactivate', ['id' => $id]),
             'restore' => $this->router->generate('unit_restore', ['id' => $id]),
         ];
     }

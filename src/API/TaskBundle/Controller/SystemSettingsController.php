@@ -148,7 +148,6 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      *       "_links":
      *       {
      *          "put": "/api/v1/task-bundle/system-settings/3",
-     *          "patch": "/api/v1/task-bundle/system-settings/3",
      *          "delete": "/api/v1/task-bundle/system-settings/3",
      *          "restore": "/api/v1/task-bundle/system-settings/restore/3"
      *        }
@@ -230,7 +229,6 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      *       "_links":
      *       {
      *          "put": "/api/v1/task-bundle/system-settings/3",
-     *          "patch": "/api/v1/task-bundle/system-settings/3",
      *          "delete": "/api/v1/task-bundle/system-settings/3",
      *          "restore": "/api/v1/task-bundle/system-settings/restore/3"
      *        }
@@ -301,7 +299,6 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      *       "_links":
      *       {
      *          "put": "/api/v1/task-bundle/system-settings/3",
-     *          "patch": "/api/v1/task-bundle/system-settings/3",
      *          "delete": "/api/v1/task-bundle/system-settings/3",
      *          "restore": "/api/v1/task-bundle/system-settings/restore/3"
      *        }
@@ -338,102 +335,38 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      * @param int $id
      * @param Request $request
      * @return Response
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \LogicException
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      */
-    public function updateAction(int $id, Request $request)
+    public function updateAction(int $id, Request $request):Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('system_settings_update', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::SYSTEM_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $systemSettingEntity = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->find($id);
         if (!$systemSettingEntity instanceof SystemSettings) {
-            return $this->createApiResponse([
-                'message' => 'System setting with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'System settings with requested Id does not exist!']));
+            return $response;
         }
 
-        $requestData = $request->request->all();
-
-        return $this->updateEntity($systemSettingEntity, $requestData, false);
-    }
-
-    /**
-     *  ### Response ###
-     *      {
-     *       "data":
-     *       {
-     *          "id": 3,
-     *          "title": "Company Name",
-     *          "value": "Lan Systems",
-     *          "is_active": true
-     *       },
-     *       "_links":
-     *       {
-     *          "put": "/api/v1/task-bundle/system-settings/3",
-     *          "patch": "/api/v1/task-bundle/system-settings/3",
-     *          "delete": "/api/v1/task-bundle/system-settings/3",
-     *          "restore": "/api/v1/task-bundle/system-settings/restore/3"
-     *        }
-     *      }
-     *
-     * @ApiDoc(
-     *  description="Partially update the System settings Entity",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  input={"class"="API\TaskBundle\Entity\SystemSettings"},
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\TaskBundle\Entity\SystemSettings"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     *
-     * @param int $id
-     * @param Request $request
-     * @return Response
-     */
-    public function updatePartialAction(int $id, Request $request)
-    {
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::SYSTEM_SETTINGS,
-            'user' => $this->getUser()
-        ];
-
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
-        }
-
-        $systemSettingEntity = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->find($id);
-        if (!$systemSettingEntity instanceof SystemSettings) {
-            return $this->createApiResponse([
-                'message' => 'System setting with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
-        }
-
-        $requestData = json_decode($request->getContent(), true);
-
-        return $this->updateEntity($systemSettingEntity, $requestData, false);
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        return $this->updateEntity($systemSettingEntity, $requestBody, false, $locationURL);
     }
 
     /**
@@ -505,7 +438,6 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      *       "_links":
      *       {
      *          "put": "/api/v1/task-bundle/system-settings/3",
-     *          "patch": "/api/v1/task-bundle/system-settings/3",
      *          "delete": "/api/v1/task-bundle/system-settings/3",
      *          "restore": "/api/v1/task-bundle/system-settings/restore/3"
      *        }
@@ -612,14 +544,17 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
                 $this->getDoctrine()->getManager()->flush();
 
                 $systemSettingsArray = $this->get('system_settings_service')->getAttributeResponse($status->getId());
-                return $this->json($systemSettingsArray, $statusCode);
+                $response = $response->setStatusCode($statusCode);
+                $response = $response->setContent(json_encode($systemSettingsArray));
+                return $response;
+            }else {
+                $data = [
+                    'errors' => $errors,
+                    'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+                ];
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode($data));
             }
-
-            $data = [
-                'errors' => $errors,
-                'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-            ];
-            return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
         }else {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
             $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));

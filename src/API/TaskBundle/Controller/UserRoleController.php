@@ -242,7 +242,6 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/user-roles/5",
-     *           "patch": "/api/v1/task-bundle/user-roles/5",
      *           "delete": "/api/v1/task-bundle/user-roles/5"
      *         }
      *      }
@@ -344,7 +343,6 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/user-roles/5",
-     *           "patch": "/api/v1/task-bundle/user-roles/5",
      *           "delete": "/api/v1/task-bundle/user-roles/5"
      *         }
      *      }
@@ -434,7 +432,6 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/user-roles/5",
-     *           "patch": "/api/v1/task-bundle/user-roles/5",
      *           "delete": "/api/v1/task-bundle/user-roles/5"
      *         }
      *      }
@@ -470,139 +467,45 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      * @param int $id
      * @param Request $request
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function updateAction(int $id, Request $request)
+    public function updateAction(int $id, Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('user_role_update', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::USER_ROLE_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($id);
-
         if (!$userRole instanceof UserRole) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'User role with requested Id does not exist!']));
+            return $response;
         }
 
         // No user can update admin role!
         if ($userRole->getTitle() === 'ADMIN') {
-            return $this->createApiResponse([
-                'message' => 'You can not update ADMIN role!',
-            ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => 'You can not update ADMIN role!']));
+            return $response;
         }
 
-        $requestData = $request->request->all();
-        return $this->updateEntity($userRole, $requestData);
-    }
-
-    /**
-     * ### Response ###
-     *      {
-     *        "data":
-     *        {
-     *           "id": 155,
-     *           "title": "MANAGER",
-     *           "description": null,
-     *           "homepage": "/",
-     *           "acl":
-     *           [
-     *              "login_to_system",
-     *              "create_tasks",
-     *              "create_projects",
-     *              "company_settings",
-     *              "report_filters",
-     *              "sent_emails_from_comments",
-     *              "update_all_tasks"
-     *           ],
-     *           "order": 2,
-     *           "is_active": true,
-     *           "users":
-     *           [
-     *              {
-     *                 "id": 2576,
-     *                 "username": "manager",
-     *                 "email": "manager@manager.sk"
-     *               }
-     *           ]
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/user-roles/5",
-     *           "patch": "/api/v1/task-bundle/user-roles/5",
-     *           "delete": "/api/v1/task-bundle/user-roles/5"
-     *         }
-     *      }
-     *
-     * @ApiDoc(
-     *  description="Partially update the User role Entity",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  input={"class"="API\TaskBundle\Entity\UserRole"},
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\TaskBundle\Entity\UserRole"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     *
-     * @param int $id
-     * @param Request $request
-     * @return Response
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \LogicException
-     * @throws \InvalidArgumentException
-     */
-    public function updatePartialAction(int $id, Request $request)
-    {
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::USER_ROLE_SETTINGS,
-            'user' => $this->getUser()
-        ];
-
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
-        }
-
-        $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($id);
-
-        if (!$userRole instanceof UserRole) {
-            return $this->notFoundResponse();
-        }
-
-        // No user can update admin role!
-        if ($userRole->getTitle() === 'ADMIN') {
-            return $this->createApiResponse([
-                'message' => 'You can not update ADMIN role!',
-            ], StatusCodesHelper::ACCESS_DENIED_CODE);
-        }
-
-        $requestData = $request->request->all();
-        return $this->updateEntity($userRole, $requestData);
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        return $this->updateEntity($userRole, $requestBody, false, $locationURL);
     }
 
     /**
@@ -703,7 +606,6 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/user-roles/5",
-     *           "patch": "/api/v1/task-bundle/user-roles/5",
      *           "delete": "/api/v1/task-bundle/user-roles/5"
      *         }
      *      }
@@ -769,6 +671,9 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      * @param bool $create
      * @param string $locationUrl
      * @return Response
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \LogicException
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      */
@@ -807,28 +712,28 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
             $loggedUserRole = $loggedUser->getUserRole();
             $loggedUserAcl = $loggedUserRole->getAcl();
 
-            // Check the order of role: this has to be higher compare to logged users role
+            // Check the order of role: this has to be higher compare to the logged users role
             if (isset($requestData['order'])) {
                 $orderNum = (int)$requestData['order'];
                 if ($orderNum <= $loggedUserRole->getOrder()) {
-                    return $this->createApiResponse([
-                        'message' => 'Order of created role has to be higher like yours role order: ' . $loggedUserRole->getOrder(),
-                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'Order of created role has to be higher like yours role order: ' . $loggedUserRole->getOrder()]));
+                    return $response;
                 }
                 $requestData['order'] = $orderNum;
             }
 
             // Check the ACL of role: this can not contain different ACL rules like logged user has
             if (isset($requestData['acl'])) {
-                $aclData = $requestData['acl'];
-                if (!is_array($aclData)) {
-                    $aclData = explode(',', $aclData);
+                $aclData = json_decode($requestData['acl']);
+                if (!\is_array($aclData)) {
+                    $aclData = explode(',', $requestData['acl']);
                 }
                 foreach ($aclData as $acl) {
-                    if (!in_array($acl, $loggedUserAcl)) {
-                        return $this->createApiResponse([
-                            'message' => 'The ACL can contains just yours ACL params: ' . implode(',', $loggedUserAcl),
-                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    if (!\in_array($acl, $loggedUserAcl, true)) {
+                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'The ACL can contains just yours ACL params: ' . implode(',', $loggedUserAcl)]));
+                        return $response;
                     }
                 }
                 $requestData['acl'] = $aclData;
@@ -848,15 +753,18 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
                 $this->getDoctrine()->getManager()->flush();
 
                 $userRoleArray = $this->get('user_role_service')->getUserRoleResponse($userRole->getId());
-                return $this->json($userRoleArray, $statusCode);
+                $response = $response->setStatusCode($statusCode);
+                $response = $response->setContent(json_encode($userRoleArray));
+                return $response;
+            } else {
+                $data = [
+                    'errors' => $errors,
+                    'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+                ];
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode($data));
             }
-
-            $data = [
-                'errors' => $errors,
-                'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-            ];
-            return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
-        }else {
+        } else {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
             $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }

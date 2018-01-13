@@ -22,23 +22,16 @@ system_settings_update:
     requirements:
             id: '\d+'
 
-system_settings_partial_update:
-    path:     /system-settings/{id}
-    defaults: { _controller: APITaskBundle:SystemSettings:updatePartial }
-    methods: [PATCH]
-    requirements:
-            id: '\d+'
-
-system_settings_delete:
-    path:     /system-settings/delete/{id}
+system_settings_inactivate:
+    path:     /system-settings/{id}/inactivate
     defaults: { _controller: APITaskBundle:SystemSettings:delete }
-    methods: [PATCH]
+    methods: [PUT]
     requirements:
             id: '\d+'
 
 system_settings_restore:
-    path:     /system-settings/restore/{id}
+    path:     /system-settings/{id}/restore
     defaults: { _controller: APITaskBundle:SystemSettings:restore }
-    methods: [PATCH]
+    methods: [PUT]
     requirements:
             id: '\d+'

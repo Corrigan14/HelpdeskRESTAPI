@@ -167,7 +167,6 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/status/id",
-     *           "patch": "/api/v1/task-bundle/status/id",
      *           "delete": "/api/v1/task-bundle/status/id"
      *         }
      *      }
@@ -204,7 +203,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @throws \UnexpectedValueException
      * @throws \LogicException
      */
-    public function getAction(int $id):Response
+    public function getAction(int $id): Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('status', ['id' => $id]);
@@ -252,7 +251,6 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/status/id",
-     *           "patch": "/api/v1/task-bundle/status/id",
      *           "delete": "/api/v1/task-bundle/status/id"
      *         }
      *      }
@@ -285,7 +283,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function createAction(Request $request):Response
+    public function createAction(Request $request): Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('status_create');
@@ -324,7 +322,6 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/status/id",
-     *           "patch": "/api/v1/task-bundle/status/id",
      *           "delete": "/api/v1/task-bundle/status/id"
      *         }
      *      }
@@ -360,110 +357,38 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function updateAction(int $id, Request $request)
+    public function updateAction(int $id, Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('status_update', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::STATUS_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($id);
-
         if (!$status instanceof Status) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Status with requested Id does not exist!']));
+            return $response;
         }
 
-        $requestData = $request->request->all();
-
-        return $this->updateStatus($status, $requestData);
-    }
-
-    /**
-     * ### Response ###
-     *      {
-     *        "data":
-     *        {
-     *            "id": "1",
-     *            "title": "New",
-     *            "description": "New task",
-     *            "color": "#1E90FF",
-     *            "is_active": true,
-     *            "default": true,
-     *            "function": "new_task"
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/status/id",
-     *           "patch": "/api/v1/task-bundle/status/id",
-     *           "delete": "/api/v1/task-bundle/status/id"
-     *         }
-     *      }
-     *
-     * @ApiDoc(
-     *  description="Partially update the Status Entity",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  input={"class"="API\TaskBundle\Entity\Status"},
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\TaskBundle\Entity\Status"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     *
-     * @param int $id
-     * @param Request $request
-     * @return Response|JsonResponse
-     * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \LogicException
-     */
-    public function updatePartialAction(int $id, Request $request)
-    {
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::STATUS_SETTINGS,
-            'user' => $this->getUser()
-        ];
-
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
-        }
-
-        $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($id);
-
-        if (!$status instanceof Status) {
-            return $this->notFoundResponse();
-        }
-
-        $requestData = $request->request->all();
-
-        return $this->updateStatus($status, $requestData);
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        return $this->updateStatus($status, $requestBody, false, $locationURL);
     }
 
     /**
@@ -538,7 +463,6 @@ class StatusController extends ApiBaseController implements ControllerInterface
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/status/id",
-     *           "patch": "/api/v1/task-bundle/status/id",
      *           "delete": "/api/v1/task-bundle/status/id"
      *         }
      *      }
@@ -615,7 +539,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    private function updateStatus(Status $status, $requestData, $create = false, $locationUrl):Response
+    private function updateStatus(Status $status, $requestData, $create = false, $locationUrl): Response
     {
         $allowedUnitEntityParams = [
             'title',
@@ -642,12 +566,11 @@ class StatusController extends ApiBaseController implements ControllerInterface
                 }
             }
 
-            // Controll, if function is allowed
-            if (isset($requestData['function']) && !in_array($requestData['function'], StatusFunctionOptions::getConstants(), true)) {
-                return $this->createApiResponse(
-                    ['message' => $requestData['function'] . ' is not allowed parameter for Function of Status Entity!'],
-                    StatusCodesHelper::INVALID_PARAMETERS_CODE
-                );
+            // Control, if function is allowed
+            if (isset($requestData['function']) && !\in_array($requestData['function'], StatusFunctionOptions::getConstants(), true)) {
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode(['message' => $requestData['function'] . ' is not allowed parameter for Function of Status Entity!']));
+                return $response;
             }
 
             $statusCode = $this->getCreateUpdateStatusCode($create);
@@ -659,15 +582,18 @@ class StatusController extends ApiBaseController implements ControllerInterface
                 $this->getDoctrine()->getManager()->flush();
 
                 $statusArray = $this->get('status_service')->getAttributeResponse($status->getId());
-                return $this->json($statusArray, $statusCode);
+                $response = $response->setStatusCode($statusCode);
+                $response = $response->setContent(json_encode($statusArray));
+                return $response;
+            } else {
+                $data = [
+                    'errors' => $errors,
+                    'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+                ];
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode($data));
             }
-
-            $data = [
-                'errors' => $errors,
-                'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-            ];
-            return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
-        }else {
+        } else {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
             $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }

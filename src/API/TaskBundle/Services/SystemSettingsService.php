@@ -88,8 +88,7 @@ class SystemSettingsService
     {
         return [
             'put' => $this->router->generate('system_settings_update', ['id' => $id]),
-            'patch' => $this->router->generate('system_settings_partial_update', ['id' => $id]),
-            'delete' => $this->router->generate('system_settings_delete', ['id' => $id]),
+            'inactivate' => $this->router->generate('system_settings_inactivate', ['id' => $id]),
             'restore' => $this->router->generate('system_settings_restore', ['id' => $id]),
         ];
     }

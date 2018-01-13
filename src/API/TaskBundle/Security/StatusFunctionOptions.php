@@ -10,7 +10,7 @@ namespace API\TaskBundle\Security;
 class StatusFunctionOptions
 {
     const NEW_TASK = 'new_task';
-    const IN_PROGRESS_TASK = 'inprogress_task';
+    const IN_PROGRESS_TASK = 'in_progress_task';
     const COMPLETED_TASK = 'completed_task';
     const CLOSED_TASK = 'closed_task';
 

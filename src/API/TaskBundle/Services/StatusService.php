@@ -95,8 +95,7 @@ class StatusService
     {
         return [
             'put' => $this->router->generate('status_update', ['id' => $id]),
-            'patch' => $this->router->generate('status_partial_update', ['id' => $id]),
-            'delete' => $this->router->generate('status_delete', ['id' => $id]),
+            'inactivate' => $this->router->generate('status_inactivate', ['id' => $id]),
             'restore' => $this->router->generate('status_restore', ['id' => $id]),
         ];
     }

@@ -80,8 +80,7 @@ class UserRoleService
     {
         return [
             'put' => $this->router->generate('user_role_update', ['id' => $id]),
-            'patch' => $this->router->generate('user_role_partial_update', ['id' => $id]),
-            'delete' => $this->router->generate('user_role_delete', ['id' => $id]),
+            'inactivate' => $this->router->generate('user_role_delete', ['id' => $id]),
         ];
     }
 }

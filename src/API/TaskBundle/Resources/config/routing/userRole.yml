@@ -22,16 +22,16 @@ user_role_update:
     requirements:
             id: '\d+'
 
-user_role_partial_update:
-    path:     /user-roles/{id}
-    defaults: { _controller: APITaskBundle:UserRole:updatePartial }
-    methods: [PATCH]
+user_role_delete:
+    path:     /user-roles/{id}/inactivate
+    defaults: { _controller: APITaskBundle:UserRole:delete }
+    methods: [PUT]
     requirements:
             id: '\d+'
 
-user_role_delete:
-    path:     /user-roles/{id}
-    defaults: { _controller: APITaskBundle:UserRole:delete }
-    methods: [DELETE]
+user_role_restore:
+    path:     /user-roles/{id}/restore
+    defaults: { _controller: APITaskBundle:UserRole:restore }
+    methods: [PUT]
     requirements:
             id: '\d+'

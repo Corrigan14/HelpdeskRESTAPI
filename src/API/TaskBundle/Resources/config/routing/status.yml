@@ -22,23 +22,16 @@ status_update:
     requirements:
             id: '\d+'
 
-status_partial_update:
-    path:     /status/{id}
-    defaults: { _controller: APITaskBundle:Status:updatePartial }
-    methods: [PATCH]
-    requirements:
-            id: '\d+'
-
-status_delete:
-    path:     /status/{id}
+status_inactivate:
+    path:     /status/{id}/inactivate
     defaults: { _controller: APITaskBundle:Status:delete }
-    methods: [DELETE]
+    methods: [PUT]
     requirements:
             id: '\d+'
 
 status_restore:
-    path:     /status/restore/{id}
+    path:     /status/{id}/restore
     defaults: { _controller: APITaskBundle:Status:restore }
-    methods: [PATCH]
+    methods: [PUT]
     requirements:
             id: '\d+'

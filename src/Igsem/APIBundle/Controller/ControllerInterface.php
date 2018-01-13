@@ -199,55 +199,6 @@ interface ControllerInterface
     public function updateAction(int $id, Request $request);
 
     /**
-     * ### Response ###
-     *      {
-     *        "data":
-     *        {
-     *           "id": "2",
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/entityName/2",
-     *           "patch": "/api/v1/entityName/2",
-     *           "delete": "/api/v1/entityName/2"
-     *         }
-     *      }
-     *
-     * @ApiDoc(
-     *  description="Partially update the Entity (PATCH)",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  input={"class"="API\CoreBundle\Entity\...entityName"},
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\CoreBundle\Entity\...entityName"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     *
-     * @param int $id
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function updatePartialAction(int $id, Request $request);
-
-    /**
      * @ApiDoc(
      *  description="Delete Entity (DELETE)",
      *  requirements={

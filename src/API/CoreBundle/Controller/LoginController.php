@@ -79,7 +79,7 @@ class LoginController extends Controller
         $locationURL = $this->generateUrl('token_authentication');
         $response->headers->set('Location', $locationURL);
         $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:3000');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type,X-Requested-With,accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization');
         $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
 
         if ($requestBody) {

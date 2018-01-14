@@ -78,7 +78,10 @@ class LoginController extends Controller
         $response->headers->set('Content-Type', 'application/json');
         $locationURL = $this->generateUrl('token_authentication');
         $response->headers->set('Location', $locationURL);
-        $response->headers->set('Access-Control-Allow-Origin','http://localhost:3000');
+        $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:3000');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+        $response->headers->set('Access-Control-Allow-Methods', 'POST, OPTIONS, GET');
+        $response->headers->set('Access-Control-Max-Age', 86400);
 
         if ($requestBody) {
             $username = $requestBody['username'];

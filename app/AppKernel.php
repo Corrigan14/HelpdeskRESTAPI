@@ -25,6 +25,7 @@ class AppKernel extends Kernel
             new \API\CoreBundle\APICoreBundle(),
             new Stof\DoctrineExtensionsBundle\StofDoctrineExtensionsBundle(),
             new API\TaskBundle\APITaskBundle(),
+            new \Nelmio\CorsBundle\NelmioCorsBundle()
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {

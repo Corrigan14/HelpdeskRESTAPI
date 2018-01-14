@@ -129,15 +129,15 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request):Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('company_list');
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
-        $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:3000');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type,X-Requested-With,accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization');
-        $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Credentials', true);
+//        $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:3000');
+//        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type,X-Requested-With,accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization');
+//        $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+//        $response->headers->set('Access-Control-Allow-Credentials', true);
 
         $aclOptions = [
             'acl' => UserRoleAclOptions::COMPANY_SETTINGS,

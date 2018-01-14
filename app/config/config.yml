@@ -86,6 +86,14 @@ jms_serializer:
         json:
             options: [JSON_FORCE_OBJECT]
 
+nelmio_cors:
+    paths:
+        '^/api':
+            allow_origin: ['*']
+            allow_headers: ['content-type','origin']
+            allow_methods: ['POST', 'PUT', 'GET', 'DELETE']
+            max_age: 3600
+
 stof_doctrine_extensions:
     default_locale: en
     translation_fallback: true

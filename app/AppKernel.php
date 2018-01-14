@@ -21,7 +21,6 @@ class AppKernel extends Kernel
             new Nelmio\ApiDocBundle\NelmioApiDocBundle(),
             new Lexik\Bundle\JWTAuthenticationBundle\LexikJWTAuthenticationBundle(),
             new JMS\SerializerBundle\JMSSerializerBundle(),
-            new Nelmio\CorsBundle\NelmioCorsBundle(),
             new \Igsem\APIBundle\IgsemAPIBundle(),
             new \API\CoreBundle\APICoreBundle(),
             new Stof\DoctrineExtensionsBundle\StofDoctrineExtensionsBundle(),

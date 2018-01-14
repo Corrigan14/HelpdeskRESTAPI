@@ -536,40 +536,49 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      * @param int $id
      *
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function deleteAction(int $id)
+    public function deleteAction(int $id): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('user_role_inactivate', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::USER_ROLE_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($id);
 
         if (!$userRole instanceof UserRole) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'User role with requested Id does not exist!']));
+            return $response;
         }
 
         // No user can delete admin role!
         if ($userRole->getTitle() === 'ADMIN') {
-            return $this->createApiResponse([
-                'message' => 'You can not delete ADMIN role!',
-            ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => 'You can not delete ADMIN role!']));
+            return $response;
         }
 
         $userRole->setIsActive(false);
         $this->getDoctrine()->getManager()->persist($userRole);
         $this->getDoctrine()->getManager()->flush();
 
-        return $this->createApiResponse([
-            'message' => 'is_active param of Entity was successfully changed to inactive: 0',
-        ], StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode(['message' => 'is_active param of Entity was successfully changed to inactive: 0']));
+        return $response;
     }
 
 
@@ -637,24 +646,33 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      * @param int $id
      *
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function restoreAction(int $id)
+    public function restoreAction(int $id):Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('user_role_restore', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::USER_ROLE_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($id);
 
         if (!$userRole instanceof UserRole) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'User role with requested Id does not exist!']));
+            return $response;
         }
 
         $userRole->setIsActive(true);
@@ -662,7 +680,9 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
         $this->getDoctrine()->getManager()->flush();
 
         $userRoleArray = $this->get('user_role_service')->getUserRoleResponse($id);
-        return $this->json($userRoleArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($userRoleArray));
+        return $response;
     }
 
     /**

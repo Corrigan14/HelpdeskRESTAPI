@@ -76,11 +76,12 @@ class UserRoleService
      *
      * @return array
      */
-    private function getFilterLinks(int $id)
+    private function getFilterLinks(int $id):array
     {
         return [
             'put' => $this->router->generate('user_role_update', ['id' => $id]),
-            'inactivate' => $this->router->generate('user_role_delete', ['id' => $id]),
+            'inactivate' => $this->router->generate('user_role_inactivate', ['id' => $id]),
+            'restore' => $this->router->generate('user_role_restore', ['id' => $id]),
         ];
     }
 }

@@ -397,32 +397,41 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      * @param int $id
      *
      * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
-    public function deleteAction(int $id)
+    public function deleteAction(int $id):Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('system_settings_inactivate', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::SYSTEM_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $systemSettingEntity = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->find($id);
         if (!$systemSettingEntity instanceof SystemSettings) {
-            return $this->createApiResponse([
-                'message' => 'System setting with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'System setting with requested Id does not exist!']));
+            return $response;
         }
 
         $systemSettingEntity->setIsActive(false);
         $this->getDoctrine()->getManager()->persist($systemSettingEntity);
         $this->getDoctrine()->getManager()->flush();
 
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::UNACITVATE_MESSAGE,
-        ], StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode(['message' => 'is_active param of Entity was successfully changed to inactive: 0']));
+        return $response;
     }
 
     /**
@@ -471,23 +480,32 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
      *
      * @param int $id
      * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
-    public function restoreAction(int $id)
+    public function restoreAction(int $id):Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('system_settings_restore', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::SYSTEM_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $systemSettingEntity = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->find($id);
         if (!$systemSettingEntity instanceof SystemSettings) {
-            return $this->createApiResponse([
-                'message' => 'System setting with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'System Setting with requested Id does not exist!']));
+            return $response;
         }
 
         $systemSettingEntity->setIsActive(true);
@@ -495,7 +513,9 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
         $this->getDoctrine()->getManager()->flush();
 
         $systemSettingsArray = $this->get('system_settings_service')->getAttributeResponse($id);
-        return $this->json($systemSettingsArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($systemSettingsArray));
+        return $response;
     }
 
     /**

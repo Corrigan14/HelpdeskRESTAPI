@@ -22,7 +22,7 @@ user_role_update:
     requirements:
             id: '\d+'
 
-user_role_delete:
+user_role_inactivate:
     path:     /user-roles/{id}/inactivate
     defaults: { _controller: APITaskBundle:UserRole:delete }
     methods: [PUT]

@@ -419,32 +419,42 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @param int $id
      *
      * @return Response|JsonResponse
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      */
-    public function deleteAction(int $id)
+    public function deleteAction(int $id):Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('status_inactivate', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::STATUS_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($id);
 
         if (!$status instanceof Status) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Status with requested Id does not exist!']));
+            return $response;
         }
 
         $status->setIsActive(false);
         $this->getDoctrine()->getManager()->persist($status);
         $this->getDoctrine()->getManager()->flush();
 
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::UNACITVATE_MESSAGE,
-        ], StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode(['message' => 'is_active param of Entity was successfully changed to inactive: 0']));
+        return $response;
     }
 
     /**
@@ -495,27 +505,36 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param int $id
-     * @return Response|JsonResponse
+     * @return Response
+     * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function restoreAction(int $id)
+    public function restoreAction(int $id):Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('user_role_inactivate', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::STATUS_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($id);
 
         if (!$status instanceof Status) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Status with requested Id does not exist!']));
+            return $response;
         }
 
         $status->setIsActive(true);
@@ -523,7 +542,9 @@ class StatusController extends ApiBaseController implements ControllerInterface
         $this->getDoctrine()->getManager()->flush();
 
         $statusArray = $this->get('status_service')->getAttributeResponse($status->getId());
-        return $this->json($statusArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($statusArray));
+        return $response;
     }
 
     /**

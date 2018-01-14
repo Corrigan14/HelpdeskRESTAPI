@@ -123,54 +123,66 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request):Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('company_list');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+//        $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:3000');
+//        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type,X-Requested-With,accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization');
+//        $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+//        $response->headers->set('Access-Control-Allow-Credentials', true);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        $pageNum = $request->get('page');
-        $pageNum = (int)$pageNum;
-        $page = ($pageNum === 0) ? 1 : $pageNum;
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        $orderString = $request->get('order');
-        $orderString = strtolower($orderString);
-        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
+        if (false !== $requestBody) {
+            $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody);
 
-        $isActive = $request->get('isActive');
+            $page = $processedFilterParams['page'];
+            $limit = $processedFilterParams['limit'];
+            $order = $processedFilterParams['order'];
+            $isActive = $processedFilterParams['isActive'];
 
-        $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ?: 10;
+            $filtersForUrl = [
+                'isActive' => '&isActive=' . $isActive,
+                'order' => '&order=' . $order,
+                'limit' => '&limit=' . $order,
+            ];
 
-        if(999 === $limit){
-            $page = 1;
+            $options = [
+                'loggedUserId' => $this->getUser()->getId(),
+                'isActive' => $isActive,
+                'filtersForUrl' => $filtersForUrl,
+                'order' => $order,
+                'limit' => $limit
+            ];
+
+            $companiesArray = $this->get('api_company.service')->getCompaniesResponse($page, $options);
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+            $response = $response->setContent(json_encode($companiesArray));
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }
 
-        $filtersForUrl = [];
-        if (null !== $isActive) {
-            $filtersForUrl['isActive'] = '&isActive=' . $isActive;
-            $filtersForUrl['limit'] = '&limit=' . $limit;
-        }
-
-        $options = [
-            'loggedUserId' => $this->getUser()->getId(),
-            'isActive' => strtolower($isActive),
-            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order]),
-            'order' => $order,
-            'limit' => $limit
-        ];
-
-        return $this->json($this->get('api_company.service')->getCompaniesResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
     }
 
     /**

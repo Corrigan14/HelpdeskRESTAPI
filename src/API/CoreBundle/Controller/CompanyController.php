@@ -284,12 +284,12 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *  })
      *
      * @param Request $request
-     * @return JsonResponse|Response
+     * @return Response
      * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function searchAction(Request $request)
+    public function searchAction(Request $request):Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('company_search');
@@ -406,14 +406,14 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param int $id
-     * @return Response|JsonResponse
+     * @return Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \InvalidArgumentException
      * @throws \UnexpectedValueException
      * @throws \LogicException
      */
-    public function getAction(int $id)
+    public function getAction(int $id):Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('company', ['id' => $id]);
@@ -512,28 +512,35 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
-     * @return Response|JsonResponse
+     * @return Response
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function createAction(Request $request)
+    public function createAction(Request $request):Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('company_create');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        $requestData = $request->request->all();
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
         $company = new Company();
 
-        return $this->updateCompany($company, $requestData, true);
+        return $this->updateCompany($company, $requestBody, true, $locationURL);
     }
 
     /**
@@ -906,14 +913,16 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      * @param mixed $company
      * @param array $requestData
      * @param bool $create
+     * @param $locationURL
      *
      * @return Response|JsonResponse
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \InvalidArgumentException
      */
-    private function updateCompany($company, array $requestData, $create = false)
+    private function updateCompany($company, array $requestData, $create = false, $locationURL)
     {
         $allowedCompanyEntityParams = [
             'title',
@@ -927,96 +936,105 @@ class CompanyController extends ApiBaseController implements ControllerInterface
             'is_active'
         ];
 
-        $requestDetailData = [];
-        if (isset($requestData['company_data']) && count($requestData['company_data']) > 0) {
-            $requestDetailData = $requestData['company_data'];
-            unset($requestData['company_data']);
-        }
+        // JSON API Response - Content type and Location settings
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
-        if (array_key_exists('_format', $requestData)) {
-            unset($requestData['_format']);
-        }
-
-        // Set is_active param
-        if (array_key_exists('is_active', $requestData)) {
-            $isActive = strtolower($requestData['is_active']);
-            unset($requestData['is_active']);
-            if ('true' === $isActive || true === $isActive || '1' === $isActive || 1 === $isActive) {
-                $company->setIsActive(true);
-            } elseif ('false' === $isActive || false === $isActive || '0' === $isActive || 0 === $isActive) {
-                $company->setIsActive(false);
+        if (false !== $requestData) {
+            $requestDetailData = [];
+            if (isset($requestData['company_data']) && count($requestData['company_data']) > 0) {
+                $requestDetailData = $requestData['company_data'];
+                unset($requestData['company_data']);
             }
-        }
 
-        foreach ($requestData as $key => $value) {
-            if (!in_array($key, $allowedCompanyEntityParams, true)) {
-                return $this->createApiResponse(
-                    ['message' => $key . ' is not allowed parameter for Company Entity!'],
-                    StatusCodesHelper::INVALID_PARAMETERS_CODE
-                );
+            if (array_key_exists('_format', $requestData)) {
+                unset($requestData['_format']);
             }
-        }
 
-        $statusCode = $this->getCreateUpdateStatusCode($create);
-
-        if (null === $company || !$company instanceof Company) {
-            return $this->notFoundResponse();
-        }
-        $errors = $this->get('entity_processor')->processEntity($company, $requestData);
-
-
-        if (false === $errors) {
-            $this->getDoctrine()->getManager()->persist($company);
-            $this->getDoctrine()->getManager()->flush();
-
-            /**
-             * Fill CompanyData Entity if some its parameters were sent
-             */
-            if ($requestDetailData) {
-                /** @var array $companyData */
-                $companyData = $requestDetailData;
-                foreach ($companyData as $key => $value) {
-                    $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($key);
-
-                    if ($companyAttribute instanceof CompanyAttribute) {
-                        $cd = $this->getDoctrine()->getRepository('APITaskBundle:CompanyData')->findOneBy([
-                            'companyAttribute' => $companyAttribute,
-                            'company' => $company,
-                        ]);
-
-                        if (!$cd instanceof CompanyData) {
-                            $cd = new CompanyData();
-                            $cd->setCompany($company);
-                            $cd->setCompanyAttribute($companyAttribute);
-                        }
-
-                        $cdErrors = $this->get('entity_processor')->processEntity($cd, ['value' => $value]);
-                        if (false === $cdErrors) {
-                            $company->addCompanyDatum($cd);
-                            $this->getDoctrine()->getManager()->persist($company);
-                            $this->getDoctrine()->getManager()->persist($cd);
-                            $this->getDoctrine()->getManager()->flush();
-                        } else {
-                            $this->createApiResponse([
-                                'message' => 'The value of company_data with key: ' . $key . ' is invalid',
-                            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                        }
-                    } else {
-                        return $this->createApiResponse([
-                            'message' => 'The key: ' . $key . ' of Company Attribute is not valid (Company Attribute with this ID doesn\'t exist)',
-                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                    }
+            // Set is_active param
+            if (array_key_exists('is_active', $requestData)) {
+                $isActive = strtolower($requestData['is_active']);
+                unset($requestData['is_active']);
+                if ('true' === $isActive || true === $isActive || '1' === $isActive || 1 === $isActive) {
+                    $company->setIsActive(true);
+                } elseif ('false' === $isActive || false === $isActive || '0' === $isActive || 0 === $isActive) {
+                    $company->setIsActive(false);
                 }
             }
 
-            $companyArray = $this->get('api_company.service')->getCompanyResponse($company->getId());
-            return $this->json($companyArray, $statusCode);
-        }
+            foreach ($requestData as $key => $value) {
+                if (!in_array($key, $allowedCompanyEntityParams, true)) {
+                    return $this->createApiResponse(
+                        ['message' => $key . ' is not allowed parameter for Company Entity!'],
+                        StatusCodesHelper::INVALID_PARAMETERS_CODE
+                    );
+                }
+            }
 
-        $data = [
-            'errors' => $errors,
-            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-        ];
-        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $statusCode = $this->getCreateUpdateStatusCode($create);
+
+            if (null === $company || !$company instanceof Company) {
+                return $this->notFoundResponse();
+            }
+            $errors = $this->get('entity_processor')->processEntity($company, $requestData);
+
+
+            if (false === $errors) {
+                $this->getDoctrine()->getManager()->persist($company);
+                $this->getDoctrine()->getManager()->flush();
+
+                /**
+                 * Fill CompanyData Entity if some its parameters were sent
+                 */
+                if ($requestDetailData) {
+                    /** @var array $companyData */
+                    $companyData = $requestDetailData;
+                    foreach ($companyData as $key => $value) {
+                        $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($key);
+
+                        if ($companyAttribute instanceof CompanyAttribute) {
+                            $cd = $this->getDoctrine()->getRepository('APITaskBundle:CompanyData')->findOneBy([
+                                'companyAttribute' => $companyAttribute,
+                                'company' => $company,
+                            ]);
+
+                            if (!$cd instanceof CompanyData) {
+                                $cd = new CompanyData();
+                                $cd->setCompany($company);
+                                $cd->setCompanyAttribute($companyAttribute);
+                            }
+
+                            $cdErrors = $this->get('entity_processor')->processEntity($cd, ['value' => $value]);
+                            if (false === $cdErrors) {
+                                $company->addCompanyDatum($cd);
+                                $this->getDoctrine()->getManager()->persist($company);
+                                $this->getDoctrine()->getManager()->persist($cd);
+                                $this->getDoctrine()->getManager()->flush();
+                            } else {
+                                $this->createApiResponse([
+                                    'message' => 'The value of company_data with key: ' . $key . ' is invalid',
+                                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                            }
+                        } else {
+                            return $this->createApiResponse([
+                                'message' => 'The key: ' . $key . ' of Company Attribute is not valid (Company Attribute with this ID doesn\'t exist)',
+                            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        }
+                    }
+                }
+
+                $companyArray = $this->get('api_company.service')->getCompanyResponse($company->getId());
+                return $this->json($companyArray, $statusCode);
+            }
+
+            $data = [
+                'errors' => $errors,
+                'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+            ];
+            return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        }else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
+        }
+        return $response;
     }
 }

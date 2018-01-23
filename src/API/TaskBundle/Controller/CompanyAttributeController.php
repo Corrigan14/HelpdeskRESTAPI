@@ -82,14 +82,14 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      * )
      *
      * @param Request $request
-     * @return Response|JsonResponse
+     * @return Response
      * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request): Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('company_attribute_list');
@@ -187,14 +187,14 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      * )
      *
      * @param int $id
-     * @return Response|JsonResponse
+     * @return Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \InvalidArgumentException
      * @throws \UnexpectedValueException
      * @throws \LogicException
      */
-    public function getAction(int $id)
+    public function getAction(int $id): Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('company_attributes', ['id' => $id]);
@@ -265,28 +265,35 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      * )
      *
      * @param Request $request
-     * @return Response|JsonResponse
+     * @return Response
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function createAction(Request $request)
+    public function createAction(Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('company_attribute_create');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $companyAttribute = new CompanyAttribute();
 
-        $requestData = $request->request->all();
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        return $this->updateCompanyAttribute($companyAttribute, $requestData, true);
+        return $this->updateCompanyAttribute($companyAttribute, $requestBody, true, $locationURL);
     }
 
     /**
@@ -576,15 +583,19 @@ class CompanyAttributeController extends ApiBaseController implements Controller
 
     /**
      * @param $companyAttribute
-     * @param $requestData
+     * @param array $requestData
      * @param bool $create
+     * @param $locationURL
      * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    private function updateCompanyAttribute(CompanyAttribute $companyAttribute, $requestData, $create = false)
+    private function updateCompanyAttribute(CompanyAttribute $companyAttribute, array $requestData, $create = false, $locationURL): Response
     {
         $allowedUnitEntityParams = [
             'title',
@@ -594,47 +605,73 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             'description'
         ];
 
-        if (array_key_exists('_format', $requestData)) {
-            unset($requestData['_format']);
-        }
+        // JSON API Response - Content type and Location settings
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
-        foreach ($requestData as $key => $value) {
-            if (!in_array($key, $allowedUnitEntityParams, true)) {
-                return $this->createApiResponse(
-                    ['message' => $key . ' is not allowed parameter for Tag Entity!'],
-                    StatusCodesHelper::INVALID_PARAMETERS_CODE
-                );
-            }
-        }
-
-        $statusCode = $this->getCreateUpdateStatusCode($create);
-
-        // Check if type is instance of Variables in VariableHelper
-        if (isset($requestData['type'])) {
-            $type = $requestData['type'];
-            $typeOptions = VariableHelper::getConstants();
-            if (!in_array($type, $typeOptions, true)) {
-                return $this->createApiResponse([
-                    'message' => 'Not allowed Type of company attribute!',
-                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        if (false !== $requestData) {
+            if (array_key_exists('_format', $requestData)) {
+                unset($requestData['_format']);
             }
 
+            foreach ($requestData as $key => $value) {
+                if (!\in_array($key, $allowedUnitEntityParams, true)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for User Entity!']));
+                    return $response;
+                }
+            }
+
+            $statusCode = $this->getCreateUpdateStatusCode($create);
+
+            // Check if type is instance of Variables in VariableHelper
+            if (isset($requestData['type'])) {
+                $type = $requestData['type'];
+                $typeOptions = VariableHelper::getConstants();
+                if (!\in_array($type, $typeOptions, true)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'Not allowed Type of company attribute! Allowed are: ' . implode(",", $typeOptions)]));
+                    return $response;
+                }
+
+                // Check and uncode the OPTIONS if the SELECT or MULTI-SELECT Company Attribute Type was chosen
+                // JSON or ARRAY is expected
+                if (VariableHelper::SIMPLE_SELECT === $type || VariableHelper::MULTI_SELECT === $type) {
+                    if (isset($requestData['options'])) {
+                        $optionsData = json_decode($requestData['options'],true);
+                        if (!\is_array($optionsData)) {
+                            $optionsData = explode(',', $requestData['options']);
+                        }
+                        $requestData['options'] = $optionsData;
+                    } else {
+                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'For SIMPLE SELECT and MULTI SELECT company attribute type possible OPTIONS have to be defined!']));
+                        return $response;
+                    }
+                }
+            }
+
+            $errors = $this->get('entity_processor')->processEntity($companyAttribute, $requestData);
+
+            if (false === $errors) {
+                $this->getDoctrine()->getManager()->persist($companyAttribute);
+                $this->getDoctrine()->getManager()->flush();
+
+                $companyAttributeArray = $this->get('company_attribute_service')->getAttributeResponse($companyAttribute->getId());
+                $response = $response->setStatusCode($statusCode);
+                $response = $response->setContent(json_encode($companyAttributeArray));
+                return $response;
+            } else {
+                $data = [
+                    'errors' => $errors,
+                    'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+                ];
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode($data));
+            }
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }
-
-        $errors = $this->get('entity_processor')->processEntity($companyAttribute, $requestData);
-
-        if (false === $errors) {
-            $this->getDoctrine()->getManager()->persist($companyAttribute);
-            $this->getDoctrine()->getManager()->flush();
-
-            $companyAttributeArray = $this->get('company_attribute_service')->getAttributeResponse($companyAttribute->getId());
-            return $this->json($companyAttributeArray, $statusCode);
-        }
-
-        $data = [
-            'errors' => $errors,
-            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-        ];
-        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $response;
     }
 }

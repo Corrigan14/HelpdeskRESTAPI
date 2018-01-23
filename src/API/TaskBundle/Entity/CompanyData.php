@@ -66,13 +66,17 @@ class CompanyData
     /**
      * Set value
      *
-     * @param string $value
+     * @param string|array $value
      *
      * @return CompanyData
      */
-    public function setValue($value)
+    public function setValue($value): CompanyData
     {
-        $this->value = $value;
+        if (\is_array($value)) {
+            $this->value = json_encode($value);
+        } else {
+            $this->value = $value;
+        }
 
         return $this;
     }
@@ -84,7 +88,12 @@ class CompanyData
      */
     public function getValue()
     {
-        return $this->value;
+        $decodedTry = json_decode($this->value);
+        if (null === $decodedTry) {
+            return $this->value;
+        } else {
+            return $decodedTry;
+        }
     }
 
     /**

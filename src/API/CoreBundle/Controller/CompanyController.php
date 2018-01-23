@@ -981,6 +981,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
                  * Fill CompanyData Entity if some its parameters were sent
                  */
                 if (\is_array($requestDetailData)) {
+                    dump($requestDetailData);
                     foreach ($requestDetailData as $key => $value) {
                         $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($key);
 
@@ -996,19 +997,18 @@ class CompanyController extends ApiBaseController implements ControllerInterface
                                 $cd->setCompanyAttribute($companyAttribute);
                             }
 
-                            $cdErrors = $this->checkCompanyDataVaueFormat($companyAttribute, ['value' => $value]);
-                            if (false === $cdErrors) {
+                            $cdValueChecker = $this->get('entity_processor')->checkDataValueFormat($companyAttribute, $value);
+                            if (true === $cdValueChecker) {
+                                $cd->setValue($value);
                                 $company->addCompanyDatum($cd);
-                                $this->getDoctrine()->getManager()->persist($company);
+
                                 $this->getDoctrine()->getManager()->persist($cd);
+                                $this->getDoctrine()->getManager()->persist($company);
                                 $this->getDoctrine()->getManager()->flush();
                             } else {
-                                $dataCompanyData = [
-                                    'errors' => $cdErrors,
-                                    'message' => 'Problem with company_data with key:' . $key
-                                ];
                                 $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                                $response = $response->setContent(json_encode($dataCompanyData));
+                                $expectation = $this->get('entity_processor')->returnExpectedDataFormat($companyAttribute);
+                                $response = $response->setContent(json_encode(['message' => 'Problem with company additional data (companyData) value format! For Company Attribute with ID: ' . $companyAttribute->getId().', '.$expectation.' is/are expected.']));
                                 return $response;
                             }
                         } else {
@@ -1034,27 +1034,5 @@ class CompanyController extends ApiBaseController implements ControllerInterface
             $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }
         return $response;
-    }
-
-    /**
-     * @param CompanyAttribute $companyAttribute
-     * @param $value
-     * @return bool
-     */
-    private function checkCompanyDataVaueFormat(CompanyAttribute $companyAttribute, $value): bool
-    {
-        $expectedDataType = $companyAttribute->getType();
-
-        switch ($expectedDataType) {
-            case 'input':
-
-                break;
-            case 'text_area':
-                break;
-            case 'simple_select':
-                break;
-            default:
-                return false;
-        }
     }
 }

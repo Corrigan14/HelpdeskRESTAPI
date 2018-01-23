@@ -152,7 +152,7 @@ class CompanyAttribute
      */
     public function setOptions($options)
     {
-        $this->options = serialize($options);
+        $this->options = json_encode($options);
 
         return $this;
     }
@@ -164,7 +164,7 @@ class CompanyAttribute
      */
     public function getOptions()
     {
-        return unserialize($this->options);
+        return json_decode($this->options);
     }
 
     /**
@@ -176,7 +176,7 @@ class CompanyAttribute
      */
     public function setIsActive($isActive)
     {
-        if (is_string($isActive)) {
+        if (\is_string($isActive)) {
             $isActive = ($isActive === 'true' || $isActive == 1) ? true : false;
         }
 

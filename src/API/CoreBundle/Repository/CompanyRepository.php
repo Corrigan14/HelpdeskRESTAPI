@@ -90,6 +90,8 @@ class CompanyRepository extends EntityRepository
      *
      * @param int $id
      * @return mixed
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getEntity(int $id)
     {
@@ -251,7 +253,6 @@ class CompanyRepository extends EntityRepository
         $companyData = $data['companyData'];
         $companyDataArray = [];
         if ($companyData) {
-            /** @var CompanyData $item */
             foreach ($companyData as $item) {
                 $companyDataArray[] = [
                     'id' => $item['id'],

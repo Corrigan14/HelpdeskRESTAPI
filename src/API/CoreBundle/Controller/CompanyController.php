@@ -129,15 +129,11 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    public function listAction(Request $request):Response
+    public function listAction(Request $request): Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('company_list');
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
-//        $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:3000');
-//        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type,X-Requested-With,accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization');
-//        $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-//        $response->headers->set('Access-Control-Allow-Credentials', true);
 
         $aclOptions = [
             'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
@@ -162,8 +158,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
 
             $filtersForUrl = [
                 'isActive' => '&isActive=' . $isActive,
-                'order' => '&order=' . $order,
-                'limit' => '&limit=' . $order,
+                'order' => '&order=' . $order
             ];
 
             $options = [
@@ -258,27 +253,41 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      */
     public function getAction(int $id)
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('company', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
 
         if (!$company instanceof Company) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Company with requested Id does not exist!']));
+            return $response;
         }
 
         $companyArray = $this->get('api_company.service')->getCompanyResponse($id);
-        return $this->json($companyArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($companyArray));
+        return $response;
     }
 
     /**

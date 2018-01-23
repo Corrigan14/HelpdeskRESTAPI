@@ -207,7 +207,7 @@ class UserRole
      */
     public function setIsActive($isActive)
     {
-        if (is_string($isActive)) {
+        if (\is_string($isActive)) {
             $isActive = ($isActive === 'true' || $isActive == 1) ? true : false;
         }
 

@@ -47,9 +47,8 @@ class CompanyAttributeService
     {
         $responseData = $this->em->getRepository('APITaskBundle:CompanyAttribute')->getAllEntities($page, $options);
 
-        $response = [
-            'data' => $responseData['array'],
-        ];
+        $response ['data'] = $responseData['array'];
+
 
         $url = $this->router->generate('company_attribute_list');
         $filters = $options['filtersForUrl'];
@@ -69,6 +68,8 @@ class CompanyAttributeService
     /**
      * @param int $id
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getAttributeResponse(int $id): array
     {
@@ -85,11 +86,10 @@ class CompanyAttributeService
      *
      * @return array
      */
-    private function getEntityLinks(int $id)
+    private function getEntityLinks(int $id):array
     {
         return [
             'put' => $this->router->generate('company_attribute_update', ['id' => $id]),
-            'patch' => $this->router->generate('company_attribute_partial_update', ['id' => $id]),
             'delete' => $this->router->generate('company_attribute_delete', ['id' => $id]),
         ];
     }

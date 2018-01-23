@@ -69,6 +69,8 @@ class CompanyService
     /**
      * @param int $id
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getCompanyResponse(int $id): array
     {
@@ -76,7 +78,7 @@ class CompanyService
 
         return [
             'data' => $entity,
-            '_links' => $this->getEntityLinks($id),
+            '_links' => $this->getEntityLinks($id)
         ];
     }
 
@@ -89,7 +91,7 @@ class CompanyService
      * @param int $limit
      * @return array
      */
-    public function getCompaniesSearchResponse($term, int $page, $isActive, array $filtersForUrl, string $order, int $limit):array
+    public function getCompaniesSearchResponse($term, int $page, $isActive, array $filtersForUrl, string $order, int $limit): array
     {
         $responseData = $this->em->getRepository('APICoreBundle:Company')->getCompaniesSearch($term, $page, $isActive, $order, $limit);
 
@@ -101,7 +103,7 @@ class CompanyService
         if (999 !== $limit) {
             $count = $responseData['count'];
         } else {
-            $count = count($responseData['array']);
+            $count = \count($responseData['array']);
         }
 
         $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filtersForUrl);
@@ -112,7 +114,7 @@ class CompanyService
     /**
      * @return array
      */
-    public function getListOfAllCompanies():array
+    public function getListOfAllCompanies(): array
     {
         return $this->em->getRepository('APICoreBundle:Company')->getAllCompanyEntitiesWithIdAndTitle();
     }
@@ -122,11 +124,10 @@ class CompanyService
      *
      * @return array
      */
-    private function getEntityLinks(int $id)
+    private function getEntityLinks(int $id): array
     {
         return [
             'put' => $this->router->generate('company_update', ['id' => $id]),
-            'patch' => $this->router->generate('company_partial_update', ['id' => $id]),
             'delete' => $this->router->generate('company_delete', ['id' => $id]),
         ];
     }

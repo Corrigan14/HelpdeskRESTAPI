@@ -83,6 +83,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
@@ -90,46 +91,54 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      */
     public function listAction(Request $request)
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('company_attribute_list');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        $pageNum = $request->get('page');
-        $pageNum = (int)$pageNum;
-        $page = ($pageNum === 0) ? 1 : $pageNum;
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ?: 10;
+        if (false !== $requestBody) {
+            $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody);
 
-        if(999 === $limit){
-            $page = 1;
+            $page = $processedFilterParams['page'];
+            $limit = $processedFilterParams['limit'];
+            $order = $processedFilterParams['order'];
+            $isActive = $processedFilterParams['isActive'];
+
+            $filtersForUrl = [
+                'isActive' => '&isActive=' . $isActive,
+                'order' => '&order=' . $order
+            ];
+
+            $options = [
+                'loggedUserId' => $this->getUser()->getId(),
+                'isActive' => $isActive,
+                'filtersForUrl' => $filtersForUrl,
+                'order' => $order,
+                'limit' => $limit
+            ];
+            $companyAttributesArray = $this->get('company_attribute_service')->getAttributesResponse($page, $options);
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+            $response = $response->setContent(json_encode($companyAttributesArray));
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         }
 
-        $orderString = $request->get('order');
-        $orderString = strtolower($orderString);
-        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
+        return $response;
 
-        $isActive = $request->get('isActive');
 
-        $filtersForUrl = [];
-        if (null !== $isActive) {
-            $filtersForUrl['isActive'] = '&isActive=' . $isActive;
-        }
-
-        $options = [
-            'loggedUserId' => $this->getUser()->getId(),
-            'isActive' => strtolower($isActive),
-            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order]),
-            'order' => $order,
-            'limit' => $limit
-        ];
-
-        return $this->json($this->get('company_attribute_service')->getAttributesResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**
@@ -179,27 +188,41 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *
      * @param int $id
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      */
     public function getAction(int $id)
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('company_attributes', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($id);
 
         if (!$companyAttribute instanceof CompanyAttribute) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Company Attribute with requested Id does not exist!']));
+            return $response;
         }
 
         $companyAttributeArray = $this->get('company_attribute_service')->getAttributeResponse($id);
-        return $this->json($companyAttributeArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($companyAttributeArray));
+        return $response;
     }
 
     /**

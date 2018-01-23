@@ -76,6 +76,8 @@ class CompanyAttributeRepository extends EntityRepository
     /**
      * @param int $id
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getEntity(int $id)
     {
@@ -134,7 +136,7 @@ class CompanyAttributeRepository extends EntityRepository
             'id' => $data['id'],
             'title' => $data['title'],
             'type' => $data['type'],
-            'options' => $data['options'],
+            'options' => json_decode($data['options']),
             'is_active' => $data['is_active']
         ];
 

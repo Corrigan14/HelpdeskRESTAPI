@@ -151,12 +151,12 @@ class CompanyRepository extends EntityRepository
         if (999 !== $limit) {
             // Pagination
             if (1 < $page) {
-                $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
+                $query->setFirstResult($limit * $page - $limit);
             } else {
                 $query->setFirstResult(0);
             }
 
-            $query->setMaxResults(self::LIMIT);
+            $query->setMaxResults($limit);
 
             $paginator = new Paginator($query, $fetchJoinCollection = true);
             $count = $paginator->count();

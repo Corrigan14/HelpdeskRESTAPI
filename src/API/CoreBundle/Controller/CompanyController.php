@@ -181,6 +181,160 @@ class CompanyController extends ApiBaseController implements ControllerInterface
     }
 
     /**
+     * ### Response ###
+     *     {
+     *       "data":
+     *       [
+     *          {
+     *            "id": "1",
+     *            "title": "Web-Solutions",
+     *            "ico": "1102587",
+     *            "dic": "12587459644",
+     *            "ic_dph": "12587459644",
+     *            "street": "Cesta 125",
+     *            "city": "Bratislava",
+     *            "zip": "02587",
+     *            "country": "SR",
+     *            "is_active": true,
+     *           "companyData":
+     *            [
+     *               {
+     *                  "id": 140,
+     *                  "value": "10",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 177,
+     *                     "title": "integer number company additional attribute"
+     *                  }
+     *               },
+     *               {
+     *                  "id": 141,
+     *                  "value": "String DATA",
+     *                  "taskAttribute":
+     *                  {
+     *                     "id": 175,
+     *                     "title": "input company additional attribute"
+     *                   }
+     *                }
+     *            ]
+     *          },
+     *          {
+     *             "id": 42,
+     *             "title": "LanSystems",
+     *             "ico": "110258782",
+     *             "dic": "12587458996244",
+     *             "ic_dph": null,
+     *             "street": "Ina cesta 125",
+     *             "city": "Bratislava",
+     *             "zip": "021478",
+     *             "country": "Slovenska Republika",
+     *             "is_active": true,
+     *             "companyData": []
+     *           }
+     *       ],
+     *       "_links":
+     *       {
+     *           "self": "api/v1/core-bundle/companies?page=1",
+     *           "first": "api/v1/core-bundle/companies?page=1",
+     *           "prev": false,
+     *           "next": "api/v1/core-bundle/companies?page=2",
+     *           "last": "api/v1/core-bundle/companies?page=3"
+     *       },
+     *       "total": 22,
+     *       "page": 1,
+     *       "numberOfPages": 3
+     *     }
+     *
+     *
+     * @ApiDoc(
+     *  description="Search in Company Entities",
+     *  filters={
+     *     {
+     *       "name"="term",
+     *       "description"="Search term"
+     *     },
+     *     {
+     *       "name"="isActive",
+     *       "description"="Return's only ACTIVE users if this param is TRUE, only INACTIVE users if param is FALSE"
+     *     },
+     *     {
+     *       "name"="page",
+     *       "description"="Pagination, limit is set to 10 records"
+     *     },
+     *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by title"
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="Entity was successfully found",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied"
+     *  })
+     *
+     * @param Request $request
+     * @return JsonResponse|Response
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     */
+    public function searchAction(Request $request)
+    {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('company_search');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
+        }
+
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+
+        if (false !== $requestBody) {
+            $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody);
+
+            $page = $processedFilterParams['page'];
+            $limit = $processedFilterParams['limit'];
+            $order = $processedFilterParams['order'];
+            $isActive = $processedFilterParams['isActive'];
+            $term = $processedFilterParams['term'];
+
+            $filtersForUrl = [
+                'isActive' => '&isActive=' . $isActive,
+                'order' => '&order=' . $order,
+                'term' => '&term=' . $term
+            ];
+
+            $companiesArray = $this->get('api_company.service')->getCompaniesSearchResponse($term, $page, $isActive, $filtersForUrl, $order, $limit);
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+            $response = $response->setContent(json_encode($companiesArray));
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
+        }
+
+        return $response;
+    }
+
+    /**
      *  ### Response ###
      *      {
      *        "data":
@@ -746,158 +900,6 @@ class CompanyController extends ApiBaseController implements ControllerInterface
 
         $companyArray = $this->get('api_company.service')->getCompanyResponse($company->getId());
         return $this->json($companyArray, StatusCodesHelper::SUCCESSFUL_CODE);
-    }
-
-    /**
-     * ### Response ###
-     *     {
-     *       "data":
-     *       [
-     *          {
-     *            "id": "1",
-     *            "title": "Web-Solutions",
-     *            "ico": "1102587",
-     *            "dic": "12587459644",
-     *            "ic_dph": "12587459644",
-     *            "street": "Cesta 125",
-     *            "city": "Bratislava",
-     *            "zip": "02587",
-     *            "country": "SR",
-     *            "is_active": true,
-     *           "companyData":
-     *            [
-     *               {
-     *                  "id": 140,
-     *                  "value": "10",
-     *                  "taskAttribute":
-     *                  {
-     *                     "id": 177,
-     *                     "title": "integer number company additional attribute"
-     *                  }
-     *               },
-     *               {
-     *                  "id": 141,
-     *                  "value": "String DATA",
-     *                  "taskAttribute":
-     *                  {
-     *                     "id": 175,
-     *                     "title": "input company additional attribute"
-     *                   }
-     *                }
-     *            ]
-     *          },
-     *          {
-     *             "id": 42,
-     *             "title": "LanSystems",
-     *             "ico": "110258782",
-     *             "dic": "12587458996244",
-     *             "ic_dph": null,
-     *             "street": "Ina cesta 125",
-     *             "city": "Bratislava",
-     *             "zip": "021478",
-     *             "country": "Slovenska Republika",
-     *             "is_active": true,
-     *             "companyData": []
-     *           }
-     *       ],
-     *       "_links":
-     *       {
-     *           "self": "api/v1/core-bundle/companies?page=1",
-     *           "first": "api/v1/core-bundle/companies?page=1",
-     *           "prev": false,
-     *           "next": "api/v1/core-bundle/companies?page=2",
-     *           "last": "api/v1/core-bundle/companies?page=3"
-     *       },
-     *       "total": 22,
-     *       "page": 1,
-     *       "numberOfPages": 3
-     *     }
-     *
-     *
-     * @ApiDoc(
-     *  description="Search in Company Entities",
-     *  filters={
-     *     {
-     *       "name"="term",
-     *       "description"="Search term"
-     *     },
-     *     {
-     *       "name"="isActive",
-     *       "description"="Return's only ACTIVE users if this param is TRUE, only INACTIVE users if param is FALSE"
-     *     },
-     *     {
-     *       "name"="page",
-     *       "description"="Pagination, limit is set to 10 records"
-     *     },
-     *     {
-     *       "name"="order",
-     *       "description"="ASC or DESC order by title"
-     *     },
-     *     {
-     *       "name"="limit",
-     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
-     *     }
-     *  },
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  statusCodes={
-     *      200 ="Entity was successfully found",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied"
-     *  })
-     *
-     * @param Request $request
-     * @return JsonResponse|Response
-     * @throws \LogicException
-     * @throws \InvalidArgumentException
-     */
-    public function searchAction(Request $request)
-    {
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
-            'user' => $this->getUser()
-        ];
-
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
-        }
-
-        $filtersForUrl = [];
-
-        $term = $request->get('term');
-        if (null !== $term) {
-            $term = strtolower($term);
-            $filtersForUrl['term'] = '&term=' . $term;
-        } else {
-            $term = false;
-        }
-
-        $pageNum = $request->get('page');
-        $page = (int)$pageNum ? (int)$pageNum : 1;
-
-        $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ? (int)$limitNum : 10;
-
-        $orderString = $request->get('order');
-        $orderString = strtolower($orderString);
-        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
-
-        $isActive = $request->get('isActive');
-        if (null !== $isActive) {
-            $isActive = strtolower($isActive);
-            $filtersForUrl['isActive'] = '&isActive=' . $isActive;
-        } else {
-            $isActive = false;
-        }
-        $filtersForUrl = array_merge($filtersForUrl, ['order' => '&order=' . $order]);
-
-        $companiesArray = $this->get('api_company.service')->getCompaniesSearchResponse($term, $page, $isActive, $filtersForUrl, $order, $limit);
-        return $this->json($companiesArray, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

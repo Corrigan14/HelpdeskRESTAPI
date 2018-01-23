@@ -103,7 +103,7 @@ class ApiBaseService
      * @param array $requestBody
      * @return array
      */
-    public function processFilterParams(array $requestBody):array
+    public function processFilterParams(array $requestBody): array
     {
         // Filter params processing
         if (isset($requestBody['page'])) {
@@ -142,11 +142,18 @@ class ApiBaseService
             $isActive = 'all';
         }
 
+        if (isset($requestBody['term'])) {
+            $term = strtolower($requestBody['term']);
+        } else {
+            $term = false;
+        }
+
         return [
             'page' => $page,
             'limit' => $limit,
             'order' => $order,
-            'isActive' => $isActive
+            'isActive' => $isActive,
+            'term' => $term
         ];
     }
 

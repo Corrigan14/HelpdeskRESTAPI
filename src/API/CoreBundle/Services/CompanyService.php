@@ -47,9 +47,7 @@ class CompanyService
     {
         $responseData = $this->em->getRepository('APICoreBundle:Company')->getAllEntities($page, $options);
 
-        $response = [
-            'data' => $responseData['array'],
-        ];
+        $response ['data'] = $responseData['array'];
 
         $url = $this->router->generate('company_list');
         $limit = $options['limit'];
@@ -95,11 +93,10 @@ class CompanyService
     {
         $responseData = $this->em->getRepository('APICoreBundle:Company')->getCompaniesSearch($term, $page, $isActive, $order, $limit);
 
-        $response = [
-            'data' => $responseData['array'],
-        ];
+        $response ['data'] = $responseData['array'];
 
         $url = $this->router->generate('company_search');
+
         if (999 !== $limit) {
             $count = $responseData['count'];
         } else {
@@ -107,7 +104,6 @@ class CompanyService
         }
 
         $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filtersForUrl);
-
         return array_merge($response, $pagination);
     }
 

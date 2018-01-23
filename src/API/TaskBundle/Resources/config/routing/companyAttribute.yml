@@ -22,23 +22,16 @@ company_attribute_update:
     requirements:
             id: '\d+'
 
-company_attribute_partial_update:
-    path:     /company-attributes/{id}
-    defaults: { _controller: APITaskBundle:CompanyAttribute:updatePartial }
-    methods: [PATCH]
-    requirements:
-            id: '\d+'
-
-company_attribute_delete:
-    path:     /company-attributes/{id}
+company_attribute_inactivate:
+    path:     /company-attributes/{id}/inactivate
     defaults: { _controller: APITaskBundle:CompanyAttribute:delete }
-    methods: [DELETE]
+    methods: [PUT]
     requirements:
             id: '\d+'
 
 company_attribute_restore:
-    path:     /company-attributes/restore/{id}
+    path:     /company-attributes/{id}/restore
     defaults: { _controller: APITaskBundle:CompanyAttribute:restore }
-    methods: [PATCH]
+    methods: [PUT]
     requirements:
             id: '\d+'

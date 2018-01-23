@@ -28,8 +28,23 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *          {
      *            "id": "1",
      *            "title": "Input company additional attribute",
-     *            "type": "input",
-     *            "options": null,
+     *            "type": "simple_select",
+     *            "options":
+     *            [
+     *               "option1",
+     *               "option2",
+     *               "option3"
+     *            ],
+     *            "is_active": true
+     *          },
+     *          {
+     *            "id": 23,
+     *            "title": "select 11",
+     *            "type": "simple_select",
+     *            "options":
+     *            {
+     *               "possition 1": "vaue 1"
+     *            },
      *            "is_active": true
      *          }
      *       ],
@@ -146,17 +161,20 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *      {
      *        "data":
      *        {
-     *           "id": "2",
-     *           "title": "Input company additional attribute",
-     *           "type": "input"
-     *           "options": null
+     *           "id": 23,
+     *           "title": "select 11",
+     *           "type": "simple_select",
+     *           "options":
+     *           {
+     *               "possition 1": "vaue 1"
+     *           },
      *           "is_active": true
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/company-attributes/id",
-     *           "patch": "/api/v1/task-bundle/company-attributes/id",
-     *           "delete": "/api/v1/task-bundle/company-attributes/id"
+     *           "put": "/api/v1/task-bundle/company-attributes/12",
+     *           "inactivate": "/api/v1/task-bundle/company-attributes/19/inactivate"
+     *           "restore": "/api/v1/task-bundle/company-attributes/19/restore"
      *         }
      *      }
      *
@@ -230,17 +248,20 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *      {
      *        "data":
      *        {
-     *           "id": "2",
-     *           "title": "Input company additional attribute",
-     *           "type": "input"
-     *           "options": null
+     *           "id": 23,
+     *           "title": "select 11",
+     *           "type": "simple_select",
+     *           "options":
+     *           {
+     *               "possition 1": "vaue 1"
+     *           },
      *           "is_active": true
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/company-attributes/id",
-     *           "patch": "/api/v1/task-bundle/company-attributes/id",
-     *           "delete": "/api/v1/task-bundle/company-attributes/id"
+     *           "put": "/api/v1/task-bundle/company-attributes/12",
+     *           "inactivate": "/api/v1/task-bundle/company-attributes/19/inactivate"
+     *           "restore": "/api/v1/task-bundle/company-attributes/19/restore"
      *         }
      *      }
      *
@@ -266,6 +287,8 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *
      * @param Request $request
      * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -301,17 +324,20 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *      {
      *        "data":
      *        {
-     *           "id": "2",
-     *           "title": "Input company additional attribute",
-     *           "type": "input"
-     *           "options": null
+     *           "id": 23,
+     *           "title": "select 11",
+     *           "type": "simple_select",
+     *           "options":
+     *           {
+     *               "possition 1": "vaue 1"
+     *           },
      *           "is_active": true
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/company-attributes/id",
-     *           "patch": "/api/v1/task-bundle/company-attributes/id",
-     *           "delete": "/api/v1/task-bundle/company-attributes/id"
+     *           "put": "/api/v1/task-bundle/company-attributes/12",
+     *           "inactivate": "/api/v1/task-bundle/company-attributes/19/inactivate"
+     *           "restore": "/api/v1/task-bundle/company-attributes/19/restore"
      *         }
      *      }
      *
@@ -345,109 +371,43 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *
      * @param int $id
      * @param Request $request
-     * @return Response|JsonResponse
+     * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function updateAction(int $id, Request $request)
+    public function updateAction(int $id, Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('company_attribute_update', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($id);
 
         if (!$companyAttribute instanceof CompanyAttribute) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Company Attribute with requested Id does not exist!']));
+            return $response;
         }
 
-        $requestData = $request->request->all();
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        return $this->updateCompanyAttribute($companyAttribute, $requestData);
-    }
-
-    /**
-     * ### Response ###
-     *      {
-     *        "data":
-     *        {
-     *           "id": "2",
-     *           "title": "Input company additional attribute",
-     *           "type": "input"
-     *           "options": null
-     *           "is_active": true
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/company-attributes/id",
-     *           "patch": "/api/v1/task-bundle/company-attributes/id",
-     *           "delete": "/api/v1/task-bundle/company-attributes/id"
-     *         }
-     *      }
-     *
-     * @ApiDoc(
-     *  description="Partially update the Entity (PATCH)",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  input={"class"="API\TaskBundle\Entity\CompanyAttribute"},
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\TaskBundle\Entity\CompanyAttribute"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     *
-     * @param int $id
-     * @param Request $request
-     * @return Response|JsonResponse
-     * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \LogicException
-     */
-    public function updatePartialAction(int $id, Request $request)
-    {
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
-            'user' => $this->getUser()
-        ];
-
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
-        }
-
-        $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($id);
-
-        if (!$companyAttribute instanceof CompanyAttribute) {
-            return $this->notFoundResponse();
-        }
-
-        $requestData = $request->request->all();
-
-        return $this->updateCompanyAttribute($companyAttribute, $requestData);
+        return $this->updateCompanyAttribute($companyAttribute, $requestBody, false, $locationURL);
     }
 
     /**
@@ -477,51 +437,64 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *
      * @param int $id
      *
-     * @return Response|JsonResponse
+     * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      */
-    public function deleteAction(int $id)
+    public function deleteAction(int $id): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('company_attribute_inactivate', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($id);
 
         if (!$companyAttribute instanceof CompanyAttribute) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Company Attribute with requested Id does not exist!']));
+            return $response;
         }
 
         $companyAttribute->setIsActive(false);
         $this->getDoctrine()->getManager()->persist($companyAttribute);
         $this->getDoctrine()->getManager()->flush();
 
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::UNACITVATE_MESSAGE,
-        ], StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode(['message' => StatusCodesHelper::UNACITVATE_MESSAGE]));
+        return $response;
     }
 
     /**
      * ### Response ###
-     *      {
+     *     {
      *        "data":
      *        {
-     *           "id": "2",
-     *           "title": "Input company additional attribute",
-     *           "type": "input"
-     *           "options": null
+     *           "id": 23,
+     *           "title": "select 11",
+     *           "type": "simple_select",
+     *           "options":
+     *           {
+     *               "possition 1": "vaue 1"
+     *           },
      *           "is_active": true
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/company-attributes/id",
-     *           "patch": "/api/v1/task-bundle/company-attributes/id",
-     *           "delete": "/api/v1/task-bundle/company-attributes/id"
+     *           "put": "/api/v1/task-bundle/company-attributes/12",
+     *           "inactivate": "/api/v1/task-bundle/company-attributes/19/inactivate"
+     *           "restore": "/api/v1/task-bundle/company-attributes/19/restore"
      *         }
      *      }
      *
@@ -552,25 +525,36 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *
      * @param int $id
      *
-     * @return Response|JsonResponse
+     * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function restoreAction(int $id)
+    public function restoreAction(int $id): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('company_attribute_restore', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::COMPANY_ATTRIBUTE_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($id);
 
         if (!$companyAttribute instanceof CompanyAttribute) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Company Attribute with requested Id does not exist!']));
+            return $response;
         }
 
         $companyAttribute->setIsActive(true);
@@ -578,7 +562,9 @@ class CompanyAttributeController extends ApiBaseController implements Controller
         $this->getDoctrine()->getManager()->flush();
 
         $companyAttributeArray = $this->get('company_attribute_service')->getAttributeResponse($id);
-        return $this->json($companyAttributeArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($companyAttributeArray));
+        return $response;
     }
 
     /**
@@ -636,16 +622,18 @@ class CompanyAttributeController extends ApiBaseController implements Controller
                 // Check and uncode the OPTIONS if the SELECT or MULTI-SELECT Company Attribute Type was chosen
                 // JSON or ARRAY is expected
                 if (VariableHelper::SIMPLE_SELECT === $type || VariableHelper::MULTI_SELECT === $type) {
-                    if (isset($requestData['options'])) {
-                        $optionsData = json_decode($requestData['options'],true);
-                        if (!\is_array($optionsData)) {
-                            $optionsData = explode(',', $requestData['options']);
+                    if (true === $create || (false === $create && isset($requestData['options']))) {
+                        if (isset($requestData['options'])) {
+                            $optionsData = json_decode($requestData['options'], true);
+                            if (!\is_array($optionsData)) {
+                                $optionsData = explode(',', $requestData['options']);
+                            }
+                            $requestData['options'] = $optionsData;
+                        } else {
+                            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                            $response = $response->setContent(json_encode(['message' => 'For SIMPLE SELECT and MULTI SELECT company attribute type possible OPTIONS have to be defined!']));
+                            return $response;
                         }
-                        $requestData['options'] = $optionsData;
-                    } else {
-                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                        $response = $response->setContent(json_encode(['message' => 'For SIMPLE SELECT and MULTI SELECT company attribute type possible OPTIONS have to be defined!']));
-                        return $response;
                     }
                 }
             }

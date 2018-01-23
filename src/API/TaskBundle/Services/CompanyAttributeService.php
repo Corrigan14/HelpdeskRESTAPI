@@ -90,7 +90,8 @@ class CompanyAttributeService
     {
         return [
             'put' => $this->router->generate('company_attribute_update', ['id' => $id]),
-            'delete' => $this->router->generate('company_attribute_delete', ['id' => $id]),
+            'inactivate' => $this->router->generate('company_attribute_inactivate', ['id' => $id]),
+            'restore' => $this->router->generate('company_attribute_restore', ['id' => $id]),
         ];
     }
 }

@@ -201,7 +201,7 @@ class UserRole
     /**
      * Set isActive
      *
-     * @param boolean $isActive
+     * @param boolean|string $isActive
      *
      * @return UserRole
      */

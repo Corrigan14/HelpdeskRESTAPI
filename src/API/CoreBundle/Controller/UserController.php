@@ -1400,10 +1400,10 @@ class UserController extends ApiBaseController
         if (false !== $requestData) {
             $requestDetailData = [];
             if (isset($requestData['detail_data']) && \count($requestData['detail_data']) > 0) {
-                $requestDetailData = $requestData['detail_data'];
+                $requestDetailData = json_decode($requestData['detail_data'], true);
                 unset($requestData['detail_data']);
             } elseif (isset($requestData['detailData']) && \count($requestData['detailData']) > 0) {
-                $requestDetailData = $requestData['detailData'];
+                $requestDetailData = json_decode($requestData['detailData'], true);
                 unset($requestData['detailData']);
             }
 

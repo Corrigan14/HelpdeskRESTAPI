@@ -602,7 +602,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             foreach ($requestData as $key => $value) {
                 if (!\in_array($key, $allowedUnitEntityParams, true)) {
                     $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                    $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for User Entity!']));
+                    $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for Company Attribute Entity!']));
                     return $response;
                 }
             }

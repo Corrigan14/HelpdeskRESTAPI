@@ -344,12 +344,16 @@ class Company implements \Serializable
     /**
      * Set isActive
      *
-     * @param boolean $isActive
+     * @param boolean|string $isActive
      *
      * @return Company
      */
-    public function setIsActive($isActive)
+    public function setIsActive($isActive): Company
     {
+        if (\is_string($isActive)) {
+            $isActive = ($isActive === 'true' || $isActive == 1);
+        }
+
         $this->is_active = $isActive;
 
         return $this;
@@ -360,7 +364,7 @@ class Company implements \Serializable
      *
      * @return boolean
      */
-    public function getIsActive()
+    public function getIsActive(): bool
     {
         return $this->is_active;
     }

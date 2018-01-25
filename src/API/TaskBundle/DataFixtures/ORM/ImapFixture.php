@@ -47,6 +47,8 @@ class ImapFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
         $imap->setInboxEmail('symfony@lanhelpdesk.com');
         $imap->setMoveEmail('done@done.sk');
         $imap->setIgnoreCertificate(true);
+        $imap->setIsActive(true);
+        $imap->setDescription('Lanhelpdesk IMAP');
         $imap->setProject($userProject);
 
         $manager->persist($imap);

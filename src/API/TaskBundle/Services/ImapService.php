@@ -36,19 +36,17 @@ class ImapService
     /**
      * Return SMTP Response
      *
-     * @param string $order
+     * @param array $options
      * @return array
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function getAttributesResponse(string $order): array
+    public function getAttributesResponse(array $options): array
     {
-        $attributes = $this->em->getRepository('APITaskBundle:Imap')->getAllEntities($order);
+        $attributes = $this->em->getRepository('APITaskBundle:Imap')->getAllEntities($options);
         $count = $this->em->getRepository('APITaskBundle:Imap')->countEntities();
 
-        $response = [
-            'data' => $attributes,
-        ];
+        $response ['data'] = $attributes;
 
         $pagination = [
             '_links' => [],
@@ -78,11 +76,13 @@ class ImapService
      * @param int $projectId
      * @return array
      */
-    private function getEntityLinks(int $id, int $projectId):array
+    private function getEntityLinks(int $id, int $projectId): array
     {
         return [
             'put' => $this->router->generate('imap_update', ['id' => $id]),
             'put: project' => $this->router->generate('imap_update_with_project', ['id' => $id, 'projectId' => $projectId]),
+            'inactivate' => $this->router->generate('imap_inactivate', ['id' => $id]),
+            'restore' => $this->router->generate('imap_restore', ['id' => $id]),
             'delete' => $this->router->generate('imap_delete', ['id' => $id])
         ];
     }

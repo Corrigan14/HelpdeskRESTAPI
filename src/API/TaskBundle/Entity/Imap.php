@@ -101,6 +101,22 @@ class Imap
     private $ignore_certificate;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="description", type="text", nullable=true)
+     * @Assert\Type("string")
+     */
+    private $description;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="is_active", type="boolean", options={"default: 1"})
+     * @Serializer\ReadOnly()
+     */
+    private $is_active;
+
+    /**
      * @var Project
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Project", inversedBy="imaps")
@@ -316,6 +332,58 @@ class Imap
     public function getSsl()
     {
         return $this->ssl;
+    }
+
+    /**
+     * Set description
+     *
+     * @param string $description
+     *
+     * @return Imap
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Set isActive
+     *
+     * @param boolean|string $isActive
+     *
+     * @return Imap
+     */
+    public function setIsActive($isActive)
+    {
+        if (\is_string($isActive)) {
+            $isActive = ($isActive === 'true' || $isActive == 1) ? true : false;
+        }
+
+        $this->is_active = $isActive;
+
+        return $this;
+    }
+
+    /**
+     * Get isActive
+     *
+     * @return bool
+     */
+    public function getIsActive()
+    {
+        return $this->is_active;
     }
 
     /**

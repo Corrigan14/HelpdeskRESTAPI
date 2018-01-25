@@ -510,7 +510,7 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
 
     /**
      * @ApiDoc(
-     *  description="Delete User role Entity",
+     *  description="Inactivate User role Entity",
      *  requirements={
      *     {
      *       "name"="id",

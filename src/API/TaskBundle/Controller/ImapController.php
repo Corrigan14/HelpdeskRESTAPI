@@ -34,6 +34,8 @@ class ImapController extends ApiBaseController
      *             "inbox_email": "test@test.sk",
      *             "move_email": "test@test.sk",
      *             "ignore_certificate": false,
+     *             "description": null,
+     *             "is_active": false,
      *             "project":
      *             {
      *                "id": 258,
@@ -64,7 +66,11 @@ class ImapController extends ApiBaseController
      *  filters={
      *     {
      *       "name"="order",
-     *       "description"="ASC or DESC order by Inbox email titile"
+     *       "description"="ASC or DESC order by Inbox email title"
+     *     },
+     *     {
+     *       "name"="isActive",
+     *       "description"="Return's only ACTIVE IMAP Entities if this param is TRUE, only INACTIVE user roles if param is FALSE"
      *     }
      *  },
      *  headers={
@@ -83,6 +89,7 @@ class ImapController extends ApiBaseController
      *
      * @param Request $request
      * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \UnexpectedValueException
      * @throws \LogicException
@@ -110,8 +117,14 @@ class ImapController extends ApiBaseController
         if (false !== $requestBody) {
             $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody);
             $order = $processedFilterParams['order'];
+            $isActive = $processedFilterParams['isActive'];
 
-            $imapArray = $this->get('imap_service')->getAttributesResponse($order);
+            $options = [
+                'isActive' => $isActive,
+                'order' => $order
+            ];
+
+            $imapArray = $this->get('imap_service')->getAttributesResponse($options);
             $response = $response->setContent(json_encode($imapArray));
             $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
         } else {
@@ -136,6 +149,8 @@ class ImapController extends ApiBaseController
      *           "inbox_email": "test@test.sk",
      *           "move_email": "test@test.sk",
      *           "ignore_certificate": false,
+     *           "description": null,
+     *           "is_active": false,
      *           "project":
      *           {
      *              "id": 258,
@@ -159,7 +174,8 @@ class ImapController extends ApiBaseController
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/imap/1",
-     *           "patch": "/api/v1/task-bundle/imap/1",
+     *           "inactivate": "/api/v1/task-bundle/imap/6/inactivate",
+     *           "restore": "/api/v1/task-bundle/imap/6/restore",
      *           "delete": "/api/v1/task-bundle/imap/1"
      *         }
      *      }
@@ -242,6 +258,8 @@ class ImapController extends ApiBaseController
      *           "inbox_email": "test@test.sk",
      *           "move_email": "test@test.sk",
      *           "ignore_certificate": false,
+     *           "description": null,
+     *           "is_active": false,
      *           "project":
      *           {
      *              "id": 258,
@@ -265,7 +283,8 @@ class ImapController extends ApiBaseController
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/imap/1",
-     *           "patch": "/api/v1/task-bundle/imap/1",
+     *           "inactivate": "/api/v1/task-bundle/imap/6/inactivate",
+     *           "restore": "/api/v1/task-bundle/imap/6/restore",
      *           "delete": "/api/v1/task-bundle/imap/1"
      *         }
      *      }
@@ -334,6 +353,7 @@ class ImapController extends ApiBaseController
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
         $imap = new Imap();
+        $imap->setIsActive(true);
         $imap->setProject($project);
 
         return $this->updateImapEntity($imap, $requestBody, true, $locationURL);
@@ -353,6 +373,8 @@ class ImapController extends ApiBaseController
      *           "inbox_email": "test@test.sk",
      *           "move_email": "test@test.sk",
      *           "ignore_certificate": false,
+     *           "description": null,
+     *           "is_active": false,
      *           "project":
      *           {
      *              "id": 258,
@@ -376,7 +398,8 @@ class ImapController extends ApiBaseController
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/imap/1",
-     *           "patch": "/api/v1/task-bundle/imap/1",
+     *           "inactivate": "/api/v1/task-bundle/imap/6/inactivate",
+     *           "restore": "/api/v1/task-bundle/imap/6/restore",
      *           "delete": "/api/v1/task-bundle/imap/1"
      *         }
      *      }
@@ -459,6 +482,182 @@ class ImapController extends ApiBaseController
 
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
         return $this->updateImapEntity($imap, $requestBody, false, $locationURL);
+    }
+
+    /**
+     * @ApiDoc(
+     *  description="Inactivate IMAP Entity",
+     *  requirements={
+     *     {
+     *       "name"="id",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of processed object"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="is_active param of Entity was successfully changed to inactive: 0",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity",
+     *  })
+     *
+     * @param int $id
+     *
+     * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     */
+    public function inactivateAction(int $id): Response
+    {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('imap_inactivate', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::IMAP_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
+        }
+
+        $imap = $this->getDoctrine()->getRepository('APITaskBundle:Imap')->find($id);
+        if (!$imap instanceof Imap) {
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Imap with requested Id does not exist!']));
+            return $response;
+        }
+
+        $imap->setIsActive(false);
+        $this->getDoctrine()->getManager()->persist($imap);
+        $this->getDoctrine()->getManager()->flush();
+
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode(['message' => 'is_active param of Entity was successfully changed to inactive: 0']));
+        return $response;
+    }
+
+    /**
+     * ### Response ###
+     *      {
+     *        "data":
+     *        {
+     *           "id": 1,
+     *           "host": "test",
+     *           "port": 3306,
+     *           "name": "test",
+     *           "password": "test",
+     *           "ssl": true,
+     *           "inbox_email": "test@test.sk",
+     *           "move_email": "test@test.sk",
+     *           "ignore_certificate": false,
+     *           "description": null,
+     *           "is_active": false,
+     *           "project":
+     *           {
+     *              "id": 258,
+     *              "title": "Project of user 1",
+     *              "description": "Description of project 1.",
+     *              "is_active": false,
+     *              "createdAt":
+     *              {
+     *                 "date": "2017-02-20 09:18:42.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *              },
+     *              "updatedAt":
+     *              {
+     *                 "date": "2017-02-20 09:18:42.000000",
+     *                 "timezone_type": 3,
+     *                 "timezone": "Europe/Berlin"
+     *               }
+     *            }
+     *        },
+     *        "_links":
+     *        {
+     *           "put": "/api/v1/task-bundle/imap/1",
+     *           "inactivate": "/api/v1/task-bundle/imap/6/inactivate",
+     *           "restore": "/api/v1/task-bundle/imap/6/restore",
+     *           "delete": "/api/v1/task-bundle/imap/1"
+     *         }
+     *      }
+     *
+     * @ApiDoc(
+     *  description="Restore IMAP Entity",
+     *  requirements={
+     *     {
+     *       "name"="id",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of processed object"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="is_active param of Entity was successfully changed to active: 1",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity",
+     *  })
+     *
+     * @param int $id
+     *
+     * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     */
+    public function restoreAction(int $id): Response
+    {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('imap_restore', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::IMAP_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
+        }
+
+        $imap = $this->getDoctrine()->getRepository('APITaskBundle:Imap')->find($id);
+        if (!$imap instanceof Imap) {
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Imap with requested Id does not exist!']));
+            return $response;
+        }
+
+        $imap->setIsActive(true);
+        $this->getDoctrine()->getManager()->persist($imap);
+        $this->getDoctrine()->getManager()->flush();
+
+        $imapArray = $this->get('imap_service')->getAttributeResponse($id);
+
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($imapArray));
+        return $response;
     }
 
     /**
@@ -548,6 +747,7 @@ class ImapController extends ApiBaseController
             'move_email',
             'ignore_certificate',
             'ssl',
+            'description'
         ];
 
         // JSON API Response - Content type and Location settings

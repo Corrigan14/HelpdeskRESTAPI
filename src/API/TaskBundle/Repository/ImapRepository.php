@@ -10,19 +10,33 @@ use Doctrine\ORM\EntityRepository;
 class ImapRepository extends EntityRepository
 {
     /**
-     * @param string $order
+     * @param array $options
      * @return array
      */
-    public function getAllEntities(string $order):array
+    public function getAllEntities(array $options): array
     {
-        $query = $this->createQueryBuilder('imap')
-            ->select('imap, project')
-            ->leftJoin('imap.project', 'project')
-            ->orderBy('imap.inbox_email', $order)
-            ->distinct()
-            ->getQuery();
+        $order = $options['order'];
+        $isActive = $options['isActive'];
 
-        return $query->getArrayResult();
+        $isActiveParam = ('true' === $isActive) ? 1 : 0;
+
+        if ('true' === $isActive || 'false' === $isActive) {
+            $query = $this->createQueryBuilder('imap')
+                ->select('imap, project')
+                ->leftJoin('imap.project', 'project')
+                ->orderBy('imap.inbox_email', $order)
+                ->where('imap.is_active = :isActiveParam')
+                ->setParameter('isActiveParam', $isActiveParam)
+                ->distinct();
+        } else {
+            $query = $this->createQueryBuilder('imap')
+                ->select('imap, project')
+                ->leftJoin('imap.project', 'project')
+                ->orderBy('imap.inbox_email', $order)
+                ->distinct();
+        }
+
+        return $query->getQuery()->getArrayResult();
     }
 
     /**
@@ -30,7 +44,7 @@ class ImapRepository extends EntityRepository
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function countEntities():int
+    public function countEntities(): int
     {
         $query = $this->createQueryBuilder('imap')
             ->select('COUNT(imap.id)')
@@ -43,11 +57,11 @@ class ImapRepository extends EntityRepository
      * @param int $id
      * @return array
      */
-    public function getEntity(int $id):array
+    public function getEntity(int $id): array
     {
         $query = $this->createQueryBuilder('imap')
             ->select('imap, project')
-            ->leftJoin('imap.project','project')
+            ->leftJoin('imap.project', 'project')
             ->where('imap.id = :id')
             ->setParameter('id', $id)
             ->getQuery();

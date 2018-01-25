@@ -32,6 +32,20 @@ imap_update_with_project:
         id: '\d+'
         projectId: '\d+'
 
+imap_inactivate:
+    path:     /imap/{id}/inactivate
+    defaults: { _controller: APITaskBundle:Imap:inactivate }
+    methods: [PUT]
+    requirements:
+        id: '\d+'
+
+imap_restore:
+    path:     /imap/{id}/restore
+    defaults: { _controller: APITaskBundle:Imap:restore }
+    methods: [PUT]
+    requirements:
+        id: '\d+'
+
 imap_delete:
     path:     /imap/{id}
     defaults: { _controller: APITaskBundle:Imap:delete }

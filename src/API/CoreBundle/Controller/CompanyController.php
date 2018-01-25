@@ -42,7 +42,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *            [
      *               {
      *                  "id": 140,
-     *                  "value": "10",
+     *                  "value": "10",,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
      *                  "taskAttribute":
      *                  {
      *                     "id": 177,
@@ -51,7 +53,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *               },
      *               {
      *                  "id": 141,
-     *                  "value": "String DATA",
+     *                  "value": "String DATA",,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
      *                  "taskAttribute":
      *                  {
      *                     "id": 175,
@@ -61,7 +65,8 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *                {
      *                  "id": 89,
      *                  "value": null,
-     *                  "dateValue": 547948800,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
      *                  "companyAttribute":
      *                  {
      *                      "id": 31,
@@ -222,7 +227,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *            [
      *               {
      *                  "id": 140,
-     *                  "value": "10",
+     *                  "value": "10",,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
      *                  "taskAttribute":
      *                  {
      *                     "id": 177,
@@ -231,7 +238,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *               },
      *               {
      *                  "id": 141,
-     *                  "value": "String DATA",
+     *                  "value": "String DATA",,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
      *                  "taskAttribute":
      *                  {
      *                     "id": 175,
@@ -241,7 +250,8 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *                {
      *                  "id": 89,
      *                  "value": null,
-     *                  "dateValue": 547948800,
+     *                  "dateValue": 547948800,,
+     *                  "boolValue": true,
      *                  "companyAttribute":
      *                  {
      *                      "id": 31,
@@ -396,7 +406,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *            [
      *               {
      *                  "id": 140,
-     *                  "value": "10",
+     *                  "value": "10",,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
      *                  "taskAttribute":
      *                  {
      *                     "id": 177,
@@ -405,7 +417,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *               },
      *               {
      *                  "id": 141,
-     *                  "value": "String DATA",
+     *                  "value": "String DATA",,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
      *                  "taskAttribute":
      *                  {
      *                     "id": 175,
@@ -415,7 +429,8 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *                {
      *                  "id": 89,
      *                  "value": null,
-     *                  "dateValue": 547948800,
+     *                  "dateValue": 547948800,,
+     *                  "boolValue": true,
      *                  "companyAttribute":
      *                  {
      *                      "id": 31,
@@ -438,7 +453,8 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *        "_links":
      *        {
      *           "put": "/api/v1/core-bundle/companies/id",
-     *           "delete": "/api/v1/core-bundle/companies/id"
+     *           "inactivate": "/api/v1/core-bundle/companies/568/inativate",
+     *           "restore": "/api/v1/core-bundle/companies/568/restore"
      *         }
      *      }
      *
@@ -526,7 +542,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *            [
      *               {
      *                  "id": 140,
-     *                  "value": "10",
+     *                  "value": "10",,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
      *                  "taskAttribute":
      *                  {
      *                     "id": 177,
@@ -535,7 +553,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *               },
      *               {
      *                  "id": 141,
-     *                  "value": "String DATA",
+     *                  "value": "String DATA",,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
      *                  "taskAttribute":
      *                  {
      *                     "id": 175,
@@ -545,7 +565,8 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *                {
      *                  "id": 89,
      *                  "value": null,
-     *                  "dateValue": 547948800,
+     *                  "dateValue": 547948800,,
+     *                  "boolValue": true,
      *                  "companyAttribute":
      *                  {
      *                      "id": 31,
@@ -568,7 +589,8 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *        "_links":
      *        {
      *           "put": "/api/v1/core-bundle/companies/2",
-     *           "delete": "/api/v1/core-bundle/companies/2"
+     *           "inactivate": "/api/v1/core-bundle/companies/568/inativate",
+     *           "restore": "/api/v1/core-bundle/companies/568/restore"
      *         }
      *      }
      *
@@ -624,6 +646,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
         $company = new Company();
+        $company->setIsActive(true);
 
         return $this->updateCompany($company, $requestBody, true, $locationURL);
     }
@@ -647,7 +670,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *            [
      *               {
      *                  "id": 140,
-     *                  "value": "10",
+     *                  "value": "10",,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
      *                  "taskAttribute":
      *                  {
      *                     "id": 177,
@@ -656,7 +681,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *               },
      *               {
      *                  "id": 141,
-     *                  "value": "String DATA",
+     *                  "value": "String DATA",,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
      *                  "taskAttribute":
      *                  {
      *                     "id": 175,
@@ -666,7 +693,8 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *                {
      *                  "id": 89,
      *                  "value": null,
-     *                  "dateValue": 547948800,
+     *                  "dateValue": 547948800,,
+     *                  "boolValue": true,
      *                  "companyAttribute":
      *                  {
      *                      "id": 31,
@@ -689,7 +717,8 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *        "_links":
      *        {
      *           "put": "/api/v1/core-bundle/companies/2",
-     *           "delete": "/api/v1/core-bundle/companies/2"
+     *           "inactivate": "/api/v1/core-bundle/companies/568/inativate",
+     *           "restore": "/api/v1/core-bundle/companies/568/restore"
      *         }
      *      }
      *
@@ -725,38 +754,49 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @param Request $request
-     * @return Response|JsonResponse
+     * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function updateAction(int $id, Request $request)
+    public function updateAction(int $id, Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('company_update', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
 
 
         if (!$company instanceof Company) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Company with requested Id does not exist!']));
+            return $response;
         }
 
-        $requestData = $request->request->all();
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        return $this->updateCompany($company, $requestData);
+        return $this->updateCompany($company, $requestBody, false, $locationURL);
     }
 
     /**
      * @ApiDoc(
-     *  description="Delete Company Entity",
+     *  description="Inactivate Company Entity",
      *  requirements={
      *     {
      *       "name"="id",
@@ -781,33 +821,43 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      *
-     * @return Response|JsonResponse
+     * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      */
-    public function deleteAction(int $id)
+    public function deleteAction(int $id): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('company_delete', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
 
         if (!$company instanceof Company) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Company with requested Id does not exist!']));
+            return $response;
         }
 
         $company->setIsActive(false);
         $this->getDoctrine()->getManager()->persist($company);
         $this->getDoctrine()->getManager()->flush();
 
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::UNACITVATE_MESSAGE,
-        ], StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode(['message' => StatusCodesHelper::UNACITVATE_MESSAGE]));
+        return $response;
     }
 
     /**
@@ -829,7 +879,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *            [
      *               {
      *                  "id": 140,
-     *                  "value": "10",
+     *                  "value": "10",,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
      *                  "taskAttribute":
      *                  {
      *                     "id": 177,
@@ -838,7 +890,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *               },
      *               {
      *                  "id": 141,
-     *                  "value": "String DATA",
+     *                  "value": "String DATA",,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
      *                  "taskAttribute":
      *                  {
      *                     "id": 175,
@@ -848,7 +902,8 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *                {
      *                  "id": 89,
      *                  "value": null,
-     *                  "dateValue": 547948800,
+     *                  "dateValue": 547948800,,
+     *                  "boolValue": true,
      *                  "companyAttribute":
      *                  {
      *                      "id": 31,
@@ -871,7 +926,8 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *        "_links":
      *        {
      *           "put": "/api/v1/core-bundle/companies/2",
-     *           "delete": "/api/v1/core-bundle/companies/2"
+     *           "inactivate": "/api/v1/core-bundle/companies/568/inativate",
+     *           "restore": "/api/v1/core-bundle/companies/568/restore"
      *         }
      *      }
      *
@@ -901,27 +957,36 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      *
-     * @return Response|JsonResponse
+     * @return Response
+     * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    public function restoreAction(int $id)
+    public function restoreAction(int $id): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('company_restore', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
 
         if (!$company instanceof Company) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Company with requested Id does not exist!']));
+            return $response;
         }
 
         $company->setIsActive(true);
@@ -929,7 +994,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
         $this->getDoctrine()->getManager()->flush();
 
         $companyArray = $this->get('api_company.service')->getCompanyResponse($company->getId());
-        return $this->json($companyArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($companyArray));
+        return $response;
     }
 
     /**
@@ -957,8 +1024,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
             'street',
             'city',
             'zip',
-            'country',
-            'is_active'
+            'country'
         ];
 
         // JSON API Response - Content type and Location settings
@@ -1011,6 +1077,12 @@ class CompanyController extends ApiBaseController implements ControllerInterface
                                     'company' => $company,
                                 ]);
 
+                                if ($cd instanceof CompanyData && 'NULL' === $value) {
+                                    $this->getDoctrine()->getManager()->remove($cd);
+                                    $this->getDoctrine()->getManager()->flush();
+                                    break;
+                                }
+
                                 if (!$cd instanceof CompanyData) {
                                     $cd = new CompanyData();
                                     $cd->setCompany($company);
@@ -1059,9 +1131,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
                     return $response;
                 } catch (\Exception $exception) {
                     $this->getDoctrine()->getConnection()->rollBack();
-                    return $this->createApiResponse([
-                        'message' => 'Assign problem: ' . $expectation->getMessage(),
-                    ], StatusCodesHelper::BAD_REQUEST_CODE);
+                    $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+                    $response = $response->setContent(json_encode(['message' => $expectation->getMessage()]));
+                    return $response;
                 }
             } else {
                 $data = [

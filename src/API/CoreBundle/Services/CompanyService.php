@@ -125,6 +125,7 @@ class CompanyService
         return [
             'put' => $this->router->generate('company_update', ['id' => $id]),
             'inactivate' => $this->router->generate('company_delete', ['id' => $id]),
+            'restore' => $this->router->generate('company_restore', ['id' => $id]),
         ];
     }
 }

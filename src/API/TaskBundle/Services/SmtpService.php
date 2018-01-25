@@ -78,7 +78,6 @@ class SmtpService
     {
         return [
             'put' => $this->router->generate('smtp_update', ['id' => $id]),
-            'patch' => $this->router->generate('smtp_partial_update', ['id' => $id]),
             'delete' => $this->router->generate('smtp_delete', ['id' => $id])
         ];
     }

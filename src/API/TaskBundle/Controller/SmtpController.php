@@ -260,7 +260,22 @@ class SmtpController extends ApiBaseController
 
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        $smtp = new Smtp();
+        // Check if there exist Entity in DB. If no, create the new one. If yes, just edit it.
+        $existedSmtp = $this->getDoctrine()->getRepository('APITaskBundle:Smtp')->findAll();
+        if (\count($existedSmtp) > 0) {
+            $iteration = 0;
+            foreach ($existedSmtp as $es) {
+                if ($iteration === 0) {
+                    $smtp = $es;
+                    $iteration++;
+                } else {
+                    $this->getDoctrine()->getManager()->remove($es);
+                    $this->getDoctrine()->getManager()->flush();
+                }
+            }
+        } else {
+            $smtp = new Smtp();
+        }
 
         return $this->updateSmtpEntity($smtp, $requestBody, true, $locationURL);
     }

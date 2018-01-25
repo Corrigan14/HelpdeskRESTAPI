@@ -22,24 +22,17 @@ company_update:
     requirements:
         id: '\d+'
 
-company_partial_update:
-    path:     companies/{id}
-    defaults: { _controller: APICoreBundle:Company:updatePartial }
-    methods: [PATCH]
-    requirements:
-        id: '\d+'
-
 company_delete:
-    path:     companies/{id}
+    path:     companies/{id}/inativate
     defaults: { _controller: APICoreBundle:Company:delete }
-    methods: [DELETE]
+    methods: [PUT]
     requirements:
         id: '\d+'
 
 company_restore:
-    path:     companies/restore/{id}
+    path:     companies/{id}/restore
     defaults: { _controller: APICoreBundle:Company:restore }
-    methods: [PATCH]
+    methods: [PUT]
     requirements:
         id: '\d+'
 

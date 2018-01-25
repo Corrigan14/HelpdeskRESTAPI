@@ -219,6 +219,8 @@ class CompanyRepository extends EntityRepository
                 $companyDataArray[] = [
                     'id' => $item->getId(),
                     'value' => $item->getValue(),
+                    'dateValue' => $item->getDateValue(),
+                    'boolValue' => $item->getBoolValue(),
                     'companyAttribute' => [
                         'id' => $item->getCompanyAttribute()->getId(),
                         'title' => $item->getCompanyAttribute()->getTitle(),
@@ -256,10 +258,12 @@ class CompanyRepository extends EntityRepository
             foreach ($companyData as $item) {
                 $companyDataArray[] = [
                     'id' => $item['id'],
-                    'value' =>  $item['value'],
+                    'value' => $item['value'],
+                    'dateValue' => $item['dateValue'],
+                    'boolValue' => $item['boolValue'],
                     'companyAttribute' => [
                         'id' => $item['companyAttribute']['id'],
-                        'title' =>  $item['companyAttribute']['title'],
+                        'title' => $item['companyAttribute']['title'],
                     ]
                 ];
             }
@@ -267,15 +271,15 @@ class CompanyRepository extends EntityRepository
 
         $response = [
             'id' => $data['id'],
-            'title' =>  $data['title'],
-            'ico' =>  $data['ico'],
-            'dic' =>  $data['dic'],
-            'ic_dph' =>  $data['ic_dph'],
-            'street' =>  $data['street'],
-            'city' =>  $data['city'],
-            'zip' =>  $data['zip'],
-            'country' =>  $data['country'],
-            'is_active' =>  $data['is_active'],
+            'title' => $data['title'],
+            'ico' => $data['ico'],
+            'dic' => $data['dic'],
+            'ic_dph' => $data['ic_dph'],
+            'street' => $data['street'],
+            'city' => $data['city'],
+            'zip' => $data['zip'],
+            'country' => $data['country'],
+            'is_active' => $data['is_active'],
             'companyData' => $companyDataArray
         ];
 

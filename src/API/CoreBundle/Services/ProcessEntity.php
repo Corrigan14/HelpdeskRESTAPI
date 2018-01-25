@@ -131,12 +131,25 @@ class ProcessEntity
                 return true;
                 break;
             case 'date':
+                $intDateData = (int)$value;
+                if (null === $intDateData || 0 === $intDateData || '0' === $intDateData) {
+                    return false;
+                }
+                $dateTimeObject = new \DateTime("@$intDateData");
+                return $dateTimeObject instanceof \DateTime;
                 break;
             case 'decimal_number':
+                return (\is_float($value) || is_numeric($value) || \is_int($value));
                 break;
             case 'integer_number':
+                $value = (int)$value;
+                return \is_int($value);
                 break;
             case 'checkbox':
+                if(\is_string($value)){
+                    $value = strtolower($value);
+                }
+                return 'true' === $value || true === $value || 1 === $value || '1' === $value || 'false' === $value || false === $value || 0 === $value || '0' === $value;
                 break;
             default:
                 return false;
@@ -165,7 +178,7 @@ class ProcessEntity
                 return 'one or more of the OPTIONS: ' . implode(",", $attribute->getOptions());
                 break;
             case 'date':
-                return 'the DATE';
+                return 'the DATE in TIMESTAMP format';
                 break;
             case 'decimal_number':
                 return 'DECIMAL NUMBER';

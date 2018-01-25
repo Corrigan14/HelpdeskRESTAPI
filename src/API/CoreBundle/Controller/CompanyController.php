@@ -57,7 +57,28 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *                     "id": 175,
      *                     "title": "input company additional attribute"
      *                   }
-     *                }
+     *                },
+     *                {
+     *                  "id": 89,
+     *                  "value": null,
+     *                  "dateValue": 547948800,
+     *                  "companyAttribute":
+     *                  {
+     *                      "id": 31,
+     *                      "title": "DATE"
+     *                  }
+     *               },
+     *              {
+     *                  "id": 167,
+     *                  "value": null,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
+     *                  "companyAttribute":
+     *                  {
+     *                      "id": 34,
+     *                      "title": "CHECKBOX"
+     *                  }
+     *              }
      *            ]
      *          },
      *          {
@@ -216,7 +237,28 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *                     "id": 175,
      *                     "title": "input company additional attribute"
      *                   }
-     *                }
+     *                },
+     *                {
+     *                  "id": 89,
+     *                  "value": null,
+     *                  "dateValue": 547948800,
+     *                  "companyAttribute":
+     *                  {
+     *                      "id": 31,
+     *                      "title": "DATE"
+     *                  }
+     *               },
+     *              {
+     *                  "id": 167,
+     *                  "value": null,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
+     *                  "companyAttribute":
+     *                  {
+     *                      "id": 34,
+     *                      "title": "CHECKBOX"
+     *                  }
+     *              }
      *            ]
      *          },
      *          {
@@ -369,13 +411,33 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *                     "id": 175,
      *                     "title": "input company additional attribute"
      *                   }
-     *                }
+     *                },
+     *                {
+     *                  "id": 89,
+     *                  "value": null,
+     *                  "dateValue": 547948800,
+     *                  "companyAttribute":
+     *                  {
+     *                      "id": 31,
+     *                      "title": "DATE"
+     *                  }
+     *               },
+     *              {
+     *                  "id": 167,
+     *                  "value": null,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
+     *                  "companyAttribute":
+     *                  {
+     *                      "id": 34,
+     *                      "title": "CHECKBOX"
+     *                  }
+     *              }
      *            ]
      *        },
      *        "_links":
      *        {
      *           "put": "/api/v1/core-bundle/companies/id",
-     *           "patch": "/api/v1/core-bundle/companies/id",
      *           "delete": "/api/v1/core-bundle/companies/id"
      *         }
      *      }
@@ -479,13 +541,33 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *                     "id": 175,
      *                     "title": "input company additional attribute"
      *                   }
-     *                }
+     *                },
+     *                {
+     *                  "id": 89,
+     *                  "value": null,
+     *                  "dateValue": 547948800,
+     *                  "companyAttribute":
+     *                  {
+     *                      "id": 31,
+     *                      "title": "DATE"
+     *                  }
+     *               },
+     *              {
+     *                  "id": 167,
+     *                  "value": null,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
+     *                  "companyAttribute":
+     *                  {
+     *                      "id": 34,
+     *                      "title": "CHECKBOX"
+     *                  }
+     *              }
      *            ]
      *        },
      *        "_links":
      *        {
      *           "put": "/api/v1/core-bundle/companies/2",
-     *           "patch": "/api/v1/core-bundle/companies/2",
      *           "delete": "/api/v1/core-bundle/companies/2"
      *         }
      *      }
@@ -580,13 +662,33 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *                     "id": 175,
      *                     "title": "input company additional attribute"
      *                   }
-     *                }
+     *                },
+     *                {
+     *                  "id": 89,
+     *                  "value": null,
+     *                  "dateValue": 547948800,
+     *                  "companyAttribute":
+     *                  {
+     *                      "id": 31,
+     *                      "title": "DATE"
+     *                  }
+     *               },
+     *              {
+     *                  "id": 167,
+     *                  "value": null,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
+     *                  "companyAttribute":
+     *                  {
+     *                      "id": 34,
+     *                      "title": "CHECKBOX"
+     *                  }
+     *              }
      *            ]
      *        },
      *        "_links":
      *        {
      *           "put": "/api/v1/core-bundle/companies/2",
-     *           "patch": "/api/v1/core-bundle/companies/2",
      *           "delete": "/api/v1/core-bundle/companies/2"
      *         }
      *      }
@@ -642,111 +744,6 @@ class CompanyController extends ApiBaseController implements ControllerInterface
 
         $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
 
-
-        if (!$company instanceof Company) {
-            return $this->notFoundResponse();
-        }
-
-        $requestData = $request->request->all();
-
-        return $this->updateCompany($company, $requestData);
-    }
-
-    /**
-     * ### Response ###
-     *      {
-     *        "data":
-     *        {
-     *            "id": "1",
-     *            "title": "Web-Solutions",
-     *            "ico": "1102587",
-     *            "dic": "12587459644",
-     *            "ic_dph": "12587459644",
-     *            "street": "Cesta 125",
-     *            "city": "Bratislava",
-     *            "zip": "02587",
-     *            "country": "SR",
-     *            "is_active": true,
-     *            "companyData":
-     *            [
-     *               {
-     *                  "id": 140,
-     *                  "value": "10",
-     *                  "taskAttribute":
-     *                  {
-     *                     "id": 177,
-     *                     "title": "integer number company additional attribute"
-     *                  }
-     *               },
-     *               {
-     *                  "id": 141,
-     *                  "value": "String DATA",
-     *                  "taskAttribute":
-     *                  {
-     *                     "id": 175,
-     *                     "title": "input company additional attribute"
-     *                   }
-     *                }
-     *            ]
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/core-bundle/companies/2",
-     *           "patch": "/api/v1/core-bundle/companies/2",
-     *           "delete": "/api/v1/core-bundle/companies/2"
-     *         }
-     *      }
-     *
-     * @ApiDoc(
-     *  description="Partially update a Company Entity with extra Company Data.
-     *  This can be edited by attributes: company_data[company_attribute_id] = value,
-     *  attributes must be defined in the CompanyAttribute Entity",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  input={"class"="API\CoreBundle\Entity\Company"},
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\CoreBundle\Entity\Company"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     *
-     * @param int $id
-     * @param Request $request
-     * @return Response|JsonResponse
-     * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \LogicException
-     */
-    public function updatePartialAction(int $id, Request $request)
-    {
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::COMPANY_SETTINGS,
-            'user' => $this->getUser()
-        ];
-
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
-        }
-
-        $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($id);
 
         if (!$company instanceof Company) {
             return $this->notFoundResponse();
@@ -847,13 +844,33 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      *                     "id": 175,
      *                     "title": "input company additional attribute"
      *                   }
-     *                }
+     *                },
+     *                {
+     *                  "id": 89,
+     *                  "value": null,
+     *                  "dateValue": 547948800,
+     *                  "companyAttribute":
+     *                  {
+     *                      "id": 31,
+     *                      "title": "DATE"
+     *                  }
+     *               },
+     *              {
+     *                  "id": 167,
+     *                  "value": null,
+     *                  "dateValue": null,
+     *                  "boolValue": true,
+     *                  "companyAttribute":
+     *                  {
+     *                      "id": 34,
+     *                      "title": "CHECKBOX"
+     *                  }
+     *              }
      *            ]
      *        },
      *        "_links":
      *        {
      *           "put": "/api/v1/core-bundle/companies/2",
-     *           "patch": "/api/v1/core-bundle/companies/2",
      *           "delete": "/api/v1/core-bundle/companies/2"
      *         }
      *      }
@@ -885,6 +902,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
      * @param int $id
      *
      * @return Response|JsonResponse
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
     public function restoreAction(int $id)
@@ -945,7 +965,6 @@ class CompanyController extends ApiBaseController implements ControllerInterface
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
         if (false !== $requestData) {
-
             // JSON Array with COMPANY ATTRIBUTE ID as an ID and VALUE as an VALUE in Company Data param is required
             $requestDetailData = false;
             if (isset($requestData['company_data']) && \count($requestData['company_data']) > 0) {
@@ -974,53 +993,76 @@ class CompanyController extends ApiBaseController implements ControllerInterface
             $errors = $this->get('entity_processor')->processEntity($company, $requestData);
 
             if (false === $errors) {
-                $this->getDoctrine()->getManager()->persist($company);
-                $this->getDoctrine()->getManager()->flush();
+                $this->getDoctrine()->getConnection()->beginTransaction();
+                try {
+                    $this->getDoctrine()->getManager()->persist($company);
+                    $this->getDoctrine()->getManager()->flush();
 
-                /**
-                 * Fill CompanyData Entity if some its parameters were sent
-                 */
-                if (\is_array($requestDetailData)) {
-                    dump($requestDetailData);
-                    foreach ($requestDetailData as $key => $value) {
-                        $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($key);
+                    /**
+                     * Fill CompanyData Entity if some its parameters were sent
+                     */
+                    if (\is_array($requestDetailData)) {
+                        foreach ($requestDetailData as $key => $value) {
+                            $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($key);
 
-                        if ($companyAttribute instanceof CompanyAttribute) {
-                            $cd = $this->getDoctrine()->getRepository('APITaskBundle:CompanyData')->findOneBy([
-                                'companyAttribute' => $companyAttribute,
-                                'company' => $company,
-                            ]);
+                            if ($companyAttribute instanceof CompanyAttribute) {
+                                $cd = $this->getDoctrine()->getRepository('APITaskBundle:CompanyData')->findOneBy([
+                                    'companyAttribute' => $companyAttribute,
+                                    'company' => $company,
+                                ]);
 
-                            if (!$cd instanceof CompanyData) {
-                                $cd = new CompanyData();
-                                $cd->setCompany($company);
-                                $cd->setCompanyAttribute($companyAttribute);
-                            }
+                                if (!$cd instanceof CompanyData) {
+                                    $cd = new CompanyData();
+                                    $cd->setCompany($company);
+                                    $cd->setCompanyAttribute($companyAttribute);
+                                }
 
-                            $cdValueChecker = $this->get('entity_processor')->checkDataValueFormat($companyAttribute, $value);
-                            if (true === $cdValueChecker) {
-                                $cd->setValue($value);
-                                $company->addCompanyDatum($cd);
+                                $cdValueChecker = $this->get('entity_processor')->checkDataValueFormat($companyAttribute, $value);
+                                if (true === $cdValueChecker) {
+                                    if ($companyAttribute->getType() === 'checkbox') {
+                                        if (\is_string($value)) {
+                                            $value = strtolower($value);
+                                        }
+                                        if ('true' === $value || '1' === $value || 1 === $value) {
+                                            $cd->setBoolValue(true);
+                                        } else {
+                                            $cd->setBoolValue(false);
+                                        }
+                                    } elseif ($companyAttribute->getType() === 'date') {
+                                        $intValue = (int)$value;
+                                        $cd->setDateValue($intValue);
+                                    } else {
+                                        $cd->setValue($value);
+                                    }
+                                    $company->addCompanyDatum($cd);
 
-                                $this->getDoctrine()->getManager()->persist($cd);
-                                $this->getDoctrine()->getManager()->persist($company);
-                                $this->getDoctrine()->getManager()->flush();
+                                    $this->getDoctrine()->getManager()->persist($cd);
+                                    $this->getDoctrine()->getManager()->persist($company);
+                                    $this->getDoctrine()->getManager()->flush();
+                                } else {
+                                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                    $expectation = $this->get('entity_processor')->returnExpectedDataFormat($companyAttribute);
+                                    $response = $response->setContent(json_encode(['message' => 'Problem with company additional data (companyData) value format! For Company Attribute with ID: ' . $companyAttribute->getId() . ', ' . $expectation . ' is/are expected.']));
+                                    return $response;
+                                }
                             } else {
                                 $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                                $expectation = $this->get('entity_processor')->returnExpectedDataFormat($companyAttribute);
-                                $response = $response->setContent(json_encode(['message' => 'Problem with company additional data (companyData) value format! For Company Attribute with ID: ' . $companyAttribute->getId().', '.$expectation.' is/are expected.']));
+                                $response = $response->setContent(json_encode(['message' => 'The key: ' . $key . ' of Company Attribute is not valid (Company Attribute with this ID does not exist)']));
                                 return $response;
                             }
-                        } else {
-                            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                            $response = $response->setContent(json_encode(['message' => 'The key: ' . $key . ' of Company Attribute is not valid (Company Attribute with this ID does not exist)']));
-                            return $response;
                         }
                     }
+                    $companyArray = $this->get('api_company.service')->getCompanyResponse($company->getId());
+                    $response = $response->setStatusCode($statusCode);
+                    $response = $response->setContent(json_encode($companyArray));
+                    $this->getDoctrine()->getConnection()->commit();
+                    return $response;
+                } catch (\Exception $exception) {
+                    $this->getDoctrine()->getConnection()->rollBack();
+                    return $this->createApiResponse([
+                        'message' => 'Assign problem: ' . $expectation->getMessage(),
+                    ], StatusCodesHelper::BAD_REQUEST_CODE);
                 }
-                $companyArray = $this->get('api_company.service')->getCompanyResponse($company->getId());
-                $response = $response->setStatusCode($statusCode);
-                $response = $response->setContent(json_encode($companyArray));
             } else {
                 $data = [
                     'errors' => $errors,

@@ -29,11 +29,26 @@ class CompanyData
     /**
      * @var string
      *
-     * @ORM\Column(name="value", type="string", length=255)
+     * @ORM\Column(name="value", type="string", length=255, nullable=true)
      * @Assert\NotBlank(message="Value is required")
      * @Assert\Type("string")
      */
     private $value;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="date_value", type="datetime", nullable=true)
+     * @Assert\DateTime(message="dateValue has to be a correct Date Time object")
+     */
+    private $dateValue;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="bool_value", type="boolean", nullable=true)
+     */
+    private $boolValue;
 
     /**
      * @var Company
@@ -94,6 +109,58 @@ class CompanyData
         } else {
             return $decodedTry;
         }
+    }
+
+    /**
+     * @param int|\DateTime $dateValue
+     * @return $this
+     */
+    public function setDateValue($dateValue)
+    {
+        if (\is_int($dateValue) && null !== $dateValue) {
+            $dateTimeUnix = new \DateTime("@$dateValue");
+            $this->dateValue = $dateTimeUnix;
+        } else {
+            $this->dateValue = $dateValue;
+        }
+        return $this;
+    }
+
+    /**
+     * Get dateValue
+     *
+     * @return \DateTime|int
+     */
+    public function getDateValue()
+    {
+        if ($this->dateValue) {
+            return $this->dateValue->getTimestamp();
+        } else {
+            return $this->dateValue;
+        }
+    }
+
+    /**
+     * Set isActive
+     *
+     * @param boolean $boolValue
+     *
+     * @return $this
+     */
+    public function setBoolValue($boolValue)
+    {
+        $this->boolValue = $boolValue;
+        return $this;
+    }
+
+    /**
+     * Get boolValue
+     *
+     * @return bool
+     */
+    public function getBoolValue()
+    {
+        return $this->boolValue;
     }
 
     /**

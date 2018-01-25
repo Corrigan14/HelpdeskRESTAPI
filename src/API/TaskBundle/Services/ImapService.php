@@ -38,6 +38,7 @@ class ImapService
      *
      * @param string $order
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
     public function getAttributesResponse(string $order): array
@@ -77,13 +78,11 @@ class ImapService
      * @param int $projectId
      * @return array
      */
-    private function getEntityLinks(int $id, int $projectId)
+    private function getEntityLinks(int $id, int $projectId):array
     {
         return [
             'put' => $this->router->generate('imap_update', ['id' => $id]),
             'put: project' => $this->router->generate('imap_update_with_project', ['id' => $id, 'projectId' => $projectId]),
-            'patch' => $this->router->generate('imap_partial_update', ['id' => $id]),
-            'patch: project' => $this->router->generate('imap_partial_update_with_project', ['id' => $id, 'projectId' => $projectId]),
             'delete' => $this->router->generate('imap_delete', ['id' => $id])
         ];
     }

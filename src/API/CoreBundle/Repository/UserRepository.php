@@ -136,12 +136,12 @@ class UserRepository extends EntityRepository
         if (999 !== $limit) {
             // Pagination
             if (1 < $page) {
-                $query->setFirstResult(self::LIMIT * $page - self::LIMIT);
+                $query->setFirstResult($limit * $page - $limit);
             } else {
                 $query->setFirstResult(0);
             }
 
-            $query->setMaxResults(self::LIMIT);
+            $query->setMaxResults($limit);
 
             $paginator = new Paginator($query, $fetchJoinCollection = true);
             $count = $paginator->count();
@@ -167,8 +167,8 @@ class UserRepository extends EntityRepository
     public function getUserResponse(int $userId): array
     {
         $query = $this->createQueryBuilder('u')
-            ->select('u')
-            ->leftJoin('u.detailData', 'd')
+            ->select('u, detailData, userRole, company, companyData, companyAttribute')
+            ->leftJoin('u.detailData', 'detailData')
             ->leftJoin('u.user_role', 'userRole')
             ->leftJoin('u.company', 'company')
             ->leftJoin('company.companyData', 'companyData')

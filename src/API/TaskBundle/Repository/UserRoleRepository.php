@@ -72,6 +72,8 @@ class UserRoleRepository extends EntityRepository
     /**
      * @param int $id
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getEntity(int $id): array
     {
@@ -88,16 +90,19 @@ class UserRoleRepository extends EntityRepository
     /**
      * @param int $order
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getAllowedUserRoles(int $order): array
     {
         $query = $this->createQueryBuilder('userRole')
             ->select('userRole')
-            ->where('userRole.order >= :order')
-            ->setParameter('order', $order)
+            ->where('userRole.order > :order')
+            ->andWhere('userRole.is_active = :isActive')
+            ->setParameters(['order' => $order, 'isActive' => true])
             ->getQuery();
 
-        return $query->getArrayResult();
+        return $this->formatListData($query->getArrayResult(), true);
     }
 
     /**
@@ -165,7 +170,7 @@ class UserRoleRepository extends EntityRepository
     {
         $users = $data->getUsers();
         $usersArray = [];
-        if (count($users) > 0) {
+        if (\count($users) > 0) {
             /** @var User $item */
             foreach ($users as $item) {
                 $usersArray[] = [

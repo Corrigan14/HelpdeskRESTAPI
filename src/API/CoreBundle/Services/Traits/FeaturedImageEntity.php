@@ -3,10 +3,8 @@
 
 namespace API\CoreBundle\Services\Traits;
 
-
-use API\CoreBundle\Entity\File;
 use Doctrine\ORM\Mapping as ORM;
-//use Gedmo\Mapping\Annotation as Gedmo;
+use JMS\Serializer\Annotation as Serializer;
 
 
 /**
@@ -19,13 +17,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 trait FeaturedImageEntity
 {
-//    /**
-//     * @ORM\OneToOne(targetEntity="API\CoreBundle\Entity\File")
-//     * @ORM\JoinColumn(name="image", referencedColumnName="id", nullable=true, onDelete="SET NULL" )
-//     */
-//    private $image;
-
-
     /**
      * @ORM\Column(name="image", length=128, nullable=true)
      */
@@ -37,7 +28,6 @@ trait FeaturedImageEntity
      */
     public function getImage()
     {
-        //return unserialize($this->image);
         return $this->image;
     }
 

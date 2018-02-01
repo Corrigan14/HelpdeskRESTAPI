@@ -2,9 +2,11 @@
 
 namespace API\CoreBundle\Controller;
 
+use API\CoreBundle\Entity\File;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
 use API\CoreBundle\Security\VoteOptions;
+use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\UserHasProject;
 use API\TaskBundle\Entity\UserRole;
 use API\TaskBundle\Security\ProjectAclOptions;
@@ -240,6 +242,161 @@ class UserController extends ApiBaseController
 
         $response = $response->setContent(json_encode($allUsers));
         $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
+    }
+
+    /**
+     * ### Response ###
+     *     {
+     *       "data":
+     *       [
+     *          {
+     *             "id": 2581,
+     *             "username": "customer2",
+     *             "email": "customer@customer2.sk",
+     *             "language": "AJ",
+     *             "is_active": true,
+     *             "image": null,
+     *             "detailData":
+     *             {
+     *                "id": 2306,
+     *                "name": "Customer2",
+     *                "surname": "Customerovic2",
+     *                "title_before": null,
+     *                "title_after": null,
+     *                "function": null,
+     *                "mobile": null,
+     *                "tel": null,
+     *                "fax": null,
+     *                "signature": null,
+     *                "street": null,
+     *                "city": null,
+     *                "zip": null,
+     *                "country": null,
+     *                "facebook": null,
+     *                "twitter": null,
+     *                "linkdin": null,
+     *                "google": null
+     *              },
+     *              "user_role":
+     *              {
+     *                 "id": 157,
+     *                 "title": "CUSTOMER",
+     *                 "description": null,
+     *                 "homepage": "/",
+     *                 "acl":
+     *                 [
+     *                    "login_to_system",
+     *                    "create_tasks"
+     *                 ],
+     *                 "order": 4
+     *              },
+     *              "company":
+     *              {
+     *                 "id": 1802,
+     *                 "title": "Web-Solutions"
+     *              }
+     *           }
+     *       ]
+     *       "_links":
+     *       {
+     *           "self": "/api/v1/core-bundle/users?page=1&term=customer70",
+     *           "first": "/api/v1/core-bundle/users?page=1&term=customer70",
+     *           "prev": false,
+     *           "next": false,
+     *           "last": "/api/v1/core-bundle/users?page=1&term=customer70"
+     *       },
+     *       "total": 22,
+     *       "page": 1,
+     *       "numberOfPages": 3
+     *     }
+     *
+     * @ApiDoc(
+     *  description="Search in User Entity",
+     *  filters={
+     *     {
+     *       "name"="term",
+     *       "description"="Search term"
+     *     },
+     *     {
+     *       "name"="isActive",
+     *       "description"="Return's only ACTIVE users if this param is TRUE, only INACTIVE users if param is FALSE"
+     *     },
+     *     {
+     *       "name"="page",
+     *       "description"="Pagination, limit is set to 10 records"
+     *     },
+     *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by Username"
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="Entity was successfully found",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied"
+     *  })
+     *
+     * @param Request $request
+     * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     */
+    public function searchAction(Request $request): Response
+    {
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('user_search');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        // Check the logged users ACL rights
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::USER_SETTINGS,
+            'user' => $this->getUser()
+        ];
+
+        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
+        }
+
+        // Filter params processing
+        if (false !== $requestBody) {
+            $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody);
+
+            $page = $processedFilterParams['page'];
+            $limit = $processedFilterParams['limit'];
+            $order = $processedFilterParams['order'];
+            $isActive = $processedFilterParams['isActive'];
+            $term = $processedFilterParams['term'];
+
+            $filtersForUrl = [
+                'isActive' => '&isActive=' . $isActive,
+                'order' => '&order=' . $order,
+                'term' => '&term=' . $term
+            ];
+
+            $usersArray = $this->get('api_user.service')->getUsersSearchResponse($term, $page, $isActive, $filtersForUrl, $order, $limit);
+            $response = $response->setContent(json_encode($usersArray));
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
+        }
 
         return $response;
     }
@@ -300,33 +457,47 @@ class UserController extends ApiBaseController
      *         {
      *           "put": "/api/v1/core-bundle/users/85",
      *           "put: user-role": "/api/v1/core-bundle/users/85/user-role/32",
-     *           "delete": "/api/v1/core-bundle/users/85",
+     *           "inactivate": "/api/v1/core-bundle/users/85",
      *           "restore": "/api/v1/core-bundle/users/85/restore",
      *           "put: company": "/api/v1/core-bundle/users/85/company/41",
      *           "put: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41"
      *         },
      *         "allowedUserRoles":
      *         [
-     *            [
-     *               {
-     *                  "id": 31,
-     *                  "title": "MANAGER",
-     *                  "description": null,
-     *                  "homepage": "/",
-     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                  "is_active": true,
-     *                  "order": 2
-     *               },
-     *              {
-     *                  "id": 32,
-     *                  "title": "AGENT",
-     *                  "description": null,
-     *                  "homepage": "/",
-     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"sent_emails_from_comments\"]",
-     *                  "is_active": true,
-     *                  "order": 3
-     *              }
-     *           ]
+     *            {
+     *              "id": 22,
+     *              "title": "MANAGER",
+     *              "description": null,
+     *              "homepage": "/",
+     *              "acl":
+     *              [
+     *                  "login_to_system",
+     *                  "create_tasks",
+     *                  "create_projects",
+     *                  "company_settings",
+     *                  "report_filters",
+     *                  "sent_emails_from_comments",
+     *                  "update_all_tasks"
+     *              ],
+     *              "order": 2,
+     *              "is_active": true
+     *           },
+     *           {
+     *              "id": 23,
+     *              "title": "AGENT",
+     *              "description": null,
+     *              "homepage": "/",
+     *              "acl":
+     *              [
+     *                  "login_to_system",
+     *                  "create_tasks",
+     *                  "create_projects",
+     *                  "company_settings",
+     *                  "sent_emails_from_comments"
+     *              ],
+     *              "order": 3,
+     *              "is_active": true
+     *           }
      *        ]
      *      }
      *
@@ -375,7 +546,7 @@ class UserController extends ApiBaseController
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (!$user instanceof User) {
             $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::NOT_FOUND_MESSAGE]));
+            $response = $response->setContent(json_encode(['message' => 'User with requested Id does not exist!']));
             return $response;
         }
 
@@ -400,14 +571,14 @@ class UserController extends ApiBaseController
             $userCompanyId = false;
         }
         $ids = [
-            'userId' => $user->getId(),
+            'userId' => $id,
             'userRoleId' => $user->getUserRole()->getId(),
             'userCompanyId' => $userCompanyId
         ];
 
         $userArray = $this->get('api_user.service')->getUserResponse($ids);
         $userRoles = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->getAllowedUserRoles($user->getUserRole()->getOrder());
-        $allowedRolesArray['allowedUserRoles'] = [$userRoles];
+        $allowedRolesArray['allowedUserRoles'] = $userRoles;
 
         $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
         $response = $response->setContent(json_encode(array_merge($userArray, $allowedRolesArray)));
@@ -470,39 +641,53 @@ class UserController extends ApiBaseController
      *         {
      *           "put": "/api/v1/core-bundle/users/85",
      *           "put: user-role": "/api/v1/core-bundle/users/85/user-role/32",
-     *           "delete": "/api/v1/core-bundle/users/85",
+     *           "inactivate": "/api/v1/core-bundle/users/85",
      *           "restore": "/api/v1/core-bundle/users/85/restore",
      *           "put: company": "/api/v1/core-bundle/users/85/company/41",
      *           "put: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41"
      *         },
      *         "allowedUserRoles":
      *         [
-     *            [
-     *               {
-     *                  "id": 31,
-     *                  "title": "MANAGER",
-     *                  "description": null,
-     *                  "homepage": "/",
-     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                  "is_active": true,
-     *                  "order": 2
-     *               },
-     *              {
-     *                  "id": 32,
-     *                  "title": "AGENT",
-     *                  "description": null,
-     *                  "homepage": "/",
-     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"sent_emails_from_comments\"]",
-     *                  "is_active": true,
-     *                  "order": 3
-     *              }
-     *           ]
+     *            {
+     *              "id": 22,
+     *              "title": "MANAGER",
+     *              "description": null,
+     *              "homepage": "/",
+     *              "acl":
+     *              [
+     *                  "login_to_system",
+     *                  "create_tasks",
+     *                  "create_projects",
+     *                  "company_settings",
+     *                  "report_filters",
+     *                  "sent_emails_from_comments",
+     *                  "update_all_tasks"
+     *              ],
+     *              "order": 2,
+     *              "is_active": true
+     *           },
+     *           {
+     *              "id": 23,
+     *              "title": "AGENT",
+     *              "description": null,
+     *              "homepage": "/",
+     *              "acl":
+     *              [
+     *                  "login_to_system",
+     *                  "create_tasks",
+     *                  "create_projects",
+     *                  "company_settings",
+     *                  "sent_emails_from_comments"
+     *              ],
+     *              "order": 3,
+     *              "is_active": true
+     *           }
      *        ]
      *      }
      *
      * @ApiDoc(
      *  resource = true,
-     *  description="Create new User, UserData Entity",
+     *  description="Create a new User. User has to have a USER ROLE. User can, but does not have to have a COMPANY",
      *  input={"class"="API\CoreBundle\Entity\User"},
      *  headers={
      *     {
@@ -525,6 +710,7 @@ class UserController extends ApiBaseController
      * @param int $userRoleId
      * @param bool|int $companyId
      * @return JsonResponse|Response
+     * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \UnexpectedValueException
@@ -537,7 +723,7 @@ class UserController extends ApiBaseController
     {
         // JSON API Response - Content type and Location settings
         if ($companyId) {
-            $locationURL = $this->generateUrl('user_create', ['userRoleId' => $userRoleId, 'companyId' => $companyId]);
+            $locationURL = $this->generateUrl('user_create_with_company', ['userRoleId' => $userRoleId, 'companyId' => $companyId]);
         } else {
             $locationURL = $this->generateUrl('user_create', ['userRoleId' => $userRoleId]);
         }
@@ -556,17 +742,15 @@ class UserController extends ApiBaseController
 
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-//        $requestDumyJsonData = '{"username":"hfhhfs","password":"jjj@dfdsd.sk","email":"jjj@dffsdd.sk","detailData":{"name":"test","surname":"test2"}}';
-
         $user = new User();
         $user->setIsActive(true);
 
         // Upload and save avatar
-        $file = $request->files->get('image');
-        if (null !== $file) {
-            $imageSlug = $this->get('upload_helper')->uploadFile($file, true);
-            $user->setImage($imageSlug);
-        }
+//        $file = $request->files->get('image');
+//        if (null !== $file) {
+//            $imageSlug = $this->get('upload_helper')->uploadFile($file, true);
+//            $user->setImage($imageSlug);
+//        }
 
         if ($userRoleId) {
             $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($userRoleId);
@@ -663,33 +847,47 @@ class UserController extends ApiBaseController
      *         {
      *           "put": "/api/v1/core-bundle/users/85",
      *           "put: user-role": "/api/v1/core-bundle/users/85/user-role/32",
-     *           "delete": "/api/v1/core-bundle/users/85",
+     *           "inactivate": "/api/v1/core-bundle/users/85",
      *           "restore": "/api/v1/core-bundle/users/85/restore",
      *           "put: company": "/api/v1/core-bundle/users/85/company/41",
      *           "put: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41"
      *         },
      *         "allowedUserRoles":
      *         [
-     *            [
-     *               {
-     *                  "id": 31,
-     *                  "title": "MANAGER",
-     *                  "description": null,
-     *                  "homepage": "/",
-     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                  "is_active": true,
-     *                  "order": 2
-     *               },
-     *              {
-     *                  "id": 32,
-     *                  "title": "AGENT",
-     *                  "description": null,
-     *                  "homepage": "/",
-     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"sent_emails_from_comments\"]",
-     *                  "is_active": true,
-     *                  "order": 3
-     *              }
-     *           ]
+     *            {
+     *              "id": 22,
+     *              "title": "MANAGER",
+     *              "description": null,
+     *              "homepage": "/",
+     *              "acl":
+     *              [
+     *                  "login_to_system",
+     *                  "create_tasks",
+     *                  "create_projects",
+     *                  "company_settings",
+     *                  "report_filters",
+     *                  "sent_emails_from_comments",
+     *                  "update_all_tasks"
+     *              ],
+     *              "order": 2,
+     *              "is_active": true
+     *           },
+     *           {
+     *              "id": 23,
+     *              "title": "AGENT",
+     *              "description": null,
+     *              "homepage": "/",
+     *              "acl":
+     *              [
+     *                  "login_to_system",
+     *                  "create_tasks",
+     *                  "create_projects",
+     *                  "company_settings",
+     *                  "sent_emails_from_comments"
+     *              ],
+     *              "order": 3,
+     *              "is_active": true
+     *           }
      *        ]
      *      }
      *
@@ -946,33 +1144,47 @@ class UserController extends ApiBaseController
      *         {
      *           "put": "/api/v1/core-bundle/users/85",
      *           "put: user-role": "/api/v1/core-bundle/users/85/user-role/32",
-     *           "delete": "/api/v1/core-bundle/users/85",
+     *           "inactivate": "/api/v1/core-bundle/users/85",
      *           "restore": "/api/v1/core-bundle/users/85/restore",
      *           "put: company": "/api/v1/core-bundle/users/85/company/41",
      *           "put: user-role & company": "/api/v1/core-bundle/users/85/user-role/32/company/41"
      *         },
      *         "allowedUserRoles":
      *         [
-     *            [
-     *               {
-     *                  "id": 31,
-     *                  "title": "MANAGER",
-     *                  "description": null,
-     *                  "homepage": "/",
-     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"report_filters\",\"sent_emails_from_comments\",\"update_all_tasks\"]",
-     *                  "is_active": true,
-     *                  "order": 2
-     *               },
-     *              {
-     *                  "id": 32,
-     *                  "title": "AGENT",
-     *                  "description": null,
-     *                  "homepage": "/",
-     *                  "acl": "[\"login_to_system\",\"create_tasks\",\"create_projects\",\"company_settings\",\"sent_emails_from_comments\"]",
-     *                  "is_active": true,
-     *                  "order": 3
-     *              }
-     *           ]
+     *            {
+     *              "id": 22,
+     *              "title": "MANAGER",
+     *              "description": null,
+     *              "homepage": "/",
+     *              "acl":
+     *              [
+     *                  "login_to_system",
+     *                  "create_tasks",
+     *                  "create_projects",
+     *                  "company_settings",
+     *                  "report_filters",
+     *                  "sent_emails_from_comments",
+     *                  "update_all_tasks"
+     *              ],
+     *              "order": 2,
+     *              "is_active": true
+     *           },
+     *           {
+     *              "id": 23,
+     *              "title": "AGENT",
+     *              "description": null,
+     *              "homepage": "/",
+     *              "acl":
+     *              [
+     *                  "login_to_system",
+     *                  "create_tasks",
+     *                  "create_projects",
+     *                  "company_settings",
+     *                  "sent_emails_from_comments"
+     *              ],
+     *              "order": 3,
+     *              "is_active": true
+     *           }
      *        ]
      *      }
      *
@@ -1056,198 +1268,6 @@ class UserController extends ApiBaseController
 
         $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
         $response = $response->setContent(json_encode(array_merge($userArray, $allowedRolesArray)));
-        return $response;
-    }
-
-    /**
-     * ### Response ###
-     *     {
-     *       "data":
-     *       [
-     *          {
-     *             "id": 2581,
-     *             "username": "customer2",
-     *             "email": "customer@customer2.sk",
-     *             "language": "AJ",
-     *             "is_active": true,
-     *             "image": null,
-     *             "detailData":
-     *             {
-     *                "id": 2306,
-     *                "name": "Customer2",
-     *                "surname": "Customerovic2",
-     *                "title_before": null,
-     *                "title_after": null,
-     *                "function": null,
-     *                "mobile": null,
-     *                "tel": null,
-     *                "fax": null,
-     *                "signature": null,
-     *                "street": null,
-     *                "city": null,
-     *                "zip": null,
-     *                "country": null,
-     *                "facebook": null,
-     *                "twitter": null,
-     *                "linkdin": null,
-     *                "google": null
-     *              },
-     *              "user_role":
-     *              {
-     *                 "id": 157,
-     *                 "title": "CUSTOMER",
-     *                 "description": null,
-     *                 "homepage": "/",
-     *                 "acl":
-     *                 [
-     *                    "login_to_system",
-     *                    "create_tasks"
-     *                 ],
-     *                 "order": 4
-     *              },
-     *              "company":
-     *              {
-     *                 "id": 1802,
-     *                 "title": "Web-Solutions"
-     *              }
-     *           }
-     *       ]
-     *       "_links":
-     *       {
-     *           "self": "/api/v1/core-bundle/users?page=1&term=customer70",
-     *           "first": "/api/v1/core-bundle/users?page=1&term=customer70",
-     *           "prev": false,
-     *           "next": false,
-     *           "last": "/api/v1/core-bundle/users?page=1&term=customer70"
-     *       },
-     *       "total": 22,
-     *       "page": 1,
-     *       "numberOfPages": 3
-     *     }
-     *
-     * @ApiDoc(
-     *  description="Search in User Entity",
-     *  filters={
-     *     {
-     *       "name"="term",
-     *       "description"="Search term"
-     *     },
-     *     {
-     *       "name"="isActive",
-     *       "description"="Return's only ACTIVE users if this param is TRUE, only INACTIVE users if param is FALSE"
-     *     },
-     *     {
-     *       "name"="page",
-     *       "description"="Pagination, limit is set to 10 records"
-     *     },
-     *     {
-     *       "name"="order",
-     *       "description"="ASC or DESC order by Username"
-     *     },
-     *     {
-     *       "name"="limit",
-     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
-     *     }
-     *  },
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  statusCodes={
-     *      200 ="Entity was successfully found",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied"
-     *  })
-     *
-     * @param Request $request
-     * @return Response
-     * @throws \UnexpectedValueException
-     * @throws \LogicException
-     * @throws \InvalidArgumentException
-     */
-    public function searchAction(Request $request): Response
-    {
-        $requestBody = $this->get('api_base.service')->encodeRequest($request);
-
-        // JSON API Response - Content type and Location settings
-        $locationURL = $this->generateUrl('user_search');
-        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
-
-        // Check the logged users ACL rights
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::USER_SETTINGS,
-            'user' => $this->getUser()
-        ];
-
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
-            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
-
-        }
-
-        // Filter params processing
-        if (false !== $requestBody) {
-            $filtersForUrl = [];
-
-            if (isset($requestBody['page'])) {
-                $pageNum = $requestBody['page'];
-                $page = (int)$pageNum;
-            } else {
-                $page = 1;
-            }
-
-            if (isset($requestBody['limit'])) {
-                $limitNum = $requestBody['limit'];
-                $limit = (int)$limitNum;
-            } else {
-                $limit = 10;
-            }
-
-            if (999 === $limit) {
-                $page = 1;
-            }
-
-            if (isset($requestBody['order'])) {
-                $orderString = $requestBody['order'];
-                $orderString = strtoupper($orderString);
-                if ($orderString === 'ASC' || $orderString === 'DESC') {
-                    $order = $orderString;
-                } else {
-                    $order = 'ASC';
-                }
-            } else {
-                $order = 'ASC';
-            }
-
-            if (isset($requestBody['isActive'])) {
-                $isActive = $requestBody['isActive'];
-            } else {
-                $isActive = 'all';
-            }
-
-            if (isset($requestBody['term'])) {
-                $term = strtolower($requestBody['term']);
-                $filtersForUrl['term'] = '&term=' . $term;
-            } else {
-                $term = false;
-            }
-
-            $filtersForUrl = [
-                'isActive' => '&isActive=' . $isActive,
-                'order' => '&order=' . $order,
-            ];
-
-            $usersArray = $this->get('api_user.service')->getUsersSearchResponse($term, $page, $isActive, $filtersForUrl, $order, $limit);
-            $response = $response->setContent(json_encode($usersArray));
-            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
-        } else {
-            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
-        }
-
         return $response;
     }
 
@@ -1370,8 +1390,7 @@ class UserController extends ApiBaseController
             'password',
             'email',
             'language',
-            'image',
-            'is_active'
+            'image'
         ];
 
         $alowedUserDetailDataParams = [
@@ -1399,27 +1418,24 @@ class UserController extends ApiBaseController
 
         if (false !== $requestData) {
             $requestDetailData = [];
-            if (isset($requestData['detail_data']) && \count($requestData['detail_data']) > 0) {
-                $requestDetailData = json_decode($requestData['detail_data'], true);
+            if (isset($requestData['detail_data'])) {
+                if (!\is_array($requestData['detail_data'])) {
+                    $requestDetailData = json_decode($requestData['detail_data'], true);
+                } else {
+                    $requestDetailData = $requestData['detail_data'];
+                }
                 unset($requestData['detail_data']);
-            } elseif (isset($requestData['detailData']) && \count($requestData['detailData']) > 0) {
-                $requestDetailData = json_decode($requestData['detailData'], true);
+            } elseif (isset($requestData['detailData'])) {
+                if (!\is_array($requestData['detailData'])) {
+                    $requestDetailData = json_decode($requestData['detailData'], true);
+                } else {
+                    $requestDetailData = $requestData['detailData'];
+                }
                 unset($requestData['detailData']);
             }
 
             if (array_key_exists('_format', $requestData)) {
                 unset($requestData['_format']);
-            }
-
-            // Set is_active param
-            if (array_key_exists('is_active', $requestData)) {
-                $isActive = strtolower($requestData['is_active']);
-                unset($requestData['is_active']);
-                if ('true' === $isActive || true === $isActive || '1' === $isActive || 1 === $isActive) {
-                    $user->setIsActive(true);
-                } elseif ('false' === $isActive || false === $isActive || '0' === $isActive || 0 === $isActive) {
-                    $user->setIsActive(false);
-                }
             }
 
             foreach ($requestData as $key => $value) {
@@ -1438,14 +1454,19 @@ class UserController extends ApiBaseController
                 }
             }
 
-            $statusCode = $this->getCreateUpdateStatusCode($create);
-
-            if (null === $user || !$user instanceof User) {
-                $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-                $response = $response->setContent(json_encode(['message' => StatusCodesHelper::NOT_FOUND_MESSAGE]));
-                return $response;
+            //Check if IMAGE was already uploaded
+            if (isset($requestData['image'])) {
+                $image = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
+                    'slug' => $requestData['image']
+                ]);
+                if(!$image instanceof File){
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'Image with requested SLUG does not exist in DB! Image has to be UPLOADED by /api/v1/core-bundle/cdn/upload first!']));
+                    return $response;
+                }
             }
 
+            $statusCode = $this->getCreateUpdateStatusCode($create);
             $errors = $this->get('entity_processor')->processEntity($user, $requestData);
 
             if (false === $errors) {
@@ -1469,7 +1490,7 @@ class UserController extends ApiBaseController
                         'title' => 'INBOX'
                     ]);
 
-                    if (null !== $inboxProject) {
+                    if ($inboxProject instanceof Project) {
                         $acl = [];
                         $acl[] = ProjectAclOptions::VIEW_OWN_TASKS;
                         $userHasProject = new UserHasProject();
@@ -1496,7 +1517,7 @@ class UserController extends ApiBaseController
                         'user' => $userId
                     ]);
 
-                    if (null === $userData) {
+                    if (!$userData instanceof UserData) {
                         $userData = new UserData();
                         $userData->setUser($user);
                         $user->setDetailData($userData);
@@ -1532,7 +1553,6 @@ class UserController extends ApiBaseController
                     return $response;
                 }
             }
-
             $data = [
                 'errors' => $errors,
                 'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE

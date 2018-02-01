@@ -111,7 +111,6 @@ class User implements AdvancedUserInterface, \Serializable
 
     public function __construct()
     {
-        $this->is_active = true;
         $this->tags = new ArrayCollection();
     }
 

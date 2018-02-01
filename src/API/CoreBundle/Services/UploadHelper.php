@@ -46,8 +46,11 @@ class UploadHelper
      *
      *
      * @return array
+     * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
-    public function uploadFiles($files)
+    public function uploadFiles($files): array
     {
         $slugs = [];
         foreach ($files as $file) {
@@ -65,8 +68,11 @@ class UploadHelper
      *
      * @param bool $public
      * @return string
+     * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
-    public function uploadFile(UploadedFile $file, bool $public=false)
+    public function uploadFile(UploadedFile $file, bool $public=false): string
     {
         $fileEntity = new File();
         $uploadDir = $this->getUploadDir();
@@ -93,7 +99,6 @@ class UploadHelper
     public function getUploadDir($onlyName = false)
     {
         $characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".time();
-
 
         $unique = md5(str_shuffle($characters));
         if ($onlyName) {

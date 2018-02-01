@@ -74,7 +74,7 @@ class UserService
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function getUserResponse(array $ids)
+    public function getUserResponse(array $ids): array
     {
         $userId = $ids['userId'];
         $user = $this->em->getRepository('APICoreBundle:User')->getUserResponse($userId);
@@ -98,9 +98,7 @@ class UserService
     {
         $responseData = $this->em->getRepository('APICoreBundle:User')->getUsersSearch($term, $page, $isActive, $order, $limit);
 
-        $response = [
-            'data' => $responseData['array'],
-        ];
+        $response['data'] = $responseData['array'];
 
         $url = $this->router->generate('user_search');
 
@@ -137,7 +135,7 @@ class UserService
      * @param array $ids
      * @return array
      */
-    private function getUserLinks(array $ids)
+    private function getUserLinks(array $ids):array
     {
         $userId = $ids['userId'];
         $userRoleId = $ids['userRoleId'];
@@ -156,7 +154,7 @@ class UserService
         $otherLinks = [
             'put' => $this->router->generate('user_update', ['id' => $userId]),
             'put: user-role' => $this->router->generate('user_update_with_user_role', ['id' => $userId, 'userRoleId' => $userRoleId]),
-            'delete' => $this->router->generate('user_delete', ['id' => $userId]),
+            'inactivate' => $this->router->generate('user_delete', ['id' => $userId]),
             'restore' => $this->router->generate('user_restore', ['id' => $userId]),
         ];
 

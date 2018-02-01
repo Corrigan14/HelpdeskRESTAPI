@@ -23,7 +23,7 @@ company_update:
         id: '\d+'
 
 company_delete:
-    path:     companies/{id}/inativate
+    path:     companies/{id}/inactivate
     defaults: { _controller: APICoreBundle:Company:delete }
     methods: [PUT]
     requirements:

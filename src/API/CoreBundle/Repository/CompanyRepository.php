@@ -176,7 +176,7 @@ class CompanyRepository extends EntityRepository
     /**
      * @return array
      */
-    public function getAllCompanyEntitiesWithIdAndTitle()
+    public function getAllCompanyEntitiesWithIdAndTitle():array
     {
         $query = $this->createQueryBuilder('company')
             ->select('company.id,  company.title')

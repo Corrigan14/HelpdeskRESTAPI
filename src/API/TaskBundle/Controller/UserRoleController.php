@@ -242,7 +242,8 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/user-roles/5",
-     *           "delete": "/api/v1/task-bundle/user-roles/5"
+     *           "inactivate": "/api/v1/task-bundle/user-roles/5/inactivate"
+     *           "restore": "/api/v1/task-bundle/user-roles/5/restore"
      *         }
      *      }
      *
@@ -342,8 +343,9 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/user-roles/5",
-     *           "delete": "/api/v1/task-bundle/user-roles/5"
+     *           "put": "/api/v1/task-bundle/user-roles/5"
+     *           "inactivate": "/api/v1/task-bundle/user-roles/5/inactivate"
+     *           "restore": "/api/v1/task-bundle/user-roles/5/restore"
      *         }
      *      }
      *
@@ -431,8 +433,9 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/user-roles/5",
-     *           "delete": "/api/v1/task-bundle/user-roles/5"
+     *           "put": "/api/v1/task-bundle/user-roles/5"
+     *           "inactivate": "/api/v1/task-bundle/user-roles/5/inactivate"
+     *           "restore": "/api/v1/task-bundle/user-roles/5/restore"
      *         }
      *      }
      *
@@ -615,7 +618,8 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/user-roles/5",
-     *           "delete": "/api/v1/task-bundle/user-roles/5"
+     *           "inactivate": "/api/v1/task-bundle/user-roles/5/inactivate"
+     *           "restore": "/api/v1/task-bundle/user-roles/5/restore"
      *         }
      *      }
      *
@@ -650,7 +654,7 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function restoreAction(int $id):Response
+    public function restoreAction(int $id): Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('user_role_restore', ['id' => $id]);
@@ -704,8 +708,7 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
             'description',
             'homepage',
             'acl',
-            'order',
-            'is_active'
+            'order'
         ];
 
         // JSON API Response - Content type and Location settings
@@ -745,16 +748,22 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
 
             // Check the ACL of role: this can not contain different ACL rules like logged user has
             if (isset($requestData['acl'])) {
-                $aclData = json_decode($requestData['acl'],true);
+                $aclData = json_decode($requestData['acl'], true);
                 if (!\is_array($aclData)) {
                     $aclData = explode(',', $requestData['acl']);
                 }
-                foreach ($aclData as $acl) {
-                    if (!\in_array($acl, $loggedUserAcl, true)) {
-                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                        $response = $response->setContent(json_encode(['message' => 'The ACL can contains just yours ACL params: ' . implode(',', $loggedUserAcl)]));
-                        return $response;
+                if (!empty($aclData)) {
+                    foreach ($aclData as $acl) {
+                        if (!\in_array($acl, $loggedUserAcl, true)) {
+                            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                            $response = $response->setContent(json_encode(['message' => 'The ACL can contain only yours ACL params: ' . implode(',', $loggedUserAcl)]));
+                            return $response;
+                        }
                     }
+                } else {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'The ACL can contain only yours ACL params: ' . implode(',', $loggedUserAcl)]));
+                    return $response;
                 }
                 $requestData['acl'] = $aclData;
             }

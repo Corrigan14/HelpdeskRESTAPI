@@ -137,6 +137,13 @@ class CdnController extends ApiBaseController
     public function uploadAction(Request $request)
     {
 
+        // Upload and save avatar
+//        $file = $request->files->get('image');
+//        if (null !== $file) {
+//            $imageSlug = $this->get('upload_helper')->uploadFile($file, true);
+//            $user->setImage($imageSlug);
+//        }
+
         $file = $this->getUploadedFile('file');
 
         if (false === $file) {

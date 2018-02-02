@@ -6,10 +6,7 @@ use API\CoreBundle\Entity\File;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
 use API\CoreBundle\Security\VoteOptions;
-use API\TaskBundle\Entity\Project;
-use API\TaskBundle\Entity\UserHasProject;
 use API\TaskBundle\Entity\UserRole;
-use API\TaskBundle\Security\ProjectAclOptions;
 use API\TaskBundle\Security\UserRoleAclOptions;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Igsem\APIBundle\Controller\ApiBaseController;
@@ -174,7 +171,7 @@ class UserController extends ApiBaseController
             $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
         } else {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::PROBLEM_WITH_FILTER_DATA_CODING]));
         }
 
         return $response;
@@ -395,7 +392,7 @@ class UserController extends ApiBaseController
             $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
         } else {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::PROBLEM_WITH_FILTER_DATA_CODING]));
         }
 
         return $response;
@@ -745,13 +742,6 @@ class UserController extends ApiBaseController
         $user = new User();
         $user->setIsActive(true);
 
-        // Upload and save avatar
-//        $file = $request->files->get('image');
-//        if (null !== $file) {
-//            $imageSlug = $this->get('upload_helper')->uploadFile($file, true);
-//            $user->setImage($imageSlug);
-//        }
-
         if ($userRoleId) {
             $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($userRoleId);
             if (!$userRole instanceof UserRole) {
@@ -1067,7 +1057,7 @@ class UserController extends ApiBaseController
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (!$user instanceof User) {
             $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::NOT_FOUND_MESSAGE]));
+            $response = $response->setContent(json_encode(['message' => 'User with requested Id does not exist!']));
             return $response;
         }
 
@@ -1076,7 +1066,7 @@ class UserController extends ApiBaseController
         $this->getDoctrine()->getManager()->flush();
 
         $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
-        $response = $response->setContent(json_encode(['message' => StatusCodesHelper::UNACITVATE_MESSAGE]));
+        $response = $response->setContent(json_encode(['message' => 'User was successfully inactivated!']));
         return $response;
     }
 
@@ -1230,11 +1220,10 @@ class UserController extends ApiBaseController
             return $response;
         }
 
-        /** @var User $user */
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($id);
         if (!$user instanceof User) {
             $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::NOT_FOUND_MESSAGE]));
+            $response = $response->setContent(json_encode(['message' => 'User with requested Id does not exist!']));
             return $response;
         }
 
@@ -1275,8 +1264,9 @@ class UserController extends ApiBaseController
      *     }
      *  },
      *  parameters={
-     *          {"name"="password", "dataType"="string", "required"=true, "format"="POST", "description"="Reseted password"},
-     *          {"name"="password_repeat", "dataType"="string", "required"=true, "format"="POST", "description"="Reseted password - repeat"}
+     *          {"name"="old_password", "dataType"="string", "required"=false, "format"="POST", "description"="Old password"},
+     *          {"name"="new_password", "dataType"="string", "required"=true, "format"="POST", "description"="New password"},
+     *          {"name"="new_password_repeat", "dataType"="string", "required"=true, "format"="POST", "description"="New password - repeat"}
      *  },
      *  headers={
      *     {
@@ -1302,7 +1292,6 @@ class UserController extends ApiBaseController
      */
     public function resetPasswordAction(Request $request, int $id)
     {
-
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('user_reset_password', ['id' => $id]);
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
@@ -1323,9 +1312,9 @@ class UserController extends ApiBaseController
 
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
         if (false !== $requestBody) {
-            if (isset($requestBody['password']) && isset($requestBody['password_repeat'])) {
-                $password = $requestBody['password'];
-                $passwordRepeated = $requestBody['password_repeat'];
+            if (isset($requestBody['new_password']) && isset($requestBody['new_password_repeat'])) {
+                $password = $requestBody['new_password'];
+                $passwordRepeated = $requestBody['new_password_repeat'];
 
                 if (\strlen($password) < 8) {
                     $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
@@ -1338,21 +1327,46 @@ class UserController extends ApiBaseController
                     $response = $response->setContent(json_encode(['message' => 'Password and repeated password are not the same!']));
                     return $response;
                 }
+            } else {
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Problem with a new password and its repetition! Both parameters are required!']));
+                return $response;
+            }
 
+            // Admin can restart everybody's password
+            if ($this->get('acl_helper')->isAdmin()) {
                 $user->setPassword($this->get('security.password_encoder')->encodePassword($user, $password));
                 $this->getDoctrine()->getManager()->persist($user);
                 $this->getDoctrine()->getManager()->flush();
 
                 $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
                 $response = $response->setContent(json_encode(['message' => 'Password was successfully changed!']));
+                return $response;
             } else {
-                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE]));
+                // Check the old password
+                if (isset($requestBody['old_password'])) {
+                    if ($this->get('security.password_encoder')->isPasswordValid($user, $requestBody['old_password'])) {
+                        $user->setPassword($this->get('security.password_encoder')->encodePassword($user, $password));
+                        $this->getDoctrine()->getManager()->persist($user);
+                        $this->getDoctrine()->getManager()->flush();
 
+                        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'Password was successfully changed!']));
+                        return $response;
+                    } else {
+                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'OLD Password is not correct! Please contact ADMIN to reset your password!']));
+                        return $response;
+                    }
+                } else {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'OLD Password is required!']));
+                    return $response;
+                }
             }
         } else {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         }
         return $response;
     }
@@ -1451,7 +1465,7 @@ class UserController extends ApiBaseController
                 $image = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
                     'slug' => $requestData['image']
                 ]);
-                if(!$image instanceof File){
+                if (!$image instanceof File) {
                     $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                     $response = $response->setContent(json_encode(['message' => 'Image with requested SLUG does not exist in DB! Image has to be UPLOADED by /api/v1/core-bundle/cdn/upload first!']));
                     return $response;
@@ -1534,7 +1548,7 @@ class UserController extends ApiBaseController
             $response = $response->setContent(json_encode($data));
         } else {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_SUPPORT]));
         }
         return $response;
     }

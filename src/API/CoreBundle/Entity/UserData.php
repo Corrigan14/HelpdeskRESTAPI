@@ -179,7 +179,7 @@ class UserData
      *
      * @return int
      */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
@@ -191,9 +191,13 @@ class UserData
      *
      * @return UserData
      */
-    public function setName($name)
+    public function setName($name): UserData
     {
-        $this->name = $name;
+        if ('null' === strtolower($name)) {
+            $this->name = null;
+        } else {
+            $this->name = $name;
+        }
 
         return $this;
     }
@@ -201,7 +205,7 @@ class UserData
     /**
      * Get name
      *
-     * @return string
+     * @return string|null
      */
     public function getName()
     {
@@ -215,9 +219,13 @@ class UserData
      *
      * @return UserData
      */
-    public function setSurname($surname)
+    public function setSurname($surname): UserData
     {
-        $this->surname = $surname;
+        if ('null' === strtolower($surname)) {
+            $this->surname = null;
+        } else {
+            $this->surname = $surname;
+        }
 
         return $this;
     }
@@ -225,7 +233,7 @@ class UserData
     /**
      * Get surname
      *
-     * @return string
+     * @return string|null
      */
     public function getSurname()
     {
@@ -239,9 +247,13 @@ class UserData
      *
      * @return UserData
      */
-    public function setTitleBefore($titleBefore)
+    public function setTitleBefore($titleBefore): UserData
     {
-        $this->title_before = $titleBefore;
+        if ('null' === strtolower($titleBefore)) {
+            $this->title_before = null;
+        } else {
+            $this->title_before = $titleBefore;
+        }
 
         return $this;
     }
@@ -249,7 +261,7 @@ class UserData
     /**
      * Get titleBefore
      *
-     * @return string
+     * @return string|null
      */
     public function getTitleBefore()
     {
@@ -263,9 +275,13 @@ class UserData
      *
      * @return UserData
      */
-    public function setTitleAfter($titleAfter)
+    public function setTitleAfter($titleAfter): UserData
     {
-        $this->title_after = $titleAfter;
+        if ('null' === strtolower($titleAfter)) {
+            $this->title_after = null;
+        } else {
+            $this->title_after = $titleAfter;
+        }
 
         return $this;
     }
@@ -273,7 +289,7 @@ class UserData
     /**
      * Get titleAfter
      *
-     * @return string
+     * @return string|null
      */
     public function getTitleAfter()
     {
@@ -287,9 +303,13 @@ class UserData
      *
      * @return UserData
      */
-    public function setFunction($function)
+    public function setFunction($function): UserData
     {
-        $this->function = $function;
+        if ('null' === strtolower($function)) {
+            $this->function = null;
+        } else {
+            $this->function = $function;
+        }
 
         return $this;
     }
@@ -297,7 +317,7 @@ class UserData
     /**
      * Get function
      *
-     * @return string
+     * @return string|null
      */
     public function getFunction()
     {
@@ -311,9 +331,13 @@ class UserData
      *
      * @return UserData
      */
-    public function setMobile($mobile)
+    public function setMobile($mobile): UserData
     {
-        $this->mobile = $mobile;
+        if ('null' === strtolower($mobile)) {
+            $this->mobile = null;
+        } else {
+            $this->mobile = $mobile;
+        }
 
         return $this;
     }
@@ -321,7 +345,7 @@ class UserData
     /**
      * Get mobile
      *
-     * @return string
+     * @return string|null
      */
     public function getMobile()
     {
@@ -335,9 +359,13 @@ class UserData
      *
      * @return UserData
      */
-    public function setTel($tel)
+    public function setTel($tel): UserData
     {
-        $this->tel = $tel;
+        if ('null' === strtolower($tel)) {
+            $this->tel = null;
+        } else {
+            $this->tel = $tel;
+        }
 
         return $this;
     }
@@ -345,7 +373,7 @@ class UserData
     /**
      * Get tel
      *
-     * @return string
+     * @return string|null
      */
     public function getTel()
     {
@@ -359,9 +387,13 @@ class UserData
      *
      * @return UserData
      */
-    public function setFax($fax)
+    public function setFax($fax): UserData
     {
-        $this->fax = $fax;
+        if ('null' === strtolower($fax)) {
+            $this->fax = null;
+        } else {
+            $this->fax = $fax;
+        }
 
         return $this;
     }
@@ -369,7 +401,7 @@ class UserData
     /**
      * Get fax
      *
-     * @return string
+     * @return string|null
      */
     public function getFax()
     {
@@ -383,9 +415,13 @@ class UserData
      *
      * @return UserData
      */
-    public function setSignature($signature)
+    public function setSignature($signature): UserData
     {
-        $this->signature = $signature;
+        if ('null' === strtolower($signature)) {
+            $this->signature = null;
+        } else {
+            $this->signature = $signature;
+        }
 
         return $this;
     }
@@ -393,7 +429,7 @@ class UserData
     /**
      * Get signature
      *
-     * @return string
+     * @return string|null
      */
     public function getSignature()
     {
@@ -407,7 +443,7 @@ class UserData
      *
      * @return UserData
      */
-    public function setUser(User $user = null)
+    public function setUser(User $user = null): UserData
     {
         $this->user = $user;
 
@@ -419,7 +455,7 @@ class UserData
      *
      * @return User
      */
-    public function getUser()
+    public function getUser(): User
     {
         return $this->user;
     }
@@ -431,9 +467,13 @@ class UserData
      *
      * @return UserData
      */
-    public function setStreet($street)
+    public function setStreet($street): UserData
     {
-        $this->street = $street;
+        if ('null' === strtolower($street)) {
+            $this->street = null;
+        } else {
+            $this->street = $street;
+        }
 
         return $this;
     }
@@ -441,7 +481,7 @@ class UserData
     /**
      * Get street
      *
-     * @return string
+     * @return string|null
      */
     public function getStreet()
     {
@@ -455,9 +495,13 @@ class UserData
      *
      * @return UserData
      */
-    public function setCity($city)
+    public function setCity($city): UserData
     {
-        $this->city = $city;
+        if ('null' === strtolower($city)) {
+            $this->city = null;
+        } else {
+            $this->city = $city;
+        }
 
         return $this;
     }
@@ -465,7 +509,7 @@ class UserData
     /**
      * Get city
      *
-     * @return string
+     * @return string|null
      */
     public function getCity()
     {
@@ -479,9 +523,13 @@ class UserData
      *
      * @return UserData
      */
-    public function setZip($zip)
+    public function setZip($zip): UserData
     {
-        $this->zip = $zip;
+        if ('null' === strtolower($zip)) {
+            $this->zip = null;
+        } else {
+            $this->zip = $zip;
+        }
 
         return $this;
     }
@@ -489,7 +537,7 @@ class UserData
     /**
      * Get zip
      *
-     * @return string
+     * @return string|null
      */
     public function getZip()
     {
@@ -503,9 +551,13 @@ class UserData
      *
      * @return UserData
      */
-    public function setCountry($country)
+    public function setCountry($country): UserData
     {
-        $this->country = $country;
+        if ('null' === strtolower($country)) {
+            $this->country = null;
+        } else {
+            $this->country = $country;
+        }
 
         return $this;
     }
@@ -513,7 +565,7 @@ class UserData
     /**
      * Get country
      *
-     * @return string
+     * @return string|null
      */
     public function getCountry()
     {
@@ -527,9 +579,13 @@ class UserData
      *
      * @return UserData
      */
-    public function setFacebook($facebook)
+    public function setFacebook($facebook): UserData
     {
-        $this->facebook = $facebook;
+        if ('null' === strtolower($facebook)) {
+            $this->facebook = null;
+        } else {
+            $this->facebook = $facebook;
+        }
 
         return $this;
     }
@@ -537,7 +593,7 @@ class UserData
     /**
      * Get facebook
      *
-     * @return string
+     * @return string|null
      */
     public function getFacebook()
     {
@@ -551,9 +607,13 @@ class UserData
      *
      * @return UserData
      */
-    public function setTwitter($twitter)
+    public function setTwitter($twitter): UserData
     {
-        $this->twitter = $twitter;
+        if ('null' === strtolower($twitter)) {
+            $this->twitter = null;
+        } else {
+            $this->twitter = $twitter;
+        }
 
         return $this;
     }
@@ -561,7 +621,7 @@ class UserData
     /**
      * Get twitter
      *
-     * @return string
+     * @return string|null
      */
     public function getTwitter()
     {
@@ -575,9 +635,13 @@ class UserData
      *
      * @return UserData
      */
-    public function setLinkdin($linkdin)
+    public function setLinkdin($linkdin): UserData
     {
-        $this->linkdin = $linkdin;
+        if ('null' === strtolower($linkdin)) {
+            $this->linkdin = null;
+        } else {
+            $this->linkdin = $linkdin;
+        }
 
         return $this;
     }
@@ -585,7 +649,7 @@ class UserData
     /**
      * Get linkdin
      *
-     * @return string
+     * @return string|null
      */
     public function getLinkdin()
     {
@@ -599,9 +663,13 @@ class UserData
      *
      * @return UserData
      */
-    public function setGoogle($google)
+    public function setGoogle($google): UserData
     {
-        $this->google = $google;
+        if ('null' === strtolower($google)) {
+            $this->google = null;
+        } else {
+            $this->google = $google;
+        }
 
         return $this;
     }
@@ -609,7 +677,7 @@ class UserData
     /**
      * Get google
      *
-     * @return string
+     * @return string|null
      */
     public function getGoogle()
     {

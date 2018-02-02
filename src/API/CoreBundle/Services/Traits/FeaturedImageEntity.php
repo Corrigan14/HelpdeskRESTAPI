@@ -37,6 +37,12 @@ trait FeaturedImageEntity
      */
     public function setImage(String $image)
     {
-        $this->image =$image;
+        if ('null' === strtolower($image)) {
+            $this->image = null;
+        } else {
+            $this->image = $image;
+        }
+
+        $this->image = $image;
     }
 }

@@ -8,6 +8,11 @@ users_list_of_all_active:
     defaults: { _controller: APICoreBundle:User:listOfAllUsers }
     methods: [GET]
 
+user_search:
+    path:     /users/search
+    defaults: { _controller: APICoreBundle:User:search }
+    methods: [GET]
+
 user:
     path:     /users/{id}
     defaults: { _controller: APICoreBundle:User:get }
@@ -75,11 +80,6 @@ user_restore:
     methods: [PUT]
     requirements:
         id: '\d+'
-
-user_search:
-    path:     /users/search
-    defaults: { _controller: APICoreBundle:User:search }
-    methods: [GET]
 
 user_reset_password:
    path:     /users/{id}/reset-password

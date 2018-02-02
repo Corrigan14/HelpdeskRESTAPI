@@ -1011,15 +1011,7 @@ class UserController extends ApiBaseController
             return $response;
         }
 
-        // Upload and save avatar
-        $file = $request->files->get('image');
-        if (null !== $file) {
-            $imageSlug = $this->get('upload_helper')->uploadFile($file, true);
-            $user->setImage($imageSlug);
-        }
-
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
-
         return $this->updateUser($user, $requestBody, false, $locationURL);
     }
 
@@ -1455,7 +1447,7 @@ class UserController extends ApiBaseController
             }
 
             //Check if IMAGE was already uploaded
-            if (isset($requestData['image'])) {
+            if (isset($requestData['image']) && 'null' !== strtolower($requestData['image'])) {
                 $image = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
                     'slug' => $requestData['image']
                 ]);
@@ -1473,7 +1465,6 @@ class UserController extends ApiBaseController
                 if (isset($requestData['password'])) {
                     $user->setPassword($this->get('security.password_encoder')->encodePassword($user, $requestData['password']));
                 }
-
                 $this->getDoctrine()->getManager()->persist($user);
                 $this->getDoctrine()->getManager()->flush();
 
@@ -1482,24 +1473,6 @@ class UserController extends ApiBaseController
                     $userCompanyId = $userCompany->getId();
                 } else {
                     $userCompanyId = false;
-                }
-
-                if ($create) {
-                    // Every New USER has ACL VIEW_OWN_TASKS to INBOX project
-                    $inboxProject = $this->getDoctrine()->getRepository('APITaskBundle:Project')->findOneBy([
-                        'title' => 'INBOX'
-                    ]);
-
-                    if ($inboxProject instanceof Project) {
-                        $acl = [];
-                        $acl[] = ProjectAclOptions::VIEW_OWN_TASKS;
-                        $userHasProject = new UserHasProject();
-                        $userHasProject->setUser($user);
-                        $userHasProject->setProject($inboxProject);
-                        $userHasProject->setAcl($acl);
-                        $this->getDoctrine()->getManager()->persist($userHasProject);
-                        $this->getDoctrine()->getManager()->flush();
-                    }
                 }
 
                 $userId = $user->getId();

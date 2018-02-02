@@ -245,7 +245,11 @@ class User implements AdvancedUserInterface, \Serializable
      */
     public function setLanguage($language)
     {
-        $this->language = $language;
+        if ('null' === strtolower($language)) {
+            $this->language = null;
+        } else {
+            $this->language = $language;
+        }
 
         return $this;
     }

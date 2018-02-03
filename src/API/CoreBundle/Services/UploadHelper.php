@@ -72,27 +72,33 @@ class UploadHelper
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
-    public function uploadFile(UploadedFile $file, bool $public=false)
+    public function uploadFile(UploadedFile $file, bool $public = false)
     {
         $fileEntity = new File();
         $uploadDir = $this->getUploadDir();
+
         $fileEntity->setUploadDir($uploadDir['dir']);
         $fileEntity->setName($file->getClientOriginalName());
         $fileEntity->setSize($file->getClientSize());
-        $fileEntity->setTempName($file->getFilename());
         try {
             $fileEntity->setType($file->getMimeType());
         } catch (\Exception $e) {
             return false;
         }
+        $guessExtension = $file->guessExtension();
+        $fileName = $file->getFilename() . '.' . $guessExtension;
+
+        $fileEntity->setTempName($fileName);
         $fileEntity->setPublic($public);
         $this->em->persist($fileEntity);
         $this->em->flush();
 
-        $file->move($uploadDir['path'],$file->getFilename());
+        $file->move($uploadDir['path'], $fileName);
 
         return $fileEntity;
+
     }
+
     /**
      * Get a relatively unique folder name
      *
@@ -102,7 +108,7 @@ class UploadHelper
      */
     public function getUploadDir($onlyName = false)
     {
-        $characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".time();
+        $characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" . time();
 
         $unique = md5(str_shuffle($characters));
         if ($onlyName) {
@@ -110,7 +116,7 @@ class UploadHelper
         }
 
         $uploadDir = $this->uploadDir;
-        $uploadDir = $uploadDir.DIRECTORY_SEPARATOR.$unique;
+        $uploadDir = $uploadDir . DIRECTORY_SEPARATOR . $unique;
 
 
         if (!is_dir($uploadDir)) {
@@ -120,7 +126,7 @@ class UploadHelper
 
         return [
             'path' => $uploadDir,
-            'dir'  => $unique,
+            'dir' => $unique,
         ];
     }
 }

@@ -8,9 +8,9 @@ file_upload_image:
     defaults: { _controller: APICoreBundle:Cdn:uploadImage }
     methods: [POST]
 
-file_load:
-    path:     /cdn/load/{slug}
-    defaults: { _controller: APICoreBundle:Cdn:load }
+file_load_image:
+    path:     /cdn/{slug}/load-image
+    defaults: { _controller: APICoreBundle:Cdn:loadImage }
     methods: [GET]
     requirements:
 

@@ -160,8 +160,8 @@ class CdnController extends ApiBaseController
         }
 
         // Check if the uploading file is an IMAGE
-        $fileType = $uploadingFile->getMimeType();
-        if ('image/png' === $fileType || 'image/gif' === $fileType || 'image/jpg' === $fileType || 'image/jpeg' === $fileType) {
+        $fileType = $uploadingFile->guessExtension();
+        if ('png' === $fileType || 'gif' === $fileType || 'jpg' === $fileType || 'jpeg' === $fileType) {
             $file = $this->get('upload_helper')->uploadFile($uploadingFile);
             if ($file) {
                 $responseArray['data'] = ['slug' => $file->getSlug()];
@@ -178,6 +178,78 @@ class CdnController extends ApiBaseController
             $response = $response->setContent(json_encode(['message' => 'Not supported image type!']));
             return $response;
         }
+    }
+
+    /**
+     *  ### Response ###
+     *      {
+     *        "data":
+     *        {
+     *           "url": "/home/martina/Desktop/Symfony/taskmanagercore/app/uploads/d3bf991fae9a36a9c2f58c5a780d4d15/phphHwC70.png"
+     *        }
+     *      }
+     *
+     * @ApiDoc(
+     *  description="Load a Image - returns image location",
+     *  requirements={
+     *     {
+     *       "name"="slug",
+     *       "dataType"="string",
+     *       "description"="Slug of a image"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      404 ="Not found file"
+     *  }
+     *  )
+     *
+     * @param string $slug
+     *
+     * @return Response
+     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
+     *
+     */
+    public function loadImageAction($slug): Response
+    {
+        $locationURL = $this->generateUrl('file_load_image', ['slug' => $slug]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        $fileEntity = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
+            'slug' => $slug,
+        ]);
+
+        if (!$fileEntity instanceof File) {
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'File with requested Slug does not exist in DB!']));
+            return $response;
+        }
+
+        // Check if the File exists in a web-page file system
+        $uploadDir = $this->getParameter('upload_dir');
+        $file = $uploadDir . DIRECTORY_SEPARATOR . $fileEntity->getUploadDir() . DIRECTORY_SEPARATOR . $fileEntity->getTempName();
+
+        if (!file_exists($file)) {
+            $response = $response->setStatusCode(StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'File with requested Slug does not exist in a web-page File System!']));
+            return $response;
+        }
+
+        $responseArray ['data'] = ['url' => $file];
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($responseArray));
+        return $response;
     }
 
     /**

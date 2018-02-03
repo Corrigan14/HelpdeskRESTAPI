@@ -67,12 +67,12 @@ class UploadHelper
      * @param UploadedFile $file
      *
      * @param bool $public
-     * @return string
+     * @return bool|File
      * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
-    public function uploadFile(UploadedFile $file, bool $public=false): string
+    public function uploadFile(UploadedFile $file, bool $public=false)
     {
         $fileEntity = new File();
         $uploadDir = $this->getUploadDir();
@@ -80,14 +80,18 @@ class UploadHelper
         $fileEntity->setName($file->getClientOriginalName());
         $fileEntity->setSize($file->getClientSize());
         $fileEntity->setTempName($file->getFilename());
-        $fileEntity->setType($file->getMimeType());
+        try {
+            $fileEntity->setType($file->getMimeType());
+        } catch (\Exception $e) {
+            return false;
+        }
         $fileEntity->setPublic($public);
         $this->em->persist($fileEntity);
         $this->em->flush();
-        $file->move($uploadDir['path']);
 
+        $file->move($uploadDir['path'],$file->getFilename());
 
-        return $fileEntity->getSlug();
+        return $fileEntity;
     }
     /**
      * Get a relatively unique folder name

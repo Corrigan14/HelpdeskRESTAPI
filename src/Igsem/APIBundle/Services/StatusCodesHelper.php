@@ -20,7 +20,10 @@ class StatusCodesHelper
     const ACITVATE_MESSAGE = 'The is_active param of entity was set to 1';
 
     const INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT = 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded';
-    const INVALID_DATA_FORMAT_MESSAGE_JSON_SUPPORT = 'Problem with data coding. Supported Content Types: application/json';
+    const INVALID_DATA_FORMAT_MESSAGE_JSON_SUPPORT = 'Problem with data coding. Supported Content Type: application/json';
+    const INVALID_DATA_FORMAT_MESSAGE_X_CODE_SUPPORT = 'Problem with data coding. Supported Content Type: application/x-www-form-urlencoded';
+    const INVALID_DATA_FORMAT_MESSAGE_MULTIPART_FORM_SUPPORT = 'Problem with data coding. Supported Content Type: multipart/form-data';
+    const INVALID_DATA_FORMAT_MESSAGE_IMAGE_SUPPORT = 'Problem with data coding. Supported Content Type: image/gif';
     const PROBLEM_WITH_FILTER_DATA_CODING = 'Problem with filter data coding!';
     const BAD_REQUEST_MESSAGE = 'Bad Request';
     const BAD_REQUEST_CODE = 400;

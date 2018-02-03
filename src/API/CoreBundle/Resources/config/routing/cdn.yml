@@ -12,4 +12,5 @@ file_load:
     path:     /cdn/load/{slug}
     defaults: { _controller: APICoreBundle:Cdn:load }
     methods: [GET]
+    requirements:
 

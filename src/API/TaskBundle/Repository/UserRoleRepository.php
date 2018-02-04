@@ -30,7 +30,7 @@ class UserRoleRepository extends EntityRepository
         $order = $options['order'];
         $limit = $options['limit'];
 
-        $isActiveParam = ('true' === $isActive) ? 1 : 0;
+        $isActiveParam = ('true' === $isActive || true === $isActive) ? 1 : 0;
 
         if ('true' === $isActive || 'false' === $isActive) {
             $query = $this->createQueryBuilder('userRole')

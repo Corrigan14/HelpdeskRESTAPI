@@ -72,7 +72,7 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
         }
 
         $userHasProjects = $this->user->getUserHasProjects();
-        if (count($userHasProjects) > 0) {
+        if (\count($userHasProjects) > 0) {
             return true;
         }
 
@@ -126,10 +126,10 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    public function hasAclProjectRight($action, UserHasProject $userHasProject)
+    public function hasAclProjectRight($action, UserHasProject $userHasProject): bool
     {
         $acl = $userHasProject->getAcl();
-        if (in_array($action, $acl, true)) {
+        if (\in_array($action, $acl, true)) {
             return true;
         }
 
@@ -145,21 +145,21 @@ class ProjectVoter extends ApiBaseVoter implements VoterInterface
      * @return bool
      * @throws \InvalidArgumentException
      */
-    public function hasAclProjectRightsConditionOR(array $actions, Project $project)
+    public function hasAclProjectRightsConditionOR(array $actions, Project $project): bool
     {
         foreach ($actions as $action) {
-            if (!in_array($action, ProjectAclOptions::getConstants(), true)) {
+            if (!\in_array($action, ProjectAclOptions::getConstants(), true)) {
                 throw new \InvalidArgumentException('Action is not valid, please list your action in the options list');
             }
 
             $userHasProjects = $this->user->getUserHasProjects();
 
-            if (count($userHasProjects) > 0) {
+            if (\count($userHasProjects) > 0) {
                 /** @var UserHasProject $uhp */
                 foreach ($userHasProjects as $uhp) {
                     if ($uhp->getProject() === $project) {
                         $acl = $uhp->getAcl();
-                        if (in_array($action, $acl, true)) {
+                        if (\in_array($action, $acl, true)) {
                             return true;
                         }
                     }

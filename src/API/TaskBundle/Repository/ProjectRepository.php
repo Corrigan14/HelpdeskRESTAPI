@@ -28,15 +28,12 @@ class ProjectRepository extends EntityRepository
     public function getAllEntities(int $page, array $options = [])
     {
         $isAdmin = $options['isAdmin'];
+        $loggedUserId = $options['loggedUserId'];
         $isActive = $options['isActive'];
         $limit = $options['limit'];
-        $projectIdArray = $options['projectIdArray'];
+        $order = $options['order'];
 
-        if ('true' === $isActive || true === $isActive) {
-            $isActiveParam = 1;
-        } else {
-            $isActiveParam = 0;
-        }
+        $isActiveParam = ('true' === $isActive || true === $isActive) ? 1 : 0;
 
         if ($isAdmin) {
             if ('true' === $isActive || 'false' === $isActive || true === $isActive || false === $isActive) {
@@ -44,7 +41,7 @@ class ProjectRepository extends EntityRepository
                     ->select('p, userHasProjects, uhpUser')
                     ->leftJoin('p.userHasProjects', 'userHasProjects')
                     ->leftJoin('userHasProjects.user', 'uhpUser')
-                    ->orderBy('p.id', 'DESC')
+                    ->orderBy('p.title', $order)
                     ->where('p.is_active = :isActive')
                     ->setParameter('isActive', $isActiveParam)
                     ->distinct();
@@ -53,21 +50,28 @@ class ProjectRepository extends EntityRepository
                     ->select('p, userHasProjects, uhpUser')
                     ->leftJoin('p.userHasProjects', 'userHasProjects')
                     ->leftJoin('userHasProjects.user', 'uhpUser')
-                    ->orderBy('p.id', 'DESC')
+                    ->orderBy('p.title', $order)
                     ->distinct();
             }
         } else {
             if ('true' === $isActive || 'false' === $isActive || true === $isActive || false === $isActive) {
+                // Select only in Allowed users projects
                 $query = $this->createQueryBuilder('p')
                     ->select('p, userHasProjects, uhpUser')
                     ->leftJoin('p.userHasProjects', 'userHasProjects')
                     ->leftJoin('userHasProjects.user', 'uhpUser')
-                    ->where('p.is_active = :isActive')
-                    ->andWhere('p.id IN (:projectIds)')
-                    ->orderBy('p.id', 'DESC')
+                    ->leftJoin('p.createdBy', 'projectCreator')
+                    ->where('p.is_active = :isActive');
+
+                $query->andWhere($query->expr()->orX(
+                    'projectCreator.id = :loggedUserId',
+                    'uhpUser.id = :loggedUserId'
+                ));
+
+                $query->orderBy('p.title', $order)
                     ->setParameters([
-                        'isActive' => $isActive,
-                        'projectIds' => $projectIdArray
+                        'isActive' => $isActiveParam,
+                        'loggedUserId' => $loggedUserId
                     ])
                     ->distinct();
             } else {
@@ -75,9 +79,15 @@ class ProjectRepository extends EntityRepository
                     ->select('p, userHasProjects, uhpUser')
                     ->leftJoin('p.userHasProjects', 'userHasProjects')
                     ->leftJoin('userHasProjects.user', 'uhpUser')
-                    ->where('p.id IN (:projectIds)')
-                    ->orderBy('p.id', 'DESC')
-                    ->setParameter('projectIds', $projectIdArray)
+                    ->leftJoin('p.createdBy', 'projectCreator');
+
+                $query->where($query->expr()->orX(
+                    'projectCreator.id = :loggedUserId',
+                    'uhpUser.id = :loggedUserId'
+                ));
+
+                $query->orderBy('p.title', $order)
+                    ->setParameter('loggedUserId', $loggedUserId)
                     ->distinct();
             }
         }

@@ -82,7 +82,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      *
      * @ApiDoc(
-     *  description="Returns a list of logged User's Projects: created and based on ACL (user_has_project: every project where user has some ACL)",
+     *  description="Returns a list of logged User's Projects: created and based on his ACL (user_has_project: every project where user has some ACL),
+     * Admin can see all projects.",
      *  filters={
      *     {
      *       "name"="page",
@@ -95,6 +96,10 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *     {
      *       "name"="limit",
      *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
+     *     },
+     *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by Title"
      *     }
      *  },
      *  headers={
@@ -112,74 +117,65 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
-     * @return JsonResponse|Response
+     * @return Response
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('projects_list');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         if (!$this->get('project_voter')->isGranted(VoteOptions::LIST_PROJECTS)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        $pageNum = $request->get('page');
-        $pageNum = (int)$pageNum;
-        $page = ($pageNum === 0) ? 1 : $pageNum;
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ?: 10;
+        if (false !== $requestBody) {
+            $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody);
 
-        if(999 === $limit){
-            $page = 1;
+            $page = $processedFilterParams['page'];
+            $limit = $processedFilterParams['limit'];
+            $order = $processedFilterParams['order'];
+            $isActive = $processedFilterParams['isActive'];
+
+            $filtersForUrl = [
+                'isActive' => '&isActive=' . $isActive,
+                'order' => '&order=' . $order,
+            ];
+
+            $options = [
+                'isAdmin' => $this->get('project_voter')->isAdmin(),
+                'loggedUserId' => $this->getUser()->getId(),
+                'isActive' => $isActive,
+                'limit' => $limit,
+                'order' => $order,
+                'filtersForUrl' => $filtersForUrl
+            ];
+
+            $projectsArray = $this->get('project_service')->getProjectsResponse($page, $options);
+            $response = $response->setContent(json_encode($projectsArray));
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         }
 
-        $isActive = $request->get('isActive') ?: 'all';
-
-        $filtersForUrl = [];
-        if (null !== $isActive) {
-            $filtersForUrl['isActive'] = '&isActive=' . $isActive;
-        }
-
-        // Find projects IDs which user Created OR he has any ACL permission in it
-        $projectIdArray = [];
-
-        $loggedUsersCreatedProjects = $this->getUser()->getProjects();
-        $loggedUsersAvailableProjects = $this->getUser()->getUserHasProjects();
-        if ($loggedUsersCreatedProjects) {
-            /** @var Project $createdProject */
-            foreach ($loggedUsersCreatedProjects as $createdProject) {
-                $projectIdArray[] = $createdProject->getId();
-            }
-        }
-
-        if ($loggedUsersAvailableProjects) {
-            /** @var UserHasProject $availableProject */
-            foreach ($loggedUsersAvailableProjects as $availableProject) {
-                $projectId = $availableProject->getProject()->getId();
-                if (!\in_array($projectId, $projectIdArray, true)) {
-                    $projectIdArray[] = $projectId;
-                }
-            }
-        }
-
-        $options = [
-            'isAdmin' => $this->get('project_voter')->isAdmin(),
-            'loggedUser' => $this->getUser(),
-            'isActive' => strtolower($isActive),
-            'limit' => $limit,
-            'filtersForUrl'=> $filtersForUrl,
-            'projectIdArray' => $projectIdArray
-        ];
-
-        return $this->json($this->get('project_service')->getProjectsResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
     }
 
 
     /**
      *  ### Response ###
      *     {
+     *       "data":
      *       [
      *          {
      *             "id": "1",
@@ -202,7 +198,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      *
      * @ApiDoc(
-     *  description="Returns a list of logged User's Active Projects: based on ACL (user_has_project: CREATE_TASK ACL)",
+     *  description="Returns a list of logged User's Active Projects where he can create tasks (user_has_project: CREATE_TASK ACL).
+     *  USAGE: list of project when task is being created. For ADMIN all projects are returned.",
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -218,6 +215,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @return JsonResponse|Response
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
@@ -225,6 +223,10 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      */
     public function listOfProjectsWhereCanCreateTasksLoggedUserAction()
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('projects_list_where_logged_user_can_create_tasks');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         /** @var User $loggedUser */
         $loggedUser = $this->getUser();
         $loggedUsersProjects = $loggedUser->getUserHasProjects();
@@ -232,12 +234,12 @@ class ProjectController extends ApiBaseController implements ControllerInterface
 
         $projectWhereLoggedUserCanCreateTasks = [];
         if (!$isAdmin) {
-            if (count($loggedUsersProjects) > 0) {
+            if (\count($loggedUsersProjects) > 0) {
                 /** @var UserHasProject $userHasProject */
                 foreach ($loggedUsersProjects as $userHasProject) {
                     $projectAcl = $userHasProject->getAcl();
                     $project = $userHasProject->getProject();
-                    if (in_array(ProjectAclOptions::CREATE_TASK, $projectAcl, true) && $project->getIsActive() === true) {
+                    if (\in_array(ProjectAclOptions::CREATE_TASK, $projectAcl, true) && $project->getIsActive() === true) {
                         $projectWhereLoggedUserCanCreateTasks[] = [
                             'id' => $project->getId(),
                             'title' => $project->getTitle(),
@@ -264,8 +266,11 @@ class ProjectController extends ApiBaseController implements ControllerInterface
                 ];
             }
         }
+        $responseArray['data'] = $projectWhereLoggedUserCanCreateTasks;
 
-        return $this->json($projectWhereLoggedUserCanCreateTasks, StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($responseArray));
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
     }
 
     /**

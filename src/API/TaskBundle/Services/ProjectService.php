@@ -50,9 +50,7 @@ class ProjectService
     {
         $responseData = $this->em->getRepository('APITaskBundle:Project')->getAllEntities($page, $options);
 
-        $response = [
-            'data' => $responseData['array'],
-        ];
+        $response ['data'] = $responseData['array'];
 
         $limit = $options['limit'];
         if (999 !== $limit) {
@@ -63,7 +61,7 @@ class ProjectService
 
         $filters = $options['filtersForUrl'];
 
-        $pagination = PaginationHelper::getPagination($this->router->generate('projects_list'),$limit,$page,$count,$filters);
+        $pagination = PaginationHelper::getPagination($this->router->generate('projects_list'), $limit, $page, $count, $filters);
 
         return array_merge($response, $pagination);
     }

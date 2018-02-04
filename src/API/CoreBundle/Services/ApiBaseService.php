@@ -137,7 +137,7 @@ class ApiBaseService
         }
 
         if (isset($requestBody['isActive'])) {
-            $isActive = $requestBody['isActive'];
+            $isActive = strtolower($requestBody['isActive']);
         } else {
             $isActive = 'all';
         }

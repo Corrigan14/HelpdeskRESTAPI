@@ -140,7 +140,7 @@ class ProjectRepository extends EntityRepository
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function getEntity($id)
+    public function getEntity($id): array
     {
         $query = $this->createQueryBuilder('project')
             ->select('project, userHasProjects, uhpUser')

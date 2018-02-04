@@ -317,9 +317,9 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *         }
      *        "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/projects/211",
-     *           "patch": "/api/v1/task-bundle/projects/211",
-     *           "delete": "/api/v1/task-bundle/projects/211"
+     *            "put": "/api/v1/task-bundle/projects/23",
+     *            "inactivate": "/api/v1/task-bundle/projects/23",
+     *            "restore": "/api/v1/task-bundle/projects/restore/23"
      *         }
      *      }
      *
@@ -351,24 +351,41 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      */
     public function getAction(int $id)
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('projects_list_where_logged_user_can_create_tasks');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($id);
 
         if (!$project instanceof Project) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Project with requested Id does not exist!']));
+            return $response;
         }
 
+        // User can see a project if he has VIEW_TASKS rights in this project
         if (!$this->get('project_voter')->isGranted(VoteOptions::VIEW_PROJECT, $project)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
+        // User can edit project if he has EDIT_PROJECT ACL right or he ia a ADMIN
         $canEdit = $this->canEditProject($project);
 
         $projectArray = $this->get('project_service')->getEntityResponse($id, $canEdit);
-        return $this->json($projectArray, StatusCodesHelper::SUCCESSFUL_CODE);
+
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($projectArray));
+        return $response;
     }
 
     /**
@@ -378,7 +395,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *         {
      *             "id": "1",
      *             "title": "Project 1",
-     *             "description": "Description of Project 1",
+     *             "description": "Description of a Project 1",
      *             "createdAt": 1507968483,
      *             "updatedAt": 1507968483,
      *             "is_active" => true,
@@ -416,9 +433,9 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/projects/211",
-     *           "patch": "/api/v1/task-bundle/projects/211",
-     *           "delete": "/api/v1/task-bundle/projects/211"
+     *           "put": "/api/v1/task-bundle/projects/23",
+     *           "inactivate": "/api/v1/task-bundle/projects/23",
+     *           "restore": "/api/v1/task-bundle/projects/restore/23"
      *         }
      *      }
      *
@@ -444,6 +461,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
@@ -451,22 +470,28 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      */
     public function createAction(Request $request)
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('projects_list_where_logged_user_can_create_tasks');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::CREATE_PROJECTS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
-
-        $requestData = $request->request->all();
 
         $project = new Project();
         $project->setCreatedBy($this->getUser());
         $project->setIsActive(true);
 
-        return $this->updateProject($project, $requestData, true);
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+
+        return $this->updateProject($project, $requestBody, true, $locationURL);
     }
 
     /**
@@ -513,9 +538,9 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *         },
      *        "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/projects/211",
-     *           "patch": "/api/v1/task-bundle/projects/211",
-     *           "delete": "/api/v1/task-bundle/projects/211"
+     *           "put": "/api/v1/task-bundle/projects/23",
+     *           "inactivate": "/api/v1/task-bundle/projects/23",
+     *           "restore": "/api/v1/task-bundle/projects/restore/23"
      *         }
      *      }
      *
@@ -556,112 +581,6 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @throws \LogicException
      */
     public function updateAction(int $id, Request $request)
-    {
-        $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($id);
-
-        if (!$project instanceof Project) {
-            return $this->notFoundResponse();
-        }
-
-        $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
-            'user' => $this->getUser(),
-            'project' => $project
-        ]);
-        if (!$this->get('project_voter')->isGranted(VoteOptions::EDIT_PROJECT, $userHasProject)) {
-            return $this->accessDeniedResponse();
-        }
-
-        $requestData = $request->request->all();
-        return $this->updateProject($project, $requestData);
-    }
-
-    /**
-     *  ### Response ###
-     *      {
-     *        "data":
-     *         {
-     *             "id": "1",
-     *             "title": "Project 1",
-     *             "description": "Description of Project 1",
-     *             "createdAt": 1507968483,
-     *             "updatedAt": 1507968483,
-     *             "is_active" => true,
-     *             "userHasProjects":
-     *             [
-     *                {
-     *                   "id": 300,
-     *                   "user":
-     *                   {
-     *                      "id": 2575,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk"
-     *                    },
-     *                    "acl":
-     *                    [
-     *                      "view_own_tasks"
-     *                    ]
-     *                },
-     *                {
-     *                   "id": 301,
-     *                   "user":
-     *                   {
-     *                      "id": 2576,
-     *                      "username": "manager",
-     *                      "email": "manager@manager.sk"
-     *                    },
-     *                   "acl":
-     *                   [
-     *                      "view_own_tasks"
-     *                   ]
-     *                },
-     *             ],
-     *             "canEdit": true
-     *         },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/projects/211",
-     *           "patch": "/api/v1/task-bundle/projects/211",
-     *           "delete": "/api/v1/task-bundle/projects/211"
-     *         }
-     *      }
-     *
-     * @ApiDoc(
-     *  description="Partially update the Project Entity",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  input={"class"="API\TaskBundle\Entity\Project"},
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\TaskBundle\Entity\Project"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     *
-     * @param int $id
-     * @param Request $request
-     * @return Response|JsonResponse
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \LogicException
-     */
-    public function updatePartialAction(int $id, Request $request)
     {
         $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($id);
 
@@ -779,9 +698,9 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *         },
      *        "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/projects/211",
-     *           "patch": "/api/v1/task-bundle/projects/211",
-     *           "delete": "/api/v1/task-bundle/projects/211"
+     *           "put": "/api/v1/task-bundle/projects/23",
+     *           "inactivate": "/api/v1/task-bundle/projects/23",
+     *           "restore": "/api/v1/task-bundle/projects/restore/23"
      *         }
      *      }
      *
@@ -884,9 +803,9 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *         }
      *        "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/projects/211",
-     *           "patch": "/api/v1/task-bundle/projects/211",
-     *           "delete": "/api/v1/task-bundle/projects/211"
+     *           "put": "/api/v1/task-bundle/projects/23",
+     *           "inactivate": "/api/v1/task-bundle/projects/23",
+     *           "restore": "/api/v1/task-bundle/projects/restore/23"
      *         }
      *      }
      *
@@ -1024,9 +943,9 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *         }
      *        "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/projects/211",
-     *           "patch": "/api/v1/task-bundle/projects/211",
-     *           "delete": "/api/v1/task-bundle/projects/211"
+     *           "put": "/api/v1/task-bundle/projects/23",
+     *           "inactivate": "/api/v1/task-bundle/projects/23",
+     *           "restore": "/api/v1/task-bundle/projects/restore/23"
      *         }
      *      }
      *
@@ -1162,9 +1081,9 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *         }
      *        "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/projects/211",
-     *           "patch": "/api/v1/task-bundle/projects/211",
-     *           "delete": "/api/v1/task-bundle/projects/211"
+     *           "put": "/api/v1/task-bundle/projects/23",
+     *           "inactivate": "/api/v1/task-bundle/projects/23",
+     *           "restore": "/api/v1/task-bundle/projects/restore/23"
      *         }
      *      }
      *
@@ -1296,9 +1215,9 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *         }
      *        "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/projects/211",
-     *           "patch": "/api/v1/task-bundle/projects/211",
-     *           "delete": "/api/v1/task-bundle/projects/211"
+     *           "put": "/api/v1/task-bundle/projects/23",
+     *           "inactivate": "/api/v1/task-bundle/projects/23",
+     *           "restore": "/api/v1/task-bundle/projects/restore/23"
      *         }
      *      }
      *
@@ -1531,6 +1450,10 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @param Project $project
      * @param array $requestData
      * @param bool $create
+     * @param $locationUrl
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      *
      * @return Response|JsonResponse
@@ -1538,60 +1461,68 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function updateProject(Project $project, $requestData, $create = false)
+    private function updateProject(Project $project, $requestData, $create = false, $locationUrl)
     {
         $allowedUnitEntityParams = [
             'title',
-            'description',
-            'is_active'
+            'description'
         ];
 
-        if (array_key_exists('_format', $requestData)) {
-            unset($requestData['_format']);
-        }
+        // JSON API Response - Content type and Location settings
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationUrl);
 
-        foreach ($requestData as $key => $value) {
-            if (!in_array($key, $allowedUnitEntityParams, true)) {
-                return $this->createApiResponse(
-                    ['message' => $key . ' is not allowed parameter for Tag Entity!'],
-                    StatusCodesHelper::INVALID_PARAMETERS_CODE
-                );
+        if (false !== $requestData) {
+            if (array_key_exists('_format', $requestData)) {
+                unset($requestData['_format']);
             }
-        }
 
-        $statusCode = $this->getCreateUpdateStatusCode($create);
-
-        $errors = $this->get('entity_processor')->processEntity($project, $requestData);
-
-        if (false === $errors) {
-            $this->getDoctrine()->getManager()->persist($project);
-
-            $this->getDoctrine()->getManager()->flush();
-
-            if ($create) {
-                // Every creator has full Project ACL automatically added
-                $addedAcl = [];
-                $addedAcl[] = $this->addProjectAclPermmisionToCreatorOfProject($project);
-
-                // Admin has full Project ACL automatically added and his ACL is not possible to delete
-//                $addedAdminAcl = $this->addProjectAclPermissionToAdmin($project);
-
-                $canEdit = true;
-                $response = $this->get('project_service')->getEntityResponse($project->getId(), $canEdit);
-                $response['data']['userHasProjects'] = $addedAcl;
-                return $this->json($response, $statusCode);
-            } else {
-                $canEdit = true;
-                $response = $this->get('project_service')->getEntityResponse($project->getId(), $canEdit);
-                return $this->json($response, $statusCode);
+            foreach ($requestData as $key => $value) {
+                if (!\in_array($key, $allowedUnitEntityParams, true)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+                    $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for a Project Entity!']));
+                    return $response;
+                }
             }
-        }
 
-        $data = [
-            'errors' => $errors,
-            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-        ];
-        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $statusCode = $this->getCreateUpdateStatusCode($create);
+
+            $errors = $this->get('entity_processor')->processEntity($project, $requestData);
+
+            if (false === $errors) {
+                $this->getDoctrine()->getManager()->persist($project);
+                $this->getDoctrine()->getManager()->flush();
+
+                if ($create) {
+                    // Every creator has full Project ACL automatically added
+                    $addedAcl[] = $this->addProjectAclPermmissionToCreatorOfProject($project);
+
+                    $canEdit = true;
+                    $projectArray = $this->get('project_service')->getEntityResponse($project->getId(), $canEdit);
+                    $projectArray['data']['userHasProjects'] = $addedAcl;
+
+                    $response = $response->setStatusCode($statusCode);
+                    $response = $response->setContent(json_encode($projectArray));
+                    return $response;
+                } else {
+                    $canEdit = true;
+                    $projectArray = $this->get('project_service')->getEntityResponse($project->getId(), $canEdit);
+
+                    $response = $response->setStatusCode($statusCode);
+                    $response = $response->setContent(json_encode($projectArray));
+                    return $response;
+                }
+            }
+            $data = [
+                'errors' => $errors,
+                'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+            ];
+            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $response = $response->setContent(json_encode($data));
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
+        }
+        return $response;
     }
 
     /**
@@ -1650,7 +1581,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    private function addProjectAclPermmisionToCreatorOfProject(Project $project)
+    private function addProjectAclPermmissionToCreatorOfProject(Project $project):array
     {
         $userHasProject = new UserHasProject();
         $userHasProject->setProject($project);
@@ -1745,6 +1676,10 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      */
     private function canEditProject(Project $project): bool
     {
+        if ($this->get('project_voter')->isAdmin()) {
+            return true;
+        }
+
         $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
             'user' => $this->getUser(),
             'project' => $project

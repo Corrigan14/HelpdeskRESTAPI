@@ -27,24 +27,17 @@ projects_update:
     requirements:
             id: '\d+'
 
-projects_partial_update:
-    path:     /projects/{id}
-    defaults: { _controller: APITaskBundle:Project:updatePartial }
-    methods: [PATCH]
-    requirements:
-            id: '\d+'
-
 projects_delete:
-    path:     /projects/{id}
+    path:     /projects/{id}/inactivate
     defaults: { _controller: APITaskBundle:Project:delete }
-    methods: [DELETE]
+    methods: [PUT]
     requirements:
             id: '\d+'
 
 projects_restore:
-    path:     /projects/restore/{id}
+    path:     /projects/{id}/restore
     defaults: { _controller: APITaskBundle:Project:restore }
-    methods: [PATCH]
+    methods: [PUT]
     requirements:
             id: '\d+'
 

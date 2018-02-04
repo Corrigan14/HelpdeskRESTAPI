@@ -36,7 +36,7 @@ class Project
      * @var string
      *
      * @ORM\Column(name="title", type="string", length=255)
-     * @Assert\NotBlank(message="Title of status is required")
+     * @Assert\NotBlank(message="Title of a project is required")
      * @Assert\Type("string")
      */
     private $title;

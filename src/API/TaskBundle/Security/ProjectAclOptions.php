@@ -22,7 +22,7 @@ class ProjectAclOptions
     /**
      * @return array
      */
-    public static function getConstants()
+    public static function getConstants():array
     {
         $oClass = new \ReflectionClass(__CLASS__);
 

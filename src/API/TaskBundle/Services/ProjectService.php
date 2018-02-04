@@ -176,8 +176,8 @@ class ProjectService
     {
         return [
             'put' => $this->router->generate('projects_update', ['id' => $id]),
-            'patch' => $this->router->generate('projects_partial_update', ['id' => $id]),
-            'delete' => $this->router->generate('projects_delete', ['id' => $id]),
+            'inactivate' => $this->router->generate('projects_delete', ['id' => $id]),
+            'restore' => $this->router->generate('projects_restore', ['id' => $id]),
         ];
     }
 }

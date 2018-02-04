@@ -746,7 +746,7 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
                 $requestData['order'] = $orderNum;
             }
 
-            // Check the ACL of role: this can not contain different ACL rules like logged user has
+            // Check the role's ACL: this can not contain different ACL rules as logged user has
             if (isset($requestData['acl'])) {
                 $aclData = json_decode($requestData['acl'], true);
                 if (!\is_array($aclData)) {

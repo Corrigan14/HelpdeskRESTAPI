@@ -16,8 +16,8 @@ class StatusCodesHelper
     const CREATED_MESSAGE = 'The entity was successfully created';
     const DELETED_CODE = 204;
     const DELETED_MESSAGE = 'The entity was successfully deleted';
-    const UNACITVATE_MESSAGE = 'The is_active param of entity was set to 0';
-    const ACITVATE_MESSAGE = 'The is_active param of entity was set to 1';
+    const UNACITVATE_MESSAGE = 'The entity was successfully inactivated!';
+    const ACITVATE_MESSAGE = 'The entity was successfully activated!';
 
     const INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT = 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded';
     const INVALID_DATA_FORMAT_MESSAGE_JSON_SUPPORT = 'Problem with data coding. Supported Content Type: application/json';

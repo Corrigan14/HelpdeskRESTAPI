@@ -44,14 +44,6 @@ projects_restore:
 project_add_to_user:
     path:     /project/{projectId}/user/{userId}
     defaults: { _controller: APITaskBundle:Project:addUserToProject }
-    methods: [POST]
-    requirements:
-            projectId: '\d+'
-            userId: '\d+'
-
-project_update_user_acl:
-    path:     /project/{projectId}/user/{userId}
-    defaults: { _controller: APITaskBundle:Project:updateUserProjectAcl }
     methods: [PUT]
     requirements:
             projectId: '\d+'
@@ -60,15 +52,15 @@ project_update_user_acl:
 project_remove_from_user:
     path:     /project/{projectId}/user/{userId}
     defaults: { _controller: APITaskBundle:Project:removeUserFromProject }
-    methods: [DELETE]
+    methods: [PUT]
     requirements:
             projectId: '\d+'
             userId: '\d+'
 
 project_process_users_acl:
-    path:     /project/{projectId}/process-acl
-    defaults: { _controller: APITaskBundle:Project:processProjectAclForUsers }
-    methods: [POST]
+    path:     /project/{projectId}/process-more-acl
+    defaults: { _controller: APITaskBundle:Project:processProjectAclForMoreUsers }
+    methods: [PUT]
     requirements:
             projectId: '\d+'
 

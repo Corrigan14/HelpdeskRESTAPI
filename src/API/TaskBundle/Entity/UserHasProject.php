@@ -58,7 +58,7 @@ class UserHasProject
      *
      * @return int
      */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
@@ -90,7 +90,7 @@ class UserHasProject
      *
      * @return UserHasProject
      */
-    public function setUser(User $user)
+    public function setUser(User $user): UserHasProject
     {
         $this->user = $user;
 
@@ -102,7 +102,7 @@ class UserHasProject
      *
      * @return User
      */
-    public function getUser()
+    public function getUser(): User
     {
         return $this->user;
     }
@@ -114,7 +114,7 @@ class UserHasProject
      *
      * @return UserHasProject
      */
-    public function setProject(Project $project)
+    public function setProject(Project $project): UserHasProject
     {
         $this->project = $project;
 
@@ -126,7 +126,7 @@ class UserHasProject
      *
      * @return Project
      */
-    public function getProject()
+    public function getProject(): Project
     {
         return $this->project;
     }

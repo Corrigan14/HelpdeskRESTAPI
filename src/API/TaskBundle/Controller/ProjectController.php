@@ -1083,7 +1083,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *         {
      *             "id": "1",
      *             "title": "Project 1",
-     *             "description": "Description of Project 1",
+     *             "description": "Description of a Project 1",
      *             "createdAt": 1507968483,
      *             "updatedAt": 1507968483,
      *             "is_active" => true,
@@ -1129,8 +1129,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      * @ApiDoc(
      *  resource = true,
-     *  description="Add MORE users ACL to a project. Input: [userId => [projectAcl1, projectAcl2]].
-     *               Return project details with list of users with their project ACL.",
+     *  description="Add/Update MORE than one user's ACL to a project. Expected Input: [userId => [projectAcl1, projectAcl2]].
+     *               Return project details with the list of users with their project ACL.",
      *  requirements={
      *     {
      *       "name"="projectId",
@@ -1161,85 +1161,110 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @param Request $request
      * @param int $projectId
      * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function processProjectAclForMoreUsersAction(Request $request, int $projectId)
+    public function processProjectAclForMoreUsersAction(Request $request, int $projectId): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('project_process_users_acl', ['projectId' => $projectId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
 
         if (!$project instanceof Project) {
-            return $this->createApiResponse([
-                'message' => 'Project with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Project with requested Id does not exist!']));
+            return $response;
         }
 
-        $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
-            'user' => $this->getUser(),
-            'project' => $project
-        ]);
-        if (!$this->get('project_voter')->isGranted(VoteOptions::EDIT_PROJECT, $userHasProject)) {
-            return $this->accessDeniedResponse();
+        //Check if logged user can Update ACL in requested project
+        if (!$this->canEditProject($project)) {
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         // Create or update UserHasProject Entity for every sent User
-        $requestData = json_decode($request->getContent(), true);
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        if (count($requestData) > 0) {
-            foreach ($requestData as $key => $aclArray) {
-                $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($key);
-                if (!$user instanceof User) {
-                    return $this->createApiResponse([
-                        'message' => 'User with requested Id ' . $key . ' does not exist!',
-                    ], StatusCodesHelper::NOT_FOUND_CODE);
-                }
+        if (false !== $requestBody) {
 
-                // Check if all ACL are from allowed options
-                if (is_array($aclArray)) {
-                    foreach ($aclArray as $acl) {
-                        if (!in_array($acl, ProjectAclOptions::getConstants(), true)) {
+            if (isset($requestBody['usersAcl'])) {
+                $usersACL = json_decode($requestBody['usersAcl'], true);
+                $projectAclOptions = ProjectAclOptions::getConstants();
+                if (\count($usersACL) > 0) {
+                    foreach ($usersACL as $key => $aclArray) {
+                        $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($key);
+                        if (!$user instanceof User) {
+                            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                            $response = $response->setContent(json_encode(['message' => 'User with requested Id: ' . $key . ' does not exist!']));
+                            return $response;
+                        }
+
+                        // Check if all ACL are from allowed options
+                        if (is_array($aclArray)) {
+                            foreach ($aclArray as $acl) {
+                                if (!\in_array($acl, $projectAclOptions, true)) {
+                                    return $this->createApiResponse([
+                                        'message' => $acl . ' ACL is not allowed!',
+                                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                }
+                            }
+
+                            // Check if requested user is ADMIN. If yes, his EDIT_PROJECT permission can't be changed
+                            $userRoles = $user->getRoles();
+                            if (in_array('ROLE_ADMIN', $userRoles, true)) {
+                                if (!in_array(ProjectAclOptions::EDIT_PROJECT, $aclArray)) {
+                                    return $this->createApiResponse([
+                                        'message' => 'EDIT_RPOJECT ACL is for ADMIN required!',
+                                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                }
+                            }
+
+                            // Check if it is an UPDATE of existed user's ACL
+                            $userHasProjectNew = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+                                'user' => $user,
+                                'project' => $project
+                            ]);
+                            if ($userHasProjectNew instanceof UserHasProject) {
+                                $userHasProjectNew->setAcl($aclArray);
+                                $this->getDoctrine()->getManager()->persist($userHasProjectNew);
+                            } else {
+                                $userHasProjectNewAdd = new UserHasProject();
+                                $userHasProjectNewAdd->setProject($project);
+                                $userHasProjectNewAdd->setUser($user);
+                                $userHasProjectNewAdd->setAcl($aclArray);
+                                $this->getDoctrine()->getManager()->persist($userHasProjectNewAdd);
+                            }
+                        } else {
                             return $this->createApiResponse([
-                                'message' => $acl . ' ACL is not allowed!',
+                                'message' => 'ACL for every user has to be an array, which includes only allowed parameters from ProjectAclOptions: '. implode(',', $projectAclOptions),
                             ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
                         }
                     }
+                    $this->getDoctrine()->getManager()->flush();
 
-                    // Check if requested user is ADMIN. If yes, his EDIT_PROJECT permission can't be changed
-                    $userRoles = $user->getRoles();
-                    if (in_array('ROLE_ADMIN', $userRoles, true)) {
-                        if (!in_array(ProjectAclOptions::EDIT_PROJECT, $aclArray)) {
-                            return $this->createApiResponse([
-                                'message' => 'EDIT_RPOJECT ACL is for ADMIN required!',
-                            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                        }
-                    }
+                    $projectArray = $this->get('project_service')->getEntityResponse($projectId, true);
 
-                    // Check if it is an UPDATE of existed user's ACL
-                    $userHasProjectNew = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
-                        'user' => $user,
-                        'project' => $project
-                    ]);
-                    if ($userHasProjectNew instanceof UserHasProject) {
-                        $userHasProjectNew->setAcl($aclArray);
-                        $this->getDoctrine()->getManager()->persist($userHasProjectNew);
-                    } else {
-                        $userHasProjectNewAdd = new UserHasProject();
-                        $userHasProjectNewAdd->setProject($project);
-                        $userHasProjectNewAdd->setUser($user);
-                        $userHasProjectNewAdd->setAcl($aclArray);
-                        $this->getDoctrine()->getManager()->persist($userHasProjectNewAdd);
-                    }
+                    $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+                    $response = $response->setContent(json_encode($projectArray));
+                    return $response;
                 } else {
-                    return $this->createApiResponse([
-                        'message' => 'ACL for every user has to be an array, which includes only allowed parameters from ProjectAclOptions!',
-                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'usersAcl array for processing is required!']));
+                    return $response;
                 }
             }
-            $this->getDoctrine()->getManager()->flush();
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         }
-        $canEdit = true;
-        $response = $this->get('project_service')->getEntityResponse($project->getId(), $canEdit);
-        return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
+
     }
 
     /**

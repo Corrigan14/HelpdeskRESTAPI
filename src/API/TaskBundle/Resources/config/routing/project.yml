@@ -42,7 +42,7 @@ projects_restore:
             id: '\d+'
 
 project_add_to_user:
-    path:     /project/{projectId}/user/{userId}
+    path:     /project/{projectId}/user/{userId}/add
     defaults: { _controller: APITaskBundle:Project:addUserToProject }
     methods: [PUT]
     requirements:
@@ -50,7 +50,7 @@ project_add_to_user:
             userId: '\d+'
 
 project_remove_from_user:
-    path:     /project/{projectId}/user/{userId}
+    path:     /project/{projectId}/user/{userId}/remove
     defaults: { _controller: APITaskBundle:Project:removeUserFromProject }
     methods: [PUT]
     requirements:

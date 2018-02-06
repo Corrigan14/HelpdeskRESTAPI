@@ -939,7 +939,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *         {
      *             "id": "1",
      *             "title": "Project 1",
-     *             "description": "Description of Project 1",
+     *             "description": "Description of a Project 1",
      *             "createdAt": 1507968483,
      *             "updatedAt": 1507968483,
      *             "is_active" => true,
@@ -984,19 +984,19 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      *
      * @ApiDoc(
-     *  description="Remove users ACL from project",
+     *  description="Remove users ACL from a project",
      *  requirements={
      *     {
      *       "name"="projectId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
-     *       "description"="The id of project"
+     *       "description"="The id of a project"
      *     },
      *     {
      *       "name"="userId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
-     *       "description"="The id of user"
+     *       "description"="The id of a user"
      *     },
      *  },
      *  headers={
@@ -1007,7 +1007,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *     }
      *  },
      *  statusCodes={
-     *      204 ="The entity was successfully deleted",
+     *      200 ="The user was successfully removed from the project",
+     *      400 ="Bad Request",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
      *      404 ="Not found user or project"
@@ -1017,34 +1018,40 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      * @param int $projectId
      * @param int $userId
-     * @return JsonResponse|Response
+     * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function removeUserFromProjectAction(int $projectId, int $userId)
+    public function removeUserFromProjectAction(int $projectId, int $userId): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('project_remove_from_user', ['projectId' => $projectId, 'userId' => $userId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
 
         if (!$project instanceof Project) {
-            return $this->createApiResponse([
-                'message' => 'Project with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Project with requested Id does not exist!']));
+            return $response;
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($userId);
 
         if (!$user instanceof User) {
-            return $this->createApiResponse([
-                'message' => 'User with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'User with requested Id does not exist!']));
+            return $response;
         }
 
-        $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
-            'user' => $this->getUser(),
-            'project' => $project
-        ]);
-        if (!$this->get('project_voter')->isGranted(VoteOptions::EDIT_PROJECT, $userHasProject)) {
-            return $this->accessDeniedResponse();
+        //Check if logged user can Update ACL in requested project
+        if (!$this->canEditProject($project)) {
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
@@ -1056,14 +1063,17 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             $this->getDoctrine()->getManager()->remove($userHasProject);
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->createApiResponse([
-                'message' => StatusCodesHelper::DELETED_MESSAGE,
-            ], StatusCodesHelper::DELETED_CODE);
+            $projectArray = $this->get('project_service')->getEntityResponse($projectId, true);
+
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+            $response = $response->setContent(json_encode($projectArray));
+            return $response;
         }
 
-        return $this->createApiResponse([
-            'message' => 'The requested User did not have permission to requested Project!',
-        ], StatusCodesHelper::NOT_FOUND_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+        $response = $response->setContent(json_encode(['message' => 'Requested user does not have an ACL permission to the requested project!']));
+        return $response;
+
     }
 
     /**

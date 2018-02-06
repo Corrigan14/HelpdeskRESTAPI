@@ -240,56 +240,31 @@ class MainController extends ApiBaseController
      *  }
      * )
      *
-     * @return JsonResponse
+     * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    public function getLeftNavigationParamsAction(): JsonResponse
+    public function getLeftNavigationParamsAction(): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('left_menu_param_list');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $doctrine = $this->getDoctrine();
         /** @var User $loggedUser */
         $loggedUser = $this->getUser();
         $isAdmin = $this->get('project_voter')->isAdmin();
 
-        // Find projects IDs which user Created OR he has any ACL permission in it
-        $projectIdArray = [];
-
-        $loggedUsersCreatedProjects = $loggedUser->getProjects();
-        $loggedUsersAvailableProjects = $loggedUser->getUserHasProjects();
-        if ($loggedUsersCreatedProjects) {
-            /** @var Project $createdProject */
-            foreach ($loggedUsersCreatedProjects as $createdProject) {
-                $projectIdArray[] = $createdProject->getId();
-            }
-        }
-
-        if ($loggedUsersAvailableProjects) {
-            /** @var UserHasProject $availableProject */
-            foreach ($loggedUsersAvailableProjects as $availableProject) {
-                $projectId = $availableProject->getProject()->getId();
-                if (!\in_array($projectId, $projectIdArray, true)) {
-                    $projectIdArray[] = $projectId;
-                }
-            }
-        }
-
-
         // Returns a list of Logged user's active Projects
-        $options = [
-            'isAdmin' => $isAdmin,
-            'loggedUser' => $loggedUser->getId(),
-            'isActive' => true,
-            'limit' => 999,
-            'projectIdArray' => $projectIdArray
-        ];
+        $loggedUsersAvailableProjects = $this->getDoctrine()->getRepository('APITaskBundle:Project')->getAllUsersAvailableProjects($isAdmin, $loggedUser->getId(), true);
 
-        $loggedUserProjectsEntities = $doctrine->getRepository('APITaskBundle:Project')->getAllEntities(1, $options);
-        $loggedUserProjects = $loggedUserProjectsEntities['array'];
         // Add to every project canEdit value based on logged user's project ACL. ADMIN can edit every project
         // Add to every project the number of Tasks
         $modifiedLoggedUserProjects = [];
-        foreach ($loggedUserProjects as $project) {
+        foreach ($loggedUsersAvailableProjects as $project) {
             $projectEntityFromDb = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($project['id']);
             if ($isAdmin) {
                 $canEditProject = true;
@@ -302,18 +277,11 @@ class MainController extends ApiBaseController
         }
 
         // Returns a list of Logged user's not-active Projects
-        $optionsArchived = [
-            'isAdmin' => $isAdmin,
-            'loggedUser' => $loggedUser->getId(),
-            'isActive' => false,
-            'limit' => 999,
-            'projectIdArray' => $projectIdArray
-        ];
-        $loggedUserArchivedProjectsArray = $doctrine->getRepository('APITaskBundle:Project')->getAllEntities(1, $optionsArchived);
-        $loggedUserArchivedProjects = $loggedUserArchivedProjectsArray['array'];
+        $loggedUsersAvailableArchivedProjects = $this->getDoctrine()->getRepository('APITaskBundle:Project')->getAllUsersAvailableProjects($isAdmin, $loggedUser->getId(), false);
+
         // Add to every project canEdit value based on logged user's project ACL. ADMIN can edit every project
         $modifiedLoggedUserNotActiveProjects = [];
-        foreach ($loggedUserArchivedProjects as $project) {
+        foreach ($loggedUsersAvailableArchivedProjects as $project) {
             $projectEntityFromDb = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($project['id']);
             if ($isAdmin) {
                 $canEditProject = true;
@@ -342,7 +310,7 @@ class MainController extends ApiBaseController
         ];
         $loggedUserFilters = $doctrine->getRepository('APITaskBundle:Filter')->getAllUsersFiltersWithoutPagination($filterOptions);
 
-        $response = [
+        $responseArray = [
             'filters' => $loggedUserFilters,
             'projects' => $modifiedLoggedUserProjects,
             'archived' => $modifiedLoggedUserNotActiveProjects,
@@ -358,10 +326,12 @@ class MainController extends ApiBaseController
                 'public' => null,
             ];
             $loggedUserReports = $doctrine->getRepository('APITaskBundle:Filter')->getAllUsersFiltersWithoutPagination($reportOptions);
-            $response['reports'] = $loggedUserReports;
+            $responseArray['reports'] = $loggedUserReports;
         }
 
-        return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($responseArray));
+        return $response;
     }
 
     /**

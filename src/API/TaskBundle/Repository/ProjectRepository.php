@@ -118,6 +118,49 @@ class ProjectRepository extends EntityRepository
     }
 
     /**
+     * @param $isAdmin
+     * @param $userId
+     * @param $isActive
+     * @return array
+     */
+    public function getAllUsersAvailableProjects($isAdmin, $userId, $isActive): array
+    {
+        if ($isAdmin) {
+            $query = $this->createQueryBuilder('p')
+                ->select('p, userHasProjects, uhpUser')
+                ->leftJoin('p.userHasProjects', 'userHasProjects')
+                ->leftJoin('userHasProjects.user', 'uhpUser')
+                ->where('p.is_active = :isActive')
+                ->setParameter('isActive', $isActive)
+                ->orderBy('p.title', 'ASC')
+                ->distinct();
+        } else {
+            // Select only in Allowed users projects
+            $query = $this->createQueryBuilder('p')
+                ->select('p, userHasProjects, uhpUser')
+                ->leftJoin('p.userHasProjects', 'userHasProjects')
+                ->leftJoin('userHasProjects.user', 'uhpUser')
+                ->leftJoin('p.createdBy', 'projectCreator')
+                ->where('p.is_active = :isActive');
+
+            $query->andWhere($query->expr()->orX(
+                'projectCreator.id = :loggedUserId',
+                'uhpUser.id = :loggedUserId'
+            ));
+
+            $query->orderBy('p.title', 'ASC')
+                ->setParameters([
+                    'isActive' => $isActive,
+                    'loggedUserId' => $userId
+                ])
+                ->distinct();
+        }
+
+        // Return all entities
+        return $this->formatData($query->getQuery()->getArrayResult(), true);
+    }
+
+    /**
      * @param $id
      * @return array
      */

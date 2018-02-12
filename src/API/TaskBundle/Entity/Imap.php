@@ -288,8 +288,8 @@ class Imap
      */
     public function setIgnoreCertificate($ignoreCertificate)
     {
-        if (is_string($ignoreCertificate)) {
-            $ignoreCertificate = ($ignoreCertificate === 'true' || $ignoreCertificate == 1) ? true : false;
+        if (\is_string($ignoreCertificate)) {
+            $ignoreCertificate = ($ignoreCertificate === 'true' || $ignoreCertificate == 1);
         }
         $this->ignore_certificate = $ignoreCertificate;
 
@@ -315,8 +315,8 @@ class Imap
      */
     public function setSsl($ssl)
     {
-        if (is_string($ssl)) {
-            $ssl = ($ssl === 'true' || $ssl == 1) ? true : false;
+        if (\is_string($ssl)) {
+            $ssl = ($ssl === 'true' || $ssl == 1);
         }
 
         $this->ssl = $ssl;
@@ -343,7 +343,11 @@ class Imap
      */
     public function setDescription($description)
     {
-        $this->description = $description;
+        if ('null' === strtolower($description)) {
+            $this->description = null;
+        } else {
+            $this->description = $description;
+        }
 
         return $this;
     }
@@ -368,7 +372,7 @@ class Imap
     public function setIsActive($isActive)
     {
         if (\is_string($isActive)) {
-            $isActive = ($isActive === 'true' || $isActive == 1) ? true : false;
+            $isActive = ($isActive === 'true' || $isActive == 1);
         }
 
         $this->is_active = $isActive;

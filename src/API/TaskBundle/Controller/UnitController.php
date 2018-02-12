@@ -552,8 +552,7 @@ class UnitController extends ApiBaseController
     {
         $allowedUnitEntityParams = [
             'title',
-            'shortcut',
-            'is_active'
+            'shortcut'
         ];
 
         // JSON API Response - Content type and Location settings

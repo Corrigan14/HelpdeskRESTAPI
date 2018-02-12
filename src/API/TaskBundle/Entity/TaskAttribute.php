@@ -65,6 +65,7 @@ class TaskAttribute
      * @var bool
      *
      * @ORM\Column(name="is_active", type="boolean", options={"default":1})
+     * @ReadOnly()
      */
     private $is_active = true;
 
@@ -151,7 +152,11 @@ class TaskAttribute
      */
     public function setOptions($options)
     {
-        $this->options = json_encode($options);
+        if (!\is_array($options) && 'null' === strtolower($options)) {
+            $this->options = null;
+        } else {
+            $this->options = json_encode($options);
+        }
 
         return $this;
     }
@@ -237,7 +242,11 @@ class TaskAttribute
      */
     public function setDescription($description)
     {
-        $this->description = $description;
+        if ('null' === strtolower($description)) {
+            $this->description = null;
+        } else {
+            $this->description = $description;
+        }
 
         return $this;
     }

@@ -29,6 +29,7 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *             "id": 142,
      *             "title": "input task additional attribute",
      *             "type": "input",
+     *             "description": "desc text",
      *             "options": null,
      *             "is_active": true
      *           },
@@ -36,6 +37,7 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *              "id": 143,
      *              "title": "select task additional attribute",
      *              "type": "simple_select",
+     *              "description": "desc text",
      *              "options":
      *              {
      *                 "select1": "select1",
@@ -48,6 +50,7 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *              "id": 144,
      *              "title": "integer number task additional attribute",
      *              "type": "integer_number",
+     *              "description": "desc text",
      *              "options": null,
      *              "is_active": true
      *            }
@@ -101,7 +104,8 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      * )
      *
      * @param Request $request
-     * @return JsonResponse|Response
+     * @return Response
+     * @throws \UnexpectedValueException
      * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
      * @throws \Symfony\Component\Routing\Exception\MissingMandatoryParametersException
      * @throws \Symfony\Component\Routing\Exception\InvalidParameterException
@@ -110,48 +114,55 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('task_attribute_list');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::TASK_ATTRIBUTE_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        $pageNum = $request->get('page');
-        $pageNum = (int)$pageNum;
-        $page = ($pageNum === 0) ? 1 : $pageNum;
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ?: 10;
+        if (false !== $requestBody) {
+            $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody);
 
-        if(999 === $limit){
-            $page = 1;
+            $page = $processedFilterParams['page'];
+            $limit = $processedFilterParams['limit'];
+            $order = $processedFilterParams['order'];
+            $isActive = $processedFilterParams['isActive'];
+
+            $filtersForUrl = [
+                'isActive' => '&isActive=' . $isActive,
+                'order' => '&order=' . $order,
+            ];
+
+            $options = [
+                'loggedUserId' => $this->getUser()->getId(),
+                'isActive' => $isActive,
+                'order' => $order,
+                'filtersForUrl' => $filtersForUrl,
+                'limit' => $limit
+            ];
+
+            $taskAttributesArray = $this->get('task_attribute_service')->getTaskAttributesResponse($page, $options);
+            $response = $response->setContent(json_encode($taskAttributesArray));
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         }
 
-        $orderString = $request->get('order');
-        $orderString = strtolower($orderString);
-        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
-
-        $isActive = $request->get('isActive');
-
-        $filtersForUrl = [];
-        if (null !== $isActive) {
-            $filtersForUrl['isActive'] = '&isActive=' . $isActive;
-        }
-
-        $options = [
-            'loggedUserId' => $this->getUser()->getId(),
-            'isActive' => strtolower($isActive),
-            'order' => $order,
-            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order]),
-            'limit' => $limit
-        ];
-
-        return $this->json($this->get('task_attribute_service')->getTaskAttributesResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
     }
 
     /**
@@ -162,6 +173,7 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *            "id": 142,
      *            "title": "input task additional attribute",
      *            "type": "input",
+     *            "description": "desc text",
      *            "options":
      *             {
      *                "select1": "select1",
@@ -172,9 +184,9 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/task-attributes/id",
-     *           "patch": "/api/v1/task-bundle/task-attributes/id",
-     *           "delete": "/api/v1/task-bundle/task-attributes/id"
+     *           "put": "/api/v1/task-bundle/task-attributes/115",
+     *           "inactivate": "/api/v1/task-bundle/task-attributes/115/inactivate",
+     *           "restore": "/api/v1/task-bundle/task-attributes/115/restore",
      *         }
      *      }
      *
@@ -205,29 +217,45 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      * )
      *
      * @param int $id
-     * @return JsonResponse|Response
+     * @return Response
+     * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
+     * @throws \Symfony\Component\Routing\Exception\MissingMandatoryParametersException
+     * @throws \Symfony\Component\Routing\Exception\InvalidParameterException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function getAction(int $id)
+    public function getAction(int $id): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('task_attributes', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::TASK_ATTRIBUTE_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $ta = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($id);
 
         if (!$ta instanceof TaskAttribute) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Task Attribute with requested Id does not exist!']));
+            return $response;
         }
 
-        $caArray = $this->get('task_attribute_service')->getTaskAttributeResponse($id);
-        return $this->json($caArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $taArray = $this->get('task_attribute_service')->getTaskAttributeResponse($id);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($taArray));
+        return $response;
     }
 
     /**
@@ -237,7 +265,8 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *        {
      *            "id": "1",
      *            "title": "Input task additional attribute",
-     *            "type": "input"
+     *            "type": "input",
+     *            "description": "desc text",
      *            "options":
      *            {
      *               "select1": "select1",
@@ -248,9 +277,9 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/task-attributes/id",
-     *           "patch": "/api/v1/task-bundle/task-attributes/id",
-     *           "delete": "/api/v1/task-bundle/task-attributes/id"
+     *           "put": "/api/v1/task-bundle/task-attributes/115",
+     *           "inactivate": "/api/v1/task-bundle/task-attributes/115/inactivate",
+     *           "restore": "/api/v1/task-bundle/task-attributes/115/restore",
      *         }
      *      }
      *
@@ -275,7 +304,10 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      * )
      *
      * @param Request $request
-     * @return JsonResponse|Response
+     * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \UnexpectedValueException
      * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
      * @throws \Symfony\Component\Routing\Exception\MissingMandatoryParametersException
      * @throws \Symfony\Component\Routing\Exception\InvalidParameterException
@@ -284,22 +316,29 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \InvalidArgumentException
      */
-    public function createAction(Request $request)
+    public function createAction(Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('task_attribute_create');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::TASK_ATTRIBUTE_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        $requestData = $request->request->all();
         $taskAttribute = new TaskAttribute();
         $taskAttribute->setIsActive(true);
 
-        return $this->updateEntity($requestData, $taskAttribute, true);
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+
+        return $this->updateEntity($requestBody, $taskAttribute, true, $locationURL);
     }
 
     /**
@@ -309,7 +348,8 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *        {
      *            "id": "1",
      *            "title": "Input task additional attribute",
-     *            "type": "input"
+     *            "type": "input",
+     *            "description": "desc text",
      *            "options":
      *            {
      *               "select1": "select1",
@@ -320,9 +360,9 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/task-attributes/id",
-     *           "patch": "/api/v1/task-bundle/task-attributes/id",
-     *           "delete": "/api/v1/task-bundle/task-attributes/id"
+     *           "put": "/api/v1/task-bundle/task-attributes/115",
+     *           "inactivate": "/api/v1/task-bundle/task-attributes/115/inactivate",
+     *           "restore": "/api/v1/task-bundle/task-attributes/115/restore",
      *         }
      *      }
      *
@@ -356,7 +396,10 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *
      * @param int $id
      * @param Request $request
-     * @return JsonResponse|Response
+     * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \UnexpectedValueException
      * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
      * @throws \Symfony\Component\Routing\Exception\MissingMandatoryParametersException
      * @throws \Symfony\Component\Routing\Exception\InvalidParameterException
@@ -365,116 +408,39 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function updateAction(int $id, Request $request)
+    public function updateAction(int $id, Request $request):Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('task_attribute_update', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::TASK_ATTRIBUTE_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($id);
 
         if (!$taskAttribute instanceof TaskAttribute) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Task Attribute with requested Id does not exist!']));
+            return $response;
         }
 
-        $requestData = $request->request->all();
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        return $this->updateEntity($requestData, $taskAttribute);
-    }
-
-    /**
-     * ### Response ###
-     *      {
-     *        "data":
-     *        {
-     *            "id": "1",
-     *            "title": "Input task additional attribute",
-     *            "type": "input"
-     *            "options":
-     *            {
-     *               "select1": "select1",
-     *               "select2": "select2",
-     *               "select3": "select3"
-     *            },
-     *            "is_active": true
-     *        },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/task-attributes/id",
-     *           "patch": "/api/v1/task-bundle/task-attributes/id",
-     *           "delete": "/api/v1/task-bundle/task-attributes/id"
-     *         }
-     *      }
-     *
-     * @ApiDoc(
-     *  description="Partially update the Task Attribute Entity",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  input={"class"="API\TaskBundle\Entity\TaskAttribute"},
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\TaskBundle\Entity\TaskAttribute"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     *
-     * @param int $id
-     * @param Request $request
-     * @return JsonResponse|Response
-     * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
-     * @throws \Symfony\Component\Routing\Exception\MissingMandatoryParametersException
-     * @throws \Symfony\Component\Routing\Exception\InvalidParameterException
-     * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \LogicException
-     */
-    public function updatePartialAction(int $id, Request $request)
-    {
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::TASK_ATTRIBUTE_SETTINGS,
-            'user' => $this->getUser()
-        ];
-
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
-        }
-
-        $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($id);
-
-        if (!$taskAttribute instanceof TaskAttribute) {
-            return $this->notFoundResponse();
-        }
-
-        $requestData = $request->request->all();
-
-        return $this->updateEntity($requestData, $taskAttribute);
+        return $this->updateEntity($requestBody, $taskAttribute, false, $locationURL);
     }
 
     /**
      * @ApiDoc(
-     *  description="Delete the Task Attribute Entity",
+     *  description="Inactivate the Task Attribute Entity",
      *  requirements={
      *     {
      *       "name"="id",
@@ -535,7 +501,8 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *        {
      *            "id": "1",
      *            "title": "Input task additional attribute",
-     *            "type": "input"
+     *            "type": "input",
+     *            "description": "desc text",
      *            "options":
      *            {
      *               "select1": "select1",
@@ -546,9 +513,9 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/task-attributes/id",
-     *           "patch": "/api/v1/task-bundle/task-attributes/id",
-     *           "delete": "/api/v1/task-bundle/task-attributes/id"
+     *           "put": "/api/v1/task-bundle/task-attributes/115",
+     *           "inactivate": "/api/v1/task-bundle/task-attributes/115/inactivate",
+     *           "restore": "/api/v1/task-bundle/task-attributes/115/restore",
      *         }
      *      }
      *
@@ -611,67 +578,103 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      * @param array $requestData
      * @param TaskAttribute $taskAttribute
      * @param bool $create
+     * @param $locationURL
+     *
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
-     *
-     * @return JsonResponse|Response
      * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
      * @throws \Symfony\Component\Routing\Exception\MissingMandatoryParametersException
      * @throws \Symfony\Component\Routing\Exception\InvalidParameterException
+     *
+     * @return Response
      */
-    private function updateEntity(array $requestData, TaskAttribute $taskAttribute, $create = false)
+    private function updateEntity(array $requestData, TaskAttribute $taskAttribute, $create = false, $locationURL): Response
     {
         $allowedUnitEntityParams = [
             'title',
             'type',
             'options',
-            'is_active',
             'description'
         ];
 
-        if (array_key_exists('_format', $requestData)) {
-            unset($requestData['_format']);
-        }
+        // JSON API Response - Content type and Location settings
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
-        foreach ($requestData as $key => $value) {
-            if (!in_array($key, $allowedUnitEntityParams, true)) {
-                return $this->createApiResponse(
-                    ['message' => $key . ' is not allowed parameter for Task Attribute Entity!'],
-                    StatusCodesHelper::INVALID_PARAMETERS_CODE
-                );
+        if (false !== $requestData) {
+            if (array_key_exists('_format', $requestData)) {
+                unset($requestData['_format']);
             }
-        }
 
-        $statusCode = $this->getCreateUpdateStatusCode($create);
-
-        // Check if selected Type is allowed
-        if (array_key_exists('type', $requestData)) {
-            $type = $requestData['type'];
-            $allowedTypes = VariableHelper::getConstants();
-
-            if (!in_array($type, $allowedTypes, true)) {
-                return $this->createApiResponse([
-                    'message' => $type . ' Type is not allowed!',
-                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            foreach ($requestData as $key => $value) {
+                if (!\in_array($key, $allowedUnitEntityParams, true)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for Task Attribute Entity!']));
+                    return $response;
+                }
             }
+
+            $statusCode = $this->getCreateUpdateStatusCode($create);
+
+            // Check if type is instance of Variables in VariableHelper
+            if (isset($requestData['type'])) {
+                $type = $requestData['type'];
+                $typeOptions = VariableHelper::getConstants();
+                if (!\in_array($type, $typeOptions, true)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'Not allowed Type of task attribute! Allowed are: ' . implode(",", $typeOptions)]));
+                    return $response;
+                }
+
+                // Check and uncode the OPTIONS if the SELECT or MULTI-SELECT Task Attribute Type was chosen
+                // JSON or ARRAY is expected
+                if (VariableHelper::SIMPLE_SELECT === $type || VariableHelper::MULTI_SELECT === $type) {
+                    if (true === $create || (false === $create && isset($requestData['options']))) {
+                        if (isset($requestData['options'])) {
+                            $optionsData = json_decode($requestData['options'], true);
+                            if (!\is_array($optionsData)) {
+                                $optionsData = explode(',', $requestData['options']);
+                            }
+                            $requestData['options'] = $optionsData;
+                        } else {
+                            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                            $response = $response->setContent(json_encode(['message' => 'For SIMPLE SELECT and MULTI SELECT task attribute type possible OPTIONS have to be defined!']));
+                            return $response;
+                        }
+                    }elseif (false === $create && !isset($requestData['options'])){
+                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'For SIMPLE SELECT and MULTI SELECT task attribute type possible OPTIONS have to be defined!']));
+                        return $response;
+                    }
+                }
+            }
+
+            $errors = $this->get('entity_processor')->processEntity($taskAttribute, $requestData);
+
+            if (false === $errors) {
+                $this->getDoctrine()->getManager()->persist($taskAttribute);
+                $this->getDoctrine()->getManager()->flush();
+
+                $taArray = $this->get('task_attribute_service')->getTaskAttributeResponse($taskAttribute->getId());
+                $response = $response->setStatusCode($statusCode);
+                $response = $response->setContent(json_encode($taArray));
+                return $response;
+            }else{
+                $data = [
+                    'errors' => $errors,
+                    'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+                ];
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode($data));
+            }
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         }
-
-        $errors = $this->get('entity_processor')->processEntity($taskAttribute, $requestData);
-
-        if (false === $errors) {
-            $this->getDoctrine()->getManager()->persist($taskAttribute);
-            $this->getDoctrine()->getManager()->flush();
-
-            $caArray = $this->get('task_attribute_service')->getTaskAttributeResponse($taskAttribute->getId());
-            return $this->json($caArray, $statusCode);
-        }
-
-        $data = [
-            'errors' => $errors,
-            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-        ];
-        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $response;
     }
 }

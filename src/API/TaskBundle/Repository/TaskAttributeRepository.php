@@ -63,7 +63,7 @@ class TaskAttributeRepository extends EntityRepository
                 'count' => $count,
                 'array' => $this->formatData($paginator)
             ];
-        }else {
+        } else {
             // Return all entities
             return [
                 'array' => $this->formatData($query->getArrayResult(), true)
@@ -91,7 +91,7 @@ class TaskAttributeRepository extends EntityRepository
     /**
      * @return array
      */
-    public function getAllActiveEntitiesWithTypeOptions()
+    public function getAllActiveEntitiesWithTypeOptions():array
     {
         $query = $this->createQueryBuilder('ca')
             ->select('ca')
@@ -102,11 +102,11 @@ class TaskAttributeRepository extends EntityRepository
 
         $response = [];
 
-        if (count($query) > 0) {
+        if (\count($query) > 0) {
             /** @var TaskAttribute $data */
             foreach ($query as $data) {
                 $response[] = [
-                    'id'=>$data['id'],
+                    'id' => $data['id'],
                     'title' => $data['title'],
                     'type' => $data['type'],
                     'options' => json_decode($data['options'])
@@ -147,6 +147,7 @@ class TaskAttributeRepository extends EntityRepository
             'id' => $data->getId(),
             'title' => $data->getTitle(),
             'type' => $data->getType(),
+            'description' => $data->getDescription(),
             'options' => $data->getOptions(),
             'is_active' => $data->getIsActive(),
         ];
@@ -164,6 +165,7 @@ class TaskAttributeRepository extends EntityRepository
             'id' => $data['id'],
             'title' => $data['title'],
             'type' => $data['type'],
+            'description' => $data['description'],
             'options' => $data['options'],
             'is_active' => $data['is_active'],
         ];

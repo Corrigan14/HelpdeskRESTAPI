@@ -22,23 +22,16 @@ task_attribute_update:
     requirements:
             id: '\d+'
 
-task_attribute_partial_update:
-    path:     /task-attributes/{id}
-    defaults: { _controller: APITaskBundle:TaskAttribute:updatePartial }
-    methods: [PATCH]
-    requirements:
-            id: '\d+'
-
-task_attribute_delete:
-    path:     /task-attributes/{id}
+task_attribute_inactivate:
+    path:     /task-attributes/{id}/inactivate
     defaults: { _controller: APITaskBundle:TaskAttribute:delete }
-    methods: [DELETE]
+    methods: [PUT]
     requirements:
             id: '\d+'
 
 task_attribute_restore:
-    path:     /task-attributes/restore/{id}
+    path:     /task-attributes/{id}/restore
     defaults: { _controller: APITaskBundle:TaskAttribute:restore }
-    methods: [PATCH]
+    methods: [PUT]
     requirements:
             id: '\d+'

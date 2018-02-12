@@ -48,13 +48,11 @@ class TaskAttributeService
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function getTaskAttributesResponse(int $page, array $options):array
+    public function getTaskAttributesResponse(int $page, array $options): array
     {
         $responseData = $this->em->getRepository('APITaskBundle:TaskAttribute')->getAllEntities($page, $options);
 
-        $response = [
-            'data' => $responseData['array'],
-        ];
+        $response['data'] = $responseData['array'];
 
         $url = $this->router->generate('task_attribute_list');
         $limit = $options['limit'];
@@ -98,12 +96,12 @@ class TaskAttributeService
      * @throws \Symfony\Component\Routing\Exception\MissingMandatoryParametersException
      * @throws \Symfony\Component\Routing\Exception\InvalidParameterException
      */
-    private function getLinks(int $id):array
+    private function getLinks(int $id): array
     {
         return [
             'put' => $this->router->generate('task_attribute_update', ['id' => $id]),
-            'patch' => $this->router->generate('task_attribute_partial_update', ['id' => $id]),
-            'delete' => $this->router->generate('task_attribute_delete', ['id' => $id]),
+            'inactivate' => $this->router->generate('task_attribute_inactivate', ['id' => $id]),
+            'restore' => $this->router->generate('task_attribute_restore', ['id' => $id]),
         ];
     }
 }

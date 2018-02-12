@@ -29,6 +29,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *            "id": "1",
      *            "title": "Input company additional attribute",
      *            "type": "simple_select",
+     *            "description": "desc text",
      *            "options":
      *            [
      *               "option1",
@@ -40,7 +41,8 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *          {
      *            "id": 23,
      *            "title": "select 11",
-     *            "type": "simple_select",
+     *            "type": "simple_select",,
+     *            "description": "desc text",
      *            "options":
      *            {
      *               "possition 1": "vaue 1"
@@ -148,7 +150,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             $response = $response->setContent(json_encode($companyAttributesArray));
         } else {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         }
 
         return $response;
@@ -163,7 +165,8 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *        {
      *           "id": 23,
      *           "title": "select 11",
-     *           "type": "simple_select",
+     *           "type": "simple_select",,
+     *           "description": "desc text",
      *           "options":
      *           {
      *               "possition 1": "vaue 1"
@@ -250,7 +253,8 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *        {
      *           "id": 23,
      *           "title": "select 11",
-     *           "type": "simple_select",
+     *           "type": "simple_select",,
+     *           "description": "desc text",
      *           "options":
      *           {
      *               "possition 1": "vaue 1"
@@ -313,6 +317,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
         }
 
         $companyAttribute = new CompanyAttribute();
+        $companyAttribute->setIsActive(true);
 
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
@@ -326,7 +331,8 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *        {
      *           "id": 23,
      *           "title": "select 11",
-     *           "type": "simple_select",
+     *           "type": "simple_select",,
+     *           "description": "desc text",
      *           "options":
      *           {
      *               "possition 1": "vaue 1"
@@ -483,7 +489,8 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *        {
      *           "id": 23,
      *           "title": "select 11",
-     *           "type": "simple_select",
+     *           "type": "simple_select",,
+     *           "description": "desc text",
      *           "options":
      *           {
      *               "possition 1": "vaue 1"
@@ -587,7 +594,6 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             'title',
             'type',
             'options',
-            'is_active',
             'description'
         ];
 
@@ -634,6 +640,10 @@ class CompanyAttributeController extends ApiBaseController implements Controller
                             $response = $response->setContent(json_encode(['message' => 'For SIMPLE SELECT and MULTI SELECT company attribute type possible OPTIONS have to be defined!']));
                             return $response;
                         }
+                    } elseif (false === $create && !isset($requestData['options'])) {
+                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'For SIMPLE SELECT and MULTI SELECT task attribute type possible OPTIONS have to be defined!']));
+                        return $response;
                     }
                 }
             }
@@ -658,7 +668,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             }
         } else {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         }
         return $response;
     }

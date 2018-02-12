@@ -66,12 +66,11 @@ class InvoiceableItemController extends ApiBaseController
      *               "is_active": true
      *            }
      *          }
-     *        ],
-     *        "_links": []
+     *        ]
      *     }
      *
      * @ApiDoc(
-     *  description="Returns a list of Invoiceable item Entities For selected Task",
+     *  description="Returns a list of ALL Invoice-able item Entities For a selected Task",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -96,26 +95,37 @@ class InvoiceableItemController extends ApiBaseController
      *
      * @param int $taskId
      * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      * @internal param Request $request
      */
-    public function listAction(int $taskId):Response
+    public function listAction(int $taskId): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('invoiceable_item_list', ['taskId' => $taskId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
-            return $this->createApiResponse([
-                'message' => 'Task with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+            return $response;
         }
 
-        // Check if user can update selected task
-        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
-            return $this->accessDeniedResponse();
+        // Check if user can view selected task
+        if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_TASK, $task)) {
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $invoiceableItemsArray = $this->get('invoiceable_item_service')->getAttributesResponse($task);
-        return $this->json($invoiceableItemsArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($invoiceableItemsArray));
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+
+        return $response;
     }
 
     /**

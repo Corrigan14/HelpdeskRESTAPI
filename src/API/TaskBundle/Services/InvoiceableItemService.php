@@ -45,15 +45,9 @@ class InvoiceableItemService
     {
         $attributes = $this->em->getRepository('APITaskBundle:InvoiceableItem')->getAllEntities($task);
 
-        $response = [
-            'data' => $attributes,
-        ];
+        $response['data'] = $attributes;
 
-        $pagination = [
-            '_links' => [],
-        ];
-
-        return array_merge($response, $pagination);
+        return $response;
     }
 
     /**

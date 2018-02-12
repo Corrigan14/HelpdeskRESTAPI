@@ -30,6 +30,7 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *             "title": "input task additional attribute",
      *             "type": "input",
      *             "description": "desc text",
+     *             "required": true,
      *             "options": null,
      *             "is_active": true
      *           },
@@ -38,6 +39,7 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *              "title": "select task additional attribute",
      *              "type": "simple_select",
      *              "description": "desc text",
+     *              "required": true,
      *              "options":
      *              {
      *                 "select1": "select1",
@@ -51,6 +53,7 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *              "title": "integer number task additional attribute",
      *              "type": "integer_number",
      *              "description": "desc text",
+     *              "required": true,
      *              "options": null,
      *              "is_active": true
      *            }
@@ -174,6 +177,7 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *            "title": "input task additional attribute",
      *            "type": "input",
      *            "description": "desc text",
+     *            "required": true,
      *            "options":
      *             {
      *                "select1": "select1",
@@ -267,6 +271,7 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *            "title": "Input task additional attribute",
      *            "type": "input",
      *            "description": "desc text",
+     *            "required": true,
      *            "options":
      *            {
      *               "select1": "select1",
@@ -350,6 +355,7 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *            "title": "Input task additional attribute",
      *            "type": "input",
      *            "description": "desc text",
+     *            "required": true,
      *            "options":
      *            {
      *               "select1": "select1",
@@ -408,7 +414,7 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function updateAction(int $id, Request $request):Response
+    public function updateAction(int $id, Request $request): Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('task_attribute_update', ['id' => $id]);
@@ -465,33 +471,43 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *
      * @param int $id
      *
-     * @return JsonResponse|Response
+     * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      */
-    public function deleteAction(int $id)
+    public function deleteAction(int $id): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('task_attribute_inactivate', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::TASK_ATTRIBUTE_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($id);
 
         if (!$taskAttribute instanceof TaskAttribute) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Task Attribute with requested Id does not exist!']));
+            return $response;
         }
 
         $taskAttribute->setIsActive(false);
         $this->getDoctrine()->getManager()->persist($taskAttribute);
         $this->getDoctrine()->getManager()->flush();
 
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::UNACITVATE_MESSAGE,
-        ], StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode(['message' => StatusCodesHelper::UNACITVATE_MESSAGE]));
+        return $response;
     }
 
     /**
@@ -503,6 +519,7 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      *            "title": "Input task additional attribute",
      *            "type": "input",
      *            "description": "desc text",
+     *            "required": true,
      *            "options":
      *            {
      *               "select1": "select1",
@@ -546,32 +563,49 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      * )
      *
      * @param int $id
-     * @return JsonResponse|Response
+     * @return Response
+     * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
+     * @throws \Symfony\Component\Routing\Exception\MissingMandatoryParametersException
+     * @throws \Symfony\Component\Routing\Exception\InvalidParameterException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      */
-    public function restoreAction(int $id)
+    public function restoreAction(int $id): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('task_attribute_restore', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $aclOptions = [
             'acl' => UserRoleAclOptions::TASK_ATTRIBUTE_SETTINGS,
             'user' => $this->getUser()
         ];
 
         if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($id);
 
         if (!$taskAttribute instanceof TaskAttribute) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Task Attribute with requested Id does not exist!']));
+            return $response;
         }
 
         $taskAttribute->setIsActive(true);
         $this->getDoctrine()->getManager()->persist($taskAttribute);
         $this->getDoctrine()->getManager()->flush();
 
-        $caArray = $this->get('task_attribute_service')->getTaskAttributeResponse($taskAttribute->getId());
-        return $this->json($caArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $taArray = $this->get('task_attribute_service')->getTaskAttributeResponse($taskAttribute->getId());
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($taArray));
+        return $response;
     }
 
     /**
@@ -599,7 +633,8 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
             'title',
             'type',
             'options',
-            'description'
+            'description',
+            'required'
         ];
 
         // JSON API Response - Content type and Location settings
@@ -645,7 +680,7 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
                             $response = $response->setContent(json_encode(['message' => 'For SIMPLE SELECT and MULTI SELECT task attribute type possible OPTIONS have to be defined!']));
                             return $response;
                         }
-                    }elseif (false === $create && !isset($requestData['options'])){
+                    } elseif (false === $create && !isset($requestData['options'])) {
                         $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                         $response = $response->setContent(json_encode(['message' => 'For SIMPLE SELECT and MULTI SELECT task attribute type possible OPTIONS have to be defined!']));
                         return $response;
@@ -663,7 +698,7 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
                 $response = $response->setStatusCode($statusCode);
                 $response = $response->setContent(json_encode($taArray));
                 return $response;
-            }else{
+            } else {
                 $data = [
                     'errors' => $errors,
                     'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE

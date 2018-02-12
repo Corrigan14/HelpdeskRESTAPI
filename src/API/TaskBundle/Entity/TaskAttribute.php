@@ -70,6 +70,13 @@ class TaskAttribute
     private $is_active = true;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="required", type="boolean", options={"default":1})
+     */
+    private $required = true;
+
+    /**
      * @var
      *
      * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskData", mappedBy="taskAttribute")
@@ -181,7 +188,7 @@ class TaskAttribute
     public function setIsActive($isActive)
     {
         if (is_string($isActive)) {
-            $isActive = ($isActive === 'true' || $isActive == 1) ? true : false;
+            $isActive = ($isActive === 'true' || $isActive == 1);
         }
 
         $this->is_active = $isActive;
@@ -197,6 +204,29 @@ class TaskAttribute
     public function getIsActive()
     {
         return $this->is_active;
+    }
+
+    /**
+     * @param bool|string $required
+     * @return $this
+     */
+    public function setRequired($required)
+    {
+        if (\is_string($required)) {
+            $required = ($required === 'true' || $required == 1);
+        }
+
+        $this->required = $required;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getRequired():bool
+    {
+        return $this->required;
     }
 
     /**

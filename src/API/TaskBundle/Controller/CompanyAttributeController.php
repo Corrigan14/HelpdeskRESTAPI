@@ -30,6 +30,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *            "title": "Input company additional attribute",
      *            "type": "simple_select",
      *            "description": "desc text",
+     *            "required": true,
      *            "options":
      *            [
      *               "option1",
@@ -43,6 +44,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *            "title": "select 11",
      *            "type": "simple_select",,
      *            "description": "desc text",
+     *            "required": true,
      *            "options":
      *            {
      *               "possition 1": "vaue 1"
@@ -167,6 +169,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *           "title": "select 11",
      *           "type": "simple_select",,
      *           "description": "desc text",
+     *           "required": true,
      *           "options":
      *           {
      *               "possition 1": "vaue 1"
@@ -255,6 +258,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *           "title": "select 11",
      *           "type": "simple_select",,
      *           "description": "desc text",
+     *           "required": true,
      *           "options":
      *           {
      *               "possition 1": "vaue 1"
@@ -333,6 +337,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *           "title": "select 11",
      *           "type": "simple_select",,
      *           "description": "desc text",
+     *           "required": true,
      *           "options":
      *           {
      *               "possition 1": "vaue 1"
@@ -418,7 +423,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
 
     /**
      * @ApiDoc(
-     *  description="Delete Company attribute Entity",
+     *  description="Inactivate Company attribute Entity",
      *  requirements={
      *     {
      *       "name"="id",
@@ -491,6 +496,7 @@ class CompanyAttributeController extends ApiBaseController implements Controller
      *           "title": "select 11",
      *           "type": "simple_select",,
      *           "description": "desc text",
+     *           "required": true,
      *           "options":
      *           {
      *               "possition 1": "vaue 1"
@@ -594,7 +600,8 @@ class CompanyAttributeController extends ApiBaseController implements Controller
             'title',
             'type',
             'options',
-            'description'
+            'description',
+            'required'
         ];
 
         // JSON API Response - Content type and Location settings

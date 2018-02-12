@@ -120,6 +120,7 @@ class CompanyAttributeRepository extends EntityRepository
             'title' => $data->getTitle(),
             'type' => $data->getType(),
             'description' => $data->getDescription(),
+            'required' => $data->getRequired(),
             'options' => $data->getOptions(),
             'is_active' => $data->getIsActive()
         ];
@@ -138,6 +139,7 @@ class CompanyAttributeRepository extends EntityRepository
             'title' => $data['title'],
             'type' => $data['type'],
             'description' => $data['description'],
+            'required' => $data['required'],
             'options' => json_decode($data['options']),
             'is_active' => $data['is_active']
         ];

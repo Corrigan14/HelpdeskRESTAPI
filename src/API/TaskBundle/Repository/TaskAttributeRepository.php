@@ -91,7 +91,7 @@ class TaskAttributeRepository extends EntityRepository
     /**
      * @return array
      */
-    public function getAllActiveEntitiesWithTypeOptions():array
+    public function getAllActiveEntitiesWithTypeOptions(): array
     {
         $query = $this->createQueryBuilder('ca')
             ->select('ca')
@@ -148,6 +148,7 @@ class TaskAttributeRepository extends EntityRepository
             'title' => $data->getTitle(),
             'type' => $data->getType(),
             'description' => $data->getDescription(),
+            'required' => $data->getRequired(),
             'options' => $data->getOptions(),
             'is_active' => $data->getIsActive(),
         ];
@@ -166,6 +167,7 @@ class TaskAttributeRepository extends EntityRepository
             'title' => $data['title'],
             'type' => $data['type'],
             'description' => $data['description'],
+            'required' => $data['required'],
             'options' => $data['options'],
             'is_active' => $data['is_active'],
         ];

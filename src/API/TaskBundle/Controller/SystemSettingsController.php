@@ -535,8 +535,7 @@ class SystemSettingsController extends ApiBaseController implements ControllerIn
     {
         $allowedUnitEntityParams = [
             'title',
-            'value',
-            'is_active'
+            'value'
         ];
 
         // JSON API Response - Content type and Location settings

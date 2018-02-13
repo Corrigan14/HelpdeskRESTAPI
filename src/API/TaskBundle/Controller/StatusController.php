@@ -301,6 +301,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
         }
 
         $status = new Status();
+        $status->setIsActive(true);
 
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
         return $this->updateStatus($status, $requestBody, true, $locationURL);
@@ -566,7 +567,6 @@ class StatusController extends ApiBaseController implements ControllerInterface
             'title',
             'color',
             'description',
-            'is_active',
             'order',
             'function'
         ];

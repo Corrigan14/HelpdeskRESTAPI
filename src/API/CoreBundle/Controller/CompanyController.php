@@ -1077,7 +1077,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
                                     'company' => $company,
                                 ]);
 
-                                if ($cd instanceof CompanyData && 'NULL' === $value) {
+                                if ($cd instanceof CompanyData && 'null' === $value) {
                                     $this->getDoctrine()->getManager()->remove($cd);
                                     $this->getDoctrine()->getManager()->flush();
                                     break;

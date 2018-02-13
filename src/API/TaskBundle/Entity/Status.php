@@ -207,7 +207,11 @@ class Status
      */
     public function setDescription($description)
     {
-        $this->description = $description;
+        if ('null' === strtolower($description)) {
+            $this->description = null;
+        } else {
+            $this->description = $description;
+        }
 
         return $this;
     }
@@ -303,7 +307,11 @@ class Status
      */
     public function setFunction($function)
     {
-        $this->function = $function;
+        if ('null' === strtolower($function)) {
+            $this->function = null;
+        } else {
+            $this->function = $function;
+        }
 
         return $this;
     }

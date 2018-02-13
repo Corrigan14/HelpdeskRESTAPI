@@ -112,14 +112,14 @@ class SystemSettings
     /**
      * Set isActive
      *
-     * @param boolean $isActive
+     * @param boolean|string $isActive
      *
      * @return SystemSettings
      */
     public function setIsActive($isActive)
     {
-        if (is_string($isActive)) {
-            $isActive = ($isActive === 'true' || $isActive == 1) ? true : false;
+        if (\is_string($isActive)) {
+            $isActive = ($isActive === 'true' || $isActive == 1);
         }
 
         $this->is_active = $isActive;

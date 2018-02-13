@@ -170,13 +170,15 @@ class Company implements \Serializable
     /**
      * Set ico
      *
-     * @param  $ico
+     * @param  string $ico
      *
      * @return Company
      */
     public function setIco($ico)
     {
-        if ($ico) {
+        if ('null' === strtolower($ico)) {
+            $this->ico = null;
+        } else {
             $this->ico = $ico;
         }
 
@@ -196,13 +198,15 @@ class Company implements \Serializable
     /**
      * Set dic
      *
-     * @param $dic
+     * @param string $dic
      *
      * @return Company
      */
     public function setDic($dic)
     {
-        if ($dic) {
+        if ('null' === strtolower($dic)) {
+            $this->dic = null;
+        } else {
             $this->dic = $dic;
         }
 
@@ -222,13 +226,15 @@ class Company implements \Serializable
     /**
      * Set icDph
      *
-     * @param $icDph
+     * @param string $icDph
      *
      * @return Company
      */
     public function setIcDph($icDph)
     {
-        if ($icDph) {
+        if ('null' === strtolower($icDph)) {
+            $this->ic_dph = null;
+        } else {
             $this->ic_dph = $icDph;
         }
 
@@ -254,7 +260,11 @@ class Company implements \Serializable
      */
     public function setStreet($street)
     {
-        $this->street = $street;
+        if ('null' === strtolower($street)) {
+            $this->street = null;
+        } else {
+            $this->street = $street;
+        }
 
         return $this;
     }
@@ -278,7 +288,11 @@ class Company implements \Serializable
      */
     public function setCity($city)
     {
-        $this->city = $city;
+        if ('null' === strtolower($city)) {
+            $this->city = null;
+        } else {
+            $this->city = $city;
+        }
 
         return $this;
     }
@@ -302,7 +316,11 @@ class Company implements \Serializable
      */
     public function setZip($zip)
     {
-        $this->zip = $zip;
+        if ('null' === strtolower($zip)) {
+            $this->zip = null;
+        } else {
+            $this->zip = $zip;
+        }
 
         return $this;
     }
@@ -326,7 +344,11 @@ class Company implements \Serializable
      */
     public function setCountry($country)
     {
-        $this->country = $country;
+        if ('null' === strtolower($country)) {
+            $this->country = null;
+        } else {
+            $this->country = $country;
+        }
 
         return $this;
     }

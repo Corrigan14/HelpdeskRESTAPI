@@ -95,6 +95,8 @@ class UploadHelper
 
         $file->move($uploadDir['path'], $fileName);
 
+
+
         return $fileEntity;
 
     }

@@ -8,7 +8,6 @@ use API\TaskBundle\Entity\TaskHasAttachment;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use API\CoreBundle\Services\CDN\UploadedFile;
 use Igsem\APIBundle\Services\StatusCodesHelper;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use API\CoreBundle\Entity\File;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -159,9 +158,24 @@ class CdnController extends ApiBaseController
             return $response;
         }
 
+        // Check, if the file was uploaded via HTTP POST
+        if (!is_uploaded_file($uploadingFile)) {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Uploading Error!']));
+            return $response;
+        }
+
         // Check if the uploading file is an IMAGE
-        $fileType = $uploadingFile->guessExtension();
-        if ('png' === $fileType || 'gif' === $fileType || 'jpg' === $fileType || 'jpeg' === $fileType) {
+        $fileType = $uploadingFile->getMimeType();
+        if ('image/png' === $fileType || 'image/gif' === $fileType || 'image/jpg' === $fileType || 'image/jpeg' === $fileType) {
+            //Check the allowed image size
+            $imageSize = getimagesize($uploadingFile);
+            if ($imageSize && ($imageSize[0] > 2500 || $imageSize[1] > 2500)) {
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Uploading image is too large!']));
+                return $response;
+            }
+
             $file = $this->get('upload_helper')->uploadFile($uploadingFile);
             if ($file) {
                 $responseArray['data'] = ['slug' => $file->getSlug()];
@@ -486,4 +500,5 @@ class CdnController extends ApiBaseController
 
         return (!$taskHasAttachment instanceof TaskHasAttachment);
     }
+
 }

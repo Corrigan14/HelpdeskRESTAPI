@@ -424,7 +424,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @throws \UnexpectedValueException
      * @throws \LogicException
      */
-    public function deleteAction(int $id):Response
+    public function deleteAction(int $id): Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('status_inactivate', ['id' => $id]);
@@ -513,7 +513,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function restoreAction(int $id):Response
+    public function restoreAction(int $id): Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('user_role_inactivate', ['id' => $id]);
@@ -588,9 +588,10 @@ class StatusController extends ApiBaseController implements ControllerInterface
             }
 
             // Control, if function is allowed
-            if (isset($requestData['function']) && !\in_array($requestData['function'], StatusFunctionOptions::getConstants(), true)) {
+            $statusConstants = StatusFunctionOptions::getConstants();
+            if (isset($requestData['function']) && 'null' !== strtolower($requestData['function']) && !\in_array($requestData['function'], $statusConstants, true)) {
                 $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                $response = $response->setContent(json_encode(['message' => $requestData['function'] . ' is not allowed parameter for Function of Status Entity!']));
+                $response = $response->setContent(json_encode(['message' => $requestData['function'] . ' is not allowed parameter for Function of Status Entity! Allowed are: ' .implode(',',$statusConstants)]));
                 return $response;
             }
 

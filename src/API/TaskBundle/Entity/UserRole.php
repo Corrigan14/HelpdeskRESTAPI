@@ -187,7 +187,7 @@ class UserRole
      */
     public function setAcl($acl)
     {
-        if ('null' === strtolower($acl)) {
+        if (\is_string($acl) && 'null' === strtolower($acl)) {
             $this->acl = null;
         } else {
             $this->acl = json_encode($acl);

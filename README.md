@@ -1,3 +1,39 @@
+.REQUIREMENTS
+=========
+php 7.1
+Symfony 3.4
+MYSQL 
+
+git - the latest version
+
+.FIRST STEPS TO WORK WITH A PROJECT
+=========
+1.  composer update
+    set-up db 
+        name: helpdesk
+        port: 3306
+        host: 127.0.0.1
+        db name: root
+        db pass: root
+        
+    check parameters.yml - db settings has to correspond to your settings
+    
+2. create db: php bin/console database:create
+3. load fixtures: db: php bin/console database:fixtures:load
+4. authentication settings 
+   necessary to Generate the SSH keys:
+        $ mkdir -p var/jwt # For Symfony3+, no need of the -p option
+        $ openssl genrsa -out var/jwt/private.pem -aes256 4096
+        $ openssl rsa -pubout -in var/jwt/private.pem -out var/jwt/public.pem
+        
+   write the created password to: 
+        parameters.yml (jwt_key_pass_phrase)
+        parameters.yml.dist (jwt_key_pass_phrase)
+ 
+5. AVAILABLE ON: http://127.0.0.1:8000/v1/doc
+    
+
+
 .API Dokumentácia
 =========
 

@@ -15,3 +15,8 @@ api_task:
     resource: "@APITaskBundle/Resources/config/routing.yml"
     prefix:   /api/v1/task-bundle
 
+file_download:
+    path:     /uploads/{fileDir}/{fileName}
+    defaults: { _controller: APICoreBundle:Cdn:downloadFile }
+    methods: [GET]
+

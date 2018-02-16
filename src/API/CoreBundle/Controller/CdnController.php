@@ -2,6 +2,7 @@
 
 namespace API\CoreBundle\Controller;
 
+use API\CoreBundle\Security\UploadingFilesOptions;
 use API\TaskBundle\Security\VoteOptions;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskHasAttachment;
@@ -9,9 +10,11 @@ use Igsem\APIBundle\Controller\ApiBaseController;
 use API\CoreBundle\Services\CDN\UploadedFile;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use API\CoreBundle\Entity\File;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 /**
  * Class CdnController - File upload control
@@ -53,7 +56,6 @@ class CdnController extends ApiBaseController
      * @param Request $request
      *
      * @return Response
-     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \UnexpectedValueException
      * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
@@ -83,16 +85,52 @@ class CdnController extends ApiBaseController
             return $response;
         }
 
-        $file = $this->get('upload_helper')->uploadFile($uploadingFile);
-        if ($file) {
-            $responseArray['data'] = ['slug' => $file->getSlug()];
-            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
-            $response = $response->setContent(json_encode($responseArray));
+        // Check, if the file was uploaded via HTTP POST
+        if (!is_uploaded_file($uploadingFile)) {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Uploading Error!']));
+            return $response;
+        }
+
+        // Check if the uploading file is in an allowed FORMAT
+        $fileType = $uploadingFile->getMimeType();
+        $supportedFileTypes = UploadingFilesOptions::$supportedFileTypes;
+
+        if (in_array($fileType, $supportedFileTypes)) {
+
+            if (in_array($fileType, UploadingFilesOptions::$supportedImageTypes)) {
+                //Check the allowed image size
+                $imageSize = getimagesize($uploadingFile);
+                if ($imageSize && ($imageSize[0] > 2500 || $imageSize[1] > 2500)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'Uploading image is too large!']));
+                    return $response;
+                }
+            } else {
+                $fileSize = filesize($uploadingFile);
+                if ($fileSize > 500000) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'Uploading file is too large! Max Allowed: 500kb']));
+                    return $response;
+                }
+            }
+
+            $file = $this->get('upload_helper')->uploadFile($uploadingFile);
+            if ($file) {
+                $responseArray['data'] = ['slug' => $file->getSlug()];
+                $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+                $response = $response->setContent(json_encode($responseArray));
+                return $response;
+            } else {
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Problem with uploaded file type!']));
+                return $response;
+            }
         } else {
             $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Problem with uploaded file type extension!']));
+            $response = $response->setContent(json_encode(['message' => 'Not supported file type! Supported are: ' . implode(', ', UploadingFilesOptions::$supportedFileTypesArray)]));
+            return $response;
         }
-        return $response;
     }
 
     /**
@@ -128,7 +166,6 @@ class CdnController extends ApiBaseController
      * @param Request $request
      *
      * @return Response
-     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \UnexpectedValueException
      * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
@@ -167,7 +204,9 @@ class CdnController extends ApiBaseController
 
         // Check if the uploading file is an IMAGE
         $fileType = $uploadingFile->getMimeType();
-        if ('image/png' === $fileType || 'image/gif' === $fileType || 'image/jpg' === $fileType || 'image/jpeg' === $fileType) {
+        $supportedImageTypes = UploadingFilesOptions::$supportedImageTypes;
+
+        if (in_array($fileType, $supportedImageTypes)) {
             //Check the allowed image size
             $imageSize = getimagesize($uploadingFile);
             if ($imageSize && ($imageSize[0] > 2500 || $imageSize[1] > 2500)) {
@@ -184,7 +223,7 @@ class CdnController extends ApiBaseController
                 return $response;
             } else {
                 $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                $response = $response->setContent(json_encode(['message' => 'Problem with uploaded file type extension!']));
+                $response = $response->setContent(json_encode(['message' => 'Problem with uploaded file type!']));
                 return $response;
             }
         } else {
@@ -199,12 +238,14 @@ class CdnController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *           "url": "/home/martina/Desktop/Symfony/taskmanagercore/app/uploads/d3bf991fae9a36a9c2f58c5a780d4d15/phphHwC70.png"
+     *           "fileDir": "d3bf991fae9a36a9c2f58c5a780d4d15",
+     *           "fileName": "phphHwC70.png",
+     *           "prefix": "uploads"
      *        }
      *      }
      *
      * @ApiDoc(
-     *  description="Load a Image - returns image location",
+     *  description="Load an Image - returns image location data.",
      *  requirements={
      *     {
      *       "name"="slug",
@@ -235,7 +276,7 @@ class CdnController extends ApiBaseController
      * @throws \LogicException
      *
      */
-    public function loadImageAction($slug): Response
+    public function loadFileLocationDataAction($slug): Response
     {
         $locationURL = $this->generateUrl('file_load_image', ['slug' => $slug]);
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
@@ -260,7 +301,11 @@ class CdnController extends ApiBaseController
             return $response;
         }
 
-        $responseArray ['data'] = ['url' => $file];
+        $responseArray ['data'] = [
+            'fileDir' => $fileEntity->getUploadDir(),
+            'fileName' => $fileEntity->getTempName(),
+            'prefix' => 'uploads'
+        ];
         $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
         $response = $response->setContent(json_encode($responseArray));
         return $response;
@@ -269,12 +314,17 @@ class CdnController extends ApiBaseController
     /**
      *
      * @ApiDoc(
-     *  description="Load a File",
+     *  description="Download a file",
      *  requirements={
      *     {
-     *       "name"="slug",
+     *       "name"="fileDir",
      *       "dataType"="string",
-     *       "description"="Slug of a file"
+     *       "description"="File DIR"
+     *     },
+     *     {
+     *       "name"="fileName",
+     *       "dataType"="string",
+     *       "description"="File DIR"
      *     }
      *  },
      *  headers={
@@ -284,72 +334,69 @@ class CdnController extends ApiBaseController
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  output={"class"="API\CoreBundle\Entity\File"},
      *  statusCodes={
      *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      404 ="Not found file"
+     *      401 ="Unauthorized request"
      *  }
      *  )
      *
-     * @param string $slug
+     * @param string $fileDir
+     * @param string $fileName
      *
-     * @return Response
+     * @return Response|BinaryFileResponse
      * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
      * @throws \InvalidArgumentException
      * @throws \UnexpectedValueException
      * @throws \LogicException
      *
      */
-    public function loadAction($slug): Response
+    public function downloadFileAction(string $fileDir, string $fileName)
     {
-        $locationURL = $this->generateUrl('file_load', ['slug' => $slug]);
-        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+        $uploadDir = $this->getParameter('upload_dir');
+        $file = $uploadDir . DIRECTORY_SEPARATOR . $fileDir . DIRECTORY_SEPARATOR . $fileName;
+
+        if (!file_exists($file)) {
+            $response = new Response();
+            $response->headers->set('Location', $this->generateUrl('file_download', ['fileName' => $fileName, 'fileDir' => $fileDir]));
+            $response = $response->setStatusCode(StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'File with requested Data does not exist in a web-page File System!']));
+            return $response;
+        }
 
         $fileEntity = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
-            'slug' => $slug,
+            'uploadDir' => $fileDir,
+            'tempName' => $fileName
         ]);
 
         if (!$fileEntity instanceof File) {
+            $response = new Response();
+            $response->headers->set('Location', $this->generateUrl('file_download', ['fileName' => $fileName, 'fileDir' => $fileDir]));
             $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-            $response = $response->setContent(json_encode(['message' => 'File with requested Slug does not exist in DB!']));
+            $response = $response->setContent(json_encode(['message' => 'File with requested Data does not exist in DB!']));
             return $response;
         }
 
-        // Check if the File exists in a web-page file system
-        $uploadDir = $this->getParameter('upload_dir');
-        $file = $uploadDir . DIRECTORY_SEPARATOR . $fileEntity->getUploadDir() . DIRECTORY_SEPARATOR . $fileEntity->getTempName();
+        $response = new BinaryFileResponse($file);
 
-        if (!file_exists($file)) {
-            $response = $response->setStatusCode(StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
-            $response = $response->setContent(json_encode(['message' => 'File with requested Slug does not exist in a web-page File System!']));
-            return $response;
-        }
+        $response->setContentDisposition(
+            ResponseHeaderBag::DISPOSITION_INLINE,
+            $fileName,
+            iconv('UTF-8', 'ASCII//TRANSLIT', $fileName)
+        );
 
-        // Generate FILE response
-        $fileResponse = new Response();
-
+        $response->headers->set('Location', $this->generateUrl('file_download', ['fileName' => $fileName, 'fileDir' => $fileDir]));
+        $response->headers->set('Content-type', $fileEntity->getType());
+        $response->headers->set('Content-length', $fileEntity->getSize());
+        $response->headers->set('Last-Modified', $fileEntity->getUpdatedAt());
         if ($fileEntity->isPublic()) {
-            $fileResponse->setPublic();
-            $fileResponse->setSharedMaxAge(3600);
+            $response->setPublic();
         } else {
-            $fileResponse->setPrivate();
+            $response->setPrivate();
         }
 
-        // Set headers
-        $fileResponse->headers->set('Content-type', $fileEntity->getType());
-        $fileResponse->headers->set('Content-length', $fileEntity->getSize());
-        $fileResponse->headers->set('Last-Modified', $fileEntity->getUpdatedAt());
-
-
-        // Send headers before outputting anything
-//        $response->sendHeaders();
-//
-//        $response->setContent(file_get_contents($file));
-//
-//        return $response;
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
     }
-
 
     /**
      * @ApiDoc(

@@ -2,6 +2,7 @@
 
 namespace API\CoreBundle\Controller;
 
+use API\CoreBundle\Security\UploadingFilesOptions;
 use API\TaskBundle\Security\VoteOptions;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskHasAttachment;
@@ -53,7 +54,6 @@ class CdnController extends ApiBaseController
      * @param Request $request
      *
      * @return Response
-     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \UnexpectedValueException
      * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
@@ -83,16 +83,52 @@ class CdnController extends ApiBaseController
             return $response;
         }
 
-        $file = $this->get('upload_helper')->uploadFile($uploadingFile);
-        if ($file) {
-            $responseArray['data'] = ['slug' => $file->getSlug()];
-            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
-            $response = $response->setContent(json_encode($responseArray));
+        // Check, if the file was uploaded via HTTP POST
+        if (!is_uploaded_file($uploadingFile)) {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Uploading Error!']));
+            return $response;
+        }
+
+        // Check if the uploading file is in an allowed FORMAT
+        $fileType = $uploadingFile->getMimeType();
+        $supportedFileTypes = UploadingFilesOptions::$supportedFileTypes;
+
+        if (in_array($fileType, $supportedFileTypes)) {
+
+            if (in_array($fileType, UploadingFilesOptions::$supportedImageTypes)) {
+                //Check the allowed image size
+                $imageSize = getimagesize($uploadingFile);
+                if ($imageSize && ($imageSize[0] > 2500 || $imageSize[1] > 2500)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'Uploading image is too large!']));
+                    return $response;
+                }
+            }else{
+                $fileSize = filesize($uploadingFile);
+                if ($fileSize > 500000) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'Uploading file is too large! Max Allowed: 500kb']));
+                    return $response;
+                }
+            }
+
+            $file = $this->get('upload_helper')->uploadFile($uploadingFile);
+            if ($file) {
+                $responseArray['data'] = ['slug' => $file->getSlug()];
+                $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+                $response = $response->setContent(json_encode($responseArray));
+                return $response;
+            } else {
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Problem with uploaded file type!']));
+                return $response;
+            }
         } else {
             $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Problem with uploaded file type extension!']));
+            $response = $response->setContent(json_encode(['message' => 'Not supported file type! Supported are: '.implode(', ',UploadingFilesOptions::$supportedFileTypesArray)]));
+            return $response;
         }
-        return $response;
     }
 
     /**
@@ -128,7 +164,6 @@ class CdnController extends ApiBaseController
      * @param Request $request
      *
      * @return Response
-     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \UnexpectedValueException
      * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
@@ -167,7 +202,9 @@ class CdnController extends ApiBaseController
 
         // Check if the uploading file is an IMAGE
         $fileType = $uploadingFile->getMimeType();
-        if ('image/png' === $fileType || 'image/gif' === $fileType || 'image/jpg' === $fileType || 'image/jpeg' === $fileType) {
+        $supportedImageTypes = UploadingFilesOptions::$supportedImageTypes;
+
+        if (in_array($fileType, $supportedImageTypes)) {
             //Check the allowed image size
             $imageSize = getimagesize($uploadingFile);
             if ($imageSize && ($imageSize[0] > 2500 || $imageSize[1] > 2500)) {
@@ -184,7 +221,7 @@ class CdnController extends ApiBaseController
                 return $response;
             } else {
                 $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                $response = $response->setContent(json_encode(['message' => 'Problem with uploaded file type extension!']));
+                $response = $response->setContent(json_encode(['message' => 'Problem with uploaded file type!']));
                 return $response;
             }
         } else {

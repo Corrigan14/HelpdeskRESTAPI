@@ -49,6 +49,7 @@ class UploadHelper
      * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\ORMException
      */
     public function uploadFiles($files): array
     {
@@ -71,6 +72,7 @@ class UploadHelper
      * @throws \Symfony\Component\HttpFoundation\File\Exception\FileException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\ORMException
      */
     public function uploadFile(UploadedFile $file, bool $public = false)
     {
@@ -90,6 +92,7 @@ class UploadHelper
 
         $fileEntity->setTempName($fileName);
         $fileEntity->setPublic($public);
+
         $this->em->persist($fileEntity);
         $this->em->flush();
 

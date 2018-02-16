@@ -10,7 +10,7 @@ use API\TaskBundle\Entity\UserRole;
  *
  * @package API\CoreBundle\Security
  */
-class UserVoter extends ApiBaseVoter implements VoterInterface
+class UserVoter extends ApiBaseVoter
 {
     /** @var  User */
     private $user;

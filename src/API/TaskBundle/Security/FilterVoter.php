@@ -3,7 +3,6 @@
 namespace API\TaskBundle\Security;
 
 use API\CoreBundle\Entity\User;
-use API\CoreBundle\Security\VoterInterface;
 use API\TaskBundle\Entity\Filter;
 use API\TaskBundle\Entity\UserHasProject;
 use Doctrine\ORM\EntityManager;
@@ -16,7 +15,7 @@ use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface
  *
  * @package API\TaskBundle\Security
  */
-class FilterVoter implements VoterInterface
+class FilterVoter
 {
     /** @var  User */
     private $user;

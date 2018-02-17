@@ -4,7 +4,6 @@ namespace API\TaskBundle\Security;
 
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Security\ApiBaseVoter;
-use API\CoreBundle\Security\VoterInterface;
 use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\UserRole;
 
@@ -13,7 +12,7 @@ use API\TaskBundle\Entity\UserRole;
  *
  * @package API\TaskBundle\Security
  */
-class TagVoter extends ApiBaseVoter implements VoterInterface
+class TagVoter extends ApiBaseVoter
 {
     /** @var  User */
     private $user;

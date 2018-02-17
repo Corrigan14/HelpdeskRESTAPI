@@ -6,12 +6,14 @@ use API\CoreBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation\ReadOnly;
 
 /**
  * @ORM\Entity(repositoryClass="API\TaskBundle\Repository\TagRepository")
  * @ORM\Table(name="tag")
+ * @UniqueEntity("title")
  */
 class Tag
 {
@@ -24,11 +26,11 @@ class Tag
     private $id;
 
     /**
-     * @ORM\Column(name="title", type="string", length=255, unique=true)
-     * @Assert\NotBlank(message="Title is required")
-     * @Assert\Type("string")
-     *
      * @var string
+     *
+     * @ORM\Column(name="title", type="string", length=255, nullable=false, unique=true)
+     * @Assert\Type("string")
+     * @Assert\NotBlank(message="Title is required")
      */
     private $title;
 

@@ -4,7 +4,6 @@ namespace API\TaskBundle\Security;
 
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Security\ApiBaseVoter;
-use API\CoreBundle\Security\VoterInterface;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\UserHasProject;
 
@@ -13,7 +12,7 @@ use API\TaskBundle\Entity\UserHasProject;
  *
  * @package API\TaskBundle\Security
  */
-class ProjectVoter extends ApiBaseVoter implements VoterInterface
+class ProjectVoter extends ApiBaseVoter
 {
     /** @var  User */
     private $user;

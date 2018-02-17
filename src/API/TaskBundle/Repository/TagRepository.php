@@ -24,11 +24,12 @@ class TagRepository extends EntityRepository
     {
         $userId = $options['loggedUserId'];
         $limit = $options['limit'];
+        $order = $options['order'];
 
         $query = $this->createQueryBuilder('t')
             ->select('t, createdBy')
             ->leftJoin('t.createdBy', 'createdBy')
-            ->orderBy('t.id', 'DESC')
+            ->orderBy('t.title', $order)
             ->distinct()
             ->where('t.createdBy = :userId')
             ->orWhere('t.public = :public')
@@ -64,6 +65,8 @@ class TagRepository extends EntityRepository
     /**
      * @param int $id
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getEntity(int $id): array
     {
@@ -82,7 +85,7 @@ class TagRepository extends EntityRepository
      * @param int $userId
      * @return array
      */
-    public function getUsersTags(int $userId)
+    public function getUsersTags(int $userId):array
     {
         $query = $this->createQueryBuilder('t')
             ->select('t')

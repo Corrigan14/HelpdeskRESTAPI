@@ -86,6 +86,10 @@ class TagController extends ApiBaseController implements ControllerInterface
      *     {
      *       "name"="limit",
      *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
+     *     },
+     *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by Title"
      *     }
      *  },
      *  headers={
@@ -102,35 +106,49 @@ class TagController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
-     * @return JsonResponse
+     * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request): Response
     {
-        $pageNum = $request->get('page');
-        $pageNum = (int)$pageNum;
-        $page = ($pageNum === 0) ? 1 : $pageNum;
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tag_list');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
-        $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ?: 10;
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        if(999 === $limit){
-            $page = 1;
+        if (false !== $requestBody) {
+            $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody);
+
+            $page = $processedFilterParams['page'];
+            $limit = $processedFilterParams['limit'];
+            $order = $processedFilterParams['order'];
+
+            $filtersForUrl = [
+                'order' => '&order=' . $order,
+            ];
+
+            $options = [
+                'loggedUserId' => $this->getUser()->getId(),
+                'isActive' => false,
+                'filtersForUrl' => $filtersForUrl,
+                'limit' => $limit,
+                'order' => $order
+            ];
+
+            $tagArray = $this->get('tag_service')->getAttributesResponse($page, $options);
+            $response = $response->setContent(json_encode($tagArray));
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         }
 
-        $filtersForUrl = [];
-
-        $options = [
-            'loggedUserId' => $this->getUser()->getId(),
-            'isActive' => false,
-            'filtersForUrl' => $filtersForUrl,
-            'limit' => $limit
-        ];
-
-        $tagArray = $this->get('tag_service')->getAttributesResponse($page, $options);
-        return $this->json($tagArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
     }
 
     /**
@@ -152,7 +170,6 @@ class TagController extends ApiBaseController implements ControllerInterface
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/tags/2",
-     *           "patch": "/api/v1/task-bundle/tags/2",
      *           "delete": "/api/v1/task-bundle/tags/2"
      *         }
      *      }
@@ -185,24 +202,38 @@ class TagController extends ApiBaseController implements ControllerInterface
      *
      *
      * @param int $id
-     * @return Response|JsonResponse
+     * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      */
-    public function getAction(int $id)
+    public function getAction(int $id): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tag', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         /** @var Tag $t */
         $t = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->find($id);
 
-        if (!$t instanceof Tag) {
-            return $this->notFoundResponse();
+        if (!$this->get('tag_voter')->isGranted(VoteOptions::SHOW_TAG, $t)) {
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        if (!$this->get('tag_voter')->isGranted(VoteOptions::SHOW_TAG, $t)) {
-            return $this->accessDeniedResponse();
+        if (!$t instanceof Tag) {
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Tag with requested Id does not exist!']));
+            return $response;
         }
 
         $tagArray = $this->get('tag_service')->getAttributeResponse($id);
-        return $this->json($tagArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($tagArray));
+        return $response;
     }
 
     /**
@@ -224,7 +255,6 @@ class TagController extends ApiBaseController implements ControllerInterface
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/tags/2",
-     *           "patch": "/api/v1/task-bundle/tags/2",
      *           "delete": "/api/v1/task-bundle/tags/2"
      *         }
      *      }
@@ -251,20 +281,24 @@ class TagController extends ApiBaseController implements ControllerInterface
      *
      *
      * @param Request $request
-     * @return Response|JsonResponse
+     * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function createAction(Request $request)
+    public function createAction(Request $request): Response
     {
-        $requestData = $request->request->all();
+        $locationURL = $this->generateUrl('tag_create');
 
         $tag = new Tag();
         $tag->setCreatedBy($this->getUser());
 
-        return $this->processTag($tag, $requestData, true);
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        return $this->updateTag($tag, $requestBody, true, $locationURL);
     }
 
     /**
@@ -286,7 +320,6 @@ class TagController extends ApiBaseController implements ControllerInterface
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/tags/2",
-     *           "patch": "/api/v1/task-bundle/tags/2",
      *           "delete": "/api/v1/task-bundle/tags/2"
      *         }
      *      }
@@ -324,6 +357,9 @@ class TagController extends ApiBaseController implements ControllerInterface
      * @param int $id
      * @param Request $request
      * @return Response|JsonResponse
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -331,104 +367,30 @@ class TagController extends ApiBaseController implements ControllerInterface
      */
     public function updateAction(int $id, Request $request)
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tag_update', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
             'id' => $id,
         ]);
 
         if (!$tag instanceof Tag) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Tag with requested Id does not exist!']));
+            return $response;
         }
 
         // User can update just it's own tags AND
         // User can update PUBLIC tags if he has general ACL SHARE_TAGS
         if (!$this->get('tag_voter')->isGranted(VoteOptions::UPDATE_TAG, $tag)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        $requestData = $request->request->all();
-
-        return $this->updateTag($tag, $requestData);
-    }
-
-    /**
-     *  ### Response ###
-     *      {
-     *        "data":
-     *        {
-     *           "id": 37,
-     *           "title": "Free Time",
-     *           "color": "BF4848",
-     *           "public": true,
-     *           "createdBy":
-     *            {
-     *               "id": 2575,
-     *               "username": "admin",
-     *               "email": "admin@admin.sk"
-     *            }
-     *        }
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/tags/2",
-     *           "patch": "/api/v1/task-bundle/tags/2",
-     *           "delete": "/api/v1/task-bundle/tags/2"
-     *         }
-     *      }
-     *
-     *
-     * @ApiDoc(
-     *  description="Partially update the Tag",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  input={"class"="API\TaskBundle\Entity\Tag"},
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\TaskBundle\Entity\Tag"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied to create PUBLIC tag",
-     *      404 ="Not found Tag",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     *
-     *
-     * @param int $id
-     * @param Request $request
-     * @return Response|JsonResponse
-     * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \LogicException
-     */
-    public function updatePartialAction(int $id, Request $request)
-    {
-        $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->find($id);
-
-        if (!$tag instanceof Tag) {
-            return $this->notFoundResponse();
-        }
-
-        // User can update just it's own tags AND
-        // User can update PUBLIC tags if he has general ACL SHARE_TAGS
-        if (!$this->get('tag_voter')->isGranted(VoteOptions::UPDATE_TAG, $tag)) {
-            return $this->accessDeniedResponse();
-        }
-
-        $requestData = $request->request->all();
-
-        return $this->updateTag($tag, $requestData);
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        return $this->updateTag($tag, $requestBody, false, $locationURL);
     }
 
     /**
@@ -453,65 +415,61 @@ class TagController extends ApiBaseController implements ControllerInterface
      *      204 ="The Tag was successfully deleted",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
-     *      404 ="Not found Tag",
+     *      404 ="Not found Tag"
      *  })
      *
      * @param int $id
      *
-     * @return Response|JsonResponse
+     * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      */
-    public function deleteAction(int $id)
+    public function deleteAction(int $id):Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tag_update', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->find($id);
 
         if (!$tag instanceof Tag) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Tag with requested Id does not exist!']));
+            return $response;
         }
 
         // User can update just it's own tags AND
         // User can update PUBLIC tags if he has general ACL SHARE_TAGS
         if (!$this->get('tag_voter')->isGranted(VoteOptions::UPDATE_TAG, $tag)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $this->getDoctrine()->getManager()->remove($tag);
         $this->getDoctrine()->getManager()->flush();
 
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::DELETED_MESSAGE,
-        ], StatusCodesHelper::DELETED_CODE);
-    }
-
-    /**
-     * @param $tag
-     * @param $requestData
-     * @return Response|JsonResponse
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \LogicException
-     * @throws \InvalidArgumentException
-     */
-    private function updateTag($tag, $requestData)
-    {
-        if (!$tag instanceof Tag) {
-            return $this->notFoundResponse();
-        }
-
-        return $this->processTag($tag, $requestData);
+        $response = $response->setStatusCode(StatusCodesHelper::DELETED_CODE);
+        $response = $response->setContent(json_encode(['message' => StatusCodesHelper::DELETED_MESSAGE]));
+        return $response;
     }
 
     /**
      * @param Tag $tag
      * @param array $requestData
      * @param bool $create
-     * @return Response|JsonResponse
+     * @param $locationUrl
+     * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    private function processTag(Tag $tag, $requestData, $create = false)
+    private function updateTag(Tag $tag, $requestData, $create = false, $locationUrl): Response
     {
         $allowedUnitEntityParams = [
             'title',
@@ -519,52 +477,71 @@ class TagController extends ApiBaseController implements ControllerInterface
             'public'
         ];
 
-        if (array_key_exists('_format', $requestData)) {
-            unset($requestData['_format']);
+        // JSON API Response - Content type and Location settings
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationUrl);
+
+        if (!$tag instanceof Tag) {
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Tag with requested Id does not exist!']));
+            return $response;
         }
 
-        foreach ($requestData as $key => $value) {
-            if (!\in_array($key, $allowedUnitEntityParams, true)) {
-                return $this->createApiResponse(
-                    ['message' => $key . ' is not allowed parameter for Tag Entity!'],
-                    StatusCodesHelper::INVALID_PARAMETERS_CODE
-                );
+        if (false !== $requestData) {
+            if (array_key_exists('_format', $requestData)) {
+                unset($requestData['_format']);
             }
-        }
 
-        $statusCode = $this->getCreateUpdateStatusCode($create);
+            foreach ($requestData as $key => $value) {
+                if (!\in_array($key, $allowedUnitEntityParams, true)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for a Tag Entity!']));
+                    return $response;
+                }
+            }
 
-        if (isset($requestData['public'])) {
-            $aclOptions = [
-                'acl' => UserRoleAclOptions::SHARE_TAGS,
-                'user' => $this->getUser()
-            ];
+            $statusCode = $this->getCreateUpdateStatusCode($create);
 
-            if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-                $tag->setPublic(false);
-                return $this->accessDeniedResponse();
-            } else {
+            // Check PUBLIC TAG creation possibility
+            if (isset($requestData['public']) && (true === $requestData['public']  || 'true' === strtolower($requestData['public']))) {
+                $aclOptions = [
+                    'acl' => UserRoleAclOptions::SHARE_TAGS,
+                    'user' => $this->getUser()
+                ];
+
+                if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+                    $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+                    return $response;
+                }
                 $tag->setPublic(true);
+                unset($requestData['public']);
+            } else {
+                $tag->setPublic(false);
             }
-            unset($requestData['public']);
+
+            $errors = $this->get('entity_processor')->processEntity($tag, $requestData);
+
+            if (false === $errors) {
+                $this->getDoctrine()->getManager()->persist($tag);
+                $this->getDoctrine()->getManager()->flush();
+
+                $tagArray = $this->get('tag_service')->getAttributeResponse($tag->getId());
+                $response = $response->setStatusCode($statusCode);
+                $response = $response->setContent(json_encode($tagArray));
+                return $response;
+            }else {
+                $data = [
+                    'errors' => $errors,
+                    'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+                ];
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode($data));
+                return $response;
+            }
         } else {
-            $tag->setPublic(false);
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         }
-
-        $errors = $this->get('entity_processor')->processEntity($tag, $requestData);
-
-        if (false === $errors) {
-            $this->getDoctrine()->getManager()->persist($tag);
-            $this->getDoctrine()->getManager()->flush();
-
-            $tagArray = $this->get('tag_service')->getAttributeResponse($tag->getId());
-            return $this->json($tagArray, $statusCode);
-        }
-
-        $data = [
-            'errors' => $errors,
-            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-        ];
-        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $response;
     }
 }

@@ -4,7 +4,6 @@ namespace API\TaskBundle\Security;
 
 use API\CoreBundle\Entity\Company;
 use API\CoreBundle\Entity\User;
-use API\CoreBundle\Security\VoterInterface;
 use API\TaskBundle\Entity\Comment;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Tag;
@@ -22,7 +21,7 @@ use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface
  *
  * @package API\TaskBundle\Security
  */
-class TaskVoter implements VoterInterface
+class TaskVoter
 {
     /** @var  User */
     private $user;

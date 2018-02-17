@@ -40,7 +40,7 @@ class Company implements \Serializable
      * @var string
      *
      * @ORM\Column(name="title", type="string", length=255)
-     * @Assert\NotBlank(message="Name of company is required")
+     * @Assert\NotBlank(message="Name of a company is required")
      * @Assert\Type("string")
      */
     private $title;

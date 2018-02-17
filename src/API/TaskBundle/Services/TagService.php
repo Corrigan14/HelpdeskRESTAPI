@@ -2,7 +2,6 @@
 
 namespace API\TaskBundle\Services;
 
-use API\TaskBundle\Repository\TagRepository;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
@@ -47,9 +46,7 @@ class TagService
     {
         $responseData = $this->em->getRepository('APITaskBundle:Tag')->getAllEntities($page, $options);
 
-        $response = [
-            'data' => $responseData['array'],
-        ];
+        $response['data'] = $responseData['array'];
 
         $url = $this->router->generate('tag_list');
         $limit = $options['limit'];
@@ -68,6 +65,8 @@ class TagService
     /**
      * @param int $id
      * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      */
     public function getAttributeResponse(int $id): array
     {
@@ -83,7 +82,7 @@ class TagService
      * @param int $userId
      * @return array
      */
-    public function getListOfUsersTags(int $userId):array
+    public function getListOfUsersTags(int $userId): array
     {
         return $this->em->getRepository('APITaskBundle:Tag')->getAllTagEntitiesWithIdAndTitleAndColor($userId);
     }
@@ -93,11 +92,10 @@ class TagService
      *
      * @return array
      */
-    private function getEntityLinks(int $id)
+    private function getEntityLinks(int $id):array
     {
         return [
             'put' => $this->router->generate('tag_update', ['id' => $id]),
-            'patch' => $this->router->generate('tag_partial_update', ['id' => $id]),
             'delete' => $this->router->generate('tag_delete', ['id' => $id])
         ];
     }

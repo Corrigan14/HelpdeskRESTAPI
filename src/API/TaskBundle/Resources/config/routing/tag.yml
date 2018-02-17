@@ -22,13 +22,6 @@ tag_update:
     requirements:
             id: '\d+'
 
-tag_partial_update:
-    path:     /tags/{id}
-    defaults: { _controller: APITaskBundle:Tag:updatePartial }
-    methods: [PATCH]
-    requirements:
-            id: '\d+'
-
 tag_delete:
     path:     /tags/{id}
     defaults: { _controller: APITaskBundle:Tag:delete }

@@ -1192,13 +1192,17 @@ class ProjectController extends ApiBaseController implements ControllerInterface
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
         if (false !== $requestBody) {
-
             if (isset($requestBody['usersAcl'])) {
-                $usersACL = json_decode($requestBody['usersAcl'], true);
+                if (\is_array($requestBody['usersAcl'])) {
+                    $usersACL = $requestBody['usersAcl'];
+                } else {
+                    $usersACL = json_decode($requestBody['usersAcl'], true);
+                }
+                dump($usersACL);
+
                 $projectAclOptions = ProjectAclOptions::getConstants();
 
                 $correctData = $this->checkIfIsCorrectArray($usersACL);
-
                 if ($correctData) {
                     foreach ($usersACL as $key => $aclArray) {
                         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($key);
@@ -1207,41 +1211,53 @@ class ProjectController extends ApiBaseController implements ControllerInterface
                             $response = $response->setContent(json_encode(['message' => 'User with requested Id: ' . $key . ' does not exist!']));
                             return $response;
                         }
-
-                        // Check if all requested ACL are from allowed options
-
-                        foreach ($aclArray as $acl) {
-                            if (!\in_array($acl, $projectAclOptions, true)) {
-                                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                                $response = $response->setContent(json_encode(['message' => $acl . ' ACL is not allowed!' . 'Allowed ACL: ' . implode(',', $projectAclOptions)]));
-                                return $response;
-                            }
-                        }
-
-                        // Check if requested user is ADMIN. If yes, his EDIT_PROJECT permission can't be changed
                         $userRoles = $user->getRoles();
-                        if (\in_array('ROLE_ADMIN', $userRoles, true)) {
-                            if (!\in_array(ProjectAclOptions::EDIT_PROJECT, $aclArray, true)) {
-                                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                                $response = $response->setContent(json_encode(['message' => 'EDIT_PROJECT ACL is for ADMIN required!']));
-                                return $response;
-                            }
-                        }
-
                         // Check if it is an UPDATE of existed user's ACL
                         $userHasProjectNew = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
                             'user' => $user,
                             'project' => $project
                         ]);
-                        if ($userHasProjectNew instanceof UserHasProject) {
-                            $userHasProjectNew->setAcl($aclArray);
-                            $this->getDoctrine()->getManager()->persist($userHasProjectNew);
+                        // null string remove user from the project
+                        if ('null' === $aclArray) {
+                            // Check if requested user is ADMIN. If yes, his EDIT_PROJECT permission can't be changed
+                            if (\in_array('ROLE_ADMIN', $userRoles, true)) {
+                                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                $response = $response->setContent(json_encode(['message' => 'EDIT_PROJECT ACL is for ADMIN required!']));
+                                return $response;
+                            }
+                            if ($userHasProjectNew instanceof UserHasProject) {
+                                $this->getDoctrine()->getManager()->remove($userHasProjectNew);
+                                continue;
+                            }
                         } else {
-                            $userHasProjectNewAdd = new UserHasProject();
-                            $userHasProjectNewAdd->setProject($project);
-                            $userHasProjectNewAdd->setUser($user);
-                            $userHasProjectNewAdd->setAcl($aclArray);
-                            $this->getDoctrine()->getManager()->persist($userHasProjectNewAdd);
+                            // Check if all requested ACL are from allowed options
+                            foreach ($aclArray as $acl) {
+                                if (!\in_array($acl, $projectAclOptions, true)) {
+                                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                    $response = $response->setContent(json_encode(['message' => $acl . ' ACL is not allowed!' . 'Allowed ACL: ' . implode(',', $projectAclOptions)]));
+                                    return $response;
+                                }
+                            }
+
+                            // Check if requested user is ADMIN. If yes, his EDIT_PROJECT permission can't be changed
+                            if (\in_array('ROLE_ADMIN', $userRoles, true)) {
+                                if (!\in_array(ProjectAclOptions::EDIT_PROJECT, $aclArray, true)) {
+                                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                    $response = $response->setContent(json_encode(['message' => 'EDIT_PROJECT ACL is for ADMIN required!']));
+                                    return $response;
+                                }
+                            }
+
+                            if ($userHasProjectNew instanceof UserHasProject) {
+                                $userHasProjectNew->setAcl($aclArray);
+                                $this->getDoctrine()->getManager()->persist($userHasProjectNew);
+                            } else {
+                                $userHasProjectNewAdd = new UserHasProject();
+                                $userHasProjectNewAdd->setProject($project);
+                                $userHasProjectNewAdd->setUser($user);
+                                $userHasProjectNewAdd->setAcl($aclArray);
+                                $this->getDoctrine()->getManager()->persist($userHasProjectNewAdd);
+                            }
                         }
 
                     }
@@ -1491,7 +1507,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
         }
 
         foreach ($dataArray as $key => $aclArray) {
-            if (!\is_array($aclArray) || \count($aclArray) === 0) {
+            if ('null' !== $aclArray && !\is_array($aclArray)) {
                 return false;
             }
         }

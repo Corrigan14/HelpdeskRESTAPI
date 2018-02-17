@@ -8,7 +8,6 @@ use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -39,7 +38,7 @@ class TagController extends ApiBaseController
      *     }
      *
      * @ApiDoc(
-     *  description="Returns array of task tags.",
+     *  description="Returns tasks tags array.",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -65,29 +64,38 @@ class TagController extends ApiBaseController
      *
      * @param int $taskId
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    public function listOfTasksTagsAction(int $taskId)
+    public function listOfTasksTagsAction(int $taskId): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tasks_list_of_tasks_tags', ['taskId' => $taskId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
-            return $this->createApiResponse([
-                'message' => 'Task with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+            return $response;
         }
 
         if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_LIST_OF_TASK_TAGS, $task)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $options['task'] = $task;
-
         $tagsArray = $this->get('task_additional_service')->getTaskTagsResponse($options);
-        return $this->json($tagsArray, StatusCodesHelper::SUCCESSFUL_CODE);
+
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($tagsArray));
+        return $response;
     }
 
     /**
@@ -333,7 +341,7 @@ class TagController extends ApiBaseController
      *     }
      *  },
      *  statusCodes={
-     *      201 ="The entity was successfully created",
+     *      200 ="The Tag entity was successfully added to the Task",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
      *      404 ="Not found Entity",
@@ -343,27 +351,32 @@ class TagController extends ApiBaseController
      * @param int $taskId
      * @param int $tagId
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function addTagToTaskAction(int $taskId, int $tagId)
+    public function addTagToTaskAction(int $taskId, int $tagId):Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tasks_add_tag_to_task', ['taskId' => $taskId, 'tagId' => $taskId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
-            return $this->createApiResponse([
-                'message' => 'Task with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+            return $response;
         }
 
         $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->find($tagId);
 
         if (!$tag instanceof Tag) {
-            return $this->createApiResponse([
-                'message' => 'Tag with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Tag with requested Id does not exist!']));
+            return $response;
         }
 
         $options = [
@@ -372,7 +385,9 @@ class TagController extends ApiBaseController
         ];
 
         if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_TAG_TO_TASK, $options)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         if ($this->canAddTagToTask($task, $tag)) {
@@ -383,18 +398,15 @@ class TagController extends ApiBaseController
             $this->getDoctrine()->getManager()->flush();
         }
 
-        // Check if user can update selected task
-        if ($this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
-            $canEdit = true;
-        } else {
-            $canEdit = false;
-        }
+        $canEdit = true;
 
         // Check if logged user Is ADMIN
         $isAdmin = $this->get('task_voter')->isAdmin();
 
         $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser(), $isAdmin);
-        return $this->json($taskArray, StatusCodesHelper::CREATED_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($taskArray));
+        return $response;
     }
 
     /**
@@ -617,19 +629,19 @@ class TagController extends ApiBaseController
      *    }
      *
      * @ApiDoc(
-     *  description="Remove the Tag from the Task. Returns Task Entity.",
+     *  description="Remove the Tag from the Task. Return Task Entity.",
      *  requirements={
      *     {
      *       "name"="tagId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
-     *       "description"="The id of task"
+     *       "description"="The id of a task"
      *     },
      *     {
-     *       "name"="userId",
+     *       "name"="taskId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
-     *       "description"="The id of tag"
+     *       "description"="The id of a tag"
      *     }
      *  },
      *  headers={
@@ -650,27 +662,32 @@ class TagController extends ApiBaseController
      * @param int $taskId
      * @param int $tagId
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    public function removeTagFromTaskAction(int $taskId, int $tagId)
+    public function removeTagFromTaskAction(int $taskId, int $tagId):Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tasks_remove_tag_from_task', ['taskId' => $taskId, 'tagId' => $taskId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
-            return $this->createApiResponse([
-                'message' => 'Task with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+            return $response;
         }
 
         $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->find($tagId);
 
         if (!$tag instanceof Tag) {
-            return $this->createApiResponse([
-                'message' => 'Tag with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Tag with requested Id does not exist!']));
+            return $response;
         }
 
         $options = [
@@ -679,7 +696,9 @@ class TagController extends ApiBaseController
         ];
 
         if (!$this->get('task_voter')->isGranted(VoteOptions::REMOVE_TAG_FROM_TASK, $options)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         if (!$this->canAddTagToTask($task, $tag)) {
@@ -689,23 +708,19 @@ class TagController extends ApiBaseController
             $this->getDoctrine()->getManager()->persist($tag);
             $this->getDoctrine()->getManager()->flush();
 
-            // Check if user can update selected task
-            if ($this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
-                $canEdit = true;
-            } else {
-                $canEdit = false;
-            }
-
             // Check if logged user Is ADMIN
             $isAdmin = $this->get('task_voter')->isAdmin();
 
+            $canEdit = true;
             $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser(), $isAdmin);
-            return $this->json($taskArray, StatusCodesHelper::SUCCESSFUL_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+            $response = $response->setContent(json_encode($taskArray));
+            return $response;
         }
 
-        return $this->createApiResponse([
-            'message' => 'Task does not contains requested tag!',
-        ], StatusCodesHelper::NOT_FOUND_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+        $response = $response->setContent(json_encode(['message'=>'Task does not contains requested tag!']));
+        return $response;
     }
 
     /**
@@ -717,7 +732,7 @@ class TagController extends ApiBaseController
     {
         $taskHasTags = $task->getTags();
 
-        if (in_array($tag, $taskHasTags->toArray(), true)) {
+        if (\in_array($tag, $taskHasTags->toArray(), true)) {
             return false;
         }
         return true;

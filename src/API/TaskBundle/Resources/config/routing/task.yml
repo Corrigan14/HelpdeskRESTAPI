@@ -81,17 +81,17 @@ tasks_list_of_tasks_tags:
             taskId: '\d+'
 
 tasks_add_tag_to_task:
-    path:     /tasks/{taskId}/tag/{tagId}
+    path:     /tasks/{taskId}/add-tag/{tagId}
     defaults: { _controller: APITaskBundle:Task/Tag:addTagToTask}
-    methods: [POST]
+    methods: [PUT]
     requirements:
             taskId: '\d+'
             tagId: '\d+'
 
 tasks_remove_tag_from_task:
-    path:     /tasks/{taskId}/tag/{tagId}
+    path:     /tasks/{taskId}/remove-tag/{tagId}
     defaults: { _controller: APITaskBundle:Task/Tag:removeTagFromTask}
-    methods: [PATCH]
+    methods: [PUT]
     requirements:
             taskId: '\d+'
             tagId: '\d+'

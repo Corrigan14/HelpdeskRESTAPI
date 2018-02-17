@@ -8,6 +8,13 @@ users_list_of_all_active:
     defaults: { _controller: APICoreBundle:User:listOfAllUsers }
     methods: [GET]
 
+users_list_of_all_active_from_date:
+    path:     /users/all/{date}
+    defaults: { _controller: APICoreBundle:User:listOfAllUsers }
+    methods: [GET]
+    requirements:
+            date: '\d+'
+
 user_search:
     path:     /users/search
     defaults: { _controller: APICoreBundle:User:search }

@@ -114,11 +114,14 @@ class UserService
     }
 
     /**
+     * @param $date
      * @return array
      */
-    public function getListOfAllUsers(): array
+    public function getListOfAllUsers($date): array
     {
-        return $this->em->getRepository('APICoreBundle:User')->getAllUserEntitiesWithIdAndTitle();
+        /** @var UserRepository $userRepository */
+        $userRepository = $this->em->getRepository('APICoreBundle:User');
+        return $userRepository->getAllUserEntitiesWithIdAndTitleEmailNameSurname($date);
     }
 
     /**

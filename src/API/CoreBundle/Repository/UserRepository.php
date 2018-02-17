@@ -150,7 +150,7 @@ class UserRepository extends EntityRepository
                 'count' => $count,
                 'array' => $this->formatData($paginator)
             ];
-        }else{
+        } else {
             // Return all entities
             return [
                 'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
@@ -181,16 +181,30 @@ class UserRepository extends EntityRepository
     }
 
     /**
+     * @param $date
      * @return array
      */
-    public function getAllUserEntitiesWithIdAndTitle(): array
+    public function getAllUserEntitiesWithIdAndTitleEmailNameSurname($date): array
     {
-        $query = $this->createQueryBuilder('user')
-            ->select('user.id, user.username, detailData.name, detailData.surname')
-            ->leftJoin('user.detailData', 'detailData')
-            ->orderBy('user.username','ASC')
-            ->where('user.is_active = :isActive')
-            ->setParameter('isActive', true);
+        if ($date) {
+            $query = $this->createQueryBuilder('user')
+                ->select('user.id, user.username, user.email, detailData.name, detailData.surname')
+                ->leftJoin('user.detailData', 'detailData')
+                ->orderBy('user.username', 'ASC')
+                ->where('user.is_active = :isActive')
+                ->andWhere('user.updatedAt >= :date')
+                ->setParameters([
+                    'isActive' => true,
+                    'date' => $date
+                ]);
+        } else {
+            $query = $this->createQueryBuilder('user')
+                ->select('user.id, user.username, user.email, detailData.name, detailData.surname')
+                ->leftJoin('user.detailData', 'detailData')
+                ->orderBy('user.username', 'ASC')
+                ->where('user.is_active = :isActive')
+                ->setParameter('isActive', true);
+        }
 
         return $query->getQuery()->getArrayResult();
     }

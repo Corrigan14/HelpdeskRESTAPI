@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use API\CoreBundle\Entity\Company;
+use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
  * Class UsersController
@@ -177,38 +178,37 @@ class UserController extends ApiBaseController
         return $response;
     }
 
+
     /**
      * ### Response ###
+     *     {
+     *       "data":
      *       [
-     *          {
-     *             "id": 2581,
-     *             "username": "customer2",
+     *           {
+     *              "id": 3,
+     *              "username": "agent",
+     *              "email": "agent@agent.sk",
+     *              "name": null,
+     *              "surname": null
      *          },
      *          {
-     *             "id": 2582,
-     *             "username": "customer3",
+     *              "id": 4,
+     *              "username": "agent2",
+     *              "email": "agent2@agent.sk",
+     *              "name": null,
+     *              "surname": null
      *          },
      *          {
-     *             "id": 2583,
-     *             "username": "customer4",
-     *          },
-     *          {
-     *             "id": 2584,
-     *             "username": "customer5",
-     *          },
-     *          {
-     *             "id": 2585,
-     *             "username": "customer6",
-     *          },
-     *          {
-     *             "id": 2586,
-     *             "username": "customer7",
-     *          },
-     *          {
-     *             "id": 2587,
-     *             "username": "customer8",
-     *          },
+     *              "id": 5,
+     *              "username": "agent3",
+     *              "email": "agent3@agent.sk",
+     *              "name": null,
+     *              "surname": null
+     *          }
      *       ]
+     *       "date": 1518907522
+     *     }
+     *
      *
      * @ApiDoc(
      *  description="Returns a list of All active Users",
@@ -221,23 +221,50 @@ class UserController extends ApiBaseController
      *  },
      *  statusCodes={
      *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request"
+     *      400 ="Bad request",
+     *      401 ="Unauthorized request",
      *  },
      * )
      *
+     * @param string|bool $date
      * @return Response
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      */
-    public function listOfAllUsersAction(): Response
+    public function listOfAllUsersAction($date = false): Response
     {
         // JSON API Response - Content type and Location settings
-        $locationURL = $this->generateUrl('users_list_of_all_active');
+        if (false !== $date && 'false' !== $date) {
+            $intDate = (int)$date;
+            if (is_int($intDate) && null !== $intDate) {
+                $locationURL = $this->generateUrl('users_list_of_all_active_from_date', ['date' => $date]);
+                $dateTimeObject = new \DateTime("@$date");
+            }else{
+                $locationURL = $this->generateUrl('users_list_of_all_active');
+                $dateTimeObject = false;
+            }
+        } else {
+            $locationURL = $this->generateUrl('users_list_of_all_active');
+            $dateTimeObject = false;
+        }
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
-        $allUsers = $this->get('api_user.service')->getListOfAllUsers();
+        if ($date && !($dateTimeObject instanceof \Datetime)) {
+            $response = $response->setContent(['message' => 'Date parameter is not in a valid format! Expected format: Timestamp']);
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            return $response;
+        }
 
-        $response = $response->setContent(json_encode($allUsers));
+        $allUsers = $this->get('api_user.service')->getListOfAllUsers($dateTimeObject);
+        $currentDate = new \DateTime;
+        $currentDateTimezone = $currentDate->getTimestamp();
+
+        $dataArray = [
+            'data' => $allUsers,
+            'date' => $currentDateTimezone
+        ];
+
+        $response = $response->setContent(json_encode($dataArray));
         $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
         return $response;
     }

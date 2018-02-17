@@ -3,6 +3,7 @@ namespace API\CoreBundle\Entity;
 
 use API\CoreBundle\Services\Traits\FeaturedImageEntity;
 use Doctrine\Common\Collections\ArrayCollection;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ReadOnly;
 use JMS\Serializer\Annotation\Exclude;
@@ -26,6 +27,7 @@ class User implements AdvancedUserInterface, \Serializable
 {
     use FeaturedImageEntity;
     use UserTrait;
+    use TimestampableEntity;
 
     /**
      * @ORM\Id
@@ -424,5 +426,37 @@ class User implements AdvancedUserInterface, \Serializable
     public function getRequestedTasks()
     {
         return $this->requestedTasks;
+    }
+
+    /**
+     * EXTENSION TO TIMESTAMP TRAIT - RETURNS TIMESTAMP DATE FORMAT
+     */
+
+    /**
+     * Returns createdAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getCreatedAt()
+    {
+        if ($this->createdAt) {
+            return $this->createdAt->getTimestamp();
+        } else {
+            return $this->createdAt;
+        }
+    }
+
+    /**
+     * Returns updatedAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getUpdatedAt()
+    {
+        if ($this->updatedAt) {
+            return $this->updatedAt->getTimestamp();
+        } else {
+            return $this->updatedAt;
+        }
     }
 }

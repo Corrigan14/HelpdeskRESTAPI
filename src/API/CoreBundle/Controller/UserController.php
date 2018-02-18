@@ -189,21 +189,22 @@ class UserController extends ApiBaseController
      *              "username": "agent",
      *              "email": "agent@agent.sk",
      *              "name": null,
-     *              "surname": null
+     *              "surname": null,
+     *              "is_active": true
      *          },
      *          {
      *              "id": 4,
      *              "username": "agent2",
      *              "email": "agent2@agent.sk",
      *              "name": null,
-     *              "surname": null
+     *              "is_active": true
      *          },
      *          {
      *              "id": 5,
      *              "username": "agent3",
      *              "email": "agent3@agent.sk",
      *              "name": null,
-     *              "surname": null
+     *              "is_active": true
      *          }
      *       ]
      *       "date": 1518907522
@@ -239,7 +240,7 @@ class UserController extends ApiBaseController
             if (is_int($intDate) && null !== $intDate) {
                 $locationURL = $this->generateUrl('users_list_of_all_active_from_date', ['date' => $date]);
                 $dateTimeObject = new \DateTime("@$date");
-            }else{
+            } else {
                 $locationURL = $this->generateUrl('users_list_of_all_active');
                 $dateTimeObject = false;
             }
@@ -256,7 +257,7 @@ class UserController extends ApiBaseController
         }
 
         $allUsers = $this->get('api_user.service')->getListOfAllUsers($dateTimeObject);
-        $currentDate = new \DateTime;
+        $currentDate = new \DateTime('UTC');
         $currentDateTimezone = $currentDate->getTimestamp();
 
         $dataArray = [
@@ -1538,7 +1539,9 @@ class UserController extends ApiBaseController
                     }
                     $errorsUserData = $this->get('entity_processor')->processEntity($userData, $requestDetailData);
                     if (false === $errorsUserData) {
+                        $user->setUpdatedAt(new \DateTime('UTC'));
                         $this->getDoctrine()->getManager()->persist($userData);
+                        $this->getDoctrine()->getManager()->persist($user);
                         $this->getDoctrine()->getManager()->flush();
 
                         $userArray = $this->get('api_user.service')->getUserResponse($ids);

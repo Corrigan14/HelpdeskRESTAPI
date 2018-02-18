@@ -3,6 +3,7 @@
 php 7.1
 Symfony 3.4
 MYSQL 
+TimeZone: UTC
 
 git - the latest version
 

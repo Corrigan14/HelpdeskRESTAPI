@@ -175,7 +175,7 @@ class CompanyAttribute
      */
     public function getOptions()
     {
-        return json_decode($this->options);
+        return json_decode($this->options, true);
     }
 
     /**

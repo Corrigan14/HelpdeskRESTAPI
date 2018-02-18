@@ -801,7 +801,6 @@ class Task
         return $this->notifications;
     }
 
-
     /**
      * EXTENSION TO TIMESTAMP TRAIT - RETURNS TIMESTAMP DATE FORMAT
      */

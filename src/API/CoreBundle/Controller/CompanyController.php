@@ -1033,11 +1033,29 @@ class CompanyController extends ApiBaseController implements ControllerInterface
         if (false !== $requestData) {
             // JSON Array with COMPANY ATTRIBUTE ID as an ID and VALUE as an VALUE in Company Data param is required
             $requestDetailData = false;
-            if (isset($requestData['company_data']) && \count($requestData['company_data']) > 0) {
-                $requestDetailData = json_decode($requestData['company_data'], true);
+            if (isset($requestData['company_data'])) {
+                if (\is_array($requestData['company_data'])) {
+                    $requestDetailData = $requestData['company_data'];
+                } else {
+                    $requestDetailData = json_decode($requestData['company_data'], true);
+                }
+                if (!\is_array($requestDetailData)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'Problem with company additional data - not a correct format. Expected: "company_data":"{\"27\":\"INPUT+VALUE\",\"28\":\"text\"']));
+                    return $response;
+                }
                 unset($requestData['company_data']);
-            } elseif (isset($requestData['companyData']) && \count($requestData['companyData']) > 0) {
-                $requestDetailData = json_decode($requestData['companyData'], true);
+            } elseif (isset($requestData['companyData'])) {
+                if (is_array($requestData['companyData'])) {
+                    $requestDetailData = $requestData['companyData'];
+                } else {
+                    $requestDetailData = json_decode($requestData['companyData'], true);
+                }
+                if (!\is_array($requestDetailData)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'Problem with company additional data - not a correct format. Expected: "company_data":"{\"27\":\"INPUT+VALUE\",\"28\":\"text\"']));
+                    return $response;
+                }
                 unset($requestData['companyData']);
             }
 
@@ -1063,7 +1081,6 @@ class CompanyController extends ApiBaseController implements ControllerInterface
                 try {
                     $this->getDoctrine()->getManager()->persist($company);
                     $this->getDoctrine()->getManager()->flush();
-
                     /**
                      * Fill CompanyData Entity if some its parameters were sent
                      */
@@ -1132,7 +1149,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
                 } catch (\Exception $exception) {
                     $this->getDoctrine()->getConnection()->rollBack();
                     $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-                    $response = $response->setContent(json_encode(['message' => $expectation->getMessage()]));
+                    $response = $response->setContent(json_encode(['message' => $exception->getMessage()]));
                     return $response;
                 }
             } else {

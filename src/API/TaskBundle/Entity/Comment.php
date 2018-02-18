@@ -271,7 +271,7 @@ class Comment
      */
     public function getEmailTo()
     {
-        return json_decode($this->email_to);
+        return json_decode($this->email_to, true);
     }
 
     /**
@@ -295,7 +295,7 @@ class Comment
      */
     public function getEmailCc()
     {
-        return json_decode($this->email_cc);
+        return json_decode($this->email_cc, true);
     }
 
     /**
@@ -319,7 +319,7 @@ class Comment
      */
     public function getEmailBcc()
     {
-        return json_decode($this->email_bcc);
+        return json_decode($this->email_bcc, true);
     }
 
     /**

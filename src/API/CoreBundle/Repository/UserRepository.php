@@ -188,18 +188,16 @@ class UserRepository extends EntityRepository
     {
         if ($date) {
             $query = $this->createQueryBuilder('user')
-                ->select('user.id, user.username, user.email, detailData.name, detailData.surname')
+                ->select('user.id, user.username, user.email, detailData.name, detailData.surname, user.is_active')
                 ->leftJoin('user.detailData', 'detailData')
                 ->orderBy('user.username', 'ASC')
-                ->where('user.is_active = :isActive')
-                ->andWhere('user.updatedAt >= :date')
+                ->where('user.updatedAt >= :date')
                 ->setParameters([
-                    'isActive' => true,
                     'date' => $date
                 ]);
         } else {
             $query = $this->createQueryBuilder('user')
-                ->select('user.id, user.username, user.email, detailData.name, detailData.surname')
+                ->select('user.id, user.username, user.email, detailData.name, detailData.surname, user.is_active')
                 ->leftJoin('user.detailData', 'detailData')
                 ->orderBy('user.username', 'ASC')
                 ->where('user.is_active = :isActive')

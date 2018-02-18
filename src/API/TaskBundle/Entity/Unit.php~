@@ -134,8 +134,8 @@ class Unit
      */
     public function setIsActive($isActive)
     {
-        if (is_string($isActive)) {
-            $isActive = ($isActive === 'true' || $isActive == 1) ? true : false;
+        if (\is_string($isActive)) {
+            $isActive = ($isActive === 'true' || $isActive == 1);
         }
 
         $this->is_active = $isActive;

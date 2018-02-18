@@ -101,6 +101,22 @@ class Imap
     private $ignore_certificate;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="description", type="text", nullable=true)
+     * @Assert\Type("string")
+     */
+    private $description;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="is_active", type="boolean", options={"default: 1"})
+     * @Serializer\ReadOnly()
+     */
+    private $is_active;
+
+    /**
      * @var Project
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Project", inversedBy="imaps")
@@ -272,8 +288,8 @@ class Imap
      */
     public function setIgnoreCertificate($ignoreCertificate)
     {
-        if (is_string($ignoreCertificate)) {
-            $ignoreCertificate = ($ignoreCertificate === 'true' || $ignoreCertificate == 1) ? true : false;
+        if (\is_string($ignoreCertificate)) {
+            $ignoreCertificate = ($ignoreCertificate === 'true' || $ignoreCertificate == 1);
         }
         $this->ignore_certificate = $ignoreCertificate;
 
@@ -299,8 +315,8 @@ class Imap
      */
     public function setSsl($ssl)
     {
-        if (is_string($ssl)) {
-            $ssl = ($ssl === 'true' || $ssl == 1) ? true : false;
+        if (\is_string($ssl)) {
+            $ssl = ($ssl === 'true' || $ssl == 1);
         }
 
         $this->ssl = $ssl;
@@ -316,6 +332,62 @@ class Imap
     public function getSsl()
     {
         return $this->ssl;
+    }
+
+    /**
+     * Set description
+     *
+     * @param string $description
+     *
+     * @return Imap
+     */
+    public function setDescription($description)
+    {
+        if ('null' === strtolower($description)) {
+            $this->description = null;
+        } else {
+            $this->description = $description;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Set isActive
+     *
+     * @param boolean|string $isActive
+     *
+     * @return Imap
+     */
+    public function setIsActive($isActive)
+    {
+        if (\is_string($isActive)) {
+            $isActive = ($isActive === 'true' || $isActive == 1);
+        }
+
+        $this->is_active = $isActive;
+
+        return $this;
+    }
+
+    /**
+     * Get isActive
+     *
+     * @return bool
+     */
+    public function getIsActive()
+    {
+        return $this->is_active;
     }
 
     /**

@@ -181,6 +181,15 @@ class Task
     private $company;
 
     /**
+     * @var Status
+     *
+     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Status", inversedBy="tasks")
+     * @ORM\JoinColumn(name="status_id", referencedColumnName="id", nullable=true)
+     * @Serializer\ReadOnly()
+     */
+    private $status;
+
+    /**
      * @var
      *
      * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\InvoiceableItem", mappedBy="task", cascade={"persist", "remove"})
@@ -800,7 +809,6 @@ class Task
     {
         return $this->notifications;
     }
-
 
     /**
      * EXTENSION TO TIMESTAMP TRAIT - RETURNS TIMESTAMP DATE FORMAT

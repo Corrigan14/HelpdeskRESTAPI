@@ -78,6 +78,11 @@ class TaskController extends ApiBaseController
      *               "id": 1802,
      *               "title": "Web-Solutions"
      *            },
+     *            "status":
+     *            {
+     *               "id": 1802,
+     *               "title": "New"
+     *            },
      *            "taskData":
      *            [
      *              {
@@ -172,7 +177,7 @@ class TaskController extends ApiBaseController
      *
      *
      * @ApiDoc(
-     *  description="Returns a list of full Task Entities which includes extended Task Data",
+     *  description="Returns a list of full Task Entities which include extended Task Data",
      *  filters={
      *     {
      *       "name"="page",
@@ -184,7 +189,7 @@ class TaskController extends ApiBaseController
      *     },
      *     {
      *       "name"="order",
-     *       "description"="Array of key=>value values, where KEY is column to sort by, VALUE is ASC or DESC order chart"
+     *       "description"="String of key=>value values, where KEY is a column to sort by, VALUE is ASC or DESC order chart"
      *     },
      *     {
      *       "name"="search",
@@ -292,57 +297,68 @@ class TaskController extends ApiBaseController
      *
      * @param Request $request
      *
-     * @return JsonResponse|Response
+     * @return Response
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request): Response
     {
-        $filterData = $this->getFilterData($request);
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tasks_list');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
-        $pageNum = $request->get('page');
-        $pageNum = (int)$pageNum;
-        $page = ($pageNum === 0) ? 1 : $pageNum;
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ?: 10;
+        if (false !== $requestBody) {
+            $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody, true);
 
-        if (999 === $limit) {
-            $page = 1;
+            $page = $processedFilterParams['page'];
+            $limit = $processedFilterParams['limit'];
+            $order = $processedFilterParams['order'];
+            $processedArray = $this->processOrderData($order);
+            if (false === $processedArray['correct']) {
+                $response = $response->setContent(json_encode(['message' => $processedArray['message']]));
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                return $response;
+            } else {
+                $orderProcessed = $processedArray['message'];
+            }
+            $filtersForUrl = [];
+
+            $processedFilterData = $this->getFilterData($requestBody);
+
+            $options = [
+                'loggedUser' => $this->getUser(),
+                'isAdmin' => $this->get('task_voter')->isAdmin(),
+                'inFilter' => $processedFilterData['inFilter'],
+                'equalFilter' => $processedFilterData['equalFilter'],
+                'isNullFilter' => $processedFilterData['isNullFilter'],
+                'dateFilter' => $processedFilterData['dateFilter'],
+                'searchFilter' => $processedFilterData['searchFilter'],
+                'notAndCurrentFilter' => $processedFilterData['notAndCurrentFilter'],
+                'inFilterAddedParams' => $processedFilterData['inFilterAddedParams'],
+                'equalFilterAddedParams' => $processedFilterData['equalFilterAddedParams'],
+                'dateFilterAddedParams' => $processedFilterData['dateFilterAddedParams'],
+                'filtersForUrl' => $filtersForUrl,
+                'order' => $orderProcessed,
+                'limit' => $limit
+            ];
+
+            $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);
+
+            // Every Task need an additional canEdit Value
+            $tasksModified = $this->addCanEditParamToEveryTask($tasksArray);
+
+            $response = $response->setContent(json_encode($tasksModified));
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         }
 
-        $orderString = $request->get('order');
-        $order = $this->processOrderData($orderString);
-
-        if (null === $orderString) {
-            $orderString = 'DESC';
-        }
-
-        $options = [
-            'loggedUser' => $this->getUser(),
-            'isAdmin' => $this->get('task_voter')->isAdmin(),
-            'inFilter' => $filterData['inFilter'],
-            'equalFilter' => $filterData['equalFilter'],
-            'isNullFilter' => $filterData['isNullFilter'],
-            'dateFilter' => $filterData['dateFilter'],
-            'searchFilter' => $filterData['searchFilter'],
-            'notAndCurrentFilter' => $filterData['notAndCurrentFilter'],
-            'inFilterAddedParams' => $filterData['inFilterAddedParams'],
-            'equalFilterAddedParams' => $filterData['equalFilterAddedParams'],
-            'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
-            'filtersForUrl' => array_merge($filterData['filterForUrl'], ['order' => '&order=' . $orderString]),
-            'order' => $order,
-            'limit' => $limit
-        ];
-
-        $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);
-
-        // Every Task need an additional canEdit Value
-        $tasksModified = $this->addCanEditParamToEveryTask($tasksArray);
-
-        return $this->json($tasksModified, StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
     }
 
     /**
@@ -482,7 +498,7 @@ class TaskController extends ApiBaseController
      *
      *
      * @ApiDoc(
-     *  description="Returns a list of full Task Entities selected by rules of requested Filter",
+     *  description="Returns a list of full Task Entities selected by rules of a requested Filter",
      *  requirements={
      *     {
      *       "name"="filterId",
@@ -2912,79 +2928,60 @@ class TaskController extends ApiBaseController
     }
 
     /**
-     * @param Request $request
-     *
+     * @param array $requestBody
      * @return array
-     * @throws \LogicException
      */
-    private function getFilterData(Request $request): array
+    private function getFilterData(array $requestBody): array
     {
         $data = [];
 
-        $search = $request->get('search');
-        $status = $request->get('status');
-        $project = $request->get('project');
-        $creator = $request->get('creator');
-        $requester = $request->get('requester');
-        $company = $request->get('company');
-        $assigned = $request->get('assigned');
-        $tag = $request->get('tag');
-        $follower = $request->get('follower');
-        $created = $request->get('createdTime');
-        $started = $request->get('startedTime');
-        $deadline = $request->get('deadlineTime');
-        $closed = $request->get('closedTime');
-        $archived = $request->get('archived');
-        $important = $request->get('important');
-        $addedParameters = $request->get('addedParameters');
-
-        if (null !== $search) {
-            $data[FilterAttributeOptions::SEARCH] = $search;
+        if (isset($requestBody['search'])) {
+            $data[FilterAttributeOptions::SEARCH] = $requestBody['search'];
         }
-        if (null !== $status) {
-            $data[FilterAttributeOptions::STATUS] = $status;
+        if (isset($requestBody['status'])) {
+            $data[FilterAttributeOptions::STATUS] = $requestBody['status'];
         }
-        if (null !== $project) {
-            $data[FilterAttributeOptions::PROJECT] = $project;
+        if (isset($requestBody['project'])) {
+            $data[FilterAttributeOptions::PROJECT] = $requestBody['project'];
         }
-        if (null !== $creator) {
-            $data[FilterAttributeOptions::CREATOR] = $creator;
+        if (isset($requestBody['creator'])) {
+            $data[FilterAttributeOptions::CREATOR] = $requestBody['creator'];
         }
-        if (null !== $requester) {
-            $data[FilterAttributeOptions::REQUESTER] = $requester;
+        if (isset($requestBody['requester'])) {
+            $data[FilterAttributeOptions::REQUESTER] = $requestBody['requester'];
         }
-        if (null !== $company) {
-            $data[FilterAttributeOptions::COMPANY] = $company;
+        if (isset($requestBody['company'])) {
+            $data[FilterAttributeOptions::COMPANY] = $requestBody['company'];
         }
-        if (null !== $assigned) {
-            $data[FilterAttributeOptions::ASSIGNED] = $assigned;
+        if (isset($requestBody['assigned'])) {
+            $data[FilterAttributeOptions::ASSIGNED] = $requestBody['assigned'];
         }
-        if (null !== $tag) {
-            $data[FilterAttributeOptions::TAG] = $tag;
+        if (isset($requestBody['tag'])) {
+            $data[FilterAttributeOptions::TAG] = $requestBody['tag'];
         }
-        if (null !== $follower) {
-            $data[FilterAttributeOptions::FOLLOWER] = $follower;
+        if (isset($requestBody['follower'])) {
+            $data[FilterAttributeOptions::FOLLOWER] = $requestBody['follower'];
         }
-        if (null !== $created) {
-            $data[FilterAttributeOptions::CREATED] = $created;
+        if (isset($requestBody['createdTime'])) {
+            $data[FilterAttributeOptions::CREATED] = $requestBody['createdTime'];
         }
-        if (null !== $started) {
-            $data[FilterAttributeOptions::STARTED] = $started;
+        if (isset($requestBody['startedTime'])) {
+            $data[FilterAttributeOptions::STARTED] = $requestBody['startedTime'];
         }
-        if (null !== $deadline) {
-            $data[FilterAttributeOptions::DEADLINE] = $deadline;
+        if (isset($requestBody['deadlineTime'])) {
+            $data[FilterAttributeOptions::DEADLINE] = $requestBody['deadlineTime'];
         }
-        if (null !== $closed) {
-            $data[FilterAttributeOptions::CLOSED] = $closed;
+        if (isset($requestBody['closedTime'])) {
+            $data[FilterAttributeOptions::CLOSED] = $requestBody['closedTime'];
         }
-        if ('true' === strtolower($archived)) {
-            $data[FilterAttributeOptions::ARCHIVED] = $archived;
+        if (isset($requestBody['archived']) && 'true' === strtolower($requestBody['archived'])) {
+            $data[FilterAttributeOptions::ARCHIVED] = true;
         }
-        if ('true' === strtolower($important)) {
-            $data[FilterAttributeOptions::IMPORTANT] = $important;
+        if (isset($requestBody['important']) && 'true' === strtolower($requestBody['important'])) {
+            $data[FilterAttributeOptions::IMPORTANT] = true;
         }
-        if (null !== $addedParameters) {
-            $data[FilterAttributeOptions::ADDED_PARAMETERS] = $addedParameters;
+        if (isset($requestBody['addedParameters'])) {
+            $data[FilterAttributeOptions::ADDED_PARAMETERS] = $requestBody['addedParameters'];
         }
 
         return $this->processFilterData($data);
@@ -3060,9 +3057,6 @@ class TaskController extends ApiBaseController
      */
     private function processFilterData(array $data): array
     {
-        // Ina-beznejsia moznost ako zadavat pole hodnot v URL adrese, ktora vracia priamo pole: index.php?id[]=1&id[]=2&id[]=3&name=john
-        // na zakodovanie dat do URL je mozne pouzit encodeURIComponent
-
         $inFilter = [];
         $dateFilter = [];
         $equalFilter = [];
@@ -3081,8 +3075,7 @@ class TaskController extends ApiBaseController
             $filterForUrl['search'] = '&search=' . $data['search'];
         }
         if (isset($data[FilterAttributeOptions::STATUS])) {
-            $inFilter['status.id'] = explode(',', $data[FilterAttributeOptions::STATUS]);
-            $equalFilter['taskHasAssignedUsers.actual'] = 1;
+            $inFilter['taskGlobalStatus.id'] = explode(',', $data[FilterAttributeOptions::STATUS]);
             $filterForUrl['status'] = '&status=' . $data[FilterAttributeOptions::STATUS];
         }
         if (isset($data[FilterAttributeOptions::PROJECT])) {
@@ -3326,7 +3319,6 @@ class TaskController extends ApiBaseController
     /**
      * @param string|null $orderString
      * @return array|Response
-     * @throws \InvalidArgumentException
      */
     private function processOrderData($orderString)
     {
@@ -3337,15 +3329,19 @@ class TaskController extends ApiBaseController
                 $orderArrayKeyValue = explode('=>', $item);
                 //Check if param to order by is allowed
                 if (!\in_array($orderArrayKeyValue[0], FilterAttributeOptions::getConstants(), true)) {
-                    return $this->createApiResponse([
-                        'message' => 'Requested filter parameter ' . $orderArrayKeyValue[0] . ' is not allowed!',
-                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $message = 'Requested filter parameter ' . $orderArrayKeyValue[0] . ' is not allowed!';
+                    return [
+                        'correct' => false,
+                        'message' => $message
+                    ];
                 }
                 $orderArrayKeyValueLowwer = strtolower($orderArrayKeyValue[1]);
                 if (!($orderArrayKeyValueLowwer === 'asc' || $orderArrayKeyValueLowwer === 'desc')) {
-                    return $this->createApiResponse([
-                        'message' => $orderArrayKeyValue[1] . ' Is not allowed! You can order data only ASC or DESC!',
-                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $message = $orderArrayKeyValue[1] . ' Is not allowed! You can order data only ASC or DESC!';
+                    return [
+                        'correct' => false,
+                        'message' => $message
+                    ];
                 }
                 $order[$orderArrayKeyValue[0]] = $orderArrayKeyValue[1];
             }
@@ -3353,7 +3349,10 @@ class TaskController extends ApiBaseController
         if (\count($order) === 0) {
             $order[FilterAttributeOptions::ID] = 'DESC';
         }
-        return $order;
+        return [
+            'correct' => true,
+            'message' => $order
+        ];
     }
 
     /**
@@ -3404,8 +3403,7 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private
-    function getTemplateParams(int $taskId, string $title, array $emailAddresses, User $user, array $changedParams): array
+    private function getTemplateParams(int $taskId, string $title, array $emailAddresses, User $user, array $changedParams): array
     {
         $userDetailData = $user->getDetailData();
         if ($userDetailData instanceof UserData) {

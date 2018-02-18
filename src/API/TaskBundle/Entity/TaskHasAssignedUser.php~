@@ -56,12 +56,12 @@ class TaskHasAssignedUser
     private $time_spent;
 
     /**
-     * @ORM\Column(name="actual", type="boolean", options={"default":0})
+     * @ORM\Column(name="actual", type="boolean", options={"default":1})
      * @Serializer\ReadOnly()
      *
      * @var bool
      */
-    private $actual = false;
+    private $actual = true;
 
     /**
      * @var Status
@@ -274,5 +274,29 @@ class TaskHasAssignedUser
         } else {
             return $this->updatedAt;
         }
+    }
+
+    /**
+     * Set actual
+     *
+     * @param boolean $actual
+     *
+     * @return TaskHasAssignedUser
+     */
+    public function setActual($actual)
+    {
+        $this->actual = $actual;
+
+        return $this;
+    }
+
+    /**
+     * Get actual
+     *
+     * @return boolean
+     */
+    public function getActual()
+    {
+        return $this->actual;
     }
 }

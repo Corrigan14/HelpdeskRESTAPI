@@ -181,6 +181,15 @@ class Task
     private $company;
 
     /**
+     * @var Status
+     *
+     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Status", inversedBy="tasks")
+     * @ORM\JoinColumn(name="status_id", referencedColumnName="id", nullable=true)
+     * @Serializer\ReadOnly()
+     */
+    private $status;
+
+    /**
      * @var
      *
      * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\InvoiceableItem", mappedBy="task", cascade={"persist", "remove"})
@@ -833,4 +842,28 @@ class Task
         }
     }
 
+
+    /**
+     * Set status.
+     *
+     * @param Status|null $status
+     *
+     * @return Task
+     */
+    public function setStatus(Status $status = null)
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * Get status.
+     *
+     * @return Status|null
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
 }

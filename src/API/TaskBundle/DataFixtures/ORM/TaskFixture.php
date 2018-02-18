@@ -6,6 +6,7 @@ use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
+use API\TaskBundle\Security\StatusOptions;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -77,6 +78,22 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             'title' => 'LanSystems'
         ]);
 
+        $newStatus = $manager->getRepository('APITaskBundle:Status')->findOneBy([
+            'title' => StatusOptions::NEW
+        ]);
+
+        $inProgresStatus = $manager->getRepository('APITaskBundle:Status')->findOneBy([
+            'title' => StatusOptions::IN_PROGRESS
+        ]);
+
+        $closedStatus = $manager->getRepository('APITaskBundle:Status')->findOneBy([
+            'title' => StatusOptions::CLOSED
+        ]);
+
+        $cmpletedStatus = $manager->getRepository('APITaskBundle:Status')->findOneBy([
+            'title' => StatusOptions::COMPLETED
+        ]);
+
         if ($userUser instanceof User && $adminUser instanceof User) {
             $task = new Task();
             $task->setTitle('Task 1');
@@ -95,6 +112,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             }
             $task->addFollower($adminUser);
             $task->setCompany($webSolCompany);
+            $task->setStatus($cmpletedStatus);
             $manager->persist($task);
 
             $task = new Task();
@@ -113,6 +131,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                 $task->addTag($tagFreeTime);
             }
             $task->setCompany($webSolCompany);
+            $task->setStatus($cmpletedStatus);
             $manager->persist($task);
 
             $task = new Task();
@@ -131,6 +150,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                 $task->addTag($tagFreeTime);
             }
             $task->setCompany($webSolCompany);
+            $task->setStatus($cmpletedStatus);
             $manager->persist($task);
 
             for ($numberOfTasks = 4; $numberOfTasks < 1000; $numberOfTasks++) {
@@ -141,6 +161,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                 $task->setCreatedBy($adminUser);
                 $task->setRequestedBy($adminUser);
                 $task->setCompany($webSolCompany);
+                $task->setStatus($newStatus);
                 if ($usersProject2 instanceof Project) {
                     $task->setProject($usersProject2);
                 }
@@ -156,6 +177,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                 $task->setCreatedBy($userUser);
                 $task->setRequestedBy($userUser);
                 $task->setCompany($lanCompany);
+                $task->setStatus($inProgresStatus);
                 if ($adminsProject instanceof Project) {
                     $task->setProject($adminsProject);
                 }
@@ -173,6 +195,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                     $task->setRequestedBy($userUser);
                     $task->setProject($userProject);
                     $task->setCompany($lanCompany);
+                    $task->setStatus($closedStatus);
                     if ($adminsProject instanceof Project) {
                         $task->setProject($adminsProject);
                     }

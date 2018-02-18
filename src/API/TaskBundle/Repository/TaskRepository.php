@@ -58,7 +58,7 @@ class TaskRepository extends EntityRepository
             ->addSelect('requestedBy')
             ->addSelect('requesterDetailData')
             ->addSelect('taskHasAttachments')
-            ->addSelect('status')
+            ->addSelect('taskGlobalStatus')
             ->addSelect('assignedUser')
             ->addSelect('assigneeDetailData')
             ->addSelect('tags')
@@ -68,7 +68,7 @@ class TaskRepository extends EntityRepository
             ->addSelect('invoiceableItems')
             ->addSelect('unit')
             ->addSelect('taskHasAssignedUsers')
-            ->addSelect('status')
+            ->addSelect('assignedUserStatus')
             ->addSelect('assignedUser')
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
@@ -81,11 +81,12 @@ class TaskRepository extends EntityRepository
             ->leftJoin('requestedBy.detailData', 'requesterDetailData')
             ->leftJoin('task.taskHasAssignedUsers', 'taskHasAssignedUsers')
             ->leftJoin('task.taskHasAttachments', 'taskHasAttachments')
-            ->leftJoin('taskHasAssignedUsers.status', 'status')
+            ->leftJoin('taskHasAssignedUsers.status', 'assignedUserStatus')
             ->leftJoin('taskHasAssignedUsers.user', 'assignedUser')
             ->leftJoin('assignedUser.detailData', 'assigneeDetailData')
             ->leftJoin('task.tags', 'tags')
             ->leftJoin('task.company', 'taskCompany')
+            ->leftJoin('task.status', 'taskGlobalStatus')
             ->leftJoin('task.followers', 'followers')
             ->leftJoin('followers.detailData', 'followersDetailData')
             ->leftJoin('task.invoiceableItems', 'invoiceableItems')
@@ -101,7 +102,7 @@ class TaskRepository extends EntityRepository
                     $query->addOrderBy('task.title', $value);
                     break;
                 case FilterAttributeOptions::STATUS:
-                    $query->addOrderBy('status.id', $value);
+                    $query->addOrderBy('taskGlobalStatus.id', $value);
                     break;
                 case FilterAttributeOptions::PROJECT:
                     $query->addOrderBy('project.id', $value);
@@ -320,7 +321,7 @@ class TaskRepository extends EntityRepository
             ->addSelect('requestedBy')
             ->addSelect('requesterDetailData')
             ->addSelect('taskHasAttachments')
-            ->addSelect('status')
+            ->addSelect('assignedUserStatus')
             ->addSelect('assignedUser')
             ->addSelect('assigneeDetailData')
             ->addSelect('tags')
@@ -330,7 +331,7 @@ class TaskRepository extends EntityRepository
             ->addSelect('invoiceableItems')
             ->addSelect('unit')
             ->addSelect('taskHasAssignedUsers')
-            ->addSelect('status')
+            ->addSelect('taskGlobalStatus')
             ->addSelect('assignedUser')
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
@@ -343,11 +344,12 @@ class TaskRepository extends EntityRepository
             ->leftJoin('requestedBy.detailData', 'requesterDetailData')
             ->leftJoin('task.taskHasAssignedUsers', 'taskHasAssignedUsers')
             ->leftJoin('task.taskHasAttachments', 'taskHasAttachments')
-            ->leftJoin('taskHasAssignedUsers.status', 'status')
+            ->leftJoin('taskHasAssignedUsers.status', 'assignedUserStatus')
             ->leftJoin('taskHasAssignedUsers.user', 'assignedUser')
             ->leftJoin('assignedUser.detailData', 'assigneeDetailData')
             ->leftJoin('task.tags', 'tags')
             ->leftJoin('task.company', 'taskCompany')
+            ->leftJoin('task.status', 'taskGlobalStatus')
             ->leftJoin('task.followers', 'followers')
             ->leftJoin('followers.detailData', 'followersDetailData')
             ->leftJoin('task.invoiceableItems', 'invoiceableItems')
@@ -363,7 +365,7 @@ class TaskRepository extends EntityRepository
                     $query->addOrderBy('task.title', $value);
                     break;
                 case FilterAttributeOptions::STATUS:
-                    $query->addOrderBy('status.id', $value);
+                    $query->addOrderBy('taskGlobalStatus.id', $value);
                     break;
                 case FilterAttributeOptions::PROJECT:
                     $query->addOrderBy('project.id', $value);
@@ -446,15 +448,6 @@ class TaskRepository extends EntityRepository
                 )
             )
         ));
-
-//        $query->where('project.id IN (:allTasksInProject) ')
-//            ->orWhere('project.id IN (:companyTasksInProject) AND taskCompany.id = :loggedUserCompanyId')
-//            ->orWhere('project.id IN (:ownTasksInProject) AND (requestedBy.id = :loggedUserId OR createdBy.id = :loggedUserId)');
-//        $paramArray['allTasksInProject'] = $allTasksInProject;
-//        $paramArray['companyTasksInProject'] = $companyTasksInProject;
-//        $paramArray['loggedUserCompanyId'] = $companyId;
-//        $paramArray['ownTasksInProject'] = $ownTasksInProject;
-//        $paramArray['loggedUserId'] = $userId;
 
         //Check and apply filters
         $paramNum = 0;
@@ -846,6 +839,15 @@ class TaskRepository extends EntityRepository
             ];
         }
 
+        $status = $data->getStatus();
+        $statusArray = [];
+        if($status){
+            $statusArray=[
+                'id' => $data->getStatus()->getId(),
+                'title' => $data->getStatus()->getTitle()
+            ];
+        }
+
         $userCreatorDetailData = $data->getCreatedBy()->getDetailData();
         $userCreatorName = null;
         $userCreatorSurname = null;
@@ -943,6 +945,7 @@ class TaskRepository extends EntityRepository
             ],
             'project' => $projectArray,
             'company' => $companyArray,
+            'status' => $statusArray,
             'taskData' => $taskDataArray,
             'followers' => $followersArray,
             'tags' => $tagsArray,
@@ -1133,6 +1136,14 @@ class TaskRepository extends EntityRepository
                 'title' => $data['company']['title']
             ];
         }
+        $status = $data['taskGlobalStatus'];
+        $statusArray = [];
+        if ($status) {
+            $statusArray = [
+                'id' => $data['taskGlobalStatus']['id'],
+                'title' => $data['taskGlobalStatus']['title']
+            ];
+        }
 
         $userCreatorDetailData = $data['createdBy']['detailData'];
         $userCreatorName = null;
@@ -1178,6 +1189,7 @@ class TaskRepository extends EntityRepository
             ],
             'project' => $projectArray,
             'company' => $companyArray,
+            'status' => $statusArray,
             'taskData' => $taskDataArray,
             'followers' => $followersArray,
             'tags' => $tagsArray,

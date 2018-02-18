@@ -65,8 +65,16 @@ class TaskAttribute
      * @var bool
      *
      * @ORM\Column(name="is_active", type="boolean", options={"default":1})
+     * @ReadOnly()
      */
     private $is_active = true;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="required", type="boolean", options={"default":1})
+     */
+    private $required = true;
 
     /**
      * @var
@@ -151,7 +159,11 @@ class TaskAttribute
      */
     public function setOptions($options)
     {
-        $this->options = json_encode($options);
+        if (!\is_array($options) && 'null' === strtolower($options)) {
+            $this->options = null;
+        } else {
+            $this->options = json_encode($options);
+        }
 
         return $this;
     }
@@ -163,7 +175,7 @@ class TaskAttribute
      */
     public function getOptions()
     {
-        return json_decode($this->options);
+        return json_decode($this->options, true);
     }
 
     /**
@@ -176,7 +188,7 @@ class TaskAttribute
     public function setIsActive($isActive)
     {
         if (is_string($isActive)) {
-            $isActive = ($isActive === 'true' || $isActive == 1) ? true : false;
+            $isActive = ($isActive === 'true' || $isActive == 1);
         }
 
         $this->is_active = $isActive;
@@ -192,6 +204,29 @@ class TaskAttribute
     public function getIsActive()
     {
         return $this->is_active;
+    }
+
+    /**
+     * @param bool|string $required
+     * @return $this
+     */
+    public function setRequired($required)
+    {
+        if (\is_string($required)) {
+            $required = ($required === 'true' || $required == 1);
+        }
+
+        $this->required = $required;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getRequired():bool
+    {
+        return $this->required;
     }
 
     /**
@@ -237,7 +272,11 @@ class TaskAttribute
      */
     public function setDescription($description)
     {
-        $this->description = $description;
+        if ('null' === strtolower($description)) {
+            $this->description = null;
+        } else {
+            $this->description = $description;
+        }
 
         return $this;
     }

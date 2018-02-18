@@ -101,9 +101,10 @@ class ApiBaseService
      * Filter params: limit, page, order and isActive
      *
      * @param array $requestBody
+     * @param bool $specialConditions
      * @return array
      */
-    public function processFilterParams(array $requestBody): array
+    public function processFilterParams(array $requestBody, $specialConditions = false): array
     {
         // Filter params processing
         if (isset($requestBody['page'])) {
@@ -124,16 +125,23 @@ class ApiBaseService
             $page = 1;
         }
 
-        if (isset($requestBody['order'])) {
+        if ($specialConditions && isset($requestBody['order'])) {
             $orderString = $requestBody['order'];
-            $orderString = strtoupper($orderString);
-            if ($orderString === 'ASC' || $orderString === 'DESC') {
-                $order = $orderString;
+            $order = $orderString;
+        } elseif ($specialConditions) {
+            $order = null;
+        } else {
+            if (isset($requestBody['order'])) {
+                $orderString = $requestBody['order'];
+                $orderString = strtoupper($orderString);
+                if ($orderString === 'ASC' || $orderString === 'DESC') {
+                    $order = $orderString;
+                } else {
+                    $order = 'ASC';
+                }
             } else {
                 $order = 'ASC';
             }
-        } else {
-            $order = 'ASC';
         }
 
         if (isset($requestBody['isActive'])) {

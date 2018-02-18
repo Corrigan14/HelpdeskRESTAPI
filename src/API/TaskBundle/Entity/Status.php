@@ -95,11 +95,20 @@ class Status
     private $taskHasAssignedUsers;
 
     /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Task", mappedBy="status")
+     * @Serializer\Exclude()
+     */
+    private $tasks;
+
+    /**
      * Status constructor.
      */
     public function __construct()
     {
         $this->taskHasAssignedUsers = new ArrayCollection();
+        $this->tasks = new ArrayCollection();
     }
 
     /**
@@ -324,5 +333,41 @@ class Status
     public function getFunction()
     {
         return $this->function;
+    }
+
+    /**
+     * Add task.
+     *
+     * @param Task $task
+     *
+     * @return Status
+     */
+    public function addTask(Task $task)
+    {
+        $this->tasks[] = $task;
+
+        return $this;
+    }
+
+    /**
+     * Remove task.
+     *
+     * @param Task $task
+     *
+     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
+     */
+    public function removeTask(Task $task)
+    {
+        return $this->tasks->removeElement($task);
+    }
+
+    /**
+     * Get tasks.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getTasks()
+    {
+        return $this->tasks;
     }
 }

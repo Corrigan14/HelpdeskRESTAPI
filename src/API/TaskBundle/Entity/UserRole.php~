@@ -55,8 +55,7 @@ class UserRole
     /**
      * @var string
      *
-     * @ORM\Column(name="acl", type="text")
-     * @Assert\NotBlank(message="ACL rules are required")
+     * @ORM\Column(name="acl", type="text", nullable=true)
      */
     private $acl;
 
@@ -64,6 +63,7 @@ class UserRole
      * @var bool
      *
      * @ORM\Column(name="is_active", type="boolean", options={"default: 1"})
+     * @Serializer\ReadOnly()
      */
     private $is_active;
 
@@ -135,7 +135,11 @@ class UserRole
      */
     public function setDescription($description)
     {
-        $this->description = $description;
+        if ('null' === strtolower($description)) {
+            $this->description = null;
+        } else {
+            $this->description = $description;
+        }
 
         return $this;
     }
@@ -177,13 +181,17 @@ class UserRole
     /**
      * Set acl
      *
-     * @param array $acl
+     * @param array|string $acl
      *
      * @return UserRole
      */
-    public function setAcl(array $acl)
+    public function setAcl($acl)
     {
-        $this->acl = json_encode($acl);
+        if (\is_string($acl) && 'null' === strtolower($acl)) {
+            $this->acl = null;
+        } else {
+            $this->acl = json_encode($acl);
+        }
 
         return $this;
     }
@@ -201,14 +209,14 @@ class UserRole
     /**
      * Set isActive
      *
-     * @param boolean $isActive
+     * @param boolean|string $isActive
      *
      * @return UserRole
      */
     public function setIsActive($isActive)
     {
-        if (is_string($isActive)) {
-            $isActive = ($isActive === 'true' || $isActive == 1) ? true : false;
+        if (\is_string($isActive)) {
+            $isActive = ($isActive === 'true' || $isActive == 1);
         }
 
         $this->is_active = $isActive;

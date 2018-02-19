@@ -296,7 +296,8 @@ class MainController extends ApiBaseController
         // Returns a list of Logged User's Tags + public tags
         $tagOptions = [
             'loggedUserId' => $loggedUser->getId(),
-            'limit' => 999
+            'limit' => 999,
+            'order' => 'ASC'
         ];
         $loggedUserTagsArray = $doctrine->getRepository('APITaskBundle:Tag')->getAllEntities(1, $tagOptions);
         $loggedUserTags = $loggedUserTagsArray['array'];

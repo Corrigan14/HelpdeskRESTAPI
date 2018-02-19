@@ -2974,8 +2974,10 @@ class TaskController extends ApiBaseController
         if (isset($requestBody['closedTime'])) {
             $data[FilterAttributeOptions::CLOSED] = $requestBody['closedTime'];
         }
-        if (isset($requestBody['archived']) && 'true' === strtolower($requestBody['archived'])) {
-            $data[FilterAttributeOptions::ARCHIVED] = true;
+        if (isset($requestBody['archived'])) {
+            if('true' === strtolower($requestBody['archived'])) {
+                $data[FilterAttributeOptions::ARCHIVED] = true;
+            }
         }
         if (isset($requestBody['important']) && 'true' === strtolower($requestBody['important'])) {
             $data[FilterAttributeOptions::IMPORTANT] = true;
@@ -3122,14 +3124,14 @@ class TaskController extends ApiBaseController
 
             if (\in_array('not', $assignedArray, true) && \in_array('current-user', $assignedArray, true)) {
                 $notAndCurrentFilter[] = [
-                    'not' => 'thau.user',
+                    'not' => 'taskHasAssignedUsers.user',
                     'equal' => [
                         'key' => 'assignedUser.id',
                         'value' => $this->getUser()->getId(),
                     ],
                 ];
             } elseif ('not' === strtolower($assigned)) {
-                $isNullFilter[] = 'thau.user';
+                $isNullFilter[] = 'taskHasAssignedUsers.user';
             } elseif ('current-user' === strtolower($assigned)) {
                 $equalFilter['assignedUser.id'] = $this->getUser()->getId();
             } else {
@@ -3189,13 +3191,13 @@ class TaskController extends ApiBaseController
             $filterForUrl['closed'] = '&closedTime=' . $closed;
         }
         if (isset($data[FilterAttributeOptions::ARCHIVED])) {
-            if ('true' === strtolower($data[FilterAttributeOptions::ARCHIVED])) {
+            if ('true' === strtolower($data[FilterAttributeOptions::ARCHIVED]) || true === $data[FilterAttributeOptions::ARCHIVED] ) {
                 $equalFilter['project.is_active'] = 0;
                 $filterForUrl['archived'] = '&archived=TRUE';
             }
         }
         if (isset($data[FilterAttributeOptions::IMPORTANT])) {
-            if ('true' === strtolower($data[FilterAttributeOptions::IMPORTANT])) {
+            if ('true' === strtolower($data[FilterAttributeOptions::IMPORTANT]) || true === $data[FilterAttributeOptions::IMPORTANT]) {
                 $equalFilter['task.important'] = 1;
                 $filterForUrl['important'] = '&important=TRUE';
             }

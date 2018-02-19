@@ -153,7 +153,7 @@ class TaskRepository extends EntityRepository
         $paramArray = [];
         $paramNum = 0;
         if (null !== $searchFilter) {
-            $query->andWhere('task.id LIKE :taskIdParam OR task.title LIKE :taskTitleParam OR requestedBy.email LIKE :taskRequesterEmailParam OR requestedBy.username LIKE :taskRequesterUsernameParam OR requesterDetailData.name LIKE :taskRequesterNameParam OR requesterDetailData.surname LIKE :taskRequesterSurnameParam OR taskCompany.title LIKE :taskCompanyParam OR assignedUser.email LIKE :taskAssigneeEmailParam OR assignedUser.username LIKE :taskAssigneeUsernameParam OR assigneeDetailData.name LIKE :taskAssigneeNameParam OR assigneeDetailData.surname LIKE :taskAssigneeSurnameParam OR task.deadline LIKE :taskDeadline OR task.createdAt LIKE :taskCreatedAt OR status.title LIKE :statusTitle');
+            $query->andWhere('task.id LIKE :taskIdParam OR task.title LIKE :taskTitleParam OR requestedBy.email LIKE :taskRequesterEmailParam OR requestedBy.username LIKE :taskRequesterUsernameParam OR requesterDetailData.name LIKE :taskRequesterNameParam OR requesterDetailData.surname LIKE :taskRequesterSurnameParam OR taskCompany.title LIKE :taskCompanyParam OR assignedUser.email LIKE :taskAssigneeEmailParam OR assignedUser.username LIKE :taskAssigneeUsernameParam OR assigneeDetailData.name LIKE :taskAssigneeNameParam OR assigneeDetailData.surname LIKE :taskAssigneeSurnameParam OR task.deadline LIKE :taskDeadline OR task.createdAt LIKE :taskCreatedAt OR taskGlobalStatus.title LIKE :statusTitle');
             $paramArray['taskIdParam'] = '%' . $searchFilter . '%';
             $paramArray['taskTitleParam'] = '%' . $searchFilter . '%';
             $paramArray['taskRequesterUsernameParam'] = '%' . $searchFilter . '%';
@@ -452,7 +452,7 @@ class TaskRepository extends EntityRepository
         //Check and apply filters
         $paramNum = 0;
         if (null !== $searchFilter) {
-            $query->andWhere('task.id LIKE :taskIdParam OR task.title LIKE :taskTitleParam OR requestedBy.email LIKE :taskRequesterEmailParam OR requestedBy.username LIKE :taskRequesterUsernameParam OR requesterDetailData.name LIKE :taskRequesterNameParam OR requesterDetailData.surname LIKE :taskRequesterSurnameParam OR taskCompany.title LIKE :taskCompanyParam OR assignedUser.email LIKE :taskAssigneeEmailParam OR assignedUser.username LIKE :taskAssigneeUsernameParam OR assigneeDetailData.name LIKE :taskAssigneeNameParam OR assigneeDetailData.surname LIKE :taskAssigneeSurnameParam OR task.deadline LIKE :taskDeadline OR task.createdAt LIKE :taskCreatedAt OR status.title LIKE :statusTitle');
+            $query->andWhere('task.id LIKE :taskIdParam OR task.title LIKE :taskTitleParam OR requestedBy.email LIKE :taskRequesterEmailParam OR requestedBy.username LIKE :taskRequesterUsernameParam OR requesterDetailData.name LIKE :taskRequesterNameParam OR requesterDetailData.surname LIKE :taskRequesterSurnameParam OR taskCompany.title LIKE :taskCompanyParam OR assignedUser.email LIKE :taskAssigneeEmailParam OR assignedUser.username LIKE :taskAssigneeUsernameParam OR assigneeDetailData.name LIKE :taskAssigneeNameParam OR assigneeDetailData.surname LIKE :taskAssigneeSurnameParam OR task.deadline LIKE :taskDeadline OR task.createdAt LIKE :taskCreatedAt OR taskGlobalStatus.title LIKE :statusTitle');
             $paramArray['taskIdParam'] = '%' . $searchFilter . '%';
             $paramArray['taskTitleParam'] = '%' . $searchFilter . '%';
             $paramArray['taskRequesterUsernameParam'] = '%' . $searchFilter . '%';

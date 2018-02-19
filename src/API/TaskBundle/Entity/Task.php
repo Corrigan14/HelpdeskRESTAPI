@@ -184,7 +184,7 @@ class Task
      * @var Status
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Status", inversedBy="tasks")
-     * @ORM\JoinColumn(name="status_id", referencedColumnName="id", nullable=true)
+     * @ORM\JoinColumn(name="status_id", referencedColumnName="id", nullable=false)
      * @Serializer\ReadOnly()
      */
     private $status;

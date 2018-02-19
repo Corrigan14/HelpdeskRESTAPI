@@ -1198,7 +1198,6 @@ class ProjectController extends ApiBaseController implements ControllerInterface
                 } else {
                     $usersACL = json_decode($requestBody['usersAcl'], true);
                 }
-                dump($usersACL);
 
                 $projectAclOptions = ProjectAclOptions::getConstants();
 

@@ -125,22 +125,17 @@ class ApiBaseService
             $page = 1;
         }
 
+        $order = 'ASC';
         if ($specialConditions && isset($requestBody['order'])) {
             $orderString = $requestBody['order'];
             $order = $orderString;
         } elseif ($specialConditions) {
             $order = null;
-        } else {
-            if (isset($requestBody['order'])) {
-                $orderString = $requestBody['order'];
-                $orderString = strtoupper($orderString);
-                if ($orderString === 'ASC' || $orderString === 'DESC') {
-                    $order = $orderString;
-                } else {
-                    $order = 'ASC';
-                }
-            } else {
-                $order = 'ASC';
+        } elseif (isset($requestBody['order'])) {
+            $orderString = $requestBody['order'];
+            $orderString = strtoupper($orderString);
+            if ($orderString === 'ASC' || $orderString === 'DESC') {
+                $order = $orderString;
             }
         }
 

@@ -81,7 +81,7 @@ class CompanyData
     /**
      * Set value
      *
-     * @param string|array $value
+     * @param string|array|null $value
      *
      * @return CompanyData
      */
@@ -112,7 +112,7 @@ class CompanyData
     }
 
     /**
-     * @param int|\DateTime $dateValue
+     * @param int|\DateTime|null $dateValue
      * @return $this
      */
     public function setDateValue($dateValue)
@@ -143,7 +143,7 @@ class CompanyData
     /**
      * Set isActive
      *
-     * @param boolean $boolValue
+     * @param boolean|null $boolValue
      *
      * @return $this
      */

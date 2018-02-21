@@ -1094,11 +1094,6 @@ class CompanyController extends ApiBaseController implements ControllerInterface
                                     'company' => $company,
                                 ]);
 
-                                if ($cd instanceof CompanyData && 'null' === $value) {
-                                    $this->getDoctrine()->getManager()->remove($cd);
-                                    $this->getDoctrine()->getManager()->flush();
-                                    break;
-                                }
 
                                 if (!$cd instanceof CompanyData) {
                                     $cd = new CompanyData();
@@ -1106,33 +1101,45 @@ class CompanyController extends ApiBaseController implements ControllerInterface
                                     $cd->setCompanyAttribute($companyAttribute);
                                 }
 
-                                $cdValueChecker = $this->get('entity_processor')->checkDataValueFormat($companyAttribute, $value);
-                                if (true === $cdValueChecker) {
-                                    if ($companyAttribute->getType() === 'checkbox') {
-                                        if (\is_string($value)) {
-                                            $value = strtolower($value);
-                                        }
-                                        if ('true' === $value || '1' === $value || 1 === $value) {
-                                            $cd->setBoolValue(true);
-                                        } else {
-                                            $cd->setBoolValue(false);
-                                        }
-                                    } elseif ($companyAttribute->getType() === 'date') {
-                                        $intValue = (int)$value;
-                                        $cd->setDateValue($intValue);
-                                    } else {
-                                        $cd->setValue($value);
-                                    }
+                                // If value = 'null' is being sent, data are set to null
+                                if ('null' === strtolower($value)) {
+                                    $cd->setValue(null);
+                                    $cd->setDateValue(null);
+                                    $cd->setBoolValue(null);
                                     $company->addCompanyDatum($cd);
 
                                     $this->getDoctrine()->getManager()->persist($cd);
                                     $this->getDoctrine()->getManager()->persist($company);
                                     $this->getDoctrine()->getManager()->flush();
                                 } else {
-                                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                                    $expectation = $this->get('entity_processor')->returnExpectedDataFormat($companyAttribute);
-                                    $response = $response->setContent(json_encode(['message' => 'Problem with company additional data (companyData) value format! For Company Attribute with ID: ' . $companyAttribute->getId() . ', ' . $expectation . ' is/are expected.']));
-                                    return $response;
+                                    $cdValueChecker = $this->get('entity_processor')->checkDataValueFormat($companyAttribute, $value);
+                                    if (true === $cdValueChecker) {
+                                        if ($companyAttribute->getType() === 'checkbox') {
+                                            if (\is_string($value)) {
+                                                $value = strtolower($value);
+                                            }
+                                            if ('true' === $value || '1' === $value || 1 === $value) {
+                                                $cd->setBoolValue(true);
+                                            } else {
+                                                $cd->setBoolValue(false);
+                                            }
+                                        } elseif ($companyAttribute->getType() === 'date') {
+                                            $intValue = (int)$value;
+                                            $cd->setDateValue($intValue);
+                                        } else {
+                                            $cd->setValue($value);
+                                        }
+                                        $company->addCompanyDatum($cd);
+
+                                        $this->getDoctrine()->getManager()->persist($cd);
+                                        $this->getDoctrine()->getManager()->persist($company);
+                                        $this->getDoctrine()->getManager()->flush();
+                                    } else {
+                                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                                        $expectation = $this->get('entity_processor')->returnExpectedDataFormat($companyAttribute);
+                                        $response = $response->setContent(json_encode(['message' => 'Problem with company additional data (companyData) value format! For Company Attribute with ID: ' . $companyAttribute->getId() . ', ' . $expectation . ' is/are expected.']));
+                                        return $response;
+                                    }
                                 }
                             } else {
                                 $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);

@@ -224,31 +224,71 @@ class TaskRepository extends EntityRepository
         }
 
         $addedParamNum = 0;
-        foreach ($inFilterAddedParams as $key => $value) {
-            if (is_array($value)) {
-                $query->andWhere('taskAttribute.id = :attributeId'.$addedParamNum);
-//                $helperCount = 1;
-//                foreach ($value as $val) {
-//                    if(1 === $helperCount) {
-//                        $query->andWhere('taskData.value LIKE :parameters' . $paramNum);
-//                        $helperCount++;
-//                    }else{
-//                        $query->orWhere('taskData.value LIKE :parameters' . $paramNum);
-//                    }
-//                    $paramArray['parameters' . $paramNum] = $val;
-//                    $paramNum++;
-//                }
-
-                $paramArray['attributeId'.$addedParamNum] = $key;
+        if (count($inFilterAddedParams) > 1) {
+            foreach ($inFilterAddedParams as $key => $value) {
+                $andString = 'taskAttribute.id = :attributeId' . $addedParamNum;
+                $paramArray['attributeId' . $addedParamNum] = $key;
                 $addedParamNum++;
+
+                $helperCount = 1;
+                $queryString = '';
+                if (count($value) > 1) {
+                    foreach ($value as $val) {
+                        // Create Query
+                        if ($helperCount === 1) {
+                            $queryString = 'taskData.value LIKE :parameters' . $paramNum;
+                            $helperCount++;
+                        } else {
+                            $queryString = $queryString . ' OR ' . 'taskData.value LIKE :parameters' . $paramNum;
+                        }
+                        $paramArray['parameters' . $paramNum] = '%' . $val . '%';
+                        $paramNum++;
+
+                    }
+                } else {
+                    $queryString = 'taskData.value LIKE :parameters' . $paramNum;
+                    $paramArray['parameters' . $paramNum] = '%' . $value[0] . '%';
+                    $paramNum++;
+                }
+                $query->andWhere($andString . ' AND ' . '(' . $queryString . ')');
+
+            }
+        } else {
+            foreach ($inFilterAddedParams as $key => $value) {
+                $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
+                $paramArray['attributeId' . $addedParamNum] = $key;
+                $addedParamNum++;
+
+                $helperCount = 1;
+                $queryString = '';
+                if (count($value) > 1) {
+                    foreach ($value as $val) {
+                        // Create Query
+                        if ($helperCount === 1) {
+                            $queryString = 'taskData.value LIKE :parameters' . $paramNum;
+                            $helperCount++;
+                        } else {
+                            $queryString = $queryString . ' OR ' . 'taskData.value LIKE :parameters' . $paramNum;
+                        }
+                        $paramArray['parameters' . $paramNum] = '%' . $val . '%';
+                        $paramNum++;
+
+                    }
+                } else {
+                    $queryString = 'taskData.value LIKE :parameters' . $paramNum;
+                    $paramArray['parameters' . $paramNum] = '%' . $value[0] . '%';
+                    $paramNum++;
+                }
+                $query->andWhere($queryString);
+
             }
         }
 
         foreach ($equalFilterAddedParams as $key => $value) {
-            $query->andWhere('taskAttribute.id = :attributeId'.$addedParamNum);
-            $query->andWhere('taskData.value = :parameter' . $paramNum);
-            $paramArray['parameter' . $paramNum] = $value;
-            $paramArray['attributeId'.$addedParamNum] = $key;
+            $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
+            $query->andWhere('taskData.value = :parameters' . $paramNum);
+            $paramArray['parameters' . $paramNum] = $value;
+            $paramArray['attributeId' . $addedParamNum] = $key;
 
             $paramNum++;
             $addedParamNum++;
@@ -257,19 +297,17 @@ class TaskRepository extends EntityRepository
         foreach ($dateFilterAddedParams as $key => $value) {
             if (isset($value[0])) {
                 if (isset($value[1])) {
-                    $query->andWhere('taskAttribute.id = :attributeId'.$addedParamNum);
+                    $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
                     $query->andWhere($query->expr()->between('taskData.value', ':FROM' . $paramNum, ':TO' . $paramNum));
                     $paramArray['FROM' . $paramNum] = $value[0];
                     $paramArray['TO' . $paramNum] = $value[1];
-                    $paramArray['attributeId'.$addedParamNum] = $key;
+                    $paramArray['attributeId' . $addedParamNum] = $key;
 
                     $paramNum++;
                     $addedParamNum++;
                 }
             }
         }
-        dump($query->getQuery());
-        dump($paramArray);
 
         if (!empty($paramArray)) {
             $query->setParameters($paramArray);
@@ -309,7 +347,8 @@ class TaskRepository extends EntityRepository
      *
      * @return array|null
      */
-    public function getAllUsersTasks(int $page, int $userId, int $companyId, $dividedProjects, array $options)
+    public
+    function getAllUsersTasks(int $page, int $userId, int $companyId, $dividedProjects, array $options)
     {
         $paramArray = [];
 
@@ -607,7 +646,8 @@ class TaskRepository extends EntityRepository
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function getTask(int $taskId)
+    public
+    function getTask(int $taskId)
     {
         $query = $this->createQueryBuilder('task')
             ->select('task')
@@ -641,7 +681,8 @@ class TaskRepository extends EntityRepository
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function getNumberOfTasksFromProject(Project $project): int
+    public
+    function getNumberOfTasksFromProject(Project $project): int
     {
         $query = $this->createQueryBuilder('task')
             ->select('COUNT(task)')
@@ -657,7 +698,8 @@ class TaskRepository extends EntityRepository
      * @param bool $array
      * @return array
      */
-    private function formatData($paginatorData, $array = false): array
+    private
+    function formatData($paginatorData, $array = false): array
     {
         $response = [];
         foreach ($paginatorData as $data) {
@@ -676,7 +718,8 @@ class TaskRepository extends EntityRepository
      * @param bool $single
      * @return array
      */
-    private function processData(Task $data, $single = false): array
+    private
+    function processData(Task $data, $single = false): array
     {
         $taskData = $data->getTaskData();
         $taskDataArray = [];
@@ -979,7 +1022,8 @@ class TaskRepository extends EntityRepository
      * @param  array $data
      * @return array
      */
-    private function processArrayData(array $data): array
+    private
+    function processArrayData(array $data): array
     {
         $taskData = $data['taskData'];
         $taskDataArray = [];

@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\DataFixtures\ORM;
 
+use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskAttribute;
 use API\TaskBundle\Entity\TaskData;
 use Doctrine\Common\DataFixtures\FixtureInterface;
@@ -43,27 +44,66 @@ class TaskDataFixture implements FixtureInterface, ContainerAwareInterface, Orde
             'title' => 'select task additional attribute'
         ]);
 
-        $usersTask = $manager->getRepository('APITaskBundle:Task')->findOneBy([
-            'title' => 'Task 1 - user is creator, user is requested'
+        $taskAttributeInteger = $manager->getRepository('APITaskBundle:TaskAttribute')->findOneBy([
+            'title' => 'integer number task additional attribute'
         ]);
 
-        if ($taskAttributeInput instanceof TaskAttribute) {
-            $td = new TaskData();
-            $td->setTaskAttribute($taskAttributeInput);
-            $td->setValue('some input');
-            $td->setTask($usersTask);
-            $manager->persist($td);
-        }
+        $taskAttributeBoolean = $manager->getRepository('APITaskBundle:TaskAttribute')->findOneBy([
+            'title' => 'boolean task additional attribute'
+        ]);
 
-        if ($taskAttributeSelect instanceof TaskAttribute) {
-            $td = new TaskData();
-            $td->setTaskAttribute($taskAttributeSelect);
-            $td->setValue('select1');
-            $td->setTask($usersTask);
-            $manager->persist($td);
-        }
+        $taskAttributeDate = $manager->getRepository('APITaskBundle:TaskAttribute')->findOneBy([
+            'title' => 'date task additional attribute'
+        ]);
 
-        $manager->flush();
+        $usersTask = $manager->getRepository('APITaskBundle:Task')->findOneBy([
+            'title' => 'Task 1'
+        ]);
+
+        if ($usersTask instanceof Task) {
+
+            if ($taskAttributeInput instanceof TaskAttribute) {
+                $td = new TaskData();
+                $td->setTaskAttribute($taskAttributeInput);
+                $td->setValue('input');
+                $td->setTask($usersTask);
+                $manager->persist($td);
+            }
+
+            if ($taskAttributeSelect instanceof TaskAttribute) {
+                $td = new TaskData();
+                $td->setTaskAttribute($taskAttributeSelect);
+                $td->setValue('select1');
+                $td->setTask($usersTask);
+                $manager->persist($td);
+            }
+
+            if ($taskAttributeInteger instanceof TaskAttribute) {
+                $td = new TaskData();
+                $td->setTaskAttribute($taskAttributeInteger);
+                $td->setValue(546);
+                $td->setTask($usersTask);
+                $manager->persist($td);
+            }
+
+            if ($taskAttributeBoolean instanceof TaskAttribute) {
+                $td = new TaskData();
+                $td->setTaskAttribute($taskAttributeBoolean);
+                $td->setBoolValue(false);
+                $td->setTask($usersTask);
+                $manager->persist($td);
+            }
+
+            if ($taskAttributeDate instanceof TaskAttribute) {
+                $td = new TaskData();
+                $td->setTaskAttribute($taskAttributeDate);
+                $td->setDateValue(1519185224);
+                $td->setTask($usersTask);
+                $manager->persist($td);
+            }
+
+            $manager->flush();
+        }
     }
 
     /**

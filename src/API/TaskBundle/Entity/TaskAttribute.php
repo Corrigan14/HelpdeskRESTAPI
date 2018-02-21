@@ -153,7 +153,7 @@ class TaskAttribute
     /**
      * Set options
      *
-     * @param array $options
+     * @param array|string $options
      *
      * @return TaskAttribute
      */
@@ -181,7 +181,7 @@ class TaskAttribute
     /**
      * Set isActive
      *
-     * @param boolean $isActive
+     * @param boolean|string $isActive
      *
      * @return TaskAttribute
      */
@@ -266,7 +266,7 @@ class TaskAttribute
     /**
      * Set description
      *
-     * @param string $description
+     * @param string|null $description
      *
      * @return TaskAttribute
      */

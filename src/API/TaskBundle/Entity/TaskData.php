@@ -27,9 +27,26 @@ class TaskData
     /**
      * @var string
      *
-     * @ORM\Column(name="value", type="string", length=255)
+     * @ORM\Column(name="value", type="string", length=255, nullable=true)
+     * @Assert\Type("string")
      */
     private $value;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="date_value", type="datetime", nullable=true)
+     * @Assert\DateTime(message="dateValue has to be a correct Date Time object")
+     */
+    private $dateValue;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="bool_value", type="boolean", nullable=true)
+     */
+    private $boolValue;
+
 
     /**
      * @var TaskAttribute
@@ -44,7 +61,7 @@ class TaskData
      * @var Task
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Task", inversedBy="taskData")
-     * @ORM\JoinColumn(name="task_id", referencedColumnName="id", nullable=true)
+     * @ORM\JoinColumn(name="task_id", referencedColumnName="id", nullable=false)
      * @Serializer\Exclude()
      */
     private $task;
@@ -62,13 +79,17 @@ class TaskData
     /**
      * Set value
      *
-     * @param string $value
+     * @param string|array|null $value
      *
      * @return TaskData
      */
-    public function setValue($value)
+    public function setValue($value): TaskData
     {
-        $this->value = $value;
+        if (\is_array($value)) {
+            $this->value = json_encode($value);
+        } else {
+            $this->value = $value;
+        }
 
         return $this;
     }
@@ -80,7 +101,64 @@ class TaskData
      */
     public function getValue()
     {
-        return $this->value;
+        $decodedTry = json_decode($this->value);
+        if (null === $decodedTry) {
+            return $this->value;
+        } else {
+            return $decodedTry;
+        }
+    }
+
+    /**
+     * @param int|\DateTime|null $dateValue
+     * @return $this
+     */
+    public function setDateValue($dateValue)
+    {
+        if (\is_int($dateValue) && null !== $dateValue) {
+            $dateTimeUnix = new \DateTime("@$dateValue");
+            $this->dateValue = $dateTimeUnix;
+        } else {
+            $this->dateValue = $dateValue;
+        }
+        return $this;
+    }
+
+    /**
+     * Get dateValue
+     *
+     * @return \DateTime|int
+     */
+    public function getDateValue()
+    {
+        if ($this->dateValue) {
+            return $this->dateValue->getTimestamp();
+        } else {
+            return $this->dateValue;
+        }
+    }
+
+    /**
+     * Set isActive
+     *
+     * @param boolean|null $boolValue
+     *
+     * @return $this
+     */
+    public function setBoolValue($boolValue)
+    {
+        $this->boolValue = $boolValue;
+        return $this;
+    }
+
+    /**
+     * Get boolValue
+     *
+     * @return bool
+     */
+    public function getBoolValue()
+    {
+        return $this->boolValue;
     }
 
     /**

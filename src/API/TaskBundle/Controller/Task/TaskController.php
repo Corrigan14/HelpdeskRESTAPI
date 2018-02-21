@@ -279,7 +279,7 @@ class TaskController extends ApiBaseController
      *     },
      *     {
      *       "name"="addedParameters",
-     *       "description"="& separated data in form: taskAttributeId=value1,value2&taskAttributeId=value"
+     *       "description"="& separated data in a form: taskAttributeId=value1,value2&taskAttributeId=value"
      *     }
      *  },
      *  headers={

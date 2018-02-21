@@ -30,7 +30,6 @@ class CompanyData
      * @var string
      *
      * @ORM\Column(name="value", type="string", length=255, nullable=true)
-     * @Assert\NotBlank(message="Value is required")
      * @Assert\Type("string")
      */
     private $value;

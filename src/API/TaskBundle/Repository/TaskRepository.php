@@ -223,37 +223,53 @@ class TaskRepository extends EntityRepository
             }
         }
 
+        $addedParamNum = 0;
         foreach ($inFilterAddedParams as $key => $value) {
-            $query->andWhere('taskAttribute.id = :attributeId');
-            $query->andWhere('taskData.value IN (:parameters' . $paramNum . ')');
-            $paramArray['parameters' . $paramNum] = $value;
-            $paramArray['attributeId'] = $key;
+            if (is_array($value)) {
+                $query->andWhere('taskAttribute.id = :attributeId'.$addedParamNum);
+//                $helperCount = 1;
+//                foreach ($value as $val) {
+//                    if(1 === $helperCount) {
+//                        $query->andWhere('taskData.value LIKE :parameters' . $paramNum);
+//                        $helperCount++;
+//                    }else{
+//                        $query->orWhere('taskData.value LIKE :parameters' . $paramNum);
+//                    }
+//                    $paramArray['parameters' . $paramNum] = $val;
+//                    $paramNum++;
+//                }
 
-            $paramNum++;
+                $paramArray['attributeId'.$addedParamNum] = $key;
+                $addedParamNum++;
+            }
         }
 
         foreach ($equalFilterAddedParams as $key => $value) {
-            $query->andWhere('taskAttribute.id = :attributeId');
+            $query->andWhere('taskAttribute.id = :attributeId'.$addedParamNum);
             $query->andWhere('taskData.value = :parameter' . $paramNum);
             $paramArray['parameter' . $paramNum] = $value;
-            $paramArray['attributeId'] = $key;
+            $paramArray['attributeId'.$addedParamNum] = $key;
 
             $paramNum++;
+            $addedParamNum++;
         }
 
         foreach ($dateFilterAddedParams as $key => $value) {
             if (isset($value[0])) {
                 if (isset($value[1])) {
-                    $query->andWhere('taskAttribute.id = :attributeId');
+                    $query->andWhere('taskAttribute.id = :attributeId'.$addedParamNum);
                     $query->andWhere($query->expr()->between('taskData.value', ':FROM' . $paramNum, ':TO' . $paramNum));
                     $paramArray['FROM' . $paramNum] = $value[0];
                     $paramArray['TO' . $paramNum] = $value[1];
-                    $paramArray['attributeId'] = $key;
+                    $paramArray['attributeId'.$addedParamNum] = $key;
 
                     $paramNum++;
+                    $addedParamNum++;
                 }
             }
         }
+        dump($query->getQuery());
+        dump($paramArray);
 
         if (!empty($paramArray)) {
             $query->setParameters($paramArray);
@@ -841,8 +857,8 @@ class TaskRepository extends EntityRepository
 
         $status = $data->getStatus();
         $statusArray = [];
-        if($status){
-            $statusArray=[
+        if ($status) {
+            $statusArray = [
                 'id' => $data->getStatus()->getId(),
                 'title' => $data->getStatus()->getTitle()
             ];

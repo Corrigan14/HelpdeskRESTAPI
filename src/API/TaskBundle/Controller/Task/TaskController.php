@@ -118,30 +118,31 @@ class TaskController extends ApiBaseController
      *                  "color": "DFD112"
      *                }
      *            ],
-     *             "taskHasAssignedUsers":
-     *             [
-     *                 {
-     *                      "id": 23,
-     *                      "status_date": null,
-     *                      "time_spent": null,
-     *                      "createdAt": 1508768644,
-     *                      "updatedAt": 1508768644,
-     *                      "status":
-     *                      {
-     *                          "id": 7,
-     *                          "title": "Completed",
-     *                          "color": "#FF4500"
-     *                      },
-     *                      "user":
-     *                      {
-     *                          "id": 212,
-     *                          "username": "customer",
-     *                          "email": "customer@customer.sk",
-     *                          "name": null,
-     *                          "surname": null
-     *                      }
+     *            "taskHasAssignedUsers":
+     *            {
+     *               "313":
+     *               {
+     *                  "id": 7,
+     *                  "status_date": null,
+     *                  "time_spent": null,
+     *                  "createdAt": 1519237291,
+     *                  "updatedAt": 1519237291,
+     *                  "status":
+     *                  {
+     *                      "id": 15,
+     *                      "title": "Completed",
+     *                      "color": "#FF4500"
+     *                  },
+     *                  "user":
+     *                  {
+     *                      "id": 313,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic"
      *                  }
-     *            ],
+     *              }
+     *            },
      *            "taskHasAttachments": [],
      *            "comments": [],
      *            "invoiceableItems":
@@ -325,7 +326,6 @@ class TaskController extends ApiBaseController
             } else {
                 $orderProcessed = $processedArray['message'];
             }
-            $filtersForUrl = [];
 
             $processedFilterData = $this->getFilterData($requestBody);
 
@@ -341,7 +341,7 @@ class TaskController extends ApiBaseController
                 'inFilterAddedParams' => $processedFilterData['inFilterAddedParams'],
                 'equalFilterAddedParams' => $processedFilterData['equalFilterAddedParams'],
                 'dateFilterAddedParams' => $processedFilterData['dateFilterAddedParams'],
-                'filtersForUrl' => $filtersForUrl,
+                'filtersForUrl' => $processedFilterData['filterForUrl'],
                 'order' => $orderProcessed,
                 'limit' => $limit
             ];
@@ -404,6 +404,11 @@ class TaskController extends ApiBaseController
      *               "id": 1802,
      *               "title": "Web-Solutions"
      *            },
+     *            "status":
+     *            {
+     *               "id": 1802,
+     *               "title": "New"
+     *            },
      *            "taskData":
      *            [
      *              {
@@ -439,30 +444,31 @@ class TaskController extends ApiBaseController
      *                  "color": "DFD112"
      *                }
      *            ],
-     *             "taskHasAssignedUsers":
-     *             [
-     *                 {
-     *                      "id": 23,
-     *                      "status_date": null,
-     *                      "time_spent": null,
-     *                      "createdAt": 1508768644,
-     *                      "updatedAt": 1508768644,
-     *                      "status":
-     *                      {
-     *                          "id": 7,
-     *                          "title": "Completed",
-     *                          "color": "#FF4500"
-     *                      },
-     *                      "user":
-     *                      {
-     *                          "id": 212,
-     *                          "username": "customer",
-     *                          "email": "customer@customer.sk",
-     *                          "name": null,
-     *                          "surname": null
-     *                      }
+     *            "taskHasAssignedUsers":
+     *            {
+     *               "313":
+     *               {
+     *                  "id": 7,
+     *                  "status_date": null,
+     *                  "time_spent": null,
+     *                  "createdAt": 1519237291,
+     *                  "updatedAt": 1519237291,
+     *                  "status":
+     *                  {
+     *                      "id": 15,
+     *                      "title": "Completed",
+     *                      "color": "#FF4500"
+     *                  },
+     *                  "user":
+     *                  {
+     *                      "id": 313,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic"
      *                  }
-     *            ],
+     *              }
+     *            },
      *            "taskHasAttachments": [],
      *            "comments": [],
      *            "invoiceableItems":
@@ -539,70 +545,81 @@ class TaskController extends ApiBaseController
      * @param Request $request
      * @param int $filterId
      *
-     * @return JsonResponse|Response
+     * @return Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function listSavedFilterAction(Request $request, int $filterId)
+    public function listSavedFilterAction(Request $request, int $filterId): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tasks_list_saved_filter', ['filterId' => $filterId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($filterId);
 
         if (!$filter instanceof Filter) {
-            return $this->createApiResponse([
-                'message' => 'Filter with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Filter with requested Id does not exist!']));
+            return $response;
         }
 
         // Check if logged user has permission to see requested filter
         if (!$this->get('filter_voter')->isGranted(VoteOptions::SHOW_FILTER, $filter)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        $pageNum = $request->get('page');
-        $pageNum = (int)$pageNum;
-        $page = ($pageNum === 0) ? 1 : $pageNum;
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ?: 10;
+        if (false !== $requestBody) {
+            $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody, true);
 
-        if (999 === $limit) {
-            $page = 1;
+            $page = $processedFilterParams['page'];
+            $limit = $processedFilterParams['limit'];
+            $order = $processedFilterParams['order'];
+            $processedArray = $this->processOrderData($order);
+            if (false === $processedArray['correct']) {
+                $response = $response->setContent(json_encode(['message' => $processedArray['message']]));
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                return $response;
+            } else {
+                $orderProcessed = $processedArray['message'];
+            }
+
+            $filterDataArray = $filter->getFilter();
+            $filterData = $this->getFilterDataFromSavedFilterArray($filterDataArray);
+            $options = [
+                'loggedUser' => $this->getUser(),
+                'isAdmin' => $this->get('task_voter')->isAdmin(),
+                'inFilter' => $filterData['inFilter'],
+                'equalFilter' => $filterData['equalFilter'],
+                'isNullFilter' => $filterData['isNullFilter'],
+                'dateFilter' => $filterData['dateFilter'],
+                'searchFilter' => $filterData['searchFilter'],
+                'notAndCurrentFilter' => $filterData['notAndCurrentFilter'],
+                'inFilterAddedParams' => $filterData['inFilterAddedParams'],
+                'equalFilterAddedParams' => $filterData['equalFilterAddedParams'],
+                'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
+                'filtersForUrl' => array_merge($filterData['filterForUrl'], ['order' => '&order=' . $order]),
+                'order' => $orderProcessed,
+                'limit' => $limit
+            ];
+            $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);
+
+            // Every Task need an additional canEdit Value
+            $tasksModified = $this->addCanEditParamToEveryTask($tasksArray);
+
+            $response = $response->setContent(json_encode($tasksModified));
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         }
 
-        $orderString = $request->get('order');
-        $order = $this->processOrderData($orderString);
-
-        if (null === $orderString) {
-            $orderString = 'DESC';
-        }
-
-        $filterDataArray = $filter->getFilter();
-        $filterData = $this->getFilterDataFromSavedFilterArray($filterDataArray);
-        $options = [
-            'loggedUser' => $this->getUser(),
-            'isAdmin' => $this->get('task_voter')->isAdmin(),
-            'inFilter' => $filterData['inFilter'],
-            'equalFilter' => $filterData['equalFilter'],
-            'isNullFilter' => $filterData['isNullFilter'],
-            'dateFilter' => $filterData['dateFilter'],
-            'searchFilter' => $filterData['searchFilter'],
-            'notAndCurrentFilter' => $filterData['notAndCurrentFilter'],
-            'inFilterAddedParams' => $filterData['inFilterAddedParams'],
-            'equalFilterAddedParams' => $filterData['equalFilterAddedParams'],
-            'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
-            'filtersForUrl' => array_merge($filterData['filterForUrl'], ['order' => '&order=' . $orderString]),
-            'order' => $order,
-            'limit' => $limit
-        ];
-
-        $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);
-
-        // Every Task need an additional canEdit Value
-        $tasksModified = $this->addCanEditParamToEveryTask($tasksArray);
-
-        return $this->json($tasksModified, StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
     }
 
     /**
@@ -647,6 +664,11 @@ class TaskController extends ApiBaseController
      *               "id": 1802,
      *               "title": "Web-Solutions"
      *            },
+     *            "status":
+     *            {
+     *               "id": 1802,
+     *               "title": "New"
+     *            },
      *            "taskData":
      *            [
      *              {
@@ -683,29 +705,30 @@ class TaskController extends ApiBaseController
      *                }
      *            ],
      *            "taskHasAssignedUsers":
-     *            [
+     *            {
+     *               "313":
      *               {
-     *                  "id": 69,
+     *                  "id": 7,
      *                  "status_date": null,
      *                  "time_spent": null,
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
+     *                  "createdAt": 1519237291,
+     *                  "updatedAt": 1519237291,
      *                  "status":
      *                  {
-     *                     "id": 240,
-     *                     "title": "Completed",
-     *                     "color": "#FF4500"
+     *                      "id": 15,
+     *                      "title": "Completed",
+     *                      "color": "#FF4500"
      *                  },
      *                  "user":
      *                  {
-     *                      "id": 2579,
-     *                      "username": "user",
-     *                      "email": "user@user.sk",
-     *                      "name": null,
-     *                      "surname": null
-     *                   }
-     *                }
-     *            ],
+     *                      "id": 313,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic"
+     *                  }
+     *              }
+     *            },
      *            "taskHasAttachments":
      *            [
      *               {
@@ -860,14 +883,22 @@ class TaskController extends ApiBaseController
      */
     public function getAction(int $id)
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('task', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
 
         if (!$task instanceof Task) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+            return $response;
         }
 
         if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_TASK, $task)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         // Check if user can update selected task
@@ -881,7 +912,9 @@ class TaskController extends ApiBaseController
         $isAdmin = $this->get('task_voter')->isAdmin();
 
         $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser(), $isAdmin);
-        return $this->json($taskArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($taskArray));
+        return $response;
     }
 
     /**
@@ -926,6 +959,11 @@ class TaskController extends ApiBaseController
      *               "id": 1802,
      *               "title": "Web-Solutions"
      *            },
+     *            "status":
+     *            {
+     *               "id": 1802,
+     *               "title": "New"
+     *            },
      *            "taskData":
      *            [
      *              {
@@ -962,29 +1000,30 @@ class TaskController extends ApiBaseController
      *                }
      *            ],
      *            "taskHasAssignedUsers":
-     *            [
+     *            {
+     *               "313":
      *               {
-     *                  "id": 69,
+     *                  "id": 7,
      *                  "status_date": null,
      *                  "time_spent": null,
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
+     *                  "createdAt": 1519237291,
+     *                  "updatedAt": 1519237291,
      *                  "status":
      *                  {
-     *                     "id": 240,
-     *                     "title": "Completed",
-     *                     "color": "#FF4500"
+     *                      "id": 15,
+     *                      "title": "Completed",
+     *                      "color": "#FF4500"
      *                  },
      *                  "user":
      *                  {
-     *                      "id": 2579,
-     *                      "username": "user",
-     *                      "email": "user@user.sk",
-     *                      "name": null,
-     *                      "surname": null
-     *                   }
-     *                }
-     *            ],
+     *                      "id": 313,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic"
+     *                  }
+     *              }
+     *            },
      *            "taskHasAttachments":
      *            [
      *               {
@@ -1604,6 +1643,11 @@ class TaskController extends ApiBaseController
      *               "id": 1802,
      *               "title": "Web-Solutions"
      *            },
+     *            "status":
+     *            {
+     *               "id": 1802,
+     *               "title": "New"
+     *            },
      *            "taskData":
      *            [
      *              {
@@ -1640,29 +1684,30 @@ class TaskController extends ApiBaseController
      *                }
      *            ],
      *            "taskHasAssignedUsers":
-     *            [
+     *            {
+     *               "313":
      *               {
-     *                  "id": 69,
+     *                  "id": 7,
      *                  "status_date": null,
      *                  "time_spent": null,
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
+     *                  "createdAt": 1519237291,
+     *                  "updatedAt": 1519237291,
      *                  "status":
      *                  {
-     *                     "id": 240,
-     *                     "title": "Completed",
-     *                     "color": "#FF4500"
+     *                      "id": 15,
+     *                      "title": "Completed",
+     *                      "color": "#FF4500"
      *                  },
      *                  "user":
      *                  {
-     *                      "id": 2579,
-     *                      "username": "user",
-     *                      "email": "user@user.sk",
-     *                      "name": null,
-     *                      "surname": null
-     *                   }
-     *                }
-     *            ],
+     *                      "id": 313,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic"
+     *                  }
+     *              }
+     *            },
      *            "taskHasAttachments":
      *            [
      *               {
@@ -1934,6 +1979,11 @@ class TaskController extends ApiBaseController
      *               "id": 1802,
      *               "title": "Web-Solutions"
      *            },
+     *            "status":
+     *            {
+     *               "id": 1802,
+     *               "title": "New"
+     *            },
      *            "taskData":
      *            [
      *              {
@@ -1970,29 +2020,30 @@ class TaskController extends ApiBaseController
      *                }
      *            ],
      *            "taskHasAssignedUsers":
-     *            [
+     *            {
+     *               "313":
      *               {
-     *                  "id": 69,
+     *                  "id": 7,
      *                  "status_date": null,
      *                  "time_spent": null,
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
+     *                  "createdAt": 1519237291,
+     *                  "updatedAt": 1519237291,
      *                  "status":
      *                  {
-     *                     "id": 240,
-     *                     "title": "Completed",
-     *                     "color": "#FF4500"
+     *                      "id": 15,
+     *                      "title": "Completed",
+     *                      "color": "#FF4500"
      *                  },
      *                  "user":
      *                  {
-     *                      "id": 2579,
-     *                      "username": "user",
-     *                      "email": "user@user.sk",
-     *                      "name": null,
-     *                      "surname": null
-     *                   }
-     *                }
-     *            ],
+     *                      "id": 313,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic"
+     *                  }
+     *              }
+     *            },
      *            "taskHasAttachments":
      *            [
      *               {
@@ -2975,7 +3026,7 @@ class TaskController extends ApiBaseController
             $data[FilterAttributeOptions::CLOSED] = $requestBody['closedTime'];
         }
         if (isset($requestBody['archived'])) {
-            if('true' === strtolower($requestBody['archived'])) {
+            if ('true' === strtolower($requestBody['archived'])) {
                 $data[FilterAttributeOptions::ARCHIVED] = true;
             }
         }
@@ -3191,7 +3242,7 @@ class TaskController extends ApiBaseController
             $filterForUrl['closed'] = '&closedTime=' . $closed;
         }
         if (isset($data[FilterAttributeOptions::ARCHIVED])) {
-            if ('true' === strtolower($data[FilterAttributeOptions::ARCHIVED]) || true === $data[FilterAttributeOptions::ARCHIVED] ) {
+            if ('true' === strtolower($data[FilterAttributeOptions::ARCHIVED]) || true === $data[FilterAttributeOptions::ARCHIVED]) {
                 $equalFilter['project.is_active'] = 0;
                 $filterForUrl['archived'] = '&archived=TRUE';
             }
@@ -3217,21 +3268,20 @@ class TaskController extends ApiBaseController
                     $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($attributeId);
                     if ($taskAttribute instanceof TaskAttribute) {
                         $typeOfTaskAttribute = $taskAttribute->getType();
-                        $attributeValues = explode(',', $strpos[1]);
 
-                        if ('checkbox' === $typeOfTaskAttribute) {
+                        if (VariableHelper::CHECKBOX === $typeOfTaskAttribute) {
                             if ('true' === strtolower($strpos[1])) {
                                 $equalFilterAddedParams[$attributeId] = 1;
                             } elseif ('false' === strtolower($strpos[1])) {
                                 $equalFilterAddedParams[$attributeId] = 0;
                             }
+                        } elseif ((VariableHelper::DATE === $typeOfTaskAttribute)) {
+                            $dateData = $this->separateFromToDateData($strpos[1], ':');
+                            $dateFilterAddedParams[$attributeId] = $dateData;
+                        } else {
+                            $attributeValues = explode(',', $strpos[1]);
+                            $inFilterAddedParams[$attributeId] = $attributeValues;
                         }
-
-                        if ('date' === $typeOfTaskAttribute) {
-                            $dateFilterAddedParams[$attributeId] = $attributeValues;
-                        }
-
-                        $inFilterAddedParams[$attributeId] = $attributeValues;
                     }
                 }
             }
@@ -3254,12 +3304,13 @@ class TaskController extends ApiBaseController
     /**
      * @param string $created
      *
+     * @param string $separator
      * @return array
      */
-    private function separateFromToDateData(string $created): array
+    private function separateFromToDateData(string $created, $separator = '='): array
     {
-        $fromPosition = strpos($created, 'FROM=');
-        $toPosition = strpos($created, 'TO=');
+        $fromPosition = strpos($created, 'FROM' . $separator);
+        $toPosition = strpos($created, 'TO' . $separator);
 
         $toDataDate = null;
         $fromDataDate = null;

@@ -32,14 +32,14 @@ tasks_create:
 tasks_update:
     path:     /tasks/{id}
     defaults: { _controller: APITaskBundle:Task/Task:update }
-    methods: [PATCH]
+    methods: [PUT]
     requirements:
             id: '\d+'
 
 tasks_quick_update:
     path:     /tasks/quick-update/{taskId}
     defaults: { _controller: APITaskBundle:Task/Task:quickUpdateTask}
-    methods: [PATCH]
+    methods: [PUT]
     requirements:
             taskId: '\d+'
 

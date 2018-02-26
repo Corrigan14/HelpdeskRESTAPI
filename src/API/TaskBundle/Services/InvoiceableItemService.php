@@ -77,8 +77,6 @@ class InvoiceableItemService
         return [
             'put: all entity with unit' => $this->router->generate('invoiceable_item_update_unit', ['taskId' => $taskId, 'invoiceableItemId' => $invoiceableItemId, 'unitId' => $unitId]),
             'put: entity' => $this->router->generate('invoiceable_item_update', ['taskId' => $taskId, 'invoiceableItemId' => $invoiceableItemId, 'unitId' => $unitId]),
-            'patch: all entity with unit' => $this->router->generate('invoiceable_item_partial_update', ['taskId' => $taskId, 'invoiceableItemId' => $invoiceableItemId, 'unitId' => $unitId]),
-            'patch: entity' => $this->router->generate('invoiceable_item_partial_update', ['taskId' => $taskId, 'invoiceableItemId' => $invoiceableItemId, 'unitId' => $unitId]),
             'delete' => $this->router->generate('invoiceable_item_delete', ['taskId' => $taskId, 'invoiceableItemId' => $invoiceableItemId]),
         ];
     }

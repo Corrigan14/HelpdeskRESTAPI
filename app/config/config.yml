@@ -90,9 +90,15 @@ nelmio_cors:
     paths:
         '^/api':
             allow_credentials: true
-            allow_origin: ['http://localhost:3000','http://localhost:8080','https://dev.lanhelpdesk.com','http://dev.lanhelpdesk.com']
+            allow_origin: ['http://localhost:3000','http://localhost:8080']
             allow_headers: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept','Authorization']
             allow_methods: ['POST', 'PUT', 'GET', 'DELETE','OPTIONS']
+            max_age: 3600
+        '^/uploads':
+            allow_credentials: true
+            allow_origin: ['https://dev.lanhelpdesk.com','http://dev.lanhelpdesk.com']
+            allow_headers: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept','Authorization']
+            allow_methods: ['GET']
             max_age: 3600
 
 stof_doctrine_extensions:

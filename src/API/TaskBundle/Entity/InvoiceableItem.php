@@ -45,7 +45,7 @@ class InvoiceableItem
      * @var string
      *
      * @ORM\Column(name="unit_price", type="decimal", precision=10, scale=2)
-     * @Assert\NotBlank(message="Amount is required")
+     * @Assert\NotBlank(message="Unit price is required")
      */
     private $unit_price;
 

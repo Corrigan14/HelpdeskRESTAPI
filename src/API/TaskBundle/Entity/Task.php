@@ -5,6 +5,7 @@ namespace API\TaskBundle\Entity;
 use API\CoreBundle\Entity\Company;
 use API\CoreBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use JMS\Serializer\Annotation as Serializer;
@@ -129,6 +130,14 @@ class Task
     /**
      * @var ArrayCollection
      *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskSubtask", mappedBy="task")
+     * @Serializer\ReadOnly()
+     */
+    private $subtasks;
+
+    /**
+     * @var ArrayCollection
+     *
      * @ORM\ManyToMany(targetEntity="API\CoreBundle\Entity\User", inversedBy="followedTasks", cascade={"persist", "remove"})
      * @ORM\JoinTable(name="task_has_follower")
      * @Serializer\ReadOnly()
@@ -218,6 +227,7 @@ class Task
         $this->comments = new ArrayCollection();
         $this->invoiceableItems = new ArrayCollection();
         $this->notifications = new ArrayCollection();
+        $this->subtasks = new ArrayCollection();
     }
 
     /**
@@ -865,5 +875,41 @@ class Task
     public function getStatus()
     {
         return $this->status;
+    }
+
+    /**
+     * Add subtask.
+     *
+     * @param TaskSubtask $subtask
+     *
+     * @return Task
+     */
+    public function addSubtask(TaskSubtask $subtask)
+    {
+        $this->subtasks[] = $subtask;
+
+        return $this;
+    }
+
+    /**
+     * Remove subtask.
+     *
+     * @param TaskSubtask $subtask
+     *
+     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
+     */
+    public function removeSubtask(TaskSubtask $subtask)
+    {
+        return $this->subtasks->removeElement($subtask);
+    }
+
+    /**
+     * Get subtasks.
+     *
+     * @return Collection
+     */
+    public function getSubtasks()
+    {
+        return $this->subtasks;
     }
 }

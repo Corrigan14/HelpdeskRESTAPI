@@ -215,3 +215,33 @@ tasks_remove_attachment_from_comment:
     methods: [DELETE]
     requirements:
             commentId: '\d+'
+
+tasks_list_of_tasks_subtasks:
+    path:     /tasks/{taskId}/subtasks
+    defaults: { _controller: APITaskBundle:Task/Subtask:listOfTasksSubtasks}
+    methods: [GET]
+    requirements:
+            taskId: '\d+'
+
+tasks_create_subtask:
+    path:     /tasks/{taskId}/subtask
+    defaults: { _controller: APITaskBundle:Task/Subtask:createSubtask}
+    methods: [POST]
+    requirements:
+            taskId: '\d+'
+
+tasks_update_subtask:
+    path:     /tasks/{taskId}/subtask/{subtaskId}
+    defaults: { _controller: APITaskBundle:Task/Subtask:updateSubtask}
+    methods: [PUT]
+    requirements:
+            taskId: '\d+'
+            subtaskId: '\d+'
+
+tasks_delete_subtask:
+    path:     /tasks/{taskId}/subtask/{subtaskId}
+    defaults: { _controller: APITaskBundle:Task/Subtask:deleteSubtask}
+    methods: [DELETE]
+    requirements:
+            taskId: '\d+'
+            subtaskId: '\d+'

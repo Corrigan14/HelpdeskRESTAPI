@@ -1,0 +1,152 @@
+<?php
+
+namespace API\TaskBundle\Entity;
+
+use API\CoreBundle\Entity\User;
+use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
+use JMS\Serializer\Annotation as Serializer;
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * TaskSubtask
+ *
+ * @ORM\Table(name="task_subtask")
+ * @ORM\Entity(repositoryClass="API\TaskBundle\Repository\TaskSubtaskRepository")
+ */
+class TaskSubtask
+{
+    use TimestampableEntity;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @Serializer\ReadOnly()
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="title", type="string", length=255)
+     * @Assert\NotBlank(message="Title is required")
+     * @Assert\Type("string")
+     */
+    private $title;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="done", type="boolean", options={"default: 0"})
+     */
+    private $done;
+
+    /**
+     * @var User
+     *
+     * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="createdSubtasks")
+     * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
+     * @Serializer\ReadOnly()
+     */
+    private $createdBy;
+
+    /**
+     * @var Task
+     *
+     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Task", inversedBy="subtasks")
+     * @ORM\JoinColumn(name="task", referencedColumnName="id", nullable=false)
+     * @Serializer\ReadOnly()
+     */
+    private $task;
+
+
+    /**
+     * Get id.
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set title.
+     *
+     * @param string $title
+     *
+     * @return TaskSubtask
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    /**
+     * Get title.
+     *
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * Set done.
+     *
+     * @param bool|string $done
+     *
+     * @return TaskSubtask
+     */
+    public function setDone($done)
+    {
+        if (\is_string($done)) {
+            $done = ($done === 'true' || $done == 1);
+        }
+
+        $this->done = $done;
+
+        return $this;
+    }
+
+
+    /**
+     * Get done.
+     *
+     * @return bool
+     */
+    public function getDone()
+    {
+        return $this->done;
+    }
+
+    /**
+     * Set createdBy.
+     *
+     * @param User $createdBy
+     *
+     * @return TaskSubtask
+     */
+    public function setCreatedBy(User $createdBy)
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    /**
+     * Get createdBy.
+     *
+     * @return User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+}

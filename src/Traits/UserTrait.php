@@ -10,6 +10,7 @@ use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
+use API\TaskBundle\Entity\TaskSubtask;
 use API\TaskBundle\Entity\UserHasProject;
 use API\TaskBundle\Entity\UserRole;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -95,6 +96,14 @@ trait UserTrait
      * @Exclude()
      */
     private $filters;
+
+    /**
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskSubtask", mappedBy="createdBy")
+     * @Exclude()
+     *
+     * @var ArrayCollection
+     */
+    private $createdSubtasks;
 
     /**
      * @var UserRole
@@ -253,6 +262,41 @@ trait UserTrait
     {
         return $this->createdTasks;
     }
+
+    /**
+     * Add createdSubTask
+     *
+     * @param TaskSubtask $createdSubtask
+     *
+     * @return User
+     */
+    public function addCreatedSubtask(TaskSubtask $createdSubtask)
+    {
+        $this->createdSubtasks[] = $createdSubtask;
+
+        return $this;
+    }
+
+    /**
+     * Remove createdTask
+     *
+     * @param TaskSubtask $createdSubtask
+     */
+    public function removeCreatedSubtask(TaskSubtask $createdSubtask)
+    {
+        $this->createdSubtasks->removeElement($createdSubtask);
+    }
+
+    /**
+     * Get createdSubtasks
+     *
+     * @return Collection
+     */
+    public function getCreatedSubtasks()
+    {
+        return $this->createdSubtasks;
+    }
+
 
     /**
      * Add requestedTask

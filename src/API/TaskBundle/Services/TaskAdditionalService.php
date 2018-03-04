@@ -5,6 +5,7 @@ namespace API\TaskBundle\Services;
 use API\TaskBundle\Entity\Comment;
 use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
+use API\TaskBundle\Entity\TaskSubtask;
 use API\TaskBundle\Repository\TaskRepository;
 use API\TaskBundle\Repository\TaskHasAssignedUserRepository;
 use Doctrine\ORM\EntityManager;
@@ -245,13 +246,52 @@ class TaskAdditionalService
     }
 
     /**
+     * @param Task $task
+     * @return array
+     */
+    public function getTaskSubtasksResponse(Task $task): array
+    {
+        $responseData = $this->em->getRepository('APITaskBundle:TaskSubtask')->getEntities($task->getId());
+
+        $response = [
+            'data' => $responseData
+        ];
+
+        $pagination = [
+            '_links' => [],
+            'total' => \count($responseData)
+        ];
+
+        return array_merge($response, $pagination);
+    }
+
+    /**
+     * @param int $taskId
+     * @param int $subtaskId
+     * @return array
+     */
+    public function getTaskSubtaskResponse(int $taskId, int $subtaskId): array
+    {
+        $subtask = $this->em->getRepository('APITaskBundle:TaskSubtask')->getEntity($taskId, $subtaskId);
+
+        return [
+            'data' => $subtask,
+            '_links' => [
+                'create subtask' => $this->router->generate('tasks_create_subtask', ['taskId' => $taskId]),
+                'update subtask' => $this->router->generate('tasks_update_subtask', ['taskId' => $taskId, 'subtaskId' => $subtaskId]),
+                'delete subtask' => $this->router->generate('tasks_delete_subtask', ['taskId' => $taskId, 'subtaskId' => $subtaskId])
+            ],
+        ];
+    }
+
+    /**
      * @param int $page
      * @param int $count
      * @param array $routeOptions
      * @param int $limit
      * @return array
      */
-    private function getPagination(int $page, int $count, array $routeOptions, $limit):array
+    private function getPagination(int $page, int $count, array $routeOptions, $limit): array
     {
         $routeName = $routeOptions['routeName'];
         $routeParams = $routeOptions['routeParams'];

@@ -2,6 +2,8 @@
 
 namespace API\TaskBundle\Repository;
 
+use API\TaskBundle\Entity\TaskSubtask;
+
 /**
  * TaskSubtaskRepository
  *
@@ -10,4 +12,113 @@ namespace API\TaskBundle\Repository;
  */
 class TaskSubtaskRepository extends \Doctrine\ORM\EntityRepository
 {
+    /**
+     * @param int $taskId
+     * @return array
+     */
+    public function getEntities(int $taskId): array
+    {
+        $query = $this->createQueryBuilder('subtask')
+            ->select('subtask,task,creator')
+            ->leftJoin('subtask.task', 'task')
+            ->leftJoin('subtask.createdBy', 'creator')
+            ->where('task.id = :taskId')
+            ->setParameters([
+                'taskId' => $taskId
+            ])
+            ->getQuery();
+
+        return $this->formatData($query->getArrayResult());
+    }
+
+    /**
+     * @param int $taskId
+     * @param int $subtaskId
+     * @return array
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getEntity(int $taskId, int $subtaskId): array
+    {
+        $query = $this->createQueryBuilder('subtask')
+            ->select('subtask')
+            ->leftJoin('subtask.task', 'task')
+            ->where('subtask.id = :subtaskId')
+            ->andWhere('task.id = :taskId')
+            ->setParameters([
+                'taskId' => $taskId,
+                'subtaskId' => $subtaskId
+            ])
+            ->getQuery();
+
+        return $this->processData($query->getSingleResult());
+    }
+
+    /**
+     * @param $dataArray
+     * @return array
+     */
+    private function formatData($dataArray): array
+    {
+        $response = [];
+        foreach ($dataArray as $data) {
+            $response[] = $this->processArrayData($data);
+
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param TaskSubtask $data
+     * @return array
+     */
+    private function processData(TaskSubtask $data): array
+    {
+        $response = [
+            'id' => $data->getId(),
+            'title' => $data->getTitle(),
+            'done' => $data->getDone(),
+            'createdAt' => $data->getCreatedAt(),
+            'updatedAt' => $data->getUpdatedAt(),
+            'createdBy' => [
+                'id' => $data->getCreatedBy()->getId(),
+                'username' => $data->getCreatedBy()->getUsername(),
+                'email' => $data->getCreatedBy()->getEmail()
+            ],
+            'task' => [
+                'id' => $data->getTask()->getId(),
+                'title' => $data->getTask()->getTitle()
+            ]
+        ];
+
+        return $response;
+    }
+
+    /**
+     * @param TaskSubtask $data
+     * @return array
+     */
+    private function processArrayData($data): array
+    {
+        $response = [
+            'id' => $data['id'],
+            'title' => $data['title'],
+            'done' => $data['done'],
+            'createdAt' => isset($data['createdAt']) ? date_timestamp_get($data['createdAt']) : null,
+            'updatedAt' => isset($data['updatedAt']) ? date_timestamp_get($data['updatedAt']) : null,
+            'createdBy' => [
+                'id' => $data['createdBy']['id'],
+                'username' => $data['createdBy']['username'],
+                'email' => $data['createdBy']['email'],
+            ],
+            'task' => [
+                'id' => $data['task']['id'],
+                'title' => $data['task']['title'],
+            ]
+        ];
+
+        return $response;
+    }
+
 }

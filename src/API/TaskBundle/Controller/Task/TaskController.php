@@ -842,7 +842,6 @@ class TaskController extends ApiBaseController
      *       "_links":
      *       {
      *          "quick update: task": "/api/v1/task-bundle/tasks/quick-update/23996",
-     *          "patch: task": "/api/v1/task-bundle/tasks/23996",
      *          "delete": "/api/v1/task-bundle/tasks/23996"
      *       }
      *    }
@@ -1137,7 +1136,6 @@ class TaskController extends ApiBaseController
      *       "_links":
      *       {
      *          "quick update: task": "/api/v1/task-bundle/tasks/quick-update/23996",
-     *          "patch: task": "/api/v1/task-bundle/tasks/23996",
      *          "delete": "/api/v1/task-bundle/tasks/23996"
      *       }
      *    }
@@ -1821,7 +1819,6 @@ class TaskController extends ApiBaseController
      *       "_links":
      *       {
      *          "quick update: task": "/api/v1/task-bundle/tasks/quick-update/23996",
-     *          "patch: task": "/api/v1/task-bundle/tasks/23996",
      *          "delete": "/api/v1/task-bundle/tasks/23996"
      *       }
      *    }
@@ -2157,7 +2154,6 @@ class TaskController extends ApiBaseController
      *       "_links":
      *       {
      *          "quick update: task": "/api/v1/task-bundle/tasks/quick-update/23996",
-     *          "patch: task": "/api/v1/task-bundle/tasks/23996",
      *          "delete": "/api/v1/task-bundle/tasks/23996"
      *       }
      *    }

@@ -162,7 +162,6 @@ class TaskService
 
         $baseUrl = [
             'quick update: task' => $this->router->generate('tasks_quick_update', ['taskId' => $id]),
-            'patch: task' => $this->router->generate('tasks_update', ['id' => $id]),
             'delete' => $this->router->generate('tasks_delete', ['id' => $id])
         ];
 

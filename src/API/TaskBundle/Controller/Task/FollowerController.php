@@ -26,12 +26,16 @@ class FollowerController extends ApiBaseController
      *           {
      *              "id": 2575,
      *              "username": "admin",
-     *              "email": "admin@admin.sk"
+     *              "email": "admin@admin.sk",
+     *              "name": "admin",
+     *              "surname": "adminovic"
      *           },
      *           {
      *              "id": 2576,
      *              "username": "admin2",
-     *              "email": "admin2@admin.sk"
+     *              "email": "admin2@admin.sk",
+     *              "name": "user",
+     *              "surname": "userovic"
      *           },
      *
      *        ]
@@ -40,7 +44,7 @@ class FollowerController extends ApiBaseController
      *      }
      *
      * @ApiDoc(
-     *  description="Returns array of tasks followers.",
+     *  description="Returns a list of tasks followers.",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -68,24 +72,32 @@ class FollowerController extends ApiBaseController
      * @return Response
      * @throws \LogicException
      */
-    public function listOfTasksFollowersAction(int $taskId)
+    public function listOfTasksFollowersAction(int $taskId): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tasks_list_of_tasks_followers', ['taskId' => $taskId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
-            return $this->createApiResponse([
-                'message' => 'Task with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+            return $response;
         }
 
         if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_LIST_OF_TASK_FOLLOWERS, $task)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $options['task'] = $task;
-
         $followersArray = $this->get('task_additional_service')->getTaskFollowerResponse($options);
-        return $this->json($followersArray, StatusCodesHelper::SUCCESSFUL_CODE);
+
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($followersArray));
+        return $response;
     }
 
     /**
@@ -93,218 +105,17 @@ class FollowerController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *            "id": 62020,
-     *            "title": "Task 3 - admin is creator, admin is requested",
-     *            "description": "Description of Task 3",
-     *            "deadline": null,
-     *            "startedAt": null,
-     *            "closedAt": null,
-     *            "important": false,
-     *            "work": null,
-     *            "work_time": null,
-     *            "createdAt":1506434914,
-     *            "updatedAt":1506434914
-     *            "createdBy":
-     *            {
-     *               "id": 2575,
-     *               "username": "admin",
-     *               "email": "admin@admin.sk",
-     *               "name": null,
-     *               "surname": null
-     *            },
-     *            "requestedBy":
-     *            {
-     *               "id": 2575,
-     *               "username": "admin",
-     *               "email": "admin@admin.sk",
-     *               "name": null,
-     *               "surname": null
-     *            },
-     *            "project":
-     *            {
-     *               "id": 284,
-     *               "title": "Project of user 1"
-     *             },
-     *            "company":
-     *            {
-     *               "id": 1802,
-     *               "title": "Web-Solutions"
-     *            },
-     *            "taskData":
-     *            [
-     *              {
-     *                 "id": 113,
-     *                 "value": "some input",
-     *                 "taskAttribute":
-     *                 {
-     *                    "id": 169,
-     *                    "title": "input task additional attribute"
-     *                  }
-     *               }
-     *            ],
-     *            "followers":
-     *            [
-     *              {
-     *                 "id": 2575,
-     *                 "username": "admin",
-     *                 "email": "admin@admin.sk",
-     *                 "name": null,
-     *                 "surname": null
-     *               }
-     *            ],
-     *            "tags":
-     *            [
-     *               {
-     *                  "id": 71,
-     *                  "title": "Free Time",
-     *                  "color": "BF4848"
-     *               },
-     *               {
-     *                  "id": 73,
-     *                  "title": "Home",
-     *                  "color": "DFD112"
-     *                }
-     *            ],
-     *            "taskHasAssignedUsers":
-     *            [
-     *               {
-     *                  "id": 69,
-     *                  "status_date": null,
-     *                  "time_spent": null,
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
-     *                  "status":
-     *                  {
-     *                     "id": 240,
-     *                     "title": "Completed",
-     *                     "color": "#FF4500"
-     *                  },
-     *                  "user":
-     *                  {
-     *                      "id": 2579,
-     *                      "username": "user",
-     *                      "email": "user@user.sk",
-     *                      "name": null,
-     *                      "surname": null
-     *                   }
-     *                }
-     *            ],
-     *            "taskHasAttachments":
-     *            [
-     *               {
-     *                   "id": 240,
-     *                   "slug": "Slug-of-image-12-14-2015",
-     *               }
-     *            ],
-     *            "comments":
-     *            {
-     *              "189":
-     *              {
-     *                  "id": 189,
-     *                  "title": "test",
-     *                  "body": "gggg 222 222",
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
-     *                  "internal": true,
-     *                  "email": true,
-     *                  "email_to":
-     *                  [
-     *                      "mb@web-solutions.sk"
-     *                  ],
-     *                  "email_cc": null,
-     *                  "email_bcc": null,
-     *                  "createdBy":
-     *                  {
-     *                      "id": 4031,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk",
-     *                      "name": "Admin",
-     *                      "surname": "Adminovic",
-     *                      "avatarSlug": "slug-15-15-2014"
-     *                  },
-     *                  "commentHasAttachments":
-     *                  [
-     *                      {
-     *                          "id": 3,
-     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                      }
-     *                  ],
-     *                  "children": false
-     *              },
-     *            },
-     *             "invoiceableItems":
-     *             [
-     *                {
-     *                   "id": 30,
-     *                   "title": "Keyboard",
-     *                   "amount": "2.00",
-     *                   "unit_price": "50.00",
-     *                   "unit":
-     *                   {
-     *                      "id": 54,
-     *                      "title": "Kus",
-     *                      "shortcut": "Ks"
-     *                   }
-     *                },
-     *                {
-     *                   "id": 31,
-     *                   "title": "Mouse",
-     *                   "amount": "5.00",
-     *                   "unit_price": "10.00",
-     *                   "unit":
-     *                   {
-     *                      "id": 54,
-     *                      "title": "Kus",
-     *                      "shortcut": "Ks"
-     *                    }
-     *                },
-     *             ],
-     *             "canEdit": true,
-     *             "follow": true,
-     *             "hasProject": true,
-     *             "loggedUserIsAdmin": false,
-     *             "loggedUserProjectAcl":
-     *             [
-     *                "edit_project",
-     *                "create_task",
-     *                "resolve_task",
-     *                "delete_task",
-     *                "view_internal_note",
-     *                "view_all_tasks",
-     *                "view_own_tasks",
-     *                "view_tasks_from_users_company"
-     *             ],
-     *             "loggedUserAcl":
-     *             [
-     *                "login_to_system",
-     *                "share_filters",
-     *                "project_shared_filters",
-     *                "report_filters",
-     *                "share_tags",
-     *                "create_projects",
-     *                "sent_emails_from_comments",
-     *                "create_tasks",
-     *                "create_tasks_in_all_projects",
-     *                "update_all_tasks",
-     *                "user_settings",
-     *                "user_role_settings",
-     *                "company_attribute_settings",
-     *                "company_settings",
-     *                "status_settings",
-     *                "task_attribute_settings",
-     *                "unit_settings",
-     *                "system_settings",
-     *                "smtp_settings",
-     *                "imap_settings"
-     *              ]
-     *           }
+     *          "id": 458,
+     *          "username": "customer37",
+     *          "email": "customer@customer37.sk",
+     *          "name": "Customer37",
+     *          "surname": "Customerovic37"
      *       },
      *       "_links":
-     *       {
-     *          "quick update: task": "/api/v1/task-bundle/tasks/quick-update/23996",
-     *          "patch: task": "/api/v1/task-bundle/tasks/23996",
-     *          "delete": "/api/v1/task-bundle/tasks/23996"
-     *       }
+     *      {
+     *         "add follower to the Task": "/api/v1/task-bundle/tasks/11991/add-follower/458",
+     *         "remove follower from the Task": "/api/v1/task-bundle/tasks/11991/remove-follower/458"
+     *      }
      *    }
      *
      * @ApiDoc(
@@ -346,22 +157,26 @@ class FollowerController extends ApiBaseController
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function addFollowerToTaskAction(int $taskId, int $userId)
+    public function addFollowerToTaskAction(int $taskId, int $userId): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tasks_add_follower_to_task', ['taskId' => $taskId, 'userId' => $userId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
-            return $this->createApiResponse([
-                'message' => 'Task with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+            return $response;
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($userId);
 
         if (!$user instanceof User) {
-            return $this->createApiResponse([
-                'message' => 'User with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'User with requested Id does not exist!']));
+            return $response;
         }
 
         $options = [
@@ -370,7 +185,9 @@ class FollowerController extends ApiBaseController
         ];
 
         if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_TASK_FOLLOWER, $options)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         if ($this->canAddTaskFollower($user, $task)) {
@@ -380,237 +197,31 @@ class FollowerController extends ApiBaseController
             $this->getDoctrine()->getManager()->flush();
         }
 
-        // Check if user can update selected task
-        if ($this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
-            $canEdit = true;
-        } else {
-            $canEdit = false;
-        }
+        $options['task'] = $taskId;
+        $options['user'] = $user;
+        $followerEntity = $this->get('task_additional_service')->getTaskOneFollowerResponse($options);
 
-        // Check if logged user Is ADMIN
-        $isAdmin = $this->get('task_voter')->isAdmin();
-
-        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser(), $isAdmin);
-        return $this->json($taskArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($followerEntity));
+        return $response;
     }
 
     /**
-     *  ### Response ###
+     * ### Response ###
      *      {
      *        "data":
      *        {
-     *            "id": 62020,
-     *            "title": "Task 3 - admin is creator, admin is requested",
-     *            "description": "Description of Task 3",
-     *            "deadline": null,
-     *            "startedAt": null,
-     *            "closedAt": null,
-     *            "important": false,
-     *            "work": null,
-     *            "work_time": null,
-     *            "createdAt":1506434914,
-     *            "updatedAt":1506434914
-     *            "createdBy":
-     *            {
-     *               "id": 2575,
-     *               "username": "admin",
-     *               "email": "admin@admin.sk",
-     *               "name": null,
-     *               "surname": null
-     *            },
-     *            "requestedBy":
-     *            {
-     *               "id": 2575,
-     *               "username": "admin",
-     *               "email": "admin@admin.sk",
-     *               "name": null,
-     *               "surname": null
-     *            },
-     *            "project":
-     *            {
-     *               "id": 284,
-     *               "title": "Project of user 1"
-     *             },
-     *            "company":
-     *            {
-     *               "id": 1802,
-     *               "title": "Web-Solutions"
-     *            },
-     *            "taskData":
-     *            [
-     *              {
-     *                 "id": 113,
-     *                 "value": "some input",
-     *                 "taskAttribute":
-     *                 {
-     *                    "id": 169,
-     *                    "title": "input task additional attribute"
-     *                  }
-     *               }
-     *            ],
-     *            "followers":
-     *            [
-     *              {
-     *                 "id": 2575,
-     *                 "username": "admin",
-     *                 "email": "admin@admin.sk",
-     *                 "name": null,
-     *                 "surname": null
-     *               }
-     *            ],
-     *            "tags":
-     *            [
-     *               {
-     *                  "id": 71,
-     *                  "title": "Free Time",
-     *                  "color": "BF4848"
-     *               },
-     *               {
-     *                  "id": 73,
-     *                  "title": "Home",
-     *                  "color": "DFD112"
-     *                }
-     *            ],
-     *            "taskHasAssignedUsers":
-     *            [
-     *               {
-     *                  "id": 69,
-     *                  "status_date": null,
-     *                  "time_spent": null,
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
-     *                  "status":
-     *                  {
-     *                     "id": 240,
-     *                     "title": "Completed",
-     *                     "color": "#FF4500"
-     *                  },
-     *                  "user":
-     *                  {
-     *                      "id": 2579,
-     *                      "username": "user",
-     *                      "email": "user@user.sk",
-     *                      "name": null,
-     *                      "surname": null
-     *                   }
-     *                }
-     *            ],
-     *            "taskHasAttachments":
-     *            [
-     *               {
-     *                   "id": 240,
-     *                   "slug": "Slug-of-image-12-14-2015",
-     *               }
-     *            ],
-     *            "comments":
-     *            {
-     *              "189":
-     *              {
-     *                  "id": 189,
-     *                  "title": "test",
-     *                  "body": "gggg 222 222",
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
-     *                  "internal": true,
-     *                  "email": true,
-     *                  "email_to":
-     *                  [
-     *                      "mb@web-solutions.sk"
-     *                  ],
-     *                  "email_cc": null,
-     *                  "email_bcc": null,
-     *                  "createdBy":
-     *                  {
-     *                      "id": 4031,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk",
-     *                      "name": "Admin",
-     *                      "surname": "Adminovic",
-     *                      "avatarSlug": "slug-15-15-2014"
-     *                  },
-     *                  "commentHasAttachments":
-     *                  [
-     *                      {
-     *                          "id": 3,
-     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                      }
-     *                  ],
-     *                  "children": false
-     *              },
-     *            },
-     *             "invoiceableItems":
-     *             [
-     *                {
-     *                   "id": 30,
-     *                   "title": "Keyboard",
-     *                   "amount": "2.00",
-     *                   "unit_price": "50.00",
-     *                   "unit":
-     *                   {
-     *                      "id": 54,
-     *                      "title": "Kus",
-     *                      "shortcut": "Ks"
-     *                   }
-     *                },
-     *                {
-     *                   "id": 31,
-     *                   "title": "Mouse",
-     *                   "amount": "5.00",
-     *                   "unit_price": "10.00",
-     *                   "unit":
-     *                   {
-     *                      "id": 54,
-     *                      "title": "Kus",
-     *                      "shortcut": "Ks"
-     *                    }
-     *                },
-     *             ],
-     *             "canEdit": true,
-     *             "follow": true,
-     *             "hasProject": true,
-     *             "loggedUserIsAdmin": false,
-     *             "loggedUserProjectAcl":
-     *             [
-     *                "edit_project",
-     *                "create_task",
-     *                "resolve_task",
-     *                "delete_task",
-     *                "view_internal_note",
-     *                "view_all_tasks",
-     *                "view_own_tasks",
-     *                "view_tasks_from_users_company"
-     *             ],
-     *             "loggedUserAcl":
-     *             [
-     *                "login_to_system",
-     *                "share_filters",
-     *                "project_shared_filters",
-     *                "report_filters",
-     *                "share_tags",
-     *                "create_projects",
-     *                "sent_emails_from_comments",
-     *                "create_tasks",
-     *                "create_tasks_in_all_projects",
-     *                "update_all_tasks",
-     *                "user_settings",
-     *                "user_role_settings",
-     *                "company_attribute_settings",
-     *                "company_settings",
-     *                "status_settings",
-     *                "task_attribute_settings",
-     *                "unit_settings",
-     *                "system_settings",
-     *                "smtp_settings",
-     *                "imap_settings"
-     *              ]
-     *           }
+     *          "id": 458,
+     *          "username": "customer37",
+     *          "email": "customer@customer37.sk",
+     *          "name": "Customer37",
+     *          "surname": "Customerovic37"
      *       },
      *       "_links":
-     *       {
-     *          "quick update: task": "/api/v1/task-bundle/tasks/quick-update/23996",
-     *          "patch: task": "/api/v1/task-bundle/tasks/23996",
-     *          "delete": "/api/v1/task-bundle/tasks/23996"
-     *       }
+     *      {
+     *         "add follower to the Task": "/api/v1/task-bundle/tasks/11991/add-follower/458",
+     *         "remove follower from the Task": "/api/v1/task-bundle/tasks/11991/remove-follower/458"
+     *      }
      *    }
      *
      * @ApiDoc(
@@ -654,20 +265,24 @@ class FollowerController extends ApiBaseController
      */
     public function removeFollowerFromTaskAction(int $taskId, int $userId)
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tasks_remove_follower_from_task', ['taskId' => $taskId, 'userId' => $userId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
-            return $this->createApiResponse([
-                'message' => 'Task with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+            return $response;
         }
 
         $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($userId);
 
         if (!$user instanceof User) {
-            return $this->createApiResponse([
-                'message' => 'User with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'User with requested Id does not exist!']));
+            return $response;
         }
 
         $options = [
@@ -676,7 +291,9 @@ class FollowerController extends ApiBaseController
         ];
 
         if (!$this->get('task_voter')->isGranted(VoteOptions::REMOVE_TASK_FOLLOWER, $options)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         if (!$this->canAddTaskFollower($user, $task)) {
@@ -686,21 +303,18 @@ class FollowerController extends ApiBaseController
             $this->getDoctrine()->getManager()->persist($user);
             $this->getDoctrine()->getManager()->flush();
 
-            // Check if user can update selected task
-            if ($this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
-                $canEdit = true;
-            } else {
-                $canEdit = false;
-            }
+            $options['task'] = $taskId;
+            $options['user'] = $user;
+            $followerEntity = $this->get('task_additional_service')->getTaskOneFollowerResponse($options);
 
-            // Check if logged user Is ADMIN
-            $isAdmin = $this->get('task_voter')->isAdmin();
-
-            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser(), $isAdmin);
-            return $this->json($taskArray, StatusCodesHelper::SUCCESSFUL_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+            $response = $response->setContent(json_encode($followerEntity));
+            return $response;
         }
 
-        return $this->notFoundResponse();
+        $response = $response->setStatusCode(StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
+        $response = $response->setContent(StatusCodesHelper::NOT_FOUND_MESSAGE);
+        return $response;
     }
 
     /**

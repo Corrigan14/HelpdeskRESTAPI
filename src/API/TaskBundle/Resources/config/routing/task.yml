@@ -58,17 +58,17 @@ tasks_list_of_tasks_followers:
             taskId: '\d+'
 
 tasks_add_follower_to_task:
-    path:     /tasks/{taskId}/follower/{userId}
+    path:     /tasks/{taskId}/add-follower/{userId}
     defaults: { _controller: APITaskBundle:Task/Follower:addFollowerToTask}
-    methods: [POST]
+    methods: [PUT]
     requirements:
             taskId: '\d+'
             userId: '\d+'
 
 tasks_remove_follower_from_task:
-    path:     /tasks/{taskId}/follower/{userId}
+    path:     /tasks/{taskId}/remove-follower/{userId}
     defaults: { _controller: APITaskBundle:Task/Follower:removeFollowerFromTask}
-    methods: [PATCH]
+    methods: [PUT]
     requirements:
             taskId: '\d+'
             userId: '\d+'

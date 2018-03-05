@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Services;
 
+use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Comment;
 use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
@@ -113,11 +114,20 @@ class TaskAdditionalService
         $followersArray = [];
 
         $responseData = $task->getFollowers();
+        /** @var User $follower */
         foreach ($responseData as $follower) {
+            $name = '';
+            $surname = '';
+            if ($follower->getDetailData()) {
+                $name = $follower->getDetailData()->getName();
+                $surname = $follower->getDetailData()->getSurname();
+            }
             $followersArray[] = [
                 'id' => $follower->getId(),
                 'username' => $follower->getUsername(),
-                'email' => $follower->getEmail()
+                'email' => $follower->getEmail(),
+                'name' => $name,
+                'surname' => $surname
             ];
         }
 
@@ -128,6 +138,45 @@ class TaskAdditionalService
         $pagination = [
             '_links' => [],
             'total' => \count($followersArray)
+        ];
+
+        return array_merge($response, $pagination);
+    }
+
+    /**
+     * @param array $options
+     * @return array
+     */
+    public function getTaskOneFollowerResponse(array $options): array
+    {
+        /** @var Task $task */
+        $taskId = $options['task'];
+        /** @var User $user */
+        $user = $options['user'];
+
+        $name = '';
+        $surname = '';
+        if ($user->getDetailData()) {
+            $name = $user->getDetailData()->getName();
+            $surname = $user->getDetailData()->getSurname();
+        }
+        $followersArray = [
+            'id' => $user->getId(),
+            'username' => $user->getUsername(),
+            'email' => $user->getEmail(),
+            'name' => $name,
+            'surname' => $surname
+        ];
+
+        $response = [
+            'data' => $followersArray
+        ];
+
+        $pagination = [
+            '_links' => [
+                'add follower to the Task' => $this->router->generate('tasks_add_follower_to_task', ['taskId' => $taskId, 'userId' => $user->getId()]),
+                'remove follower from the Task' => $this->router->generate('tasks_remove_follower_from_task', ['taskId' => $taskId, 'userId' => $user->getId()]),
+            ]
         ];
 
         return array_merge($response, $pagination);

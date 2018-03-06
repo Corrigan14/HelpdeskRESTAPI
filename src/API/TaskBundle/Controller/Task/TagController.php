@@ -103,221 +103,20 @@ class TagController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *            "id": 62020,
-     *            "title": "Task 3 - admin is creator, admin is requested",
-     *            "description": "Description of Task 3",
-     *            "deadline": null,
-     *            "startedAt": null,
-     *            "closedAt": null,
-     *            "important": false,
-     *            "work": null,
-     *            "work_time": null,
-     *            "createdAt":1506434914,
-     *            "updatedAt":1506434914
-     *            "createdBy":
-     *            {
-     *               "id": 2575,
-     *               "username": "admin",
-     *               "email": "admin@admin.sk",
-     *               "name": null,
-     *               "surname": null
-     *            },
-     *            "requestedBy":
-     *            {
-     *               "id": 2575,
-     *               "username": "admin",
-     *               "email": "admin@admin.sk",
-     *               "name": null,
-     *               "surname": null
-     *            },
-     *            "project":
-     *            {
-     *               "id": 284,
-     *               "title": "Project of user 1"
-     *             },
-     *            "company":
-     *            {
-     *               "id": 1802,
-     *               "title": "Web-Solutions"
-     *            },
-     *            "taskData":
-     *            [
-     *              {
-     *                 "id": 113,
-     *                 "value": "some input",
-     *                 "taskAttribute":
-     *                 {
-     *                    "id": 169,
-     *                    "title": "input task additional attribute"
-     *                  }
-     *               }
-     *            ],
-     *            "followers":
-     *            [
-     *              {
-     *                 "id": 2575,
-     *                 "username": "admin",
-     *                 "email": "admin@admin.sk",
-     *                 "name": null,
-     *                 "surname": null
-     *               }
-     *            ],
-     *            "tags":
-     *            [
-     *               {
-     *                  "id": 71,
-     *                  "title": "Free Time",
-     *                  "color": "BF4848"
-     *               },
-     *               {
-     *                  "id": 73,
-     *                  "title": "Home",
-     *                  "color": "DFD112"
-     *                }
-     *            ],
-     *            "taskHasAssignedUsers":
-     *            [
-     *               {
-     *                  "id": 69,
-     *                  "status_date": null,
-     *                  "time_spent": null,
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
-     *                  "status":
-     *                  {
-     *                     "id": 240,
-     *                     "title": "Completed",
-     *                     "color": "#FF4500"
-     *                  },
-     *                  "user":
-     *                  {
-     *                      "id": 2579,
-     *                      "username": "user",
-     *                      "email": "user@user.sk",
-     *                      "name": null,
-     *                      "surname": null
-     *                   }
-     *                }
-     *            ],
-     *            "taskHasAttachments":
-     *            [
-     *               {
-     *                   "id": 240,
-     *                   "slug": "Slug-of-image-12-14-2015",
-     *               }
-     *            ],
-     *            "comments":
-     *            {
-     *              "189":
-     *              {
-     *                  "id": 189,
-     *                  "title": "test",
-     *                  "body": "gggg 222 222",
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
-     *                  "internal": true,
-     *                  "email": true,
-     *                  "email_to":
-     *                  [
-     *                      "mb@web-solutions.sk"
-     *                  ],
-     *                  "email_cc": null,
-     *                  "email_bcc": null,
-     *                  "createdBy":
-     *                  {
-     *                      "id": 4031,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk",
-     *                      "name": "Admin",
-     *                      "surname": "Adminovic",
-     *                      "avatarSlug": "slug-15-15-2014"
-     *                  },
-     *                  "commentHasAttachments":
-     *                  [
-     *                      {
-     *                          "id": 3,
-     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                      }
-     *                  ],
-     *                  "children": false
-     *              },
-     *            },
-     *             "invoiceableItems":
-     *             [
-     *                {
-     *                   "id": 30,
-     *                   "title": "Keyboard",
-     *                   "amount": "2.00",
-     *                   "unit_price": "50.00",
-     *                   "unit":
-     *                   {
-     *                      "id": 54,
-     *                      "title": "Kus",
-     *                      "shortcut": "Ks"
-     *                   }
-     *                },
-     *                {
-     *                   "id": 31,
-     *                   "title": "Mouse",
-     *                   "amount": "5.00",
-     *                   "unit_price": "10.00",
-     *                   "unit":
-     *                   {
-     *                      "id": 54,
-     *                      "title": "Kus",
-     *                      "shortcut": "Ks"
-     *                    }
-     *                },
-     *             ],
-     *             "canEdit": true,
-     *             "follow": true,
-     *             "hasProject": true,
-     *             "loggedUserIsAdmin": false,
-     *             "loggedUserProjectAcl":
-     *             [
-     *                "edit_project",
-     *                "create_task",
-     *                "resolve_task",
-     *                "delete_task",
-     *                "view_internal_note",
-     *                "view_all_tasks",
-     *                "view_own_tasks",
-     *                "view_tasks_from_users_company"
-     *             ],
-     *             "loggedUserAcl":
-     *             [
-     *                "login_to_system",
-     *                "share_filters",
-     *                "project_shared_filters",
-     *                "report_filters",
-     *                "share_tags",
-     *                "create_projects",
-     *                "sent_emails_from_comments",
-     *                "create_tasks",
-     *                "create_tasks_in_all_projects",
-     *                "update_all_tasks",
-     *                "user_settings",
-     *                "user_role_settings",
-     *                "company_attribute_settings",
-     *                "company_settings",
-     *                "status_settings",
-     *                "task_attribute_settings",
-     *                "unit_settings",
-     *                "system_settings",
-     *                "smtp_settings",
-     *                "imap_settings"
-     *              ]
-     *           }
-     *       },
-     *       "_links":
-     *       {
-     *          "quick update: task": "/api/v1/task-bundle/tasks/quick-update/23996",
-     *          "delete": "/api/v1/task-bundle/tasks/23996"
-     *       }
+     *          "id": 20,
+     *          "title": "Another Admin Public Tag",
+     *          "color": "DFD115",
+     *          "public": false
+     *        },
+     *        "_links":
+     *        {
+     *          "add tag to the Task": "/api/v1/task-bundle/tasks/11991/add-tag/20",
+     *          "remove tag from the Task": "/api/v1/task-bundle/tasks/11991/remove-tag/20"
+     *        }
      *    }
      *
      * @ApiDoc(
-     *  description="Add a new Tag to the Task. Returns Task Entity.",
+     *  description="Add a new Tag to the Task. Return Added Tag Entity.",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -356,7 +155,7 @@ class TagController extends ApiBaseController
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function addTagToTaskAction(int $taskId, int $tagId):Response
+    public function addTagToTaskAction(int $taskId, int $tagId): Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('tasks_add_tag_to_task', ['taskId' => $taskId, 'tagId' => $taskId]);
@@ -397,237 +196,34 @@ class TagController extends ApiBaseController
             $this->getDoctrine()->getManager()->flush();
         }
 
-        $canEdit = true;
+        $options['task'] = $task->getId();
+        $options['tag'] = $tag;
+        $tagsArray = $this->get('task_additional_service')->getTaskOneTagResponse($options);
 
-        // Check if logged user Is ADMIN
-        $isAdmin = $this->get('task_voter')->isAdmin();
-
-        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser(), $isAdmin);
         $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
-        $response = $response->setContent(json_encode($taskArray));
+        $response = $response->setContent(json_encode($tagsArray));
         return $response;
     }
 
     /**
      *  ### Response ###
      *      {
-     *        "data":
+     *         "data":
      *        {
-     *            "id": 62020,
-     *            "title": "Task 3 - admin is creator, admin is requested",
-     *            "description": "Description of Task 3",
-     *            "deadline": null,
-     *            "startedAt": null,
-     *            "closedAt": null,
-     *            "important": false,
-     *            "work": null,
-     *            "work_time": null,
-     *            "createdAt":1506434914,
-     *            "updatedAt":1506434914
-     *            "createdBy":
-     *            {
-     *               "id": 2575,
-     *               "username": "admin",
-     *               "email": "admin@admin.sk",
-     *               "name": null,
-     *               "surname": null
-     *            },
-     *            "requestedBy":
-     *            {
-     *               "id": 2575,
-     *               "username": "admin",
-     *               "email": "admin@admin.sk",
-     *               "name": null,
-     *               "surname": null
-     *            },
-     *            "project":
-     *            {
-     *               "id": 284,
-     *               "title": "Project of user 1"
-     *             },
-     *            "company":
-     *            {
-     *               "id": 1802,
-     *               "title": "Web-Solutions"
-     *            },
-     *            "taskData":
-     *            [
-     *              {
-     *                 "id": 113,
-     *                 "value": "some input",
-     *                 "taskAttribute":
-     *                 {
-     *                    "id": 169,
-     *                    "title": "input task additional attribute"
-     *                  }
-     *               }
-     *            ],
-     *            "followers":
-     *            [
-     *              {
-     *                 "id": 2575,
-     *                 "username": "admin",
-     *                 "email": "admin@admin.sk",
-     *                 "name": null,
-     *                 "surname": null
-     *               }
-     *            ],
-     *            "tags":
-     *            [
-     *               {
-     *                  "id": 71,
-     *                  "title": "Free Time",
-     *                  "color": "BF4848"
-     *               },
-     *               {
-     *                  "id": 73,
-     *                  "title": "Home",
-     *                  "color": "DFD112"
-     *                }
-     *            ],
-     *            "taskHasAssignedUsers":
-     *            [
-     *               {
-     *                  "id": 69,
-     *                  "status_date": null,
-     *                  "time_spent": null,
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
-     *                  "status":
-     *                  {
-     *                     "id": 240,
-     *                     "title": "Completed",
-     *                     "color": "#FF4500"
-     *                  },
-     *                  "user":
-     *                  {
-     *                      "id": 2579,
-     *                      "username": "user",
-     *                      "email": "user@user.sk",
-     *                      "name": null,
-     *                      "surname": null
-     *                   }
-     *                }
-     *            ],
-     *            "taskHasAttachments":
-     *            [
-     *               {
-     *                   "id": 240,
-     *                   "slug": "Slug-of-image-12-14-2015",
-     *               }
-     *            ],
-     *            "comments":
-     *            {
-     *              "189":
-     *              {
-     *                  "id": 189,
-     *                  "title": "test",
-     *                  "body": "gggg 222 222",
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
-     *                  "internal": true,
-     *                  "email": true,
-     *                  "email_to":
-     *                  [
-     *                      "mb@web-solutions.sk"
-     *                  ],
-     *                  "email_cc": null,
-     *                  "email_bcc": null,
-     *                  "createdBy":
-     *                  {
-     *                      "id": 4031,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk",
-     *                      "name": "Admin",
-     *                      "surname": "Adminovic",
-     *                      "avatarSlug": "slug-15-15-2014"
-     *                  },
-     *                  "commentHasAttachments":
-     *                  [
-     *                      {
-     *                          "id": 3,
-     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                      }
-     *                  ],
-     *                  "children": false
-     *              },
-     *            },
-     *             "invoiceableItems":
-     *             [
-     *                {
-     *                   "id": 30,
-     *                   "title": "Keyboard",
-     *                   "amount": "2.00",
-     *                   "unit_price": "50.00",
-     *                   "unit":
-     *                   {
-     *                      "id": 54,
-     *                      "title": "Kus",
-     *                      "shortcut": "Ks"
-     *                   }
-     *                },
-     *                {
-     *                   "id": 31,
-     *                   "title": "Mouse",
-     *                   "amount": "5.00",
-     *                   "unit_price": "10.00",
-     *                   "unit":
-     *                   {
-     *                      "id": 54,
-     *                      "title": "Kus",
-     *                      "shortcut": "Ks"
-     *                    }
-     *                },
-     *             ],
-     *             "canEdit": true,
-     *             "follow": true,
-     *             "hasProject": true,
-     *             "loggedUserIsAdmin": false,
-     *             "loggedUserProjectAcl":
-     *             [
-     *                "edit_project",
-     *                "create_task",
-     *                "resolve_task",
-     *                "delete_task",
-     *                "view_internal_note",
-     *                "view_all_tasks",
-     *                "view_own_tasks",
-     *                "view_tasks_from_users_company"
-     *             ],
-     *             "loggedUserAcl":
-     *             [
-     *                "login_to_system",
-     *                "share_filters",
-     *                "project_shared_filters",
-     *                "report_filters",
-     *                "share_tags",
-     *                "create_projects",
-     *                "sent_emails_from_comments",
-     *                "create_tasks",
-     *                "create_tasks_in_all_projects",
-     *                "update_all_tasks",
-     *                "user_settings",
-     *                "user_role_settings",
-     *                "company_attribute_settings",
-     *                "company_settings",
-     *                "status_settings",
-     *                "task_attribute_settings",
-     *                "unit_settings",
-     *                "system_settings",
-     *                "smtp_settings",
-     *                "imap_settings"
-     *              ]
-     *           }
-     *       },
-     *       "_links":
-     *       {
-     *          "quick update: task": "/api/v1/task-bundle/tasks/quick-update/23996",
-     *          "delete": "/api/v1/task-bundle/tasks/23996"
-     *       }
+     *          "id": 20,
+     *          "title": "Another Admin Public Tag",
+     *          "color": "DFD115",
+     *          "public": false
+     *        },
+     *        "_links":
+     *        {
+     *          "add tag to the Task": "/api/v1/task-bundle/tasks/11991/add-tag/20",
+     *          "remove tag from the Task": "/api/v1/task-bundle/tasks/11991/remove-tag/20"
+     *        }
      *    }
      *
      * @ApiDoc(
-     *  description="Remove the Tag from the Task. Return Task Entity.",
+     *  description="Remove the Tag from the Task. Return Removed Tag Entity.",
      *  requirements={
      *     {
      *       "name"="tagId",
@@ -666,7 +262,7 @@ class TagController extends ApiBaseController
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    public function removeTagFromTaskAction(int $taskId, int $tagId):Response
+    public function removeTagFromTaskAction(int $taskId, int $tagId): Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('tasks_remove_tag_from_task', ['taskId' => $taskId, 'tagId' => $taskId]);
@@ -706,18 +302,18 @@ class TagController extends ApiBaseController
             $this->getDoctrine()->getManager()->persist($tag);
             $this->getDoctrine()->getManager()->flush();
 
-            // Check if logged user Is ADMIN
-            $isAdmin = $this->get('task_voter')->isAdmin();
 
-            $canEdit = true;
-            $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser(), $isAdmin);
+            $options['task'] = $task->getId();
+            $options['tag'] = $tag;
+            $tagsArray = $this->get('task_additional_service')->getTaskOneTagResponse($options);
+
             $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
-            $response = $response->setContent(json_encode($taskArray));
+            $response = $response->setContent(json_encode($tagsArray));
             return $response;
         }
 
         $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-        $response = $response->setContent(json_encode(['message'=>'Task does not contains requested tag!']));
+        $response = $response->setContent(json_encode(['message' => 'Task does not contains requested tag!']));
         return $response;
     }
 

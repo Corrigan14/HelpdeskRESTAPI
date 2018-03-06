@@ -2,10 +2,12 @@
 
 namespace API\TaskBundle\Services;
 
+use API\CoreBundle\Entity\File;
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Comment;
 use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
+use API\TaskBundle\Entity\TaskHasAttachment;
 use API\TaskBundle\Entity\TaskSubtask;
 use API\TaskBundle\Repository\TaskRepository;
 use API\TaskBundle\Repository\TaskHasAssignedUserRepository;
@@ -40,34 +42,66 @@ class TaskAdditionalService
     }
 
     /**
-     * Return Attachment (File) Response which includes Data, Links and is based on Pagination
-     *
      * @param array $options
-     * @param int $page
-     * @param array $routeOptions
      * @return array
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
-     * @internal param int $taskId
      */
-    public function getTaskAttachmentsResponse(array $options, int $page, array $routeOptions): array
+    public function getTaskAttachmentsResponse(array $options): array
     {
-        $taskId = $options['task'];
-        $limit = $options['limit'];
+        /** @var Task $task */
+        $task = $options['task'];
+        $taskAttachmentArray = [];
 
-        $responseData = $this->em->getRepository('APITaskBundle:TaskHasAttachment')->getAllAttachmentSlugs($taskId, $page, $limit);
-
-        $response = [
-            'data' => $responseData['array'],
-        ];
-
-        if (999 !== $limit) {
-            $count = $responseData['count'];
-        } else {
-            $count = \count($responseData['array']);
+        $taskAttachments = $task->getTaskHasAttachments();
+        /** @var TaskHasAttachment $tag */
+        foreach ($taskAttachments as $attachment) {
+            $taskAttachmentArray [] = [
+                'id' => $attachment->getId(),
+                'slug' => $attachment->getSlug()
+            ];
         }
 
-        $pagination = $this->getPagination($page, $count, $routeOptions, $limit);
+        $response = [
+            'data' => $taskAttachmentArray
+        ];
+
+        $pagination = [
+            '_links' => [],
+            'total' => \count($taskAttachmentArray)
+        ];
+
+        return array_merge($response, $pagination);
+    }
+
+    /**
+     * @param array $options
+     * @return array
+     */
+    public function getTaskOneAttachmentResponse(array $options): array
+    {
+        /** @var Task $task */
+        $taskId = $options['task'];
+        /** @var File $file */
+        $file = $options['file'];
+
+        $attachmentArray = [
+            'id' => $file->getId(),
+            'slug' => $file->getSlug(),
+            'fileDir' => $file->getUploadDir(),
+            'fileName' => $file->getTempName()
+        ];
+
+        $response = [
+            'data' => $attachmentArray
+        ];
+
+        $pagination = [
+            '_links' => [
+                'add attachment to the Task' => $this->router->generate('tasks_add_attachment_to_task', ['taskId' => $taskId, 'slug' => $file->getSlug()]),
+                'remove attachment from the Task' => $this->router->generate('tasks_remove_attachment_from_task', ['taskId' => $taskId, 'slug' => $file->getSlug()]),
+            ]
+        ];
 
         return array_merge($response, $pagination);
     }
@@ -98,6 +132,38 @@ class TaskAdditionalService
         $pagination = [
             '_links' => [],
             'total' => \count($taskTagsArray)
+        ];
+
+        return array_merge($response, $pagination);
+    }
+
+    /**
+     * @param array $options
+     * @return array
+     */
+    public function getTaskOneTagResponse(array $options): array
+    {
+        /** @var Task $task */
+        $taskId = $options['task'];
+        /** @var Tag $user */
+        $tag = $options['tag'];
+
+        $tagArray = [
+            'id' => $tag->getId(),
+            'title' => $tag->getTitle(),
+            'color' => $tag->getColor(),
+            'public' => $tag->getPublic()
+        ];
+
+        $response = [
+            'data' => $tagArray
+        ];
+
+        $pagination = [
+            '_links' => [
+                'add tag to the Task' => $this->router->generate('tasks_add_tag_to_task', ['taskId' => $taskId, 'tagId' => $tag->getId()]),
+                'remove tag from the Task' => $this->router->generate('tasks_remove_tag_from_task', ['taskId' => $taskId, 'tagId' => $tag->getId()]),
+            ]
         ];
 
         return array_merge($response, $pagination);

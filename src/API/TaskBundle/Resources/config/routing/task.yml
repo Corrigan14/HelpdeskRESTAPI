@@ -146,16 +146,16 @@ tasks_list_of_tasks_attachments:
             taskId: '\d+'
 
 tasks_add_attachment_to_task:
-    path:     /tasks/{taskId}/attachment/{slug}
+    path:     /tasks/{taskId}/add-attachment/{slug}
     defaults: { _controller: APITaskBundle:Task/Attachment:addAttachmentToTask}
-    methods: [POST]
+    methods: [PUT]
     requirements:
             taskId: '\d+'
 
 tasks_remove_attachment_from_task:
-    path:     /tasks/{taskId}/attachment/{slug}
+    path:     /tasks/{taskId}/remove-attachment/{slug}
     defaults: { _controller: APITaskBundle:Task/Attachment:removeAttachmentFromTask}
-    methods: [DELETE]
+    methods: [PUT]
     requirements:
             taskId: '\d+'
 

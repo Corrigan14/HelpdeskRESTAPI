@@ -119,7 +119,7 @@ class FollowerController extends ApiBaseController
      *    }
      *
      * @ApiDoc(
-     *  description="Add a new follower to the Task. Returns a task.",
+     *  description="Add a new follower to the Task. Returns added user.",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -225,7 +225,7 @@ class FollowerController extends ApiBaseController
      *    }
      *
      * @ApiDoc(
-     *  description="Remove the follower from the Task. Returns Task Entity.",
+     *  description="Remove the follower from the Task. Returns Removed User.",
      *  requirements={
      *     {
      *       "name"="taskId",

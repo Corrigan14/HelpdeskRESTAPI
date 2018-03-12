@@ -3,6 +3,18 @@ status_list:
     defaults: { _controller: APITaskBundle:Status:list }
     methods: [GET]
 
+status_list_of_all_active:
+    path:     /status/all
+    defaults: { _controller: APITaskBundle:Status:listOfAllStatuses }
+    methods: [GET]
+
+status_list_of_all_active_from_date:
+    path:     /status/all/{date}
+    defaults: { _controller: APITaskBundle:Status:listOfAllStatuses }
+    methods: [GET]
+    requirements:
+            date: '\d+'
+
 status:
     path:     /status/{id}
     defaults: { _controller: APITaskBundle:Status:get }

@@ -73,6 +73,17 @@ class StatusService
     }
 
     /**
+     * @param $date
+     * @return array
+     */
+    public function getListOfAllStatuses($date): array
+    {
+        /** @var StatusRepository $statusRepository */
+        $statusRepository = $this->em->getRepository('APITaskBundle:Status');
+        return $statusRepository->getAllStatusEntitiesForSelectionLists($date);
+    }
+
+    /**
      * @param int $id
      * @return array
      */

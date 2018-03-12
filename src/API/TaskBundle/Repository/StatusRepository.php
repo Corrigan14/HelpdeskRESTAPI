@@ -103,6 +103,31 @@ class StatusRepository extends EntityRepository
     }
 
     /**
+     * @param $date
+     * @return array
+     */
+    public function getAllStatusEntitiesForSelectionLists($date): array
+    {
+        if ($date) {
+            $query = $this->createQueryBuilder('status')
+                ->select('status.title, status.color, status.order, status.function, status.is_active')
+                ->orderBy('status.order', 'ASC')
+                ->where('status.updatedAt >= :date')
+                ->setParameters([
+                    'date' => $date
+                ]);
+        } else {
+            $query = $this->createQueryBuilder('status')
+                ->select('status.title, status.color, status.order, status.function, status.is_active')
+                ->orderBy('status.order', 'ASC')
+                ->where('status.is_active = :isActive')
+                ->setParameter('isActive', true);
+        }
+
+        return $query->getQuery()->getArrayResult();
+    }
+
+    /**
      * @param $paginatorData
      * @param bool $array
      * @return array

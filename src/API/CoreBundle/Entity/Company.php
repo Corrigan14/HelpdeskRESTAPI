@@ -5,6 +5,7 @@ namespace API\CoreBundle\Entity;
 use API\TaskBundle\Entity\Task;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ExclusionPolicy;
@@ -26,6 +27,8 @@ use Traits\CompanyTrait;
 class Company implements \Serializable
 {
     use CompanyTrait;
+    use TimestampableEntity;
+
     /**
      * @var int
      *
@@ -486,5 +489,37 @@ class Company implements \Serializable
     public function getTasks()
     {
         return $this->tasks;
+    }
+
+    /**
+     * EXTENSION TO TIMESTAMP TRAIT - RETURNS TIMESTAMP DATE FORMAT
+     */
+
+    /**
+     * Returns createdAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getCreatedAt()
+    {
+        if ($this->createdAt) {
+            return $this->createdAt->getTimestamp();
+        } else {
+            return $this->createdAt;
+        }
+    }
+
+    /**
+     * Returns updatedAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getUpdatedAt()
+    {
+        if ($this->updatedAt) {
+            return $this->updatedAt->getTimestamp();
+        } else {
+            return $this->updatedAt;
+        }
     }
 }

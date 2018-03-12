@@ -187,6 +187,31 @@ class CompanyRepository extends EntityRepository
     }
 
     /**
+     * @param $date
+     * @return array
+     */
+    public function getAllCompaniesForASelectionList($date): array
+    {
+        if ($date) {
+            $query = $this->createQueryBuilder('company')
+                ->select('company.id, company.title, company.ico, company.dic, company.ic_dph, company.is_active')
+                ->orderBy('company.title', 'ASC')
+                ->where('company.updatedAt >= :date')
+                ->setParameters([
+                    'date' => $date
+                ]);
+        } else {
+            $query = $this->createQueryBuilder('company')
+                ->select('company.id, company.title, company.ico, company.dic, company.ic_dph, company.is_active')
+                ->orderBy('company.title', 'ASC')
+                ->where('company.is_active = :isActive')
+                ->setParameter('isActive', true);
+        }
+
+        return $query->getQuery()->getArrayResult();
+    }
+
+    /**
      * @param $paginatorData
      * @param bool $array
      * @return array

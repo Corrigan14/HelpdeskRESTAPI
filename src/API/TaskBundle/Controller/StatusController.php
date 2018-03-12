@@ -224,7 +224,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
             return $response;
         }
 
-        $allStatuses = $this->get('status_service')->getListOfAllStatuses($dateTimeObject);
+        $allStatuses = $this->get('status_service')->getLAllStatusesForASelectionList($dateTimeObject);
         $currentDate = new \DateTime('UTC');
         $currentDateTimezone = $currentDate->getTimestamp();
 

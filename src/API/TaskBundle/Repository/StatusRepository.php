@@ -106,11 +106,11 @@ class StatusRepository extends EntityRepository
      * @param $date
      * @return array
      */
-    public function getAllStatusEntitiesForSelectionLists($date): array
+    public function getLAllStatusesForASelectionList($date): array
     {
         if ($date) {
             $query = $this->createQueryBuilder('status')
-                ->select('status.title, status.color, status.order, status.function, status.is_active')
+                ->select('status.id, status.title, status.color, status.order, status.function, status.is_active')
                 ->orderBy('status.order', 'ASC')
                 ->where('status.updatedAt >= :date')
                 ->setParameters([
@@ -118,7 +118,7 @@ class StatusRepository extends EntityRepository
                 ]);
         } else {
             $query = $this->createQueryBuilder('status')
-                ->select('status.title, status.color, status.order, status.function, status.is_active')
+                ->select('status.id, status.title, status.color, status.order, status.function, status.is_active')
                 ->orderBy('status.order', 'ASC')
                 ->where('status.is_active = :isActive')
                 ->setParameter('isActive', true);

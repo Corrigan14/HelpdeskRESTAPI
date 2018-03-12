@@ -69,18 +69,20 @@ class StatusService
      */
     public function getListOfExistedStatuses():array
     {
-        return $this->em->getRepository('APITaskBundle:Status')->getAllStatusEntitiesWithIdAndTitle();
+         /** @var StatusRepository $statusRepository */
+         $statusRepository = $this->em->getRepository('APITaskBundle:Status');
+         return $statusRepository->getAllStatusEntitiesWithIdAndTitle();
     }
 
     /**
      * @param $date
      * @return array
      */
-    public function getListOfAllStatuses($date): array
+    public function getLAllStatusesForASelectionList($date): array
     {
         /** @var StatusRepository $statusRepository */
         $statusRepository = $this->em->getRepository('APITaskBundle:Status');
-        return $statusRepository->getAllStatusEntitiesForSelectionLists($date);
+        return $statusRepository->getLAllStatusesForASelectionList($date);
     }
 
     /**

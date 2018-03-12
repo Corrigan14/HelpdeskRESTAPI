@@ -388,6 +388,91 @@ class CompanyController extends ApiBaseController implements ControllerInterface
     }
 
     /**
+     * ### Response ###
+     *     {
+     *       "data":
+     *       [
+     *          {
+     *             "id": 42,
+     *             "title": "LanSystems",
+     *             "ico": "110258782",
+     *             "dic": "12587458996244",
+     *             "ic_dph": null,
+     *             "is_active": true
+     *           },
+     *          {
+     *             "id": 43,
+     *             "title": "LanFast",
+     *             "ico": "110258783",
+     *             "dic": "12587458996245",
+     *             "ic_dph": null,
+     *             "is_active": true
+     *           }
+     *       ]
+     *       "date": 1518907522
+     *     }
+     *
+     *
+     * @ApiDoc(
+     *  description="Returns a list of All active Companies",
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      400 ="Bad request",
+     *      401 ="Unauthorized request",
+     *  },
+     * )
+     *
+     * @param string|bool $date
+     * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     */
+    public function listOfAllCompaniesAction($date = false): Response
+    {
+        // JSON API Response - Content type and Location settings
+        if (false !== $date && 'false' !== $date) {
+            $intDate = (int)$date;
+            if (is_int($intDate) && null !== $intDate) {
+                $locationURL = $this->generateUrl('company_list_of_all_active_from_date', ['date' => $date]);
+                $dateTimeObject = new \DateTime("@$date");
+            } else {
+                $locationURL = $this->generateUrl('company_list_of_all_active');
+                $dateTimeObject = false;
+            }
+        } else {
+            $locationURL = $this->generateUrl('company_list_of_all_active');
+            $dateTimeObject = false;
+        }
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        if ($date && !($dateTimeObject instanceof \Datetime)) {
+            $response = $response->setContent(['message' => 'Date parameter is not in a valid format! Expected format: Timestamp']);
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            return $response;
+        }
+
+        $allCompanies = $this->get('api_company.service')->getAllCompaniesForASelectionList($dateTimeObject);
+        $currentDate = new \DateTime('UTC');
+        $currentDateTimezone = $currentDate->getTimestamp();
+
+        $dataArray = [
+            'data' => $allCompanies,
+            'date' => $currentDateTimezone
+        ];
+
+        $response = $response->setContent(json_encode($dataArray));
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
+    }
+
+    /**
      *  ### Response ###
      *      {
      *        "data":

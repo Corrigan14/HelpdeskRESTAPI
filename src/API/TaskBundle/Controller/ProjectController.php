@@ -82,8 +82,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      *
      * @ApiDoc(
-     *  description="Returns a list of logged User's Projects: created and based on his ACL (user_has_project: every project where user has some ACL),
-     * Admin can see all projects.",
+     *  description="Returns a list of logged User's Projects: created and based on his/her ACL (user_has_project: every project where user has some ACL),
+     *  Admin can see all projects.",
      *  filters={
      *     {
      *       "name"="page",
@@ -214,14 +214,14 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *  }
      * )
      *
-     * @return JsonResponse|Response
+     * @return Response
      * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function listOfProjectsWhereCanCreateTasksLoggedUserAction()
+    public function listOfProjectsWhereCanCreateTasksLoggedUserAction():Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('projects_list_where_logged_user_can_create_tasks');
@@ -350,14 +350,14 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param int $id
-     * @return Response|JsonResponse
+     * @return Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \InvalidArgumentException
      * @throws \UnexpectedValueException
      * @throws \LogicException
      */
-    public function getAction(int $id)
+    public function getAction(int $id):Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('project', ['id' => $id]);

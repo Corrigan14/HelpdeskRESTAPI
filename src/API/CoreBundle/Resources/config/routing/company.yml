@@ -3,6 +3,23 @@ company_list:
     defaults: { _controller: APICoreBundle:Company:list }
     methods: [GET]
 
+company_search:
+    path:     companies/search
+    defaults: { _controller: APICoreBundle:Company:search }
+    methods: [GET]
+
+company_list_of_all_active:
+    path:     companies/all
+    defaults: { _controller: APICoreBundle:Company:listOfAllCompanies }
+    methods: [GET]
+
+company_list_of_all_active_from_date:
+    path:     companies/all/{date}
+    defaults: { _controller: APICoreBundle:Company:listOfAllCompanies }
+    methods: [GET]
+    requirements:
+            date: '\d+'
+
 company:
     path:     companies/{id}
     defaults: { _controller: APICoreBundle:Company:get }
@@ -35,8 +52,3 @@ company_restore:
     methods: [PUT]
     requirements:
         id: '\d+'
-
-company_search:
-    path:     companies/search
-    defaults: { _controller: APICoreBundle:Company:search }
-    methods: [GET]

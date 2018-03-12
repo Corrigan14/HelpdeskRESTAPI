@@ -112,7 +112,20 @@ class CompanyService
      */
     public function getListOfAllCompanies(): array
     {
-        return $this->em->getRepository('APICoreBundle:Company')->getAllCompanyEntitiesWithIdAndTitle();
+        /** @var CompanyRepository $companyRepository */
+        $companyRepository = $this->em->getRepository('APICoreBundle:Company');
+        return $companyRepository->getAllCompanyEntitiesWithIdAndTitle();
+    }
+
+    /**
+     * @param $date
+     * @return array
+     */
+    public function getAllCompaniesForASelectionList($date): array
+    {
+        /** @var CompanyRepository $companyRepository */
+        $companyRepository = $this->em->getRepository('APICoreBundle:Company');
+        return $companyRepository->getAllCompaniesForASelectionList($date);
     }
 
     /**

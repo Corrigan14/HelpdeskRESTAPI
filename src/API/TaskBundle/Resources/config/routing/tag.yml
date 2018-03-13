@@ -3,6 +3,11 @@ tag_list:
     defaults: { _controller: APITaskBundle:Tag:list }
     methods: [GET]
 
+tag_list_of_available_logged_users_tags:
+    path:     /tags/all
+    defaults: { _controller: APITaskBundle:Task/Tag:listOfAllAvailableTags}
+    methods: [GET]
+
 tag:
     path:     /tags/{id}
     defaults: { _controller: APITaskBundle:Tag:get }

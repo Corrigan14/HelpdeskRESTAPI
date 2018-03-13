@@ -19,6 +19,61 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 class UnitController extends ApiBaseController
 {
     /**
+     * ### Response ###
+     *     {
+     *       "data":
+     *       [
+     *           {
+     *               "id": 1014,
+     *               "title": "kilogram",
+     *               "shortcut": "kg"
+     *           },
+     *          {
+     *               "id": 1015,
+     *               "title": "meter",
+     *               "color": "m"
+     *           }
+     *       ]
+     *     }
+     *
+     *
+     * @ApiDoc(
+     *  description="Returns a list of all active Units",
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request"
+     *  },
+     * )
+     *
+     * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     */
+    public function listOfAllAvailableUnitsAction(): Response
+    {
+        $locationURL = $locationURL = $this->generateUrl('tag_list_of_available_logged_users_tags');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        // Every unit is available
+        $unitArray = $this->get('unit_service')->getListOfAllUnits();
+
+        $dataArray = [
+            'data' => $unitArray
+        ];
+
+        $response = $response->setContent(json_encode($dataArray));
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
+    }
+
+    /**
      *  ### Response###
      *     {
      *        "data":

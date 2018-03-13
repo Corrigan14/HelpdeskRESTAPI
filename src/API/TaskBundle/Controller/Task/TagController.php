@@ -19,6 +19,61 @@ class TagController extends ApiBaseController
 {
     /**
      * ### Response ###
+     *     {
+     *       "data":
+     *       [
+     *           {
+     *               "id": 1014,
+     *               "title": "work",
+     *               "color": dddddd
+     *           },
+     *          {
+     *               "id": 1015,
+     *               "title": "home",
+     *               "color": ffffff
+     *           }
+     *       ]
+     *     }
+     *
+     *
+     * @ApiDoc(
+     *  description="Returns a list of all Tags - public and logged user's ",
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request"
+     *  },
+     * )
+     *
+     * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     */
+    public function listOfAllAvailableTagsAction(): Response
+    {
+        $locationURL = $locationURL = $this->generateUrl('tag_list_of_available_logged_users_tags');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        // Public and logged user's tags are available
+        $tagArray = $this->get('tag_service')->getListOfUsersTags($this->getUser()->getId());
+
+        $dataArray = [
+            'data' => $tagArray
+        ];
+
+        $response = $response->setContent(json_encode($dataArray));
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
+    }
+
+    /**
+     * ### Response ###
      *      {
      *       "data":
      *       [

@@ -58,7 +58,7 @@ class UserHasProjectRepository extends EntityRepository
     public function getAllUserEntitiesWithIdAndTitle(Project $project, string $rule):array
     {
         $query = $this->createQueryBuilder('uhp')
-            ->select('user.id, user.username, userDetailData.name, userDetailData.surname')
+            ->select('user.id, user.username, user.email, userDetailData.name, userDetailData.surname')
             ->leftJoin('uhp.user', 'user')
             ->leftJoin('user.detailData','userDetailData')
             ->where('uhp.project = :project')

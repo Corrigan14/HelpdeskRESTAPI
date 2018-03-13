@@ -3,6 +3,11 @@ unit_list:
     defaults: { _controller: APITaskBundle:Unit:list }
     methods: [GET]
 
+unit_list_of_all_units:
+    path:     /units/all
+    defaults: { _controller: APITaskBundle:Unit:listOfAllAvailableUnits}
+    methods: [GET]
+
 unit:
     path:     /units/{id}
     defaults: { _controller: APITaskBundle:Unit:get }

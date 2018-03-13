@@ -96,13 +96,6 @@ tasks_remove_tag_from_task:
             taskId: '\d+'
             tagId: '\d+'
 
-tasks_list_of_tasks_assigned_users:
-    path:     /tasks/{taskId}/assign-user
-    defaults: { _controller: APITaskBundle:Task/Assign:listOfTasksAssignedUsers}
-    methods: [GET]
-    requirements:
-            taskId: '\d+'
-
 tasks_assign_user_to_task:
     path:     /tasks/{taskId}/assign-user/{userId}
     defaults: { _controller: APITaskBundle:Task/Assign:createAssignUserToTask}

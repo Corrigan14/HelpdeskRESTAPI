@@ -70,6 +70,31 @@ class TaskAttributeService
     }
 
     /**
+     * @return array
+     */
+    public function getAllActiveEntitiesWithTypeOptions():array
+    {
+        /** @var TaskAttributeRepository $taskAttributeRepository */
+        $taskAttributeRepository = $this->em->getRepository('APITaskBundle:TaskAttribute');
+        $array = $taskAttributeRepository->getAllActiveEntitiesWithTypeOptions();
+        $response = [];
+
+        if (\count($array) > 0) {
+            /** @var TaskAttribute $data */
+            foreach ($array as $data) {
+                $response[] = [
+                    'id' => $data['id'],
+                    'title' => $data['title'],
+                    'type' => $data['type'],
+                    'options' => json_decode($data['options'])
+                ];
+            }
+        }
+
+        return $response;
+    }
+
+    /**
      * @param int $id
      * @return array
      * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException

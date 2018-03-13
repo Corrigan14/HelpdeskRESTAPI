@@ -21,6 +21,61 @@ use Symfony\Component\HttpFoundation\Response;
 class TaskAttributeController extends ApiBaseController implements ControllerInterface
 {
     /**
+     * ### Response ###
+     *     {
+     *       "data":
+     *       [
+     *           {
+     *               "id": 1014,
+     *               "title": "kilogram",
+     *               "type": "select"
+     *           },
+     *          {
+     *               "id": 1015,
+     *               "title": "meter",
+     *               "type": "multi_select"
+     *           }
+     *       ]
+     *     }
+     *
+     *
+     * @ApiDoc(
+     *  description="Returns an Options lists for all Select type attributes.",
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request"
+     *  },
+     * )
+     *
+     * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     */
+    public function listOfAllSelectOptionsAction(): Response
+    {
+        $locationURL = $locationURL = $this->generateUrl('tag_list_of_available_logged_users_tags');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        // Task attributes - the list of active task attributes with TITLE, TYPE and OPTIONS
+        $taskAttributes = $this->get('task_attribute_service')->getAllActiveEntitiesWithTypeOptions();
+
+        $dataArray = [
+            'data' => $taskAttributes
+        ];
+
+        $response = $response->setContent(json_encode($dataArray));
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
+    }
+
+    /**
      *  ### Response ###
      *     {
      *       "data":

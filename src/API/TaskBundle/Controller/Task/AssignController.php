@@ -3,9 +3,11 @@
 namespace API\TaskBundle\Controller\Task;
 
 use API\CoreBundle\Entity\User;
+use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Status;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
+use API\TaskBundle\Security\ProjectAclOptions;
 use API\TaskBundle\Security\StatusOptions;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
@@ -23,79 +25,29 @@ class AssignController extends ApiBaseController
 {
     /**
      * ### Response ###
-     *      {
-     *        "data":
-     *         {
-     *            "id": 69,
-     *            "createdAt": 1508768644,
-     *            "updatedAt": 1508768644,
-     *            "status_date": null,
-     *            "time_spent": null,
-     *            "user":
-     *            {
-     *               "id": 2579,
-     *               "username": "user",
-     *               "email": "user@user.sk"
-     *            },
-     *            "status":
-     *            {
-     *               "id": 240,
-     *               "title": "Completed",
-     *               "color": "#FF4500"
-     *            }
-     *         },
-     *        {
-     *            "id": 70,
-     *            "createdAt": 1508768644,
-     *            "updatedAt": 1508768644,
-     *            "status_date": null,
-     *            "time_spent": null,
-     *            "user":
-     *            {
-     *               "id": 2578,
-     *               "username": "user",
-     *               "email": "user@user.sk"
-     *            },
-     *            "status":
-     *            {
-     *               "id": 240,
-     *               "title": "Completed",
-     *               "color": "#FF4500"
-     *            }
-     *         }
-     *        "_links":
-     *        {
-     *          "self": "/api/v1/task-bundle/tasks/7/assign-user?page=1",
-     *          "first": "/api/v1/task-bundle/tasks/7/assign-user?page=1",
-     *          "prev": false,
-     *          "next": false,
-     *          "last": "/api/v1/task-bundle/tasks/7/assign-user?page=1"
-     *        },
-     *        "total": 3,
-     *        "page": 1,
-     *        "numberOfPages": 1
-     *      }
+     *     {
+     *       "data":
+     *       [
+     *           {
+     *               "id": 1014,
+     *               "username": "admin",
+     *               "email": admin@admin.sk
+     *               "name": null,
+     *               "surname": null
+     *           },
+     *          {
+     *               "id": 1015,
+     *               "username": "admin4",
+     *               "email": admin@admin4.sk
+     *               "name": null,
+     *               "surname": null
+     *           }
+     *       ]
+     *     }
+     *
      *
      * @ApiDoc(
-     *  description="Returns array of users assigned to task",
-     *  filters={
-     *     {
-     *       "name"="page",
-     *       "description"="Pagination, limit is set to 10 records"
-     *     },
-     *     {
-     *       "name"="limit",
-     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
-     *     }
-     *  },
-     *  requirements={
-     *     {
-     *       "name"="taskId",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of task"
-     *     }
-     *  },
+     *  description="Returns a list of all Assigners available for a requested project.",
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -104,54 +56,41 @@ class AssignController extends ApiBaseController
      *     }
      *  },
      *  statusCodes={
-     *      201 ="The request has succeeded",
+     *      200 ="The request has succeeded",
+     *      400 ="Bad request",
      *      401 ="Unauthorized request",
-     *      403 ="Access denied",
      *      404 ="Not found Entity"
-     *  }
+     *  },
      * )
      *
-     * @param Request $request
-     * @param int $taskId
+     * @param int $projectId
      * @return Response
-     * @throws \LogicException
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      */
-    public function listOfTasksAssignedUsersAction(Request $request, int $taskId)
+    public function listOfAllAvailableAssignersAction(int $projectId): Response
     {
-        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+        $locationURL =  $locationURL = $this->generateUrl('project_list_of_available_assign_users', ['projectId' => $projectId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
-        if (!$task instanceof Task) {
-            return $this->createApiResponse([
-                'message' => 'Task with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+        $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
+
+        if (!$project instanceof Project) {
+            $response = $response->setContent(json_encode(['message' => 'Project with requested Id does not exist!']));
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            return $response;
         }
 
-        if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_LIST_OF_USERS_ASSIGNED_TO_TASK, $task)) {
-            return $this->accessDeniedResponse();
-        }
+        // Assigner has to have RESOLVE_TASK ACL in user_has_project
+        $allAssigners = $this->get('api_user.service')->getListOfAvailableProjectAssigners($project, ProjectAclOptions::RESOLVE_TASK);
 
-        $pageNum = $request->get('page');
-        $pageNum = (int)$pageNum;
-        $page = ($pageNum === 0) ? 1 : $pageNum;
-
-        $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ?: 10;
-
-        if(999 === $limit){
-            $page = 1;
-        }
-
-        $options = [
-            'task' => $task,
-            'limit' => $limit
-        ];
-        $routeOptions = [
-            'routeName' => 'tasks_list_of_tasks_assigned_users',
-            'routeParams' => ['taskId' => $taskId]
+        $dataArray = [
+            'data' => $allAssigners
         ];
 
-        $assignedUsersArray = $this->get('task_additional_service')->getUsersAssignedToTaskResponse($options, $page, $routeOptions);
-        return $this->json($assignedUsersArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($dataArray));
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
     }
 
     /**

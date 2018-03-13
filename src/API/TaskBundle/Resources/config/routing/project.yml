@@ -63,3 +63,10 @@ project_process_users_acl:
     methods: [PUT]
     requirements:
             projectId: '\d+'
+
+project_list_of_available_assign_users:
+    path:     /project/{projectId}/assign-user
+    defaults: { _controller: APITaskBundle:Task/Assign:listOfAllAvailableAssigners}
+    methods: [GET]
+    requirements:
+            projectId: '\d+'

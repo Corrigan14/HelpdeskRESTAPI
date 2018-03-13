@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Repository;
 
 use API\TaskBundle\Entity\TaskAttribute;
+use API\TaskBundle\Services\VariableHelper;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
@@ -91,31 +92,20 @@ class TaskAttributeRepository extends EntityRepository
     /**
      * @return array
      */
-    public function getAllActiveEntitiesWithTypeOptions(): array
+    public function getAllActiveEntitiesWithTypeOptions()
     {
-        $query = $this->createQueryBuilder('ca')
-            ->select('ca')
-            ->where('ca.is_active = :isActive')
-            ->setParameter('isActive', true)
-            ->getQuery()
-            ->getArrayResult();
-
-        $response = [];
-
-        if (\count($query) > 0) {
-            /** @var TaskAttribute $data */
-            foreach ($query as $data) {
-                $response[] = [
-                    'id' => $data['id'],
-                    'title' => $data['title'],
-                    'type' => $data['type'],
-                    'options' => json_decode($data['options'])
-                ];
-            }
-        }
+        $query = $this->createQueryBuilder('taskAttribute')
+            ->select('taskAttribute')
+            ->where('taskAttribute.is_active = :isActive')
+            ->andWhere('taskAttribute.type = :simpleSelect OR taskAttribute.type = :multiSelect');
+        $query->setParameters([
+            'isActive' => true,
+            'simpleSelect' => VariableHelper::SIMPLE_SELECT,
+            'multiSelect' => VariableHelper::MULTI_SELECT
+        ]);
 
 
-        return $response;
+        return $query->getQuery()->getArrayResult();
     }
 
     /**

@@ -4,6 +4,8 @@ namespace API\TaskBundle\Repository;
 
 use API\TaskBundle\Entity\Unit;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
@@ -63,7 +65,7 @@ class UnitRepository extends EntityRepository
                 'count' => $count,
                 'array' => $this->formatData($paginator)
             ];
-        }else {
+        } else {
             // Return all entities
             return [
                 'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
@@ -83,7 +85,11 @@ class UnitRepository extends EntityRepository
             ->setParameter('unitId', $id)
             ->getQuery();
 
-        return $this->processData($query->getSingleResult());
+        try {
+            return $this->processData($query->getSingleResult());
+        } catch (NoResultException $e) {
+        } catch (NonUniqueResultException $e) {
+        }
     }
 
     /**
@@ -92,7 +98,9 @@ class UnitRepository extends EntityRepository
     public function getListOfUnitsWithShortcutAndId()
     {
         $query = $this->createQueryBuilder('unit')
-            ->select('unit.shortcut, unit.id')
+            ->select('unit.id, unit.title, unit.shortcut')
+            ->where('unit.is_active = :active')
+            ->setParameter('active', true)
             ->getQuery();
 
         return $query->getArrayResult();
@@ -103,7 +111,7 @@ class UnitRepository extends EntityRepository
      * @param bool $array
      * @return array
      */
-    private function formatData($paginatorData, $array = false):array
+    private function formatData($paginatorData, $array = false): array
     {
         $response = [];
         foreach ($paginatorData as $data) {
@@ -121,7 +129,7 @@ class UnitRepository extends EntityRepository
      * @param Unit $data
      * @return array
      */
-    private function processData(Unit $data):array
+    private function processData(Unit $data): array
     {
         $response = [
             'id' => $data->getId(),

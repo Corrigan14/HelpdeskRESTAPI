@@ -2,17 +2,3 @@ left_menu_param_list:
     path:     /left-menu-params
     defaults: { _controller: APITaskBundle:Main:getLeftNavigationParams }
     methods: [GET]
-
-project_assigners:
-    path:     /project/{projectId}/assigners/
-    defaults: { _controller: APITaskBundle:Main:getAvailableAssigners }
-    methods: [GET]
-    requirements:
-        projectId: '\d+'
-
-task_without_project_assigners:
-    path:     /task/{taskId}/assigners/
-    defaults: { _controller: APITaskBundle:Main:getAvailableAssigners }
-    methods: [GET]
-    requirements:
-        taskId: '\d+'

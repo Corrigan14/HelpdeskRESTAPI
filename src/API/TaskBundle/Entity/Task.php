@@ -35,7 +35,7 @@ class Task
      * @var string
      *
      * @ORM\Column(name="title", type="string", length=255)
-     * @Assert\NotBlank(message="Title of task is required")
+     * @Assert\NotBlank(message="Title of a task is required")
      * @Assert\Type("string")
      */
     private $title;
@@ -122,22 +122,6 @@ class Task
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskData", mappedBy="task", cascade={"persist", "remove"})
-     * @Serializer\ReadOnly()
-     */
-    private $taskData;
-
-    /**
-     * @var ArrayCollection
-     *
-     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskSubtask", mappedBy="task")
-     * @Serializer\ReadOnly()
-     */
-    private $subtasks;
-
-    /**
-     * @var ArrayCollection
-     *
      * @ORM\ManyToMany(targetEntity="API\CoreBundle\Entity\User", inversedBy="followedTasks", cascade={"persist", "remove"})
      * @ORM\JoinTable(name="task_has_follower")
      * @Serializer\ReadOnly()
@@ -155,6 +139,24 @@ class Task
      * @Serializer\ReadOnly()
      */
     private $tags;
+
+    /**
+     * @var Company
+     *
+     * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\Company", inversedBy="tasks")
+     * @ORM\JoinColumn(name="company_id", referencedColumnName="id", nullable=true)
+     * @Serializer\ReadOnly()
+     */
+    private $company;
+
+    /**
+     * @var Status
+     *
+     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Status", inversedBy="tasks")
+     * @ORM\JoinColumn(name="status_id", referencedColumnName="id", nullable=false)
+     * @Serializer\ReadOnly()
+     */
+    private $status;
 
     /**
      * @var ArrayCollection
@@ -181,22 +183,20 @@ class Task
     private $comments;
 
     /**
-     * @var Company
+     * @var ArrayCollection
      *
-     * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\Company", inversedBy="tasks")
-     * @ORM\JoinColumn(name="company_id", referencedColumnName="id", nullable=true)
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskData", mappedBy="task", cascade={"persist", "remove"})
      * @Serializer\ReadOnly()
      */
-    private $company;
+    private $taskData;
 
     /**
-     * @var Status
+     * @var ArrayCollection
      *
-     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Status", inversedBy="tasks")
-     * @ORM\JoinColumn(name="status_id", referencedColumnName="id", nullable=false)
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskSubtask", mappedBy="task")
      * @Serializer\ReadOnly()
      */
-    private $status;
+    private $subtasks;
 
     /**
      * @var
@@ -273,7 +273,11 @@ class Task
      */
     public function setDescription($description)
     {
-        $this->description = $description;
+        if ('null' === strtolower($description)) {
+            $this->description = null;
+        } else {
+            $this->description = $description;
+        }
 
         return $this;
     }
@@ -689,7 +693,11 @@ class Task
      */
     public function setWork($work)
     {
-        $this->work = $work;
+        if ('null' === strtolower($work)) {
+            $this->work = null;
+        } else {
+            $this->work = $work;
+        }
 
         return $this;
     }
@@ -713,7 +721,11 @@ class Task
      */
     public function setWorkTime($workTime)
     {
-        $this->work_time = $workTime;
+        if ('null' === strtolower($workTime)) {
+            $this->work_time = null;
+        } else {
+            $this->work_time = $workTime;
+        }
 
         return $this;
     }

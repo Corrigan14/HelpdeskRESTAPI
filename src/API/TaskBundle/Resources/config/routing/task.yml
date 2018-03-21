@@ -17,17 +17,41 @@ task:
     requirements:
         id: '\d+'
 
-task_options:
-    path:     /tasks/options/{taskId}
-    defaults: { _controller: APITaskBundle:Task/Task:getTaskOptions }
-    methods: [GET]
-    requirements:
-        taskId: '\d+'
-
-tasks_create:
-    path:     /tasks
+tasks_create_project_status:
+    path:     /tasks/project/{projectId}/status/{statusId}
     defaults: { _controller: APITaskBundle:Task/Task:create }
     methods: [POST]
+    requirements:
+            projectId: '\d+'
+            statusId: '\d+'
+
+tasks_create_project_status_requester:
+    path:     /tasks/project/{projectId}/status/{statusId}/requester/{requesterId}
+    defaults: { _controller: APITaskBundle:Task/Task:create }
+    methods: [POST]
+    requirements:
+            projectId: '\d+'
+            statusId: '\d+'
+            requesterId: '\d+'
+
+tasks_create_project_status_company:
+    path:     /tasks/project/{projectId}/status/{statusId}/company/{companyId}
+    defaults: { _controller: APITaskBundle:Task/Task:create }
+    methods: [POST]
+    requirements:
+            projectId: '\d+'
+            statusId: '\d+'
+            companyId: '\d+'
+
+tasks_create_project_status_requester_company:
+    path:     /tasks/project/{projectId}/status/{statusId}/requester/{requesterId}/company/{companyId}
+    defaults: { _controller: APITaskBundle:Task/Task:create }
+    methods: [POST]
+    requirements:
+            projectId: '\d+'
+            statusId: '\d+'
+            requesterId: '\d+'
+            companyId: '\d+'
 
 tasks_update:
     path:     /tasks/{id}

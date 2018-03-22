@@ -95,9 +95,8 @@ nelmio_cors:
             allow_methods: ['POST', 'PUT', 'GET', 'DELETE','OPTIONS']
             max_age: 3600
         '^/uploads':
-            allow_credentials: true
-            allow_origin: ['https://dev.lanhelpdesk.com','http://dev.lanhelpdesk.com']
-            allow_headers: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept','Authorization']
+            forced_allow_origin_value: ['*']
+            allow_headers: ['*']
             allow_methods: ['GET']
             max_age: 3600
 

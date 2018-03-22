@@ -97,7 +97,7 @@ nelmio_cors:
         '^/uploads':
             allow_origin: ['*']
             allow_headers: ['*']
-            allow_methods: ['GET']
+            allow_methods: ['GET','OPTIONS']
             max_age: 3600
 
 stof_doctrine_extensions:

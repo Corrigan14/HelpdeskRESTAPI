@@ -1157,6 +1157,16 @@ class CompanyController extends ApiBaseController implements ControllerInterface
                 }
             }
 
+            // Check if some Company Data are required
+            $allExistedCompanyAttributes = $this->getDoctrine()->getRepository('APICoreBundle:CompanyAttribute')->findAll();
+            $requiredCompanyAttributeData = [];
+            /** @var TaskAttribute|null $attr */
+            foreach ($allExistedCompanyAttributes as $attr) {
+                if ($attr->getIsActive() && $attr->getRequired()) {
+                    $requiredCompanyAttributeData[] = $attr->getId();
+                }
+            }
+
             $statusCode = $this->getCreateUpdateStatusCode($create);
 
             $errors = $this->get('entity_processor')->processEntity($company, $requestData);
@@ -1167,10 +1177,12 @@ class CompanyController extends ApiBaseController implements ControllerInterface
                     $this->getDoctrine()->getManager()->persist($company);
                     $this->getDoctrine()->getManager()->flush();
                     /**
-                     * Fill CompanyData Entity if some its parameters were sent
+                     * Fill CompanyData Entity if some of its parameters were sent
                      */
                     if (\is_array($requestDetailData)) {
+                        $sentCompanyAttributeKeys = [];
                         foreach ($requestDetailData as $key => $value) {
+                            $sentCompanyAttributeKeys[] = $key;
                             $companyAttribute = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->find($key);
 
                             if ($companyAttribute instanceof CompanyAttribute) {
@@ -1187,7 +1199,7 @@ class CompanyController extends ApiBaseController implements ControllerInterface
                                 }
 
                                 // If value = 'null' is being sent, data are set to null
-                                if ('null' === strtolower($value)) {
+                                if (!is_array($value) && 'null' === strtolower($value)) {
                                     $cd->setValue(null);
                                     $cd->setDateValue(null);
                                     $cd->setBoolValue(null);
@@ -1232,6 +1244,17 @@ class CompanyController extends ApiBaseController implements ControllerInterface
                                 return $response;
                             }
                         }
+                        // Check if All required Company Attribute Data were sent
+                        $intersect = array_diff($requiredCompanyAttributeData, $sentCompanyAttributeKeys);
+                        if (count($intersect) > 0) {
+                            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                            $response = $response->setContent(json_encode(['message' => 'Company Data with Company Attribute ID: ' . implode(',', $intersect) . ' are also required!']));
+                            return $response;
+                        }
+                    } elseif (count($requiredCompanyAttributeData) > 0) {
+                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'Company Data with Company Attribute ID: ' . implode(',', $requiredCompanyAttributeData) . ' are required!']));
+                        return $response;
                     }
                     $companyArray = $this->get('api_company.service')->getCompanyResponse($company->getId());
                     $response = $response->setStatusCode($statusCode);

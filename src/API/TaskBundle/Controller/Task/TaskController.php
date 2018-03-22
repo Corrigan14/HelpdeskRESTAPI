@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Controller\Task;
 
 use API\CoreBundle\Entity\Company;
+use API\CoreBundle\Entity\File;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
 use API\TaskBundle\Entity\Filter;
@@ -13,6 +14,7 @@ use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskAttribute;
 use API\TaskBundle\Entity\TaskData;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
+use API\TaskBundle\Entity\TaskHasAttachment;
 use API\TaskBundle\Entity\UserHasProject;
 use API\TaskBundle\Security\ProjectAclOptions;
 use API\TaskBundle\Security\StatusFunctionOptions;
@@ -1214,7 +1216,6 @@ class TaskController extends ApiBaseController
 
         //Decode sent parameters
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
-        dump($requestBody);
 
         $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
         if (!$project instanceof Project) {
@@ -1277,12 +1278,6 @@ class TaskController extends ApiBaseController
             } else {
                 $task->setCompany($company);
             }
-        }
-
-        $requestDetailData = false;
-        if (isset($requestBody['taskData'])) {
-            $requestDetailData = json_decode($requestBody['taskData'], true);
-            unset($requestBody['taskData']);
         }
 
         // REQUIRED PARAMETERS
@@ -1501,108 +1496,163 @@ class TaskController extends ApiBaseController
             }
         }
 
-        // Fill TaskData Entity if some of its parameters were sent
-        // Expected json objects: {"10": "value 1", "12": "value 2"}
-        if ($requestDetailData) {
-            /** @var array $requestDetailData */
-            foreach ($requestDetailData as $key => $value) {
-                $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($key);
-                if ($taskAttribute instanceof TaskAttribute) {
-                    $cd = $this->getDoctrine()->getRepository('APITaskBundle:TaskData')->findOneBy(['taskAttribute' => $taskAttribute,
-                        'task' => $task,]);
+        // Add attachment(s) to the task
+        if (isset($requestBody['attachment'])) {
+            $attachmentArray = json_decode($requestBody['attachment'], true);
+            if (!\is_array($attachmentArray)) {
+                $attachmentArray = explode(',', $requestBody['attachment']);
+            }
 
-                    if (!$cd instanceof TaskData) {
-                        $cd = new TaskData();
-                        $cd->setTask($task);
-                        $cd->setTaskAttribute($taskAttribute);
-                    }
+            foreach ($attachmentArray as $data) {
+                $fileEntity = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
+                    'slug' => $data,
+                ]);
 
-                    $cdErrors = $this->get('entity_processor')->processEntity($cd, ['value' => $value]);
-                    if (false === $cdErrors) {
-                        //Check the data format
-                        $taskAttributeDataFormat = $taskAttribute->getType();
-                        switch ($taskAttributeDataFormat) {
-                            case VariableHelper::INTEGER_NUMBER:
-                                if (!\is_int($value)) {
-                                    return $this->createApiResponse([
-                                        'message' => 'The value format of task_data with key: ' . $key . ' is invalid. Expected format: INTEGER',
-                                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                                }
-                                break;
-                            case VariableHelper::DECIMAL_NUMBER:
-                                if (!\is_float($value)) {
-                                    return $this->createApiResponse([
-                                        'message' => 'The value format of task_data with key: ' . $key . ' is invalid. Expected format: DECIMAL NUMBER',
-                                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                                }
-                                break;
-                            case VariableHelper::SIMPLE_SELECT:
-                                $selectionOptions = $taskAttribute->getOptions();
-                                if (!\in_array($value, $selectionOptions, true)) {
-                                    return $this->createApiResponse([
-                                        'message' => 'The value of task_data with key: ' . $key . ' is invalid. Expected is value from ATTRIBUTE OPTIONS',
-                                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                                }
-                                break;
-                            case VariableHelper::MULTI_SELECT:
-                                $selectionOptions = $taskAttribute->getOptions();
-                                $sentOptions = json_decode($value);
-                                foreach ($sentOptions as $option) {
-                                    if (!\in_array($option, $selectionOptions, true)) {
-                                        return $this->createApiResponse([
-                                            'message' => 'The value of task_data with key: ' . $key . ' is invalid. Expected is value from ATTRIBUTE OPTIONS',
-                                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                                    }
-                                }
-                                break;
-                            case VariableHelper::DATE:
-                                $intDateData = (int)$value;
-                                try {
-                                    $timeObject = new \DateTime("@$intDateData");
-                                    $cd->setValue($timeObject);
-                                } catch (\Exception $e) {
-                                    return $this->createApiResponse([
-                                        'message' => 'The value of task_data with key: ' . $key . ' is invalid. Expected is TIMESTAMP',
-                                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                                }
+                if (!$fileEntity instanceof File) {
+                    $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'File with requested Slug does not exist in a DB!']));
+                    return $response;
+                }
 
-                                break;
-                            default:
-                                break;
-                        }
+                // Check if the File exists in a web-page file system
+                $uploadDir = $this->getParameter('upload_dir');
+                $file = $uploadDir . DIRECTORY_SEPARATOR . $fileEntity->getUploadDir() . DIRECTORY_SEPARATOR . $fileEntity->getTempName();
 
-                        if (null === $value || 'null' === $value) {
-                            $cd->setValue(null);
-                        }
-                        $task->addTaskDatum($cd);
-                        $this->getDoctrine()->getManager()->persist($task);
-                        $this->getDoctrine()->getManager()->persist($cd);
-                    } else {
-                        return $this->createApiResponse([
-                            'message' => 'The value of task_data with key: ' . $key . ' is invalid',
-                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                    }
+                if (!file_exists($file)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'File with requested Slug does not exist in a web-page File System!']));
+                    return $response;
+                }
+
+                $taskHasAttachment = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAttachment')->findOneBy([
+                    'slug' => $data,
+                    'task' => $task->getId()
+                ]);
+
+                if ($taskHasAttachment instanceof TaskHasAttachment) {
+                    continue;
                 } else {
-                    return $this->createApiResponse([
-                        'message' => 'The key: ' . $key . ' of Task Attribute is not valid (Task Attribute with this ID doesn\'t exist)',
-                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    //Add attachment to the task
+                    $taskHasAttachmentNew = new TaskHasAttachment();
+                    $taskHasAttachmentNew->setTask($task);
+                    $taskHasAttachmentNew->setSlug($data);
+                    $task->addTaskHasAttachment($taskHasAttachmentNew);
+                    $this->getDoctrine()->getManager()->persist($taskHasAttachmentNew);
+                    $this->getDoctrine()->getManager()->persist($task);
                 }
             }
         }
-        $this->getDoctrine()->getManager()->flush();
 
-// Check if user can update selected task
-        if ($this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
-            $canEdit = true;
-        } else {
-            $canEdit = false;
+        // Fill TaskData Entity if some of its parameters were sent
+        // Check REQUIRED task attributes
+        // Expected json objects: {"10": "value 1", "12": "value 2"}
+
+        $allExistedTaskAttributes = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->findAll();
+        $requiredTaskAttributeData = [];
+        /** @var TaskAttribute|null $attr */
+        foreach ($allExistedTaskAttributes as $attr) {
+            if ($attr->getIsActive() && $attr->getRequired()) {
+                $requiredTaskAttributeData[] = $attr->getId();
+            }
         }
 
-// Check if logged user Is ADMIN
-        $isAdmin = $this->get('task_voter')->isAdmin();
+        if (isset($requestBody['taskData'])) {
+            if (is_array($requestBody['taskData'])) {
+                $requestDetailData = $requestBody['taskData'];
+            } else {
+                $requestDetailData = json_decode($requestBody['taskData'], true);
+            }
+            if (!\is_array($requestDetailData)) {
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Problem with task additional data - not a correct format. Expected: "taskData":"{\"27\":\"INPUT+VALUE\",\"28\":\"text\"']));
+                return $response;
+            }
 
-        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser(), $isAdmin);
-        return $this->json($taskArray, StatusCodesHelper::CREATED_CODE);
+            $sentTaskAttributeKeys = [];
+            /** @var array $requestDetailData */
+            foreach ($requestDetailData as $key => $value) {
+                $sentTaskAttributeKeys[] = $key;
+                $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($key);
+
+                if ($taskAttribute instanceof TaskAttribute) {
+                    $taskData = $this->getDoctrine()->getRepository('APITaskBundle:TaskData')->findOneBy([
+                        'taskAttribute' => $taskAttribute,
+                        'task' => $task,
+                    ]);
+
+
+                    if (!$taskData instanceof TaskData) {
+                        $taskData = new TaskData();
+                        $taskData->setTask($task);
+                        $taskData->setTaskAttribute($taskAttribute);
+                    }
+
+                    // If value = 'null' is being sent, data are set to null
+                    if (!is_array($value) && 'null' === strtolower($value)) {
+                        $taskData->setValue(null);
+                        $taskData->setDateValue(null);
+                        $taskData->setBoolValue(null);
+                        $task->addTaskDatum($taskData);
+
+                        $this->getDoctrine()->getManager()->persist($taskData);
+                        $this->getDoctrine()->getManager()->persist($task);
+                        $this->getDoctrine()->getManager()->flush();
+                    } else {
+                        $tdValueChecker = $this->get('entity_processor')->checkDataValueFormat($taskAttribute, $value);
+                        if (true === $tdValueChecker) {
+                            if ($taskAttribute->getType() === 'checkbox') {
+                                if (\is_string($value)) {
+                                    $value = strtolower($value);
+                                }
+                                if ('true' === $value || '1' === $value || 1 === $value) {
+                                    $taskData->setBoolValue(true);
+                                } else {
+                                    $taskData->setBoolValue(false);
+                                }
+                            } elseif ($taskAttribute->getType() === 'date') {
+                                $intValue = (int)$value;
+                                $taskData->setDateValue($intValue);
+                            } else {
+                                $taskData->setValue($value);
+                            }
+                            $task->addTaskDatum($taskData);
+
+                            $this->getDoctrine()->getManager()->persist($taskAttribute);
+                            $this->getDoctrine()->getManager()->persist($task);
+                            $this->getDoctrine()->getManager()->flush();
+                        } else {
+                            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                            $expectation = $this->get('entity_processor')->returnExpectedDataFormat($taskAttribute);
+                            $response = $response->setContent(json_encode(['message' => 'Problem with task additional data (taskData) value format! For a Task Attribute with ID: ' . $taskAttribute->getId() . ', ' . $expectation . ' is/are expected.']));
+                            return $response;
+                        }
+                    }
+                } else {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'The key: ' . $key . ' of a Task Attribute is not valid (Task Attribute with this ID does not exist)']));
+                    return $response;
+                }
+            }
+            // Check if All required Task Attribute Data were sent
+            $intersect = array_diff($requiredTaskAttributeData, $sentTaskAttributeKeys);
+            if (count($intersect) > 0) {
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Task Data with Task Attribute ID: ' . implode(',', $intersect) . ' are also required!']));
+                return $response;
+            }
+        } elseif (count($requiredTaskAttributeData) > 0) {
+            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Task Data with Task Attribute ID: ' . implode(',', $requiredTaskAttributeData) . ' are required!']));
+            return $response;
+        }
+
+        $this->getDoctrine()->getManager()->flush();
+
+        $taskArray = $this->get('task_service')->getFullTaskEntity($task, true, $this->getUser(), $this->get('task_voter')->isAdmin());
+
+        $response = $response->setStatusCode(StatusCodesHelper::CREATED_CODE);
+        $response = $response->setContent(json_encode($taskArray));
+        return $response;
     }
 
     /**

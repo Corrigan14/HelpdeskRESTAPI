@@ -123,12 +123,19 @@ class ProcessEntity
                 break;
             case 'multi_select':
                 $options = $attributeEntity->getOptions();
-                foreach ($value as $val) {
-                    if (!\in_array($val, $options, true)) {
+                if (is_array($value)) {
+                    foreach ($value as $val) {
+                        if (!\in_array($val, $options, true)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                } else {
+                    if (!\in_array($value, $options, true)) {
                         return false;
                     }
+                    return true;
                 }
-                return true;
                 break;
             case 'date':
                 $intDateData = (int)$value;
@@ -146,7 +153,7 @@ class ProcessEntity
                 return \is_int($value);
                 break;
             case 'checkbox':
-                if(\is_string($value)){
+                if (\is_string($value)) {
                     $value = strtolower($value);
                 }
                 return 'true' === $value || true === $value || 1 === $value || '1' === $value || 'false' === $value || false === $value || 0 === $value || '0' === $value;

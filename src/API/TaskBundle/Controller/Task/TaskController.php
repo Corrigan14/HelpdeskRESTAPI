@@ -146,7 +146,6 @@ class TaskController extends ApiBaseController
      *              }
      *            },
      *            "taskHasAttachments": [],
-     *            "comments": [],
      *            "invoiceableItems":
      *            [
      *              {
@@ -472,7 +471,6 @@ class TaskController extends ApiBaseController
      *              }
      *            },
      *            "taskHasAttachments": [],
-     *            "comments": [],
      *            "invoiceableItems":
      *            [
      *              {
@@ -738,42 +736,6 @@ class TaskController extends ApiBaseController
      *                   "slug": "Slug-of-image-12-14-2015",
      *               }
      *            ],
-     *            "comments":
-     *            {
-     *              "189":
-     *              {
-     *                  "id": 189,
-     *                  "title": "test",
-     *                  "body": "gggg 222 222",
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
-     *                  "internal": true,
-     *                  "email": true,
-     *                  "email_to":
-     *                  [
-     *                      "mb@web-solutions.sk"
-     *                  ],
-     *                  "email_cc": null,
-     *                  "email_bcc": null,
-     *                  "createdBy":
-     *                  {
-     *                      "id": 4031,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk",
-     *                      "name": "Admin",
-     *                      "surname": "Adminovic",
-     *                      "avatarSlug": "slug-15-15-2014"
-     *                  },
-     *                  "commentHasAttachments":
-     *                  [
-     *                      {
-     *                          "id": 3,
-     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                      }
-     *                  ],
-     *                  "children": false
-     *              },
-     *            },
      *             "invoiceableItems":
      *             [
      *                {
@@ -843,8 +805,17 @@ class TaskController extends ApiBaseController
      *        },
      *       "_links":
      *       {
-     *          "quick update: task": "/api/v1/task-bundle/tasks/quick-update/23996",
-     *          "delete": "/api/v1/task-bundle/tasks/23996"
+     *            "update 1": "/api/v1/task-bundle/tasks/11998/project/20/status/14/requester/318/company/300",
+     *            "update 2": "/api/v1/task-bundle/tasks/11998/project/20",
+     *            "update 3": "/api/v1/task-bundle/tasks/11998/project/20/status/14",
+     *            "update 4": "/api/v1/task-bundle/tasks/11998/project/20/status/14/requester/318",
+     *            "update 5": "/api/v1/task-bundle/tasks/11998/status/14",
+     *            "update 6": "/api/v1/task-bundle/tasks/11998/status/14/requester/318",
+     *            "update 7": "/api/v1/task-bundle/tasks/11998/status/14/requester/318/company/300",
+     *            "update 8": "/api/v1/task-bundle/tasks/11998/requester/318",
+     *            "update 9": "/api/v1/task-bundle/tasks/11998/requester/318/company/300",
+     *            "update 10": "/api/v1/task-bundle/tasks/11998/company/300",
+     *            "delete": "/api/v1/task-bundle/tasks/11998"
      *       }
      *    }
      *
@@ -1032,42 +1003,6 @@ class TaskController extends ApiBaseController
      *                   "slug": "Slug-of-image-12-14-2015",
      *               }
      *            ],
-     *            "comments":
-     *            {
-     *              "189":
-     *              {
-     *                  "id": 189,
-     *                  "title": "test",
-     *                  "body": "gggg 222 222",
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
-     *                  "internal": true,
-     *                  "email": true,
-     *                  "email_to":
-     *                  [
-     *                      "mb@web-solutions.sk"
-     *                  ],
-     *                  "email_cc": null,
-     *                  "email_bcc": null,
-     *                  "createdBy":
-     *                  {
-     *                      "id": 4031,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk",
-     *                      "name": "Admin",
-     *                      "surname": "Adminovic",
-     *                      "avatarSlug": "slug-15-15-2014"
-     *                  },
-     *                  "commentHasAttachments":
-     *                  [
-     *                      {
-     *                          "id": 3,
-     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                      }
-     *                  ],
-     *                  "children": false
-     *              },
-     *            },
      *             "invoiceableItems":
      *             [
      *                {
@@ -1135,10 +1070,19 @@ class TaskController extends ApiBaseController
      *              ]
      *           }
      *        },
-     *       "_links":
+     *        "_links":
      *       {
-     *          "quick update: task": "/api/v1/task-bundle/tasks/quick-update/23996",
-     *          "delete": "/api/v1/task-bundle/tasks/23996"
+     *            "update 1": "/api/v1/task-bundle/tasks/11998/project/20/status/14/requester/318/company/300",
+     *            "update 2": "/api/v1/task-bundle/tasks/11998/project/20",
+     *            "update 3": "/api/v1/task-bundle/tasks/11998/project/20/status/14",
+     *            "update 4": "/api/v1/task-bundle/tasks/11998/project/20/status/14/requester/318",
+     *            "update 5": "/api/v1/task-bundle/tasks/11998/status/14",
+     *            "update 6": "/api/v1/task-bundle/tasks/11998/status/14/requester/318",
+     *            "update 7": "/api/v1/task-bundle/tasks/11998/status/14/requester/318/company/300",
+     *            "update 8": "/api/v1/task-bundle/tasks/11998/requester/318",
+     *            "update 9": "/api/v1/task-bundle/tasks/11998/requester/318/company/300",
+     *            "update 10": "/api/v1/task-bundle/tasks/11998/company/300",
+     *            "delete": "/api/v1/task-bundle/tasks/11998"
      *       }
      *    }
      *
@@ -1240,6 +1184,7 @@ class TaskController extends ApiBaseController
         } else {
             // Check Status function. If it is CLOSED, closedAt and startedAT params are required.
             // Only Task with a COMPANY can be closed!
+            // If it IS IN PROGRESS or COMPLETED, startedAt param has to be set
             if ($status->getFunction() === StatusFunctionOptions::CLOSED_TASK) {
                 if (null === $task->getCompany()) {
                     $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
@@ -1251,6 +1196,10 @@ class TaskController extends ApiBaseController
                     $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                     $response = $response->setContent(json_encode(['message' => 'StartedAt and ClosedAt params are required for tasks with a CLOSED Status!']));
                     return $response;
+                }
+            } elseif ($status->getFunction() === StatusFunctionOptions::IN_PROGRESS_TASK || $status->getFunction() === StatusFunctionOptions::COMPLETED_TASK) {
+                if (!isset($requestBody['startedAt'])) {
+                    $task->setStartedAt(new \DateTime());
                 }
             }
             $task->setStatus($status);
@@ -1280,12 +1229,495 @@ class TaskController extends ApiBaseController
             }
         }
 
+        return $this->updateTask($task, $requestBody, $locationURL, $status, true);
+    }
+
+    /**
+     *  ### Response ###
+     *      {
+     *        "data":
+     *        {
+     *            "id": 62020,
+     *            "title": "Task 3 - admin is creator, admin is requested",
+     *            "description": "Description of Task 3",
+     *            "deadline": null,
+     *            "startedAt": null,
+     *            "closedAt": null,
+     *            "important": false,
+     *            "work": null,
+     *            "work_time": null,
+     *            "createdAt":1506434914,
+     *            "updatedAt":1506434914
+     *            "createdBy":
+     *            {
+     *               "id": 2575,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
+     *            },
+     *            "requestedBy":
+     *            {
+     *               "id": 2575,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
+     *            },
+     *            "project":
+     *            {
+     *               "id": 284,
+     *               "title": "Project of user 1"
+     *             },
+     *            "company":
+     *            {
+     *               "id": 1802,
+     *               "title": "Web-Solutions"
+     *            },
+     *            "status":
+     *            {
+     *               "id": 1802,
+     *               "title": "New"
+     *            },
+     *            "taskData":
+     *            [
+     *              {
+     *                 "id": 113,
+     *                 "value": "some input",
+     *                 "taskAttribute":
+     *                 {
+     *                    "id": 169,
+     *                    "title": "input task additional attribute"
+     *                  }
+     *               }
+     *            ],
+     *            "followers":
+     *            [
+     *              {
+     *                 "id": 2575,
+     *                 "username": "admin",
+     *                 "email": "admin@admin.sk",
+     *                 "name": null,
+     *                 "surname": null
+     *               }
+     *            ],
+     *            "tags":
+     *            [
+     *               {
+     *                  "id": 71,
+     *                  "title": "Free Time",
+     *                  "color": "BF4848"
+     *               },
+     *               {
+     *                  "id": 73,
+     *                  "title": "Home",
+     *                  "color": "DFD112"
+     *                }
+     *            ],
+     *            "taskHasAssignedUsers":
+     *            {
+     *               "313":
+     *               {
+     *                  "id": 7,
+     *                  "status_date": null,
+     *                  "time_spent": null,
+     *                  "createdAt": 1519237291,
+     *                  "updatedAt": 1519237291,
+     *                  "status":
+     *                  {
+     *                      "id": 15,
+     *                      "title": "Completed",
+     *                      "color": "#FF4500"
+     *                  },
+     *                  "user":
+     *                  {
+     *                      "id": 313,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic"
+     *                  }
+     *              }
+     *            },
+     *            "taskHasAttachments":
+     *            [
+     *               {
+     *                   "id": 240,
+     *                   "slug": "Slug-of-image-12-14-2015",
+     *               }
+     *            ]
+     *             "invoiceableItems":
+     *             [
+     *                {
+     *                   "id": 30,
+     *                   "title": "Keyboard",
+     *                   "amount": "2.00",
+     *                   "unit_price": "50.00",
+     *                   "unit":
+     *                   {
+     *                      "id": 54,
+     *                      "title": "Kus",
+     *                      "shortcut": "Ks"
+     *                   }
+     *                },
+     *                {
+     *                   "id": 31,
+     *                   "title": "Mouse",
+     *                   "amount": "5.00",
+     *                   "unit_price": "10.00",
+     *                   "unit":
+     *                   {
+     *                      "id": 54,
+     *                      "title": "Kus",
+     *                      "shortcut": "Ks"
+     *                    }
+     *                },
+     *             ],
+     *             "canEdit": true,
+     *             "follow": true,
+     *             "hasProject": true,
+     *             "loggedUserIsAdmin": false,
+     *             "loggedUserProjectAcl":
+     *             [
+     *                "edit_project",
+     *                "create_task",
+     *                "resolve_task",
+     *                "delete_task",
+     *                "view_internal_note",
+     *                "view_all_tasks",
+     *                "view_own_tasks",
+     *                "view_tasks_from_users_company"
+     *             ],
+     *             "loggedUserAcl":
+     *             [
+     *                "login_to_system",
+     *                "share_filters",
+     *                "project_shared_filters",
+     *                "report_filters",
+     *                "share_tags",
+     *                "create_projects",
+     *                "sent_emails_from_comments",
+     *                "create_tasks",
+     *                "create_tasks_in_all_projects",
+     *                "update_all_tasks",
+     *                "user_settings",
+     *                "user_role_settings",
+     *                "company_attribute_settings",
+     *                "company_settings",
+     *                "status_settings",
+     *                "task_attribute_settings",
+     *                "unit_settings",
+     *                "system_settings",
+     *                "smtp_settings",
+     *                "imap_settings"
+     *              ]
+     *           }
+     *        },
+     *        "_links":
+     *       {
+     *            "update 1": "/api/v1/task-bundle/tasks/11998/project/20/status/14/requester/318/company/300",
+     *            "update 2": "/api/v1/task-bundle/tasks/11998/project/20",
+     *            "update 3": "/api/v1/task-bundle/tasks/11998/project/20/status/14",
+     *            "update 4": "/api/v1/task-bundle/tasks/11998/project/20/status/14/requester/318",
+     *            "update 5": "/api/v1/task-bundle/tasks/11998/status/14",
+     *            "update 6": "/api/v1/task-bundle/tasks/11998/status/14/requester/318",
+     *            "update 7": "/api/v1/task-bundle/tasks/11998/status/14/requester/318/company/300",
+     *            "update 8": "/api/v1/task-bundle/tasks/11998/requester/318",
+     *            "update 9": "/api/v1/task-bundle/tasks/11998/requester/318/company/300",
+     *            "update 10": "/api/v1/task-bundle/tasks/11998/company/300",
+     *            "delete": "/api/v1/task-bundle/tasks/11998"
+     *       }
+     *    }
+     *
+     *
+     * @ApiDoc(
+     *  resource = true,
+     *  description="Update Task Entity.",
+     *  requirements={
+     *     {
+     *       "name"="taskId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of a processed task"
+     *     }
+     *  },
+     *  parameters={
+     *      {"name"="title", "dataType"="string", "required"=true,  "description"="Tasks title"},
+     *      {"name"="description", "dataType"="string", "required"=false,  "description"="Tasks description"},
+     *      {"name"="deadline", "dataType"="datetime", "required"=false,  "description"="Deadline date"},
+     *      {"name"="startedAt", "dataType"="datetime", "required"=false,  "description"="Planned start date"},
+     *      {"name"="closedAt", "dataType"="datetime", "required"=false,  "description"="Closure date"},
+     *      {"name"="important", "dataType"="boolean", "required"=false,  "description"="set TRUE if the Task should be checked as IMPORTANT"},
+     *      {"name"="work", "dataType"="string", "required"=false,  "description"="Work description"},
+     *      {"name"="workTime", "dataType"="string", "required"=false,  "description"="Work time"},
+     *      {"name"="tag", "dataType"="array", "required"=false,  "description"="Tag titles array: [tag1, tag2]"},
+     *      {"name"="assigned", "dataType"="array", "required"=false,  "description"="UserId - assigner and StatusId collection: [userId => 12, statusId => 5]"},
+     *      {"name"="attachment", "dataType"="array", "required"=false,  "description"="Attachment slugs array: [slug1, slug2]"},
+     *      {"name"="taskData", "dataType"="array", "required"=false,  "description"="Tasks additional attributes array: [taskAttributeId => value, taskAttributeId2 => values]. Format: $json array - http://php.net/manual/en/function.json-decode.php"},
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  output={"class"="API\TaskBundle\Entity\Task"},
+     *  statusCodes={
+     *      200 ="The entity was successfully updated",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found entity",
+     *      409 ="Invalid parameters",
+     *  }
+     * )
+     *
+     * @param int $taskId
+     * @param Request $request
+     *
+     * @param bool|int $projectId
+     * @param bool|int $statusId
+     * @param bool|int $requesterId
+     * @param bool|int $companyId
+     * @return Response
+     */
+    public function updateAction(int $taskId, Request $request, $projectId = false, $statusId = false, $requesterId = false, $companyId = false): Response
+    {
+        // JSON API Response - Content type and Location settings
+        if ($requesterId && $companyId && $statusId && $projectId) {
+            $locationURL = $this->generateUrl('tasks_update_project_status_requester_company', ['taskId' => $taskId, 'projectId' => $projectId, 'statusId' => $statusId, 'requesterId' => $requesterId, 'companyId' => $companyId]);
+        } elseif ($projectId && !$companyId && !$statusId && !$requesterId) {
+            $locationURL = $this->generateUrl('tasks_update_project', ['taskId' => $taskId, 'projectId' => $projectId]);
+        } elseif ($projectId && $statusId && !$companyId && !$requesterId) {
+            $locationURL = $this->generateUrl('tasks_update_project_status', ['taskId' => $taskId, 'projectId' => $projectId, 'statusId' => $statusId]);
+        } elseif ($projectId && $statusId && $requesterId && !$companyId) {
+            $locationURL = $this->generateUrl('tasks_update_project_status_requester', ['taskId' => $taskId, 'projectId' => $projectId, 'statusId' => $statusId, 'requesterId' => $requesterId]);
+        } elseif ($statusId && !$companyId && !$projectId && !$requesterId) {
+            $locationURL = $this->generateUrl('tasks_update_status', ['taskId' => $taskId, 'statusId' => $statusId]);
+        } elseif ($statusId && $requesterId && !$companyId && !$projectId) {
+            $locationURL = $this->generateUrl('tasks_update_status_requester', ['taskId' => $taskId, 'statusId' => $statusId, 'requesterId' => $requesterId]);
+        } elseif ($statusId && $requesterId && $companyId && !$projectId) {
+            $locationURL = $this->generateUrl('tasks_update_status_requester_company', ['taskId' => $taskId, 'statusId' => $statusId, 'requesterId' => $requesterId, 'companyId' => $companyId]);
+        } elseif ($requesterId && !$companyId && !$statusId && !$projectId) {
+            $locationURL = $this->generateUrl('tasks_update_requester', ['taskId' => $taskId, 'requesterId' => $requesterId]);
+        } elseif ($requesterId && $companyId && !$statusId && !$projectId) {
+            $locationURL = $this->generateUrl('tasks_update_requester_company', ['taskId' => $taskId, 'requesterId' => $requesterId, 'companyId' => $companyId]);
+        } elseif ($companyId && !$projectId && !$statusId && !$requesterId) {
+            $locationURL = $this->generateUrl('tasks_update_company', ['taskId' => $taskId, 'companyId' => $companyId]);
+        }
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+        if (!$task instanceof Task) {
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+            return $response;
+        }
+
+        // Check if user can update selected task
+        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
+        }
+
+        //Decode sent parameters
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        $changedParams = [];
+
+        if ($projectId) {
+            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
+            if (!$project instanceof Project) {
+                $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Project with requested Id does not exist!']));
+                return $response;
+            } else {
+                // Check if user can create task in a selected project
+                if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT, $project)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'Permission denied! You can not create task in a selected project!']));
+                    return $response;
+                }
+                $oldProjectTitle = $task->getProject()->getTitle();
+                $task->setProject($project);
+                $changedParams['project'] = [
+                    'from' => $oldProjectTitle,
+                    'to' => $project->getTitle()
+                ];
+            }
+        }
+
+        if ($statusId) {
+            $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($statusId);
+            if (!$status instanceof Status) {
+                $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Status with requested Id does not exist!']));
+                return $response;
+            } else {
+                // Check Status function. If it is CLOSED, closedAt and startedAT params are required.
+                // Only Task with a COMPANY can be closed!
+                // If it IS IN PROGRESS or COMPLETED, startedAt param has to be set
+                if ($status->getFunction() === StatusFunctionOptions::CLOSED_TASK) {
+                    if (null === $task->getCompany()) {
+                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'Company is required for tasks with a CLOSED Status!']));
+                        return $response;
+                    }
+
+                    if ((!$task->getStartedAt() && !isset($requestBody['startedAt'])) || !isset($requestBody['closedAt'])) {
+                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'StartedAt and ClosedAt params are required for a tasks with a CLOSED Status!']));
+                        return $response;
+                    }
+                } elseif ($status->getFunction() === StatusFunctionOptions::IN_PROGRESS_TASK || $status->getFunction() === StatusFunctionOptions::COMPLETED_TASK) {
+                    if (!$task->getStartedAt() && !isset($requestBody['startedAt'])) {
+                        $task->setStartedAt(new \DateTime());
+                    }
+                }
+                $oldStatusTitle = $task->getStatus()->getTitle();
+                $task->setStatus($status);
+                $changedParams['status'] = [
+                    'from' => $oldStatusTitle,
+                    'to' => $status->getTitle()
+                ];
+            }
+        }
+
+        if ($requesterId) {
+            $requester = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requesterId);
+            if (!$requester instanceof User) {
+                $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Requester with requested Id does not exist!']));
+                return $response;
+            } else {
+                $oldRequester = $task->getRequestedBy();
+                if ($oldRequester->getDetailData()) {
+                    $name = $oldRequester->getDetailData()->getName();
+                    $surname = $oldRequester->getDetailData()->getSurname();
+                    $detailData = ' (' . $name . ' ' . $surname . ')';
+                } else {
+                    $name = null;
+                    $surname = null;
+                    $detailData = '';
+                }
+
+                if ($requester->getDetailData()) {
+                    $nameNew = $requester->getDetailData()->getName();
+                    $surnameNew = $requester->getDetailData()->getSurname();
+                    $detailDataNew = ' (' . $nameNew . ' ' . $surnameNew . ')';
+                } else {
+                    $nameNew = null;
+                    $surnameNew = null;
+                    $detailDataNew = '';
+                }
+
+                $task->setRequestedBy($requester);
+                $changedParams['requester'] = [
+                    'from' => $oldRequester->getUsername() . $detailData,
+                    'to' => $requester->getUsername() . $detailDataNew
+                ];
+            }
+        }
+
+        if ($companyId) {
+            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
+            if (!$company instanceof Company) {
+                $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Company with requested Id does not exist!']));
+                return $response;
+            } else {
+                $oldCompanyTitle = $task->getCompany()->getTitle();
+                $task->setCompany($company);
+                $changedParams['company'] = [
+                    'from' => $oldCompanyTitle,
+                    'to' => $company->getTitle()
+                ];
+            }
+        }
+
+        return $this->updateTask($task, $requestBody, $locationURL, $status, false, $changedParams);
+    }
+
+    /**
+     * @ApiDoc(
+     *  description="Delete Task entity",
+     *  requirements={
+     *     {
+     *       "name"="taskId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="Processed object id."
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      204 ="The Entity was successfully deleted",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity",
+     *  })
+     *
+     * @param int $taskId
+     *
+     * @return JsonResponse|Response
+     * @throws \LogicException
+     */
+    public function deleteAction(int $taskId): Response
+    {
+        $locationURL = $this->generateUrl('tasks_delete', ['taskId' => $taskId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+        if (!$task instanceof Task) {
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+            return $response;
+        }
+
+        if (!$this->get('task_voter')->isGranted(VoteOptions::DELETE_TASK, $task)) {
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
+        }
+
+        $this->getDoctrine()->getManager()->remove($task);
+        $this->getDoctrine()->getManager()->flush();
+
+        $response = $response->setStatusCode(StatusCodesHelper::DELETED_CODE);
+        $response = $response->setContent(json_encode(['message' => StatusCodesHelper::DELETED_MESSAGE]));
+        return $response;
+    }
+
+    /**
+     * @param Task $task
+     * @param array $requestBody
+     * @param $locationURL
+     * @param Status $status
+     * @param bool $create
+     * @param bool|array $changedParams
+     * @return Response
+     */
+    private function updateTask(Task $task, array $requestBody, $locationURL, Status $status, $create = false, $changedParams = false): Response
+    {
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         // REQUIRED PARAMETERS
         if (isset($requestBody['title'])) {
             if (\strlen($requestBody['title']) > 0) {
+                $oldTitle = $task->getTitle();
                 $task->setTitle($requestBody['title']);
+                $changedParams ['title'] = [
+                    'from' => $oldTitle,
+                    'to' => $requestBody['title']
+                ];
             }
-        } else {
+        } elseif ($create) {
             $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
             $response = $response->setContent(json_encode(['message' => 'Tasks Title is required!']));
             return $response;
@@ -1294,7 +1726,7 @@ class TaskController extends ApiBaseController
         if (isset($requestBody['important'])) {
             $important = $requestBody['important'];
             $task->setImportant($important);
-        } else {
+        } elseif ($create) {
             $task->setImportant(false);
         }
 
@@ -1308,6 +1740,7 @@ class TaskController extends ApiBaseController
                 return $response;
             }
         }
+
         if (isset($requestBody['work'])) {
             if (\is_string($requestBody['work'])) {
                 $task->setWork($requestBody['work']);
@@ -1448,12 +1881,11 @@ class TaskController extends ApiBaseController
             }
 
             foreach ($assignedUsersArray as $key => $value) {
-                $userIsAssignedToTask = new TaskHasAssignedUser();
                 $assignedUserId = $value['userId'];
                 if (isset($value['statusId'])) {
                     $assignedUserStatusId = $value['statusId'];
                 } else {
-                    $assignedUserStatusId = $statusId;
+                    $assignedUserStatusId = $status->getId();
                 }
 
                 // USER
@@ -1462,6 +1894,14 @@ class TaskController extends ApiBaseController
                     $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
                     $response = $response->setContent(json_encode(['message' => 'Assigner with requested Id does not exist!']));
                     return $response;
+                }
+
+                // Check if user is already assigned to the task
+                $existedEntity = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy(
+                    ['task' => $task, 'user' => $assignedUser]
+                );
+                if (!$existedEntity instanceof TaskHasAssignedUser) {
+                    $userIsAssignedToTask = new TaskHasAssignedUser();
                 }
 
                 // Check if user can be assigned to the task
@@ -1546,9 +1986,9 @@ class TaskController extends ApiBaseController
         // Fill TaskData Entity if some of its parameters were sent
         // Check REQUIRED task attributes
         // Expected json objects: {"10": "value 1", "12": "value 2"}
-
         $allExistedTaskAttributes = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->findAll();
         $requiredTaskAttributeData = [];
+
         /** @var TaskAttribute|null $attr */
         foreach ($allExistedTaskAttributes as $attr) {
             if ($attr->getIsActive() && $attr->getRequired()) {
@@ -1633,20 +2073,41 @@ class TaskController extends ApiBaseController
                     return $response;
                 }
             }
-            // Check if All required Task Attribute Data were sent
-            $intersect = array_diff($requiredTaskAttributeData, $sentTaskAttributeKeys);
-            if (count($intersect) > 0) {
-                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                $response = $response->setContent(json_encode(['message' => 'Task Data with Task Attribute ID: ' . implode(',', $intersect) . ' are also required!']));
-                return $response;
+            if ($create) {
+                // Check if All required Task Attribute Data were sent
+                $intersect = array_diff($requiredTaskAttributeData, $sentTaskAttributeKeys);
+                if (count($intersect) > 0) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'Task Data with Task Attribute ID: ' . implode(',', $intersect) . ' are also required!']));
+                    return $response;
+                }
             }
-        } elseif (count($requiredTaskAttributeData) > 0) {
+        } elseif (count($requiredTaskAttributeData) > 0 && $create) {
             $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
             $response = $response->setContent(json_encode(['message' => 'Task Data with Task Attribute ID: ' . implode(',', $requiredTaskAttributeData) . ' are required!']));
             return $response;
         }
 
         $this->getDoctrine()->getManager()->flush();
+
+        dump($changedParams);
+        // Sent Notification Emails about a Task update to tasks: REQUESTER, ASSIGNED USERS, FOLLOWERS
+        if (\count($changedParams) > 0) {
+            $notificationEmailAddresses = $this->getEmailForUpdateTaskNotification($task, $this->getUser()->getEmail());
+            if (\count($notificationEmailAddresses) > 0) {
+                $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $notificationEmailAddresses, $this->getUser(), $changedParams);
+                $sendingError = $this->get('email_service')->sendEmail($templateParams);
+                if (true !== $sendingError) {
+                    $data = [
+                        'errors' => $sendingError,
+                        'message' => 'Error with sending notifications!'
+                    ];
+                    $response = $response->setStatusCode(StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
+                    $response = $response->setContent(json_encode($data));
+                    return $response;
+                }
+            }
+        }
 
         $taskArray = $this->get('task_service')->getFullTaskEntity($task, true, $this->getUser(), $this->get('task_voter')->isAdmin());
 
@@ -1656,1193 +2117,10 @@ class TaskController extends ApiBaseController
     }
 
     /**
-     *   ### Response ###
-     *      {
-     *        "data":
-     *        {
-     *            "id": 62020,
-     *            "title": "Task 3 - admin is creator, admin is requested",
-     *            "description": "Description of Task 3",
-     *            "deadline": null,
-     *            "startedAt": null,
-     *            "closedAt": null,
-     *            "important": false,
-     *            "work": null,
-     *            "work_time": null,
-     *            "createdAt":1506434914,
-     *            "updatedAt":1506434914
-     *            "createdBy":
-     *            {
-     *               "id": 2575,
-     *               "username": "admin",
-     *               "email": "admin@admin.sk",
-     *               "name": null,
-     *               "surname": null
-     *            },
-     *            "requestedBy":
-     *            {
-     *               "id": 2575,
-     *               "username": "admin",
-     *               "email": "admin@admin.sk",
-     *               "name": null,
-     *               "surname": null
-     *            },
-     *            "project":
-     *            {
-     *               "id": 284,
-     *               "title": "Project of user 1"
-     *             },
-     *            "company":
-     *            {
-     *               "id": 1802,
-     *               "title": "Web-Solutions"
-     *            },
-     *            "status":
-     *            {
-     *               "id": 1802,
-     *               "title": "New"
-     *            },
-     *            "taskData":
-     *            [
-     *              {
-     *                 "id": 113,
-     *                 "value": "some input",
-     *                 "taskAttribute":
-     *                 {
-     *                    "id": 169,
-     *                    "title": "input task additional attribute"
-     *                  }
-     *               }
-     *            ],
-     *            "followers":
-     *            [
-     *              {
-     *                 "id": 2575,
-     *                 "username": "admin",
-     *                 "email": "admin@admin.sk",
-     *                 "name": null,
-     *                 "surname": null
-     *               }
-     *            ],
-     *            "tags":
-     *            [
-     *               {
-     *                  "id": 71,
-     *                  "title": "Free Time",
-     *                  "color": "BF4848"
-     *               },
-     *               {
-     *                  "id": 73,
-     *                  "title": "Home",
-     *                  "color": "DFD112"
-     *                }
-     *            ],
-     *            "taskHasAssignedUsers":
-     *            {
-     *               "313":
-     *               {
-     *                  "id": 7,
-     *                  "status_date": null,
-     *                  "time_spent": null,
-     *                  "createdAt": 1519237291,
-     *                  "updatedAt": 1519237291,
-     *                  "status":
-     *                  {
-     *                      "id": 15,
-     *                      "title": "Completed",
-     *                      "color": "#FF4500"
-     *                  },
-     *                  "user":
-     *                  {
-     *                      "id": 313,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk",
-     *                      "name": "Admin",
-     *                      "surname": "Adminovic"
-     *                  }
-     *              }
-     *            },
-     *            "taskHasAttachments":
-     *            [
-     *               {
-     *                   "id": 240,
-     *                   "slug": "Slug-of-image-12-14-2015",
-     *               }
-     *            ],
-     *            "comments":
-     *            {
-     *              "189":
-     *              {
-     *                  "id": 189,
-     *                  "title": "test",
-     *                  "body": "gggg 222 222",
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
-     *                  "internal": true,
-     *                  "email": true,
-     *                  "email_to":
-     *                  [
-     *                      "mb@web-solutions.sk"
-     *                  ],
-     *                  "email_cc": null,
-     *                  "email_bcc": null,
-     *                  "createdBy":
-     *                  {
-     *                      "id": 4031,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk",
-     *                      "name": "Admin",
-     *                      "surname": "Adminovic",
-     *                      "avatarSlug": "slug-15-15-2014"
-     *                  },
-     *                  "commentHasAttachments":
-     *                  [
-     *                      {
-     *                          "id": 3,
-     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                      }
-     *                  ],
-     *                  "children": false
-     *              },
-     *            },
-     *             "invoiceableItems":
-     *             [
-     *                {
-     *                   "id": 30,
-     *                   "title": "Keyboard",
-     *                   "amount": "2.00",
-     *                   "unit_price": "50.00",
-     *                   "unit":
-     *                   {
-     *                      "id": 54,
-     *                      "title": "Kus",
-     *                      "shortcut": "Ks"
-     *                   }
-     *                },
-     *                {
-     *                   "id": 31,
-     *                   "title": "Mouse",
-     *                   "amount": "5.00",
-     *                   "unit_price": "10.00",
-     *                   "unit":
-     *                   {
-     *                      "id": 54,
-     *                      "title": "Kus",
-     *                      "shortcut": "Ks"
-     *                    }
-     *                },
-     *             ],
-     *             "canEdit": true,
-     *             "follow": true,
-     *             "hasProject": true,
-     *             "loggedUserIsAdmin": false,
-     *             "loggedUserProjectAcl":
-     *             [
-     *                "edit_project",
-     *                "create_task",
-     *                "resolve_task",
-     *                "delete_task",
-     *                "view_internal_note",
-     *                "view_all_tasks",
-     *                "view_own_tasks",
-     *                "view_tasks_from_users_company"
-     *             ],
-     *             "loggedUserAcl":
-     *             [
-     *                "login_to_system",
-     *                "share_filters",
-     *                "project_shared_filters",
-     *                "report_filters",
-     *                "share_tags",
-     *                "create_projects",
-     *                "sent_emails_from_comments",
-     *                "create_tasks",
-     *                "create_tasks_in_all_projects",
-     *                "update_all_tasks",
-     *                "user_settings",
-     *                "user_role_settings",
-     *                "company_attribute_settings",
-     *                "company_settings",
-     *                "status_settings",
-     *                "task_attribute_settings",
-     *                "unit_settings",
-     *                "system_settings",
-     *                "smtp_settings",
-     *                "imap_settings"
-     *              ]
-     *           }
-     *       },
-     *       "_links":
-     *       {
-     *          "quick update: task": "/api/v1/task-bundle/tasks/quick-update/23996",
-     *          "delete": "/api/v1/task-bundle/tasks/23996"
-     *       }
-     *    }
-     *
-     * @ApiDoc(
-     *  description="Update the Task Entity with extra Task Data.
-     *  These could be updated by attributes: task_data[task_attribute_id] = value,
-     *  attributes must be defined in the TaskAttribute Entity.
-     *  Project and Requested User could be updated by Id-s in URL.",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  parameters={
-     *      {"name"="project", "dataType"="int", "required"=false, "description"="id of the Project"},
-     *      {"name"="requester", "dataType"="int", "required"=false,  "description"="id of the User"},
-     *      {"name"="company", "dataType"="int", "required"=false,  "description"="id of the Company"},
-     *      {"name"="assigned", "dataType"="array", "required"=false,  "description"="array of the Users assigned to the task: [userId => 12, statusId => 5]"},
-     *      {"name"="startedAt", "dataType"="datetime", "required"=false,  "description"="the date of planned start"},
-     *      {"name"="deadline", "dataType"="datetime", "required"=false,  "description"="the date of deadline"},
-     *      {"name"="closedAt", "dataType"="datetime", "required"=false,  "description"="the date of closure"},
-     *      {"name"="tag", "dataType"="array", "required"=false,  "description"="array of the Tag titles: [tag1, tag2]"},
-     *      {"name"="title", "dataType"="string", "required"=false,  "description"="tile of the Task"},
-     *      {"name"="description", "dataType"="string", "required"=false,  "description"="description of the Task"},
-     *      {"name"="important", "dataType"="boolean", "required"=false,  "description"="set TRUE if the Task should be checked as IMPORTANT"},
-     *      {"name"="work", "dataType"="string", "required"=false,  "description"="work"},
-     *      {"name"="workTime", "dataType"="string", "required"=false,  "description"="work time"}
-     *  },
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\TaskBundle\Entity\Task"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     *
-     * @param int $id
-     * @param Request $request
-     *
-     * @return JsonResponse|Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \LogicException
-     */
-    public
-    function updateAction(int $id, Request $request)
-    {
-        return $this->quickUpdateTaskAction($id, $request);
-    }
-
-    /**
-     * @ApiDoc(
-     *  description="Delete the Task entity",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  statusCodes={
-     *      204 ="The Entity was successfully deleted",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *  })
-     *
-     * @param int $id
-     *
-     * @return JsonResponse|Response
-     * @throws \LogicException
-     */
-    public
-    function deleteAction(int $id)
-    {
-        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($id);
-
-        if (!$task instanceof Task) {
-            return $this->notFoundResponse();
-        }
-
-        if (!$this->get('task_voter')->isGranted(VoteOptions::DELETE_TASK, $task)) {
-            return $this->accessDeniedResponse();
-        }
-
-        $this->getDoctrine()->getManager()->remove($task);
-        $this->getDoctrine()->getManager()->flush();
-
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::DELETED_MESSAGE,
-        ], StatusCodesHelper::DELETED_CODE);
-    }
-
-    /**
-     *  ### Response ###
-     *      {
-     *        "data":
-     *        {
-     *            "id": 62020,
-     *            "title": "Task 3 - admin is creator, admin is requested",
-     *            "description": "Description of Task 3",
-     *            "deadline": null,
-     *            "startedAt": null,
-     *            "closedAt": null,
-     *            "important": false,
-     *            "work": null,
-     *            "work_time": null,
-     *            "createdAt":1506434914,
-     *            "updatedAt":1506434914
-     *            "createdBy":
-     *            {
-     *               "id": 2575,
-     *               "username": "admin",
-     *               "email": "admin@admin.sk",
-     *               "name": null,
-     *               "surname": null
-     *            },
-     *            "requestedBy":
-     *            {
-     *               "id": 2575,
-     *               "username": "admin",
-     *               "email": "admin@admin.sk",
-     *               "name": null,
-     *               "surname": null
-     *            },
-     *            "project":
-     *            {
-     *               "id": 284,
-     *               "title": "Project of user 1"
-     *             },
-     *            "company":
-     *            {
-     *               "id": 1802,
-     *               "title": "Web-Solutions"
-     *            },
-     *            "status":
-     *            {
-     *               "id": 1802,
-     *               "title": "New"
-     *            },
-     *            "taskData":
-     *            [
-     *              {
-     *                 "id": 113,
-     *                 "value": "some input",
-     *                 "taskAttribute":
-     *                 {
-     *                    "id": 169,
-     *                    "title": "input task additional attribute"
-     *                  }
-     *               }
-     *            ],
-     *            "followers":
-     *            [
-     *              {
-     *                 "id": 2575,
-     *                 "username": "admin",
-     *                 "email": "admin@admin.sk",
-     *                 "name": null,
-     *                 "surname": null
-     *               }
-     *            ],
-     *            "tags":
-     *            [
-     *               {
-     *                  "id": 71,
-     *                  "title": "Free Time",
-     *                  "color": "BF4848"
-     *               },
-     *               {
-     *                  "id": 73,
-     *                  "title": "Home",
-     *                  "color": "DFD112"
-     *                }
-     *            ],
-     *            "taskHasAssignedUsers":
-     *            {
-     *               "313":
-     *               {
-     *                  "id": 7,
-     *                  "status_date": null,
-     *                  "time_spent": null,
-     *                  "createdAt": 1519237291,
-     *                  "updatedAt": 1519237291,
-     *                  "status":
-     *                  {
-     *                      "id": 15,
-     *                      "title": "Completed",
-     *                      "color": "#FF4500"
-     *                  },
-     *                  "user":
-     *                  {
-     *                      "id": 313,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk",
-     *                      "name": "Admin",
-     *                      "surname": "Adminovic"
-     *                  }
-     *              }
-     *            },
-     *            "taskHasAttachments":
-     *            [
-     *               {
-     *                   "id": 240,
-     *                   "slug": "Slug-of-image-12-14-2015",
-     *               }
-     *            ],
-     *            "comments":
-     *            {
-     *              "189":
-     *              {
-     *                  "id": 189,
-     *                  "title": "test",
-     *                  "body": "gggg 222 222",
-     *                  "createdAt": 1506434914,
-     *                  "updatedAt": 1506434914,
-     *                  "internal": true,
-     *                  "email": true,
-     *                  "email_to":
-     *                  [
-     *                      "mb@web-solutions.sk"
-     *                  ],
-     *                  "email_cc": null,
-     *                  "email_bcc": null,
-     *                  "createdBy":
-     *                  {
-     *                      "id": 4031,
-     *                      "username": "admin",
-     *                      "email": "admin@admin.sk",
-     *                      "name": "Admin",
-     *                      "surname": "Adminovic",
-     *                      "avatarSlug": "slug-15-15-2014"
-     *                  },
-     *                  "commentHasAttachments":
-     *                  [
-     *                      {
-     *                          "id": 3,
-     *                          "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                      }
-     *                  ],
-     *                  "children": false
-     *              },
-     *            },
-     *             "invoiceableItems":
-     *             [
-     *                {
-     *                   "id": 30,
-     *                   "title": "Keyboard",
-     *                   "amount": "2.00",
-     *                   "unit_price": "50.00",
-     *                   "unit":
-     *                   {
-     *                      "id": 54,
-     *                      "title": "Kus",
-     *                      "shortcut": "Ks"
-     *                   }
-     *                },
-     *                {
-     *                   "id": 31,
-     *                   "title": "Mouse",
-     *                   "amount": "5.00",
-     *                   "unit_price": "10.00",
-     *                   "unit":
-     *                   {
-     *                      "id": 54,
-     *                      "title": "Kus",
-     *                      "shortcut": "Ks"
-     *                    }
-     *                },
-     *             ],
-     *             "canEdit": true,
-     *             "follow": true,
-     *             "hasProject": true,
-     *             "loggedUserIsAdmin": false,
-     *             "loggedUserProjectAcl":
-     *             [
-     *                "edit_project",
-     *                "create_task",
-     *                "resolve_task",
-     *                "delete_task",
-     *                "view_internal_note",
-     *                "view_all_tasks",
-     *                "view_own_tasks",
-     *                "view_tasks_from_users_company"
-     *             ],
-     *             "loggedUserAcl":
-     *             [
-     *                "login_to_system",
-     *                "share_filters",
-     *                "project_shared_filters",
-     *                "report_filters",
-     *                "share_tags",
-     *                "create_projects",
-     *                "sent_emails_from_comments",
-     *                "create_tasks",
-     *                "create_tasks_in_all_projects",
-     *                "update_all_tasks",
-     *                "user_settings",
-     *                "user_role_settings",
-     *                "company_attribute_settings",
-     *                "company_settings",
-     *                "status_settings",
-     *                "task_attribute_settings",
-     *                "unit_settings",
-     *                "system_settings",
-     *                "smtp_settings",
-     *                "imap_settings"
-     *              ]
-     *           }
-     *       },
-     *       "_links":
-     *       {
-     *          "quick update: task": "/api/v1/task-bundle/tasks/quick-update/23996",
-     *          "delete": "/api/v1/task-bundle/tasks/23996"
-     *       }
-     *    }
-     *
-     * @ApiDoc(
-     *  description="Partially update the Task Entity with extra Task Data.
-     *  These could be updated by attributes: task_data[task_attribute_id] = value,
-     *  attributes must be defined in the TaskAttribute Entity.
-     *  Project and Requested User could be updated by Id-s in URL.",
-     *  requirements={
-     *     {
-     *       "name"="taskId",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  parameters={
-     *      {"name"="project", "dataType"="int", "required"=false, "description"="id of a Project"},
-     *      {"name"="requester", "dataType"="int", "required"=false,  "description"="id of a User"},
-     *      {"name"="company", "dataType"="int", "required"=false,  "description"="id of a Company"},
-     *      {"name"="assigned", "dataType"="array", "required"=false,  "description"="array of the Users assigned to the task: [userId => 12, statusId => 5]"},
-     *      {"name"="startedAt", "dataType"="datetime", "required"=false,  "description"="planned start date"},
-     *      {"name"="deadline", "dataType"="datetime", "required"=false,  "description"="deadline date"},
-     *      {"name"="closedAt", "dataType"="datetime", "required"=false,  "description"="closure date"},
-     *      {"name"="tag", "dataType"="array", "required"=false,  "description"="Tag titles array: [tag1, tag2]"},
-     *      {"name"="title", "dataType"="string", "required"=false,  "description"="Tasks title"},
-     *      {"name"="description", "dataType"="string", "required"=false,  "description"="Task description"},
-     *      {"name"="important", "dataType"="boolean", "required"=false,  "description"="set TRUE if the Task should be checked as IMPORTANT"},
-     *      {"name"="work", "dataType"="string", "required"=false,  "description"="work"},
-     *      {"name"="workTime", "dataType"="string", "required"=false,  "description"="work time"},
-     *      {"name"="task_data", "dataType"="array", "required"=false,  "description"="array of the additional task attributes: [task_attribute_id => value, task_attribute_id2 => values]. Format: $json array - http://php.net/manual/en/function.json-decode.php"},
-     *  },
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\TaskBundle\Entity\Task"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     *
-     * @param int $taskId
-     * @param Request $request
-     *
-     * @return JsonResponse|Response
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \LogicException
-     * @throws \InvalidArgumentException
-     */
-    public
-    function quickUpdateTaskAction(int $taskId, Request $request)
-    {
-        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
-
-        if (!$task instanceof Task) {
-            return $this->createApiResponse([
-                'message' => 'Task with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
-        }
-
-        // Check if user can update selected task
-        if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
-            return $this->accessDeniedResponse();
-        }
-
-        $canEdit = true;
-
-//      $requestData = '{"assigned":[{"userId": 212, "statusId": 8}],"company":202}';
-        $requestDataFromContent = json_decode($request->getContent(), true);
-        if (null === $requestDataFromContent) {
-            $requestData = $request->request->all();
-        } else {
-            $requestData = $requestDataFromContent;
-        }
-        $changedParams = [];
-
-        if (isset($requestData['title'])) {
-            $title = $requestData['title'];
-            if (\strlen($title) > 0) {
-                $task->setTitle($title);
-                $changedParams[] = 'title';
-            } else {
-                return $this->createApiResponse([
-                    'message' => 'Title of the task can not be empty!',
-                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-            }
-        }
-
-        if (isset($requestData['description'])) {
-            $desc = $requestData['description'];
-            $task->setDescription($desc);
-            $changedParams[] = 'description';
-        }
-
-        if (isset($requestData['work'])) {
-            $work = $requestData['work'];
-            $task->setWork($work);
-            $changedParams[] = 'work';
-        }
-
-        if (isset($requestData['workTime'])) {
-            $workTime = $requestData['workTime'];
-            $task->setWorkTime($workTime);
-            $changedParams[] = 'workTime';
-        }
-
-        if (isset($requestData['important'])) {
-            $important = $requestData['important'];
-            $task->setImportant($important);
-            $changedParams[] = 'important';
-        }
-
-        if (isset($requestData['project'])) {
-            $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($requestData['project']);
-            if (!$project instanceof Project) {
-                return $this->createApiResponse([
-                    'message' => 'Project with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
-            }
-
-            // Check if user can create task in selected project
-            if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT, $project)) {
-                return $this->createApiResponse([
-                    'message' => 'Permission denied! Can not create task in selected project!',
-                ], StatusCodesHelper::ACCESS_DENIED_CODE);
-            }
-            $task->setProject($project);
-            $changedParams[] = 'project';
-
-            // Remove users assigned to task which haven't RESOLVE_TASK permission in selected project
-            $taskHasAssignedUsers = $task->getTaskHasAssignedUsers();
-            if (count($taskHasAssignedUsers) > 0) {
-                /** @var TaskHasAssignedUser $entity */
-                foreach ($taskHasAssignedUsers as $entity) {
-                    if (!$this->checkIfUserHasResolveTaskAclPermission($entity, $project)) {
-                        $this->getDoctrine()->getManager()->remove($entity);
-                    }
-                }
-                $this->getDoctrine()->getManager()->flush();
-            }
-        }
-
-        if (isset($requestData['requester'])) {
-            $requestedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requestData['requester']);
-            if (!$requestedUser instanceof User) {
-                return $this->createApiResponse([
-                    'message' => 'Requested user with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
-            }
-            $task->setRequestedBy($requestedUser);
-            $changedParams[] = 'requester';
-        }
-
-        if (isset($requestData['company'])) {
-            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($requestData['company']);
-            if (!$company instanceof Company) {
-                return $this->createApiResponse([
-                    'message' => 'Company with requested Id does not exist!',
-                ], StatusCodesHelper::NOT_FOUND_CODE);
-            }
-            $task->setCompany($company);
-            $changedParams[] = 'company';
-        }
-
-        if (isset($requestData['assigned'])) {
-            $this->getDoctrine()->getConnection()->beginTransaction();
-            try {
-                $assignedUsersArray = $requestData['assigned'];
-                if (\is_string($assignedUsersArray)) {
-                    $assignedUsersArray = json_decode($assignedUsersArray, true);
-                }
-
-                // Add new requested users to the task
-                foreach ($assignedUsersArray as $value) {
-                    $assignedUserId = $value['userId'];
-
-                    $assignedUserStatusId = null;
-                    if (isset($value['statusId'])) {
-                        $assignedUserStatusId = $value['statusId'];
-                    }
-
-                    // USER
-                    $user = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($assignedUserId);
-                    if (!$user instanceof User) {
-                        return $this->createApiResponse([
-                            'message' => 'User with requested Id does not exist!',
-                        ], StatusCodesHelper::NOT_FOUND_CODE);
-                    }
-
-                    // Check if user can be assigned to task
-                    $options = [
-                        'task' => $task,
-                        'user' => $user
-                    ];
-
-                    if (!$this->get('task_voter')->isGranted(VoteOptions::ASSIGN_USER_TO_TASK, $options)) {
-                        return $this->createApiResponse([
-                            'message' => 'User with id: ' . $assignedUserId . 'has not permission to be assigned to requested task!',
-                        ], StatusCodesHelper::NOT_FOUND_CODE);
-                    }
-
-                    // Check if task already has another one assigned user - if yes, delete that user
-                    // because system temporary support ONLY ONE assigned USER
-                    $taskHasOtherAssignedUserArray = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOtherUsersAssignedToTask($options);
-                    if (\count($taskHasOtherAssignedUserArray) !== 0) {
-                        foreach ($taskHasOtherAssignedUserArray as $tau) {
-                            $this->getDoctrine()->getManager()->remove($tau);
-                        }
-                        $this->getDoctrine()->getManager()->flush();
-                    }
-
-                    // Set all other Users previous statuses to NOT ACTUAL
-                    $taskHasAlreadyAssignedUser = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findAssignedUsersEntities($options);
-
-                    // If we are only changing user's status, we don't reset StartedAt time
-                    // If we are changing assigner, we hav to reset StartedAt task time
-                    $keepStartedAtDatetime = false;
-                    if (\count($taskHasAlreadyAssignedUser) !== 0) {
-                        /** @var TaskHasAssignedUser $tau */
-                        foreach ($taskHasAlreadyAssignedUser as $tau) {
-                            $tau->setActual(false);
-                            $this->getDoctrine()->getManager()->persist($tau);
-                        }
-                        $this->getDoctrine()->getManager()->flush();
-                        $keepStartedAtDatetime = true;
-                    }
-
-                    if ($keepStartedAtDatetime) {
-                        $task->setStartedAt(null);
-                    }
-
-                    // Create new task has assigned entity and set it as ACTUAL
-                    $userIsAssignedToTask = new TaskHasAssignedUser();
-                    $userIsAssignedToTask->setActual(true);
-
-                    // STATUS
-                    if (null !== $assignedUserStatusId) {
-                        $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($assignedUserStatusId);
-
-                        // ONLY TASK WITH PROJECT, REQUESTER AND COMPANY CAN BE CLOSED
-                        if ($status->getDefault() === TRUE && $status->getFunction() === StatusFunctionOptions::CLOSED_TASK) {
-
-                            $tasksProject = $task->getProject();
-                            if (!$tasksProject instanceof Project) {
-                                return $this->createApiResponse([
-                                    'message' => 'Task without PROJECT can not be closed!',
-                                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                            }
-
-                            $tasksRequester = $task->getRequestedBy();
-                            if (!$tasksRequester instanceof User) {
-                                return $this->createApiResponse([
-                                    'message' => 'Task without REQUESTER can not be closed!',
-                                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                            }
-
-                            $tasksCompany = $task->getCompany();
-                            if (!$tasksCompany instanceof Company) {
-                                return $this->createApiResponse([
-                                    'message' => 'Task without COMPANY can not be closed!',
-                                ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                            }
-
-                            $closedAtDateTimeObject = new \Datetime();
-                            $task->setClosedAt($closedAtDateTimeObject);
-
-                            if (!$task->getStartedAt()) {
-                                $task->setStartedAt($closedAtDateTimeObject);
-                            }
-                        } else {
-                            $task->setClosedAt(null);
-                        }
-                    } else {
-                        $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->findOneBy([
-                            'function' => StatusFunctionOptions::NEW_TASK,
-                            'default' => true
-                        ]);
-                        $task->setStartedAt(null);
-                        $task->setClosedAt(null);
-                    }
-
-                    if (!$status instanceof Status) {
-                        return $this->createApiResponse([
-                            'message' => 'New Status or your requested Status does not exist!',
-                        ], StatusCodesHelper::NOT_FOUND_CODE);
-                    }
-
-                    if ((null === $task->getStartedAt() || false === $keepStartedAtDatetime) && $status->getDefault() === true && $status->getFunction() !== StatusFunctionOptions::NEW_TASK) {
-                        $startedAtDateTimeObject = new \Datetime();
-                        $task->setStartedAt($startedAtDateTimeObject);
-                    }
-
-                    $userIsAssignedToTask->setTask($task);
-                    $userIsAssignedToTask->setStatus($status);
-                    $userIsAssignedToTask->setUser($user);
-                    $this->getDoctrine()->getManager()->persist($userIsAssignedToTask);
-                }
-                $this->getDoctrine()->getConnection()->commit();
-                $this->getDoctrine()->getManager()->flush();
-                $changedParams[] = 'assigned user/s';
-            } catch (\Exception $e) {
-                $this->getDoctrine()->getConnection()->rollBack();
-                return $this->createApiResponse([
-                    'message' => 'Assign problem: ' . $e->getMessage(),
-                ], StatusCodesHelper::BAD_REQUEST_CODE);
-            }
-        }
-
-        if (isset($requestData['startedAt'])) {
-            $intDateData = (int)$requestData['startedAt'];
-            if (null === $requestData['startedAt'] || 'null' === $requestData['startedAt']) {
-                $task->setStartedAt(null);
-                $changedParams[] = 'started at';
-            } else {
-                try {
-                    $startedAtDateTimeObject = new \DateTime("@$intDateData");
-                    $task->setStartedAt($startedAtDateTimeObject);
-                    $changedParams[] = 'started at';
-                } catch (\Exception $e) {
-                    return $this->createApiResponse([
-                        'message' => 'startedAt parameter is not in a valid format! Expected format: Timestamp',
-                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                }
-            }
-        }
-
-        if (isset($requestData['deadline'])) {
-            $intDateData = (int)$requestData['deadline'];
-            if (null === $requestData['deadline'] || 'null' === $requestData['deadline']) {
-                $task->setDeadline(null);
-                $changedParams[] = 'deadline';
-            } else {
-                try {
-                    $deadlineDateTimeObject = new \Datetime("@$intDateData");
-                    $task->setDeadline($deadlineDateTimeObject);
-                    $changedParams[] = 'deadline';
-                } catch (\Exception $e) {
-                    return $this->createApiResponse([
-                        'message' => 'deadline parameter is not in a valid format! Expected format: Timestamp',
-                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                }
-            }
-        }
-
-        if (isset($requestData['closedAt'])) {
-            $intDateData = (int)$requestData['deadline'];
-            if (null === $requestData['closedAt'] || 'null' === $requestData['closedAt']) {
-                $task->setClosedAt(null);
-                $changedParams[] = 'closed At';
-            } else {
-                try {
-                    $closedAtDateTimeObject = new \Datetime("@$intDateData");
-                    $task->setClosedAt($closedAtDateTimeObject);
-                    $changedParams[] = 'closed At';
-                } catch (\Exception $e) {
-                    return $this->createApiResponse([
-                        'message' => 'closedAt parameter is not in a valid format! Expected format: Timestamp',
-                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                }
-            }
-        }
-
-        //$requestData = '{"tag":["tag1"."tag2"]}';
-        if (isset($requestData['tag'])) {
-            $this->getDoctrine()->getConnection()->beginTransaction();
-            try {
-                // Remove all task's tags
-                $taskHasTags = $task->getTags();
-                if (\count($taskHasTags) > 0) {
-                    /** @var Tag $taskTag */
-                    foreach ($taskHasTags as $taskTag) {
-                        $task->removeTag($taskTag);
-                        $taskTag->removeTask($task);
-                        $this->getDoctrine()->getManager()->persist($task);
-                        $this->getDoctrine()->getManager()->persist($taskTag);
-                    }
-                    $this->getDoctrine()->getManager()->flush();
-                }
-
-                // Add tags to task
-                $tagsArray = $requestData['tag'];
-                if (\is_string($tagsArray)) {
-                    $tagsArray = json_decode($tagsArray, true);
-                }
-
-                foreach ($tagsArray as $data) {
-                    if (isset($data['title'])) {
-                        $tagTitle = $data['title'];
-                        $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
-                            'title' => $data['title']
-                        ]);
-                    } else {
-                        $tagTitle = $data;
-                        $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
-                            'title' => $data
-                        ]);
-                    }
-
-                    if ($tag instanceof Tag) {
-                        //Check if user can add tag to requested Task
-                        $options = [
-                            'task' => $task,
-                            'tag' => $tag
-                        ];
-
-                        if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_TAG_TO_TASK, $options)) {
-                            return $this->createApiResponse([
-                                'message' => 'Tag with title: ' . $tagTitle . 'can not be added to requested task!',
-                            ], StatusCodesHelper::NOT_FOUND_CODE);
-                        }
-
-                        //Check if tag is already added to task
-                        $taskHasTags = $task->getTags();
-                        if (\in_array($tag, $taskHasTags->toArray(), true)) {
-                            continue;
-                        }
-                    } else {
-                        //Create a new tag
-                        $tag = new Tag();
-                        $tag->setTitle($tagTitle);
-                        $tag->setPublic(false);
-                        $tag->setColor('FFFF66');
-                        $tag->setCreatedBy($this->getUser());
-
-                        $this->getDoctrine()->getManager()->persist($tag);
-                        $this->getDoctrine()->getManager()->flush();
-                    }
-
-                    //Add tag to task
-                    $task->addTag($tag);
-                    $this->getDoctrine()->getManager()->persist($task);
-                }
-                $this->getDoctrine()->getConnection()->commit();
-                $changedParams[] = 'tag/s';
-            } catch (\Exception $e) {
-                $this->getDoctrine()->getConnection()->rollBack();
-                return $this->createApiResponse([
-                    'message' => 'Tag problem: ' . $e->getMessage(),
-                ], StatusCodesHelper::BAD_REQUEST_CODE);
-            }
-        }
-        $this->getDoctrine()->getManager()->persist($task);
-        $this->getDoctrine()->getManager()->flush();
-
-        // Fill TaskData Entity if some of its parameters were sent
-        // Expected json objects: {"10": "value 1", "12": "value 2"}
-        if (isset($requestData['task_data'])) {
-            // json decode only if task_data is string
-            $requestDetailData = is_string($requestData['task_data']) ? json_decode($requestData['task_data'], true) : $requestData['task_data'];
-            unset($requestData['task_data']);
-
-
-            /** @var array $requestDetailData */
-            foreach ($requestDetailData as $key => $value) {
-                $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($key);
-                if ($taskAttribute instanceof TaskAttribute) {
-                    $cd = $this->getDoctrine()->getRepository('APITaskBundle:TaskData')->findOneBy(['taskAttribute' => $taskAttribute,
-                        'task' => $task,]);
-
-                    if (!$cd instanceof TaskData) {
-                        $cd = new TaskData();
-                        $cd->setTask($task);
-                        $cd->setTaskAttribute($taskAttribute);
-                    }
-
-                    $cdErrors = $this->get('entity_processor')->processEntity($cd, ['value' => $value]);
-                    if (false === $cdErrors) {
-                        //Check the data format
-                        $taskAttributeDataFormat = $taskAttribute->getType();
-                        if (null !== $value && 'null' !== $value) {
-                            switch ($taskAttributeDataFormat) {
-                                case VariableHelper::INTEGER_NUMBER:
-//                                if (!is_int($value)) {
-                                    $regexInt = "/^[+-]?[0-9]+$/";
-                                    if (!preg_match($regexInt, $value)) {
-                                        return $this->createApiResponse([
-                                            'message' => 'The value format of task_data with key: ' . $key . ' is invalid. Expected format: INTEGER',
-                                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                                    }
-                                    break;
-                                case VariableHelper::DECIMAL_NUMBER:
-//                                if (!is_float($value)) {
-                                    $regexFloat = "/^[+-]?[0-9]+[.,]?[0-9]*$/";
-                                    if (!preg_match($regexFloat, $value)) {
-                                        return $this->createApiResponse([
-                                            'message' => 'The value format of task_data with key: ' . $key . ' is invalid. Expected format: DECIMAL NUMBER',
-                                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                                    }
-                                    break;
-                                case VariableHelper::SIMPLE_SELECT:
-                                    $selectionOptions = $taskAttribute->getOptions();
-                                    // TODO dat do modelu tento explode? options su v db ako csv
-                                    $selectionOptions = explode(',', $selectionOptions);
-                                    if (!in_array($value, $selectionOptions, true)) {
-                                        return $this->createApiResponse([
-                                            'message' => 'The value of task_data with key: ' . $key . ' is invalid. Expected is value from ATTRIBUTE OPTIONS',
-                                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                                    }
-                                    break;
-                                case VariableHelper::MULTI_SELECT:
-                                    $selectionOptions = $taskAttribute->getOptions();
-                                    // TODO dat do modelu tento explode? options su v db ako csv
-                                    $selectionOptions = explode(',', $selectionOptions);
-//                                $sentOptions = explode(',',json_decode($value));
-                                    $sentOptions = explode(',', $value);
-                                    foreach ($sentOptions as $option) {
-                                        if (!in_array($option, $selectionOptions, true)) {
-                                            return $this->createApiResponse([
-                                                'message' => 'The value of task_data with key: ' . $key . ' is invalid. Expected is value from ATTRIBUTE OPTIONS',
-                                            ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                                        }
-                                    }
-                                    break;
-                                case VariableHelper::DATE:
-
-                                    try {
-
-//                                    $timeObject = new \DateTime("@$intDateData");
-//                                    dump($intDateData);
-//                                    dump($timeObject);
-//                                    $timeObject = $timeObject->format('Y-m-d H:i:s');
-//                                    $cd->setValue($timeObject);
-
-                                        if (null !== $value) {
-                                            $timestamp = (int)$value;
-                                            $cd->setValue($timestamp);
-                                        }
-
-                                    } catch (\Exception $e) {
-                                        return $this->createApiResponse([
-                                            'message' => 'The value of task_data with key: ' . $key . ' is invalid. Expected is TIMESTAMP',
-                                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                                    }
-
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-
-                        if (null === $value || 'null' === $value) {
-                            $cd->setValue(null);
-                        }
-
-
-                        // ak je custom task data
-                        if (null !== $cd->getValue()) {
-                            $task->addTaskDatum($cd);
-                            $this->getDoctrine()->getManager()->persist($task);
-                            $this->getDoctrine()->getManager()->persist($cd);
-                        }
-
-                        // ak je null, tak sa zmaze z db
-                        if (null === $cd->getValue() && null !== $cd->getId()) {
-                            $this->getDoctrine()->getManager()->remove($cd);
-                        }
-
-
-//                        if(null===$cd->getValue()){
-//                            dump($cd);
-//                            dump('removing');
-////                            $this->getDoctrine()->getManager()->remove($cd);
-//                        }else {
-//                            dump('persisting');
-//                            dump($cd);
-//                            $this->getDoctrine()->getManager()->persist($cd);
-//                        }
-
-
-                    } else {
-                        return $this->createApiResponse([
-                            'message' => 'The value of task_data with key: ' . $key . ' is invalid',
-                        ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                    }
-                } else {
-                    return $this->createApiResponse([
-                        'message' => 'The key: ' . $key . ' of Task Attribute is not valid (Task Attribute with this ID doesn\'t exist)',
-                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                }
-            }
-
-
-        }
-        $this->getDoctrine()->getManager()->flush();
-
-
-        /** @var User $loggedUser */
-        $loggedUser = $this->getUser();
-
-        // Sent Notification Emails about updating of Task to task REQUESTER, ASSIGNED USERS, FOLLOWERS
-        if (\count($changedParams) > 0) {
-//            $notificationEmailAddresses = $this->getEmailForUpdateTaskNotification($task, $loggedUser->getEmail());
-            $notificationEmailAddresses = [];
-            if (\count($notificationEmailAddresses) > 0) {
-                $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $notificationEmailAddresses, $loggedUser, $changedParams);
-                $sendingError = $this->get('email_service')->sendEmail($templateParams);
-                if (true !== $sendingError) {
-                    $data = [
-                        'errors' => $sendingError,
-                        'message' => 'Error with sending notifications!'
-                    ];
-                    return $this->createApiResponse($data, StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
-                }
-            }
-        }
-
-        // Check if logged user Is ADMIN
-        $isAdmin = $this->get('task_voter')->isAdmin();
-
-        $taskArray = $this->get('task_service')->getFullTaskEntity($task, $canEdit, $this->getUser(), $isAdmin);
-        return $this->json($taskArray, StatusCodesHelper::SUCCESSFUL_CODE);
-    }
-
-    /**
      * @param array $requestBody
      * @return array
      */
-    private
-    function getFilterData(array $requestBody): array
+    private function getFilterData(array $requestBody): array
     {
         $data = [];
 
@@ -2906,8 +2184,7 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private
-    function getFilterDataFromSavedFilterArray(array $filterDataArray): array
+    private function getFilterDataFromSavedFilterArray(array $filterDataArray): array
     {
         $data = [];
 
@@ -2969,8 +2246,7 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private
-    function processFilterData(array $data): array
+    private function processFilterData(array $data): array
     {
         $inFilter = [];
         $dateFilter = [];
@@ -3216,8 +2492,7 @@ class TaskController extends ApiBaseController
      * @return bool
      * @throws \LogicException
      */
-    private
-    function checkIfUserHasResolveTaskAclPermission(TaskHasAssignedUser $entity, Project $project): bool
+    private function checkIfUserHasResolveTaskAclPermission(TaskHasAssignedUser $entity, Project $project): bool
     {
         $user = $entity->getUser();
         $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
@@ -3237,8 +2512,7 @@ class TaskController extends ApiBaseController
      * @param string|null $orderString
      * @return array|Response
      */
-    private
-    function processOrderData($orderString)
+    private function processOrderData($orderString)
     {
         $order = [];
         if (null !== $orderString) {
@@ -3278,8 +2552,7 @@ class TaskController extends ApiBaseController
      * @param string $loggedUserEmail
      * @return array
      */
-    private
-    function getEmailForUpdateTaskNotification(Task $task, string $loggedUserEmail): array
+    private function getEmailForUpdateTaskNotification(Task $task, string $loggedUserEmail): array
     {
         $notificationEmailAddresses = [];
 
@@ -3322,8 +2595,7 @@ class TaskController extends ApiBaseController
      * @return array
      * @throws \LogicException
      */
-    private
-    function getTemplateParams(int $taskId, string $title, array $emailAddresses, User $user, array $changedParams): array
+    private function getTemplateParams(int $taskId, string $title, array $emailAddresses, User $user, array $changedParams): array
     {
         $userDetailData = $user->getDetailData();
         if ($userDetailData instanceof UserData) {
@@ -3343,7 +2615,7 @@ class TaskController extends ApiBaseController
             'taskId' => $taskId,
             'subject' => $title,
             'taskLink' => $baseFrontURL->getValue() . '/tasks/' . $taskId,
-            'changedParams' => implode(', ', $changedParams)
+            'changedParams' => ''
         ];
         $params = [
             'subject' => 'LanHelpdesk - ' . '[#' . $taskId . '] ' . 'Úloha bola zmenená',
@@ -3360,8 +2632,7 @@ class TaskController extends ApiBaseController
      * @param array $changedParams
      * @return array
      */
-    private
-    function getChangedParams(array &$requestData, array &$changedParams): array
+    private function getChangedParams(array &$requestData, array &$changedParams): array
     {
         if (\count($requestData) > 0) {
             foreach ($requestData as $key => $value) {
@@ -3378,8 +2649,7 @@ class TaskController extends ApiBaseController
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    private
-    function addCanEditParamToEveryTask(array $tasksArray): array
+    private function addCanEditParamToEveryTask(array $tasksArray): array
     {
         $tasksModified = [];
         if (\count($tasksArray['data']) > 0) {

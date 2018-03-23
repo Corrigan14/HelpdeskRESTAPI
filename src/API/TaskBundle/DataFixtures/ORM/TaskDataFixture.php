@@ -90,6 +90,7 @@ class TaskDataFixture implements FixtureInterface, ContainerAwareInterface, Orde
                 $td = new TaskData();
                 $td->setTaskAttribute($taskAttributeBoolean);
                 $td->setBoolValue(false);
+                $td->setValue(null);
                 $td->setTask($usersTask);
                 $manager->persist($td);
             }
@@ -98,6 +99,7 @@ class TaskDataFixture implements FixtureInterface, ContainerAwareInterface, Orde
                 $td = new TaskData();
                 $td->setTaskAttribute($taskAttributeDate);
                 $td->setDateValue(1519185224);
+                $td->setValue(null);
                 $td->setTask($usersTask);
                 $manager->persist($td);
             }

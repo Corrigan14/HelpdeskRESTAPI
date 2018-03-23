@@ -360,8 +360,7 @@ class TaskRepository extends EntityRepository
      *
      * @return array|null
      */
-    public
-    function getAllUsersTasks(int $page, int $userId, int $companyId, $dividedProjects, array $options)
+    public function getAllUsersTasks(int $page, int $userId, int $companyId, $dividedProjects, array $options)
     {
         $paramArray = [];
 
@@ -993,59 +992,6 @@ class TaskRepository extends EntityRepository
             $userRequesterSurname = $userRequesterDetailData->getSurname();
         }
 
-        $commentsArray = [];
-        if ($single) {
-            // If we ask for a whole list of comments, comment tree is not built
-            // The list just contains all comment
-            $comments = $data->getComments();
-            /** @var Comment $comment */
-            foreach ($comments as $comment) {
-                $attachments = $comment->getCommentHasAttachments();
-                $attachmentArray = [];
-
-                if (\count($attachments) > 0) {
-                    foreach ($attachments as $attachment) {
-                        $attachmentArray[] = [
-                            'id' => $attachment->getId(),
-                            'slug' => $attachment->getSlug()
-                        ];
-                    }
-                }
-
-                $detailData = $comment->getCreatedBy()->getDetailData();
-                if ($detailData instanceof UserData) {
-                    $nameOfCreator = $detailData->getName();
-                    $surnameOfCreator = $detailData->getSurname();
-                } else {
-                    $nameOfCreator = null;
-                    $surnameOfCreator = null;
-                }
-
-                $array = [
-                    'id' => $comment->getId(),
-                    'title' => $comment->getTitle(),
-                    'body' => $comment->getBody(),
-                    'createdAt' => $comment->getCreatedAt(),
-                    'updatedAt' => $comment->getUpdatedAt(),
-                    'internal' => $comment->getInternal(),
-                    'email' => $comment->getEmail(),
-                    'email_to' => $comment->getEmailTo(),
-                    'email_cc' => $comment->getEmailCc(),
-                    'email_bcc' => $comment->getEmailBcc(),
-                    'createdBy' => [
-                        'id' => $comment->getCreatedBy()->getId(),
-                        'username' => $comment->getCreatedBy()->getUsername(),
-                        'email' => $comment->getCreatedBy()->getEmail(),
-                        'name' => $nameOfCreator,
-                        'surname' => $surnameOfCreator,
-                        'avatarSlug' => $comment->getCreatedBy()->getImage()
-                    ],
-                    'commentHasAttachments' => $attachmentArray
-                ];
-                $commentsArray[] = $array;
-            }
-        }
-
         $response = [
             'id' => $data->getId(),
             'title' => $data->getTitle(),
@@ -1080,7 +1026,6 @@ class TaskRepository extends EntityRepository
             'tags' => $tagsArray,
             'taskHasAssignedUsers' => $taskHasAssignedUsersArray,
             'taskHasAttachments' => $taskHasAttachmentsArray,
-            'comments' => $commentsArray,
             'invoiceableItems' => $invoiceableItemsArray
         ];
 
@@ -1092,8 +1037,7 @@ class TaskRepository extends EntityRepository
      * @param  array $data
      * @return array
      */
-    private
-    function processArrayData(array $data): array
+    private function processArrayData(array $data): array
     {
         $taskData = $data['taskData'];
         $taskDataArray = [];
@@ -1314,7 +1258,6 @@ class TaskRepository extends EntityRepository
             'tags' => $tagsArray,
             'taskHasAssignedUsers' => $taskHasAssignedUsersArray,
             'taskHasAttachments' => $taskHasAttachmentsArray,
-            'comments' => [],
             'invoiceableItems' => $invoiceableItemsArray
         ];
 

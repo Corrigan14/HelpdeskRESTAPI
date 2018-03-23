@@ -70,22 +70,6 @@ class TaskService
     }
 
     /**
-     * @param array $ids
-     * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
-     */
-    public function getTaskResponse(array $ids)
-    {
-        $id = $ids['id'];
-
-        return [
-            'data' => $this->em->getRepository('APITaskBundle:Task')->getTask($id),
-            '_links' => $this->getTaskLinks($ids)
-        ];
-    }
-
-    /**
      * @param Task $task
      * @param bool $canEdit
      * @param  User $loggedUser
@@ -131,7 +115,11 @@ class TaskService
         }
 
         $ids = [
-            'id' => $task->getId(),
+            'taskId' => $task->getId(),
+            'projectId' => $task->getProject()->getId(),
+            'companyId' => $task->getCompany()->getId(),
+            'requesterId' => $task->getRequestedBy()->getId(),
+            'statusId' => $task->getStatus()->getId()
         ];
 
         /** @var UserRole $loggedUserRole */
@@ -152,17 +140,46 @@ class TaskService
     }
 
     /**
+     * @param array $ids
+     * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     */
+    public function getTaskResponse(array $ids)
+    {
+        $taskId = $ids['taskId'];
+
+        return [
+            'data' => $this->em->getRepository('APITaskBundle:Task')->getTask($taskId),
+            '_links' => $this->getTaskLinks($ids)
+        ];
+    }
+
+    /**
      *
      * @param array $ids
      * @return array
      */
     private function getTaskLinks(array $ids)
     {
-        $id = $ids['id'];
+        $taskId = $ids['taskId'];
+        $projectId = $ids['projectId'];
+        $statusId = $ids['statusId'];
+        $requesterId = $ids['requesterId'];
+        $companyId = $ids['companyId'];
 
         $baseUrl = [
-            'quick update: task' => $this->router->generate('tasks_quick_update', ['taskId' => $id]),
-            'delete' => $this->router->generate('tasks_delete', ['id' => $id])
+            'update 1' => $this->router->generate('tasks_update_project_status_requester_company', ['taskId' => $taskId, 'projectId' => $projectId, 'statusId' => $statusId, 'requesterId' => $requesterId, 'companyId' => $companyId]),
+            'update 2' => $this->router->generate('tasks_update_project', ['taskId' => $taskId, 'projectId' => $projectId]),
+            'update 3' => $this->router->generate('tasks_update_project_status', ['taskId' => $taskId, 'projectId' => $projectId, 'statusId' => $statusId]),
+            'update 4' => $this->router->generate('tasks_update_project_status_requester', ['taskId' => $taskId, 'projectId' => $projectId, 'statusId' => $statusId, 'requesterId' => $requesterId]),
+            'update 5' => $this->router->generate('tasks_update_status', ['taskId' => $taskId, 'statusId' => $statusId]),
+            'update 6' => $this->router->generate('tasks_update_status_requester', ['taskId' => $taskId, 'statusId' => $statusId, 'requesterId' => $requesterId]),
+            'update 7' => $this->router->generate('tasks_update_status_requester_company', ['taskId' => $taskId, 'statusId' => $statusId, 'requesterId' => $requesterId, 'companyId' => $companyId]),
+            'update 8' => $this->router->generate('tasks_update_requester', ['taskId' => $taskId, 'requesterId' => $requesterId]),
+            'update 9' => $this->router->generate('tasks_update_requester_company', ['taskId' => $taskId, 'requesterId' => $requesterId, 'companyId' => $companyId]),
+            'update 10' => $this->router->generate('tasks_update_company', ['taskId' => $taskId, 'companyId' => $companyId]),
+            'delete' => $this->router->generate('tasks_delete', ['taskId' => $taskId])
         ];
 
         return $baseUrl;
@@ -177,7 +194,7 @@ class TaskService
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    private function getRequiredTasks(int $page, array $options):array
+    private function getRequiredTasks(int $page, array $options): array
     {
         /** @var User $loggedUser */
         $loggedUser = $options['loggedUser'];

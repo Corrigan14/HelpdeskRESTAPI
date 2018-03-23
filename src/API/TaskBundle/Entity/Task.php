@@ -193,7 +193,7 @@ class Task
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskSubtask", mappedBy="task")
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\TaskSubtask", mappedBy="task", cascade={"persist", "remove"})
      * @Serializer\ReadOnly()
      */
     private $subtasks;

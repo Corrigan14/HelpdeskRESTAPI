@@ -53,26 +53,102 @@ tasks_create_project_status_requester_company:
             requesterId: '\d+'
             companyId: '\d+'
 
-tasks_update:
-    path:     /tasks/{id}
+tasks_update_project:
+    path:     /tasks/{taskId}/project/{projectId}
     defaults: { _controller: APITaskBundle:Task/Task:update }
     methods: [PUT]
     requirements:
-            id: '\d+'
+            taskId: '\d+'
+            projectId: '\d+'
 
-tasks_quick_update:
-    path:     /tasks/quick-update/{taskId}
-    defaults: { _controller: APITaskBundle:Task/Task:quickUpdateTask}
+tasks_update_project_status:
+    path:     /tasks/{taskId}/project/{projectId}/status/{statusId}
+    defaults: { _controller: APITaskBundle:Task/Task:update }
     methods: [PUT]
     requirements:
             taskId: '\d+'
+            projectId: '\d+'
+            statusId: '\d+'
+
+tasks_update_project_status_requester:
+    path:     /tasks/{taskId}/project/{projectId}/status/{statusId}/requester/{requesterId}
+    defaults: { _controller: APITaskBundle:Task/Task:update }
+    methods: [PUT]
+    requirements:
+            taskId: '\d+'
+            projectId: '\d+'
+            statusId: '\d+'
+            requesterId: '\d+'
+
+tasks_update_project_status_requester_company:
+    path:     /tasks/{taskId}/project/{projectId}/status/{statusId}/requester/{requesterId}/company/{companyId}
+    defaults: { _controller: APITaskBundle:Task/Task:update }
+    methods: [PUT]
+    requirements:
+            taskId: '\d+'
+            projectId: '\d+'
+            statusId: '\d+'
+            requesterId: '\d+'
+            companyId: '\d+'
+
+tasks_update_status:
+    path:     /tasks/{taskId}/status/{statusId}
+    defaults: { _controller: APITaskBundle:Task/Task:update }
+    methods: [PUT]
+    requirements:
+            taskId: '\d+'
+            statusId: '\d+'
+
+tasks_update_status_requester:
+    path:     /tasks/{taskId}/status/{statusId}/requester/{requesterId}
+    defaults: { _controller: APITaskBundle:Task/Task:update }
+    methods: [PUT]
+    requirements:
+            taskId: '\d+'
+            statusId: '\d+'
+            requesterId: '\d+'
+
+tasks_update_status_requester_company:
+    path:     /tasks/{taskId}/status/{statusId}/requester/{requesterId}/company/{companyId}
+    defaults: { _controller: APITaskBundle:Task/Task:update }
+    methods: [PUT]
+    requirements:
+            taskId: '\d+'
+            statusId: '\d+'
+            requesterId: '\d+'
+            companyId: '\d+'
+
+tasks_update_requester:
+    path:     /tasks/{taskId}/requester/{requesterId}
+    defaults: { _controller: APITaskBundle:Task/Task:update }
+    methods: [PUT]
+    requirements:
+            taskId: '\d+'
+            requesterId: '\d+'
+
+tasks_update_requester_company:
+    path:     /tasks/{taskId}/requester/{requesterId}/company/{companyId}
+    defaults: { _controller: APITaskBundle:Task/Task:update }
+    methods: [PUT]
+    requirements:
+            taskId: '\d+'
+            requesterId: '\d+'
+            companyId: '\d+'
+
+tasks_update_company:
+    path:     /tasks/{taskId}/company/{companyId}
+    defaults: { _controller: APITaskBundle:Task/Task:update }
+    methods: [PUT]
+    requirements:
+            taskId: '\d+'
+            companyId: '\d+'
 
 tasks_delete:
-    path:     /tasks/{id}
+    path:     /tasks/{taskId}
     defaults: { _controller: APITaskBundle:Task/Task:delete }
     methods: [DELETE]
     requirements:
-            id: '\d+'
+            taskId: '\d+'
 
 tasks_list_of_tasks_followers:
     path:     /tasks/{taskId}/follower

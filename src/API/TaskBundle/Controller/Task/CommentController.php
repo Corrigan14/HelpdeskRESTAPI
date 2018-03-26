@@ -32,119 +32,56 @@ class CommentController extends ApiBaseController
      *  ### Response ###
      *     {
      *       "data":
-     *       {
-     *          "188":
+     *       [
      *          {
-     *             "id": 188,
-     *             "title": "test",
-     *             "body": "gggg 222",
-     *             "createdAt": 1507968484,
-     *             "updatedAt": 1507968484,
-     *             "internal": true,
-     *             "email": true,
-     *             "email_to":
-     *             [
-     *                "mb@web-solutions.sk"
-     *             ],
-     *             "email_cc": null,
-     *             "email_bcc": null,
-     *             "createdBy":
-     *             {
-     *                "id": 4031,
-     *                "username": "admin",
-     *                "email": "admin@admin.sk",
-     *                "name": "Admin",
-     *                "surname": "Adminovic",
-     *                "avatarSlug": "slug-15-15-2014"
-     *             },
-     *             "commentHasAttachments":
-     *             [
-     *                {
-     *                   "id": 3,
-     *                   "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                }
-     *             ],
-     *             "children":
-     *             [
-     *              6,
-     *              9
-     *             ]
-     *           },
-     *           "189":
-     *           {
-     *              "id": 189,
-     *              "title": "test",
-     *              "body": "gggg 222 222",
-     *             "createdAt": 1507968484,
-     *             "updatedAt": 1507968484,
-     *              "internal": true,
+     *              "id": 4,
+     *              "title": "Email - public",
+     *              "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *              "createdAt": 1521708938,
+     *              "updatedAt": 1521708938,
+     *              "internal": false,
      *              "email": true,
      *              "email_to":
      *              [
-     *                 "mb@web-solutions.sk"
+     *                  "email@email.com"
      *              ],
-     *              "email_cc": null,
+     *              "email_cc":
+     *              [
+     *                  "email2@email.sk",
+     *                  "email3@email.com"
+     *              ],
      *              "email_bcc": null,
      *              "createdBy":
      *              {
-     *                 "id": 4031,
-     *                 "username": "admin",
-     *                 "email": "admin@admin.sk",
-     *                 "name": "Admin",
-     *                 "surname": "Adminovic",
-     *                 "avatarSlug": "slug-15-15-2014"
+     *                  "id": 313,
+     *                  "username": "admin",
+     *                  "email": "admin@admin.sk",
+     *                  "name": "Admin",
+     *                  "surname": "Adminovic",
+     *                  "avatarSlug": null
      *              },
      *              "commentHasAttachments":
      *              [
-     *                {
-     *                   "id": 3,
-     *                   "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                }
+     *                  "slug1",
+     *                  "slug2"
      *              ],
-     *              "children": false
-     *             },
-     *             "190":
-     *             {
-     *                "id": 190,
-     *                "title": "test",
-     *                "body": "gggg 222 222 555",
-     *                "createdAt": 1507968484,
-     *                "updatedAt": 1507968484,
-     *                "internal": true,
-     *                "email": true,
-     *                "email_to":
-     *                [
-     *                   "mb@web-solutions.sk"
-     *                ],
-     *                "email_cc": null,
-     *                "email_bcc": null,
-     *                "createdBy":
-     *                {
-     *                   "id": 4031,
-     *                   "username": "admin",
-     *                   "email": "admin@admin.sk",
-     *                   "name": "Admin",
-     *                   "surname": "Adminovic",
-     *                   "avatarSlug": "slug-15-15-2014"
-     *                },
-     *                "commentHasAttachments":
-     *                [
-     *                  {
-     *                     "id": 3,
-     *                     "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                  }
-     *                ],
-     *                "children": false
-     *               }
-     *            }
-     *       }
+     *              "hasParent": false,
+     *              "parentId": null,
+     *              "hasChild": true,
+     *              "childId":
+     *              [
+     *                  2,
+     *                  5
+     *              ]
+     *          },
+     *       ]
      *       "_links":
      *       {
-     *           "self": "/api/v1/task-bundle/tasks/21/comments?page=1",
-     *           "first": "/api/v1/task-bundle/tasks/21/comments?page=1",
-     *           "prev": false,
-     *           "next": "/api/v1/task-bundle/tasks/21/comments?page=2",
-     *           "last": "/api/v1/task-bundle/tasks/21/comments?page=3"
+     *           "self": "/api/v1/task-bundle/tasks/8994/comments?page=1&limit=5&order=ASC&internal=false",
+     *          "first": "/api/v1/task-bundle/tasks/8994/comments?page=1&limit=5&order=ASC&internal=false",
+     *          "prev": "&limit=5&order=ASC&internal=false",
+     *          "next": "&limit=5&order=ASC&internal=false",
+     *          "last": "/api/v1/task-bundle/tasks/8994/comments?page=1&limit=5&order=ASC&internal=false"
      *       },
      *       "total": 22,
      *       "page": 1,
@@ -173,7 +110,11 @@ class CommentController extends ApiBaseController
      *     },
      *     {
      *       "name"="limit",
-     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
+     *       "description"="Pagination limit: 999 - returns all entities, null - returns 10 entities"
+     *     },
+     *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by CREATION DATE"
      *     }
      *  },
      *  headers={
@@ -199,44 +140,58 @@ class CommentController extends ApiBaseController
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    public function tasksCommentsListAction(Request $request, int $taskId)
+    public function tasksCommentsListAction(Request $request, int $taskId): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tasks_list_of_tasks_comments', ['taskId' => $taskId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+            return $response;
         }
 
         // Check if logged user has access to show tasks comments
         if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_LIST_OF_TASKS_COMMENTS, $task)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        $pageNum = $request->get('page');
-        $pageNum = (int)$pageNum;
-        $page = ($pageNum === 0) ? 1 : $pageNum;
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ?: 10;
+        if (false !== $requestBody) {
+            $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody);
 
-        if(999 === $limit){
-            $page = 1;
+            $page = $processedFilterParams['page'];
+            $limit = $processedFilterParams['limit'];
+            $order = $processedFilterParams['order'];
+            $internal = $processedFilterParams['internal'];
+
+            $options = [
+                'task' => $taskId,
+                'internal' => $internal,
+                'limit' => $limit,
+                'order' => $order,
+                'filterForUrl' => '&limit=' . $limit . '&order=' . $order . '&internal=' . $internal
+            ];
+            $routeOptions = [
+                'routeName' => 'tasks_list_of_tasks_comments',
+                'routeParams' => ['taskId' => $taskId]
+            ];
+
+            $commentsArray = $this->get('task_additional_service')->getTaskCommentsResponse($options, $page, $routeOptions);
+            $response = $response->setContent(json_encode($commentsArray));
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         }
 
-        $internal = $request->get('internal') ?: 'all';
-
-        $options = [
-            'task' => $task,
-            'internal' => $internal,
-            'limit' => $limit
-        ];
-        $routeOptions = [
-            'routeName' => 'tasks_list_of_tasks_comments',
-            'routeParams' => ['taskId' => $taskId]
-        ];
-
-        $commentsArray = $this->get('task_additional_service')->getCommentsOfTaskResponse($options, $page, $routeOptions);
-        return $this->json($commentsArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
     }
 
     /**
@@ -244,40 +199,45 @@ class CommentController extends ApiBaseController
      *      {
      *       "data":
      *       {
-     *             "id": 188,
-     *             "title": "test",
-     *             "body": "gggg 222",
-     *             "createdAt": 1507968484,
-     *             "updatedAt": 1507968484,
-     *             "internal": true,
-     *             "email": true,
-     *             "email_to":
-     *             [
-     *                "mb@web-solutions.sk"
-     *             ],
-     *             "email_cc": null,
-     *             "email_bcc": null,
-     *             "createdBy":
-     *             {
-     *                "id": 4031,
-     *                "username": "admin",
-     *                "email": "admin@admin.sk",
-     *                "name": "Admin",
-     *                "surname": "Adminovic",
-     *                "avatarSlug": "slug-15-15-2014"
-     *             },
-     *             "commentHasAttachments":
-     *             [
-     *                {
-     *                   "id": 3,
-     *                   "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                }
-     *             ],
-     *             "children":
-     *             [
-     *              6,
-     *              9
-     *             ]
+     *             "id": 4,
+     *              "title": "Email - public",
+     *              "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *              "createdAt": 1521708938,
+     *              "updatedAt": 1521708938,
+     *              "internal": false,
+     *              "email": true,
+     *              "email_to":
+     *              [
+     *                  "email@email.com"
+     *              ],
+     *              "email_cc":
+     *              [
+     *                  "email2@email.sk",
+     *                  "email3@email.com"
+     *              ],
+     *              "email_bcc": null,
+     *              "createdBy":
+     *              {
+     *                  "id": 313,
+     *                  "username": "admin",
+     *                  "email": "admin@admin.sk",
+     *                  "name": "Admin",
+     *                  "surname": "Adminovic",
+     *                  "avatarSlug": null
+     *              },
+     *              "commentHasAttachments":
+     *              [
+     *                  "slug1",
+     *                  "slug2"
+     *              ],
+     *              "hasParent": false,
+     *              "parentId": null,
+     *              "hasChild": true,
+     *              "childId":
+     *              [
+     *                  2,
+     *                  5
+     *              ]
      *        },
      *        "_links":
      *        {
@@ -286,7 +246,7 @@ class CommentController extends ApiBaseController
      *      }
      *
      * @ApiDoc(
-     *  description="Returns a Comment",
+     *  description="Returns a Comment Entity",
      *  requirements={
      *     {
      *       "name"="commentId",
@@ -316,21 +276,32 @@ class CommentController extends ApiBaseController
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function getTasksCommentAction(int $commentId)
+    public function getTasksCommentAction(int $commentId): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tasks_comment', ['commentId' => $commentId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $comment = $this->getDoctrine()->getRepository('APITaskBundle:Comment')->find($commentId);
 
         if (!$comment instanceof Comment) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Comment with requested Id does not exist!']));
+            return $response;
         }
 
         $task = $comment->getTask();
         if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_TASKS_COMMENT, $task)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        $commentArray = $this->get('task_additional_service')->getCommentOfTaskResponse($commentId);
-        return $this->json($commentArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $commentArray = $this->get('task_additional_service')->getTaskCommentResponse($commentId);
+        $response = $response->setContent(json_encode($commentArray));
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+
+        return $response;
     }
 
     /**

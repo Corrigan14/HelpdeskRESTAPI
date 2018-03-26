@@ -151,12 +151,19 @@ class ApiBaseService
             $term = false;
         }
 
+        if (isset($requestBody['internal'])) {
+            $internal = strtolower($requestBody['internal']);
+        } else {
+            $internal = 'all';
+        }
+
         return [
             'page' => $page,
             'limit' => $limit,
             'order' => $order,
             'isActive' => $isActive,
-            'term' => $term
+            'term' => $term,
+            'internal' => $internal
         ];
     }
 

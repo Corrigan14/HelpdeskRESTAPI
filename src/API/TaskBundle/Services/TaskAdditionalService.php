@@ -284,7 +284,7 @@ class TaskAdditionalService
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function getCommentsOfTaskResponse(array $options, int $page, array $routeOptions): array
+    public function getTaskCommentsResponse(array $options, int $page, array $routeOptions): array
     {
         $limit = $options['limit'];
         $responseData = $this->em->getRepository('APITaskBundle:Comment')->getTaskComments($options, $page, $limit);
@@ -300,7 +300,7 @@ class TaskAdditionalService
             $count = \count($responseData['array']);
         }
 
-        $pagination = $this->getPagination($page, $count, $routeOptions, $limit);
+        $pagination = $this->getPagination($page, $count, $routeOptions, $limit, $options['filterForUrl']);
 
         return array_merge($response, $pagination);
     }
@@ -314,7 +314,7 @@ class TaskAdditionalService
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function getCommentOfTaskResponse(int $id): array
+    public function getTaskCommentResponse(int $id): array
     {
         $comment = $this->em->getRepository('APITaskBundle:Comment')->getCommentEntity($id);
 
@@ -324,40 +324,6 @@ class TaskAdditionalService
                 'delete' => $this->router->generate('tasks_delete_tasks_comment', ['commentId' => $id])
             ],
         ];
-    }
-
-    /**
-     * Return Attachment (File) Response which includes Data, Links and is based on Pagination
-     *
-     * @param array $options
-     * @param int $page
-     * @param array $routeOptions
-     * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
-     * @internal param int $taskId
-     */
-    public function getCommentAttachmentsResponse(array $options, int $page, array $routeOptions): array
-    {
-        $commentId = $options['comment'];
-        $limit = $options['limit'];
-
-        $responseData = $this->em->getRepository('APITaskBundle:CommentHasAttachment')->getAllAttachmentSlugs($commentId, $page, $limit);
-
-        $response = [
-            'data' => $responseData['array'],
-        ];
-
-
-        if (999 !== $limit) {
-            $count = $responseData['count'];
-        } else {
-            $count = \count($responseData['array']);
-        }
-
-        $pagination = $this->getPagination($page, $count, $routeOptions, $limit);
-
-        return array_merge($response, $pagination);
     }
 
     /**
@@ -404,9 +370,10 @@ class TaskAdditionalService
      * @param int $count
      * @param array $routeOptions
      * @param int $limit
+     * @param bool $filterForUrl
      * @return array
      */
-    private function getPagination(int $page, int $count, array $routeOptions, $limit): array
+    private function getPagination(int $page, int $count, array $routeOptions, $limit, $filterForUrl = false): array
     {
         $routeName = $routeOptions['routeName'];
         $routeParams = $routeOptions['routeParams'];
@@ -424,11 +391,11 @@ class TaskAdditionalService
 
         return [
             '_links' => [
-                'self' => $url . '?page=' . $page,
-                'first' => $url . '?page=' . 1,
-                'prev' => $previousPage ? $url . '?page=' . $previousPage : false,
-                'next' => $nextPage ? $url . '?page=' . $nextPage : false,
-                'last' => $url . '?page=' . $totalNumberOfPages,
+                'self' => $url . '?page=' . $page . $filterForUrl,
+                'first' => $url . '?page=' . 1 . $filterForUrl,
+                'prev' => $previousPage ? $url . '?page=' . $previousPage : false . $filterForUrl,
+                'next' => $nextPage ? $url . '?page=' . $nextPage : false . $filterForUrl,
+                'last' => $url . '?page=' . $totalNumberOfPages . $filterForUrl,
             ],
             'total' => $count,
             'page' => $page,

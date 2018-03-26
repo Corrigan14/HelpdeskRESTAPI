@@ -25,14 +25,16 @@ class CommentRepository extends EntityRepository
         /** @var Task $task */
         $task = $options['task'];
         $internal = $options['internal'];
+        $order = $options['order'];
 
-        if ('false' === strtolower($internal)) {
+        if ('false' === $internal || false === $internal) {
             $query = $this->createQueryBuilder('c')
-                ->select('c,createdBy,detailData,commentHasAttachments')
+                ->select('c,createdBy,detailData,commentHasAttachments,parentComment')
                 ->leftJoin('c.createdBy', 'createdBy')
                 ->leftJoin('createdBy.detailData', 'detailData')
                 ->leftJoin('c.commentHasAttachments', 'commentHasAttachments')
-                ->orderBy('c.id')
+                ->leftJoin('c.comment', 'parentComment')
+                ->orderBy('c.createdAt', $order)
                 ->distinct()
                 ->where('c.task = :taskId')
                 ->andWhere('c.internal = :internal')
@@ -40,11 +42,12 @@ class CommentRepository extends EntityRepository
                 ->getQuery();
         } else {
             $query = $this->createQueryBuilder('c')
-                ->select('c,createdBy,detailData,commentHasAttachments')
+                ->select('c,createdBy,detailData,commentHasAttachments,parentComment')
                 ->leftJoin('c.createdBy', 'createdBy')
                 ->leftJoin('createdBy.detailData', 'detailData')
                 ->leftJoin('c.commentHasAttachments', 'commentHasAttachments')
-                ->orderBy('c.id')
+                ->leftJoin('c.comment', 'parentComment')
+                ->orderBy('c.createdAt', $order)
                 ->distinct()
                 ->where('c.task = :taskId')
                 ->setParameter('taskId', $task)
@@ -93,7 +96,7 @@ class CommentRepository extends EntityRepository
             ->where('comment.id = :id')
             ->setParameter('id', $id);
 
-        return $this->fillArray($query->getQuery()->getSingleResult(), true);
+        return $this->processData($query->getQuery()->getSingleResult());
     }
 
     /**
@@ -104,59 +107,22 @@ class CommentRepository extends EntityRepository
     private function formatData($paginatorData, $array = false): array
     {
         $response = [];
-        $processedCommentIds = [];
-
-        if (!$array) {
-            /** @var Comment $comment */
-            foreach ($paginatorData as $comment) {
-                if (in_array($comment->getId(), $processedCommentIds, true)) {
-                    continue;
-                }
-                $this->buildCommentTree($response, $processedCommentIds, $comment);
-            }
-        } else {
-            // If we ask for a whole list of comments, comment tree is not built
-            // The list just contains all comment
-            foreach ($paginatorData as $data) {
+        foreach ($paginatorData as $data) {
+            if ($array) {
                 $response[] = $this->processArrayData($data);
+            } else {
+                $response[] = $this->processData($data);
             }
         }
+
         return $response;
     }
 
     /**
-     * @param $response
-     * @param $processedCommentIds
      * @param Comment $comment
-     */
-    private function buildCommentTree(&$response, &$processedCommentIds, Comment $comment)
-    {
-        $commentId = $comment->getId();
-
-        if (!in_array($commentId, $processedCommentIds, true)) {
-            $processedCommentIds[] = $commentId;
-            $children = $comment->getInversedComment();
-            if (count($children) > 0) {
-                $response[$commentId] = $this->fillArray($comment);
-                $childArray = [];
-                foreach ($children as $child) {
-                    $childId = $child->getId();
-                    $childArray[] = $childId;
-                }
-                $response[$commentId]['children'] = $childArray;
-            } else {
-                $response[$commentId] = $this->fillArray($comment);
-                $response[$commentId]['children'] = false;
-            }
-        }
-    }
-
-    /**
-     * @param Comment $comment
-     * @param bool $single
      * @return array
      */
-    private function fillArray(Comment $comment, $single = false)
+    private function processData(Comment $comment): array
     {
         $attachments = $comment->getCommentHasAttachments();
         $attachmentArray = [];
@@ -164,10 +130,7 @@ class CommentRepository extends EntityRepository
         if (count($attachments) > 0) {
             /** @var CommentHasAttachment $attachment */
             foreach ($attachments as $attachment) {
-                $attachmentArray[] = [
-                    'id' => $attachment->getId(),
-                    'slug' => $attachment->getSlug()
-                ];
+                $attachmentArray[] = $attachment->getSlug();
             }
         }
 
@@ -178,6 +141,27 @@ class CommentRepository extends EntityRepository
         } else {
             $nameOfCreator = null;
             $surnameOfCreator = null;
+        }
+
+        $parrentComment = $comment->getComment();
+        if ($parrentComment instanceof Comment) {
+            $parentId = $parrentComment->getId();
+            $hasParent = true;
+        } else {
+            $parentId = null;
+            $hasParent = false;
+        }
+
+        $childrenComments = $comment->getInversedComment();
+        if (count($childrenComments) > 0) {
+            $hasChild = true;
+            $childId = [];
+            foreach ($childrenComments as $data) {
+                $childId[] = $data->getId();
+            }
+        } else {
+            $hasChild = false;
+            $childId = null;
         }
 
         $array = [
@@ -199,20 +183,12 @@ class CommentRepository extends EntityRepository
                 'surname' => $surnameOfCreator,
                 'avatarSlug' => $comment->getCreatedBy()->getImage()
             ],
-            'commentHasAttachments' => $attachmentArray
+            'commentHasAttachments' => $attachmentArray,
+            'hasParent' => $hasParent,
+            'parentId' => $parentId,
+            'hasChild' => $hasChild,
+            'childId' => $childId
         ];
-
-        if ($single) {
-            $childrenComments = $comment->getInversedComment();
-            $childrenCommentsArray = false;
-            if (count($childrenComments) > 0) {
-                /** @var Comment $comment */
-                foreach ($childrenComments as $commentN) {
-                    $childrenCommentsArray[] = $commentN->getId();
-                }
-            }
-            $array['children'] = $childrenCommentsArray;
-        }
 
         return $array;
     }
@@ -228,20 +204,26 @@ class CommentRepository extends EntityRepository
 
         if (count($attachments) > 0) {
             foreach ($attachments as $attachment) {
-                $attachmentArray[] = [
-                    'id' => $attachment['id'],
-                    'slug' => $attachment['slug']
-                ];
+                $attachmentArray[] = $attachment['slug'];
             }
         }
 
         $detailData = $data['createdBy']['detailData'];
-        if ($detailData instanceof UserData) {
+        if (count($detailData) > 0) {
             $nameOfCreator = $detailData['name'];
             $surnameOfCreator = $detailData['surname'];
         } else {
             $nameOfCreator = null;
             $surnameOfCreator = null;
+        }
+
+        $parrentComment = $data['comment'];
+        if (count($parrentComment) > 0) {
+            $parentId = $parrentComment['id'];
+            $hasParent = true;
+        } else {
+            $parentId = null;
+            $hasParent = false;
         }
 
         $array = [
@@ -263,7 +245,9 @@ class CommentRepository extends EntityRepository
                 'surname' => $surnameOfCreator,
                 'avatarSlug' => $data['createdBy']['image']
             ],
-            'commentHasAttachments' => $attachmentArray
+            'commentHasAttachments' => $attachmentArray,
+            'hasParent' => $hasParent,
+            'parentId' => $parentId
         ];
 
         return $array;

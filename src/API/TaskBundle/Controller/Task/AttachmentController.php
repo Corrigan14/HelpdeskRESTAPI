@@ -169,13 +169,23 @@ class AttachmentController extends ApiBaseController
             return $response;
         }
 
-        $file = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
-            'slug' => $slug
+        $fileEntity = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
+            'slug' => $slug,
         ]);
 
-        if (!$file instanceof File) {
+        if (!$fileEntity instanceof File) {
             $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Attachment with requested Slug does not exist! Attachment has to be uploaded before added to task!']));
+            $response = $response->setContent(json_encode(['message' => 'File with requested Slug does not exist in DB!']));
+            return $response;
+        }
+
+        // Check if the File exists in a web-page file system
+        $uploadDir = $this->getParameter('upload_dir');
+        $file = $uploadDir . DIRECTORY_SEPARATOR . $fileEntity->getUploadDir() . DIRECTORY_SEPARATOR . $fileEntity->getTempName();
+
+        if (!file_exists($file)) {
+            $response = $response->setStatusCode(StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'File with requested Slug does not exist in a web-page File System!']));
             return $response;
         }
 

@@ -309,40 +309,45 @@ class CommentController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *             "id": 188,
-     *             "title": "test",
-     *             "body": "gggg 222",
-     *             "createdAt": 1507968484,
-     *             "updatedAt": 1507968484,
-     *             "internal": true,
-     *             "email": true,
-     *             "email_to":
-     *             [
-     *                "mb@web-solutions.sk"
-     *             ],
-     *             "email_cc": null,
-     *             "email_bcc": null,
-     *             "createdBy":
-     *             {
-     *                "id": 4031,
-     *                "username": "admin",
-     *                "email": "admin@admin.sk",
-     *                "name": "Admin",
-     *                "surname": "Adminovic",
-     *                "avatarSlug": "slug-15-15-2014"
-     *             },
-     *             "commentHasAttachments":
-     *             [
-     *                {
-     *                   "id": 3,
-     *                   "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                }
-     *             ],
-     *             "children":
-     *             [
-     *              6,
-     *              9
-     *             ]
+     *             "id": 4,
+     *              "title": "Email - public",
+     *              "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *              "createdAt": 1521708938,
+     *              "updatedAt": 1521708938,
+     *              "internal": false,
+     *              "email": true,
+     *              "email_to":
+     *              [
+     *                  "email@email.com"
+     *              ],
+     *              "email_cc":
+     *              [
+     *                  "email2@email.sk",
+     *                  "email3@email.com"
+     *              ],
+     *              "email_bcc": null,
+     *              "createdBy":
+     *              {
+     *                  "id": 313,
+     *                  "username": "admin",
+     *                  "email": "admin@admin.sk",
+     *                  "name": "Admin",
+     *                  "surname": "Adminovic",
+     *                  "avatarSlug": null
+     *              },
+     *              "commentHasAttachments":
+     *              [
+     *                  "slug1",
+     *                  "slug2"
+     *              ],
+     *              "hasParent": false,
+     *              "parentId": null,
+     *              "hasChild": true,
+     *              "childId":
+     *              [
+     *                  2,
+     *                  5
+     *              ]
      *        },
      *        "_links":
      *        {
@@ -352,13 +357,13 @@ class CommentController extends ApiBaseController
      *
      * @ApiDoc(
      *  resource = true,
-     *  description="Create a new Comment to Task",
+     *  description="Create a new Tasks Comment",
      *  requirements={
      *     {
      *       "name"="taskId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
-     *       "description"="The id of task"
+     *       "description"="Tasks id"
      *     }
      *  },
      *  input={"class"="API\TaskBundle\Entity\Comment"},
@@ -389,26 +394,33 @@ class CommentController extends ApiBaseController
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function createTasksCommentAction(Request $request, int $taskId)
+    public function createTasksCommentAction(Request $request, int $taskId): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tasks_add_comment_to_task', ['taskId' => $taskId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
-            return $this->createApiResponse([
-                'message' => 'Task with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+            return $response;
         }
 
         if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_COMMENT_TO_TASK, $task)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        $data = $request->request->all();
         $comment = new Comment();
         $comment->setCreatedBy($this->getUser());
         $comment->setTask($task);
 
-        return $this->updateCommentEntity($comment, $data);
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+
+        return $this->updateCommentEntity($comment, $requestBody, $locationURL);
     }
 
     /**
@@ -416,41 +428,46 @@ class CommentController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *             "id": 188,
-     *             "title": "test",
-     *             "body": "gggg 222",
-     *             "createdAt": 1507968484,
-     *             "updatedAt": 1507968484,
-     *             "internal": true,
-     *             "email": true,
-     *             "email_to":
-     *             [
-     *                "mb@web-solutions.sk"
-     *             ],
-     *             "email_cc": null,
-     *             "email_bcc": null,
-     *             "createdBy":
-     *             {
-     *                "id": 4031,
-     *                "username": "admin",
-     *                "email": "admin@admin.sk",
-     *                "name": "Admin",
-     *                "surname": "Adminovic",
-     *                "avatarSlug": "slug-15-15-2014"
-     *             },
-     *             "commentHasAttachments":
-     *             [
-     *                {
-     *                   "id": 3,
-     *                   "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                }
-     *             ],
-     *             "children":
-     *             [
-     *              6,
-     *              9
-     *             ]
-     *        },
+     *             "id": 4,
+     *              "title": "Email - public",
+     *              "body": "Lorem Ipsum er rett og slett dummytekst fra og for trykkeindustrien. Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. ",
+     *              "createdAt": 1521708938,
+     *              "updatedAt": 1521708938,
+     *              "internal": false,
+     *              "email": true,
+     *              "email_to":
+     *              [
+     *                  "email@email.com"
+     *              ],
+     *              "email_cc":
+     *              [
+     *                  "email2@email.sk",
+     *                  "email3@email.com"
+     *              ],
+     *              "email_bcc": null,
+     *              "createdBy":
+     *              {
+     *                  "id": 313,
+     *                  "username": "admin",
+     *                  "email": "admin@admin.sk",
+     *                  "name": "Admin",
+     *                  "surname": "Adminovic",
+     *                  "avatarSlug": null
+     *              },
+     *              "commentHasAttachments":
+     *              [
+     *                  "slug1",
+     *                  "slug2"
+     *              ],
+     *              "hasParent": false,
+     *              "parentId": null,
+     *              "hasChild": true,
+     *              "childId":
+     *              [
+     *                  2,
+     *                  5
+     *              ]
+     *        }
      *        "_links":
      *        {
      *          "delete": "/api/v1/task-bundle/tasks/comments/9"
@@ -459,7 +476,7 @@ class CommentController extends ApiBaseController
      *
      * @ApiDoc(
      *  resource = true,
-     *  description="Create a new child Comment to Comment",
+     *  description="Create Comments child Comment.",
      *  requirements={
      *     {
      *       "name"="commentId",
@@ -496,40 +513,46 @@ class CommentController extends ApiBaseController
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function createCommentsCommentAction(Request $request, int $commentId)
+    public function createCommentsCommentAction(Request $request, int $commentId): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tasks_add_comment_to_comment', ['commentId' => $commentId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $comment = $this->getDoctrine()->getRepository('APITaskBundle:Comment')->find($commentId);
 
         if (!$comment instanceof Comment) {
-            return $this->createApiResponse([
-                'message' => 'Parent Comment with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Parent Comment with requested Id does not exist!']));
+            return $response;
         }
 
         $task = $comment->getTask();
 
         if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_COMMENT_TO_COMMENT, $task)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        $data = $request->request->all();
         $commentNew = new Comment();
         $commentNew->setCreatedBy($this->getUser());
         $commentNew->setTask($task);
         $commentNew->setComment($comment);
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        return $this->updateCommentEntity($commentNew, $data);
+        return $this->updateCommentEntity($commentNew, $requestBody, $locationURL);
     }
 
     /**
      * @ApiDoc(
-     *  description="Delete Comment Entity",
+     *  description="Delete a Comment Entity",
      *  requirements={
      *     {
      *       "name"="commentId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
-     *       "description"="The id of processed object"
+     *       "description"="Processed object ID"
      *     }
      *  },
      *  headers={
@@ -551,41 +574,47 @@ class CommentController extends ApiBaseController
      * @return Response
      * @throws \LogicException
      */
-    public function deleteAction(int $commentId)
+    public function deleteAction(int $commentId):Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tasks_delete_tasks_comment', ['commentId' => $commentId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $comment = $this->getDoctrine()->getRepository('APITaskBundle:Comment')->find($commentId);
 
         if (!$comment instanceof Comment) {
-            return $this->createApiResponse([
-                'message' => 'Parent Comment with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Parent Comment with requested Id does not exist!']));
+            return $response;
         }
 
         $task = $comment->getTask();
 
         if (!$this->get('task_voter')->isGranted(VoteOptions::DELETE_COMMENT, $task)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $this->getDoctrine()->getManager()->remove($comment);
         $this->getDoctrine()->getManager()->flush();
 
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::DELETED_MESSAGE,
-        ], StatusCodesHelper::DELETED_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::DELETED_CODE);
+        $response = $response->setContent(json_encode(['message' => StatusCodesHelper::DELETED_MESSAGE]));
+        return $response;
     }
 
     /**
      * @param Comment $comment
      * @param $requestData
-     * @param bool $create
+     * @param $locationUrl
      * @return Response
      * @throws \InvalidArgumentException
      * @throws \LogicException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
-    private function updateCommentEntity(Comment $comment, $requestData, $create = true)
+    private function updateCommentEntity(Comment $comment, $requestData, $locationUrl): Response
     {
         $allowedUnitEntityParams = [
             'title',
@@ -598,133 +627,156 @@ class CommentController extends ApiBaseController
             'slug'
         ];
 
-        if (array_key_exists('_format', $requestData)) {
-            unset($requestData['_format']);
-        }
+        // JSON API Response - Content type and Location settings
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationUrl);
 
-        foreach ($requestData as $key => $value) {
-            if (!in_array($key, $allowedUnitEntityParams, true)) {
-                return $this->createApiResponse(
-                    ['message' => $key . ' is not allowed parameter for Comment Entity!'],
-                    StatusCodesHelper::INVALID_PARAMETERS_CODE
-                );
-            }
-        }
-
-        // Add attachment to comment
-        $attachment = false;
-        if (array_key_exists('slug', $requestData)) {
-            $slugArray = $requestData['slug'];
-            if (!is_array($slugArray)) {
-                $slugArray = explode(',', $slugArray);
+        if (false !== $requestData) {
+            if (array_key_exists('_format', $requestData)) {
+                unset($requestData['_format']);
             }
 
-            if (count($slugArray) > 0) {
-                $attachment = [];
-                foreach ($slugArray as $slug) {
-                    $file = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
-                        'slug' => $slug
-                    ]);
+            foreach ($requestData as $key => $value) {
+                if (!in_array($key, $allowedUnitEntityParams, true)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for a Comment Entity!']));
+                    return $response;
+                }
+            }
 
-                    if (!$file instanceof File) {
-                        return $this->createApiResponse([
-                            'message' => 'Attachment with requested Slug: ' . $slug . ' does not exist! Attachment has to be uploaded before added to comment!',
-                        ], StatusCodesHelper::BAD_REQUEST_CODE);
+            // Add attachment to the Comment
+            $attachment = [];
+            if (array_key_exists('slug', $requestData)) {
+                $slugArray = json_decode($requestData['slug'], true);
+                if (!\is_array($slugArray)) {
+                    $slugArray = explode(',', $requestData['slug']);
+                }
+
+                if (count($slugArray) > 0) {
+                    foreach ($slugArray as $slug) {
+                        $fileEntity = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
+                            'slug' => $slug,
+                        ]);
+
+                        if (!$fileEntity instanceof File) {
+                            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                            $response = $response->setContent(json_encode(['message' => 'File with requested Slug ' . $slug . ' does not exist in DB!']));
+                            return $response;
+                        }
+
+                        // Check if File exists in a web-page file system
+                        $uploadDir = $this->getParameter('upload_dir');
+                        $file = $uploadDir . DIRECTORY_SEPARATOR . $fileEntity->getUploadDir() . DIRECTORY_SEPARATOR . $fileEntity->getTempName();
+
+                        if (!file_exists($file)) {
+                            $response = $response->setStatusCode(StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
+                            $response = $response->setContent(json_encode(['message' => 'File with requested Slug ' . $slug . ' does not exist in a web-page File System!']));
+                            return $response;
+                        }
+
+                        if ($this->canAddAttachmentToComment($comment, $slug)) {
+                            $commentHasAttachment = new CommentHasAttachment();
+                            $commentHasAttachment->setComment($comment);
+                            $commentHasAttachment->setSlug($slug);
+                            $comment->addCommentHasAttachment($commentHasAttachment);
+                            $this->getDoctrine()->getManager()->persist($commentHasAttachment);
+                        }
+
+                        $attachment[] = [
+                            'dir' => $fileEntity->getUploadDir(),
+                            'name' => $fileEntity->getTempName()
+                        ];
                     }
+                }
+                unset($requestData['slug']);
+            }
 
-                    if ($this->canAddAttachmentToComment($comment, $slug)) {
-                        $commentHasAttachment = new CommentHasAttachment();
-                        $commentHasAttachment->setComment($comment);
-                        $commentHasAttachment->setSlug($slug);
-                        $comment->addCommentHasAttachment($commentHasAttachment);
-                        $this->getDoctrine()->getManager()->persist($commentHasAttachment);
+            // Comment marked like an Email - email addresses validation
+            $emailAddresses = [];
+            $notValidEmailAddresses = [];
+            $isEmail = false;
+            if (isset($requestData['email'])) {
+                $isEmail = ('true' === strtolower($requestData['email']) || 1 == $requestData['email']) ? true : false;
+                if ($isEmail) {
+                    if (isset($requestData['email_to'])) {
+                        $this->processEmailAddress($requestData, $comment, $emailAddresses, $notValidEmailAddresses);
+
+                        if (count($notValidEmailAddresses) > 0) {
+                            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                            $response = $response->setContent(json_encode(['message' => 'Not valid email address: ' . implode(";", $notValidEmailAddresses)]));
+                            return $response;
+                        }
+                    } else {
+                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'Comment marked like an EMAIL has to contain at least one TO Email address']));
+                        return $response;
                     }
-
-                    $attachment[] = [
-                        'dir' => $file->getUploadDir(),
-                        'name' => $file->getTempName()
-                    ];
                 }
             }
 
-            unset($requestData['slug']);
-        }
+            unset($requestData['email_to']);
+            unset($requestData['email_cc']);
+            unset($requestData['email_bcc']);
 
-        // Comment marked like Email - validation of email addresses
-        $emailAddresses = [];
-        $notValidEmailAddresses = [];
-        $isEmail = false;
-        if (isset($requestData['email'])) {
-            $isEmail = ('true' === strtolower($requestData['email']) || 1 == $requestData['email']) ? true : false;
-            if ($isEmail) {
-                if (isset($requestData['email_to'])) {
-                    $this->processEmailAddress($requestData, $comment, $emailAddresses, $notValidEmailAddresses);
+            $statusCode = $this->getCreateUpdateStatusCode(true);
 
-                    if (count($notValidEmailAddresses) > 0) {
-                        return $this->createApiResponse(
-                            ['message' => 'Not valid email address: ' . implode(";", $notValidEmailAddresses)],
-                            StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $errors = $this->get('entity_processor')->processEntity($comment, $requestData);
+
+            if (false === $errors) {
+                $task = $comment->getTask();
+                $loggedUserEmail = $this->getUser()->getEmail();
+
+                // If Comment is an Email - send Email
+                if ($isEmail) {
+                    $templateParams = $this->getTemplateParams($task->getId(), $requestData, $emailAddresses, $attachment);
+                    $sendingError = $this->get('email_service')->sendEmail($templateParams);
+                    if (true !== $sendingError) {
+                        $data = [
+                            'errors' => $sendingError,
+                            'message' => 'Error with email sending!'
+                        ];
+                        $response = $response->setStatusCode(StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
+                        $response = $response->setContent(json_encode($data));
+                        return $response;
                     }
-                } else {
-                    return $this->createApiResponse(
-                        ['message' => 'Email address is required to sent comment like Email!'],
-                        StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 }
+
+                $this->getDoctrine()->getManager()->persist($comment);
+                $this->getDoctrine()->getManager()->flush();
+
+                $commentArray = $this->get('task_additional_service')->getTaskCommentResponse($comment->getId());
+                $response = $response->setStatusCode($statusCode);
+                $response = $response->setContent(json_encode($commentArray));
+
+                // Notification about a Comment creation to task REQUESTER, ASSIGNED USERS, FOLLOWERS
+                $notificationEmailAddresses = $this->getEmailForAddCommentNotification($task, $loggedUserEmail, $emailAddresses);
+                if (count($notificationEmailAddresses) > 0) {
+                    $templateParams = $this->getTemplateParams($task->getId(), $requestData, $notificationEmailAddresses, $attachment);
+                    $sendingError = $this->get('email_service')->sendEmail($templateParams);
+                    if (true !== $sendingError) {
+                        $data = [
+                            'errors' => $sendingError,
+                            'message' => 'Error with notification sending!'
+                        ];
+                        $response = $response->setStatusCode(StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
+                        $response = $response->setContent(json_encode($data));
+                        return $response;
+                    }
+                }
+
+                return $response;
+            } else {
+                $data = [
+                    'errors' => $errors,
+                    'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+                ];
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode($data));
             }
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         }
-
-        unset($requestData['email_to']);
-        unset($requestData['email_cc']);
-        unset($requestData['email_bcc']);
-
-        $statusCode = $this->getCreateUpdateStatusCode($create);
-
-        $errors = $this->get('entity_processor')->processEntity($comment, $requestData);
-
-        if (false === $errors) {
-            $this->getDoctrine()->getManager()->persist($comment);
-            $this->getDoctrine()->getManager()->flush();
-
-            $commentArray = $this->get('task_additional_service')->getCommentOfTaskResponse($comment->getId());
-
-            $task = $comment->getTask();
-            $loggedUserEmail = $this->getUser()->getEmail();
-
-            // If Comment is an Email - send Email
-            if ($isEmail) {
-                $templateParams = $this->getTemplateParams($task->getId(), $requestData, $emailAddresses, $attachment);
-                $sendingError = $this->get('email_service')->sendEmail($templateParams);
-                if (true !== $sendingError) {
-                    $data = [
-                        'errors' => $sendingError,
-                        'message' => 'Error with sending emails!'
-                    ];
-                    return $this->createApiResponse($data, StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
-                }
-            }
-
-            // Notification about creation of Comment to task REQUESTER, ASSIGNED USERS, FOLLOWERS
-            $notificationEmailAddresses = $this->getEmailForAddCommentNotification($task, $loggedUserEmail, $emailAddresses);
-            if (count($notificationEmailAddresses) > 0) {
-                $templateParams = $this->getTemplateParams($task->getId(), $requestData, $notificationEmailAddresses, $attachment);
-                $sendingError = $this->get('email_service')->sendEmail($templateParams);
-                if (true !== $sendingError) {
-                    $data = [
-                        'errors' => $sendingError,
-                        'message' => 'Error with sending notifications!'
-                    ];
-                    return $this->createApiResponse($data, StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
-                }
-            }
-
-            return $this->json($commentArray, $statusCode);
-        }
-
-        $data = [
-            'errors' => $errors,
-            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-        ];
-        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $response;
     }
 
 
@@ -741,63 +793,60 @@ class CommentController extends ApiBaseController
             new Email(),
             new NotBlank()
         ];
-        $emailBccArray = [];
         $emailCcArray = [];
+        $emailBccArray = [];
 
         // Email TO
-        $emailTo = $requestData['email_to'];
-        if (!is_array($emailTo)) {
-            $emailToArray = explode(';', $emailTo);
-        } else {
-            $emailToArray = $emailTo;
+        $emailTo = json_decode($requestData['email_to'], true);
+        if (!\is_array($emailTo)) {
+            $emailTo = explode(',', $requestData['email_to']);
         }
+        $emailToArray = $emailTo;
 
         // Check the correct email address
-        foreach ($emailToArray as $item) {
+        foreach ($emailTo as $item) {
             $emailError = $validator->validate($item, $constraints);
             if (count($emailError)) {
                 $notValidEmailAddresses[] = $item;
             }
         }
-        $comment->setEmailTo($emailToArray);
+        $comment->setEmailTo($emailTo);
 
 
         // Email CC
         if (isset($requestData['email_cc'])) {
-            $emailCc = $requestData['email_cc'];
-            if (!is_array($emailCc)) {
-                $emailCcArray = explode(';', $emailCc);
-            } else {
-                $emailCcArray = $emailCc;
+            $emailCc = json_decode($requestData['email_cc'], true);
+            if (!\is_array($emailTo)) {
+                $emailCc = explode(',', $requestData['email_cc']);
             }
+            $emailCcArray = $emailCc;
 
             // Check the correct email address
-            foreach ($emailCcArray as $item) {
+            foreach ($emailCc as $item) {
                 $emailError = $validator->validate($item, $constraints);
                 if (count($emailError)) {
                     $notValidEmailAddresses[] = $item;
                 }
             }
-            $comment->setEmailCc($emailCcArray);
+            $comment->setEmailCc($emailCc);
         }
 
         // Email BCC
         if (isset($requestData['email_bcc'])) {
-            $emailBcc = $requestData['email_bcc'];
-            if (!is_array($emailBcc)) {
-                $emailBccArray = explode(';', $emailBcc);
-            } else {
-                $emailBccArray = $emailBcc;
+            $emailBcc = json_decode($requestData['email_bcc'], true);
+            if (!\is_array($emailTo)) {
+                $emailBcc = explode(',', $requestData['email_bcc']);
             }
+            $emailBccArray = $emailBcc;
 
             // Check the correct email address
-            foreach ($emailBccArray as $item) {
+            foreach ($emailBcc as $item) {
                 $emailError = $validator->validate($item, $constraints);
                 if (count($emailError)) {
                     $notValidEmailAddresses[] = $item;
                 }
             }
-            $comment->setEmailBcc($emailBccArray);
+            $comment->setEmailBcc($emailBcc);
         }
 
         $emailAddress = array_merge($emailToArray, $emailCcArray, $emailBccArray);
@@ -827,12 +876,17 @@ class CommentController extends ApiBaseController
         $baseFrontURL = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->findOneBy([
             'title' => 'Base Front URL'
         ]);
+        if (isset($requestData['title'])) {
+            $title = $requestData['title'];
+        } else {
+            $title = ' ';
+        }
         $templateParams = [
             'date' => $todayDate,
             'username' => $username,
             'email' => $email,
             'taskId' => $taskId,
-            'subject' => $requestData['title'],
+            'subject' => $title,
             'commentBody' => $requestData['body'],
             'signature' => $usersSignature,
             'taskLink' => $baseFrontURL ? $baseFrontURL->getValue() : '' . '/tasks/' . $taskId

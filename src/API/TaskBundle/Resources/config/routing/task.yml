@@ -267,14 +267,14 @@ tasks_comment:
             commentId: '\d+'
 
 tasks_add_comment_to_task:
-    path:     /tasks/{taskId}/comments
+    path:     /tasks/{taskId}/add-comment
     defaults: { _controller: APITaskBundle:Task/Comment:createTasksComment }
     methods: [POST]
     requirements:
             taskId: '\d+'
 
 tasks_add_comment_to_comment:
-    path:     /tasks/comments/{commentId}
+    path:     /tasks/comments/{commentId}/add-comment
     defaults: { _controller: APITaskBundle:Task/Comment:createCommentsComment }
     methods: [POST]
     requirements:

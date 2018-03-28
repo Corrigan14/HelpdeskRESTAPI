@@ -204,7 +204,7 @@ class CommentRepository extends EntityRepository
 
         if (count($attachments) > 0) {
             foreach ($attachments as $attachment) {
-                $attachmentArray[] = $attachment['slug'];
+                $attachmentArray[] =  $attachment['slug'];
             }
         }
 

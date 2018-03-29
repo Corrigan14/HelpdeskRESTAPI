@@ -21,64 +21,35 @@ class CommentAttachmentController extends ApiBaseController
 {
 
     /**
-     *  ### Response ###
+     * ### Response ###
      *      {
-     *       "data":
-     *       {
-     *          "id": 188,
-     *             "title": "test",
-     *             "body": "gggg 222",
-     *             "createdAt": 1507968484,
-     *             "updatedAt": 1507968484,
-     *             "internal": true,
-     *             "email": true,
-     *             "email_to":
-     *             [
-     *                "mb@web-solutions.sk"
-     *             ],
-     *             "email_cc": null,
-     *             "email_bcc": null,
-     *             "createdBy":
-     *             {
-     *                "id": 4031,
-     *                "username": "admin",
-     *                "email": "admin@admin.sk",
-     *                "name": "Admin",
-     *                "surname": "Adminovic",
-     *                "avatarSlug": "slug-15-15-2014"
-     *             },
-     *             "commentHasAttachments":
-     *             [
-     *                {
-     *                   "id": 3,
-     *                   "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                }
-     *             ],
-     *             "children":
-     *             [
-     *              6,
-     *              9
-     *             ]
-     *        },
-     *        "_links":
-     *        {
-     *           "delete": "/api/v1/task-bundle/tasks/comments/9"
-     *         }
+     *          "data":
+     *          {
+     *              "id": 5,
+     *              "slug": "zsskcd-jpg-2016-12-17-15-36",
+     *              "fileDir": "Upload dir",
+     *              "fileName": "Temp name"
+     *          },
+     *          "_links":
+     *          {
+     *              "add attachment to the Comment": "/api/v1/task-bundle/tasks/comments/13/add-attachment/api-documentation-xls-2018-03-28-18-48",
+     *              "remove attachment from the Comment": "/api/v1/task-bundle/tasks/comments/13/remove-attachment/api-documentation-xls-2018-03-28-18-48"
+     *          }
      *      }
      *
      * @ApiDoc(
-     *  description="Add a new attachment to the Comment. Returns a comment.",
+     *  description="Add a new attachment to the Comment.",
      *  requirements={
      *     {
      *       "name"="commentId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
-     *       "description"="The id of task"
+     *       "description"="Comment Id"
      *     },
      *     {
      *       "name"="slug",
      *       "dataType"="string",
-     *       "description"="The slug of uploaded attachment"
+     *       "description"="Uploaded attachment slug"
      *     }
      *  },
      *  headers={
@@ -89,7 +60,7 @@ class CommentAttachmentController extends ApiBaseController
      *     }
      *  },
      *  statusCodes={
-     *      201 ="The attachment was successfully added to task",
+     *      200 ="The attachment was successfully added to the comment",
      *      400 ="Bad request",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
@@ -103,28 +74,44 @@ class CommentAttachmentController extends ApiBaseController
      * @throws \LogicException
      * @internal param int $userId
      */
-    public function addAttachmentToCommentAction(int $commentId, string $slug)
+    public function addAttachmentToCommentAction(int $commentId, string $slug): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tasks_add_attachment_to_comment', ['commentId' => $commentId, 'slug' => $slug]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $comment = $this->getDoctrine()->getRepository('APITaskBundle:Comment')->find($commentId);
 
         if (!$comment instanceof Comment) {
-            return $this->createApiResponse([
-                'message' => 'Comment with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Comment with requested Id does not exist!']));
+            return $response;
         }
 
-        $file = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
+        $fileEntity = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
             'slug' => $slug
         ]);
 
-        if (!$file instanceof File) {
-            return $this->createApiResponse([
-                'message' => 'Attachment with requested Slug does not exist! Attachment has to be uploaded before added to comment!',
-            ], StatusCodesHelper::BAD_REQUEST_CODE);
+        if (!$fileEntity instanceof File) {
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'File with requested Slug does not exist in as DB!']));
+            return $response;
+        }
+
+        // Check if File exists in a web-page file system
+        $uploadDir = $this->getParameter('upload_dir');
+        $file = $uploadDir . DIRECTORY_SEPARATOR . $fileEntity->getUploadDir() . DIRECTORY_SEPARATOR . $fileEntity->getTempName();
+
+        if (!file_exists($file)) {
+            $response = $response->setStatusCode(StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'File with requested Slug does not exist in a web-page File System!']));
+            return $response;
         }
 
         if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_ATTACHMENT_TO_COMMENT, $comment)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         if ($this->canAddAttachmentToComment($comment, $slug)) {
@@ -137,54 +124,30 @@ class CommentAttachmentController extends ApiBaseController
             $this->getDoctrine()->getManager()->flush();
         }
 
-        $commentArray = $this->get('task_additional_service')->getCommentOfTaskResponse($commentId);
-        return $this->json($commentArray, StatusCodesHelper::CREATED_CODE);
+        $options['comment'] = $commentId;
+        $options['file'] = $fileEntity;
+        $attachmentEntity = $this->get('task_additional_service')->getCommentOneAttachmentResponse($options);
+
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($attachmentEntity));
+        return $response;
     }
 
     /**
      *  ### Response ###
      *      {
-     *       "data":
-     *       {
-     *          "id": 188,
-     *             "title": "test",
-     *             "body": "gggg 222",
-     *             "createdAt": 1507968484,
-     *             "updatedAt": 1507968484,
-     *             "internal": true,
-     *             "email": true,
-     *             "email_to":
-     *             [
-     *                "mb@web-solutions.sk"
-     *             ],
-     *             "email_cc": null,
-     *             "email_bcc": null,
-     *             "createdBy":
-     *             {
-     *                "id": 4031,
-     *                "username": "admin",
-     *                "email": "admin@admin.sk",
-     *                "name": "Admin",
-     *                "surname": "Adminovic",
-     *                "avatarSlug": "slug-15-15-2014"
-     *             },
-     *             "commentHasAttachments":
-     *             [
-     *                {
-     *                   "id": 3,
-     *                   "slug": "zsskcd-jpg-2016-12-17-15-36"
-     *                }
-     *             ],
-     *             "children":
-     *             [
-     *              6,
-     *              9
-     *             ]
-     *        },
+     *        "data":
+     *          {
+     *              "id": 5,
+     *              "slug": "zsskcd-jpg-2016-12-17-15-36",
+     *              "fileDir": "Upload dir",
+     *              "fileName": "Temp name"
+     *          },
      *        "_links":
-     *        {
-     *           "delete": "/api/v1/task-bundle/tasks/comments/9"
-     *         }
+     *          {
+     *              "add attachment to the Comment": "/api/v1/task-bundle/tasks/comments/13/add-attachment/api-documentation-xls-2018-03-28-18-48",
+     *              "remove attachment from the Comment": "/api/v1/task-bundle/tasks/comments/13/remove-attachment/api-documentation-xls-2018-03-28-18-48"
+     *          }
      *      }
      *
      * @ApiDoc(
@@ -194,12 +157,12 @@ class CommentAttachmentController extends ApiBaseController
      *       "name"="commentId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
-     *       "description"="The id of comment"
+     *       "description"="Comment Id"
      *     },
      *     {
      *       "name"="slug",
      *       "dataType"="string",
-     *       "description"="The slug of uploaded attachment"
+     *       "description"="Uploaded attachment slug"
      *     }
      *  },
      *  headers={
@@ -210,7 +173,7 @@ class CommentAttachmentController extends ApiBaseController
      *     }
      *  },
      *  statusCodes={
-     *      204 ="The attachment was successfully removed",
+     *      200 ="The attachment was successfully removed",
      *      400 ="Bad request",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
@@ -223,24 +186,28 @@ class CommentAttachmentController extends ApiBaseController
      * @return Response
      * @throws \LogicException
      */
-    public function removeAttachmentFromCommentAction(int $commentId, string $slug)
+    public function removeAttachmentFromCommentAction(int $commentId, string $slug): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('tasks_remove_attachment_from_comment', ['commentId' => $commentId, 'slug' => $slug]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $comment = $this->getDoctrine()->getRepository('APITaskBundle:Comment')->find($commentId);
 
         if (!$comment instanceof Comment) {
-            return $this->createApiResponse([
-                'message' => 'Comment with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Comment with requested Id does not exist!']));
+            return $response;
         }
 
-        $file = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
+        $fileEntity = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
             'slug' => $slug
         ]);
 
-        if (!$file instanceof File) {
-            return $this->createApiResponse([
-                'message' => 'Attachment with requested Slug does not exist!',
-            ], StatusCodesHelper::BAD_REQUEST_CODE);
+        if (!$fileEntity instanceof File) {
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'File with requested Slug does not exist in a DB!']));
+            return $response;
         }
 
         $commentHasAttachment = $this->getDoctrine()->getRepository('APITaskBundle:CommentHasAttachment')->findOneBy([
@@ -249,20 +216,27 @@ class CommentAttachmentController extends ApiBaseController
         ]);
 
         if (!$commentHasAttachment instanceof CommentHasAttachment) {
-            return $this->createApiResponse([
-                'message' => 'The requested attachment is not the attachment of the requested Task!',
-            ], StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Requested attachment is not an attachment of the requested Comment!']));
+            return $response;
         }
 
         if (!$this->get('task_voter')->isGranted(VoteOptions::REMOVE_ATTACHMENT_FROM_COMMENT, $comment)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $this->getDoctrine()->getManager()->remove($commentHasAttachment);
         $this->getDoctrine()->getManager()->flush();
 
-        $commentArray = $this->get('task_additional_service')->getCommentOfTaskResponse($commentId);
-        return $this->json($commentArray, StatusCodesHelper::DELETED_CODE);
+        $options['comment'] = $commentId;
+        $options['file'] = $fileEntity;
+        $attachmentEntity = $this->get('task_additional_service')->getCommentOneAttachmentResponse($options);
+
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($attachmentEntity));
+        return $response;
     }
 
     /**

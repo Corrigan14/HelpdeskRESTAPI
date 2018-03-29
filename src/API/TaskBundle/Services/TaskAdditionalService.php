@@ -366,6 +366,38 @@ class TaskAdditionalService
     }
 
     /**
+     * @param array $options
+     * @return array
+     */
+    public function getCommentOneAttachmentResponse(array $options): array
+    {
+        /** @var Task $task */
+        $commentId = $options['comment'];
+        /** @var File $file */
+        $file = $options['file'];
+
+        $attachmentArray = [
+            'fileId' => $file->getId(),
+            'slug' => $file->getSlug(),
+            'fileDir' => $file->getUploadDir(),
+            'fileName' => $file->getTempName()
+        ];
+
+        $response = [
+            'data' => $attachmentArray
+        ];
+
+        $pagination = [
+            '_links' => [
+                'add attachment to the Comment' => $this->router->generate('tasks_add_attachment_to_comment', ['commentId' => $commentId, 'slug' => $file->getSlug()]),
+                'remove attachment from the Comment' => $this->router->generate('tasks_remove_attachment_from_comment', ['commentId' => $commentId, 'slug' => $file->getSlug()]),
+            ]
+        ];
+
+        return array_merge($response, $pagination);
+    }
+
+    /**
      * @param int $page
      * @param int $count
      * @param array $routeOptions

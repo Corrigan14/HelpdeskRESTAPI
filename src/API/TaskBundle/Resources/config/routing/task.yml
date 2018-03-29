@@ -288,16 +288,16 @@ tasks_delete_tasks_comment:
             commentId: '\d+'
 
 tasks_add_attachment_to_comment:
-    path:     /tasks/comments/{commentId}/attachment/{slug}
+    path:     /tasks/comments/{commentId}/add-attachment/{slug}
     defaults: { _controller: APITaskBundle:Task/CommentAttachment:addAttachmentToComment}
-    methods: [POST]
+    methods: [PUT]
     requirements:
             commentId: '\d+'
 
 tasks_remove_attachment_from_comment:
-    path:     /tasks/comments/{commentId}/attachment/{slug}
+    path:     /tasks/comments/{commentId}/remove-attachment/{slug}
     defaults: { _controller: APITaskBundle:Task/CommentAttachment:removeAttachmentFromComment}
-    methods: [DELETE]
+    methods: [PUT]
     requirements:
             commentId: '\d+'
 

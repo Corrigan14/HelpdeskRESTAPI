@@ -298,7 +298,7 @@ class AttachmentController extends ApiBaseController
 
         if ($this->canAddAttachmentToTask($task, $slug)) {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent(json_encode(['message' => 'The requested attachment is not the attachment of the requested Task!']));
+            $response = $response->setContent(json_encode(['message' => 'Requested attachment is not an attachment of the requested Task!']));
             return $response;
         }
 

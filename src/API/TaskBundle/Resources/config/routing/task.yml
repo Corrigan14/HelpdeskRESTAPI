@@ -53,6 +53,13 @@ tasks_create_project_status_requester_company:
             requesterId: '\d+'
             companyId: '\d+'
 
+tasks_update:
+    path:     /tasks/{taskId}
+    defaults: { _controller: APITaskBundle:Task/Task:update }
+    methods: [PUT]
+    requirements:
+            taskId: '\d+'
+
 tasks_update_project:
     path:     /tasks/{taskId}/project/{projectId}
     defaults: { _controller: APITaskBundle:Task/Task:update }

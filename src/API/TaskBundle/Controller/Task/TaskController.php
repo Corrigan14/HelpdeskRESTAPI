@@ -1504,6 +1504,8 @@ class TaskController extends ApiBaseController
             $locationURL = $this->generateUrl('tasks_update_requester_company', ['taskId' => $taskId, 'requesterId' => $requesterId, 'companyId' => $companyId]);
         } elseif ($companyId && !$projectId && !$statusId && !$requesterId) {
             $locationURL = $this->generateUrl('tasks_update_company', ['taskId' => $taskId, 'companyId' => $companyId]);
+        } else {
+            $locationURL = $this->generateUrl('tasks_update', ['taskId' => $taskId]);
         }
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
@@ -1581,6 +1583,8 @@ class TaskController extends ApiBaseController
                     'to' => $status->getTitle()
                 ];
             }
+        } else {
+            $status = $task->getStatus();
         }
 
         if ($requesterId) {
@@ -1706,6 +1710,7 @@ class TaskController extends ApiBaseController
     private function updateTask(Task $task, array $requestBody, $locationURL, Status $status, $create = false, $changedParams = false): Response
     {
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+        $statusCode = $this->getCreateUpdateStatusCode($create);
 
         // REQUIRED PARAMETERS
         if (isset($requestBody['title'])) {
@@ -2027,16 +2032,15 @@ class TaskController extends ApiBaseController
                         $taskData->setTaskAttribute($taskAttribute);
                     }
 
-                    // If value = 'null' is being sent, data are set to null
-                    if (!is_array($value) && 'null' === strtolower($value)) {
-                        $taskData->setValue(null);
-                        $taskData->setDateValue(null);
-                        $taskData->setBoolValue(null);
-                        $task->addTaskDatum($taskData);
-
-                        $this->getDoctrine()->getManager()->persist($taskData);
-                        $this->getDoctrine()->getManager()->persist($task);
+                    // If value = 'null' is being sent and DataAttribute is not Required - data are deleted
+                    if (!is_array($value) && 'null' === strtolower($value) && !in_array($key, $requiredTaskAttributeData, true)) {
+                        $this->getDoctrine()->getManager()->remove($taskData);
                         $this->getDoctrine()->getManager()->flush();
+                        continue;
+                    } elseif (!is_array($value) && 'null' === strtolower($value) && in_array($key, $requiredTaskAttributeData, true)) {
+                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'Task Data with a Task Attribute key: ' . $key . ' are Required! It is not possible to delete this data.']));
+                        return $response;
                     } else {
                         $tdValueChecker = $this->get('entity_processor')->checkDataValueFormat($taskAttribute, $value);
                         if (true === $tdValueChecker) {
@@ -2089,8 +2093,6 @@ class TaskController extends ApiBaseController
         }
 
         $this->getDoctrine()->getManager()->flush();
-
-        dump($changedParams);
         // Sent Notification Emails about a Task update to tasks: REQUESTER, ASSIGNED USERS, FOLLOWERS
         if (\count($changedParams) > 0) {
             $notificationEmailAddresses = $this->getEmailForUpdateTaskNotification($task, $this->getUser()->getEmail());
@@ -2111,7 +2113,7 @@ class TaskController extends ApiBaseController
 
         $taskArray = $this->get('task_service')->getFullTaskEntity($task, true, $this->getUser(), $this->get('task_voter')->isAdmin());
 
-        $response = $response->setStatusCode(StatusCodesHelper::CREATED_CODE);
+        $response = $response->setStatusCode($statusCode);
         $response = $response->setContent(json_encode($taskArray));
         return $response;
     }

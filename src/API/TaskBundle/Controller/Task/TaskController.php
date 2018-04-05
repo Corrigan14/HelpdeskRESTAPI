@@ -1540,12 +1540,23 @@ class TaskController extends ApiBaseController
                     $response = $response->setContent(json_encode(['message' => 'Permission denied! You can not create task in a selected project!']));
                     return $response;
                 }
-                $oldProjectTitle = $task->getProject()->getTitle();
+                $oldProject = $task->getProject();
                 $task->setProject($project);
                 $changedParams['project'] = [
-                    'from' => $oldProjectTitle,
+                    'from' => $oldProject->getTitle(),
                     'to' => $project->getTitle()
                 ];
+
+                // Delete all assigners from the old project
+                if ($oldProject->getId() !== $project->getId()) {
+                    $assigners = $task->getTaskHasAssignedUsers();
+                    if (count($assigners) > 0) {
+                        foreach ($assigners as $assigner) {
+                            $this->getDoctrine()->getManager()->remove($assigner);
+                        }
+                        $this->getDoctrine()->getManager()->flush();
+                    }
+                }
             }
         }
 
@@ -1831,159 +1842,193 @@ class TaskController extends ApiBaseController
 
         // Add tag(s) to the task
         if (isset($requestBody['tag'])) {
-            $tagsArray = json_decode($requestBody['tag'], true);
-            if (!\is_array($tagsArray)) {
-                $tagsArray = explode(',', $requestBody['tag']);
+            //Delete old tags: sent body is actual, another data has to be removed
+            $oldTags = $task->getTags();
+            if (count($oldTags) > 0) {
+                foreach ($oldTags as $oldTag) {
+                    $task->removeTag($oldTag);
+                    $this->getDoctrine()->getManager()->persist($task);
+                }
+                $this->getDoctrine()->getManager()->flush();
             }
 
-            foreach ($tagsArray as $data) {
-                $tagTitle = $data;
-                $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
-                    'title' => $data
-                ]);
-
-                if ($tag instanceof Tag) {
-                    //Check if user can add tag to requested Task
-                    $options = [
-                        'task' => $task,
-                        'tag' => $tag
-                    ];
-
-                    if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_TAG_TO_TASK, $options)) {
-                        $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
-                        $response = $response->setContent(json_encode(['message' => 'Tag with title: ' . $tagTitle . ' can not be added to the requested task!']));
-                        return $response;
-                    }
-
-                    //Check if tag is already added to task
-                    $taskHasTags = $task->getTags();
-                    if (in_array($tag, $taskHasTags->toArray(), true)) {
-                        continue;
-                    }
-                } else {
-                    //Create a new tag
-                    $tag = new Tag();
-                    $tag->setTitle($tagTitle);
-                    $tag->setPublic(false);
-                    $tag->setColor('FFFFFF');
-                    $tag->setCreatedBy($this->getUser());
-
-                    $this->getDoctrine()->getManager()->persist($tag);
-                    $this->getDoctrine()->getManager()->flush();
+            if (strtolower($requestBody['tag'] !== "null")) {
+                $tagsArray = json_decode($requestBody['tag'], true);
+                if (!\is_array($tagsArray)) {
+                    $tagsArray = explode(',', $requestBody['tag']);
                 }
-                //Add tag to task
-                $task->addTag($tag);
-                $this->getDoctrine()->getManager()->persist($task);
+
+                foreach ($tagsArray as $data) {
+                    $tagTitle = $data;
+                    $tag = $this->getDoctrine()->getRepository('APITaskBundle:Tag')->findOneBy([
+                        'title' => $data
+                    ]);
+
+                    if ($tag instanceof Tag) {
+                        //Check if user can add tag to requested Task
+                        $options = [
+                            'task' => $task,
+                            'tag' => $tag
+                        ];
+
+                        if (!$this->get('task_voter')->isGranted(VoteOptions::ADD_TAG_TO_TASK, $options)) {
+                            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+                            $response = $response->setContent(json_encode(['message' => 'Tag with title: ' . $tagTitle . ' can not be added to the requested task!']));
+                            return $response;
+                        }
+
+                        //Check if tag is already added to task
+                        $taskHasTags = $task->getTags();
+                        if (in_array($tag, $taskHasTags->toArray(), true)) {
+                            continue;
+                        }
+                    } else {
+                        //Create a new tag
+                        $tag = new Tag();
+                        $tag->setTitle($tagTitle);
+                        $tag->setPublic(false);
+                        $tag->setColor('20B2AA');
+                        $tag->setCreatedBy($this->getUser());
+
+                        $this->getDoctrine()->getManager()->persist($tag);
+                        $this->getDoctrine()->getManager()->flush();
+                    }
+                    //Add tag to task
+                    $task->addTag($tag);
+                    $this->getDoctrine()->getManager()->persist($task);
+                }
             }
         }
 
         // Add assigner(s) to the task
         // $requestData['assigned'] = '[{"userId": 209, "statusId": 8}]';
         if (isset($requestBody['assigned'])) {
-            $assignedUsersArray = json_decode($requestBody['assigned'], true);
-            if (!\is_array($assignedUsersArray)) {
-                $assignedUsersArray = explode(',', $requestBody['assigned']);
+            //Delete old assigners: sent body is actual, another data has to be removed
+            $oldAssigners = $task->getTaskHasAssignedUsers();
+            if (count($oldAssigners) > 0) {
+                foreach ($oldAssigners as $oldAssigner) {
+                    $this->getDoctrine()->getManager()->remove($oldAssigner);
+                }
+                $this->getDoctrine()->getManager()->flush();
             }
 
-            foreach ($assignedUsersArray as $key => $value) {
-                $assignedUserId = $value['userId'];
-                if (isset($value['statusId'])) {
-                    $assignedUserStatusId = $value['statusId'];
-                } else {
-                    $assignedUserStatusId = $status->getId();
+            if (strtolower($requestBody['assigned'] !== "null")) {
+                $assignedUsersArray = json_decode($requestBody['assigned'], true);
+                if (!\is_array($assignedUsersArray)) {
+                    $assignedUsersArray = explode(',', $requestBody['assigned']);
                 }
 
-                // USER
-                $assignedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($assignedUserId);
-                if (!$assignedUser instanceof User) {
-                    $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-                    $response = $response->setContent(json_encode(['message' => 'Assigner with requested Id does not exist!']));
-                    return $response;
+                foreach ($assignedUsersArray as $key => $value) {
+                    $assignedUserId = $value['userId'];
+                    if (isset($value['statusId'])) {
+                        $assignedUserStatusId = $value['statusId'];
+                    } else {
+                        $assignedUserStatusId = $status->getId();
+                    }
+
+                    // USER
+                    $assignedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($assignedUserId);
+                    if (!$assignedUser instanceof User) {
+                        $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'Assigner with requested Id ' . $assignedUserId . ' does not exist!']));
+                        return $response;
+                    }
+
+                    // Check if user is already assigned to the task
+                    $existedEntity = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy(
+                        ['task' => $task, 'user' => $assignedUser]
+                    );
+                    if (!$existedEntity instanceof TaskHasAssignedUser) {
+                        $userIsAssignedToTask = new TaskHasAssignedUser();
+                    }
+
+                    // Check if user can be assigned to the task
+                    $options = [
+                        'task' => $task,
+                        'user' => $assignedUser
+                    ];
+
+                    if (!$this->get('task_voter')->isGranted(VoteOptions::ASSIGN_USER_TO_TASK, $options)) {
+                        $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'User with id: ' . $assignedUserId . 'has not permission to be assigned to requested task!']));
+                        return $response;
+                    }
+
+                    // STATUS
+                    $assignerStatus = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($assignedUserStatusId);
+                    if (!$assignerStatus instanceof Status) {
+                        $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'Assigners requested STATUS does not Exist!']));
+                        return $response;
+                    }
+
+                    $userIsAssignedToTask->setTask($task);
+                    $userIsAssignedToTask->setStatus($assignerStatus);
+                    $userIsAssignedToTask->setUser($assignedUser);
+                    $userIsAssignedToTask->setActual(true);
+                    $this->getDoctrine()->getManager()->persist($userIsAssignedToTask);
+                    $this->getDoctrine()->getManager()->flush();
+
+                    $task->addTaskHasAssignedUser($userIsAssignedToTask);
+                    $this->getDoctrine()->getManager()->persist($task);
                 }
-
-                // Check if user is already assigned to the task
-                $existedEntity = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy(
-                    ['task' => $task, 'user' => $assignedUser]
-                );
-                if (!$existedEntity instanceof TaskHasAssignedUser) {
-                    $userIsAssignedToTask = new TaskHasAssignedUser();
-                }
-
-                // Check if user can be assigned to the task
-                $options = [
-                    'task' => $task,
-                    'user' => $assignedUser
-                ];
-
-                if (!$this->get('task_voter')->isGranted(VoteOptions::ASSIGN_USER_TO_TASK, $options)) {
-                    $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
-                    $response = $response->setContent(json_encode(['message' => 'User with id: ' . $assignedUserId . 'has not permission to be assigned to requested task!']));
-                    return $response;
-                }
-
-                // STATUS
-                $assignerStatus = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($assignedUserStatusId);
-                if (!$assignerStatus instanceof Status) {
-                    $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-                    $response = $response->setContent(json_encode(['message' => 'Assigners requested STATUS does not Exist!']));
-                    return $response;
-                }
-
-                $userIsAssignedToTask->setTask($task);
-                $userIsAssignedToTask->setStatus($assignerStatus);
-                $userIsAssignedToTask->setUser($assignedUser);
-                $userIsAssignedToTask->setActual(true);
-                $this->getDoctrine()->getManager()->persist($userIsAssignedToTask);
-                $this->getDoctrine()->getManager()->flush();
-
-                $task->addTaskHasAssignedUser($userIsAssignedToTask);
-                $this->getDoctrine()->getManager()->persist($task);
             }
         }
 
         // Add attachment(s) to the task
         if (isset($requestBody['attachment'])) {
-            $attachmentArray = json_decode($requestBody['attachment'], true);
-            if (!\is_array($attachmentArray)) {
-                $attachmentArray = explode(',', $requestBody['attachment']);
+            //Delete old attachments: sent body is actual, another data has to be removed
+            $oldAttachments = $task->getTaskHasAttachments();
+            if (count($oldAttachments) > 0) {
+                foreach ($oldAttachments as $oldAttachment) {
+                    $this->getDoctrine()->getManager()->remove($oldAttachment);
+                }
+                $this->getDoctrine()->getManager()->flush();
             }
 
-            foreach ($attachmentArray as $data) {
-                $fileEntity = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
-                    'slug' => $data,
-                ]);
-
-                if (!$fileEntity instanceof File) {
-                    $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-                    $response = $response->setContent(json_encode(['message' => 'File with requested Slug does not exist in a DB!']));
-                    return $response;
+            if (strtolower($requestBody['attachment'] !== "null")) {
+                $attachmentArray = json_decode($requestBody['attachment'], true);
+                if (!\is_array($attachmentArray)) {
+                    $attachmentArray = explode(',', $requestBody['attachment']);
                 }
 
-                // Check if the File exists in a web-page file system
-                $uploadDir = $this->getParameter('upload_dir');
-                $file = $uploadDir . DIRECTORY_SEPARATOR . $fileEntity->getUploadDir() . DIRECTORY_SEPARATOR . $fileEntity->getTempName();
+                foreach ($attachmentArray as $data) {
+                    $fileEntity = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
+                        'slug' => $data,
+                    ]);
 
-                if (!file_exists($file)) {
-                    $response = $response->setStatusCode(StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
-                    $response = $response->setContent(json_encode(['message' => 'File with requested Slug does not exist in a web-page File System!']));
-                    return $response;
-                }
+                    if (!$fileEntity instanceof File) {
+                        $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'File with requested Slug does not exist in a DB!']));
+                        return $response;
+                    }
 
-                $taskHasAttachment = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAttachment')->findOneBy([
-                    'slug' => $data,
-                    'task' => $task->getId()
-                ]);
+                    // Check if the File exists in a web-page file system
+                    $uploadDir = $this->getParameter('upload_dir');
+                    $file = $uploadDir . DIRECTORY_SEPARATOR . $fileEntity->getUploadDir() . DIRECTORY_SEPARATOR . $fileEntity->getTempName();
 
-                if ($taskHasAttachment instanceof TaskHasAttachment) {
-                    continue;
-                } else {
-                    //Add attachment to the task
-                    $taskHasAttachmentNew = new TaskHasAttachment();
-                    $taskHasAttachmentNew->setTask($task);
-                    $taskHasAttachmentNew->setSlug($data);
-                    $task->addTaskHasAttachment($taskHasAttachmentNew);
-                    $this->getDoctrine()->getManager()->persist($taskHasAttachmentNew);
-                    $this->getDoctrine()->getManager()->persist($task);
+                    if (!file_exists($file)) {
+                        $response = $response->setStatusCode(StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'File with requested Slug does not exist in a web-page File System!']));
+                        return $response;
+                    }
+
+                    $taskHasAttachment = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAttachment')->findOneBy([
+                        'slug' => $data,
+                        'task' => $task->getId()
+                    ]);
+
+                    if ($taskHasAttachment instanceof TaskHasAttachment) {
+                        continue;
+                    } else {
+                        //Add attachment to the task
+                        $taskHasAttachmentNew = new TaskHasAttachment();
+                        $taskHasAttachmentNew->setTask($task);
+                        $taskHasAttachmentNew->setSlug($data);
+                        $task->addTaskHasAttachment($taskHasAttachmentNew);
+                        $this->getDoctrine()->getManager()->persist($taskHasAttachmentNew);
+                        $this->getDoctrine()->getManager()->persist($task);
+                    }
                 }
             }
         }

@@ -1488,16 +1488,30 @@ class UserController extends ApiBaseController
                 }
             }
 
-            //Check if IMAGE was already uploaded
             if (isset($requestData['image']) && 'null' !== strtolower($requestData['image'])) {
                 $image = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
                     'slug' => $requestData['image']
                 ]);
+
+                //Check if IMAGE was already uploaded
                 if (!$image instanceof File) {
                     $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                     $response = $response->setContent(json_encode(['message' => 'Image with requested SLUG does not exist in DB! Image has to be UPLOADED by /api/v1/core-bundle/cdn/upload first!']));
                     return $response;
                 }
+
+                // Check if the File exists in a web-page file system
+                $uploadDir = $this->getParameter('upload_dir');
+                $file = $uploadDir . DIRECTORY_SEPARATOR . $image->getUploadDir() . DIRECTORY_SEPARATOR . $image->getTempName();
+
+                if (!file_exists($file)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'File with requested Slug does not exist in a web-page File System!']));
+                    return $response;
+                }
+
+                $user->setImage($requestData['image']);
+                unset($requestData['image']);
             }
 
             $statusCode = $this->getCreateUpdateStatusCode($create);

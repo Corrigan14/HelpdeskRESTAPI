@@ -29,6 +29,7 @@ class FilterRepository extends EntityRepository
         $loggedUserId = $options['loggedUserId'];
         $order = $options['order'];
         $limit = $options['limit'];
+        $default = $options['default'];
 
         $query = $this->createQueryBuilder('f')
             ->select('f, createdBy, project, projectCreator')
@@ -72,7 +73,7 @@ class FilterRepository extends EntityRepository
             $paramArray['reportParam'] = false;
         }
 
-        if (!empty($project)) {
+        if ($project) {
             if ('not' === $project) {
                 $query->andWhere('f.project IS NULL');
             } elseif ('current-user' === $project) {
@@ -83,6 +84,13 @@ class FilterRepository extends EntityRepository
 
                 $projectIds = explode(',', $project);
                 $paramArray['projectIds'] = $projectIds;
+            }
+        }
+
+        if ($default) {
+            if ('true' === $default) {
+                $query->andWhere('f.default = :defaultParam');
+                $paramArray['defaultParam'] = true;
             }
         }
 
@@ -292,7 +300,7 @@ class FilterRepository extends EntityRepository
             'project' => $projectArray,
             'columns' => $data->getColumns(),
             'columns_task_attributes' => $data->getColumnsTaskAttributes(),
-            'remembered'=> $data->getUsersRemembered()
+            'remembered' => $data->getUsersRemembered()
         ];
 
         return $response;

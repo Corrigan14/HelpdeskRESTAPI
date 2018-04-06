@@ -155,7 +155,11 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *     {
      *       "name"="limit",
      *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
-     *     }
+     *     },
+     *     {
+     *       "name"="default",
+     *       "description"="Returns only DEFAULT filters if this param is TRUE"
+     *     },
      *  },
      *  headers={
      *     {
@@ -171,59 +175,60 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
-     * @return JsonResponse
+     * @return Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    public function listAction(Request $request):JsonResponse
+    public function listAction(Request $request): Response
     {
-        $pageNum = $request->get('page');
-        $pageNum = (int)$pageNum;
-        $page = ($pageNum === 0) ? 1 : $pageNum;
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('filter_list');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
-        $limitNum = $request->get('limit');
-        $limit = (int)$limitNum ?: 10;
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        if (false !== $requestBody) {
+            $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody);
 
-        if(999 === $limit){
-            $page = 1;
+            $page = $processedFilterParams['page'];
+            $limit = $processedFilterParams['limit'];
+            $order = $processedFilterParams['order'];
+            $isActive = $processedFilterParams['isActive'];
+            $public = $processedFilterParams['public'];
+            $report = $processedFilterParams['report'];
+            $project = $processedFilterParams['project'];
+            $default = $processedFilterParams['default'];
+
+            $filtersForUrl = [
+                'isActive' => '&isActive=' . $isActive,
+                'order' => '&order=' . $order,
+                'public' => '&public=' . $public,
+                'report' => '&report=' . $report,
+                'project' => '&project=' . $project,
+                'default' => '&default=' . $default
+            ];
+
+            $options = [
+                'loggedUserId' => $this->getUser()->getId(),
+                'isActive' => strtolower($isActive),
+                'public' => strtolower($public),
+                'report' => strtolower($report),
+                'project' => strtolower($project),
+                'default' => strtolower($default),
+                'order' => $order,
+                'filtersForUrl' => $filtersForUrl,
+                'limit' => $limit
+            ];
+
+            $filtersArray = $this->get('filter_service')->getFiltersResponse($page, $options);
+            $response = $response->setContent(json_encode($filtersArray));
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        } else {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         }
 
-        $orderString = $request->get('order');
-        $orderString = strtolower($orderString);
-        $order = ($orderString === 'asc' || $orderString === 'desc') ? $orderString : 'ASC';
-
-        $isActive = $request->get('isActive');
-        $public = $request->get('public');
-        $report = $request->get('report');
-        $project = $request->get('project');
-
-        $filtersForUrl = [];
-        if (null !== $public) {
-            $filtersForUrl['public'] = '&public=' . $public;
-        }
-        if (null !== $isActive) {
-            $filtersForUrl['isActive'] = '&isActive=' . $isActive;
-        }
-        if (null !== $report) {
-            $filtersForUrl['report'] = '&report=' . $report;
-        }
-        if (null !== $project) {
-            $filtersForUrl['project'] = '&project=' . $project;
-        }
-
-        $options = [
-            'loggedUserId' => $this->getUser()->getId(),
-            'isActive' => strtolower($isActive),
-            'public' => strtolower($public),
-            'report' => strtolower($report),
-            'project' => strtolower($project),
-            'order' => $order,
-            'filtersForUrl' => array_merge($filtersForUrl, ['order' => '&order=' . $order]),
-            'limit' => $limit
-        ];
-
-        return $this->json($this->get('filter_service')->getFiltersResponse($page, $options), StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
     }
 
     /**

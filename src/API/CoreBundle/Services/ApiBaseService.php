@@ -157,13 +157,41 @@ class ApiBaseService
             $internal = 'all';
         }
 
+        if (isset($requestBody['public'])) {
+            $public = strtolower($requestBody['public']);
+        } else {
+            $public = 'all';
+        }
+
+        if (isset($requestBody['report'])) {
+            $report = strtolower($requestBody['report']);
+        } else {
+            $report = 'all';
+        }
+
+        if (isset($requestBody['project'])) {
+            $project = strtolower($requestBody['project']);
+        } else {
+            $project = null;
+        }
+
+        if (isset($requestBody['default'])) {
+            $default = strtolower($requestBody['default']);
+        } else {
+            $default = null;
+        }
+
         return [
             'page' => $page,
             'limit' => $limit,
             'order' => $order,
             'isActive' => $isActive,
             'term' => $term,
-            'internal' => $internal
+            'internal' => $internal,
+            'public' => $public,
+            'report' => $report,
+            'project' => $project,
+            'default' => $default
         ];
     }
 

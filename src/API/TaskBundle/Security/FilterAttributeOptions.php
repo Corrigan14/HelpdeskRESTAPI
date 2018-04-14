@@ -1,17 +1,15 @@
 <?php
 
-namespace API\TaskBundle\Services;
+namespace API\TaskBundle\Security;
 
 /**
  * Class FilterAttributeOptions
  *
- * @package API\TaskBundle\Services
+ * @package API\TaskBundle\Security
  */
 class FilterAttributeOptions
 {
     // Attributes available for filter
-    const ID = 'id';
-    const TITLE = 'title';
     const STATUS = 'status';
     const PROJECT = 'project';
     const CREATOR = 'creator';

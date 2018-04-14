@@ -21,7 +21,7 @@ use API\TaskBundle\Security\StatusFunctionOptions;
 use API\TaskBundle\Security\StatusOptions;
 use API\TaskBundle\Security\UserRoleAclOptions;
 use API\TaskBundle\Security\VoteOptions;
-use API\TaskBundle\Services\FilterAttributeOptions;
+use API\TaskBundle\Security\FilterAttributeOptions;
 use API\TaskBundle\Services\VariableHelper;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;

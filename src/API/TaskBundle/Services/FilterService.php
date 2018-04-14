@@ -93,7 +93,6 @@ class FilterService
     {
         return [
             'put' => $this->router->generate('filter_update', ['id' => $id]),
-            'patch' => $this->router->generate('filter_partial_update', ['id' => $id]),
             'delete' => $this->router->generate('filter_delete', ['id' => $id]),
         ];
     }

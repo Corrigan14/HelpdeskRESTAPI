@@ -5,13 +5,12 @@ namespace API\TaskBundle\Controller;
 use API\TaskBundle\Entity\Filter;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\TaskAttribute;
+use API\TaskBundle\Security\FilterAttributeOptions;
+use API\TaskBundle\Security\FilterColumnsOptions;
 use API\TaskBundle\Security\UserRoleAclOptions;
 use API\TaskBundle\Security\VoteOptions;
-use API\TaskBundle\Services\FilterAttributeOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
-use Igsem\APIBundle\Controller\ControllerInterface;
 use Igsem\APIBundle\Services\StatusCodesHelper;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,7 +20,7 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * @package API\TaskBundle\Controller
  */
-class FilterController extends ApiBaseController implements ControllerInterface
+class FilterController extends ApiBaseController
 {
     /**
      *  ### Response ###
@@ -391,7 +390,6 @@ class FilterController extends ApiBaseController implements ControllerInterface
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/filters/2",
-     *           "patch": "/api/v1/task-bundle/filters/2",
      *           "delete": "/api/v1/task-bundle/filters/2"
      *         }
      *      }
@@ -399,7 +397,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @ApiDoc(
      *  resource = true,
      *  description="Create a new Filter Entity.
-     *  Filter field is expected an array with key = filter option, value = requested data id/val/... (look at task list filters)
+     *  Filter field is expected to be an array with key = filter option, value = requested data id/val/... (look at task list filters)
      *  Allowed filter options are saved in FilterAttributeOptions file.",
      *  input={"class"="API\TaskBundle\Entity\Filter"},
      *  headers={
@@ -427,37 +425,126 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function createAction(Request $request)
+    public function createAction(Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('filter_create');
+
         $filter = new Filter();
-        $requestData = $request->request->all();
-        // Check if user can create PUBLIC filter (it's role has SHARE_FILTER ACL)
-        if (isset($requestData['public'])) {
-            if (true === $requestData['public'] || 1 === (int)$requestData['public']) {
-                $aclOptions = [
-                    'acl' => UserRoleAclOptions::SHARE_FILTERS,
-                    'user' => $this->getUser()
-                ];
-
-                if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-                    $filter->setPublic(false);
-                    return $this->createApiResponse([
-                        'message' => 'You have not permission to create a PUBLIC filter!',
-                    ], StatusCodesHelper::ACCESS_DENIED_CODE);
-                } else {
-                    $filter->setPublic(true);
-                }
-                unset($requestData['public']);
-            } else {
-                $filter->setPublic(false);
-            }
-        }
-
         $filter->setIsActive(true);
         $filter->setCreatedBy($this->getUser());
         $filter->setUsersRemembered(false);
 
-        return $this->updateEntity($filter, $requestData, true);
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        return $this->updateEntity($filter, $requestBody, true, $locationURL);
+    }
+
+    /**
+     * ### Response ###
+     *      {
+     *        "data":
+     *         {
+     *             "id": 145,
+     *             "title": 145,
+     *             "public": true,
+     *             "filter":
+     *             {
+     *                "status": "238,239",
+     *                "assigned": "not,current-user"
+     *             },
+     *             "report": false,
+     *             "is_active": true,
+     *             "default": true,
+     *             "icon_class": "&#xE88A;"
+     *             "createdBy":
+     *             {
+     *                "id": 2575,
+     *                "username": "admin",
+     *                "email": "admin@admin.sk"
+     *             },
+     *             "project":
+     *             {
+     *                "id": 2575,
+     *                "title": "INBOX",
+     *             },
+     *             "columns":
+     *             [
+     *                "title",
+     *                "creator",
+     *                "company",
+     *                "assigned",
+     *                "createdTime",
+     *                "deadlineTime",
+     *                "status"
+     *             ],
+     *             "columns_task_attributes":
+     *             [
+     *                205,
+     *                206
+     *             ],
+     *             "remembered": false
+     *         },
+     *        "_links":
+     *        {
+     *           "put": "/api/v1/task-bundle/filters/2",
+     *           "delete": "/api/v1/task-bundle/filters/2"
+     *         }
+     *      }
+     *
+     * @ApiDoc(
+     *  resource = true,
+     *  description="Update Filter Entity.
+     *  Filter field is expected to be an array with key = filter option, value = requested data id/val/... (look at task list filters)
+     *  Allowed filter options are saved in FilterAttributeOptions file.",
+     *  input={"class"="API\TaskBundle\Entity\Filter"},
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  output={"class"="API\TaskBundle\Entity\Filter"},
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity",
+     *      409 ="Invalid parameters",
+     *  }
+     * )
+     *
+     * @param Request $request
+     * @param int $id
+     * @return Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     */
+    public function updateAction(Request $request, int $id): Response
+    {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('filter_update');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
+        if (!$filter instanceof Filter) {
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Filter with requested Id does not exist!']));
+            return $response;
+        }
+
+        if (!$this->get('filter_voter')->isGranted(VoteOptions::UPDATE_FILTER, $filter)) {
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
+        }
+
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        return $this->updateEntity($filter, $requestBody, false, $locationURL);
     }
 
     /**
@@ -817,133 +904,6 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * ### Response ###
      *      {
      *        "data":
-     *         {
-     *             "id": 145,
-     *             "title": 145,
-     *             "public": true,
-     *             "filter":
-     *             {
-     *                "status": "238,239",
-     *                "assigned": "not,current-user"
-     *             },
-     *             "report": false,
-     *             "is_active": true,
-     *             "default": true,
-     *             "icon_class": "&#xE88A;"
-     *             "createdBy":
-     *             {
-     *                "id": 2575,
-     *                "username": "admin",
-     *                "email": "admin@admin.sk"
-     *             },
-     *             "project":
-     *             {
-     *                "id": 2575,
-     *                "title": "INBOX",
-     *             },
-     *             "columns":
-     *             [
-     *                "title",
-     *                "creator",
-     *                "company",
-     *                "assigned",
-     *                "createdTime",
-     *                "deadlineTime",
-     *                "status"
-     *             ],
-     *             "columns_task_attributes":
-     *             [
-     *                205,
-     *                206
-     *             ],
-     *             "remembered": false
-     *         },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/filters/2",
-     *           "patch": "/api/v1/task-bundle/filters/2",
-     *           "delete": "/api/v1/task-bundle/filters/2"
-     *         }
-     *      }
-     *
-     * @ApiDoc(
-     *  description="Update the Filter Entity",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  input={"class"="API\TaskBundle\Entity\Filter"},
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\TaskBundle\Entity\Filter"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     *
-     * @param int $id
-     * @param Request $request
-     * @return Response
-     * @throws \LogicException
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \InvalidArgumentException
-     */
-    public function updateAction(int $id, Request $request)
-    {
-        $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
-        $requestData = $request->request->all();
-
-        if (!$filter instanceof Filter) {
-            return $this->createApiResponse([
-                'message' => 'Filter with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
-        }
-
-        if (!$this->get('filter_voter')->isGranted(VoteOptions::UPDATE_FILTER, $filter)) {
-            return $this->accessDeniedResponse();
-        }
-
-        // Check if user can create PUBLIC filter (it's role has SHARE_FILTER ACL)
-        if (isset($requestData['public']) && true === $requestData['public']) {
-            $aclOptions = [
-                'acl' => UserRoleAclOptions::SHARE_FILTERS,
-                'user' => $this->getUser()
-            ];
-
-            if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-                $filter->setPublic(false);
-                return $this->createApiResponse([
-                    'message' => 'You have not permission to create PUBLIC filter!',
-                ], StatusCodesHelper::ACCESS_DENIED_CODE);
-            } else {
-                $filter->setPublic(true);
-            }
-            unset($requestData['public']);
-        } else {
-            $filter->setPublic(false);
-        }
-
-        return $this->updateEntity($filter, $requestData);
-    }
-
-    /**
-     * ### Response ###
-     *      {
-     *        "data":
      *        {
      *             "id": 145,
      *             "title": 145,
@@ -1138,7 +1098,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @param Filter $filter
      * @param array $data
      * @param bool $create
-     * @param bool $usersRemembered
+     * @param $locationUrl
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \InvalidArgumentException
@@ -1148,7 +1108,7 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    private function updateEntity(Filter $filter, array $data, $create = false, $usersRemembered = false)
+    private function updateEntity(Filter $filter, array $data, $create = false, $locationUrl)
     {
         $allowedUnitEntityParams = [
             'title',
@@ -1163,151 +1123,180 @@ class FilterController extends ApiBaseController implements ControllerInterface
             'columns_task_attributes'
         ];
 
-        if (array_key_exists('_format', $data)) {
-            unset($data['_format']);
-        }
+        // JSON API Response - Content type and Location settings
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationUrl);
 
-        foreach ($data as $key => $value) {
-            if (!in_array($key, $allowedUnitEntityParams, true)) {
-                return $this->createApiResponse(
-                    ['message' => $key . ' is not allowed parameter for Filter Entity!'],
-                    StatusCodesHelper::INVALID_PARAMETERS_CODE
-                );
-            }
-        }
 
-        $statusCode = $this->getCreateUpdateStatusCode($create);
-
-        // Check if every key sent in filter array is allowed in FilterOptions and decode data correctly
-        // Possilbe ways how to send Filter data:
-        // 1. array [assigned => "210,211", taskCompany => "202"]
-        // 2. json: e.g {"assigned":"210,211","taskCompany":"202"}
-        // 3. string in a specific format: assigned=>210,taskCompany=>202
-        if (isset($data['filter'])) {
-            $filters = $data['filter'];
-            if (!is_array($filters)) {
-                //Try Json decode or Array Exploding
-                $filtersArray = json_decode($filters, true);
-                // Not very nice to use the third post data option
-                if (!is_array($filtersArray)) {
-                    $filtersArray = explode(',', $filters);
-                    $filtersExplodedArray = [];
-                    foreach ($filtersArray as $array) {
-                        $keyValue = explode('=>', $array);
-                        $filtersExplodedArray[$keyValue[0]] = $keyValue[1];
-                    }
-                    $filtersArray = $filtersExplodedArray;
-                }
-            } else {
-                $filtersArray = $filters;
+        if (false !== $data) {
+            if (array_key_exists('_format', $data)) {
+                unset($data['_format']);
             }
 
-            foreach ($filtersArray as $key => $value) {
-                if (!in_array($key, FilterAttributeOptions::getConstants(), true)) {
-                    return $this->createApiResponse([
-                        'message' => 'Requested filter parameter ' . $key . ' is not allowed!',
-                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            foreach ($data as $key => $value) {
+                if (!in_array($key, $allowedUnitEntityParams, true)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for a Filter Entity!']));
+                    return $response;
                 }
             }
 
-            $filter->setFilter($filtersArray);
-            unset($data['filter']);
-        }
+            // Check if user can create PUBLIC filter (it's role has SHARE_FILTER ACL)
+            if (isset($data['public']) && (true === $data['public'] || 'true' == $data['public'] || 1 === (int)$data['public'])) {
+                $aclOptions = [
+                    'acl' => UserRoleAclOptions::SHARE_FILTERS,
+                    'user' => $this->getUser()
+                ];
 
-        // Check if user can create REPORT Filter (it's role has to have ACL REPORT_FILTERS)
-        if (isset($data['report']) && $data['report']) {
-            $aclOptions = [
-                'acl' => UserRoleAclOptions::REPORT_FILTERS,
-                'user' => $this->getUser()
-            ];
+                if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'You have not permission to create a PUBLIC filter!']));
+                    return $response;
+                } else {
+                    $filter->setPublic(true);
+                }
+                unset($data['public']);
+            } elseif ($create) {
+                $filter->setPublic(false);
+            }
 
-            if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+            // Check if user can create REPORT Filter (it's role has to have ACL REPORT_FILTERS)
+            if (isset($data['report']) && (true === $data['report'] || 'true' == $data['report'] || 1 === (int)$data['report'])) {
+                $aclOptions = [
+                    'acl' => UserRoleAclOptions::REPORT_FILTERS,
+                    'user' => $this->getUser()
+                ];
+
+                if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+                    $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'You have not permission to create a REPORT filter!']));
+                    return $response;
+                } else {
+                    $filter->setReport(true);
+                }
+                unset($data['report']);
+            } elseif ($create) {
                 $filter->setReport(false);
-                return $this->createApiResponse([
-                    'message' => 'You have not permission to create REPORT filter!',
-                ], StatusCodesHelper::ACCESS_DENIED_CODE);
+            }
+
+
+            // Check if user want to set this filter like default
+            if (isset($data['default']) && (true === $data['default'] || 'true' == $data['default'] || 1 === (int)$data['default'])) {
+                $filter->setDefault(true);
+            } elseif ($create) {
+                $filter->setDefault(false);
+            }
+
+            // Check if every key sent in a filter array is allowed in FilterOptions and decode data correctly
+            // Possilbe ways how to send Filter data:
+            // 1. array [assigned => "210,211", taskCompany => "202"]
+            // 2. json: e.g {"assigned":"210,211","taskCompany":"202"}
+            // 3. string in a specific format: assigned=>210,taskCompany=>202
+            if (isset($data['filter'])) {
+                $filters = $data['filter'];
+                if (!is_array($filters)) {
+                    //Try Json decode or Array Exploding
+                    $filtersArray = json_decode($filters, true);
+                    // Not very nice to use the third post data option
+                    if (!is_array($filtersArray)) {
+                        $filtersArray = explode(',', $filters);
+                        $filtersExplodedArray = [];
+                        foreach ($filtersArray as $array) {
+                            $keyValue = explode('=>', $array);
+                            $filtersExplodedArray[$keyValue[0]] = $keyValue[1];
+                        }
+                        $filtersArray = $filtersExplodedArray;
+                    }
+                } else {
+                    $filtersArray = $filters;
+                }
+
+                foreach ($filtersArray as $key => $value) {
+                    if (!in_array($key, FilterAttributeOptions::getConstants(), true)) {
+                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'Requested filter parameter ' . $key . ' is not allowed!']));
+                        return $response;
+                    }
+                }
+                $filter->setFilter($filtersArray);
+                unset($data['filter']);
+            }
+
+            // Check if user set some Columns and if these columns are allowed (exists)
+            // The data format should be
+            // 1. JSON ARRAY: ["title","status"]
+            // 2. Arrray separated by ,: title, status
+            if (isset($data['columns'])) {
+                $dataColumnsArray = $data['columns'];
+                if (!is_array($dataColumnsArray)) {
+                    $dataColumnsArray = json_decode($data['columns'], true);
+                    if (!is_array($dataColumnsArray)) {
+                        $dataColumnsArray = explode(',', $data['columns']);
+                    }
+                }
+
+                foreach ($dataColumnsArray as $col) {
+                    if (!in_array($col, FilterColumnsOptions::getConstants(), true)) {
+                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'Requested column parameter ' . $col . ' is not allowed!']));
+                        return $response;
+                    }
+                }
+
+                $filter->setColumns($dataColumnsArray);
+                unset($data['columns']);
+            }
+
+            // Check if user set some Columns and if these columns are allowed (exists)
+            // The data format shoul be
+            // 1. JSON ARRAY: ["title","status"]
+            // 2. Arrray separated by ,: title, status
+            // Check if user set some Columns_task_attributes and if these columns are allowed (exists)
+            if (isset($data['columns_task_attributes'])) {
+                $dataColumnsArray = $data['columns_task_attributes'];
+                if (!is_array($dataColumnsArray)) {
+                    $dataColumnsArray = json_decode($data['columns_task_attributes'], true);
+                    if (!is_array($dataColumnsArray)) {
+                        $dataColumnsArray = explode(',', $data['columns_task_attributes']);
+                    }
+                }
+
+                foreach ($dataColumnsArray as $col) {
+                    $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($col);
+
+                    if (!$taskAttribute instanceof TaskAttribute) {
+                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        $response = $response->setContent(json_encode(['message' =>  'Requested task attribute with id ' . $col . ' does not exist!']));
+                        return $response;
+                    }
+                }
+
+                $filter->setColumnsTaskAttributes($dataColumnsArray);
+                unset($data['columns_task_attributes']);
+            }
+
+            $statusCode = $this->getCreateUpdateStatusCode($create);
+            $errors = $this->get('entity_processor')->processEntity($filter, $data);
+
+            if (false === $errors) {
+                $this->getDoctrine()->getManager()->persist($filter);
+                $this->getDoctrine()->getManager()->flush();
+
+                $filterArray = $this->get('filter_service')->getFilterResponse($filter->getId());
+                $response = $response->setStatusCode($statusCode);
+                $response = $response->setContent(json_encode($filterArray));
+                return $response;
             } else {
-                $filter->setReport(true);
+                $data = [
+                    'errors' => $errors,
+                    'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+                ];
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode($data));
             }
-            unset($data['report']);
         } else {
-            $filter->setReport(false);
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         }
-
-        // Check id user want to set this filter like default
-        if (!isset($data['default'])) {
-            $data['default'] = false;
-        }
-
-        // Check if user set some Columns and if these columns are allowed (exists)
-        // The data format should be
-        // 1. JSON ARRAY: ["title","status"]
-        // 2. Arrray separated by ,: title, status
-        if (isset($data['columns'])) {
-            $dataColumnsArray = $data['columns'];
-            if (!is_array($dataColumnsArray)) {
-                $dataColumnsArray = json_decode($data['columns'], true);
-                if (!is_array($dataColumnsArray)) {
-                    $dataColumnsArray = explode(',', $data['columns']);
-                }
-            }
-
-            foreach ($dataColumnsArray as $col) {
-                if (!in_array($col, FilterAttributeOptions::getConstants(), true)) {
-                    return $this->createApiResponse([
-                        'message' => 'Requested column parameter ' . $col . ' is not allowed!',
-                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                }
-            }
-
-            $filter->setColumns($dataColumnsArray);
-            unset($data['columns']);
-        }
-
-        // Check if user set some Columns and if these columns are allowed (exists)
-        // The data format shoul be
-        // 1. JSON ARRAY: ["title","status"]
-        // 2. Arrray separated by ,: title, status
-        // Check if user set some Columns_task_attributes and if these columns are allowed (exists)
-        if (isset($data['columns_task_attributes'])) {
-            $dataColumnsArray = $data['columns_task_attributes'];
-            if (!is_array($dataColumnsArray)) {
-                $dataColumnsArray = json_decode($data['columns_task_attributes'], true);
-                if (!is_array($dataColumnsArray)) {
-                    $dataColumnsArray = explode(',', $data['columns_task_attributes']);
-                }
-            }
-
-            foreach ($dataColumnsArray as $col) {
-                $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($col);
-
-                if (!$taskAttribute instanceof TaskAttribute) {
-                    return $this->createApiResponse([
-                        'message' => 'Requested task attribute with id ' . $col . ' does not exist!',
-                    ], StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                }
-            }
-
-            $filter->setColumnsTaskAttributes($dataColumnsArray);
-            unset($data['columns_task_attributes']);
-        }
-
-
-        $errors = $this->get('entity_processor')->processEntity($filter, $data);
-
-        if (false === $errors) {
-            $this->getDoctrine()->getManager()->persist($filter);
-            $this->getDoctrine()->getManager()->flush();
-
-            $filterArray = $this->get('filter_service')->getFilterResponse($filter->getId());
-            return $this->json($filterArray, $statusCode);
-        }
-
-
-        $data = [
-            'errors' => $errors,
-            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-        ];
-        return $this->createApiResponse($data, StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        return $response;
     }
 }

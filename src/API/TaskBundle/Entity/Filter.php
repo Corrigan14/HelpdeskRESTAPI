@@ -29,7 +29,7 @@ class Filter
      * @var string
      *
      * @ORM\Column(name="title", type="string", length=255)
-     * @Assert\NotBlank(message="Title of filter is required")
+     * @Assert\NotBlank(message="Filters title is required!")
      * @Assert\Type("string")
      */
     private $title;
@@ -77,7 +77,7 @@ class Filter
      *
      * @ORM\Column(name="icon_class", type="string", length=255, nullable=false)
      * @Assert\Type("string")
-     * @Assert\NotBlank(message="Icon class of filter is required")
+     * @Assert\NotBlank(message="Filters Icon class is required")
      */
     private $icon_class;
 
@@ -85,7 +85,7 @@ class Filter
      * @var int
      *
      * @ORM\Column(name="`order`", type="integer", nullable=false)
-     * @Assert\NotBlank(message="Order of filter is required")
+     * @Assert\NotBlank(message="Filters Order is required")
      */
     private $order;
 

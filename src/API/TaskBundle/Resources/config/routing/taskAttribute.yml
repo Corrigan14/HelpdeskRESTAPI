@@ -8,6 +8,11 @@ task_attribute_list_of_select_and_multiselect_entities:
     defaults: { _controller: APITaskBundle:TaskAttribute:listOfAllSelectOptions}
     methods: [GET]
 
+task_attribute_list_of_all_active_entities:
+    path:     /task-attributes/all-active
+    defaults: { _controller: APITaskBundle:TaskAttribute:listOfAllActiveEntities}
+    methods: [GET]
+
 task_attributes:
     path:     /task-attributes/{id}
     defaults: { _controller: APITaskBundle:TaskAttribute:get }

@@ -60,11 +60,79 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
      */
     public function listOfAllSelectOptionsAction(): Response
     {
-        $locationURL = $locationURL = $this->generateUrl('tag_list_of_available_logged_users_tags');
+        $locationURL = $locationURL = $this->generateUrl('task_attribute_list_of_select_and_multiselect_entities');
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
         // Task attributes - the list of active task attributes with TITLE, TYPE and OPTIONS
         $taskAttributes = $this->get('task_attribute_service')->getAllActiveEntitiesWithTypeOptions();
+
+        $dataArray = [
+            'data' => $taskAttributes
+        ];
+
+        $response = $response->setContent(json_encode($dataArray));
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
+    }
+
+    /**
+     * ### Response ###
+     *     {
+     *       "data":
+     *       [
+     *           {
+     *              "id": 16,
+     *              "title": "input task additional attribute",
+     *              "type": "input",
+     *              "description": "Test description of Input",
+     *              "required": false,
+     *              "options": null,
+     *              "is_active": true
+     *          },
+     *          {
+     *              "id": 17,
+     *              "title": "select task additional attribute",
+     *              "type": "simple_select",
+     *              "description": "Test description of a Simple select",
+     *              "required": false,
+     *              "options":
+     *              [
+     *                  "select1",
+     *                  "select2",
+     *                  "select3"
+     *              ],
+     *              "is_active": true
+     *          }
+     *       ]
+     *     }
+     *
+     *
+     * @ApiDoc(
+     *  description="Returns a lists of all active Task Attribute entities.",
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request"
+     *  },
+     * )
+     *
+     * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     */
+    public function listOfAllActiveEntitiesAction(): Response
+    {
+        $locationURL = $locationURL = $this->generateUrl('task_attribute_list_of_all_active_entities');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        // Task attributes - the list of active task attributes with TITLE, TYPE and OPTIONS
+        $taskAttributes = $this->get('task_attribute_service')->getAllActiveEntities();
 
         $dataArray = [
             'data' => $taskAttributes

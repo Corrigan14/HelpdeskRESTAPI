@@ -317,20 +317,30 @@ class FilterController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    public function getAction(int $id)
+    public function getAction(int $id): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('filter', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
 
         if (!$filter instanceof Filter) {
-            return $this->notFoundResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Filter with requested Id does not exist!']));
+            return $response;
         }
 
         if (!$this->get('filter_voter')->isGranted(VoteOptions::SHOW_FILTER, $filter)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
         $filterArray = $this->get('filter_service')->getFilterResponse($id);
-        return $this->json($filterArray, StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($filterArray));
+        return $response;
     }
 
     /**
@@ -1073,131 +1083,6 @@ class FilterController extends ApiBaseController implements ControllerInterface
     }
 
     /**
-     * ### Response ###
-     *      {
-     *        "data":
-     *         {
-     *             "id": 145,
-     *             "title": 145,
-     *             "public": true,
-     *             "filter":
-     *             {
-     *                "status": "238,239",
-     *                "assigned": "not,current-user"
-     *             },
-     *             "report": false,
-     *             "is_active": true,
-     *             "default": true,
-     *             "icon_class": "&#xE88A;"
-     *             "createdBy":
-     *             {
-     *                "id": 2575,
-     *                "username": "admin",
-     *                "email": "admin@admin.sk"
-     *             },
-     *             "project":
-     *             {
-     *                "id": 2575,
-     *                "title": "INBOX",
-     *             },
-     *             "columns":
-     *             [
-     *                "title",
-     *                "creator",
-     *                "company",
-     *                "assigned",
-     *                "createdTime",
-     *                "deadlineTime",
-     *                "status"
-     *             ],
-     *             "columns_task_attributes":
-     *             [
-     *                205,
-     *                206
-     *             ],
-     *             "remembered": false
-     *         },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/filters/2",
-     *           "patch": "/api/v1/task-bundle/filters/2",
-     *           "delete": "/api/v1/task-bundle/filters/2"
-     *         }
-     *      }
-     *
-     * @ApiDoc(
-     *  description="Partially update the Filter Entity",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  input={"class"="API\TaskBundle\Entity\Filter"},
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  output={"class"="API\TaskBundle\Entity\Filter"},
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
-     *
-     * @param int $id
-     * @param Request $request
-     * @return Response
-     * @throws \LogicException
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \InvalidArgumentException
-     */
-    public function updatePartialAction(int $id, Request $request)
-    {
-        $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
-        $requestData = $request->request->all();
-
-        if (!$filter instanceof Filter) {
-            return $this->notFoundResponse();
-        }
-
-        if (!$this->get('filter_voter')->isGranted(VoteOptions::UPDATE_FILTER, $filter)) {
-            return $this->accessDeniedResponse();
-        }
-
-        // Check if user can create PUBLIC filter (it's role has SHARE_FILTER ACL)
-        if (isset($requestData['public']) && true === $requestData['public']) {
-            $aclOptions = [
-                'acl' => UserRoleAclOptions::SHARE_FILTERS,
-                'user' => $this->getUser()
-            ];
-
-            if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-                $filter->setPublic(false);
-                return $this->createApiResponse([
-                    'message' => 'You have not permission to create PUBLIC filter!',
-                ], StatusCodesHelper::ACCESS_DENIED_CODE);
-            } else {
-                $filter->setPublic(true);
-            }
-            unset($requestData['public']);
-        } else {
-            $filter->setPublic(false);
-        }
-
-        return $this->updateEntity($filter, $requestData);
-    }
-
-    /**
      * @ApiDoc(
      *  description="Delete Filter Entity",
      *  requirements={
@@ -1247,160 +1132,6 @@ class FilterController extends ApiBaseController implements ControllerInterface
         return $this->createApiResponse([
             'message' => StatusCodesHelper::DELETED_MESSAGE,
         ], StatusCodesHelper::DELETED_CODE);
-    }
-
-    /**
-     *  ### Response ###
-     *      {
-     *         "status":
-     *         [
-     *            {
-     *               "id": 178,
-     *               "title": "new"
-     *            },
-     *            {
-     *               "id": 179,
-     *               "title": "In Progress"
-     *            },
-     *         ],
-     *         "project":
-     *         [
-     *            {
-     *               "id": 207,
-     *               "title": "Project of user 2"
-     *            },
-     *            {
-     *              "id": 208,
-     *              "title": "Project of admin"
-     *            },
-     *         ],
-     *         "requester":
-     *         [
-     *            {
-     *               "id": 1014,
-     *               "username": "admin",
-     *               "name": "Customer2",
-     *               "surname": "Customerovic2"
-     *            },
-     *            {
-     *               "id": 1015,
-     *               "username": "manager",
-     *               "name": "Customer2",
-     *               "surname": "Customerovic2"
-     *            },
-     *         ],
-     *         "created":
-     *         [
-     *            {
-     *               "id": 1014,
-     *               "username": "admin",
-     *               "name": "Customer2",
-     *               "surname": "Customerovic2"
-     *            },
-     *            {
-     *               "id": 1015,
-     *               "username": "manager",
-     *               "name": "Customer2",
-     *               "surname": "Customerovic2"
-     *            },
-     *         ],
-     *         "company":
-     *         [
-     *           {
-     *              "id": 317,
-     *              "title": "Web-Solutions"
-     *           },
-     *           {
-     *              "id": 318,
-     *              "title": "LanSystems"
-     *           }
-     *         ],
-     *         "tag":
-     *         [
-     *           {
-     *              "id": 9,
-     *              "title": "Free Time"
-     *            },
-     *           {
-     *              "id": 10,
-     *              "title": "Work"
-     *            },
-     *            {
-     *               "id": 12,
-     *               "title": "Another Admin Public Tag"
-     *             }
-     *          ],
-     *          "assigned":
-     *          [
-     *            {
-     *               "id": 1014,
-     *               "username": "admin",
-     *               "name": "Customer2",
-     *               "surname": "Customerovic2"
-     *            }
-     *          ]
-     *      }
-     * @ApiDoc(
-     *  description="Get all options for filter: statuses, available projects, available creators, available requesters, available companies, available assigners, available tags",
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  statusCodes={
-     *      200 ="The request has succeeded",
-     *      401 ="Unauthorized request"
-     *  })
-     *
-     *
-     * @return JsonResponse
-     * @throws \LogicException
-     */
-    public function getFilterOptionsAction()
-    {
-        // Return arrays of options
-        $statusesArray = $this->get('status_service')->getListOfExistedStatuses();
-
-        // Available projects are where logged user have any ACL
-        // Admin can use All existed projects
-        $isAdmin = $this->get('task_voter')->isAdmin();
-        $projectsArray = $this->get('project_service')->getListOfAvailableProjectsWhereUsersACLExists($this->getUser(), $isAdmin);
-
-        $currentUser [] = [
-            'id' => 'current-user',
-            'username' => 'Current User'
-        ];
-
-        // Every user can be creator
-        // The current-user option is added to the returned array
-        $creatorArray = $this->get('api_user.service')->getListOfAllUsers();
-        $creatorModifiedArray = array_merge($currentUser, $creatorArray);
-
-        // Every user can be requester
-        $requesterArray = $creatorModifiedArray;
-
-        // Every company is available
-        $companyArray = $this->get('api_company.service')->getListOfAllCompanies();
-
-        // Public and logged user's tags are available
-        $tagArray = $this->get('tag_service')->getListOfUsersTags($this->getUser()->getId());
-
-        // Every user can have assigned tasks
-        $assignArray = $creatorModifiedArray;
-
-        $response = [
-            'status' => $statusesArray,
-            'project' => $projectsArray,
-            'created' => $creatorModifiedArray,
-            'requester' => $requesterArray,
-            'company' => $companyArray,
-            'tag' => $tagArray,
-            'assigned' => $assignArray
-        ];
-
-        return $this->json($response, StatusCodesHelper::SUCCESSFUL_CODE);
     }
 
     /**

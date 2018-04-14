@@ -92,7 +92,7 @@ class TaskAttributeRepository extends EntityRepository
     /**
      * @return array
      */
-    public function getAllActiveEntitiesWithTypeOptions()
+    public function getAllActiveEntitiesWithTypeOptions():array
     {
         $query = $this->createQueryBuilder('taskAttribute')
             ->select('taskAttribute')
@@ -106,6 +106,22 @@ class TaskAttributeRepository extends EntityRepository
 
 
         return $query->getQuery()->getArrayResult();
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllActiveEntities():array
+    {
+        $query = $this->createQueryBuilder('taskAttribute')
+            ->select('taskAttribute')
+            ->where('taskAttribute.is_active = :isActive');
+        $query->setParameters([
+            'isActive' => true
+        ]);
+
+
+        return $this->formatData($query->getQuery()->getArrayResult(), true);
     }
 
     /**
@@ -158,7 +174,7 @@ class TaskAttributeRepository extends EntityRepository
             'type' => $data['type'],
             'description' => $data['description'],
             'required' => $data['required'],
-            'options' => $data['options'],
+            'options' => json_decode($data['options'],true),
             'is_active' => $data['is_active'],
         ];
 

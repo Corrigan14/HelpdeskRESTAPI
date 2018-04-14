@@ -140,14 +140,17 @@ class FilterRepository extends EntityRepository
         $isActive = $options['isActive'];
         $public = $options['public'];
         $report = $options['report'];
+        $project = $options['project'];
         $loggedUserId = $options['loggedUserId'];
+        $order = $options['order'];
+        $default = $options['default'];
 
         $query = $this->createQueryBuilder('f')
-            ->select('f, createdBy, project')
+            ->select('f, createdBy, project, projectCreator')
             ->leftJoin('f.createdBy', 'createdBy')
             ->leftJoin('f.project', 'project')
             ->leftJoin('project.createdBy', 'projectCreator')
-            ->orderBy('f.id', 'DESC')
+            ->orderBy('f.order', $order)
             ->distinct()
             ->where('f.id is not NULL')
             ->andWhere('f.users_remembered = :usersRememberedParam');
@@ -155,35 +158,55 @@ class FilterRepository extends EntityRepository
         $paramArray = [];
         $paramArray ['usersRememberedParam'] = false;
 
-        if (true === $isActive) {
+        if ('true' === $isActive) {
             $query->andWhere('f.is_active = :isActiveParam');
             $paramArray['isActiveParam'] = true;
-        } elseif (false === $isActive) {
+        } elseif ('false' === $isActive) {
             $query->andWhere('f.is_active = :isActiveParam');
             $paramArray['isActiveParam'] = false;
         }
 
-        if (true === $public) {
+        if ('true' === $public) {
             $query->andWhere('f.public = :publicParam');
             $paramArray['publicParam'] = true;
-        } elseif (false === $public) {
+        } elseif ('false' === $public) {
             $query->andWhere('createdBy.id = :loggedUserId');
             $paramArray['loggedUserId'] = $loggedUserId;
         } else {
-            $query->andWhere('f.public = :publicParam')
-                ->orWhere('createdBy.id = :loggedUserId');
-            $paramArray['publicParam'] = true;
-            $paramArray['loggedUserId'] = $loggedUserId;
+            $query->andWhere($query->expr()->orX(
+                $query->expr()->eq('f.public', true),
+                $query->expr()->eq('createdBy.id', $loggedUserId)
+            ));
         }
 
-        if (true === $report) {
+        if ('true' === $report) {
             $query->andWhere('f.report = :reportParam');
             $paramArray['reportParam'] = true;
-        } elseif (false === $report) {
+        } elseif ('false' === $report) {
             $query->andWhere('f.report = :reportParam');
             $paramArray['reportParam'] = false;
         }
 
+        if ($project) {
+            if ('not' === $project) {
+                $query->andWhere('f.project IS NULL');
+            } elseif ('current-user' === $project) {
+                $query->andWhere('projectCreator.id = :projectCreatorId');
+                $paramArray['projectCreatorId'] = $loggedUserId;
+            } else {
+                $query->andWhere('project.id IN (:projectIds)');
+
+                $projectIds = explode(',', $project);
+                $paramArray['projectIds'] = $projectIds;
+            }
+        }
+
+        if ($default) {
+            if ('true' === $default) {
+                $query->andWhere('f.default = :defaultParam');
+                $paramArray['defaultParam'] = true;
+            }
+        }
         // Return also logged users Remembered filter
         $query->orWhere($query->expr()->andX(
             $query->expr()->eq('f.users_remembered', true),
@@ -223,6 +246,7 @@ class FilterRepository extends EntityRepository
                 ],
                 'project' => $projectArray,
                 'columns' => json_decode($data['columns']),
+                'columns_task_attributes' => json_decode($data['columns_task_attributes']),
                 'remembered' => $data['users_remembered']
             ];
         }
@@ -338,7 +362,7 @@ class FilterRepository extends EntityRepository
             ],
             'project' => $projectArray,
             'columns' => json_decode($data['columns']),
-            'columns_task_attributes' => $data['columns_task_attributes'],
+            'columns_task_attributes' => json_decode($data['columns_task_attributes']),
             'remembered' => $data['users_remembered']
         ];
 

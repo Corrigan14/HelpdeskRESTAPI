@@ -275,6 +275,107 @@ class ProjectController extends ApiBaseController implements ControllerInterface
 
     /**
      *  ### Response ###
+     *     {
+     *       "data":
+     *       [
+     *          {
+     *             "id": "1",
+     *             "title": "Project 1",
+     *             "description": "Description of Project 1",
+     *             "createdAt": 1507968483,
+     *             "updatedAt": 1507968483,
+     *             "is_active" => true,
+     *          },
+     *          {
+     *             "id": 38,
+     *             "title": "INBOX",
+     *             "description": "INBOX - main project",
+     *             "createdAt": 1507968483,
+     *             "updatedAt": 1507968483,
+     *             "is_active": true
+     *          },
+     *       ]
+     *     }
+     *
+     *
+     * @ApiDoc(
+     *  description="Returns a list of logged User's Active Projects where he can view some tasks (user_has_project: VIEW_OWN_TASKS, VIEW_TASKS_FROM_USERS_COMPANY, VIEW_ALL_TASKS ACL).
+     *  USAGE: list of project when tasks are filtered. For ADMIN all projects are returned.",
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="The request has succeeded",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied"
+     *  }
+     * )
+     *
+     * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     */
+    public function listOfProjectsWhereLoggedUserCanViewTasksAction():Response
+    {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('projects_list_where_logged_user_can_view_tasks');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        /** @var User $loggedUser */
+        $loggedUser = $this->getUser();
+        $loggedUsersProjects = $loggedUser->getUserHasProjects();
+        $isAdmin = $this->get('project_voter')->isAdmin();
+
+        $projectWhereLoggedUserCanCreateTasks = [];
+        if (!$isAdmin) {
+            if (\count($loggedUsersProjects) > 0) {
+                /** @var UserHasProject $userHasProject */
+                foreach ($loggedUsersProjects as $userHasProject) {
+                    $projectAcl = $userHasProject->getAcl();
+                    $project = $userHasProject->getProject();
+                    if (((\in_array(ProjectAclOptions::VIEW_ALL_TASKS, $projectAcl, true)) || (\in_array(ProjectAclOptions::VIEW_OWN_TASKS, $projectAcl, true)) || (\in_array(ProjectAclOptions::VIEW_TASKS_FROM_USERS_COMPANY, $projectAcl, true))) && $project->getIsActive() === true) {
+                        $projectWhereLoggedUserCanCreateTasks[] = [
+                            'id' => $project->getId(),
+                            'title' => $project->getTitle(),
+                            'description' => $project->getDescription(),
+                            'createdAt' => $project->getCreatedAt(),
+                            'updatedAt' => $project->getUpdatedAt(),
+                            'is_active' => $project->getIsActive()
+                        ];
+                    }
+                }
+            }
+        } else {
+            $existedActiveProjects = $this->getDoctrine()->getRepository('APITaskBundle:Project')->findBy([
+                'is_active' => true
+            ]);
+            foreach ($existedActiveProjects as $project) {
+                $projectWhereLoggedUserCanCreateTasks[] = [
+                    'id' => $project->getId(),
+                    'title' => $project->getTitle(),
+                    'description' => $project->getDescription(),
+                    'createdAt' => $project->getCreatedAt(),
+                    'updatedAt' => $project->getUpdatedAt(),
+                    'is_active' => $project->getIsActive()
+                ];
+            }
+        }
+        $responseArray['data'] = $projectWhereLoggedUserCanCreateTasks;
+
+        $response = $response->setContent(json_encode($responseArray));
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        return $response;
+    }
+
+    /**
+     *  ### Response ###
      *      {
      *        "data":
      *        {

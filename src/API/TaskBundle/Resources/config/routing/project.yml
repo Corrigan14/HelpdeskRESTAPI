@@ -8,6 +8,11 @@ projects_list_where_logged_user_can_create_tasks:
     defaults: { _controller: APITaskBundle:Project:listOfProjectsWhereCanCreateTasksLoggedUser }
     methods: [GET]
 
+projects_list_where_logged_user_can_view_tasks:
+    path:     /projects/view-tasks
+    defaults: { _controller: APITaskBundle:Project:listOfProjectsWhereLoggedUserCanViewTasks }
+    methods: [GET]
+
 project:
     path:     /projects/{id}
     defaults: { _controller: APITaskBundle:Project:get }

@@ -72,7 +72,7 @@ class TaskAttributeService
     /**
      * @return array
      */
-    public function getAllActiveEntitiesWithTypeOptions():array
+    public function getAllActiveEntitiesWithTypeOptions(): array
     {
         /** @var TaskAttributeRepository $taskAttributeRepository */
         $taskAttributeRepository = $this->em->getRepository('APITaskBundle:TaskAttribute');
@@ -92,6 +92,17 @@ class TaskAttributeService
         }
 
         return $response;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllActiveEntities(): array
+    {
+        /** @var TaskAttributeRepository $taskAttributeRepository */
+        $taskAttributeRepository = $this->em->getRepository('APITaskBundle:TaskAttribute');
+        return $taskAttributeRepository->getAllActiveEntities();
+
     }
 
     /**

@@ -192,8 +192,9 @@ class FollowerController extends ApiBaseController
 
         if ($this->canAddTaskFollower($user, $task)) {
             $task->addFollower($user);
-
+            $user->addFollowedTask($task);
             $this->getDoctrine()->getManager()->persist($task);
+            $this->getDoctrine()->getManager()->persist($user);
             $this->getDoctrine()->getManager()->flush();
         }
 
@@ -225,7 +226,7 @@ class FollowerController extends ApiBaseController
      *    }
      *
      * @ApiDoc(
-     *  description="Remove the follower from the Task. Returns Removed User.",
+     *  description="Remove follower from the Task. Returns Removed User.",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -313,7 +314,7 @@ class FollowerController extends ApiBaseController
         }
 
         $response = $response->setStatusCode(StatusCodesHelper::RESOURCE_NOT_FOUND_CODE);
-        $response = $response->setContent(StatusCodesHelper::NOT_FOUND_MESSAGE);
+        $response = $response->setContent(json_encode(['message' => 'Requested User is not following requested Task!']));
         return $response;
     }
 

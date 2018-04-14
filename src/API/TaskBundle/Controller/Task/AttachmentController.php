@@ -27,11 +27,13 @@ class AttachmentController extends ApiBaseController
      *         [
      *              {
      *                  "id": 1,
-     *                  "slug": "zsskcd-jpg-2016-12-17-15-36"
+     *                  "slug": "zsskcd-jpg-2016-12-17-15-36",
+     *                  "name": "Uploaded file name"
      *              },
      *              {
      *                  "id": 2,
-     *                  "slug": "zsskcd-jpg-2016-12-17-15-37"
+     *                  "slug": "zsskcd-jpg-2016-12-17-15-37",
+     *                  "name": "Uploaded file name"
      *              }
      *         ],
      *        "_links":[]
@@ -39,7 +41,7 @@ class AttachmentController extends ApiBaseController
      *      }
      *
      * @ApiDoc(
-     *  description="Returns a list of tasks attachments slugs.",
+     *  description="Returns a list of tasks attachments slugs and names.",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -106,7 +108,8 @@ class AttachmentController extends ApiBaseController
      *              "id": 5,
      *              "slug": "zsskcd-jpg-2016-12-17-15-36",
      *              "fileDir": "Upload dir",
-     *              "fileName": "Temp name"
+     *              "fileName": "Temp name",
+     *              "name": "Uploaded file name"
      *          },
      *          "_links":
      *          {
@@ -207,7 +210,7 @@ class AttachmentController extends ApiBaseController
 
 
         $options['task'] = $taskId;
-        $options['file'] = $file;
+        $options['file'] = $fileEntity;
         $attachmentEntity = $this->get('task_additional_service')->getTaskOneAttachmentResponse($options);
 
         $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
@@ -223,7 +226,8 @@ class AttachmentController extends ApiBaseController
      *              "id": 5,
      *              "slug": "zsskcd-jpg-2016-12-17-15-36",
      *              "fileDir": "Upload dir",
-     *              "fileName": "Temp name"
+     *              "fileName": "Temp name",
+     *              "name": "Uploaded file name"
      *          },
      *          "_links":
      *          {

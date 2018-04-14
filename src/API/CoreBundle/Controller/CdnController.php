@@ -28,7 +28,8 @@ class CdnController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *           "slug": "slug-of-uploaded-entity"
+     *           "slug": "slug-of-uploaded-entity",
+     *           "name": "Uploaded file name"
      *        }
      *      }
      *
@@ -117,7 +118,10 @@ class CdnController extends ApiBaseController
 
             $file = $this->get('upload_helper')->uploadFile($uploadingFile);
             if ($file) {
-                $responseArray['data'] = ['slug' => $file->getSlug()];
+                $responseArray['data'] = [
+                    'slug' => $file->getSlug(),
+                    'name' => $file->getName()
+                ];
                 $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
                 $response = $response->setContent(json_encode($responseArray));
                 return $response;
@@ -138,7 +142,8 @@ class CdnController extends ApiBaseController
      *      {
      *        "data":
      *        {
-     *           "slug": "slug-of-uploaded-entity"
+     *           "slug": "slug-of-uploaded-entity",
+     *           "name": "Uploaded file name"
      *        }
      *      }
      *
@@ -217,7 +222,10 @@ class CdnController extends ApiBaseController
 
             $file = $this->get('upload_helper')->uploadFile($uploadingFile);
             if ($file) {
-                $responseArray['data'] = ['slug' => $file->getSlug()];
+                $responseArray['data'] = [
+                    'slug' => $file->getSlug(),
+                    'name' => $file->getName()
+                ];
                 $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
                 $response = $response->setContent(json_encode($responseArray));
                 return $response;
@@ -314,7 +322,7 @@ class CdnController extends ApiBaseController
     /**
      *
      * @ApiDoc(
-     *  description="Download a file",
+     *  description="Download file",
      *  requirements={
      *     {
      *       "name"="fileDir",
@@ -397,22 +405,4 @@ class CdnController extends ApiBaseController
         $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
         return $response;
     }
-
-    /**
-     * @param Task $task
-     * @param string $slug
-     *
-     * @return bool
-     * @throws \LogicException
-     */
-    private function canAddAttachmentToTask(Task $task, string $slug): bool
-    {
-        $taskHasAttachment = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAttachment')->findOneBy([
-            'task' => $task,
-            'slug' => $slug,
-        ]);
-
-        return (!$taskHasAttachment instanceof TaskHasAttachment);
-    }
-
 }

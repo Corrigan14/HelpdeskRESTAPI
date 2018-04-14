@@ -145,7 +145,19 @@ class TaskController extends ApiBaseController
      *                  }
      *              }
      *            },
-     *            "taskHasAttachments": [],
+     *            "taskHasAttachments":
+     *            [
+     *              {
+     *                  "id": 17,
+     *                  "slug": "coming-soon1-png-2018-04-06-06-50",
+     *                  "name": "coming-soon1.png"
+     *              },
+     *              {
+     *                  "id": 19,
+     *                  "slug": "left-png-2018-04-14-10-33",
+     *                  "name": "left.png"
+     *              }
+     *            ],
      *            "invoiceableItems":
      *            [
      *              {
@@ -470,7 +482,19 @@ class TaskController extends ApiBaseController
      *                  }
      *              }
      *            },
-     *            "taskHasAttachments": [],
+     *            "taskHasAttachments":
+     *            [
+     *              {
+     *                  "id": 17,
+     *                  "slug": "coming-soon1-png-2018-04-06-06-50",
+     *                  "name": "coming-soon1.png"
+     *              },
+     *              {
+     *                  "id": 19,
+     *                  "slug": "left-png-2018-04-14-10-33",
+     *                  "name": "left.png"
+     *              }
+     *            ],
      *            "invoiceableItems":
      *            [
      *              {
@@ -731,10 +755,16 @@ class TaskController extends ApiBaseController
      *            },
      *            "taskHasAttachments":
      *            [
-     *               {
-     *                   "id": 240,
-     *                   "slug": "Slug-of-image-12-14-2015",
-     *               }
+     *              {
+     *                  "id": 17,
+     *                  "slug": "coming-soon1-png-2018-04-06-06-50",
+     *                  "name": "coming-soon1.png"
+     *              },
+     *              {
+     *                  "id": 19,
+     *                  "slug": "left-png-2018-04-14-10-33",
+     *                  "name": "left.png"
+     *              }
      *            ],
      *             "invoiceableItems":
      *             [
@@ -998,10 +1028,16 @@ class TaskController extends ApiBaseController
      *            },
      *            "taskHasAttachments":
      *            [
-     *               {
-     *                   "id": 240,
-     *                   "slug": "Slug-of-image-12-14-2015",
-     *               }
+     *              {
+     *                  "id": 17,
+     *                  "slug": "coming-soon1-png-2018-04-06-06-50",
+     *                  "name": "coming-soon1.png"
+     *              },
+     *              {
+     *                  "id": 19,
+     *                  "slug": "left-png-2018-04-14-10-33",
+     *                  "name": "left.png"
+     *              }
      *            ],
      *             "invoiceableItems":
      *             [
@@ -1341,11 +1377,17 @@ class TaskController extends ApiBaseController
      *            },
      *            "taskHasAttachments":
      *            [
-     *               {
-     *                   "id": 240,
-     *                   "slug": "Slug-of-image-12-14-2015",
-     *               }
-     *            ]
+     *              {
+     *                  "id": 17,
+     *                  "slug": "coming-soon1-png-2018-04-06-06-50",
+     *                  "name": "coming-soon1.png"
+     *              },
+     *              {
+     *                  "id": 19,
+     *                  "slug": "left-png-2018-04-14-10-33",
+     *                  "name": "left.png"
+     *              }
+     *            ],
      *             "invoiceableItems":
      *             [
      *                {
@@ -2492,8 +2534,7 @@ class TaskController extends ApiBaseController
      * @param string $separator
      * @return array
      */
-    private
-    function separateFromToDateData(string $created, $separator = '='): array
+    private function separateFromToDateData(string $created, $separator = '='): array
     {
         $fromPosition = strpos($created, 'FROM' . $separator);
         $toPosition = strpos($created, 'TO' . $separator);

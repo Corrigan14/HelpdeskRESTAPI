@@ -54,11 +54,18 @@ class TaskAdditionalService
         $taskAttachmentArray = [];
 
         $taskAttachments = $task->getTaskHasAttachments();
-        /** @var TaskHasAttachment $tag */
+        /** @var TaskHasAttachment $attachment */
         foreach ($taskAttachments as $attachment) {
+            /** @var File $fileEntity */
+            $fileEntity = $this->em->getRepository('APICoreBundle:File')->findOneBy([
+                'slug' => $attachment->getSlug(),
+            ]);
             $taskAttachmentArray [] = [
                 'id' => $attachment->getId(),
-                'slug' => $attachment->getSlug()
+                'slug' => $attachment->getSlug(),
+                'fileDir' => $fileEntity->getUploadDir(),
+                'fileName' => $fileEntity->getTempName(),
+                'name' => $fileEntity->getTempName()
             ];
         }
 
@@ -89,7 +96,8 @@ class TaskAdditionalService
             'id' => $file->getId(),
             'slug' => $file->getSlug(),
             'fileDir' => $file->getUploadDir(),
-            'fileName' => $file->getTempName()
+            'fileName' => $file->getTempName(),
+            'name' => $file->getName()
         ];
 
         $response = [
@@ -380,7 +388,8 @@ class TaskAdditionalService
             'fileId' => $file->getId(),
             'slug' => $file->getSlug(),
             'fileDir' => $file->getUploadDir(),
-            'fileName' => $file->getTempName()
+            'fileName' => $file->getTempName(),
+            'name' => $file->getName()
         ];
 
         $response = [

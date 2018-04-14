@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Repository;
 
+use API\CoreBundle\Entity\File;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
 use API\TaskBundle\Controller\Task\AttachmentController;
@@ -304,7 +305,7 @@ class TaskRepository extends EntityRepository
 
                 $paramNum++;
                 $addedParamNum++;
-            }elseif (isset($value['from']) && !isset($value['to'])) {
+            } elseif (isset($value['from']) && !isset($value['to'])) {
                 $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
                 $query->andWhere('taskData.value' . '>= :FROM' . $paramNum);
                 $paramArray['FROM' . $paramNum] = $value['from'];
@@ -672,7 +673,7 @@ class TaskRepository extends EntityRepository
 
                 $paramNum++;
                 $addedParamNum++;
-            }elseif (isset($value['from']) && !isset($value['to'])) {
+            } elseif (isset($value['from']) && !isset($value['to'])) {
                 $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
                 $query->andWhere('taskData.value' . '>= :FROM' . $paramNum);
                 $paramArray['FROM' . $paramNum] = $value['from'];
@@ -924,9 +925,18 @@ class TaskRepository extends EntityRepository
         if (\count($taskHasAttachments) > 0) {
             /** @var TaskHasAttachment $item */
             foreach ($taskHasAttachments as $item) {
+                $fileEntity = $this->getEntityManager()->getRepository('APICoreBundle:File')->findOneBy([
+                    'slug' => $item->getSlug()
+                ]);
+                if ($fileEntity instanceof File) {
+                    $name = $fileEntity->getName();
+                } else {
+                    $name = 'not available in a DB';
+                }
                 $taskHasAttachmentsArray[] = [
                     'id' => $item->getId(),
-                    'slug' => $item->getSlug()
+                    'slug' => $item->getSlug(),
+                    'name' => $name
                 ];
             }
         }
@@ -1159,9 +1169,18 @@ class TaskRepository extends EntityRepository
         $taskHasAttachmentsArray = [];
         if (\count($taskHasAttachments) > 0) {
             foreach ($taskHasAttachments as $item) {
+                $fileEntity = $this->getEntityManager()->getRepository('APICoreBundle:File')->findOneBy([
+                    'slug' => $item['slug']
+                ]);
+                if ($fileEntity instanceof File) {
+                    $name = $fileEntity->getName();
+                } else {
+                    $name = 'not available in a DB';
+                }
                 $taskHasAttachmentsArray[] = [
                     'id' => $item['id'],
-                    'slug' => $item['slug']
+                    'slug' => $item['slug'],
+                    'name' => $name
                 ];
             }
         }

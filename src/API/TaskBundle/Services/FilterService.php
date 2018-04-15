@@ -92,8 +92,12 @@ class FilterService
     private function getFilterLinks(int $id)
     {
         return [
-            'put' => $this->router->generate('filter_update', ['id' => $id]),
-            'delete' => $this->router->generate('filter_delete', ['id' => $id]),
+            'update filter' => $this->router->generate('filter_update', ['id' => $id]),
+            'inactivate' => $this->router->generate('filter_inactivate', ['id' => $id]),
+            'restore' => $this->router->generate('filter_restore', ['id' => $id]),
+            'set logged users remembered filter' => $this->router->generate('filter_set_user_remembered', ['id' => $id]),
+            'get logged users remembered filter' => $this->router->generate('filter_get_user_remembered'),
+            'remove logged users remembered filter' => $this->router->generate('filter_reset_user_remembered'),
         ];
     }
 }

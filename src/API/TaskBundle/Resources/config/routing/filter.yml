@@ -46,9 +46,16 @@ filter_update:
     requirements:
             id: '\d+'
 
-filter_delete:
-    path:     /filters/{id}
-    defaults: { _controller: APITaskBundle:Filter:delete }
-    methods: [DELETE]
+filter_inactivate:
+    path:     /filters/{id}/inactivate
+    defaults: { _controller: APITaskBundle:Filter:inactivate }
+    methods: [PUT]
+    requirements:
+            id: '\d+'
+
+filter_restore:
+    path:     /filters/{id}/restore
+    defaults: { _controller: APITaskBundle:Filter:activate }
+    methods: [PUT]
     requirements:
             id: '\d+'

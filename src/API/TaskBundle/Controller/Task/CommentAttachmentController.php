@@ -29,6 +29,7 @@ class CommentAttachmentController extends ApiBaseController
      *              "slug": "zsskcd-jpg-2016-12-17-15-36",
      *              "fileDir": "Upload dir",
      *              "fileName": "Temp name"
+     *              "name": "Uploaded file name"
      *          },
      *          "_links":
      *          {
@@ -141,7 +142,8 @@ class CommentAttachmentController extends ApiBaseController
      *              "id": 5,
      *              "slug": "zsskcd-jpg-2016-12-17-15-36",
      *              "fileDir": "Upload dir",
-     *              "fileName": "Temp name"
+     *              "fileName": "Temp name",
+     *              "name": "Uploaded file name"
      *          },
      *        "_links":
      *          {

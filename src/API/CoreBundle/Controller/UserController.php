@@ -963,10 +963,12 @@ class UserController extends ApiBaseController
             $locationURL = $this->generateUrl('user_update', ['id' => $id]);
         }
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+        /** @var User $loggedUser */
+        $loggedUser = $this->getUser();
 
         // Check if user has permission to CRUD User entity
         // User can update his own data
-        if ($this->getUser()->getId() !== $id) {
+        if ($loggedUser->getId() !== $id) {
             $aclOptions = [
                 'acl' => UserRoleAclOptions::USER_SETTINGS,
                 'user' => $this->getUser()
@@ -985,7 +987,8 @@ class UserController extends ApiBaseController
             return $response;
         }
 
-        if ($userRoleId && $this->getUser()->getId() !== $id) {
+        $userRoleId = (int)$userRoleId;
+        if ($userRoleId && $loggedUser->getId() !== $id) {
             $userRole = $this->getDoctrine()->getRepository('APITaskBundle:UserRole')->find($userRoleId);
             if (!$userRole instanceof UserRole) {
                 $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
@@ -1008,13 +1011,14 @@ class UserController extends ApiBaseController
             } else {
                 $user->setRoles(['ROLE_USER']);
             }
-        } elseif ($userRoleId && $this->getUser()->getId() === $id) {
+        } elseif ($userRoleId && $loggedUser->getId() === $id && $loggedUser->getUserRole()->getId() !== $userRoleId) {
             $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
             $response = $response->setContent(json_encode(['message' => 'You can not change your own User Role!']));
             return $response;
         }
 
-        if ($companyId && $this->getUser()->getId() !== $id) {
+        $companyId = (int)$companyId;
+        if ($companyId && $loggedUser->getId() !== $id) {
             $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
 
             if (!$company instanceof Company) {
@@ -1023,7 +1027,7 @@ class UserController extends ApiBaseController
                 return $response;
             }
             $user->setCompany($company);
-        } elseif ($companyId && $this->getUser()->getId() === $id) {
+        } elseif ($companyId && $loggedUser->getId() === $id && $loggedUser->getCompany()->getId() !== $companyId) {
             $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
             $response = $response->setContent(json_encode(['message' => 'You can not change your own Company!']));
             return $response;

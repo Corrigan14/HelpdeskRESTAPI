@@ -32,7 +32,13 @@ git - the latest version
         parameters.yml.dist (jwt_key_pass_phrase)
  
 5. AVAILABLE ON: http://127.0.0.1:8000/v1/doc
-    
+  
+
+.Drop the whole DB
+=========    
+php bin/console doctrine:schema:drop --full-database --force
+php bin/console doctrine:schema:update --force
+php bin/console doctrine:fixtures:load
 
 
 .API Dokumentácia

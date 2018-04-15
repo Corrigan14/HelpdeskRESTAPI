@@ -23,6 +23,7 @@ class VoteOptions
     const UPDATE_FILTER = 'update_filter';
     const UPDATE_PROJECT_FILTER = 'update_project_filter';
     const DELETE_FILTER = 'delete_filter';
+    const SET_REMEMBERED_FILTER = 'set_remembered_filter';
 
     // TASK VOTE OPTIONS
     const SHOW_TASK = 'read_task';

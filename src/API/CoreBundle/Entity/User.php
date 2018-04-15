@@ -1,7 +1,9 @@
 <?php
+
 namespace API\CoreBundle\Entity;
 
 use API\CoreBundle\Services\Traits\FeaturedImageEntity;
+use API\TaskBundle\Entity\Filter;
 use Doctrine\Common\Collections\ArrayCollection;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use JMS\Serializer\Annotation as Serializer;
@@ -110,6 +112,15 @@ class User implements AdvancedUserInterface, \Serializable
      * @ReadOnly()
      */
     private $company;
+
+    /**
+     * @var Filter
+     *
+     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Filter", inversedBy="rememberUser")
+     * @ORM\JoinColumn(name="remembered_filter_id", referencedColumnName="id", nullable=true)
+     * @ReadOnly()
+     */
+    private $rememberedFilter;
 
     public function __construct()
     {
@@ -458,5 +469,29 @@ class User implements AdvancedUserInterface, \Serializable
         } else {
             return $this->updatedAt;
         }
+    }
+
+    /**
+     * Set rememberedFilter.
+     *
+     * @param Filter|null $rememberedFilter
+     *
+     * @return User
+     */
+    public function setRememberedFilter(Filter $rememberedFilter = null)
+    {
+        $this->rememberedFilter = $rememberedFilter;
+
+        return $this;
+    }
+
+    /**
+     * Get rememberedFilter.
+     *
+     * @return Filter|null
+     */
+    public function getRememberedFilter()
+    {
+        return $this->rememberedFilter;
     }
 }

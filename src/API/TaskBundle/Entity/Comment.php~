@@ -41,7 +41,7 @@ class Comment
      * @var string
      *
      * @ORM\Column(name="body", type="text")
-     * @Assert\NotBlank(message="Body of comment is required")
+     * @Assert\NotBlank(message="Comments Body is required")
      * @Assert\Type("string")
      */
     private $body;
@@ -155,7 +155,11 @@ class Comment
      */
     public function setTitle($title)
     {
-        $this->title = $title;
+        if ('null' === strtolower($title)) {
+            $this->title = null;
+        } else {
+            $this->title = $title;
+        }
 
         return $this;
     }

@@ -1,8 +1,11 @@
 <?php
+
 namespace API\CoreBundle\Entity;
 
 use API\CoreBundle\Services\Traits\FeaturedImageEntity;
+use API\TaskBundle\Entity\Filter;
 use Doctrine\Common\Collections\ArrayCollection;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\ReadOnly;
 use JMS\Serializer\Annotation\Exclude;
@@ -26,6 +29,7 @@ class User implements AdvancedUserInterface, \Serializable
 {
     use FeaturedImageEntity;
     use UserTrait;
+    use TimestampableEntity;
 
     /**
      * @ORM\Id
@@ -109,9 +113,17 @@ class User implements AdvancedUserInterface, \Serializable
      */
     private $company;
 
+    /**
+     * @var Filter
+     *
+     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Filter", inversedBy="rememberUser")
+     * @ORM\JoinColumn(name="remembered_filter_id", referencedColumnName="id", nullable=true)
+     * @Serializer\ReadOnly()
+     */
+    private $rememberedFilter;
+
     public function __construct()
     {
-        $this->is_active = true;
         $this->tags = new ArrayCollection();
     }
 
@@ -246,7 +258,11 @@ class User implements AdvancedUserInterface, \Serializable
      */
     public function setLanguage($language)
     {
-        $this->language = $language;
+        if ('null' === strtolower($language)) {
+            $this->language = null;
+        } else {
+            $this->language = $language;
+        }
 
         return $this;
     }
@@ -421,5 +437,37 @@ class User implements AdvancedUserInterface, \Serializable
     public function getRequestedTasks()
     {
         return $this->requestedTasks;
+    }
+
+    /**
+     * EXTENSION TO TIMESTAMP TRAIT - RETURNS TIMESTAMP DATE FORMAT
+     */
+
+    /**
+     * Returns createdAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getCreatedAt()
+    {
+        if ($this->createdAt) {
+            return $this->createdAt->getTimestamp();
+        } else {
+            return $this->createdAt;
+        }
+    }
+
+    /**
+     * Returns updatedAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getUpdatedAt()
+    {
+        if ($this->updatedAt) {
+            return $this->updatedAt->getTimestamp();
+        } else {
+            return $this->updatedAt;
+        }
     }
 }

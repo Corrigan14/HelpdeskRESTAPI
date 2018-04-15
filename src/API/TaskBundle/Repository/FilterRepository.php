@@ -38,11 +38,9 @@ class FilterRepository extends EntityRepository
             ->leftJoin('project.createdBy', 'projectCreator')
             ->orderBy('f.order', $order)
             ->distinct()
-            ->where('f.id is not NULL')
-            ->andWhere('f.users_remembered = :usersRememberedParam');
+            ->where('f.id is not NULL');
 
         $paramArray = [];
-        $paramArray ['usersRememberedParam'] = false;
 
         if ('true' === $isActive) {
             $query->andWhere('f.is_active = :isActiveParam');
@@ -96,7 +94,6 @@ class FilterRepository extends EntityRepository
 
         // Return also logged users Remembered filter
         $query->orWhere($query->expr()->andX(
-            $query->expr()->eq('f.users_remembered', true),
             $query->expr()->eq('createdBy.id', $loggedUserId)
         ));
 
@@ -152,11 +149,9 @@ class FilterRepository extends EntityRepository
             ->leftJoin('project.createdBy', 'projectCreator')
             ->orderBy('f.order', $order)
             ->distinct()
-            ->where('f.id is not NULL')
-            ->andWhere('f.users_remembered = :usersRememberedParam');
+            ->where('f.id is not NULL');
 
         $paramArray = [];
-        $paramArray ['usersRememberedParam'] = false;
 
         if ('true' === $isActive) {
             $query->andWhere('f.is_active = :isActiveParam');
@@ -209,7 +204,6 @@ class FilterRepository extends EntityRepository
         }
         // Return also logged users Remembered filter
         $query->orWhere($query->expr()->andX(
-            $query->expr()->eq('f.users_remembered', true),
             $query->expr()->eq('createdBy.id', $loggedUserId)
         ));
 
@@ -246,8 +240,7 @@ class FilterRepository extends EntityRepository
                 ],
                 'project' => $projectArray,
                 'columns' => json_decode($data['columns']),
-                'columns_task_attributes' => json_decode($data['columns_task_attributes']),
-                'remembered' => $data['users_remembered']
+                'columns_task_attributes' => json_decode($data['columns_task_attributes'])
             ];
         }
 
@@ -323,8 +316,7 @@ class FilterRepository extends EntityRepository
             ],
             'project' => $projectArray,
             'columns' => $data->getColumns(),
-            'columns_task_attributes' => $data->getColumnsTaskAttributes(),
-            'remembered' => $data->getUsersRemembered()
+            'columns_task_attributes' => $data->getColumnsTaskAttributes()
         ];
 
         return $response;
@@ -362,8 +354,7 @@ class FilterRepository extends EntityRepository
             ],
             'project' => $projectArray,
             'columns' => json_decode($data['columns']),
-            'columns_task_attributes' => json_decode($data['columns_task_attributes']),
-            'remembered' => $data['users_remembered']
+            'columns_task_attributes' => json_decode($data['columns_task_attributes'])
         ];
 
         return $response;

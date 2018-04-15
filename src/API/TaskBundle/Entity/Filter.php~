@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Entity;
 
 use API\CoreBundle\Entity\User;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -29,7 +30,7 @@ class Filter
      * @var string
      *
      * @ORM\Column(name="title", type="string", length=255)
-     * @Assert\NotBlank(message="Title of filter is required")
+     * @Assert\NotBlank(message="Filters title is required!")
      * @Assert\Type("string")
      */
     private $title;
@@ -77,7 +78,7 @@ class Filter
      *
      * @ORM\Column(name="icon_class", type="string", length=255, nullable=false)
      * @Assert\Type("string")
-     * @Assert\NotBlank(message="Icon class of filter is required")
+     * @Assert\NotBlank(message="Filters Icon class is required")
      */
     private $icon_class;
 
@@ -85,7 +86,7 @@ class Filter
      * @var int
      *
      * @ORM\Column(name="`order`", type="integer", nullable=false)
-     * @Assert\NotBlank(message="Order of filter is required")
+     * @Assert\NotBlank(message="Filters Order is required")
      */
     private $order;
 
@@ -104,14 +105,6 @@ class Filter
     private $columns_task_attributes;
 
     /**
-     * @var bool
-     *
-     * @ORM\Column(name="users_remembered", type="boolean", options={"default":0})
-     * @Serializer\ReadOnly()
-     */
-    private $users_remembered;
-
-    /**
      * @var User
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="filters")
@@ -128,6 +121,14 @@ class Filter
      * @Serializer\ReadOnly()
      */
     private $project;
+
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\CoreBundle\Entity\User", mappedBy="rememberedFilter")
+     * @Serializer\Exclude()
+     */
+    private $rememberUser;
 
 
     /**
@@ -442,29 +443,5 @@ class Filter
     public function getColumnsTaskAttributes()
     {
         return json_decode($this->columns_task_attributes);
-    }
-
-    /**
-     * Set usersRemembered
-     *
-     * @param boolean $usersRemembered
-     *
-     * @return Filter
-     */
-    public function setUsersRemembered($usersRemembered)
-    {
-        $this->users_remembered = $usersRemembered;
-
-        return $this;
-    }
-
-    /**
-     * Get usersRemembered
-     *
-     * @return boolean
-     */
-    public function getUsersRemembered()
-    {
-        return $this->users_remembered;
     }
 }

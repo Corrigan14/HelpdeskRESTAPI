@@ -71,6 +71,8 @@ class FilterVoter
                 return $this->canUpdateProjectFilter($options);
             case VoteOptions::DELETE_FILTER:
                 return $this->canDeleteFilter($options);
+            case VoteOptions::SET_REMEMBERED_FILTER:
+                return $this->canSetRememberedFilter($options);
             default:
                 return false;
         }
@@ -161,6 +163,28 @@ class FilterVoter
 
         // User can delete filter if he created it
         if ($filter->getCreatedBy()->getId() === $this->user->getId()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param Filter $filter
+     * @return bool
+     */
+    private function canSetRememberedFilter(Filter $filter): bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        // User can set remembered filter if this filter if PUBLIC or he created it
+        if ($filter->getCreatedBy()->getId() === $this->user->getId()) {
+            return true;
+        }
+
+        if ($filter->getPublic()) {
             return true;
         }
 

@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Controller;
 
+use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Filter;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\TaskAttribute;
@@ -65,8 +66,7 @@ class FilterController extends ApiBaseController
      *             [
      *                205,
      *                206
-     *             ],
-     *             "remembered": false
+     *             ]
      *          },
      *          {
      *             "id": 146,
@@ -102,8 +102,7 @@ class FilterController extends ApiBaseController
      *             [
      *                205,
      *                206
-     *             ],
-     *             "remembered": false
+     *             ]
      *           },
      *       ],
      *       "_links":
@@ -272,8 +271,7 @@ class FilterController extends ApiBaseController
      *             [
      *                205,
      *                206
-     *             ],
-     *             "remembered": false
+     *             ]
      *         },
      *        "_links":
      *        {
@@ -384,8 +382,7 @@ class FilterController extends ApiBaseController
      *             [
      *                205,
      *                206
-     *             ],
-     *             "remembered": false
+     *             ]
      *         },
      *        "_links":
      *        {
@@ -481,8 +478,7 @@ class FilterController extends ApiBaseController
      *             [
      *                205,
      *                206
-     *             ],
-     *             "remembered": false
+     *             ]
      *         },
      *        "_links":
      *        {
@@ -527,7 +523,7 @@ class FilterController extends ApiBaseController
     public function updateAction(Request $request, int $id): Response
     {
         // JSON API Response - Content type and Location settings
-        $locationURL = $this->generateUrl('filter_update');
+        $locationURL = $this->generateUrl('filter_update', ['id' => $id]);
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
         $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
@@ -548,64 +544,8 @@ class FilterController extends ApiBaseController
     }
 
     /**
-     * ### Response ###
-     *      {
-     *        "data":
-     *         {
-     *             "id": 145,
-     *             "title": 145,
-     *             "public": true,
-     *             "filter":
-     *             {
-     *                "status": "238,239",
-     *                "assigned": "not,current-user"
-     *             },
-     *             "report": false,
-     *             "is_active": true,
-     *             "default": true,
-     *             "icon_class": "&#xE88A;"
-     *             "createdBy":
-     *             {
-     *                "id": 2575,
-     *                "username": "admin",
-     *                "email": "admin@admin.sk"
-     *             },
-     *             "project":
-     *             {
-     *                "id": 2575,
-     *                "title": "INBOX",
-     *             },
-     *             "columns":
-     *             [
-     *                "title",
-     *                "creator",
-     *                "company",
-     *                "assigned",
-     *                "createdTime",
-     *                "deadlineTime",
-     *                "status"
-     *             ],
-     *             "columns_task_attributes":
-     *             [
-     *                205,
-     *                206
-     *             ],
-     *             "remembered": true
-     *         },
-     *        "_links":
-     *        {
-     *           "put": "/api/v1/task-bundle/filters/2",
-     *           "patch": "/api/v1/task-bundle/filters/2",
-     *           "delete": "/api/v1/task-bundle/filters/2"
-     *         }
-     *      }
-     *
      * @ApiDoc(
-     *  resource = true,
-     *  description="Create/Update Filter For user which should be remembered after the Log off. The Entity is rewritten after the next save.
-     *  Filter field is expected an array with key = filter option, value = requested data id/val/... (look at task list filters)
-     *  Allowed filter options are saved in FilterAttributeOptions file.",
-     *  input={"class"="API\TaskBundle\Entity\Filter"},
+     *  description="Set Filter Entity as REMEMBERED for a logged user.",
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -613,46 +553,47 @@ class FilterController extends ApiBaseController
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  output={"class"="API\TaskBundle\Entity\Filter"},
      *  statusCodes={
-     *      201 ="The entity was successfully created",
+     *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
-     *      409 ="Invalid parameters",
-     *  }
-     * )
+     *      404 ="Not found Entity"
+     *  })
      *
-     * @param Request $request
      * @return Response
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
-     * @throws \InvalidArgumentException
      */
-    public function setUsersRememberedFilterAction(Request $request)
+    public function setUsersRememberedFilterAction($id): Response
     {
-        $loggedUser = $this->getUser();
-        $requestData = $request->request->all();
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('filter_set_user_remembered', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
-        // Check if logged user already has its remembered filter. If no, create the new entity.
-        $existedRememberedFilter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->findOneBy([
-            'createdBy' => $loggedUser,
-            'users_remembered' => true
-        ]);
-
-        if ($existedRememberedFilter instanceof Filter) {
-            $filter = $existedRememberedFilter;
-            $create = false;
-        } else {
-            $filter = new Filter();
-            $filter->setIsActive(true);
-            $filter->setCreatedBy($loggedUser);
-            $filter->setUsersRemembered(true);
-            $filter->setPublic(false);
-            $create = true;
+        $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
+        if (!$filter instanceof Filter) {
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Filter with requested Id does not exist!']));
+            return $response;
         }
 
-        return $this->updateEntity($filter, $requestData, $create, true);
+        if (!$this->get('filter_voter')->isGranted(VoteOptions::SET_REMEMBERED_FILTER, $filter)) {
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
+        }
+
+        /** @var User $loggedUser */
+        $loggedUser = $this->getUser();
+        $loggedUser->setRememberedFilter($filter);
+        $filter->addRememberUser($loggedUser);
+        $this->getDoctrine()->getManager()->persist($loggedUser);
+        $this->getDoctrine()->getManager()->persist($filter);
+        $this->getDoctrine()->getManager()->flush();
+
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode(['message' => 'Filter was successfully set as remembered']));
+        return $response;
+
     }
 
     /**
@@ -697,13 +638,11 @@ class FilterController extends ApiBaseController
      *             [
      *                205,
      *                206
-     *             ],
-     *             "remembered": true
+     *             ]
      *         },
      *        "_links":
      *        {
      *           "put": "/api/v1/task-bundle/filters/2",
-     *           "patch": "/api/v1/task-bundle/filters/2",
      *           "delete": "/api/v1/task-bundle/filters/2"
      *         }
      *      }
@@ -731,17 +670,25 @@ class FilterController extends ApiBaseController
      */
     public function getUsersRememberedFilterAction()
     {
-        $savedFilter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->findOneBy([
-            'createdBy' => $this->getUser(),
-            'users_remembered' => true
-        ]);
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('filter_get_user_remembered');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        /** @var User $loggedUser */
+        $loggedUser = $this->getUser();
+        $savedFilter = $loggedUser->getRememberedFilter();
 
         if ($savedFilter instanceof Filter) {
             $filterArray = $this->get('filter_service')->getFilterResponse($savedFilter->getId());
-            return $this->json($filterArray, StatusCodesHelper::SUCCESSFUL_CODE);
+
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+            $response = $response->setContent(json_encode($filterArray));
         } else {
-            return $this->json(null, StatusCodesHelper::SUCCESSFUL_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+            $response = $response->setContent(json_encode(null));
         }
+
+        return $response;
     }
 
     /**
@@ -755,8 +702,7 @@ class FilterController extends ApiBaseController
      *     }
      *  },
      *  statusCodes={
-     *      200 ="The Entity does not exist - no action was done",
-     *      204 ="The Entity was successfully deleted",
+     *      200 ="Entity does not exist - no action was done|Entity was successfully deleted",
      *      401 ="Unauthorized request"
      *  })
      *
@@ -765,18 +711,29 @@ class FilterController extends ApiBaseController
      */
     public function resetUsersRememberedFilterAction()
     {
-        $savedFilter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->findOneBy([
-            'createdBy' => $this->getUser(),
-            'users_remembered' => true
-        ]);
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('filter_reset_user_remembered');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        /** @var User $loggedUser */
+        $loggedUser = $this->getUser();
+        $savedFilter = $loggedUser->getRememberedFilter();
 
         if ($savedFilter instanceof Filter) {
-            $this->getDoctrine()->getManager()->remove($savedFilter);
+            $savedFilter->removeRememberUser($loggedUser);
+            $loggedUser->setRememberedFilter(null);
+            $this->getDoctrine()->getManager()->persist($savedFilter);
+            $this->getDoctrine()->getManager()->persist($loggedUser);
             $this->getDoctrine()->getManager()->flush();
-            return $this->json(null, StatusCodesHelper::DELETED_CODE);
+
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Filter was successfully removed from the logged user!']));
         } else {
-            return $this->json(null, StatusCodesHelper::SUCCESSFUL_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+            $response = $response->setContent(json_encode(['message' => 'User does not have saved any filter!']));
         }
+
+        return $response;
     }
 
 
@@ -1265,7 +1222,7 @@ class FilterController extends ApiBaseController
 
                     if (!$taskAttribute instanceof TaskAttribute) {
                         $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                        $response = $response->setContent(json_encode(['message' =>  'Requested task attribute with id ' . $col . ' does not exist!']));
+                        $response = $response->setContent(json_encode(['message' => 'Requested task attribute with id ' . $col . ' does not exist!']));
                         return $response;
                     }
                 }

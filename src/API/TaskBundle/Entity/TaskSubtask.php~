@@ -149,4 +149,61 @@ class TaskSubtask
     {
         return $this->createdBy;
     }
+
+    /**
+     * Set task.
+     *
+     * @param Task $task
+     *
+     * @return TaskSubtask
+     */
+    public function setTask(Task $task)
+    {
+        $this->task = $task;
+
+        return $this;
+    }
+
+    /**
+     * Get task.
+     *
+     * @return Task
+     */
+    public function getTask()
+    {
+        return $this->task;
+    }
+
+    /**
+     * EXTENSION TO TIMESTAMP TRAIT - RETURNS TIMESTAMP DATE FORMAT
+     */
+
+    /**
+     * Returns createdAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getCreatedAt()
+    {
+        if ($this->createdAt) {
+            return $this->createdAt->getTimestamp();
+        } else {
+            return $this->createdAt;
+        }
+    }
+
+    /**
+     * Returns updatedAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getUpdatedAt()
+    {
+        if ($this->updatedAt) {
+            return $this->updatedAt->getTimestamp();
+        } else {
+            return $this->updatedAt;
+        }
+    }
+
 }

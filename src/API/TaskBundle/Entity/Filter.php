@@ -3,6 +3,8 @@
 namespace API\TaskBundle\Entity;
 
 use API\CoreBundle\Entity\User;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -104,14 +106,6 @@ class Filter
     private $columns_task_attributes;
 
     /**
-     * @var bool
-     *
-     * @ORM\Column(name="users_remembered", type="boolean", options={"default":0})
-     * @Serializer\ReadOnly()
-     */
-    private $users_remembered;
-
-    /**
      * @var User
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="filters")
@@ -129,6 +123,21 @@ class Filter
      */
     private $project;
 
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\CoreBundle\Entity\User", mappedBy="rememberedFilter")
+     * @Serializer\Exclude()
+     */
+    private $rememberUser;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->rememberUser = new ArrayCollection();
+    }
 
     /**
      * Get id
@@ -444,27 +453,40 @@ class Filter
         return json_decode($this->columns_task_attributes);
     }
 
+
     /**
-     * Set usersRemembered
+     * Add rememberUser.
      *
-     * @param boolean $usersRemembered
+     * @param User $rememberUser
      *
      * @return Filter
      */
-    public function setUsersRemembered($usersRemembered)
+    public function addRememberUser(User $rememberUser)
     {
-        $this->users_remembered = $usersRemembered;
+        $this->rememberUser[] = $rememberUser;
 
         return $this;
     }
 
     /**
-     * Get usersRemembered
+     * Remove rememberUser.
      *
-     * @return boolean
+     * @param User $rememberUser
+     *
+     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
      */
-    public function getUsersRemembered()
+    public function removeRememberUser(User $rememberUser)
     {
-        return $this->users_remembered;
+        return $this->rememberUser->removeElement($rememberUser);
+    }
+
+    /**
+     * Get rememberUser.
+     *
+     * @return Collection
+     */
+    public function getRememberUser()
+    {
+        return $this->rememberUser;
     }
 }

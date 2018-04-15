@@ -356,7 +356,8 @@ class TaskController extends ApiBaseController
                 'dateFilterAddedParams' => $processedFilterData['dateFilterAddedParams'],
                 'filtersForUrl' => $processedFilterData['filterForUrl'],
                 'order' => $orderProcessed,
-                'limit' => $limit
+                'limit' => $limit,
+                'project' => null
             ];
 
             $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);
@@ -615,6 +616,12 @@ class TaskController extends ApiBaseController
 
             $filterDataArray = $filter->getFilter();
             $filterData = $this->getFilterDataFromSavedFilterArray($filterDataArray);
+
+            if ($filter->getProject()) {
+                $projectId = $filter->getProject()->getId();
+            } else {
+                $projectId = null;
+            }
             $options = [
                 'loggedUser' => $this->getUser(),
                 'isAdmin' => $this->get('task_voter')->isAdmin(),
@@ -629,7 +636,8 @@ class TaskController extends ApiBaseController
                 'dateFilterAddedParams' => $filterData['dateFilterAddedParams'],
                 'filtersForUrl' => array_merge($filterData['filterForUrl'], ['order' => '&order=' . $order]),
                 'order' => $orderProcessed,
-                'limit' => $limit
+                'limit' => $limit,
+                'project' => $projectId
             ];
             $tasksArray = $this->get('task_service')->getTasksResponse($page, $options);
 
@@ -2270,10 +2278,10 @@ class TaskController extends ApiBaseController
     /**
      * @param array $filterDataArray
      *
-     * @return array
+     * @return array|null
      * @throws \LogicException
      */
-    private function getFilterDataFromSavedFilterArray(array $filterDataArray): array
+    private function getFilterDataFromSavedFilterArray($filterDataArray): array
     {
         $data = [];
 
@@ -2330,12 +2338,12 @@ class TaskController extends ApiBaseController
     }
 
     /**
-     * @param array $data
+     * @param array|null $data
      *
      * @return array
      * @throws \LogicException
      */
-    private function processFilterData(array $data): array
+    private function processFilterData($data): array
     {
         $inFilter = [];
         $dateFilter = [];
@@ -2355,82 +2363,134 @@ class TaskController extends ApiBaseController
             $filterForUrl['search'] = '&search=' . $data['search'];
         }
         if (isset($data[FilterAttributeOptions::STATUS])) {
-            $inFilter['taskGlobalStatus.id'] = explode(',', $data[FilterAttributeOptions::STATUS]);
-            $filterForUrl['status'] = '&status=' . $data[FilterAttributeOptions::STATUS];
+            $status = $data[FilterAttributeOptions::STATUS];
+            if (!is_array($status)) {
+                $inFilter['taskGlobalStatus.id'] = explode(',', $status);
+                $filterForUrl['status'] = '&status=' . $status;
+            } else {
+                $inFilter['taskGlobalStatus.id'] = $status;
+                $filterForUrl['status'] = '&status=' . implode(',', $status);
+            }
         }
         if (isset($data[FilterAttributeOptions::PROJECT])) {
             $project = $data[FilterAttributeOptions::PROJECT];
-            if ('not' === strtolower($project)) {
-                $isNullFilter[] = 'task.project';
-            } elseif ('current-user' === strtolower($project)) {
-                $equalFilter['projectCreator.id'] = $this->getUser()->getId();
+            if (!is_array($project)) {
+                if ('not' === strtolower($project)) {
+                    $isNullFilter[] = 'task.project';
+                } elseif ('current-user' === strtolower($project)) {
+                    $equalFilter['projectCreator.id'] = $this->getUser()->getId();
+                } else {
+                    $inFilter['project.id'] = explode(',', $project);
+                }
+                $filterForUrl['project'] = '&project=' . $project;
             } else {
-                $inFilter['project.id'] = explode(',', $project);
+                $inFilter['project.id'] = $project;
+                $filterForUrl['project'] = '&project=' . implode(',', $project);
             }
-            $filterForUrl['project'] = '&project=' . $project;
         }
         if (isset($data[FilterAttributeOptions::CREATOR])) {
             $creator = $data[FilterAttributeOptions::CREATOR];
-            if ('current-user' === strtolower($creator)) {
-                $equalFilter['createdBy.id'] = $this->getUser()->getId();
+            if (!is_array($creator)) {
+                if ('current-user' === strtolower($creator)) {
+                    $equalFilter['createdBy.id'] = $this->getUser()->getId();
+                } else {
+                    $inFilter['createdBy.id'] = explode(',', $creator);
+                }
+                $filterForUrl['createdBy'] = '&creator=' . $creator;
             } else {
-                $inFilter['createdBy.id'] = explode(',', $creator);
+                $inFilter['createdBy.id'] = $creator;
+                $filterForUrl['createdBy'] = '&creator=' . implode(',', $creator);
             }
-            $filterForUrl['createdBy'] = '&creator=' . $creator;
         }
         if (isset($data[FilterAttributeOptions::REQUESTER])) {
             $requester = $data[FilterAttributeOptions::REQUESTER];
-            if ('current-user' === strtolower($requester)) {
-                $equalFilter['requestedBy.id'] = $this->getUser()->getId();
+            if (!is_array($requester)) {
+                if ('current-user' === strtolower($requester)) {
+                    $equalFilter['requestedBy.id'] = $this->getUser()->getId();
+                } else {
+                    $inFilter['requestedBy.id'] = explode(',', $requester);
+                }
+                $filterForUrl['requestedBy'] = '&requester=' . $requester;
             } else {
-                $inFilter['requestedBy.id'] = explode(',', $requester);
+                $inFilter['requestedBy.id'] = $requester;
+                $filterForUrl['requestedBy'] = '&requester=' . implode(',', $requester);
             }
-            $filterForUrl['requestedBy'] = '&requester=' . $requester;
         }
         if (isset($data[FilterAttributeOptions::COMPANY])) {
             $company = $data[FilterAttributeOptions::COMPANY];
-            if ('current-user' === strtolower($company)) {
-                $equalFilter['taskCompany.id'] = $this->getUser()->getCompany()->getId();
+            if (!is_array($company)) {
+                if ('current-user' === strtolower($company)) {
+                    $equalFilter['taskCompany.id'] = $this->getUser()->getCompany()->getId();
+                } else {
+                    $inFilter['taskCompany.id'] = explode(',', $company);
+                }
+                $filterForUrl['taskCompany'] = '&taskCompany=' . $company;
             } else {
-                $inFilter['taskCompany.id'] = explode(',', $company);
+                $inFilter['taskCompany.id'] = $company;
+                $filterForUrl['taskCompany'] = '&taskCompany=' . implode(',', $company);
             }
-            $filterForUrl['taskCompany'] = '&taskCompany=' . $company;
         }
         if (isset($data[FilterAttributeOptions::ASSIGNED])) {
             $assigned = $data[FilterAttributeOptions::ASSIGNED];
-            $assignedArray = explode(',', $assigned);
+            if (!is_array($assigned)) {
+                if ('not' === strtolower($assigned)) {
+                    $isNullFilter[] = 'taskHasAssignedUsers.user';
+                } elseif ('current-user' === strtolower($assigned)) {
+                    $equalFilter['assignedUser.id'] = $this->getUser()->getId();
+                } elseif (is_array(explode(',', $assigned))) {
+                    $assignedArray = explode(',', $assigned);
+                    if (\in_array('not', $assignedArray, true) && \in_array('current-user', $assignedArray, true)) {
+                        $notAndCurrentFilter[] = [
+                            'not' => 'taskHasAssignedUsers.user',
+                            'equal' => [
+                                'key' => 'assignedUser.id',
+                                'value' => $this->getUser()->getId(),
+                            ],
+                        ];
+                    }
+                } else {
+                    $inFilter['assignedUser.id'] = explode(',', $assigned);
+                }
 
-            if (\in_array('not', $assignedArray, true) && \in_array('current-user', $assignedArray, true)) {
-                $notAndCurrentFilter[] = [
-                    'not' => 'taskHasAssignedUsers.user',
-                    'equal' => [
-                        'key' => 'assignedUser.id',
-                        'value' => $this->getUser()->getId(),
-                    ],
-                ];
-            } elseif ('not' === strtolower($assigned)) {
-                $isNullFilter[] = 'taskHasAssignedUsers.user';
-            } elseif ('current-user' === strtolower($assigned)) {
-                $equalFilter['assignedUser.id'] = $this->getUser()->getId();
+                $filterForUrl['assigned'] = '&assigned=' . $assigned;
             } else {
-                $inFilter['assignedUser.id'] = explode(',', $assigned);
+                if (\in_array('not', $assigned, true) && \in_array('current-user', $assigned, true)) {
+                    $notAndCurrentFilter[] = [
+                        'not' => 'taskHasAssignedUsers.user',
+                        'equal' => [
+                            'key' => 'assignedUser.id',
+                            'value' => $this->getUser()->getId(),
+                        ],
+                    ];
+                } else {
+                    $inFilter['assignedUser.id'] = $assigned;
+                }
+                $filterForUrl['assigned'] = '&assigned=' . implode(',', $assigned);
             }
-
-            $filterForUrl['assigned'] = '&assigned=' . $assigned;
         }
         if (isset($data[FilterAttributeOptions::TAG])) {
             $tag = $data[FilterAttributeOptions::TAG];
-            $inFilter['tags.id'] = explode(',', $tag);
-            $filterForUrl['tag'] = '&tag=' . $tag;
+            if (!is_array($tag)) {
+                $inFilter['tags.id'] = explode(',', $tag);
+                $filterForUrl['tag'] = '&tag=' . $tag;
+            } else {
+                $inFilter['tags.id'] = $tag;
+                $filterForUrl['tag'] = '&tag=' . implode(',', $tag);
+            }
         }
         if (isset($data[FilterAttributeOptions::FOLLOWER])) {
             $follower = $data[FilterAttributeOptions::FOLLOWER];
-            if ('current-user' === $follower) {
-                $equalFilter['followers.id'] = $this->getUser()->getId();
+            if (!is_array($follower)) {
+                if ('current-user' === $follower) {
+                    $equalFilter['followers.id'] = $this->getUser()->getId();
+                } else {
+                    $inFilter['followers.id'] = explode(',', $follower);
+                }
+                $filterForUrl['followers'] = '&follower=' . $follower;
             } else {
-                $inFilter['followers.id'] = explode(',', $follower);
+                $inFilter['followers.id'] = $follower;
+                $filterForUrl['followers'] = '&follower=' . implode(',', $follower);
             }
-            $filterForUrl['followers'] = '&follower=' . $follower;
         }
         if (isset($data[FilterAttributeOptions::CREATED])) {
             $created = $data[FilterAttributeOptions::CREATED];

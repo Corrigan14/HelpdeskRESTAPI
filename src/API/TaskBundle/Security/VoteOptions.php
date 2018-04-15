@@ -22,6 +22,7 @@ class VoteOptions
     const SHOW_FILTER = 'show_filter';
     const UPDATE_FILTER = 'update_filter';
     const UPDATE_PROJECT_FILTER = 'update_project_filter';
+    const CREATE_PROJECT_FILTER = 'create_project_filter';
     const DELETE_FILTER = 'delete_filter';
     const SET_REMEMBERED_FILTER = 'set_remembered_filter';
 

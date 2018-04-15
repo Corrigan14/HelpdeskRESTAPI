@@ -69,6 +69,8 @@ class FilterVoter
                 return $this->canUpdateFilter($options);
             case VoteOptions::UPDATE_PROJECT_FILTER:
                 return $this->canUpdateProjectFilter($options);
+            case VoteOptions::CREATE_PROJECT_FILTER:
+                return $this->canCreateProjectFilter($options);
             case VoteOptions::DELETE_FILTER:
                 return $this->canDeleteFilter($options);
             case VoteOptions::SET_REMEMBERED_FILTER:
@@ -145,6 +147,31 @@ class FilterVoter
             }
 
             return false;
+        }
+
+        return false;
+    }
+
+
+    /**
+     * @param array $options
+     * @return bool
+     */
+    private function canCreateProjectFilter(array $options): bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        $project = $options['project'];
+
+        // User can create filter in a project if he has ANY permission to this project
+        $userHasProject = $this->em->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+            'user' => $this->user,
+            'project' => $project
+        ]);
+        if ($userHasProject instanceof UserHasProject) {
+            return true;
         }
 
         return false;

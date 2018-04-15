@@ -252,11 +252,7 @@ class FilterController extends ApiBaseController
      *                "username": "admin",
      *                "email": "admin@admin.sk"
      *             },
-     *             "project":
-     *             {
-     *                "id": 2575,
-     *                "title": "INBOX",
-     *             },
+     *             "project": null,
      *             "columns":
      *             [
      *                "title",
@@ -366,11 +362,7 @@ class FilterController extends ApiBaseController
      *                "username": "admin",
      *                "email": "admin@admin.sk"
      *             },
-     *             "project":
-     *             {
-     *                "id": 2575,
-     *                "title": "INBOX",
-     *             },
+     *             "project": null,
      *             "columns":
      *             [
      *                "title",
@@ -401,8 +393,7 @@ class FilterController extends ApiBaseController
      * @ApiDoc(
      *  resource = true,
      *  description="Create a new Filter Entity.
-     *  Filter field is expected to be an array with key = filter option, value = requested data id/val/... (look at task list filters)
-     *  Allowed filter options are saved in FilterAttributeOptions file.",
+     *  Filter field is expected to be an array with key = filter option, value = requested data id/val/... (look at task list filters)",
      *  input={"class"="API\TaskBundle\Entity\Filter"},
      *  headers={
      *     {
@@ -466,11 +457,7 @@ class FilterController extends ApiBaseController
      *                "username": "admin",
      *                "email": "admin@admin.sk"
      *             },
-     *             "project":
-     *             {
-     *                "id": 2575,
-     *                "title": "INBOX",
-     *             },
+     *             "project": null,
      *             "columns":
      *             [
      *                "title",
@@ -501,8 +488,7 @@ class FilterController extends ApiBaseController
      * @ApiDoc(
      *  resource = true,
      *  description="Update Filter Entity.
-     *  Filter field is expected to be an array with key = filter option, value = requested data id/val/... (look at task list filters)
-     *  Allowed filter options are saved in FilterAttributeOptions file.",
+     *  Filter field is expected to be an array with key = filter option, value = requested data id/val/... (look at task list filters)",
      *  input={"class"="API\TaskBundle\Entity\Filter"},
      *  headers={
      *     {
@@ -583,7 +569,7 @@ class FilterController extends ApiBaseController
      *                "id": 2575,
      *                "title": "INBOX",
      *             },
-     *            "columns":
+     *             "columns":
      *             [
      *                "title",
      *                "creator",
@@ -597,20 +583,31 @@ class FilterController extends ApiBaseController
      *             [
      *                205,
      *                206
-     *             ],
-     *             "remembered": false
+     *             ]
      *         },
-     *        "_links":
+     *       "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/filters/2",
-     *           "patch": "/api/v1/task-bundle/filters/2",
-     *           "delete": "/api/v1/task-bundle/filters/2"
+     *          "update filter": "/api/v1/task-bundle/filters/15",
+     *          "inactivate": "/api/v1/task-bundle/filters/15/inactivate",
+     *          "restore": "/api/v1/task-bundle/filters/15/restore",
+     *          "set logged users remembered filter": "/api/v1/task-bundle/filters/15/user-remembered",
+     *          "get logged users remembered filter": "/api/v1/task-bundle/filters/user-remembered",
+     *          "remove logged users remembered filter": "/api/v1/task-bundle/filters/user-remembered/delete"
      *         }
      *      }
      *
      * @ApiDoc(
      *  resource = true,
-     *  description="Create a new Filter Entity for Project",
+     *  description="Create Filter Entity for a requested Project.
+     *  Filter field is expected to be an array with a key = filter option, value = requested data id/val/... (look at task list filters).",
+     *  requirements={
+     *     {
+     *       "name"="projectId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="Processed objects ID"
+     *     }
+     *  },
      *  input={"class"="API\TaskBundle\Entity\Filter"},
      *  headers={
      *     {
@@ -621,9 +618,10 @@ class FilterController extends ApiBaseController
      *  },
      *  output={"class"="API\TaskBundle\Entity\Filter"},
      *  statusCodes={
-     *      201 ="The entity was successfully created",
+     *      201 ="The request has succeeded",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
+     *      404 ="Not found Entity",
      *      409 ="Invalid parameters",
      *  }
      * )
@@ -631,55 +629,52 @@ class FilterController extends ApiBaseController
      * @param Request $request
      * @param int $projectId
      * @return Response
-     * @throws \LogicException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function createProjectsFilterAction(Request $request, int $projectId)
+    public function createProjectsFilterAction(Request $request, int $projectId): Response
     {
-        $filter = new Filter();
-        $requestData = $request->request->all();
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('filter_project_create', ['projectId' => $projectId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
         $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
         if (!$project instanceof Project) {
-            return $this->createApiResponse([
-                'message' => 'Project with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Project with requested Id does not exist!']));
+            return $response;
         }
 
-        // Check if user can create PUBLIC filter (it's role has PROJECT_SHARED_FILTER ACL)
-        if (isset($requestData['public']) && true === $requestData['public']) {
-            $aclOptions = [
-                'acl' => UserRoleAclOptions::PROJECT_SHARED_FILTERS,
-                'user' => $this->getUser()
-            ];
-
-            if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-                $filter->setPublic(false);
-                return $this->createApiResponse([
-                    'message' => 'You have not permission to create PUBLIC filters in Projects!',
-                ], StatusCodesHelper::ACCESS_DENIED_CODE);
-            } else {
-                $filter->setPublic(true);
-            }
-            unset($requestData['public']);
-        } else {
-            $filter->setPublic(false);
+        // User can create filter in a project if he has ANY permission to this project
+        $options = [
+            'project' => $project
+        ];
+        if (!$this->get('filter_voter')->isGranted(VoteOptions::CREATE_PROJECT_FILTER, $options)) {
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
+
+        $filter = new Filter();
         $filter->setIsActive(true);
         $filter->setCreatedBy($this->getUser());
         $filter->setProject($project);
 
-        return $this->updateEntity($filter, $requestData, true);
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        return $this->updateEntity($filter, $requestBody, true, $locationURL, true);
     }
+
 
     /**
      * ### Response ###
      *      {
      *        "data":
-     *        {
+     *         {
      *             "id": 145,
      *             "title": 145,
      *             "public": true,
@@ -703,7 +698,7 @@ class FilterController extends ApiBaseController
      *                "id": 2575,
      *                "title": "INBOX",
      *             },
-     *            "columns":
+     *             "columns":
      *             [
      *                "title",
      *                "creator",
@@ -717,25 +712,34 @@ class FilterController extends ApiBaseController
      *             [
      *                205,
      *                206
-     *             ],
-     *             "remembered": false
+     *             ]
      *         },
-     *        "_links":
+     *       "_links":
      *        {
-     *           "put": "/api/v1/task-bundle/filters/2",
-     *           "patch": "/api/v1/task-bundle/filters/2",
-     *           "delete": "/api/v1/task-bundle/filters/2"
+     *          "update filter": "/api/v1/task-bundle/filters/15",
+     *          "inactivate": "/api/v1/task-bundle/filters/15/inactivate",
+     *          "restore": "/api/v1/task-bundle/filters/15/restore",
+     *          "set logged users remembered filter": "/api/v1/task-bundle/filters/15/user-remembered",
+     *          "get logged users remembered filter": "/api/v1/task-bundle/filters/user-remembered",
+     *          "remove logged users remembered filter": "/api/v1/task-bundle/filters/user-remembered/delete"
      *         }
      *      }
      *
      * @ApiDoc(
-     *  description="Update the projects Filter Entity",
-     *  requirements={
+     *  resource = true,
+     *  description="Update Filter Entity in a requested Project.",
+     * requirements={
      *     {
-     *       "name"="id",
+     *       "name"="projectId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
-     *       "description"="The id of processed object"
+     *       "description"="Projects ID"
+     *     },
+     *     {
+     *       "name"="filterId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="Filters ID"
      *     }
      *  },
      *  input={"class"="API\TaskBundle\Entity\Filter"},
@@ -756,31 +760,35 @@ class FilterController extends ApiBaseController
      *  }
      * )
      *
-     * @param int $id
-     * @param int $projectId
      * @param Request $request
+     * @param int $projectId
+     * @param int $filterId
      * @return Response
-     * @throws \LogicException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function updateProjectFilterAction(int $id, int $projectId, Request $request)
+    public function updateProjectFilterAction(int $filterId, int $projectId, Request $request)
     {
-        $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
-        $requestData = $request->request->all();
-
-        if (!$filter instanceof Filter) {
-            return $this->createApiResponse([
-                'message' => 'Filter with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
-        }
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('filter_project_update', ['projectId' => $projectId, 'filterId' => $filterId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
         $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
         if (!$project instanceof Project) {
-            return $this->createApiResponse([
-                'message' => 'Project with requested Id does not exist!',
-            ], StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Project with requested Id does not exist!']));
+            return $response;
+        }
+
+        $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($filterId);
+        if (!$filter instanceof Filter) {
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Filter with requested Id does not exist!']));
+            return $response;
         }
 
         $options = [
@@ -789,32 +797,16 @@ class FilterController extends ApiBaseController
         ];
 
         if (!$this->get('filter_voter')->isGranted(VoteOptions::UPDATE_PROJECT_FILTER, $options)) {
-            return $this->accessDeniedResponse();
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
         }
 
-        // Check if user can create PUBLIC filter (it's role has PROJECT_SHARED_FILTER ACL)
-        if (isset($requestData['public']) && true === $requestData['public']) {
-            $aclOptions = [
-                'acl' => UserRoleAclOptions::PROJECT_SHARED_FILTERS,
-                'user' => $this->getUser()
-            ];
-
-            if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-                $filter->setPublic(false);
-                return $this->createApiResponse([
-                    'message' => 'You have not permission to create PUBLIC filters in Projects!',
-                ], StatusCodesHelper::ACCESS_DENIED_CODE);
-            } else {
-                $filter->setPublic(true);
-            }
-            unset($requestData['public']);
-        } else {
-            $filter->setPublic(false);
-        }
 
         $filter->setProject($project);
 
-        return $this->updateEntity($filter, $requestData);
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        return $this->updateEntity($filter, $requestBody, false, $locationURL, true);
     }
 
     /**
@@ -1196,6 +1188,7 @@ class FilterController extends ApiBaseController
      * @param array $data
      * @param bool $create
      * @param $locationUrl
+     * @param bool $project
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \InvalidArgumentException
@@ -1205,7 +1198,7 @@ class FilterController extends ApiBaseController
      * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    private function updateEntity(Filter $filter, array $data, $create = false, $locationUrl)
+    private function updateEntity(Filter $filter, array $data, $create = false, $locationUrl, $project = false)
     {
         $allowedUnitEntityParams = [
             'title',
@@ -1237,12 +1230,19 @@ class FilterController extends ApiBaseController
                 }
             }
 
-            // Check if user can create PUBLIC filter (it's role has SHARE_FILTER ACL)
+            // Check if user can create PUBLIC filter (it's role has SHARE_FILTER/PROJECT_SHARED_FILTERS ACL)
             if (isset($data['public']) && (true === $data['public'] || 'true' == $data['public'] || 1 === (int)$data['public'])) {
-                $aclOptions = [
-                    'acl' => UserRoleAclOptions::SHARE_FILTERS,
-                    'user' => $this->getUser()
-                ];
+                if ($project) {
+                    $aclOptions = [
+                        'acl' => UserRoleAclOptions::PROJECT_SHARED_FILTERS,
+                        'user' => $this->getUser()
+                    ];
+                } else {
+                    $aclOptions = [
+                        'acl' => UserRoleAclOptions::SHARE_FILTERS,
+                        'user' => $this->getUser()
+                    ];
+                }
 
                 if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
                     $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);

@@ -15,6 +15,13 @@ filter_create:
     defaults: { _controller: APITaskBundle:Filter:create }
     methods: [POST]
 
+filter_update:
+    path:     /filters/{id}
+    defaults: { _controller: APITaskBundle:Filter:update }
+    methods: [PUT]
+    requirements:
+            id: '\d+'
+
 filter_set_user_remembered:
     path:     /filters/{id}/user-remembered
     defaults: { _controller: APITaskBundle:Filter:setUsersRememberedFilter }
@@ -32,20 +39,6 @@ filter_reset_user_remembered:
     defaults: { _controller: APITaskBundle:Filter:resetUsersRememberedFilter }
     methods: [PUT]
 
-filter_project_create:
-    path:     /filters/project/{projectId}
-    defaults: { _controller: APITaskBundle:Filter:createProjectsFilter }
-    methods: [POST]
-    requirements:
-        projectId: '\d+'
-
-filter_update:
-    path:     /filters/{id}
-    defaults: { _controller: APITaskBundle:Filter:update }
-    methods: [PUT]
-    requirements:
-            id: '\d+'
-
 filter_inactivate:
     path:     /filters/{id}/inactivate
     defaults: { _controller: APITaskBundle:Filter:inactivate }
@@ -59,3 +52,18 @@ filter_restore:
     methods: [PUT]
     requirements:
             id: '\d+'
+
+filter_project_create:
+    path:     /filters/project/{projectId}
+    defaults: { _controller: APITaskBundle:Filter:createProjectsFilter }
+    methods: [POST]
+    requirements:
+        projectId: '\d+'
+
+filter_project_update:
+    path:     /filters/{filterId}/project/{projectId}
+    defaults: { _controller: APITaskBundle:Filter:updateProjectFilter }
+    methods: [PUT]
+    requirements:
+        filterId: '\d+'
+        projectId: '\d+'

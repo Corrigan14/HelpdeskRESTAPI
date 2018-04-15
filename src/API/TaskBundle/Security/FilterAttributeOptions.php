@@ -10,6 +10,8 @@ namespace API\TaskBundle\Security;
 class FilterAttributeOptions
 {
     // Attributes available for filter
+    const ID = 'id';
+    const TITLE = 'title';
     const STATUS = 'status';
     const PROJECT = 'project';
     const CREATOR = 'creator';

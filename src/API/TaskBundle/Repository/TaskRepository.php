@@ -4,9 +4,6 @@ namespace API\TaskBundle\Repository;
 
 use API\CoreBundle\Entity\File;
 use API\CoreBundle\Entity\User;
-use API\CoreBundle\Entity\UserData;
-use API\TaskBundle\Controller\Task\AttachmentController;
-use API\TaskBundle\Entity\Comment;
 use API\TaskBundle\Entity\InvoiceableItem;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Tag;
@@ -14,7 +11,7 @@ use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskData;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
 use API\TaskBundle\Entity\TaskHasAttachment;
-use API\TaskBundle\Services\FilterAttributeOptions;
+use API\TaskBundle\Security\FilterAttributeOptions;
 use API\TaskBundle\Services\VariableHelper;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
@@ -46,6 +43,7 @@ class TaskRepository extends EntityRepository
         $dateFilterAddedParams = $options['dateFilterAddedParams'];
         $order = $options['order'];
         $limit = $options['limit'];
+        $project = $options['project'];
 
         $query = $this->createQueryBuilder('task')
             ->select('task')
@@ -321,8 +319,13 @@ class TaskRepository extends EntityRepository
                 $paramNum++;
                 $addedParamNum++;
             }
-
         }
+
+        if (null !== $project) {
+            $query->andWhere('project.id = :mainProjectId' . $addedParamNum);
+            $paramArray['mainProjectId' . $addedParamNum] = $project;
+        }
+
         if (!empty($paramArray)) {
             $query->setParameters($paramArray);
         }
@@ -376,6 +379,7 @@ class TaskRepository extends EntityRepository
         $dateFilterAddedParams = $options['dateFilterAddedParams'];
         $order = $options['order'];
         $limit = $options['limit'];
+        $project = $options['project'];
 
         $query = $this->createQueryBuilder('task')
             ->select('task')
@@ -689,6 +693,11 @@ class TaskRepository extends EntityRepository
                 $paramNum++;
                 $addedParamNum++;
             }
+        }
+
+        if (null !== $project) {
+            $query->andWhere('project.id = :mainProjectId' . $addedParamNum);
+            $paramArray['mainProjectId' . $addedParamNum] = $project;
         }
 
         if (!empty($paramArray)) {

@@ -1158,9 +1158,9 @@ class CompanyController extends ApiBaseController implements ControllerInterface
             }
 
             // Check if some Company Data are required
-            $allExistedCompanyAttributes = $this->getDoctrine()->getRepository('APICoreBundle:CompanyAttribute')->findAll();
+            $allExistedCompanyAttributes = $this->getDoctrine()->getRepository('APITaskBundle:CompanyAttribute')->findAll();
             $requiredCompanyAttributeData = [];
-            /** @var TaskAttribute|null $attr */
+            /** @var CompanyAttribute|null $attr */
             foreach ($allExistedCompanyAttributes as $attr) {
                 if ($attr->getIsActive() && $attr->getRequired()) {
                     $requiredCompanyAttributeData[] = $attr->getId();
@@ -1168,7 +1168,6 @@ class CompanyController extends ApiBaseController implements ControllerInterface
             }
 
             $statusCode = $this->getCreateUpdateStatusCode($create);
-
             $errors = $this->get('entity_processor')->processEntity($company, $requestData);
 
             if (false === $errors) {

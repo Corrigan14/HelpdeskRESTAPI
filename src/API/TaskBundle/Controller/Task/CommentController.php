@@ -891,8 +891,9 @@ class CommentController extends ApiBaseController
             'signature' => $usersSignature,
             'taskLink' => $baseFrontURL ? $baseFrontURL->getValue() : '' . '/tasks/' . $taskId
         ];
+
         $params = [
-            'subject' => 'LanHelpdesk - ' . '[#' . $taskId . ']' . ' ' . $requestData['title'],
+            'subject' => 'LanHelpdesk - ' . '[#' . $taskId . ']' . ' ' . $title,
             'from' => $email,
             'to' => $emailAddresses,
             'body' => $this->renderView('@APITask/Emails/comment.html.twig', $templateParams),

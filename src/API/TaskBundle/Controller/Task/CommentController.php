@@ -246,7 +246,7 @@ class CommentController extends ApiBaseController
      *      }
      *
      * @ApiDoc(
-     *  description="Returns a Comment Entity",
+     *  description="Returns Comment Entity",
      *  requirements={
      *     {
      *       "name"="commentId",
@@ -357,7 +357,7 @@ class CommentController extends ApiBaseController
      *
      * @ApiDoc(
      *  resource = true,
-     *  description="Create a new Tasks Comment",
+     *  description="Create a new Task Comment",
      *  requirements={
      *     {
      *       "name"="taskId",
@@ -546,7 +546,7 @@ class CommentController extends ApiBaseController
 
     /**
      * @ApiDoc(
-     *  description="Delete a Comment Entity",
+     *  description="Delete Comment Entity",
      *  requirements={
      *     {
      *       "name"="commentId",

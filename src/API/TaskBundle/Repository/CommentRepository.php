@@ -2,6 +2,7 @@
 
 namespace API\TaskBundle\Repository;
 
+use API\CoreBundle\Entity\File;
 use API\CoreBundle\Entity\UserData;
 use API\TaskBundle\Entity\Comment;
 use API\TaskBundle\Entity\CommentHasAttachment;
@@ -130,7 +131,19 @@ class CommentRepository extends EntityRepository
         if (count($attachments) > 0) {
             /** @var CommentHasAttachment $attachment */
             foreach ($attachments as $attachment) {
-                $attachmentArray[] = $attachment->getSlug();
+                $fileEntity = $this->getEntityManager()->getRepository('APICoreBundle:File')->findOneBy([
+                    'slug' => $attachment->getSlug()
+                ]);
+                if ($fileEntity instanceof File) {
+                    $name = $fileEntity->getName();
+                } else {
+                    $name = 'not available in a DB';
+                }
+                $attachmentArray[] = [
+                    'id' => $attachment->getId(),
+                    'slug' => $attachment->getSlug(),
+                    'name' => $name
+                ];
             }
         }
 
@@ -204,8 +217,21 @@ class CommentRepository extends EntityRepository
 
         if (count($attachments) > 0) {
             foreach ($attachments as $attachment) {
-                $attachmentArray[] =  $attachment['slug'];
+                $fileEntity = $this->getEntityManager()->getRepository('APICoreBundle:File')->findOneBy([
+                    'slug' => $attachment['slug']
+                ]);
+                if ($fileEntity instanceof File) {
+                    $name = $fileEntity->getName();
+                } else {
+                    $name = 'not available in a DB';
+                }
+                $attachmentArray[] = [
+                    'id' => $attachment['id'],
+                    'slug' => $attachment['slug'],
+                    'name' => $name
+                ];
             }
+
         }
 
         $detailData = $data['createdBy']['detailData'];

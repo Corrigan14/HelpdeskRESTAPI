@@ -6,6 +6,8 @@ use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\UserHasProject;
+use API\TaskBundle\Repository\FilterRepository;
+use API\TaskBundle\Repository\TagRepository;
 use API\TaskBundle\Security\ProjectAclOptions;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
@@ -265,6 +267,7 @@ class MainController extends ApiBaseController
         // Add to every project the number of Tasks
         $modifiedLoggedUserProjects = [];
         foreach ($loggedUsersAvailableProjects as $project) {
+            /** @var Project $projectEntityFromDb */
             $projectEntityFromDb = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($project['id']);
             if ($isAdmin) {
                 $canEditProject = true;
@@ -299,7 +302,9 @@ class MainController extends ApiBaseController
             'limit' => 999,
             'order' => 'ASC'
         ];
-        $loggedUserTagsArray = $doctrine->getRepository('APITaskBundle:Tag')->getAllEntities(1, $tagOptions);
+        /** @var TagRepository $tagRepository */
+        $tagRepository = $doctrine->getRepository('APITaskBundle:Tag');
+        $loggedUserTagsArray = $tagRepository->getAllEntities(1, $tagOptions);
         $loggedUserTags = $loggedUserTagsArray['array'];
 
         // Returns a list of Logged user's Filters
@@ -308,8 +313,13 @@ class MainController extends ApiBaseController
             'isActive' => true,
             'report' => false,
             'public' => null,
+            'project' => false,
+            'order' => 'ASC',
+            'default' => false
         ];
-        $loggedUserFilters = $doctrine->getRepository('APITaskBundle:Filter')->getAllUsersFiltersWithoutPagination($filterOptions);
+        /** @var FilterRepository $filterRepository */
+        $filterRepository = $doctrine->getRepository('APITaskBundle:Filter');
+        $loggedUserFilters = $filterRepository->getAllUsersFiltersWithoutPagination($filterOptions);
 
         $responseArray = [
             'filters' => $loggedUserFilters,
@@ -325,8 +335,11 @@ class MainController extends ApiBaseController
                 'isActive' => true,
                 'report' => true,
                 'public' => null,
+                'project' => false,
+                'order' => 'ASC',
+                'default' => false
             ];
-            $loggedUserReports = $doctrine->getRepository('APITaskBundle:Filter')->getAllUsersFiltersWithoutPagination($reportOptions);
+            $loggedUserReports = $filterRepository->getAllUsersFiltersWithoutPagination($reportOptions);
             $responseArray['reports'] = $loggedUserReports;
         }
 

@@ -2,10 +2,13 @@
 
 namespace API\TaskBundle\Repository;
 
+use API\CoreBundle\Entity\Company;
 use API\CoreBundle\Entity\File;
 use API\CoreBundle\Entity\User;
+use API\CoreBundle\Entity\UserData;
 use API\TaskBundle\Entity\InvoiceableItem;
 use API\TaskBundle\Entity\Project;
+use API\TaskBundle\Entity\Status;
 use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskData;
@@ -819,6 +822,8 @@ class TaskRepository extends EntityRepository
                 $taskDataArray[] = [
                     'id' => $item->getId(),
                     'value' => $item->getValue(),
+                    'boolValue' => $item->getBoolValue(),
+                    'dateValue' => $item->getDateValue(),
                     'taskAttribute' => [
                         'id' => $item->getTaskAttribute()->getId(),
                         'title' => $item->getTaskAttribute()->getTitle(),
@@ -834,7 +839,7 @@ class TaskRepository extends EntityRepository
                 $userDetailData = $item->getDetailData();
                 $userName = null;
                 $userSurname = null;
-                if ($userDetailData) {
+                if ($userDetailData instanceof UserData) {
                     $userName = $userDetailData->getName();
                     $userSurname = $userDetailData->getSurname();
                 }
@@ -970,7 +975,7 @@ class TaskRepository extends EntityRepository
         };
         $project = $data->getProject();
         $projectArray = [];
-        if ($project) {
+        if ($project instanceof Project) {
             $projectArray = [
                 'id' => $data->getProject()->getId(),
                 'title' => $data->getProject()->getTitle(),
@@ -979,7 +984,7 @@ class TaskRepository extends EntityRepository
         }
         $company = $data->getCompany();
         $companyArray = [];
-        if ($company) {
+        if ($company instanceof Company) {
             $companyArray = [
                 'id' => $data->getCompany()->getId(),
                 'title' => $data->getCompany()->getTitle()
@@ -988,7 +993,7 @@ class TaskRepository extends EntityRepository
 
         $status = $data->getStatus();
         $statusArray = [];
-        if ($status) {
+        if ($status instanceof Status) {
             $statusArray = [
                 'id' => $data->getStatus()->getId(),
                 'title' => $data->getStatus()->getTitle()
@@ -998,7 +1003,7 @@ class TaskRepository extends EntityRepository
         $userCreatorDetailData = $data->getCreatedBy()->getDetailData();
         $userCreatorName = null;
         $userCreatorSurname = null;
-        if ($userCreatorDetailData) {
+        if ($userCreatorDetailData instanceof UserData) {
             $userCreatorName = $userCreatorDetailData->getName();
             $userCreatorSurname = $userCreatorDetailData->getSurname();
         }
@@ -1006,7 +1011,7 @@ class TaskRepository extends EntityRepository
         $userRequesterDetailData = $data->getRequestedBy()->getDetailData();
         $userRequesterName = null;
         $userRequesterSurname = null;
-        if ($userRequesterDetailData) {
+        if ($userRequesterDetailData instanceof UserData) {
             $userRequesterName = $userRequesterDetailData->getName();
             $userRequesterSurname = $userRequesterDetailData->getSurname();
         }
@@ -1065,6 +1070,8 @@ class TaskRepository extends EntityRepository
                 $taskDataArray[] = [
                     'id' => $item['id'],
                     'value' => $item['value'],
+                    'boolValue' => $item['boolValue'],
+                    'dateValue' => $item['dateValue'],
                     'taskAttribute' => [
                         'id' => $item['taskAttribute']['id'],
                         'title' => $item['taskAttribute']['title'],

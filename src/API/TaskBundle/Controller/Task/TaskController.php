@@ -90,6 +90,8 @@ class TaskController extends ApiBaseController
      *              {
      *                 "id": 113,
      *                 "value": "some input",
+     *                 "boolValue": null,
+     *                 "dateValue": null,
      *                 "taskAttribute":
      *                 {
      *                    "id": 169,
@@ -428,6 +430,8 @@ class TaskController extends ApiBaseController
      *              {
      *                 "id": 113,
      *                 "value": "some input",
+     *                 "boolValue": null,
+     *                 "dateValue": null,
      *                 "taskAttribute":
      *                 {
      *                    "id": 169,
@@ -706,6 +710,8 @@ class TaskController extends ApiBaseController
      *              {
      *                 "id": 113,
      *                 "value": "some input",
+     *                 "boolValue": null,
+     *                 "dateValue": null,
      *                 "taskAttribute":
      *                 {
      *                    "id": 169,
@@ -979,6 +985,8 @@ class TaskController extends ApiBaseController
      *              {
      *                 "id": 113,
      *                 "value": "some input",
+     *                 "boolValue": null,
+     *                 "dateValue": null,
      *                 "taskAttribute":
      *                 {
      *                    "id": 169,
@@ -1226,19 +1234,19 @@ class TaskController extends ApiBaseController
             $response = $response->setContent(json_encode(['message' => 'Status with requested Id does not exist!']));
             return $response;
         } else {
-            // Check Status function. If it is CLOSED, closedAt and startedAT params are required.
+            // Check Status function. If it is CLOSED, closedAt param is required.
             // Only Task with a COMPANY can be closed!
             // If it IS IN PROGRESS or COMPLETED, startedAt param has to be set
             if ($status->getFunction() === StatusFunctionOptions::CLOSED_TASK) {
                 if (null === $task->getCompany()) {
                     $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                    $response = $response->setContent(json_encode(['message' => 'Company is required for tasks with a CLOSED Status!']));
+                    $response = $response->setContent(json_encode(['message' => 'Company is required for a tasks with CLOSED Status!']));
                     return $response;
                 }
 
-                if (!isset($requestBody['startedAt']) || !isset($requestBody['closedAt'])) {
+                if (!isset($requestBody['closedAt'])) {
                     $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                    $response = $response->setContent(json_encode(['message' => 'StartedAt and ClosedAt params are required for tasks with a CLOSED Status!']));
+                    $response = $response->setContent(json_encode(['message' => ' ClosedAt param is required for a tasks with CLOSED Status!']));
                     return $response;
                 }
             } elseif ($status->getFunction() === StatusFunctionOptions::IN_PROGRESS_TASK || $status->getFunction() === StatusFunctionOptions::COMPLETED_TASK) {
@@ -1249,6 +1257,8 @@ class TaskController extends ApiBaseController
             $task->setStatus($status);
         }
 
+        /** @var User $loggedUser */
+        $loggedUser = $this->getUser();
         if ($requesterId) {
             $requester = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requesterId);
             if (!$requester instanceof User) {
@@ -1259,7 +1269,7 @@ class TaskController extends ApiBaseController
                 $task->setRequestedBy($requester);
             }
         } else {
-            $task->setRequestedBy($this->getUser());
+            $task->setRequestedBy($loggedUser);
         }
 
         if ($companyId) {
@@ -1271,6 +1281,14 @@ class TaskController extends ApiBaseController
             } else {
                 $task->setCompany($company);
             }
+        } else {
+            $usersCompany = $loggedUser->getCompany();
+            if (!$usersCompany instanceof Company) {
+                $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Company has to be set for a task! Logged user does not have a company what could be set up!']));
+                return $response;
+            }
+            $task->setCompany($usersCompany);
         }
 
         return $this->updateTask($task, $requestBody, $locationURL, $status, true);
@@ -1328,6 +1346,8 @@ class TaskController extends ApiBaseController
      *              {
      *                 "id": 113,
      *                 "value": "some input",
+     *                 "bollValue": null,
+     *                 "dateValue": null,
      *                 "taskAttribute":
      *                 {
      *                    "id": 169,
@@ -1627,9 +1647,9 @@ class TaskController extends ApiBaseController
                         return $response;
                     }
 
-                    if ((!$task->getStartedAt() && !isset($requestBody['startedAt'])) || !isset($requestBody['closedAt'])) {
+                    if (!isset($requestBody['closedAt'])) {
                         $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                        $response = $response->setContent(json_encode(['message' => 'StartedAt and ClosedAt params are required for a tasks with a CLOSED Status!']));
+                        $response = $response->setContent(json_encode(['message' => 'ClosedAt param is required for a tasks with CLOSED Status!']));
                         return $response;
                     }
                 } elseif ($status->getFunction() === StatusFunctionOptions::IN_PROGRESS_TASK || $status->getFunction() === StatusFunctionOptions::COMPLETED_TASK) {
@@ -2134,7 +2154,7 @@ class TaskController extends ApiBaseController
                         continue;
                     } elseif (!is_array($value) && 'null' === strtolower($value) && in_array($key, $requiredTaskAttributeData, true)) {
                         $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                        $response = $response->setContent(json_encode(['message' => 'Task Data with a Task Attribute key: ' . $key . ' are Required! It is not possible to delete this data.']));
+                        $response = $response->setContent(json_encode(['message' => 'Task Data with a Task Attribute key: ' . $key . ' is Required! It is not possible to delete this data.']));
                         return $response;
                     } else {
                         $tdValueChecker = $this->get('entity_processor')->checkDataValueFormat($taskAttribute, $value);
@@ -2189,23 +2209,23 @@ class TaskController extends ApiBaseController
 
         $this->getDoctrine()->getManager()->flush();
         // Sent Notification Emails about a Task update to tasks: REQUESTER, ASSIGNED USERS, FOLLOWERS
-        if (\count($changedParams) > 0) {
-            $notificationEmailAddresses = $this->getEmailForUpdateTaskNotification($task, $this->getUser()->getEmail());
-            if (\count($notificationEmailAddresses) > 0) {
-                $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $notificationEmailAddresses, $this->getUser(), $changedParams);
-                $sendingError = $this->get('email_service')->sendEmail($templateParams);
-                if (true !== $sendingError) {
-                    $data = [
-                        'errors' => $sendingError,
-                        'message' => 'Error with sending notifications!'
-                    ];
-                    $response = $response->setStatusCode(StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
-                    $response = $response->setContent(json_encode($data));
-                    return $response;
-                }
-            }
-        }
-
+//        if (\count($changedParams) > 0) {
+//            $notificationEmailAddresses = $this->getEmailForUpdateTaskNotification($task, $this->getUser()->getEmail());
+//            if (\count($notificationEmailAddresses) > 0) {
+//                $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $notificationEmailAddresses, $this->getUser(), $changedParams);
+//                $sendingError = $this->get('email_service')->sendEmail($templateParams);
+//                if (true !== $sendingError) {
+//                    $data = [
+//                        'errors' => $sendingError,
+//                        'message' => 'Error with sending notifications!'
+//                    ];
+//                    $response = $response->setStatusCode(StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
+//                    $response = $response->setContent(json_encode($data));
+//                    return $response;
+//                }
+//            }
+//        }
+//
         $taskArray = $this->get('task_service')->getFullTaskEntity($task, true, $this->getUser(), $this->get('task_voter')->isAdmin());
 
         $response = $response->setStatusCode($statusCode);

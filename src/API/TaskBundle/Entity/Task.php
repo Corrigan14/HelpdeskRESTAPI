@@ -144,7 +144,7 @@ class Task
      * @var Company
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\Company", inversedBy="tasks")
-     * @ORM\JoinColumn(name="company_id", referencedColumnName="id", nullable=true)
+     * @ORM\JoinColumn(name="company_id", referencedColumnName="id", nullable=false)
      * @Serializer\ReadOnly()
      */
     private $company;

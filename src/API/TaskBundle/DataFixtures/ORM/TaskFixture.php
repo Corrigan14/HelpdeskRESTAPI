@@ -86,14 +86,6 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             'title' => StatusOptions::IN_PROGRESS
         ]);
 
-        $closedStatus = $manager->getRepository('APITaskBundle:Status')->findOneBy([
-            'title' => StatusOptions::CLOSED
-        ]);
-
-        $cmpletedStatus = $manager->getRepository('APITaskBundle:Status')->findOneBy([
-            'title' => StatusOptions::COMPLETED
-        ]);
-
         if ($userUser instanceof User && $adminUser instanceof User) {
             $task = new Task();
             $task->setTitle('Task 1');
@@ -101,9 +93,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             $task->setImportant(false);
             $task->setCreatedBy($userUser);
             $task->setRequestedBy($userUser);
-            if ($userProject instanceof Project) {
-                $task->setProject($userProject);
-            }
+            $task->setProject($userProject);
             if ($tagHome instanceof Tag) {
                 $task->addTag($tagHome);
             }
@@ -112,7 +102,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             }
             $task->addFollower($adminUser);
             $task->setCompany($webSolCompany);
-            $task->setStatus($cmpletedStatus);
+            $task->setStatus($newStatus);
             $manager->persist($task);
 
             $task = new Task();
@@ -121,9 +111,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             $task->setImportant(false);
             $task->setCreatedBy($userUser);
             $task->setRequestedBy($adminUser);
-            if ($userProject instanceof Project) {
-                $task->setProject($userProject);
-            }
+            $task->setProject($userProject);
             if ($tagHome instanceof Tag) {
                 $task->addTag($tagHome);
             }
@@ -131,7 +119,8 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                 $task->addTag($tagFreeTime);
             }
             $task->setCompany($webSolCompany);
-            $task->setStatus($cmpletedStatus);
+            $task->setStatus($inProgresStatus);
+            $task->setStartedAt(new \DateTime());
             $manager->persist($task);
 
             $task = new Task();
@@ -140,9 +129,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             $task->setImportant(false);
             $task->setCreatedBy($adminUser);
             $task->setRequestedBy($adminUser);
-            if ($userProject instanceof Project) {
-                $task->setProject($userProject);
-            }
+            $task->setProject($userProject);
             if ($tagHome instanceof Tag) {
                 $task->addTag($tagHome);
             }
@@ -150,7 +137,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                 $task->addTag($tagFreeTime);
             }
             $task->setCompany($webSolCompany);
-            $task->setStatus($cmpletedStatus);
+            $task->setStatus($newStatus);
             $manager->persist($task);
 
             for ($numberOfTasks = 4; $numberOfTasks < 1000; $numberOfTasks++) {
@@ -160,10 +147,14 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                 $task->setImportant(true);
                 $task->setCreatedBy($adminUser);
                 $task->setRequestedBy($adminUser);
-                $task->setCompany($webSolCompany);
+                $task->setCompany($lanCompany);
                 $task->setStatus($newStatus);
-                if ($usersProject2 instanceof Project) {
-                    $task->setProject($usersProject2);
+                $task->setProject($usersProject2);
+                if ($tagHome instanceof Tag) {
+                    $task->addTag($tagHome);
+                }
+                if ($tagFreeTime instanceof Tag) {
+                    $task->addTag($tagFreeTime);
                 }
 
                 $manager->persist($task);
@@ -178,30 +169,10 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                 $task->setRequestedBy($userUser);
                 $task->setCompany($lanCompany);
                 $task->setStatus($inProgresStatus);
-                if ($adminsProject instanceof Project) {
-                    $task->setProject($adminsProject);
-                }
+                $task->setProject($adminsProject);
+                $task->setStartedAt(new \DateTime());
 
                 $manager->persist($task);
-            }
-
-            if ($userProject instanceof Project) {
-                for ($numberOfTasks = 1001; $numberOfTasks < 2000; $numberOfTasks++) {
-                    $task = new Task();
-                    $task->setTitle('Task ' . $numberOfTasks);
-                    $task->setDescription('Description of Users Task ' . $numberOfTasks);
-                    $task->setImportant(true);
-                    $task->setCreatedBy($userUser);
-                    $task->setRequestedBy($userUser);
-                    $task->setProject($userProject);
-                    $task->setCompany($lanCompany);
-                    $task->setStatus($closedStatus);
-                    if ($adminsProject instanceof Project) {
-                        $task->setProject($adminsProject);
-                    }
-
-                    $manager->persist($task);
-                }
             }
 
             $manager->flush();

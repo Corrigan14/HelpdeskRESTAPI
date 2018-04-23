@@ -98,7 +98,7 @@ class TaskDataFixture implements FixtureInterface, ContainerAwareInterface, Orde
             if ($taskAttributeDate instanceof TaskAttribute) {
                 $td = new TaskData();
                 $td->setTaskAttribute($taskAttributeDate);
-                $td->setDateValue(1519185224);
+                $td->setDateValue(1524506402);
                 $td->setValue(null);
                 $td->setTask($usersTask);
                 $manager->persist($td);

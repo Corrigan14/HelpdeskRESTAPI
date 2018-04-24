@@ -1794,14 +1794,14 @@ class TaskController extends ApiBaseController
         $statusCode = $this->getCreateUpdateStatusCode($create);
 
         // REQUIRED PARAMETERS
-        if (isset($requestBody['title'])) {
-            if (\strlen($requestBody['title']) > 0) {
-                $oldTitle = $task->getTitle();
-                $task->setTitle($requestBody['title']);
-                $changedParams ['title'] = [
-                    'from' => $oldTitle,
-                    'to' => $requestBody['title']
-                ];
+        if (isset($requestBody['title']) && \strlen($requestBody['title']) > 0) {
+            $oldParam = $task->getTitle();
+            $newParam = $requestBody['title'];
+            $task->setTitle($newParam);
+
+            //Notification
+            if (!$create && $this->setChangedParams($oldParam, $newParam)) {
+                $changedParams['title'] = $this->setChangedParams($oldParam, $newParam);
             }
         } elseif ($create) {
             $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
@@ -1810,16 +1810,29 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestBody['important'])) {
-            $important = $requestBody['important'];
-            $task->setImportant($important);
+            $oldParam = $task->getImportant();
+            $newParam = $requestBody['important'];
+            $task->setImportant($newParam);
+
+            //Notification
+            if (!$create && $this->setChangedParams($oldParam, $newParam)) {
+                $changedParams['important'] = $this->setChangedParams($oldParam, $newParam);
+            }
         } elseif ($create) {
             $task->setImportant(false);
         }
 
         // OPTIONAL PARAMETERS
         if (isset($requestBody['description'])) {
-            if (\is_string($requestBody['description'])) {
+            $newParam = $requestBody['description'];
+            if (\is_string($newParam) && \strlen($newParam) > 0) {
+                $oldParam = $task->getDescription();
                 $task->setDescription($requestBody['description']);
+
+                //Notification
+                if (!$create && $this->setChangedParams($oldParam, $newParam)) {
+                    $changedParams['description'] = $this->setChangedParams($oldParam, $newParam);
+                }
             } else {
                 $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 $response = $response->setContent(json_encode(['message' => 'Description param required type is TEXT!']));
@@ -1828,8 +1841,15 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestBody['work'])) {
-            if (\is_string($requestBody['work'])) {
+            $newParam = $requestBody['work'];
+            if (\is_string($newParam) && \strlen($newParam) > 0) {
+                $oldParam = $task->getWork();
                 $task->setWork($requestBody['work']);
+
+                //Notification
+                if (!$create && $this->setChangedParams($oldParam, $newParam)) {
+                    $changedParams['work'] = $this->setChangedParams($oldParam, $newParam);
+                }
             } else {
                 $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 $response = $response->setContent(json_encode(['message' => 'Work param required type is STRING!']));
@@ -1838,8 +1858,15 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestBody['workTime'])) {
-            if (\is_string($requestBody['workTime'])) {
+            $newParam = $requestBody['workTime'];
+            if (\is_string($newParam) && \strlen($newParam) > 0) {
+                $oldParam = $task->getWorkTime();
                 $task->setWorkTime($requestBody['workTime']);
+
+                //Notification
+                if (!$create && $this->setChangedParams($oldParam, $newParam)) {
+                    $changedParams['workTime'] = $this->setChangedParams($oldParam, $newParam);
+                }
             } else {
                 $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 $response = $response->setContent(json_encode(['message' => 'WorkTime param required type is STRING!']));
@@ -1848,13 +1875,25 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestBody['startedAt'])) {
-            if (null === $requestBody['startedAt'] || 'null' === $requestBody['startedAt'] || 0 == $requestBody['startedAt']) {
+            $newParam = $requestBody ['startedAt'];
+            $oldParam = $task->getStartedAt();
+            if (null === $newParam || 'null' === $newParam || 0 == $newParam) {
                 $task->setStartedAt(null);
+
+                //Notification
+                if (!$create && $this->setChangedParams($oldParam, null)) {
+                    $changedParams['startedAt'] = $this->setChangedParams($oldParam, null);
+                }
             } else {
-                $intDateData = (int)$requestBody['startedAt'];
+                $intDateData = (int)$newParam;
                 try {
                     $startedAtDateTimeObject = new \DateTime("@$intDateData");
                     $task->setStartedAt($startedAtDateTimeObject);
+
+                    //Notification
+                    if (!$create && $this->setChangedParams($oldParam, $intDateData)) {
+                        $changedParams['startedAt'] = $this->setChangedParams($oldParam, $intDateData, true);
+                    }
                 } catch (\Exception $e) {
                     $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                     $response = $response->setContent(json_encode(['message' => 'startedAt parameter is not in a valid format! Expected format: Timestamp']));
@@ -1907,6 +1946,8 @@ class TaskController extends ApiBaseController
             }
         }
         $this->getDoctrine()->getManager()->persist($task);
+
+        dump($changedParams);
 
         // OPTIONAL PARAMETERS - ANOTHER NEW ENTITY IS REQUIRED (tag, assigned, attachment, taskData)
 
@@ -2231,6 +2272,43 @@ class TaskController extends ApiBaseController
         $response = $response->setStatusCode($statusCode);
         $response = $response->setContent(json_encode($taskArray));
         return $response;
+    }
+
+    /**
+     * @param $oldParam
+     * @param $newParam
+     * @param $date
+     * @return array|bool
+     */
+    private function setChangedParams($oldParam, $newParam, $date = false)
+    {
+        if (true === $oldParam || false === $oldParam) {
+            if ('1' === $newParam || 'true' === $newParam || true === $newParam) {
+                $newParam = true;
+            } elseif ('0' === $newParam || 'false' === $newParam || false === $newParam) {
+                $newParam = false;
+            } else {
+                return false;
+            }
+        }
+
+        if ($oldParam === $newParam) {
+            return false;
+        }
+
+        if ($date) {
+            $oldParam = new \DateTime("@$oldParam");
+            $newParam = new \DateTime("@$newParam");
+
+            $oldParam = $oldParam->format('d-m-Y H:i:s');
+            $newParam = $newParam->format('d-m-Y H:i:s');
+        }
+
+        return [
+            'from' => $oldParam,
+            'to' => $newParam
+        ];
+
     }
 
     /**

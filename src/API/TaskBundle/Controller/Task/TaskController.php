@@ -1800,7 +1800,7 @@ class TaskController extends ApiBaseController
             $task->setTitle($newParam);
 
             //Notification
-            if (!$create && $this->setChangedParams($oldParam, $newParam)) {
+            if (!$create && $this->paramsAreDifferent($oldParam, $newParam)) {
                 $changedParams['title'] = $this->setChangedParams($oldParam, $newParam);
             }
         } elseif ($create) {
@@ -1815,7 +1815,7 @@ class TaskController extends ApiBaseController
             $task->setImportant($newParam);
 
             //Notification
-            if (!$create && $this->setChangedParams($oldParam, $newParam)) {
+            if (!$create && $this->paramsAreDifferent($oldParam, $newParam)) {
                 $changedParams['important'] = $this->setChangedParams($oldParam, $newParam);
             }
         } elseif ($create) {
@@ -1830,7 +1830,7 @@ class TaskController extends ApiBaseController
                 $task->setDescription($requestBody['description']);
 
                 //Notification
-                if (!$create && $this->setChangedParams($oldParam, $newParam)) {
+                if (!$create && $this->paramsAreDifferent($oldParam, $newParam)) {
                     $changedParams['description'] = $this->setChangedParams($oldParam, $newParam);
                 }
             } else {
@@ -1847,7 +1847,7 @@ class TaskController extends ApiBaseController
                 $task->setWork($requestBody['work']);
 
                 //Notification
-                if (!$create && $this->setChangedParams($oldParam, $newParam)) {
+                if (!$create && $this->paramsAreDifferent($oldParam, $newParam)) {
                     $changedParams['work'] = $this->setChangedParams($oldParam, $newParam);
                 }
             } else {
@@ -1864,7 +1864,7 @@ class TaskController extends ApiBaseController
                 $task->setWorkTime($requestBody['workTime']);
 
                 //Notification
-                if (!$create && $this->setChangedParams($oldParam, $newParam)) {
+                if (!$create && $this->paramsAreDifferent($oldParam, $newParam)) {
                     $changedParams['workTime'] = $this->setChangedParams($oldParam, $newParam);
                 }
             } else {
@@ -1881,7 +1881,7 @@ class TaskController extends ApiBaseController
                 $task->setStartedAt(null);
 
                 //Notification
-                if (!$create && $this->setChangedParams($oldParam, null)) {
+                if (!$create && $this->paramsAreDifferent($oldParam, null)) {
                     $changedParams['startedAt'] = $this->setChangedParams($oldParam, null);
                 }
             } else {
@@ -1891,7 +1891,7 @@ class TaskController extends ApiBaseController
                     $task->setStartedAt($startedAtDateTimeObject);
 
                     //Notification
-                    if (!$create && $this->setChangedParams($oldParam, $intDateData)) {
+                    if (!$create && $this->paramsAreDifferent($oldParam, $intDateData)) {
                         $changedParams['startedAt'] = $this->setChangedParams($oldParam, $intDateData, true);
                     }
                 } catch (\Exception $e) {
@@ -1903,13 +1903,25 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestBody['deadline'])) {
-            if (null === $requestBody['deadline'] || 'null' === $requestBody['deadline'] || 0 == $requestBody['deadline']) {
+            $newParam = $requestBody['deadline'];
+            $oldParam = $task->getDeadline();
+            if (null === $newParam || 'null' === $newParam || 0 == $newParam) {
                 $task->setDeadline(null);
+
+                //Notification
+                if (!$create && $this->paramsAreDifferent($oldParam, null)) {
+                    $changedParams['deadline'] = $this->setChangedParams($oldParam, null);
+                }
             } else {
-                $intDateData = (int)$requestBody['deadline'];
+                $intDateData = (int)$newParam;
                 try {
                     $deadlineDateTimeObject = new \Datetime("@$intDateData");
                     $task->setDeadline($deadlineDateTimeObject);
+
+                    //Notification
+                    if (!$create && $this->paramsAreDifferent($oldParam, $intDateData)) {
+                        $changedParams['deadline'] = $this->setChangedParams($oldParam, $intDateData, true);
+                    }
                 } catch (\Exception $e) {
                     $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                     $response = $response->setContent(json_encode(['message' => 'deadline parameter is not in a valid format! Expected format: Timestamp']));
@@ -1919,7 +1931,9 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestBody['closedAt'])) {
-            if (null === $requestBody['closedAt'] || 'null' === $requestBody['closedAt'] || 0 == $requestBody['closedAt']) {
+            $newParam = $requestBody['closedAt'];
+            $oldParam = $task->getClosedAt();
+            if (null === $newParam || 'null' === $newParam || 0 == $newParam) {
                 // Check if user changed Status from "closed" to another one
                 if ($status->getFunction() === StatusFunctionOptions::CLOSED_TASK) {
                     $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
@@ -1927,16 +1941,24 @@ class TaskController extends ApiBaseController
                     return $response;
                 }
                 $task->setClosedAt(null);
+                //Notification
+                if (!$create && $this->paramsAreDifferent($oldParam, null)) {
+                    $changedParams['closedAt'] = $this->setChangedParams($oldParam, null);
+                }
             } else {
-                $intDateData = (int)$requestBody['closedAt'];
+                $intDateData = (int)$newParam;
                 try {
-                    $deadlineDateTimeObject = new \Datetime("@$intDateData");
-                    $task->setClosedAt($deadlineDateTimeObject);
+                    $deadlineDateTimeObject = new \DateTime("@$intDateData");
                     // Check if user changed Status to "closed"
                     if ($status->getFunction() !== StatusFunctionOptions::CLOSED_TASK) {
                         $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                         $response = $response->setContent(json_encode(['message' => 'If you want to set up a closure time, tasks STATUS has to be CLOSED']));
                         return $response;
+                    }
+                    $task->setClosedAt($deadlineDateTimeObject);
+                    //Notification
+                    if (!$create && $this->paramsAreDifferent($oldParam, $intDateData)) {
+                        $changedParams['deadline'] = $this->setChangedParams($oldParam, $intDateData, true);
                     }
                 } catch (\Exception $e) {
                     $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
@@ -1947,14 +1969,13 @@ class TaskController extends ApiBaseController
         }
         $this->getDoctrine()->getManager()->persist($task);
 
-        dump($changedParams);
-
         // OPTIONAL PARAMETERS - ANOTHER NEW ENTITY IS REQUIRED (tag, assigned, attachment, taskData)
-
         // Add tag(s) to the task
         if (isset($requestBody['tag'])) {
             //Delete old tags: sent body is actual, another data has to be removed
             $oldTags = $task->getTags();
+            $oldParams = $this->createArrayOfTitles($oldTags);
+            $newParams = [];
             if (count($oldTags) > 0) {
                 foreach ($oldTags as $oldTag) {
                     $task->removeTag($oldTag);
@@ -2008,8 +2029,15 @@ class TaskController extends ApiBaseController
                     $task->addTag($tag);
                     $this->getDoctrine()->getManager()->persist($task);
                 }
+                $newParams = $tagsArray;
+            }
+            //Notification
+            if (!$create && $this->arraysAreDifferent($oldParams, $newParams)) {
+                $changedParams['tags'] = $this->setChangedParams(implode(',', $oldParams), implode(',', $newParams));
             }
         }
+
+        dump($changedParams);
 
         // Add assigner(s) to the task
         // $requestData['assigned'] = '[{"userId": 209, "statusId": 8}]';
@@ -2275,12 +2303,43 @@ class TaskController extends ApiBaseController
     }
 
     /**
+     * @param $objects
+     * @return array
+     */
+    private function createArrayOfTitles($objects): array
+    {
+        $array = [];
+
+        foreach ($objects as $object) {
+            $array[] = $object->getTitle();
+        }
+
+        return $array;
+    }
+
+    /**
+     * @param array $oldParams
+     * @param array $newParams
+     * @return bool
+     */
+    private function arraysAreDifferent(array $oldParams, array $newParams): bool
+    {
+        $differentAreOld = array_diff($oldParams, $newParams);
+        $differentAreNew = array_diff($newParams, $oldParams);
+
+        if (count($differentAreNew) === 0 && count($differentAreOld) === 0) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * @param $oldParam
      * @param $newParam
-     * @param $date
-     * @return array|bool
+     * @return bool
      */
-    private function setChangedParams($oldParam, $newParam, $date = false)
+    private function paramsAreDifferent($oldParam, $newParam): bool
     {
         if (true === $oldParam || false === $oldParam) {
             if ('1' === $newParam || 'true' === $newParam || true === $newParam) {
@@ -2292,17 +2351,47 @@ class TaskController extends ApiBaseController
             }
         }
 
+        if (null === $oldParam && (('null' === $newParam) || (null === $newParam) || ('NULL' === $newParam))) {
+            return false;
+        }
+
         if ($oldParam === $newParam) {
             return false;
         }
 
-        if ($date) {
+        return true;
+    }
+
+    /**
+     * @param $oldParam
+     * @param $newParam
+     * @param $date
+     * @return array|bool
+     */
+    private function setChangedParams($oldParam, $newParam, $date = false)
+    {
+        if (true === $oldParam || false === $oldParam) {
+            if ('1' === $newParam || 'true' === $newParam || true === $newParam) {
+                $newParam = true;
+            } else {
+                $newParam = false;
+            }
+        }
+
+        if ($date && null !== $oldParam && null !== $newParam) {
             $oldParam = new \DateTime("@$oldParam");
             $newParam = new \DateTime("@$newParam");
 
             $oldParam = $oldParam->format('d-m-Y H:i:s');
             $newParam = $newParam->format('d-m-Y H:i:s');
+        } elseif ($date && null === $oldParam && null !== $newParam) {
+            $newParam = new \DateTime("@$newParam");
+            $newParam = $newParam->format('d-m-Y H:i:s');
+        } elseif ($date && null !== $oldParam && null === $newParam) {
+            $oldParam = new \DateTime("@$oldParam");
+            $oldParam = $oldParam->format('d-m-Y H:i:s');
         }
+
 
         return [
             'from' => $oldParam,

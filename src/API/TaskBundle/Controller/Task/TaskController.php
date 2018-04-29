@@ -2037,13 +2037,13 @@ class TaskController extends ApiBaseController
             }
         }
 
-        dump($changedParams);
-
         // Add assigner(s) to the task
         // $requestData['assigned'] = '[{"userId": 209, "statusId": 8}]';
         if (isset($requestBody['assigned'])) {
             //Delete old assigners: sent body is actual, another data has to be removed
             $oldAssigners = $task->getTaskHasAssignedUsers();
+            $oldParams = $this->createArrayOfUsernames($oldAssigners);
+            $newParams = [];
             if (count($oldAssigners) > 0) {
                 foreach ($oldAssigners as $oldAssigner) {
                     $this->getDoctrine()->getManager()->remove($oldAssigner);
@@ -2072,6 +2072,7 @@ class TaskController extends ApiBaseController
                         $response = $response->setContent(json_encode(['message' => 'Assigner with requested Id ' . $assignedUserId . ' does not exist!']));
                         return $response;
                     }
+                    $newParams[] = $assignedUser->getUsername();
 
                     // Check if user is already assigned to the task
                     $existedEntity = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy(
@@ -2112,12 +2113,18 @@ class TaskController extends ApiBaseController
                     $this->getDoctrine()->getManager()->persist($task);
                 }
             }
+            //Notification
+            if (!$create && $this->arraysAreDifferent($oldParams, $newParams)) {
+                $changedParams['assigner'] = $this->setChangedParams(implode(',', $oldParams), implode(',', $newParams));
+            }
         }
 
         // Add attachment(s) to the task
         if (isset($requestBody['attachment'])) {
             //Delete old attachments: sent body is actual, another data has to be removed
             $oldAttachments = $task->getTaskHasAttachments();
+            $oldParams = $this->createArrayOfFileNames($oldAttachments);
+            $newParams = [];
             if (count($oldAttachments) > 0) {
                 foreach ($oldAttachments as $oldAttachment) {
                     $this->getDoctrine()->getManager()->remove($oldAttachment);
@@ -2151,6 +2158,7 @@ class TaskController extends ApiBaseController
                         $response = $response->setContent(json_encode(['message' => 'File with requested Slug does not exist in a web-page File System!']));
                         return $response;
                     }
+                    $newParams[] = $fileEntity->getName();
 
                     $taskHasAttachment = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAttachment')->findOneBy([
                         'slug' => $data,
@@ -2170,7 +2178,13 @@ class TaskController extends ApiBaseController
                     }
                 }
             }
+            //Notification
+            if (!$create && $this->arraysAreDifferent($oldParams, $newParams)) {
+                $changedParams['attachment'] = $this->setChangedParams(implode(',', $oldParams), implode(',', $newParams));
+            }
         }
+
+        dump($changedParams);
 
         // Fill TaskData Entity if some of its parameters were sent
         // Check REQUIRED task attributes
@@ -2312,6 +2326,45 @@ class TaskController extends ApiBaseController
 
         foreach ($objects as $object) {
             $array[] = $object->getTitle();
+        }
+
+        return $array;
+    }
+
+
+    /**
+     * @param $objects
+     * @return array
+     */
+    private function createArrayOfUsernames($objects): array
+    {
+        $array = [];
+
+        foreach ($objects as $object) {
+            $array[] = $object->getUser()->getUsername();
+        }
+
+        return $array;
+    }
+
+    /**
+     * @param $objects
+     * @return array
+     */
+    private function createArrayOfFileNames($objects): array
+    {
+        $array = [];
+
+        foreach ($objects as $object) {
+            $slug = $object->getSlug();
+            $fileEntity = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
+                'slug' => $slug,
+            ]);
+
+            if (!$fileEntity instanceof File) {
+                continue;
+            }
+            $array[]=$fileEntity->getName();
         }
 
         return $array;

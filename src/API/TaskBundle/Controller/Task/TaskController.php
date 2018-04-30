@@ -7,6 +7,7 @@ use API\CoreBundle\Entity\File;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
 use API\TaskBundle\Entity\Filter;
+use API\TaskBundle\Entity\Notification;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Status;
 use API\TaskBundle\Entity\Tag;
@@ -2184,7 +2185,6 @@ class TaskController extends ApiBaseController
             }
         }
 
-        dump($changedParams);
 
         // Fill TaskData Entity if some of its parameters were sent
         // Check REQUIRED task attributes
@@ -2228,12 +2228,21 @@ class TaskController extends ApiBaseController
                         $taskData = new TaskData();
                         $taskData->setTask($task);
                         $taskData->setTaskAttribute($taskAttribute);
+                        $oldParam = null;
                     }
+
+                    $oldParam = $this->getValueBasedOnTaskAttributeType($taskData, $taskAttribute);
+                    $isDate = $this->checkTaskAttributeDateType($taskAttribute);
 
                     // If value = 'null' is being sent and DataAttribute is not Required - data are deleted
                     if (!is_array($value) && 'null' === strtolower($value) && !in_array($key, $requiredTaskAttributeData, true)) {
                         $this->getDoctrine()->getManager()->remove($taskData);
-                        $this->getDoctrine()->getManager()->flush();
+                        $newParam = null;
+
+                        //Notification
+                        if (!$create && $this->paramsAreDifferent($oldParam, $newParam)) {
+                            $changedParams[$taskAttribute->getTitle()] = $this->setChangedParams($oldParam, $newParam, $isDate);
+                        }
                         continue;
                     } elseif (!is_array($value) && 'null' === strtolower($value) && in_array($key, $requiredTaskAttributeData, true)) {
                         $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
@@ -2248,20 +2257,24 @@ class TaskController extends ApiBaseController
                                 }
                                 if ('true' === $value || '1' === $value || 1 === $value) {
                                     $taskData->setBoolValue(true);
+                                    $newParam = true;
                                 } else {
                                     $taskData->setBoolValue(false);
+                                    $newParam = false;
                                 }
                             } elseif ($taskAttribute->getType() === 'date') {
                                 $intValue = (int)$value;
                                 $taskData->setDateValue($intValue);
+                                $newParam = $intValue;
                             } else {
                                 $taskData->setValue($value);
+                                $newParam = $value;
                             }
                             $task->addTaskDatum($taskData);
 
                             $this->getDoctrine()->getManager()->persist($taskAttribute);
                             $this->getDoctrine()->getManager()->persist($task);
-                            $this->getDoctrine()->getManager()->flush();
+                            $this->getDoctrine()->getManager()->persist($taskData);
                         } else {
                             $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                             $expectation = $this->get('entity_processor')->returnExpectedDataFormat($taskAttribute);
@@ -2269,6 +2282,11 @@ class TaskController extends ApiBaseController
                             return $response;
                         }
                     }
+                    //Notification
+                    if (!$create && $this->paramsAreDifferent($oldParam, $newParam)) {
+                        $changedParams[$taskAttribute->getTitle()] = $this->setChangedParams($oldParam, $newParam, $isDate);
+                    }
+
                 } else {
                     $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                     $response = $response->setContent(json_encode(['message' => 'The key: ' . $key . ' of a Task Attribute is not valid (Task Attribute with this ID does not exist)']));
@@ -2291,29 +2309,180 @@ class TaskController extends ApiBaseController
         }
 
         $this->getDoctrine()->getManager()->flush();
-        // Sent Notification Emails about a Task update to tasks: REQUESTER, ASSIGNED USERS, FOLLOWERS
-//        if (\count($changedParams) > 0) {
-//            $notificationEmailAddresses = $this->getEmailForUpdateTaskNotification($task, $this->getUser()->getEmail());
-//            if (\count($notificationEmailAddresses) > 0) {
-//                $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $notificationEmailAddresses, $this->getUser(), $changedParams);
-//                $sendingError = $this->get('email_service')->sendEmail($templateParams);
-//                if (true !== $sendingError) {
-//                    $data = [
-//                        'errors' => $sendingError,
-//                        'message' => 'Error with sending notifications!'
-//                    ];
-//                    $response = $response->setStatusCode(StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
-//                    $response = $response->setContent(json_encode($data));
-//                    return $response;
-//                }
-//            }
-//        }
-//
         $taskArray = $this->get('task_service')->getFullTaskEntity($task, true, $this->getUser(), $this->get('task_voter')->isAdmin());
+
+        // Sent Notification Emails about a Task update to tasks: REQUESTER, ASSIGNED USERS, FOLLOWERS
+        $processedNotiffications = $this->processNotifications($this->getUser(), $task, $changedParams, $create);
+        if (true !== $processedNotiffications) {
+            $taskArray = array_merge($taskArray,['notification ERROR' => $processedNotiffications]);
+        }
 
         $response = $response->setStatusCode($statusCode);
         $response = $response->setContent(json_encode($taskArray));
         return $response;
+    }
+
+    /**
+     * @param User $loggedUser
+     * @param Task $task
+     * @param array $changedParams
+     * @param bool $create
+     * @return bool|string
+     */
+    private function processNotifications(User $loggedUser, Task $task, array $changedParams, bool $create)
+    {
+        if (\count($changedParams) > 0 && !$create) {
+            $notificationEmailAddresses = $this->getEmailForUpdateTaskNotification($task, $loggedUser, $changedParams);
+            if (\count($notificationEmailAddresses) > 0) {
+                $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $notificationEmailAddresses, $this->getUser(), $changedParams);
+                $sendingError = $this->get('email_service')->sendEmail($templateParams);
+                return $sendingError;
+            }
+        }
+
+        return true;
+
+    }
+
+    /**
+     * @param Task $task
+     * @param User $loggedUser
+     * @param array $changedParams
+     * @return array
+     */
+    private function getEmailForUpdateTaskNotification(Task $task, User $loggedUser, array $changedParams): array
+    {
+        $notificationEmailAddresses = [];
+        $createdNotifications = 0;
+        $jsonFromChangedParams = json_encode($changedParams,true);
+
+        $requesterEmail = $task->getRequestedBy()->getEmail();
+        $loggedUserEmail = $loggedUser->getEmail();
+        if ($loggedUserEmail !== $requesterEmail && !in_array($requesterEmail, $notificationEmailAddresses, true)) {
+            $notificationEmailAddresses[] = $requesterEmail;
+
+            $notification = new Notification();
+            $notification->setTask($task);
+            $notification->setCreatedBy($loggedUser);
+            $notification->setUser($task->getRequestedBy());
+            $notification->setChecked(false);
+            $notification->setBody($jsonFromChangedParams);
+            $notification->setTitle('Task UPDATE');
+            $this->getDoctrine()->getManager()->persist($notification);
+            $createdNotifications++;
+        }
+
+//        $followers = $task->getFollowers();
+//        if (count($followers) > 0) {
+//            /** @var User $follower */
+//            foreach ($followers as $follower) {
+//                $followerEmail = $follower->getEmail();
+//                if ($loggedUserEmail !== $followerEmail && !in_array($followerEmail, $notificationEmailAddresses)) {
+//                    $notificationEmailAddresses[] = $followerEmail;
+//                }
+//            }
+//        }
+
+        // Premysliet - aka sprava sa posle ak sa zmenil assigner
+        $assignedUsers = $task->getTaskHasAssignedUsers();
+        if (count($assignedUsers) > 0) {
+            /** @var TaskHasAssignedUser $item */
+            foreach ($assignedUsers as $item) {
+                $assignedUserEmail = $item->getUser()->getEmail();
+                if ($loggedUserEmail !== $assignedUserEmail && !in_array($assignedUserEmail, $notificationEmailAddresses, true)) {
+                    $notificationEmailAddresses[] = $assignedUserEmail;
+
+                    $notification = new Notification();
+                    $notification->setTask($task);
+                    $notification->setCreatedBy($loggedUser);
+                    $notification->setUser($item->getUser());
+                    $notification->setChecked(false);
+                    $notification->setBody($jsonFromChangedParams);
+                    $notification->setTitle('Task UPDATE');
+                    $this->getDoctrine()->getManager()->persist($notification);
+                    $createdNotifications++;
+                }
+            }
+        }
+
+        if ($createdNotifications > 0) {
+            $this->getDoctrine()->getManager()->flush();
+        }
+
+        return $notificationEmailAddresses;
+    }
+
+    /**
+     * @param int $taskId
+     * @param string $title
+     * @param array $emailAddresses
+     * @param User $user
+     * @param array $changedParams
+     * @return array
+     * @throws \LogicException
+     */
+    private function getTemplateParams(int $taskId, string $title, array $emailAddresses, User $user, array $changedParams): array
+    {
+        $userDetailData = $user->getDetailData();
+        if ($userDetailData instanceof UserData) {
+            $username = $userDetailData->getName() . ' ' . $userDetailData->getSurname();
+        } else {
+            $username = '';
+        }
+        $todayDate = new \DateTime();
+        $email = $user->getEmail();
+        $baseFrontURL = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->findOneBy([
+            'title' => 'Base Front URL'
+        ]);
+        $templateParams = [
+            'date' => $todayDate,
+            'username' => $username,
+            'email' => $email,
+            'taskId' => $taskId,
+            'subject' => $title,
+            'taskLink' => $baseFrontURL->getValue() . '/tasks/' . $taskId,
+            'changedParams' => ''
+        ];
+        $params = [
+            'subject' => 'LanHelpdesk - ' . '[#' . $taskId . '] ' . 'Úloha bola zmenená',
+            'from' => $email,
+            'to' => $emailAddresses,
+            'body' => $this->renderView('@APITask/Emails/taskUpdate.html.twig', $templateParams)
+        ];
+
+        return $params;
+    }
+
+
+    /**
+     * @param TaskData $taskData
+     * @param TaskAttribute $taskAttribute
+     * @return bool|\DateTime|int|string
+     */
+    private function getValueBasedOnTaskAttributeType(TaskData $taskData, TaskAttribute $taskAttribute)
+    {
+        if ($taskAttribute->getType() === 'checkbox') {
+            $oldParam = $taskData->getBoolValue();
+        } elseif ($taskAttribute->getType() === 'date') {
+            $oldParam = $taskData->getDateValue();
+        } else {
+            $oldParam = $taskData->getValue();
+        }
+
+        return $oldParam;
+    }
+
+    /**
+     * @param TaskAttribute $taskAttribute
+     * @return bool
+     */
+    private function checkTaskAttributeDateType(TaskAttribute $taskAttribute): bool
+    {
+        if ($taskAttribute->getType() === 'date') {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -2364,7 +2533,7 @@ class TaskController extends ApiBaseController
             if (!$fileEntity instanceof File) {
                 continue;
             }
-            $array[]=$fileEntity->getName();
+            $array[] = $fileEntity->getName();
         }
 
         return $array;
@@ -2875,28 +3044,6 @@ class TaskController extends ApiBaseController
     }
 
     /**
-     * @param TaskHasAssignedUser $entity
-     * @param Project $project
-     * @return bool
-     * @throws \LogicException
-     */
-    private function checkIfUserHasResolveTaskAclPermission(TaskHasAssignedUser $entity, Project $project): bool
-    {
-        $user = $entity->getUser();
-        $userHasProject = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
-            'user' => $user,
-            'project' => $project
-        ]);
-        if ($userHasProject instanceof UserHasProject) {
-            $acl = $userHasProject->getAcl();
-            if (\in_array(ProjectAclOptions::RESOLVE_TASK, $acl, true)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * @param string|null $orderString
      * @return array|Response
      */
@@ -2933,86 +3080,6 @@ class TaskController extends ApiBaseController
             'correct' => true,
             'message' => $order
         ];
-    }
-
-    /**
-     * @param Task $task
-     * @param string $loggedUserEmail
-     * @return array
-     */
-    private function getEmailForUpdateTaskNotification(Task $task, string $loggedUserEmail): array
-    {
-        $notificationEmailAddresses = [];
-
-        $requesterEmail = $task->getRequestedBy()->getEmail();
-        if ($loggedUserEmail !== $requesterEmail && !in_array($requesterEmail, $notificationEmailAddresses, true)) {
-            $notificationEmailAddresses[] = $requesterEmail;
-        }
-
-        $followers = $task->getFollowers();
-        if (count($followers) > 0) {
-            /** @var User $follower */
-            foreach ($followers as $follower) {
-                $followerEmail = $follower->getEmail();
-                if ($loggedUserEmail !== $followerEmail && !in_array($followerEmail, $notificationEmailAddresses)) {
-                    $notificationEmailAddresses[] = $followerEmail;
-                }
-            }
-        }
-
-        $assignedUsers = $task->getTaskHasAssignedUsers();
-        if (count($assignedUsers) > 0) {
-            /** @var TaskHasAssignedUser $item */
-            foreach ($assignedUsers as $item) {
-                $assignedUserEmail = $item->getUser()->getEmail();
-                if ($loggedUserEmail !== $assignedUserEmail && !in_array($assignedUserEmail, $notificationEmailAddresses, true)) {
-                    $notificationEmailAddresses[] = $assignedUserEmail;
-                }
-            }
-        }
-
-        return $notificationEmailAddresses;
-    }
-
-    /**
-     * @param int $taskId
-     * @param string $title
-     * @param array $emailAddresses
-     * @param User $user
-     * @param array $changedParams
-     * @return array
-     * @throws \LogicException
-     */
-    private function getTemplateParams(int $taskId, string $title, array $emailAddresses, User $user, array $changedParams): array
-    {
-        $userDetailData = $user->getDetailData();
-        if ($userDetailData instanceof UserData) {
-            $username = $userDetailData->getName() . ' ' . $userDetailData->getSurname();
-        } else {
-            $username = '';
-        }
-        $todayDate = new \DateTime();
-        $email = $user->getEmail();
-        $baseFrontURL = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->findOneBy([
-            'title' => 'Base Front URL'
-        ]);
-        $templateParams = [
-            'date' => $todayDate,
-            'username' => $username,
-            'email' => $email,
-            'taskId' => $taskId,
-            'subject' => $title,
-            'taskLink' => $baseFrontURL->getValue() . '/tasks/' . $taskId,
-            'changedParams' => ''
-        ];
-        $params = [
-            'subject' => 'LanHelpdesk - ' . '[#' . $taskId . '] ' . 'Úloha bola zmenená',
-            'from' => $email,
-            'to' => $emailAddresses,
-            'body' => $this->renderView('@APITask/Emails/taskUpdate.html.twig', $templateParams)
-        ];
-
-        return $params;
     }
 
     /**

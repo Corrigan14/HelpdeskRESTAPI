@@ -1612,20 +1612,30 @@ class TaskController extends ApiBaseController
                     return $response;
                 }
                 $oldProject = $task->getProject();
+                $oldParam = $oldProject->getTitle();
+                $newParam = $project->getTitle();
                 $task->setProject($project);
-                $changedParams['project'] = [
-                    'from' => $oldProject->getTitle(),
-                    'to' => $project->getTitle()
-                ];
+
+                //Notification
+                if ($this->paramsAreDifferent($oldParam, $newParam)) {
+                    $changedParams['project'] = $this->setChangedParams($oldParam, $newParam);
+                }
 
                 // Delete all assigners from the old project
                 if ($oldProject->getId() !== $project->getId()) {
                     $assigners = $task->getTaskHasAssignedUsers();
+
+                    $oldParams = $this->createArrayOfUsernames($assigners);
+                    $newParams = [];
                     if (count($assigners) > 0) {
                         foreach ($assigners as $assigner) {
                             $this->getDoctrine()->getManager()->remove($assigner);
                         }
                         $this->getDoctrine()->getManager()->flush();
+                    }
+                    //Notification
+                    if ($this->arraysAreDifferent($oldParams, $newParams)) {
+                        $changedParams['assigner'] = $this->setChangedParams(implode(',', $oldParams), implode(',', $newParams));
                     }
                 }
             }
@@ -1658,12 +1668,14 @@ class TaskController extends ApiBaseController
                         $task->setStartedAt(new \DateTime());
                     }
                 }
-                $oldStatusTitle = $task->getStatus()->getTitle();
+                $oldParam = $task->getStatus()->getTitle();
+                $newParam = $status->getTitle();
                 $task->setStatus($status);
-                $changedParams['status'] = [
-                    'from' => $oldStatusTitle,
-                    'to' => $status->getTitle()
-                ];
+
+                //Notification
+                if ($this->paramsAreDifferent($oldParam, $newParam)) {
+                    $changedParams['status'] = $this->setChangedParams($oldParam, $newParam);
+                }
             }
         } else {
             $status = $task->getStatus();
@@ -1697,11 +1709,16 @@ class TaskController extends ApiBaseController
                     $detailDataNew = '';
                 }
 
+                $oldParam = $oldRequester->getUsername() . $detailData;
+                $newParam = $requester->getUsername() . $detailDataNew;
                 $task->setRequestedBy($requester);
-                $changedParams['requester'] = [
-                    'from' => $oldRequester->getUsername() . $detailData,
-                    'to' => $requester->getUsername() . $detailDataNew
-                ];
+
+                //Notification
+                if ($this->paramsAreDifferent($oldParam, $newParam)) {
+                    $changedParams['requester'] = $this->setChangedParams($oldParam, $newParam);
+                    $changedParams['requester']['fromEmail'] = $oldRequester->getEmail();
+                    $changedParams['requester']['toEmail'] = $requester->getEmail();
+                }
             }
         }
 
@@ -1712,12 +1729,14 @@ class TaskController extends ApiBaseController
                 $response = $response->setContent(json_encode(['message' => 'Company with requested Id does not exist!']));
                 return $response;
             } else {
-                $oldCompanyTitle = $task->getCompany()->getTitle();
+                $oldParam = $task->getCompany()->getTitle();
+                $newParam = $company->getTitle();
                 $task->setCompany($company);
-                $changedParams['company'] = [
-                    'from' => $oldCompanyTitle,
-                    'to' => $company->getTitle()
-                ];
+
+                //Notification
+                if ($this->paramsAreDifferent($oldParam, $newParam)) {
+                    $changedParams['requester'] = $this->setChangedParams($oldParam, $newParam);
+                }
             }
         }
 
@@ -2044,79 +2063,93 @@ class TaskController extends ApiBaseController
             //Delete old assigners: sent body is actual, another data has to be removed
             $oldAssigners = $task->getTaskHasAssignedUsers();
             $oldParams = $this->createArrayOfUsernames($oldAssigners);
+            $oldAssignersEmails = $this->createArrayOfEmails($oldAssigners);
             $newParams = [];
-            if (count($oldAssigners) > 0) {
-                foreach ($oldAssigners as $oldAssigner) {
-                    $this->getDoctrine()->getManager()->remove($oldAssigner);
-                }
-                $this->getDoctrine()->getManager()->flush();
-            }
+            $newAssignersEmails = [];
 
-            if (strtolower($requestBody['assigned'] !== "null")) {
-                $assignedUsersArray = json_decode($requestBody['assigned'], true);
-                if (!\is_array($assignedUsersArray)) {
-                    $assignedUsersArray = explode(',', $requestBody['assigned']);
-                }
-
-                foreach ($assignedUsersArray as $key => $value) {
-                    $assignedUserId = $value['userId'];
-                    if (isset($value['statusId'])) {
-                        $assignedUserStatusId = $value['statusId'];
-                    } else {
-                        $assignedUserStatusId = $status->getId();
+            $this->getDoctrine()->getManager()->getConnection()->beginTransaction();
+            try {
+                if (count($oldAssigners) > 0) {
+                    foreach ($oldAssigners as $oldAssigner) {
+                        $this->getDoctrine()->getManager()->remove($oldAssigner);
                     }
-
-                    // USER
-                    $assignedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($assignedUserId);
-                    if (!$assignedUser instanceof User) {
-                        $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-                        $response = $response->setContent(json_encode(['message' => 'Assigner with requested Id ' . $assignedUserId . ' does not exist!']));
-                        return $response;
-                    }
-                    $newParams[] = $assignedUser->getUsername();
-
-                    // Check if user is already assigned to the task
-                    $existedEntity = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy(
-                        ['task' => $task, 'user' => $assignedUser]
-                    );
-                    if (!$existedEntity instanceof TaskHasAssignedUser) {
-                        $userIsAssignedToTask = new TaskHasAssignedUser();
-                    }
-
-                    // Check if user can be assigned to the task
-                    $options = [
-                        'task' => $task,
-                        'user' => $assignedUser
-                    ];
-
-                    if (!$this->get('task_voter')->isGranted(VoteOptions::ASSIGN_USER_TO_TASK, $options)) {
-                        $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
-                        $response = $response->setContent(json_encode(['message' => 'User with id: ' . $assignedUserId . 'has not permission to be assigned to requested task!']));
-                        return $response;
-                    }
-
-                    // STATUS
-                    $assignerStatus = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($assignedUserStatusId);
-                    if (!$assignerStatus instanceof Status) {
-                        $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-                        $response = $response->setContent(json_encode(['message' => 'Assigners requested STATUS does not Exist!']));
-                        return $response;
-                    }
-
-                    $userIsAssignedToTask->setTask($task);
-                    $userIsAssignedToTask->setStatus($assignerStatus);
-                    $userIsAssignedToTask->setUser($assignedUser);
-                    $userIsAssignedToTask->setActual(true);
-                    $this->getDoctrine()->getManager()->persist($userIsAssignedToTask);
                     $this->getDoctrine()->getManager()->flush();
-
-                    $task->addTaskHasAssignedUser($userIsAssignedToTask);
-                    $this->getDoctrine()->getManager()->persist($task);
                 }
-            }
-            //Notification
-            if (!$create && $this->arraysAreDifferent($oldParams, $newParams)) {
-                $changedParams['assigner'] = $this->setChangedParams(implode(',', $oldParams), implode(',', $newParams));
+
+                if (strtolower($requestBody['assigned'] !== "null")) {
+                    $assignedUsersArray = json_decode($requestBody['assigned'], true);
+                    if (!\is_array($assignedUsersArray)) {
+                        $assignedUsersArray = explode(',', $requestBody['assigned']);
+                    }
+
+                    foreach ($assignedUsersArray as $key => $value) {
+                        if (isset($value['statusId'])) {
+                            $assignedUserStatusId = $value['statusId'];
+                            // STATUS
+                            $assignerStatus = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($assignedUserStatusId);
+                            if (!$assignerStatus instanceof Status) {
+                                $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                                $response = $response->setContent(json_encode(['message' => 'Assigners requested STATUS does not Exist!']));
+                                return $response;
+                            }
+                        } else {
+                            $assignerStatus = $status;
+                        }
+
+                        // USER
+                        $assignedUserId = $value['userId'];
+                        $assignedUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($assignedUserId);
+                        if (!$assignedUser instanceof User) {
+                            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                            $response = $response->setContent(json_encode(['message' => 'Assigner with requested Id ' . $assignedUserId . ' does not exist!']));
+                            return $response;
+                        }
+                        $newParams[] = $assignedUser->getUsername();
+                        $newAssignersEmails[] = $assignedUser->getEmail();
+
+                        // Check if user is already assigned to the task
+                        $existedEntity = $this->getDoctrine()->getRepository('APITaskBundle:TaskHasAssignedUser')->findOneBy(
+                            ['task' => $task, 'user' => $assignedUser]
+                        );
+                        if (!$existedEntity instanceof TaskHasAssignedUser) {
+                            $userIsAssignedToTask = new TaskHasAssignedUser();
+                        }
+
+                        // Check if user can be assigned to the task
+                        $options = [
+                            'task' => $task,
+                            'user' => $assignedUser
+                        ];
+
+                        if (!$this->get('task_voter')->isGranted(VoteOptions::ASSIGN_USER_TO_TASK, $options)) {
+                            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+                            $response = $response->setContent(json_encode(['message' => 'User with id: ' . $assignedUserId . 'has not permission to be assigned to requested task!']));
+                            return $response;
+                        }
+
+                        $userIsAssignedToTask->setTask($task);
+                        $userIsAssignedToTask->setStatus($assignerStatus);
+                        $userIsAssignedToTask->setUser($assignedUser);
+                        $userIsAssignedToTask->setActual(true);
+                        $this->getDoctrine()->getManager()->persist($userIsAssignedToTask);
+
+                        $task->addTaskHasAssignedUser($userIsAssignedToTask);
+                        $this->getDoctrine()->getManager()->persist($task);
+                    }
+                    $this->getDoctrine()->getManager()->flush();
+                    $this->getDoctrine()->getManager()->getConnection()->commit();
+                }
+                //Notification
+                if (!$create && $this->arraysAreDifferent($oldParams, $newParams)) {
+                    $changedParams['assigner'] = $this->setChangedParams(implode(',', $oldParams), implode(',', $newParams));
+                    $changedParams['assigner']['emailFrom'] = $oldAssignersEmails;
+                    $changedParams['assigner']['emailTo'] = $newAssignersEmails;
+                }
+            } catch (\Exception $exception) {
+                $this->getDoctrine()->getManager()->getConnection()->rollBack();
+                $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Problem with Assigners! Data could not be saved to DB! Problem: ' . $exception]));
+                return $response;
             }
         }
 
@@ -2312,9 +2345,11 @@ class TaskController extends ApiBaseController
         $taskArray = $this->get('task_service')->getFullTaskEntity($task, true, $this->getUser(), $this->get('task_voter')->isAdmin());
 
         // Sent Notification Emails about a Task update to tasks: REQUESTER, ASSIGNED USERS, FOLLOWERS
-        $processedNotiffications = $this->processNotifications($this->getUser(), $task, $changedParams, $create);
-        if (true !== $processedNotiffications) {
-            $taskArray = array_merge($taskArray,['notification ERROR' => $processedNotiffications]);
+        $processedNotifications = $this->processNotifications($this->getUser(), $task, $changedParams, $create);
+        if ($processedNotifications['error']) {
+            $taskArray = array_merge($taskArray, ['notification ERROR' => $processedNotifications['error']]);
+        } else {
+            $taskArray = array_merge($taskArray, ['sent notification EMAILS' => $processedNotifications['sentEmails']]);
         }
 
         $response = $response->setStatusCode($statusCode);
@@ -2327,20 +2362,76 @@ class TaskController extends ApiBaseController
      * @param Task $task
      * @param array $changedParams
      * @param bool $create
-     * @return bool|string
+     * @return array
      */
-    private function processNotifications(User $loggedUser, Task $task, array $changedParams, bool $create)
+    private function processNotifications(User $loggedUser, Task $task, array $changedParams, bool $create): array
     {
+        $sentEmailsToGeneral = [];
+        $sentEmailsToOldRequester = [];
+        $sentEmailsToNewRequester = [];
+        $sentEmailsToOldAssigner = [];
+        $sentEmailsToNewAssigner = [];
+        $sentEmailsToGeneralError = false;
+        $sentEmailsToOldRequesterError = false;
+        $sentEmailsToNewRequesterError = false;
+        $sentEmailsToOldAssignerError = false;
+        $sentEmailsToNewAssignerError = false;
+        $error = false;
+
         if (\count($changedParams) > 0 && !$create) {
-            $notificationEmailAddresses = $this->getEmailForUpdateTaskNotification($task, $loggedUser, $changedParams);
-            if (\count($notificationEmailAddresses) > 0) {
-                $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $notificationEmailAddresses, $this->getUser(), $changedParams);
-                $sendingError = $this->get('email_service')->sendEmail($templateParams);
-                return $sendingError;
+            $notificationEmailAddresses = $this->getEmailForUpdateTaskNotificationAndCreateNotifications($task, $loggedUser, $changedParams);
+
+            $generalUpdate = $notificationEmailAddresses['generalUpdateAddresses'];
+            if (\count($generalUpdate) > 0) {
+                $stringifyChangedParams = $this->createStringFromDeepArray($changedParams);
+                $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $generalUpdate, $this->getUser(), $stringifyChangedParams, 'taskUpdate.html.twig');
+                $processedEmails = $this->get('email_service')->sendEmail($templateParams);
+                $sentEmailsToGeneral = $processedEmails['sentEmails'];
+                $sentEmailsToGeneralError = $processedEmails['error'];
+            }
+
+            $oldRequester[] = $notificationEmailAddresses['oldRequesterAddress'];
+            if ($oldRequester[0]) {
+                $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $oldRequester, $this->getUser(), $changedParams['requester']['from'], 'taskOldRequester.html.twig');
+                $processedEmails = $this->get('email_service')->sendEmail($templateParams);
+                $sentEmailsToOldRequester = $processedEmails['sentEmails'];
+                $sentEmailsToOldRequesterError = $processedEmails['error'];
+            }
+
+            $newRequester[] = $notificationEmailAddresses['newRequesterAddress'];
+            if ($newRequester[0]) {
+                $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $newRequester, $this->getUser(), $changedParams['requester']['to'], 'taskNewRequester.html.twig');
+                $processedEmails = $this->get('email_service')->sendEmail($templateParams);
+                $sentEmailsToNewRequester = $processedEmails['sentEmails'];
+                $sentEmailsToNewRequesterError = $processedEmails['error'];
+            }
+
+            $oldAssigner = $notificationEmailAddresses['oldAssignerAddresses'];
+            if ($oldAssigner) {
+                $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $oldAssigner, $this->getUser(), $changedParams['assigner']['from'], 'taskOldAssigner.html.twig');
+                $processedEmails = $this->get('email_service')->sendEmail($templateParams);
+                $sentEmailsToOldAssigner = $processedEmails['sentEmails'];
+                $sentEmailsToOldAssignerError = $processedEmails['error'];
+            }
+
+            $newAssigner = $notificationEmailAddresses['newAssignerAddresses'];
+            if ($newAssigner) {
+                $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $newAssigner, $this->getUser(), $changedParams['assigner']['from'], 'taskNewAssigner.html.twig');
+                $processedEmails = $this->get('email_service')->sendEmail($templateParams);
+                $sentEmailsToNewAssigner = $processedEmails['sentEmails'];
+                $sentEmailsToNewAssignerError = $processedEmails['error'];
             }
         }
 
-        return true;
+        if ($sentEmailsToGeneralError || $sentEmailsToNewRequesterError || $sentEmailsToOldRequesterError || $sentEmailsToOldAssignerError || $sentEmailsToNewAssignerError) {
+            $error = 'Problem with SMTP settings! Please contact admin!';
+        }
+
+        $allSentEmails = array_merge($sentEmailsToGeneral, $sentEmailsToOldRequester, $sentEmailsToNewRequester, $sentEmailsToOldAssigner, $sentEmailsToNewAssigner);
+        return [
+            'error' => $error,
+            'sentEmails' => $allSentEmails
+        ];
 
     }
 
@@ -2350,26 +2441,143 @@ class TaskController extends ApiBaseController
      * @param array $changedParams
      * @return array
      */
-    private function getEmailForUpdateTaskNotification(Task $task, User $loggedUser, array $changedParams): array
+    private function getEmailForUpdateTaskNotificationAndCreateNotifications(Task $task, User $loggedUser, array $changedParams): array
     {
         $notificationEmailAddresses = [];
+        $oldRequesterEmailAddress = false;
+        $newRequesterEmailAddress = false;
+        $oldAssignerEmailAddresses = [];
+        $newAssignerEmailAddresses = [];
+
         $createdNotifications = 0;
-        $jsonFromChangedParams = json_encode($changedParams,true);
-
-        $requesterEmail = $task->getRequestedBy()->getEmail();
+        $jsonFromChangedParams = json_encode($changedParams, true);
         $loggedUserEmail = $loggedUser->getEmail();
-        if ($loggedUserEmail !== $requesterEmail && !in_array($requesterEmail, $notificationEmailAddresses, true)) {
-            $notificationEmailAddresses[] = $requesterEmail;
 
-            $notification = new Notification();
-            $notification->setTask($task);
-            $notification->setCreatedBy($loggedUser);
-            $notification->setUser($task->getRequestedBy());
-            $notification->setChecked(false);
-            $notification->setBody($jsonFromChangedParams);
-            $notification->setTitle('Task UPDATE');
-            $this->getDoctrine()->getManager()->persist($notification);
-            $createdNotifications++;
+        if (isset($changedParams['requester'])) {
+            $oldRequester = $changedParams['requester']['fromEmail'];
+            $newRequester = $changedParams['requester']['toEmail'];
+
+            if ($loggedUserEmail !== $oldRequester) {
+                $oldRequesterEmailAddress = $oldRequester;
+                /** @var User $oldRequesterUser */
+                $oldRequesterUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->findOneBy([
+                    'email' => $oldRequester
+                ]);
+
+                $notification = new Notification();
+                $notification->setTask($task);
+                $notification->setCreatedBy($loggedUser);
+                $notification->setUser($oldRequesterUser);
+                $notification->setChecked(false);
+                $notification->setBody('Tasks requester was changed from you to ' . $changedParams['requester']['to'] . '.');
+                $notification->setTitle('Task UPDATE');
+                $this->getDoctrine()->getManager()->persist($notification);
+                $createdNotifications++;
+            }
+
+            if ($loggedUserEmail !== $newRequester) {
+                $newRequesterEmailAddress = $newRequester;
+                /** @var User $newRequesterUser */
+                $newRequesterUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->findOneBy([
+                    'email' => $newRequester
+                ]);
+
+                $notification = new Notification();
+                $notification->setTask($task);
+                $notification->setCreatedBy($loggedUser);
+                $notification->setUser($newRequesterUser);
+                $notification->setChecked(false);
+                $notification->setBody('Tasks requester was changed from ' . $changedParams['requester']['from'] . ' to you.');
+                $notification->setTitle('Task UPDATE');
+                $this->getDoctrine()->getManager()->persist($notification);
+                $createdNotifications++;
+            }
+        }
+
+        if (isset($changedParams['assigner'])) {
+            $oldAssignersDifferentFromNew = array_diff($changedParams['assigner']['emailFrom'], $changedParams['assigner']['emailTo']);
+            $newAssignersDifferentFromOld = array_diff($changedParams['assigner']['emailTo'], $changedParams['assigner']['emailFrom']);
+
+            foreach ($oldAssignersDifferentFromNew as $assigner) {
+                if ($assigner !== $loggedUserEmail && !in_array($assigner, $oldAssignerEmailAddresses, true)) {
+                    $oldAssignerEmailAddresses[] = $assigner;
+                    /** @var User $oldAssignerUser */
+                    $oldAssignerUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->findOneBy([
+                        'email' => $assigner
+                    ]);
+
+                    $notification = new Notification();
+                    $notification->setTask($task);
+                    $notification->setCreatedBy($loggedUser);
+                    $notification->setUser($oldAssignerUser);
+                    $notification->setChecked(false);
+                    $notification->setBody('Tasks assigner was changed from you to ' . $changedParams['assigner']['to'] . '.');
+                    $notification->setTitle('Task UPDATE');
+                    $this->getDoctrine()->getManager()->persist($notification);
+                    $createdNotifications++;
+                }
+            }
+
+            foreach ($newAssignersDifferentFromOld as $assigner) {
+                if ($assigner !== $loggedUserEmail && !in_array($assigner, $newAssignerEmailAddresses, true)) {
+                    $newAssignerEmailAddresses[] = $assigner;
+                    /** @var User $newAssignerUser */
+                    $newAssignerUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->findOneBy([
+                        'email' => $assigner
+                    ]);
+
+                    $notification = new Notification();
+                    $notification->setTask($task);
+                    $notification->setCreatedBy($loggedUser);
+                    $notification->setUser($newAssignerUser);
+                    $notification->setChecked(false);
+                    $notification->setBody('Tasks assigner was changed from ' . $changedParams['assigner']['from'] . ' to you.');
+                    $notification->setTitle('Task UPDATE');
+                    $this->getDoctrine()->getManager()->persist($notification);
+                    $createdNotifications++;
+                }
+            }
+        }
+
+        if (!isset($changedParams['requester'])) {
+            $requesterEmail = $task->getRequestedBy()->getEmail();
+
+            if ($loggedUserEmail !== $requesterEmail && !in_array($requesterEmail, $notificationEmailAddresses, true) && !in_array($requesterEmail, $newAssignerEmailAddresses, true) && !in_array($requesterEmail, $oldAssignerEmailAddresses, true)) {
+                $notificationEmailAddresses[] = $requesterEmail;
+
+                $notification = new Notification();
+                $notification->setTask($task);
+                $notification->setCreatedBy($loggedUser);
+                $notification->setUser($task->getRequestedBy());
+                $notification->setChecked(false);
+                $notification->setBody($jsonFromChangedParams);
+                $notification->setTitle('Task UPDATE');
+                $this->getDoctrine()->getManager()->persist($notification);
+                $createdNotifications++;
+            }
+        }
+
+        if (!isset($changedParams['assigner'])) {
+            $assignedUsers = $task->getTaskHasAssignedUsers();
+            if (count($assignedUsers) > 0) {
+                /** @var TaskHasAssignedUser $item */
+                foreach ($assignedUsers as $item) {
+                    $assignedUserEmail = $item->getUser()->getEmail();
+                    if ($loggedUserEmail !== $assignedUserEmail && !in_array($assignedUserEmail, $notificationEmailAddresses, true) && $oldRequesterEmailAddress !== $assignedUserEmail && $newRequesterEmailAddress !== $assignedUserEmail) {
+                        $notificationEmailAddresses[] = $assignedUserEmail;
+
+                        $notification = new Notification();
+                        $notification->setTask($task);
+                        $notification->setCreatedBy($loggedUser);
+                        $notification->setUser($item->getUser());
+                        $notification->setChecked(false);
+                        $notification->setBody($jsonFromChangedParams);
+                        $notification->setTitle('Task UPDATE');
+                        $this->getDoctrine()->getManager()->persist($notification);
+                        $createdNotifications++;
+                    }
+                }
+            }
         }
 
 //        $followers = $task->getFollowers();
@@ -2383,33 +2591,17 @@ class TaskController extends ApiBaseController
 //            }
 //        }
 
-        // Premysliet - aka sprava sa posle ak sa zmenil assigner
-        $assignedUsers = $task->getTaskHasAssignedUsers();
-        if (count($assignedUsers) > 0) {
-            /** @var TaskHasAssignedUser $item */
-            foreach ($assignedUsers as $item) {
-                $assignedUserEmail = $item->getUser()->getEmail();
-                if ($loggedUserEmail !== $assignedUserEmail && !in_array($assignedUserEmail, $notificationEmailAddresses, true)) {
-                    $notificationEmailAddresses[] = $assignedUserEmail;
-
-                    $notification = new Notification();
-                    $notification->setTask($task);
-                    $notification->setCreatedBy($loggedUser);
-                    $notification->setUser($item->getUser());
-                    $notification->setChecked(false);
-                    $notification->setBody($jsonFromChangedParams);
-                    $notification->setTitle('Task UPDATE');
-                    $this->getDoctrine()->getManager()->persist($notification);
-                    $createdNotifications++;
-                }
-            }
-        }
-
         if ($createdNotifications > 0) {
             $this->getDoctrine()->getManager()->flush();
         }
 
-        return $notificationEmailAddresses;
+        return [
+            'generalUpdateAddresses' => $notificationEmailAddresses,
+            'oldRequesterAddress' => $oldRequesterEmailAddress,
+            'newRequesterAddress' => $newRequesterEmailAddress,
+            'oldAssignerAddresses' => $oldAssignerEmailAddresses,
+            'newAssignerAddresses' => $newAssignerEmailAddresses
+        ];
     }
 
     /**
@@ -2417,11 +2609,11 @@ class TaskController extends ApiBaseController
      * @param string $title
      * @param array $emailAddresses
      * @param User $user
-     * @param array $changedParams
+     * @param string $changedParams
+     * @param string $twigTemplate
      * @return array
-     * @throws \LogicException
      */
-    private function getTemplateParams(int $taskId, string $title, array $emailAddresses, User $user, array $changedParams): array
+    private function getTemplateParams(int $taskId, string $title, array $emailAddresses, User $user, string $changedParams, string $twigTemplate): array
     {
         $userDetailData = $user->getDetailData();
         if ($userDetailData instanceof UserData) {
@@ -2441,18 +2633,32 @@ class TaskController extends ApiBaseController
             'taskId' => $taskId,
             'subject' => $title,
             'taskLink' => $baseFrontURL->getValue() . '/tasks/' . $taskId,
-            'changedParams' => ''
+            'changedParams' => $changedParams
         ];
         $params = [
             'subject' => 'LanHelpdesk - ' . '[#' . $taskId . '] ' . 'Úloha bola zmenená',
             'from' => $email,
             'to' => $emailAddresses,
-            'body' => $this->renderView('@APITask/Emails/taskUpdate.html.twig', $templateParams)
+            'body' => $this->renderView('@APITask/Emails/' . $twigTemplate, $templateParams)
         ];
 
         return $params;
     }
 
+    /**
+     * @param $params
+     * @return string
+     */
+    private function createStringFromDeepArray($params):string
+    {
+        $array = [];
+
+        foreach ($params as $key => $value) {
+            $array[] = 'Parameter ' . $key . ' changed FROM ' . $value['from'] . ' TO ' . $value['to'];
+        }
+
+        return implode(',', $array);
+    }
 
     /**
      * @param TaskData $taskData
@@ -2500,6 +2706,21 @@ class TaskController extends ApiBaseController
         return $array;
     }
 
+
+    /**
+     * @param $objects
+     * @return array
+     */
+    private function createArrayOfEmails($objects): array
+    {
+        $array = [];
+
+        foreach ($objects as $object) {
+            $array[] = $object->getUser()->getEmail();
+        }
+
+        return $array;
+    }
 
     /**
      * @param $objects

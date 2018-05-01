@@ -30,9 +30,9 @@ class EmailService
 
     /**
      * @param array $params
-     * @return string|bool
+     * @return array
      */
-    public function sendEmail(array $params)
+    public function sendEmail(array $params): array
     {
         // Load SMTP settings
         $smtpSettings = $this->em->getRepository('APITaskBundle:Smtp')->findOneBy([]);
@@ -53,13 +53,17 @@ class EmailService
 
             $this->mailer = \Swift_Mailer::newInstance($transport);
         } else {
-            return 'Problem with SMTP settings! Please contact admin!';
+            return [
+                'error' => 'Problem with SMTP settings! Please contact admin!',
+                'sentEmails' => []
+            ];
         }
 
         $subject = $params['subject'];
         $from = $params['from'];
         $addressesTo = $params['to'];
         $body = $params['body'];
+        $sentEmailsTo = [];
 
         try {
             foreach ($addressesTo as $to) {
@@ -83,10 +87,17 @@ class EmailService
                         ->setBody($body, 'text/html');
                 }
                 $this->mailer->send($message);
+                $sentEmailsTo[] = $to;
             }
-            return true;
+            return [
+                'error' => false,
+                'sentEmails' => $sentEmailsTo
+            ];
         } catch (\Swift_TransportException $e) {
-            return $e->getMessage();
+            return [
+                'error' => $e->getMessage(),
+                'sentEmails' => []
+            ];
         }
     }
 }

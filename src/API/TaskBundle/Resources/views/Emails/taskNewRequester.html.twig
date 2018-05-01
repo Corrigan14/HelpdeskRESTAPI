@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task UPDATE</title>
+</head>
+<body>
+<p style="margin-top: 0; margin-bottom: 0">
+    {{ date|date("d.m.Y H:i") }}
+</p>
+
+<p style="margin-top: 0; margin-bottom: 0">
+    <b>{{ username }}</b>
+    ({{ email }})
+    <span>
+        Ta zmenil na Requester-a ulohy.
+    </span>
+    <span>
+        Povodny Requester: {{ changedParams }}
+    </span>
+
+</p>
+
+<p style="margin-top: 0">
+    #{{ taskId }} : {{ subject }}
+</p>
+
+<p style="margin-top: 40px; margin-bottom: 0">
+    Pre zobrazenie úlohy kliknite na odkaz:
+</p>
+<p style="margin-top: 0">
+    <a href={{ taskLink }}>
+        {{ taskLink }}
+    </a>
+</p>
+</body>
+</html>

@@ -1996,7 +1996,7 @@ class TaskController extends ApiBaseController
             $oldTags = $task->getTags();
             $oldParams = $this->createArrayOfTitles($oldTags);
             $newParams = [];
-            if (count($oldTags) > 0) {
+            if (\count($oldTags) > 0) {
                 foreach ($oldTags as $oldTag) {
                     $task->removeTag($oldTag);
                     $this->getDoctrine()->getManager()->persist($task);
@@ -2004,7 +2004,7 @@ class TaskController extends ApiBaseController
                 $this->getDoctrine()->getManager()->flush();
             }
 
-            if (strtolower($requestBody['tag'] !== "null")) {
+            if (strtolower($requestBody['tag']) !== 'null') {
                 $tagsArray = json_decode($requestBody['tag'], true);
                 if (!\is_array($tagsArray)) {
                     $tagsArray = explode(',', $requestBody['tag']);
@@ -2031,7 +2031,7 @@ class TaskController extends ApiBaseController
 
                         //Check if tag is already added to task
                         $taskHasTags = $task->getTags();
-                        if (in_array($tag, $taskHasTags->toArray(), true)) {
+                        if (\in_array($tag, $taskHasTags->toArray(), true)) {
                             continue;
                         }
                     } else {
@@ -2069,14 +2069,14 @@ class TaskController extends ApiBaseController
 
             $this->getDoctrine()->getManager()->getConnection()->beginTransaction();
             try {
-                if (count($oldAssigners) > 0) {
+                if (\count($oldAssigners) > 0) {
                     foreach ($oldAssigners as $oldAssigner) {
                         $this->getDoctrine()->getManager()->remove($oldAssigner);
                     }
                     $this->getDoctrine()->getManager()->flush();
                 }
 
-                if (strtolower($requestBody['assigned'] !== "null")) {
+                if (strtolower($requestBody['assigned']) !== "null") {
                     $assignedUsersArray = json_decode($requestBody['assigned'], true);
                     if (!\is_array($assignedUsersArray)) {
                         $assignedUsersArray = explode(',', $requestBody['assigned']);
@@ -2159,14 +2159,14 @@ class TaskController extends ApiBaseController
             $oldAttachments = $task->getTaskHasAttachments();
             $oldParams = $this->createArrayOfFileNames($oldAttachments);
             $newParams = [];
-            if (count($oldAttachments) > 0) {
+            if (\count($oldAttachments) > 0) {
                 foreach ($oldAttachments as $oldAttachment) {
                     $this->getDoctrine()->getManager()->remove($oldAttachment);
                 }
                 $this->getDoctrine()->getManager()->flush();
             }
 
-            if (strtolower($requestBody['attachment'] !== "null")) {
+            if (strtolower($requestBody['attachment']) !== 'null') {
                 $attachmentArray = json_decode($requestBody['attachment'], true);
                 if (!\is_array($attachmentArray)) {
                     $attachmentArray = explode(',', $requestBody['attachment']);
@@ -2233,7 +2233,7 @@ class TaskController extends ApiBaseController
         }
 
         if (isset($requestBody['taskData'])) {
-            if (is_array($requestBody['taskData'])) {
+            if (\is_array($requestBody['taskData'])) {
                 $requestDetailData = $requestBody['taskData'];
             } else {
                 $requestDetailData = json_decode($requestBody['taskData'], true);
@@ -2262,13 +2262,13 @@ class TaskController extends ApiBaseController
                         $taskData->setTask($task);
                         $taskData->setTaskAttribute($taskAttribute);
                         $oldParam = null;
+                    } else {
+                        $oldParam = $this->getValueBasedOnTaskAttributeType($taskData, $taskAttribute);
                     }
-
-                    $oldParam = $this->getValueBasedOnTaskAttributeType($taskData, $taskAttribute);
                     $isDate = $this->checkTaskAttributeDateType($taskAttribute);
 
                     // If value = 'null' is being sent and DataAttribute is not Required - data are deleted
-                    if (!is_array($value) && 'null' === strtolower($value) && !in_array($key, $requiredTaskAttributeData, true)) {
+                    if (!\is_array($value) && 'null' === strtolower($value) && !\in_array($key, $requiredTaskAttributeData, true)) {
                         $this->getDoctrine()->getManager()->remove($taskData);
                         $newParam = null;
 
@@ -2277,43 +2277,45 @@ class TaskController extends ApiBaseController
                             $changedParams[$taskAttribute->getTitle()] = $this->setChangedParams($oldParam, $newParam, $isDate);
                         }
                         continue;
-                    } elseif (!is_array($value) && 'null' === strtolower($value) && in_array($key, $requiredTaskAttributeData, true)) {
+                    }
+
+                    if (!\is_array($value) && 'null' === strtolower($value) && \in_array($key, $requiredTaskAttributeData, true)) {
                         $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                         $response = $response->setContent(json_encode(['message' => 'Task Data with a Task Attribute key: ' . $key . ' is Required! It is not possible to delete this data.']));
                         return $response;
-                    } else {
-                        $tdValueChecker = $this->get('entity_processor')->checkDataValueFormat($taskAttribute, $value);
-                        if (true === $tdValueChecker) {
-                            if ($taskAttribute->getType() === 'checkbox') {
-                                if (\is_string($value)) {
-                                    $value = strtolower($value);
-                                }
-                                if ('true' === $value || '1' === $value || 1 === $value) {
-                                    $taskData->setBoolValue(true);
-                                    $newParam = true;
-                                } else {
-                                    $taskData->setBoolValue(false);
-                                    $newParam = false;
-                                }
-                            } elseif ($taskAttribute->getType() === 'date') {
-                                $intValue = (int)$value;
-                                $taskData->setDateValue($intValue);
-                                $newParam = $intValue;
-                            } else {
-                                $taskData->setValue($value);
-                                $newParam = $value;
-                            }
-                            $task->addTaskDatum($taskData);
+                    }
 
-                            $this->getDoctrine()->getManager()->persist($taskAttribute);
-                            $this->getDoctrine()->getManager()->persist($task);
-                            $this->getDoctrine()->getManager()->persist($taskData);
+                    $tdValueChecker = $this->get('entity_processor')->checkDataValueFormat($taskAttribute, $value);
+                    if (true === $tdValueChecker) {
+                        if ($taskAttribute->getType() === 'checkbox') {
+                            if (\is_string($value)) {
+                                $value = strtolower($value);
+                            }
+                            if ('true' === $value || '1' === $value || 1 === $value) {
+                                $taskData->setBoolValue(true);
+                                $newParam = true;
+                            } else {
+                                $taskData->setBoolValue(false);
+                                $newParam = false;
+                            }
+                        } elseif ($taskAttribute->getType() === 'date') {
+                            $intValue = (int)$value;
+                            $taskData->setDateValue($intValue);
+                            $newParam = $intValue;
                         } else {
-                            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                            $expectation = $this->get('entity_processor')->returnExpectedDataFormat($taskAttribute);
-                            $response = $response->setContent(json_encode(['message' => 'Problem with task additional data (taskData) value format! For a Task Attribute with ID: ' . $taskAttribute->getId() . ', ' . $expectation . ' is/are expected.']));
-                            return $response;
+                            $taskData->setValue($value);
+                            $newParam = $value;
                         }
+                        $task->addTaskDatum($taskData);
+
+                        $this->getDoctrine()->getManager()->persist($taskAttribute);
+                        $this->getDoctrine()->getManager()->persist($task);
+                        $this->getDoctrine()->getManager()->persist($taskData);
+                    } else {
+                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                        $expectation = $this->get('entity_processor')->returnExpectedDataFormat($taskAttribute);
+                        $response = $response->setContent(json_encode(['message' => 'Problem with task additional data (taskData) value format! For a Task Attribute with ID: ' . $taskAttribute->getId() . ', ' . $expectation . ' is/are expected.']));
+                        return $response;
                     }
                     //Notification
                     if (!$create && $this->paramsAreDifferent($oldParam, $newParam)) {
@@ -2329,13 +2331,13 @@ class TaskController extends ApiBaseController
             if ($create) {
                 // Check if All required Task Attribute Data were sent
                 $intersect = array_diff($requiredTaskAttributeData, $sentTaskAttributeKeys);
-                if (count($intersect) > 0) {
+                if (\count($intersect) > 0) {
                     $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                     $response = $response->setContent(json_encode(['message' => 'Task Data with Task Attribute ID: ' . implode(',', $intersect) . ' are also required!']));
                     return $response;
                 }
             }
-        } elseif (count($requiredTaskAttributeData) > 0 && $create) {
+        } elseif (\count($requiredTaskAttributeData) > 0 && $create) {
             $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
             $response = $response->setContent(json_encode(['message' => 'Task Data with Task Attribute ID: ' . implode(',', $requiredTaskAttributeData) . ' are required!']));
             return $response;
@@ -2649,7 +2651,7 @@ class TaskController extends ApiBaseController
      * @param $params
      * @return string
      */
-    private function createStringFromDeepArray($params):string
+    private function createStringFromDeepArray($params): string
     {
         $array = [];
 

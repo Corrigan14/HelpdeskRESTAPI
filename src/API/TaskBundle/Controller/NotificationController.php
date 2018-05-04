@@ -178,24 +178,73 @@ class NotificationController extends ApiBaseController
      *     {
      *        "data":
      *        [
+     *           {
+     *              "id": 3,
+     *              "title": "User updated task",
+     *              "body": "following parameters were changed: title (FROM .. TO) + link na task",
+     *              "read": true,
+     *              "createdAt": 1524504678,
+     *              "createdBy":
+     *              {
+     *                  "id": 5,
+     *                  "username": "user",
+     *                  "email": "user@user.sk",
+     *                  "name": null,
+     *                  "surname": null
+     *              },
+     *              "project": null,
+     *              "task":
+     *              {
+     *                  "id": 1,
+     *                  "title": "test 2"
+     *              }
+     *          },
      *          {
-     *
-     *          }
+     *              "id": 22,
+     *              "title": "Task UPDATE",
+     *              "body":
+     *              {
+     *                  "project":
+     *                  {
+     *                      "from": "Project of admin 3 - inactive",
+     *                      "to": "Project of user 2"
+     *                  },
+     *                  "status":
+     *                  {
+     *                      "from": "In Progress",
+     *                      "to": "Completed"
+     *                  }
+     *              },
+     *              "read": false,
+     *              "createdAt": 1525171078,
+     *              "createdBy":
+     *              {
+     *                  "id": 1,
+     *                  "username": "admin",
+     *                  "email": "admin@admin.sk",
+     *                  "name": "Admin",
+     *                  "surname": "Adminovic"
+     *              },
+     *              "project": null,
+     *              "task":
+     *              {
+     *                  "id": 1,
+     *                  "title": "test 2"
+     *              }
+     *           }
      *        ],
-     *        "_links": [],
-     *        "total NOT READ": 10,
-     *        "total": 15
+     *        "_counts":
+     *        {
+     *            "not read": 9,
+     *            "read": 2,
+     *            "all": 11
+     *        }
      *     }
      *
      * @ApiDoc(
-     *  description="Set notification as READ. Return updated notification.",
-     *  requirements={
-     *     {
-     *       "name"="notificationId",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
+     *  description="Set notification(s) as READ. Return updated notification(s).",
+     *  parameters={
+     *      {"name"="notifications", "dataType"="string", "required"=true,  "description"="Coma separated list of notifications' IDs"},
      *  },
      *  headers={
      *     {
@@ -212,10 +261,10 @@ class NotificationController extends ApiBaseController
      *  }
      * )
      *
-     * @param int $notificationId
+     * @param bool $read
      * @return JsonResponse
      */
-    public function setAsReadNotificationAction(int $notificationId)
+    public function setAsReadNotificationAction(bool $read):Response
     {
 
     }
@@ -245,10 +294,9 @@ class NotificationController extends ApiBaseController
      *      404 ="Not found Entity",
      *  })
      *
-     * @param int $notificationId
      * @return Response|JsonResponse
      */
-    public function deleteNotificationAction(int $notificationId)
+    public function deleteNotificationAction():Response
     {
 
     }

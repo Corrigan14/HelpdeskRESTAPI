@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Services;
 
 
+use API\TaskBundle\Repository\NotificationRepository;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
@@ -34,23 +35,41 @@ class NotificationService
     }
 
     /**
-     * @param $options
+     * @param int $page
+     * @param array $options
      * @return array
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public function getLoggedUserNotifications($options): array
+    public function getLoggedUserNotifications(int $page, array $options): array
     {
-        $loggedUserId = $options['loggedUserId'];
-        $read = $options['read'];
+        /** @var NotificationRepository $notificationRepository */
+        $notificationRepository = $this->em->getRepository('APITaskBundle:Notification');
+        $responseData = $notificationRepository->getLoggedUserNotifications($page, $options);
 
-        $allNotifications = $this->em->getRepository('APITaskBundle:Notification')->getLoggedUserNotifications($loggedUserId, $read);
+        $response['data'] = $responseData['array'];
 
-        return [
-            'data' => $allNotifications,
-            'not read' => $this->em->getRepository('APITaskBundle:Notification')->countLoggedUserNotifications($loggedUserId,false),
-            'read' => $this->em->getRepository('APITaskBundle:Notification')->countLoggedUserNotifications($loggedUserId,true)
+        $url = $this->router->generate('users_notifications');
+        $limit = $options['limit'];
+        $filters = $options['filtersForUrl'];
+
+        if (999 !== $limit) {
+            $count = $responseData['count'];
+        } else {
+            $count = \count($responseData['array']);
+        }
+
+        $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);
+
+        $notificationCountNotRead = $notificationRepository->countLoggedUserNotifications($options['loggedUserId'], false);
+        $notificationCountRead = $notificationRepository->countLoggedUserNotifications($options['loggedUserId'], true);
+        $notificationCount['_counts'] = [
+            'not read' => $notificationCountNotRead,
+            'read' => $notificationCountRead,
+            'all' => $notificationCountNotRead + $notificationCountRead
         ];
+
+        return array_merge($response, $notificationCount,$pagination);
     }
 
 

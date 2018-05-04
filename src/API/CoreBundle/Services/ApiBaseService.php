@@ -181,6 +181,17 @@ class ApiBaseService
             $default = null;
         }
 
+        if (isset($requestBody['read'])) {
+            $read = strtolower($requestBody['read']);
+            if ('true' === $read || true === $read) {
+                $read = true;
+            } elseif ('false' === $read || false === $read) {
+                $read = false;
+            }
+        }else {
+            $read = 'all';
+        }
+
         return [
             'page' => $page,
             'limit' => $limit,
@@ -191,7 +202,8 @@ class ApiBaseService
             'public' => $public,
             'report' => $report,
             'project' => $project,
-            'default' => $default
+            'default' => $default,
+            'read' => $read
         ];
     }
 

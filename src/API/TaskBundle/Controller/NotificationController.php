@@ -21,41 +21,97 @@ class NotificationController extends ApiBaseController
      *        "data":
      *        [
      *           {
-     *              "id": 4,
-     *              "title": "User assigned you a Project",
-     *              "body": null,
-     *              "checked": false,
-     *              "createdAt": 1510407878,
+     *              "id": 3,
+     *              "title": "User updated task",
+     *              "body": "following parameters were changed: title (FROM .. TO) + link na task",
+     *              "read": true,
+     *              "createdAt": 1524504678,
      *              "createdBy":
      *              {
-     *                  "id": 521,
+     *                  "id": 5,
+     *                  "username": "user",
+     *                  "email": "user@user.sk",
+     *                  "name": null,
+     *                  "surname": null
+     *              },
+     *              "project": null,
+     *              "task":
+     *              {
+     *                  "id": 1,
+     *                  "title": "test 2"
+     *              }
+     *          },
+     *          {
+     *              "id": 22,
+     *              "title": "Task UPDATE",
+     *              "body":
+     *              {
+     *                  "project":
+     *                  {
+     *                      "from": "Project of admin 3 - inactive",
+     *                      "to": "Project of user 2"
+     *                  },
+     *                  "status":
+     *                  {
+     *                      "from": "In Progress",
+     *                      "to": "Completed"
+     *                  }
+     *              },
+     *              "read": false,
+     *              "createdAt": 1525171078,
+     *              "createdBy":
+     *              {
+     *                  "id": 1,
      *                  "username": "admin",
      *                  "email": "admin@admin.sk",
      *                  "name": "Admin",
      *                  "surname": "Adminovic"
      *              },
-     *              "project":
-     *              {
-     *                  "id": 23,
-     *                  "title": "Project of admin"
-     *              },
+     *              "project": null,
      *              "task":
      *              {
-     *                  "id": 23,
-     *                  "title": "Project of admin"
-     *              },
+     *                  "id": 1,
+     *                  "title": "test 2"
+     *              }
      *           }
-     *        ],
-     *        "not read": 10,
-     *        "read": 0
+     *        ]
+     *        "_counts":
+     *        {
+     *            "not read": 9,
+     *            "read": 2,
+     *            "all": 11
+     *        },
+     *        "_links":
+     *        {
+     *            "self": "/api/v1/task-bundle/notification?page=1&limit=3&read=1&order=ASC",
+     *            "first": "/api/v1/task-bundle/notification?page=1&limit=3&read=1&order=ASC",
+     *            "prev": false,
+     *            "next": false,
+     *            "last": "/api/v1/task-bundle/notification?page=1&limit=3&read=1&order=ASC"
+     *        },
+     *       "total": 2,
+     *       "page": 1,
+     *       "numberOfPages": 1
      *     }
      *
      * @ApiDoc(
-     *  description="Returns logged user's existed notification list.",
+     *  description="Returns logged user's notifications.",
      *  filters={
      *     {
      *       "name"="read",
      *       "description"="Return's only NOT READ notifications if this param is FALSE, only READ notifications if param is TRUE. If null - return all."
+     *     },
+     *     {
+     *       "name"="page",
+     *       "description"="Pagination, limit is set to 10 records"
+     *     },
+     *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order by Order"
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
      *     }
      *  },
      *  headers={
@@ -74,50 +130,47 @@ class NotificationController extends ApiBaseController
      * @param Request $request
      * @return Response
      * @throws \UnexpectedValueException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
     public function getLoggedUsersNotificationAction(Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('users_notifications');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
-        // JSON API Response - Content type and Location settings
-        $response = new Response();
-        $response->headers->set('Content-Type', 'application/json');
-        $locationURL = $this->generateUrl('token_authentication');
-        $response->headers->set('Location', $locationURL);
-
         if (false !== $requestBody) {
-            $user = $this->getUser();
-            $read = null;
+            $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody);
 
-            if (isset($requestBody['read'])) {
-                $readString = $requestBody['read'];
-                if ('true' === strtolower($readString) || true === $readString) {
-                    $read = true;
-                } elseif ('false' === strtolower($readString) || false === $readString) {
-                    $read = false;
-                }
-            }
+            $page = $processedFilterParams['page'];
+            $limit = $processedFilterParams['limit'];
+            $order = $processedFilterParams['order'];
+            $read = $processedFilterParams['read'];
 
-            $options = [
-                'loggedUserId' => $user->getId(),
-                'read' => $read
+            $filtersForUrl = [
+                'read' => '&read=' . $read,
+                'order' => '&order=' . $order,
             ];
 
-            $notificationArray = $this->get('notifications_service')->getLoggedUserNotifications($options);
+            $options = [
+                'read' => $read,
+                'order' => $order,
+                'filtersForUrl' => $filtersForUrl,
+                'limit' => $limit,
+                'loggedUserId' => $this->getUser()->getId()
+            ];
 
+            $notificationArray = $this->get('notifications_service')->getLoggedUserNotifications($page, $options);
             $response = $response->setContent(json_encode($notificationArray));
             $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
         } else {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         }
 
         return $response;
-
     }
 
     /**

@@ -7,8 +7,6 @@ notification_set_as_read:
     path:     /notification/read/{read}
     defaults: { _controller: APITaskBundle:Notification:setAsReadNotification }
     methods: [PUT]
-    requirements:
-        read: '\d+'
 
 notification_delete:
     path:     /notification/{notificationId}

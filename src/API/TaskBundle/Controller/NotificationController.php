@@ -2,6 +2,9 @@
 
 namespace API\TaskBundle\Controller;
 
+use API\TaskBundle\Entity\Notification;
+use API\TaskBundle\Entity\Project;
+use API\TaskBundle\Entity\Task;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -261,12 +264,91 @@ class NotificationController extends ApiBaseController
      *  }
      * )
      *
-     * @param bool $read
+     * @param string $read
+     * @param Request $request
      * @return JsonResponse
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
      */
-    public function setAsReadNotificationAction(bool $read):Response
+    public function setAsReadNotificationAction(string $read, Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('notification_set_as_read', ['read' => $read]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
+        $read = strtolower($read);
+        if ('true' !== $read && 'false' !== $read) {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with read param format! Just TRUE = 1, FALSE = 0 are allowed!']));
+            return $response;
+        }
+
+        if ('true' === $read) {
+            $readParam = true;
+        } else {
+            $readParam = false;
+        }
+
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        if (false === $requestBody) {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
+            return $response;
+        }
+
+        if (!isset($requestBody['notifications'])) {
+            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Please fill notification IDs']));
+            return $response;
+        }
+
+        $notifications = [];
+        $decodedIds = json_decode($requestBody['notifications']);
+        if (!\is_array($decodedIds)) {
+            $decodedIds = explode(',', $requestBody['notifications']);
+        }
+
+        if (!\is_array($decodedIds)) {
+            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Please pass the correct format of ids! Expected format: JSON array']));
+            return $response;
+        }
+
+        $this->getDoctrine()->getManager()->getConnection()->beginTransaction();
+        try {
+            foreach ($decodedIds as $id) {
+                $notification = $this->getDoctrine()->getRepository('APITaskBundle:Notification')->find($id);
+                if ($notification instanceof Notification) {
+                    //User can change only his/her own notifications
+                    if ($notification->getUser() !== $this->getUser()) {
+                        $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'You are not allowed to change Notification with ID ' . $notification->getId()]));
+                        return $response;
+                    }
+
+                    $notification->setChecked($readParam);
+                    $this->getDoctrine()->getManager()->persist($notification);
+
+                    // Updated Notification array
+                    $notifications[] = $this->processNotificationToArray($notification);
+                } else {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'Notification with ID ' . $id . ' does not exist!']));
+                    return $response;
+                }
+            }
+            $this->getDoctrine()->getManager()->flush();
+            $this->getDoctrine()->getManager()->getConnection()->commit();
+
+            $response = $response->setContent(json_encode($notifications));
+            $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+            return $response;
+        } catch (\Exception $exception) {
+            $this->getDoctrine()->getManager()->getConnection()->rollBack();
+            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with Notification IDs: ' . $exception]));
+            return $response;
+        }
     }
 
     /**
@@ -296,8 +378,62 @@ class NotificationController extends ApiBaseController
      *
      * @return Response|JsonResponse
      */
-    public function deleteNotificationAction():Response
+    public function deleteNotificationAction(): Response
     {
+
+    }
+
+
+    /**
+     * @param Notification $notification
+     * @return array
+     */
+    private function processNotificationToArray(Notification $notification): array
+    {
+        $userCreatorDetailData = $notification->getCreatedBy()->getDetailData();
+        $userCreatorName = null;
+        $userCreatorSurname = null;
+        if ($userCreatorDetailData) {
+            $userCreatorName = $userCreatorDetailData->getName();
+            $userCreatorSurname = $userCreatorDetailData->getSurname();
+        }
+
+        $project = $notification->getProject();
+        $projectArray = null;
+        if ($project instanceof Project) {
+            $projectArray = [
+                'id' => $project->getId(),
+                'title' => $project->getTitle()
+            ];
+        }
+
+        $task = $notification->getTask();
+        $taskArray = null;
+        if ($task instanceof Task) {
+            $taskArray = [
+                'id' => $task->getId(),
+                'title' => $task->getTitle()
+            ];
+        }
+
+        $response = [
+            'id' => $notification->getId(),
+            'title' => $notification->getTitle(),
+            'body' => $notification->getBody(),
+            'read' => $notification->getChecked(),
+            'createdAt' => $notification->getCreatedAt(),
+            'createdBy' => [
+                'id' => $notification->getCreatedBy()->getId(),
+                'username' => $notification->getCreatedBy()->getUsername(),
+                'email' => $notification->getCreatedBy()->getEmail(),
+                'name' => $userCreatorName,
+                'surname' => $userCreatorSurname,
+            ],
+            'project' => $projectArray,
+            'task' => $taskArray
+        ];
+
+        return $response;
 
     }
 }

@@ -3,6 +3,9 @@
 namespace API\TaskBundle\Services;
 
 
+use API\CoreBundle\Entity\User;
+use API\TaskBundle\Entity\Notification;
+use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Repository\NotificationRepository;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
@@ -39,7 +42,6 @@ class NotificationService
      * @param array $options
      * @return array
      * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      */
     public function getLoggedUserNotifications(int $page, array $options): array
     {
@@ -70,19 +72,5 @@ class NotificationService
         ];
 
         return array_merge($response, $notificationCount,$pagination);
-    }
-
-
-    /**
-     * @param int $notificationId
-     * @return array
-     */
-    private function getNotificationLinks(int $notificationId): array
-    {
-        return [
-            'get logged users notifications' => $this->router->generate('users_notifications'),
-            'set as read' => $this->router->generate('notification_set_as_read', ['notificationId' => $notificationId]),
-            'delete' => $this->router->generate('notification_delete', ['notificationId' => $notificationId]),
-        ];
     }
 }

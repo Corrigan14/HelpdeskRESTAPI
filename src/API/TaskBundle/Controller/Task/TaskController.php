@@ -1181,6 +1181,7 @@ class TaskController extends ApiBaseController
      * @param bool|int $requesterId
      * @param bool|int $companyId
      * @return Response
+     * @throws \LogicException
      */
     public function createAction(Request $request, $projectId, $statusId, $requesterId = false, $companyId = false): Response
     {
@@ -1266,9 +1267,8 @@ class TaskController extends ApiBaseController
                 $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
                 $response = $response->setContent(json_encode(['message' => 'Requester with requested Id does not exist!']));
                 return $response;
-            } else {
-                $task->setRequestedBy($requester);
             }
+            $task->setRequestedBy($requester);
         } else {
             $task->setRequestedBy($loggedUser);
         }
@@ -1279,9 +1279,8 @@ class TaskController extends ApiBaseController
                 $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
                 $response = $response->setContent(json_encode(['message' => 'Company with requested Id does not exist!']));
                 return $response;
-            } else {
-                $task->setCompany($company);
             }
+            $task->setCompany($company);
         } else {
             $usersCompany = $loggedUser->getCompany();
             if (!$usersCompany instanceof Company) {
@@ -1551,6 +1550,7 @@ class TaskController extends ApiBaseController
      * @param bool|int $requesterId
      * @param bool|int $companyId
      * @return Response
+     * @throws \LogicException
      */
     public function updateAction(int $taskId, Request $request, $projectId = false, $statusId = false, $requesterId = false, $companyId = false): Response
     {
@@ -1627,7 +1627,7 @@ class TaskController extends ApiBaseController
 
                     $oldParams = $this->createArrayOfUsernames($assigners);
                     $newParams = [];
-                    if (count($assigners) > 0) {
+                    if (\count($assigners) > 0) {
                         foreach ($assigners as $assigner) {
                             $this->getDoctrine()->getManager()->remove($assigner);
                         }
@@ -1807,6 +1807,7 @@ class TaskController extends ApiBaseController
      * @param bool $create
      * @param bool|array $changedParams
      * @return Response
+     * @throws \LogicException
      */
     private function updateTask(Task $task, array $requestBody, $locationURL, Status $status, $create = false, $changedParams = false): Response
     {

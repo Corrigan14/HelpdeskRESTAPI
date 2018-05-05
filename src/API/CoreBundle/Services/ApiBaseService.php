@@ -77,6 +77,19 @@ class ApiBaseService
                 return $requestBody;
 
                 break;
+            case 'DELETE':
+                // Data in both: JSON and FORM x-www-form-urlencoded are supported by API
+                // Based on Content-type header we need different encoding standard
+                if ('application/json' === $contentType) {
+                    $requestBody = json_decode($request->getContent(), true);
+                    return $requestBody;
+                }
+                if ('application/x-www-form-urlencoded' === $contentType) {
+                    $requestBody = $request->request->all();
+                    return $requestBody;
+                }
+                break;
+                break;
             default:
                 return false;
         }

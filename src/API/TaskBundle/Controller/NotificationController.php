@@ -332,7 +332,7 @@ class NotificationController extends ApiBaseController
                     // Updated Notification array
                     $notifications[] = $this->processNotificationToArray($notification);
                 } else {
-                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
                     $response = $response->setContent(json_encode(['message' => 'Notification with ID ' . $id . ' does not exist!']));
                     return $response;
                 }
@@ -353,14 +353,9 @@ class NotificationController extends ApiBaseController
 
     /**
      * @ApiDoc(
-     *  description="Delete Notification Entity",
-     *  requirements={
-     *     {
-     *       "name"="notificationId",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
+     *  description="Delete Notifications.",
+     *  parameters={
+     *      {"name"="notifications", "dataType"="string", "required"=true,  "description"="Coma separated list of notifications' IDs"},
      *  },
      *  headers={
      *     {
@@ -370,17 +365,79 @@ class NotificationController extends ApiBaseController
      *     }
      *  },
      *  statusCodes={
-     *      201 ="Notification was successfully deleted.",
+     *      204 ="Notification was successfully deleted.",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
      *      404 ="Not found Entity",
      *  })
      *
+     * @param Request $request
      * @return Response|JsonResponse
+     * @throws \InvalidArgumentException
+     * @throws \LogicException
      */
-    public function deleteNotificationAction(): Response
+    public function deleteNotificationAction(Request $request): Response
     {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('notification_delete');
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
+        $requestBody = $this->get('api_base.service')->encodeRequest($request);
+        if (false === $requestBody) {
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
+            return $response;
+        }
+
+        if (!isset($requestBody['notifications'])) {
+            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Please fill notification IDs']));
+            return $response;
+        }
+
+        $notifications = [];
+        $decodedIds = json_decode($requestBody['notifications']);
+        if (!\is_array($decodedIds)) {
+            $decodedIds = explode(',', $requestBody['notifications']);
+        }
+
+        if (!\is_array($decodedIds)) {
+            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Please pass the correct format of ids! Expected format: JSON array']));
+            return $response;
+        }
+
+        $this->getDoctrine()->getManager()->getConnection()->beginTransaction();
+        try {
+            foreach ($decodedIds as $id) {
+                $notification = $this->getDoctrine()->getRepository('APITaskBundle:Notification')->find($id);
+                if ($notification instanceof Notification) {
+                    //User can change only his/her own notifications
+                    if ($notification->getUser() !== $this->getUser()) {
+                        $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+                        $response = $response->setContent(json_encode(['message' => 'You are not allowed to change Notification with ID ' . $notification->getId()]));
+                        return $response;
+                    }
+
+                    $this->getDoctrine()->getManager()->remove($notification);
+                } else {
+                    $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'Notification with ID ' . $id . ' does not exist!']));
+                    return $response;
+                }
+            }
+            $this->getDoctrine()->getManager()->flush();
+            $this->getDoctrine()->getManager()->getConnection()->commit();
+
+            $response = $response->setContent(json_encode($notifications));
+            $response = $response->setStatusCode(StatusCodesHelper::DELETED_CODE);
+            return $response;
+        } catch (\Exception $exception) {
+            $this->getDoctrine()->getManager()->getConnection()->rollBack();
+            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Problem with Notification IDs: ' . $exception]));
+            return $response;
+        }
     }
 
 

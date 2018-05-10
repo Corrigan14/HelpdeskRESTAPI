@@ -84,7 +84,8 @@ class TaskController extends ApiBaseController
      *            "status":
      *            {
      *               "id": 1802,
-     *               "title": "New"
+     *               "title": "New",
+     *               "color": "#FF4500"
      *            },
      *            "taskData":
      *            [
@@ -424,7 +425,8 @@ class TaskController extends ApiBaseController
      *            "status":
      *            {
      *               "id": 1802,
-     *               "title": "New"
+     *               "title": "New",
+     *               "color": "#FF4500"
      *            },
      *            "taskData":
      *            [
@@ -704,7 +706,8 @@ class TaskController extends ApiBaseController
      *            "status":
      *            {
      *               "id": 1802,
-     *               "title": "New"
+     *               "title": "New",
+     *               "color": "#FF4500"
      *            },
      *            "taskData":
      *            [
@@ -979,7 +982,8 @@ class TaskController extends ApiBaseController
      *            "status":
      *            {
      *               "id": 1802,
-     *               "title": "New"
+     *               "title": "New",
+     *               "color": "#FF4500"
      *            },
      *            "taskData":
      *            [
@@ -1339,7 +1343,8 @@ class TaskController extends ApiBaseController
      *            "status":
      *            {
      *               "id": 1802,
-     *               "title": "New"
+     *               "title": "New",
+     *               "color": "#FF4500"
      *            },
      *            "taskData":
      *            [

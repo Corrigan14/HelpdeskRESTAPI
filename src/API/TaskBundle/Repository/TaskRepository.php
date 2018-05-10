@@ -738,8 +738,7 @@ class TaskRepository extends EntityRepository
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      */
-    public
-    function getTask(int $taskId)
+    public function getTask(int $taskId): array
     {
         $query = $this->createQueryBuilder('task')
             ->select('task')
@@ -775,7 +774,6 @@ class TaskRepository extends EntityRepository
      * @param Project $project
      * @return int
      * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      */
     public function getNumberOfTasksFromProject(Project $project): int
     {
@@ -996,7 +994,8 @@ class TaskRepository extends EntityRepository
         if ($status instanceof Status) {
             $statusArray = [
                 'id' => $data->getStatus()->getId(),
-                'title' => $data->getStatus()->getTitle()
+                'title' => $data->getStatus()->getTitle(),
+                'color' => $data->getStatus()->getColor(),
             ];
         }
 
@@ -1239,7 +1238,8 @@ class TaskRepository extends EntityRepository
         if ($status) {
             $statusArray = [
                 'id' => $data['taskGlobalStatus']['id'],
-                'title' => $data['taskGlobalStatus']['title']
+                'title' => $data['taskGlobalStatus']['title'],
+                'color' => $data['taskGlobalStatus']['color']
             ];
         }
 

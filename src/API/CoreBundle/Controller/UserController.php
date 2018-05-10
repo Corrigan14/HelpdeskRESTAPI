@@ -129,11 +129,8 @@ class UserController extends ApiBaseController
      *
      * @return Response|JsonResponse
      * @throws \UnexpectedValueException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
-     * @throws \Doctrine\DBAL\DBALException
      */
     public function listAction(Request $request): Response
     {
@@ -190,21 +187,36 @@ class UserController extends ApiBaseController
      *              "email": "agent@agent.sk",
      *              "name": null,
      *              "surname": null,
-     *              "is_active": true
+     *              "is_active": true,
+     *              "company":
+     *              {
+     *                  "id": 2,
+     *                  "title": "LanSystems"
+     *              }
      *          },
      *          {
      *              "id": 4,
      *              "username": "agent2",
      *              "email": "agent2@agent.sk",
      *              "name": null,
-     *              "is_active": true
+     *              "is_active": true,
+     *              "company":
+     *              {
+     *                  "id": 2,
+     *                  "title": "LanSystems"
+     *              }
      *          },
      *          {
      *              "id": 5,
      *              "username": "agent3",
      *              "email": "agent3@agent.sk",
      *              "name": null,
-     *              "is_active": true
+     *              "is_active": true,
+     *              "company":
+     *              {
+     *                  "id": 2,
+     *                  "title": "LanSystems"
+     *              }
      *          }
      *       ]
      *       "date": 1518907522
@@ -237,7 +249,7 @@ class UserController extends ApiBaseController
         // JSON API Response - Content type and Location settings
         if (false !== $date && 'false' !== $date) {
             $intDate = (int)$date;
-            if (is_int($intDate) && null !== $intDate) {
+            if (\is_int($intDate) && null !== $intDate) {
                 $locationURL = $this->generateUrl('users_list_of_all_active_from_date', ['date' => $date]);
                 $dateTimeObject = new \DateTime("@$date");
             } else {
@@ -556,11 +568,8 @@ class UserController extends ApiBaseController
      *
      * @return Response
      * @throws \UnexpectedValueException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
-     * @throws \Doctrine\DBAL\DBALException
      */
     public function getAction(int $id): Response
     {

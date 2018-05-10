@@ -150,12 +150,12 @@ class UserRepository extends EntityRepository
                 'count' => $count,
                 'array' => $this->formatData($paginator)
             ];
-        } else {
-            // Return all entities
-            return [
-                'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
-            ];
         }
+
+        // Return all entities
+        return [
+            'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
+        ];
     }
 
     /**
@@ -188,8 +188,9 @@ class UserRepository extends EntityRepository
     {
         if ($date) {
             $query = $this->createQueryBuilder('user')
-                ->select('user.id, user.username, user.email, detailData.name, detailData.surname, user.is_active')
+                ->select('user', 'detailData', 'company')
                 ->leftJoin('user.detailData', 'detailData')
+                ->leftJoin('user.company', 'company')
                 ->orderBy('user.username', 'ASC')
                 ->where('user.updatedAt >= :date')
                 ->setParameters([
@@ -197,14 +198,15 @@ class UserRepository extends EntityRepository
                 ]);
         } else {
             $query = $this->createQueryBuilder('user')
-                ->select('user.id, user.username, user.email, detailData.name, detailData.surname, user.is_active')
+                ->select('user', 'detailData', 'company')
                 ->leftJoin('user.detailData', 'detailData')
+                ->leftJoin('user.company', 'company')
                 ->orderBy('user.username', 'ASC')
                 ->where('user.is_active = :isActive')
                 ->setParameter('isActive', true);
         }
 
-        return $query->getQuery()->getArrayResult();
+        return $this->getExpectedDataFormat($query->getQuery()->getArrayResult());
     }
 
     /**
@@ -366,5 +368,48 @@ class UserRepository extends EntityRepository
         ];
 
         return $response;
+    }
+
+    /**
+     * @param array $array
+     * @return array
+     */
+    private function getExpectedDataFormat(array $array): array
+    {
+        $responseArray = [];
+        /** @var User $data */
+        foreach ($array as $data) {
+            $detailData = $data['detailData'];
+            if ($detailData) {
+                $name = $data['detailData']['name'];
+                $surname = $data['detailData']['surname'];
+            } else {
+                $name = null;
+                $surname = null;
+            }
+
+            $company = $data['company'];
+            $companyArray = [];
+            if ($company) {
+                $companyArray = [
+                    'id' => $company['id'],
+                    'title' => $company['title']
+                ];
+            }
+
+            $response = [
+                'id' => $data['id'],
+                'username' => $data['username'],
+                'email' => $data['email'],
+                'is_active' => $data['is_active'],
+                'name' => $name,
+                'surname' => $surname,
+                'company' => $companyArray
+            ];
+
+            $responseArray[] = $response;
+        }
+
+        return $responseArray;
     }
 }

@@ -71,8 +71,6 @@ class UserService
      *
      * @param array $ids
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      */
     public function getUserResponse(array $ids): array
     {

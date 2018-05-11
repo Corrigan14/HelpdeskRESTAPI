@@ -317,8 +317,6 @@ class TaskController extends ApiBaseController
      *
      * @return Response
      * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
     public function listAction(Request $request): Response
@@ -578,8 +576,6 @@ class TaskController extends ApiBaseController
      * @param int $filterId
      *
      * @return Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -895,13 +891,11 @@ class TaskController extends ApiBaseController
      *
      * @param int $id
      *
-     * @return JsonResponse|Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
      * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    public function getAction(int $id)
+    public function getAction(int $id):Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('task', ['id' => $id]);
@@ -1740,7 +1734,7 @@ class TaskController extends ApiBaseController
 
                 //Notification
                 if ($this->paramsAreDifferent($oldParam, $newParam)) {
-                    $changedParams['requester'] = $this->setChangedParams($oldParam, $newParam);
+                    $changedParams['company'] = $this->setChangedParams($oldParam, $newParam);
                 }
             }
         }
@@ -2448,6 +2442,7 @@ class TaskController extends ApiBaseController
      * @param User $loggedUser
      * @param array $changedParams
      * @return array
+     * @throws \LogicException
      */
     private function getEmailForUpdateTaskNotificationAndCreateNotifications(Task $task, User $loggedUser, array $changedParams): array
     {
@@ -2507,7 +2502,7 @@ class TaskController extends ApiBaseController
             $newAssignersDifferentFromOld = array_diff($changedParams['assigner']['emailTo'], $changedParams['assigner']['emailFrom']);
 
             foreach ($oldAssignersDifferentFromNew as $assigner) {
-                if ($assigner !== $loggedUserEmail && !in_array($assigner, $oldAssignerEmailAddresses, true)) {
+                if ($assigner !== $loggedUserEmail && !\in_array($assigner, $oldAssignerEmailAddresses, true)) {
                     $oldAssignerEmailAddresses[] = $assigner;
                     /** @var User $oldAssignerUser */
                     $oldAssignerUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->findOneBy([
@@ -2527,7 +2522,7 @@ class TaskController extends ApiBaseController
             }
 
             foreach ($newAssignersDifferentFromOld as $assigner) {
-                if ($assigner !== $loggedUserEmail && !in_array($assigner, $newAssignerEmailAddresses, true)) {
+                if ($assigner !== $loggedUserEmail && !\in_array($assigner, $newAssignerEmailAddresses, true)) {
                     $newAssignerEmailAddresses[] = $assigner;
                     /** @var User $newAssignerUser */
                     $newAssignerUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->findOneBy([
@@ -2550,7 +2545,7 @@ class TaskController extends ApiBaseController
         if (!isset($changedParams['requester'])) {
             $requesterEmail = $task->getRequestedBy()->getEmail();
 
-            if ($loggedUserEmail !== $requesterEmail && !in_array($requesterEmail, $notificationEmailAddresses, true) && !in_array($requesterEmail, $newAssignerEmailAddresses, true) && !in_array($requesterEmail, $oldAssignerEmailAddresses, true)) {
+            if ($loggedUserEmail !== $requesterEmail && !\in_array($requesterEmail, $notificationEmailAddresses, true) && !\in_array($requesterEmail, $newAssignerEmailAddresses, true) && !\in_array($requesterEmail, $oldAssignerEmailAddresses, true)) {
                 $notificationEmailAddresses[] = $requesterEmail;
 
                 $notification = new Notification();
@@ -2567,11 +2562,11 @@ class TaskController extends ApiBaseController
 
         if (!isset($changedParams['assigner'])) {
             $assignedUsers = $task->getTaskHasAssignedUsers();
-            if (count($assignedUsers) > 0) {
+            if (\count($assignedUsers) > 0) {
                 /** @var TaskHasAssignedUser $item */
                 foreach ($assignedUsers as $item) {
                     $assignedUserEmail = $item->getUser()->getEmail();
-                    if ($loggedUserEmail !== $assignedUserEmail && !in_array($assignedUserEmail, $notificationEmailAddresses, true) && $oldRequesterEmailAddress !== $assignedUserEmail && $newRequesterEmailAddress !== $assignedUserEmail) {
+                    if ($loggedUserEmail !== $assignedUserEmail && !\in_array($assignedUserEmail, $notificationEmailAddresses, true) && $oldRequesterEmailAddress !== $assignedUserEmail && $newRequesterEmailAddress !== $assignedUserEmail) {
                         $notificationEmailAddresses[] = $assignedUserEmail;
 
                         $notification = new Notification();

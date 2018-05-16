@@ -141,6 +141,7 @@ class FilterRepository extends EntityRepository
         $loggedUserId = $options['loggedUserId'];
         $order = $options['order'];
         $default = $options['default'];
+        $date = $options['date'];
 
         $query = $this->createQueryBuilder('f')
             ->select('f, createdBy, project, projectCreator')
@@ -202,6 +203,12 @@ class FilterRepository extends EntityRepository
                 $paramArray['defaultParam'] = true;
             }
         }
+
+        if($date){
+            $query->andWhere('f.updatedAt >= :date');
+            $paramArray['date'] = $date;
+        }
+
         // Return also logged users Remembered filter
         $query->orWhere($query->expr()->andX(
             $query->expr()->eq('createdBy.id', $loggedUserId)

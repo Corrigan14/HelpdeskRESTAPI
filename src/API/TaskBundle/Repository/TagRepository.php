@@ -25,17 +25,25 @@ class TagRepository extends EntityRepository
         $userId = $options['loggedUserId'];
         $limit = $options['limit'];
         $order = $options['order'];
+        $date = $options['date'];
 
         $query = $this->createQueryBuilder('t')
             ->select('t, createdBy')
             ->leftJoin('t.createdBy', 'createdBy')
             ->orderBy('t.title', $order)
-            ->distinct()
-            ->where('t.createdBy = :userId')
-            ->orWhere('t.public = :public')
-            ->setParameters(['userId' => $userId, 'public' => true])
-            ->getQuery();
+            ->distinct();
 
+        $query->where($query->expr()->orX(
+            $query->expr()->eq('t.createdBy', $userId),
+            $query->expr()->eq('t.public', true)
+        ));
+
+        if ($date) {
+            $query->andWhere('t.updatedAt >= :date');
+            $query->setParameter('date',$date);
+        }
+
+        $query = $query->getQuery();
 
         if (999 !== $limit) {
             // Pagination
@@ -54,7 +62,7 @@ class TagRepository extends EntityRepository
                 'count' => $count,
                 'array' => $this->formatData($paginator)
             ];
-        }else {
+        } else {
             // Return all entities
             return [
                 'array' => $this->formatData($query->getArrayResult(), true)
@@ -85,7 +93,7 @@ class TagRepository extends EntityRepository
      * @param int $userId
      * @return array
      */
-    public function getUsersTags(int $userId):array
+    public function getUsersTags(int $userId): array
     {
         $query = $this->createQueryBuilder('t')
             ->select('t')

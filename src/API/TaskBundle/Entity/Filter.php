@@ -6,6 +6,7 @@ use API\CoreBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -17,6 +18,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Filter
 {
+    use TimestampableEntity;
+
     /**
      * @var int
      *

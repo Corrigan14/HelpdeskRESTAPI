@@ -118,22 +118,25 @@ class ProjectRepository extends EntityRepository
     }
 
     /**
-     * @param $isAdmin
-     * @param $userId
-     * @param $isActive
+     * @param array $options
      * @return array
      */
-    public function getAllUsersAvailableProjects($isAdmin, $userId, $isActive): array
+    public function getAllUsersAvailableProjects(array $options): array
     {
+        $isAdmin = $options ['isAdmin'];
+        $isActive = $options ['isActive'];
+        $userId = $options ['loggedUserId'];
+        $date = $options ['date'];
+
         if ($isAdmin) {
             $query = $this->createQueryBuilder('p')
                 ->select('p, userHasProjects, uhpUser')
                 ->leftJoin('p.userHasProjects', 'userHasProjects')
                 ->leftJoin('userHasProjects.user', 'uhpUser')
                 ->where('p.is_active = :isActive')
-                ->setParameter('isActive', $isActive)
                 ->orderBy('p.title', 'ASC')
                 ->distinct();
+            $paramArray['isActive'] = $isActive;
         } else {
             // Select only in Allowed users projects
             $query = $this->createQueryBuilder('p')
@@ -149,12 +152,17 @@ class ProjectRepository extends EntityRepository
             ));
 
             $query->orderBy('p.title', 'ASC')
-                ->setParameters([
-                    'isActive' => $isActive,
-                    'loggedUserId' => $userId
-                ])
                 ->distinct();
+            $paramArray['isActive'] = $isActive;
+            $paramArray['loggedUserId'] = $userId;
         }
+
+
+        if ($date) {
+            $query->andWhere('p.updatedAt >= :date');
+            $paramArray['date'] = $date;
+        }
+        $query = $query->setParameters($paramArray);
 
         // Return all entities
         return $this->formatData($query->getQuery()->getArrayResult(), true);

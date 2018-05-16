@@ -225,6 +225,7 @@ class MainController extends ApiBaseController
      *                },
      *            }
      *         ],
+     *         "date": 1518907522
      *      }
      *
      * @ApiDoc(
@@ -242,18 +243,33 @@ class MainController extends ApiBaseController
      *  }
      * )
      *
+     * @param bool $date
      * @return Response
-     * @throws \UnexpectedValueException
-     * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
-    public function getLeftNavigationParamsAction(): Response
+    public function getLeftNavigationParamsAction($date = false): Response
     {
         // JSON API Response - Content type and Location settings
-        $locationURL = $this->generateUrl('left_menu_param_list');
+        if (false !== $date && 'false' !== $date) {
+            $intDate = (int)$date;
+            if (\is_int($intDate) && null !== $intDate) {
+                $locationURL = $this->generateUrl('left_menu_param_list_from_date', ['date' => $date]);
+                $dateTimeObject = new \DateTime("@$date");
+            } else {
+                $locationURL = $this->generateUrl('left_menu_param_list');
+                $dateTimeObject = false;
+            }
+        } else {
+            $locationURL = $this->generateUrl('left_menu_param_list');
+            $dateTimeObject = false;
+        }
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        if ($date && !($dateTimeObject instanceof \Datetime)) {
+            $response = $response->setContent(['message' => 'Date parameter is not in a valid format! Expected format: Timestamp']);
+            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+            return $response;
+        }
 
         $doctrine = $this->getDoctrine();
         /** @var User $loggedUser */
@@ -261,7 +277,13 @@ class MainController extends ApiBaseController
         $isAdmin = $this->get('project_voter')->isAdmin();
 
         // Returns a list of Logged user's active Projects
-        $loggedUsersAvailableProjects = $this->getDoctrine()->getRepository('APITaskBundle:Project')->getAllUsersAvailableProjects($isAdmin, $loggedUser->getId(), true);
+        $projectOptions = [
+            'isAdmin' => $isAdmin,
+            'loggedUserId' => $loggedUser->getId(),
+            'isActive' => true,
+            'date' => $dateTimeObject
+        ];
+        $loggedUsersAvailableProjects = $this->getDoctrine()->getRepository('APITaskBundle:Project')->getAllUsersAvailableProjects($projectOptions);
 
         // Add to every project canEdit value based on logged user's project ACL. ADMIN can edit every project
         // Add to every project the number of Tasks
@@ -280,7 +302,13 @@ class MainController extends ApiBaseController
         }
 
         // Returns a list of Logged user's not-active Projects
-        $loggedUsersAvailableArchivedProjects = $this->getDoctrine()->getRepository('APITaskBundle:Project')->getAllUsersAvailableProjects($isAdmin, $loggedUser->getId(), false);
+        $archivedProjectOptions = [
+            'isAdmin' => $isAdmin,
+            'loggedUserId' => $loggedUser->getId(),
+            'isActive' => false,
+            'date' => $dateTimeObject
+        ];
+        $loggedUsersAvailableArchivedProjects = $this->getDoctrine()->getRepository('APITaskBundle:Project')->getAllUsersAvailableProjects($archivedProjectOptions);
 
         // Add to every project canEdit value based on logged user's project ACL. ADMIN can edit every project
         $modifiedLoggedUserNotActiveProjects = [];
@@ -300,7 +328,8 @@ class MainController extends ApiBaseController
         $tagOptions = [
             'loggedUserId' => $loggedUser->getId(),
             'limit' => 999,
-            'order' => 'ASC'
+            'order' => 'ASC',
+            'date' => $dateTimeObject
         ];
         /** @var TagRepository $tagRepository */
         $tagRepository = $doctrine->getRepository('APITaskBundle:Tag');
@@ -315,7 +344,8 @@ class MainController extends ApiBaseController
             'public' => null,
             'project' => false,
             'order' => 'ASC',
-            'default' => false
+            'default' => false,
+            'date' => $dateTimeObject
         ];
         /** @var FilterRepository $filterRepository */
         $filterRepository = $doctrine->getRepository('APITaskBundle:Filter');
@@ -337,11 +367,16 @@ class MainController extends ApiBaseController
                 'public' => null,
                 'project' => false,
                 'order' => 'ASC',
-                'default' => false
+                'default' => false,
+                'date' => $dateTimeObject
             ];
             $loggedUserReports = $filterRepository->getAllUsersFiltersWithoutPagination($reportOptions);
             $responseArray['reports'] = $loggedUserReports;
         }
+
+        $currentDate = new \DateTime('UTC');
+        $currentDateTimezone = $currentDate->getTimestamp();
+        $responseArray['date'] = $currentDateTimezone;
 
         $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
         $response = $response->setContent(json_encode($responseArray));

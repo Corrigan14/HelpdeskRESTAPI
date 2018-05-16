@@ -5,6 +5,7 @@ namespace API\TaskBundle\Entity;
 use API\CoreBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -17,6 +18,8 @@ use JMS\Serializer\Annotation\ReadOnly;
  */
 class Tag
 {
+    use TimestampableEntity;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task CREATE</title>
+</head>
+<body>
+<p style="margin-top: 0; margin-bottom: 0">
+    {{ date|date("d.m.Y H:i") }}
+</p>
+
+<p style="margin-top: 0; margin-bottom: 0">
+    <b>{{ username }}</b>
+    ({{ email }})
+    <span>
+        Vytvoril  ulohu a oznacil Ta ako Requester-a tejto ulohy.
+    </span>
+
+</p>
+
+<p style="margin-top: 0">
+    #{{ taskId }} : {{ subject }}
+</p>
+
+<p style="margin-top: 40px; margin-bottom: 0">
+    Pre zobrazenie úlohy kliknite na odkaz:
+</p>
+<p style="margin-top: 0">
+    <a href={{ taskLink }}>
+        {{ taskLink }}
+    </a>
+</p>
+</body>
+</html>

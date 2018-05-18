@@ -333,6 +333,8 @@ class TaskRepository extends EntityRepository
             $query->setParameters($paramArray);
         }
 
+        dump($query->getQuery());
+
         if (999 !== $limit) {
             // Pagination
             if (1 < $page) {

@@ -833,7 +833,7 @@ class FilterController extends ApiBaseController
      * @return Response
      * @throws \LogicException
      */
-    public function inactivateAction(int $id)
+    public function inactivateAction(int $id): Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('filter_inactivate', ['id' => $id]);
@@ -944,7 +944,7 @@ class FilterController extends ApiBaseController
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function activateAction(int $id)
+    public function activateAction(int $id): Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('filter_restore', ['id' => $id]);
@@ -971,6 +971,63 @@ class FilterController extends ApiBaseController
 
         $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
         $response = $response->setContent(json_encode($filterArray));
+        return $response;
+    }
+
+    /**
+     * @ApiDoc(
+     *  description="Delete Filter Entity",
+     *  requirements={
+     *     {
+     *       "name"="id",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of processed object"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      204 ="The Entity was successfully deleted",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity",
+     *  })
+     *
+     * @param int $id
+     *
+     * @return Response
+     * @throws \LogicException
+     */
+    public function deleteAction(int $id): Response
+    {
+        // JSON API Response - Content type and Location settings
+        $locationURL = $this->generateUrl('filter_inactivate', ['id' => $id]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
+        if (!$filter instanceof Filter) {
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Filter with requested Id does not exist!']));
+            return $response;
+        }
+
+        if (!$this->get('filter_voter')->isGranted(VoteOptions::DELETE_FILTER, $filter)) {
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
+        }
+
+        $this->getDoctrine()->getManager()->remove($filter);
+        $this->getDoctrine()->getManager()->flush();
+
+        $response = $response->setStatusCode(StatusCodesHelper::DELETED_CODE);
+        $response = $response->setContent(json_encode(['message' => StatusCodesHelper::DELETED_MESSAGE]));
         return $response;
     }
 

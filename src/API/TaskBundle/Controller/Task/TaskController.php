@@ -2849,6 +2849,7 @@ class TaskController extends ApiBaseController
     /**
      * @param array $requestBody
      * @return array
+     * @throws \LogicException
      */
     private function getFilterData(array $requestBody): array
     {
@@ -2997,7 +2998,7 @@ class TaskController extends ApiBaseController
         }
         if (isset($data[FilterAttributeOptions::STATUS])) {
             $status = $data[FilterAttributeOptions::STATUS];
-            if (!is_array($status)) {
+            if (!\is_array($status)) {
                 $inFilter['taskGlobalStatus.id'] = explode(',', $status);
                 $filterForUrl['status'] = '&status=' . $status;
             } else {
@@ -3007,7 +3008,7 @@ class TaskController extends ApiBaseController
         }
         if (isset($data[FilterAttributeOptions::PROJECT])) {
             $project = $data[FilterAttributeOptions::PROJECT];
-            if (!is_array($project)) {
+            if (!\is_array($project)) {
                 if ('not' === strtolower($project)) {
                     $isNullFilter[] = 'task.project';
                 } elseif ('current-user' === strtolower($project)) {
@@ -3023,7 +3024,7 @@ class TaskController extends ApiBaseController
         }
         if (isset($data[FilterAttributeOptions::CREATOR])) {
             $creator = $data[FilterAttributeOptions::CREATOR];
-            if (!is_array($creator)) {
+            if (!\is_array($creator)) {
                 if ('current-user' === strtolower($creator)) {
                     $equalFilter['createdBy.id'] = $this->getUser()->getId();
                 } else {
@@ -3037,7 +3038,7 @@ class TaskController extends ApiBaseController
         }
         if (isset($data[FilterAttributeOptions::REQUESTER])) {
             $requester = $data[FilterAttributeOptions::REQUESTER];
-            if (!is_array($requester)) {
+            if (!\is_array($requester)) {
                 if ('current-user' === strtolower($requester)) {
                     $equalFilter['requestedBy.id'] = $this->getUser()->getId();
                 } else {
@@ -3051,7 +3052,7 @@ class TaskController extends ApiBaseController
         }
         if (isset($data[FilterAttributeOptions::COMPANY])) {
             $company = $data[FilterAttributeOptions::COMPANY];
-            if (!is_array($company)) {
+            if (!\is_array($company)) {
                 if ('current-user' === strtolower($company)) {
                     $equalFilter['taskCompany.id'] = $this->getUser()->getCompany()->getId();
                 } else {
@@ -3065,12 +3066,12 @@ class TaskController extends ApiBaseController
         }
         if (isset($data[FilterAttributeOptions::ASSIGNED])) {
             $assigned = $data[FilterAttributeOptions::ASSIGNED];
-            if (!is_array($assigned)) {
+            if (!\is_array($assigned)) {
                 if ('not' === strtolower($assigned)) {
                     $isNullFilter[] = 'taskHasAssignedUsers.user';
                 } elseif ('current-user' === strtolower($assigned)) {
                     $equalFilter['assignedUser.id'] = $this->getUser()->getId();
-                } elseif (is_array(explode(',', $assigned))) {
+                } elseif (\is_array(explode(',', $assigned))) {
                     $assignedArray = explode(',', $assigned);
                     if (\in_array('not', $assignedArray, true) && \in_array('current-user', $assignedArray, true)) {
                         $notAndCurrentFilter[] = [
@@ -3103,7 +3104,7 @@ class TaskController extends ApiBaseController
         }
         if (isset($data[FilterAttributeOptions::TAG])) {
             $tag = $data[FilterAttributeOptions::TAG];
-            if (!is_array($tag)) {
+            if (!\is_array($tag)) {
                 $inFilter['tags.id'] = explode(',', $tag);
                 $filterForUrl['tag'] = '&tag=' . $tag;
             } else {
@@ -3113,7 +3114,7 @@ class TaskController extends ApiBaseController
         }
         if (isset($data[FilterAttributeOptions::FOLLOWER])) {
             $follower = $data[FilterAttributeOptions::FOLLOWER];
-            if (!is_array($follower)) {
+            if (!\is_array($follower)) {
                 if ('current-user' === $follower) {
                     $equalFilter['followers.id'] = $this->getUser()->getId();
                 } else {
@@ -3175,32 +3176,55 @@ class TaskController extends ApiBaseController
         }
         if (isset($data[FilterAttributeOptions::ADDED_PARAMETERS])) {
             $addedParameters = $data[FilterAttributeOptions::ADDED_PARAMETERS];
-            $arrayOfAddedParameters = explode('&', $addedParameters);
 
-            if (!empty($arrayOfAddedParameters[0])) {
-                $filterForUrl['addedParameters'] = '&addedParameters=' . $addedParameters;
+            if(!\is_array($addedParameters)) {
+                $arrayOfAddedParameters = explode('&', $addedParameters);
 
-                foreach ($arrayOfAddedParameters as $value) {
-                    $strpos = explode('=', $value);
-                    $attributeId = $strpos[0];
+                if (!empty($arrayOfAddedParameters[0])) {
+                    $filterForUrl['addedParameters'] = '&addedParameters=' . $addedParameters;
 
+                    foreach ($arrayOfAddedParameters as $value) {
+                        $strpos = explode('=', $value);
+                        $attributeId = $strpos[0];
+
+                        // Check if TaskAttribute exists, select filter type based on it's TYPE
+                        $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($attributeId);
+                        if ($taskAttribute instanceof TaskAttribute) {
+                            $typeOfTaskAttribute = $taskAttribute->getType();
+
+                            if (VariableHelper::CHECKBOX === $typeOfTaskAttribute) {
+                                if ('true' === strtolower($strpos[1])) {
+                                    $equalFilterAddedParams[$attributeId] = 1;
+                                } elseif ('false' === strtolower($strpos[1])) {
+                                    $equalFilterAddedParams[$attributeId] = 0;
+                                }
+                            } elseif (VariableHelper::DATE === $typeOfTaskAttribute) {
+                                $dateData = $this->separateFromToDateData($strpos[1], ':');
+                                $dateFilterAddedParams[$attributeId] = $dateData;
+                            } else {
+                                $attributeValues = explode(',', $strpos[1]);
+                                $inFilterAddedParams[$attributeId] = $attributeValues;
+                            }
+                        }
+                    }
+                }
+            }else{
+                foreach ($addedParameters as $key => $value){
                     // Check if TaskAttribute exists, select filter type based on it's TYPE
-                    $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($attributeId);
+                    $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($key);
                     if ($taskAttribute instanceof TaskAttribute) {
                         $typeOfTaskAttribute = $taskAttribute->getType();
-
                         if (VariableHelper::CHECKBOX === $typeOfTaskAttribute) {
-                            if ('true' === strtolower($strpos[1])) {
-                                $equalFilterAddedParams[$attributeId] = 1;
-                            } elseif ('false' === strtolower($strpos[1])) {
-                                $equalFilterAddedParams[$attributeId] = 0;
+                            if ('true' === $value || true === $value) {
+                                $equalFilterAddedParams[$key] = 1;
+                            } elseif ('false' === $value || false === $value) {
+                                $equalFilterAddedParams[$key] = 0;
                             }
-                        } elseif ((VariableHelper::DATE === $typeOfTaskAttribute)) {
-                            $dateData = $this->separateFromToDateData($strpos[1], ':');
-                            $dateFilterAddedParams[$attributeId] = $dateData;
+                        } elseif (VariableHelper::DATE === $typeOfTaskAttribute) {
+                            $dateData = $this->separateFromToDateData($value, ':');
+                            $dateFilterAddedParams[$key] = $dateData;
                         } else {
-                            $attributeValues = explode(',', $strpos[1]);
-                            $inFilterAddedParams[$attributeId] = $attributeValues;
+                            $inFilterAddedParams[$key] = $value;
                         }
                     }
                 }

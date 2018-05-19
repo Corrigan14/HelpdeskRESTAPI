@@ -2097,7 +2097,7 @@ class TaskController extends ApiBaseController
                     $this->getDoctrine()->getManager()->flush();
                 }
 
-                if (strtolower($requestBody['assigned']) !== "null") {
+                if (strtolower($requestBody['assigned']) !== 'null') {
                     $assignedUsersArray = json_decode($requestBody['assigned'], true);
                     if (!\is_array($assignedUsersArray)) {
                         $assignedUsersArray = explode(',', $requestBody['assigned']);
@@ -2161,7 +2161,7 @@ class TaskController extends ApiBaseController
                     $this->getDoctrine()->getManager()->getConnection()->commit();
                 }
                 //Notification
-                if (!$create && $this->arraysAreDifferent($oldParams, $newParams)) {
+                if ($this->arraysAreDifferent($oldParams, $newParams)) {
                     $changedParams['assigner'] = $this->setChangedParams(implode(',', $oldParams), implode(',', $newParams));
                     $changedParams['assigner']['emailFrom'] = $oldAssignersEmails;
                     $changedParams['assigner']['emailTo'] = $newAssignersEmails;
@@ -2389,24 +2389,33 @@ class TaskController extends ApiBaseController
         return $response;
     }
 
+    /**
+     * @param User $loggedUser
+     * @param Task $task
+     * @param array $changedParams
+     * @return array
+     * @throws \LogicException
+     */
     private function processCreateNotifications(User $loggedUser, Task $task, array $changedParams): array
     {
         $createdNotifications = 0;
         $sentEmailsToRequester = [];
+        $sentEmailsToAssigner = [];
         $sentEmailsToRequesterError = false;
+        $sentEmailsToAssignerError = false;
+        $error = false;
 
         if (isset($changedParams['requester'])) {
-            /** @var User $oldRequesterUser */
+            /** @var User $requesterUser */
             $requesterUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->findOneBy([
                 'email' => $changedParams['requester']['toEmail']
             ]);
-
             $notification = new Notification();
             $notification->setTask($task);
             $notification->setCreatedBy($loggedUser);
             $notification->setUser($requesterUser);
             $notification->setChecked(false);
-            $notification->setBody('New task was created and you was marked as its REQUESTER!');
+            $notification->setBody('New task was created and you was promoted to be its REQUESTER!');
             $notification->setTitle('Task CREATE');
             $this->getDoctrine()->getManager()->persist($notification);
             $createdNotifications++;
@@ -2417,13 +2426,52 @@ class TaskController extends ApiBaseController
             $sentEmailsToRequesterError = $processedEmails['error'];
         }
 
+        if (isset($changedParams['assigner'])) {
+            $newAssigners = $changedParams['assigner']['emailTo'];
+            $processAssignersEmails = [];
+
+            foreach ($newAssigners as $assignerEmail) {
+                if ($assignerEmail !== $loggedUser->getEmail()) {
+                    /** @var User $newAssignerUser */
+                    $newAssignerUser = $this->getDoctrine()->getRepository('APICoreBundle:User')->findOneBy([
+                        'email' => $assignerEmail
+                    ]);
+                    $processAssignersEmails[] = $assignerEmail;
+
+                    $notification = new Notification();
+                    $notification->setTask($task);
+                    $notification->setCreatedBy($loggedUser);
+                    $notification->setUser($newAssignerUser);
+                    $notification->setChecked(false);
+                    $notification->setBody('New task was created and you was promoted to be its ASSIGNER!');
+                    $notification->setTitle('Task CREATE');
+                    $this->getDoctrine()->getManager()->persist($notification);
+                    $createdNotifications++;
+                }
+            }
+            if (\count($newAssigners) > 1) {
+                $otherAssigners = implode(',', $newAssigners);
+            } else {
+                $otherAssigners = false;
+            }
+
+            $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $processAssignersEmails, $loggedUser, $otherAssigners, 'taskCreateAssigner.html.twig', 'vytvorena');
+            $processedEmails = $this->get('email_service')->sendEmail($templateParams);
+            $sentEmailsToAssigner = $processedEmails['sentEmails'];
+            $sentEmailsToAssignerError = $processedEmails['error'];
+        }
+
         if ($createdNotifications > 0) {
             $this->getDoctrine()->getManager()->flush();
         }
 
+        if ($sentEmailsToRequesterError || $sentEmailsToAssignerError) {
+            $error = 'Problem with SMTP settings! Please contact admin!';
+        }
+
         return [
-            'error' => $sentEmailsToRequesterError,
-            'sentEmails' => $sentEmailsToRequester
+            'error' => $error,
+            'sentEmails' => array_merge($sentEmailsToRequester, $sentEmailsToAssigner)
         ];
     }
 
@@ -2840,7 +2888,7 @@ class TaskController extends ApiBaseController
         $differentAreOld = array_diff($oldParams, $newParams);
         $differentAreNew = array_diff($newParams, $oldParams);
 
-        if (count($differentAreNew) === 0 && count($differentAreOld) === 0) {
+        if (\count($differentAreNew) === 0 && \count($differentAreOld) === 0) {
             return false;
         }
 

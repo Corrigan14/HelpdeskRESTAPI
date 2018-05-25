@@ -139,10 +139,14 @@ class Notification
     /**
      * Get body
      *
-     * @return string
+     * @return string|array
      */
     public function getBody()
     {
+        $decodedBody = json_decode($this->body, true);
+        if ($decodedBody) {
+            return $decodedBody;
+        }
         return $this->body;
     }
 

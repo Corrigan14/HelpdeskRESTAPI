@@ -93,6 +93,13 @@ class Task
     private $work_time;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="work_type", type="string", nullable=false)
+     */
+    private $work_type;
+
+    /**
      * @var User
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="createdTasks")
@@ -923,5 +930,29 @@ class Task
     public function getSubtasks()
     {
         return $this->subtasks;
+    }
+
+    /**
+     * Set workType.
+     *
+     * @param string $workType
+     *
+     * @return Task
+     */
+    public function setWorkType($workType): Task
+    {
+        $this->work_type = $workType;
+
+        return $this;
+    }
+
+    /**
+     * Get workType.
+     *
+     * @return string
+     */
+    public function getWorkType()
+    {
+        return $this->work_type;
     }
 }

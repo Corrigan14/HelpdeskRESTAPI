@@ -207,12 +207,13 @@ class FilterRepository extends EntityRepository
         if($date){
             $query->andWhere('f.updatedAt >= :date');
             $paramArray['date'] = $date;
+        }else{
+            // Return also logged users Remembered filter
+            $query->orWhere($query->expr()->andX(
+                $query->expr()->eq('createdBy.id', $loggedUserId)
+            ));
         }
 
-        // Return also logged users Remembered filter
-        $query->orWhere($query->expr()->andX(
-            $query->expr()->eq('createdBy.id', $loggedUserId)
-        ));
 
         if (!empty($paramArray)) {
             $query->setParameters($paramArray);

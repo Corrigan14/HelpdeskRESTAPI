@@ -4,7 +4,9 @@ namespace API\TaskBundle\Entity;
 
 use API\CoreBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -16,6 +18,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Filter
 {
+    use TimestampableEntity;
+
     /**
      * @var int
      *
@@ -130,6 +134,13 @@ class Filter
      */
     private $rememberUser;
 
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->rememberUser = new ArrayCollection();
+    }
 
     /**
      * Get id
@@ -443,5 +454,42 @@ class Filter
     public function getColumnsTaskAttributes()
     {
         return json_decode($this->columns_task_attributes);
+    }
+
+
+    /**
+     * Add rememberUser.
+     *
+     * @param User $rememberUser
+     *
+     * @return Filter
+     */
+    public function addRememberUser(User $rememberUser)
+    {
+        $this->rememberUser[] = $rememberUser;
+
+        return $this;
+    }
+
+    /**
+     * Remove rememberUser.
+     *
+     * @param User $rememberUser
+     *
+     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
+     */
+    public function removeRememberUser(User $rememberUser)
+    {
+        return $this->rememberUser->removeElement($rememberUser);
+    }
+
+    /**
+     * Get rememberUser.
+     *
+     * @return Collection
+     */
+    public function getRememberUser()
+    {
+        return $this->rememberUser;
     }
 }

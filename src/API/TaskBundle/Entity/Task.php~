@@ -93,6 +93,13 @@ class Task
     private $work_time;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="work_type", type="string", nullable=false)
+     */
+    private $work_type;
+
+    /**
      * @var User
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="createdTasks")
@@ -144,7 +151,7 @@ class Task
      * @var Company
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\Company", inversedBy="tasks")
-     * @ORM\JoinColumn(name="company_id", referencedColumnName="id", nullable=true)
+     * @ORM\JoinColumn(name="company_id", referencedColumnName="id", nullable=false)
      * @Serializer\ReadOnly()
      */
     private $company;

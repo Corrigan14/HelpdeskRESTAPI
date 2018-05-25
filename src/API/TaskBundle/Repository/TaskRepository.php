@@ -333,8 +333,6 @@ class TaskRepository extends EntityRepository
             $query->setParameters($paramArray);
         }
 
-        dump($query->getQuery());
-
         if (999 !== $limit) {
             // Pagination
             if (1 < $page) {
@@ -1027,6 +1025,7 @@ class TaskRepository extends EntityRepository
             'important' => $data->getImportant(),
             'work' => $data->getWork(),
             'work_time' => $data->getWorkTime(),
+            'work_type' => $data->getWorkType(),
             'createdAt' => $data->getCreatedAt(),
             'updatedAt' => $data->getUpdatedAt(),
             'createdBy' => [
@@ -1271,6 +1270,7 @@ class TaskRepository extends EntityRepository
             'important' => $data['important'],
             'work' => $data['work'],
             'work_time' => isset($data['work_time']) ? (int)$data['work_time'] : null,
+            'work_type' => $data['work_type'],
             'createdAt' => isset($data['createdAt']) ? date_timestamp_get($data['createdAt']) : null,
             'updatedAt' => isset($data['updatedAt']) ? date_timestamp_get($data['updatedAt']) : null,
             'createdBy' => [

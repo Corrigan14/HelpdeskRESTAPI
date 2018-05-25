@@ -28,14 +28,14 @@ class TaskAttributeFixture implements FixtureInterface, ContainerAwareInterface,
         $ta->setTitle('input task additional attribute');
         $ta->setType(VariableHelper::INPUT);
         $ta->setDescription('Test description of Input');
-        $ta->setRequired(true);
+        $ta->setRequired(false);
         $manager->persist($ta);
 
         $ta = new TaskAttribute();
         $ta->setTitle('select task additional attribute');
         $ta->setType(VariableHelper::SIMPLE_SELECT);
         $ta->setDescription('Test description of a Simple select');
-        $ta->setRequired(true);
+        $ta->setRequired(false);
         $options = [
            'select1',
            'select2',
@@ -47,19 +47,19 @@ class TaskAttributeFixture implements FixtureInterface, ContainerAwareInterface,
         $ta = new TaskAttribute();
         $ta->setTitle('integer number task additional attribute');
         $ta->setType(VariableHelper::INTEGER_NUMBER);
-        $ta->setRequired(true);
+        $ta->setRequired(false);
         $manager->persist($ta);
 
         $ta = new TaskAttribute();
         $ta->setTitle('boolean task additional attribute');
         $ta->setType(VariableHelper::CHECKBOX);
-        $ta->setRequired(true);
+        $ta->setRequired(false);
         $manager->persist($ta);
 
         $ta = new TaskAttribute();
         $ta->setTitle('date task additional attribute');
         $ta->setType(VariableHelper::DATE);
-        $ta->setRequired(true);
+        $ta->setRequired(false);
         $manager->persist($ta);
 
         $manager->flush();

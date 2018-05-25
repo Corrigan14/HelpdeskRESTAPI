@@ -20,6 +20,7 @@ use API\TaskBundle\Entity\UserHasProject;
 use API\TaskBundle\Security\ProjectAclOptions;
 use API\TaskBundle\Security\StatusFunctionOptions;
 use API\TaskBundle\Security\StatusOptions;
+use API\TaskBundle\Security\TaskWorkTypeOptions;
 use API\TaskBundle\Security\UserRoleAclOptions;
 use API\TaskBundle\Security\VoteOptions;
 use API\TaskBundle\Security\FilterAttributeOptions;
@@ -53,6 +54,7 @@ class TaskController extends ApiBaseController
      *            "important": false,
      *            "work": null,
      *            "work_time": null,
+     *            "work_type": "servis IT",
      *            "createdAt": 1506434914,
      *            "updatedAt": 1506434914,
      *            "createdBy":
@@ -391,7 +393,8 @@ class TaskController extends ApiBaseController
      *            "closedAt": null,
      *            "important": false,
      *            "work": null,
-     *            "work_time": null,
+     *            "work_time": null,,
+     *            "work_type": "servis IT",
      *            "createdAt": 1506434914,
      *            "updatedAt": 1506434914,
      *            "createdBy":
@@ -670,7 +673,8 @@ class TaskController extends ApiBaseController
      *            "closedAt": null,
      *            "important": false,
      *            "work": null,
-     *            "work_time": null,
+     *            "work_time": null,,
+     *            "work_type": "servis IT",
      *            "createdAt":1506434914,
      *            "updatedAt":1506434914
      *            "createdBy":
@@ -944,7 +948,8 @@ class TaskController extends ApiBaseController
      *            "closedAt": null,
      *            "important": false,
      *            "work": null,
-     *            "work_time": null,
+     *            "work_time": null,,
+     *            "work_type": "servis IT",
      *            "createdAt":1506434914,
      *            "updatedAt":1506434914
      *            "createdBy":
@@ -1150,6 +1155,7 @@ class TaskController extends ApiBaseController
      *      {"name"="important", "dataType"="boolean", "required"=false,  "description"="set TRUE if the Task should be checked as IMPORTANT"},
      *      {"name"="work", "dataType"="string", "required"=false,  "description"="Work description"},
      *      {"name"="workTime", "dataType"="string", "required"=false,  "description"="Work time"},
+     *      {"name"="workType", "dataType"="string", "required"=true,  "description"="Work type"},
      *      {"name"="tag", "dataType"="array", "required"=false,  "description"="Tag titles array: [tag1, tag2]"},
      *      {"name"="assigned", "dataType"="array", "required"=false,  "description"="UserId - assigner and StatusId collection: [userId => 12, statusId => 5]"},
      *      {"name"="attachment", "dataType"="array", "required"=false,  "description"="Attachment slugs array: [slug1, slug2]"},
@@ -1180,6 +1186,7 @@ class TaskController extends ApiBaseController
      * @param bool|int $companyId
      * @return Response
      * @throws \LogicException
+     * @throws \ReflectionException
      */
     public function createAction(Request $request, $projectId, $statusId, $requesterId = false, $companyId = false): Response
     {
@@ -1326,7 +1333,8 @@ class TaskController extends ApiBaseController
      *            "closedAt": null,
      *            "important": false,
      *            "work": null,
-     *            "work_time": null,
+     *            "work_time": null,,
+     *            "work_type": "servis IT",
      *            "createdAt":1506434914,
      *            "updatedAt":1506434914
      *            "createdBy":
@@ -1540,6 +1548,7 @@ class TaskController extends ApiBaseController
      *      {"name"="important", "dataType"="boolean", "required"=false,  "description"="set TRUE if the Task should be checked as IMPORTANT"},
      *      {"name"="work", "dataType"="string", "required"=false,  "description"="Work description"},
      *      {"name"="workTime", "dataType"="string", "required"=false,  "description"="Work time"},
+     *      {"name"="workType", "dataType"="string", "required"=true,  "description"="Work type"},
      *      {"name"="tag", "dataType"="array", "required"=false,  "description"="Tag titles array: [tag1, tag2]"},
      *      {"name"="assigned", "dataType"="array", "required"=false,  "description"="UserId - assigner and StatusId collection: [userId => 12, statusId => 5]"},
      *      {"name"="attachment", "dataType"="array", "required"=false,  "description"="Attachment slugs array: [slug1, slug2]"},
@@ -1828,6 +1837,7 @@ class TaskController extends ApiBaseController
      * @param bool|array $changedParams
      * @return Response
      * @throws \LogicException
+     * @throws \ReflectionException
      */
     private function updateTask(Task $task, array $requestBody, $locationURL, Status $status, $create = false, $changedParams = false): Response
     {
@@ -1847,6 +1857,27 @@ class TaskController extends ApiBaseController
         } elseif ($create) {
             $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
             $response = $response->setContent(json_encode(['message' => 'Tasks Title is required!']));
+            return $response;
+        }
+
+        if (isset($requestBody['workType']) && \strlen($requestBody['workType']) > 0) {
+            $oldParam = $task->getWorkType();
+            $newParam = $requestBody['workType'];
+            if(!\in_array($newParam, TaskWorkTypeOptions::getConstants(), true)){
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $workTypeOptions = implode(',',TaskWorkTypeOptions::getConstants());
+                $response = $response->setContent(json_encode(['message' => 'Allowed Tasks Work Type params are: '.$workTypeOptions]));
+                return $response;
+            }
+            $task->setWorkType($newParam);
+
+            //Notification
+            if (!$create && $this->paramsAreDifferent($oldParam, $newParam)) {
+                $changedParams['workType'] = $this->setChangedParams($oldParam, $newParam);
+            }
+        } elseif ($create) {
+            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Tasks Work Type is required!']));
             return $response;
         }
 
@@ -2730,6 +2761,7 @@ class TaskController extends ApiBaseController
      * @param string $changedParams
      * @param string $twigTemplate
      * @return array
+     * @throws \LogicException
      */
     private function getTemplateParams(int $taskId, string $title, array $emailAddresses, User $user, string $changedParams, string $twigTemplate, string $change): array
     {

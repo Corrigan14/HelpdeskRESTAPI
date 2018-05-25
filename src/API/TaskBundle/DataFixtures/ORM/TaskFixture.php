@@ -7,6 +7,7 @@ use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Security\StatusOptions;
+use API\TaskBundle\Security\TaskWorkTypeOptions;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -102,6 +103,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             }
             $task->addFollower($adminUser);
             $task->setCompany($webSolCompany);
+            $task->setWorkType(TaskWorkTypeOptions::ADMINISTRATIVA);
             $task->setStatus($newStatus);
             $manager->persist($task);
 
@@ -121,6 +123,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             $task->setCompany($webSolCompany);
             $task->setStatus($inProgresStatus);
             $task->setStartedAt(new \DateTime());
+            $task->setWorkType(TaskWorkTypeOptions::BUG_REKLAMACIA);
             $manager->persist($task);
 
             $task = new Task();
@@ -138,6 +141,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             }
             $task->setCompany($webSolCompany);
             $task->setStatus($newStatus);
+            $task->setWorkType(TaskWorkTypeOptions::CENOVA_PONUKA);
             $manager->persist($task);
 
             for ($numberOfTasks = 4; $numberOfTasks < 1000; $numberOfTasks++) {
@@ -149,6 +153,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                 $task->setRequestedBy($adminUser);
                 $task->setCompany($lanCompany);
                 $task->setStatus($newStatus);
+                $task->setWorkType(TaskWorkTypeOptions::MATERIAL);
                 $task->setProject($usersProject2);
                 if ($tagHome instanceof Tag) {
                     $task->addTag($tagHome);
@@ -171,6 +176,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                 $task->setStatus($inProgresStatus);
                 $task->setProject($adminsProject);
                 $task->setStartedAt(new \DateTime());
+                $task->setWorkType(TaskWorkTypeOptions::PROGRAMOVANIE_WWW);
 
                 $manager->persist($task);
             }

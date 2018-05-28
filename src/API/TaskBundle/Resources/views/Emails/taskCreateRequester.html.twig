@@ -1,33 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Task CREATE</title>
+    <meta charset="UTF-8" >
+    <title> Your task has been registered</title>
 </head>
 <body>
-<p style="margin-top: 0; margin-bottom: 0">
-    {{ date|date("d.m.Y H:i") }}
-</p>
+    <p>
+        Your task has been registered
+    </p>
+    <p style="margin-bottom: 0; margin-top: 20px">
+        Creator: {{  username }} {{ email }}
+    </p>
+    <p style="margin-top: 0; margin-bottom: 0">
+        Requester: {{ requester }}
+    </p>
 
-<p style="margin-top: 0; margin-bottom: 0">
-    <b>{{ username }}</b>
-    ({{ email }})
-    <span>
-        Vytvoril  ulohu a oznacil Vas ako Requester-a tejto ulohy.
-    </span>
-</p>
+    {% if changedParams %}
+        <p style="margin-top: 0; margin-bottom: 0">
+            <b>Uloha bola pridelena viacerym Assignerom:</b>
+            <span>
+                {{ changedParams }}
+            </span>
+        </p>
+    {% endif %}
 
-<p style="margin-top: 0">
-    #{{ taskId }} : {{ subject }}
-</p>
+    <p style="margin-top: 20px; font-size: 16px; margin-bottom: 20px">
+        Názov úlohy: #{{ taskId }} {{ subject }}
+    </p>
+    <p style="margin-top: 0; margin-bottom: 0">
+        Popis:
+        <br/>
+        {{ taskDescription }}
+    </p>
 
-<p style="margin-top: 40px; margin-bottom: 0">
-    Pre zobrazenie úlohy kliknite na odkaz:
-</p>
-<p style="margin-top: 0">
-    <a href={{ taskLink }}>
-        {{ taskLink }}
-    </a>
-</p>
+
+    <p style="margin-top: 20px; margin-bottom: 20px">
+        <a href={{ taskLink }}>
+            {{ taskLink }}
+        </a>
+    </p>
+
+    <p style="border-top-style: groove; max-width: 200px">
+        Lan Helpdesk
+        <br/>
+        {{ signature }}
+    </p>
 </body>
 </html>

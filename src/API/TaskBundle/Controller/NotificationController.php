@@ -42,7 +42,9 @@ class NotificationController extends ApiBaseController
      *              {
      *                  "id": 1,
      *                  "title": "test 2"
-     *              }
+     *              },
+     *              'type': 'COMMENT',
+     *              'internal': false
      *          },
      *          {
      *              "id": 22,
@@ -75,7 +77,9 @@ class NotificationController extends ApiBaseController
      *              {
      *                  "id": 1,
      *                  "title": "test 2"
-     *              }
+     *              },
+     *              'type': 'COMMENT',
+     *              'internal': false
      *           }
      *        ]
      *        "_counts":
@@ -200,7 +204,9 @@ class NotificationController extends ApiBaseController
      *              {
      *                  "id": 1,
      *                  "title": "test 2"
-     *              }
+     *              },
+     *              'type': 'COMMENT',
+     *              'internal': false
      *          },
      *          {
      *              "id": 22,
@@ -233,7 +239,9 @@ class NotificationController extends ApiBaseController
      *              {
      *                  "id": 1,
      *                  "title": "test 2"
-     *              }
+     *              },
+     *              'type': 'COMMENT',
+     *              'internal': false
      *           }
      *        ],
      *        "_counts":

@@ -160,6 +160,8 @@ class NotificationRepository extends EntityRepository
             'id' => $data->getId(),
             'title' => $data->getTitle(),
             'body' => $data->getBody(),
+            'type' => $data->getType(),
+            'internal' => $data->getInternal(),
             'read' => $data->getChecked(),
             'createdAt' => $data->getCreatedAt(),
             'createdBy' => [
@@ -219,6 +221,8 @@ class NotificationRepository extends EntityRepository
             'id' => $data['id'],
             'title' => $data['title'],
             'body' => $bodyDecoded,
+            'type' => $data['type'],
+            'internal' => $data['internal'],
             'read' => $data['checked'],
             'createdAt' => isset($data['createdAt']) ? date_timestamp_get($data['createdAt']) : null,
             'createdBy' => [

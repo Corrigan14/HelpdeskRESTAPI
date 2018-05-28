@@ -7,6 +7,7 @@ use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
 use API\TaskBundle\Entity\Comment;
 use API\TaskBundle\Entity\CommentHasAttachment;
+use API\TaskBundle\Entity\Notification;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
 use API\TaskBundle\Security\VoteOptions;
@@ -636,7 +637,7 @@ class CommentController extends ApiBaseController
             }
 
             foreach ($requestData as $key => $value) {
-                if (!in_array($key, $allowedUnitEntityParams, true)) {
+                if (!\in_array($key, $allowedUnitEntityParams, true)) {
                     $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                     $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for a Comment Entity!']));
                     return $response;
@@ -651,7 +652,7 @@ class CommentController extends ApiBaseController
                     $slugArray = explode(',', $requestData['slug']);
                 }
 
-                if (count($slugArray) > 0) {
+                if (\count($slugArray) > 0) {
                     foreach ($slugArray as $slug) {
                         $fileEntity = $this->getDoctrine()->getRepository('APICoreBundle:File')->findOneBy([
                             'slug' => $slug,
@@ -695,12 +696,12 @@ class CommentController extends ApiBaseController
             $notValidEmailAddresses = [];
             $isEmail = false;
             if (isset($requestData['email'])) {
-                $isEmail = ('true' === strtolower($requestData['email']) || 1 == $requestData['email']) ? true : false;
+                $isEmail = ('true' === strtolower($requestData['email']) || 1 == $requestData['email']);
                 if ($isEmail) {
                     if (isset($requestData['email_to'])) {
                         $this->processEmailAddress($requestData, $comment, $emailAddresses, $notValidEmailAddresses);
 
-                        if (count($notValidEmailAddresses) > 0) {
+                        if (\count($notValidEmailAddresses) > 0) {
                             $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                             $response = $response->setContent(json_encode(['message' => 'Not valid email address: ' . implode(";", $notValidEmailAddresses)]));
                             return $response;
@@ -713,9 +714,7 @@ class CommentController extends ApiBaseController
                 }
             }
 
-            unset($requestData['email_to']);
-            unset($requestData['email_cc']);
-            unset($requestData['email_bcc']);
+            unset($requestData['email_to'], $requestData['email_cc'], $requestData['email_bcc']);
 
             $statusCode = $this->getCreateUpdateStatusCode(true);
 
@@ -727,11 +726,11 @@ class CommentController extends ApiBaseController
 
                 // If Comment is an Email - send Email
                 if ($isEmail) {
-                    $templateParams = $this->getTemplateParams($task->getId(), $requestData, $emailAddresses, $attachment);
-                    $sendingError = $this->get('email_service')->sendEmail($templateParams);
-                    if (true !== $sendingError) {
+                    $templateParams = $this->getTemplateParams($task, $requestData, $emailAddresses, $attachment);
+                    $processedEmails = $this->get('email_service')->sendEmail($templateParams);
+                    if ($processedEmails['error']) {
                         $data = [
-                            'errors' => $sendingError,
+                            'errors' => $processedEmails['error'],
                             'message' => 'Error with email sending!'
                         ];
                         $response = $response->setStatusCode(StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
@@ -743,26 +742,24 @@ class CommentController extends ApiBaseController
                 $this->getDoctrine()->getManager()->persist($comment);
                 $this->getDoctrine()->getManager()->flush();
 
-                $commentArray = $this->get('task_additional_service')->getTaskCommentResponse($comment->getId());
-                $response = $response->setStatusCode($statusCode);
-                $response = $response->setContent(json_encode($commentArray));
 
-                // Notification about a Comment creation to task REQUESTER, ASSIGNED USERS, FOLLOWERS
-                $notificationEmailAddresses = $this->getEmailForAddCommentNotification($task, $loggedUserEmail, $emailAddresses);
-                if (count($notificationEmailAddresses) > 0) {
-                    $templateParams = $this->getTemplateParams($task->getId(), $requestData, $notificationEmailAddresses, $attachment);
-                    $sendingError = $this->get('email_service')->sendEmail($templateParams);
-                    if (true !== $sendingError) {
-                        $data = [
-                            'errors' => $sendingError,
-                            'message' => 'Error with notification sending!'
-                        ];
-                        $response = $response->setStatusCode(StatusCodesHelper::PROBLEM_WITH_EMAIL_SENDING);
-                        $response = $response->setContent(json_encode($data));
-                        return $response;
-                    }
+                // Notification about a Comment creation to task REQUESTER, ASSIGNED USERS
+                $notificationEmailAddresses = $this->getEmailForAddCommentNotificationAndCreateNotifications($task, $comment, $loggedUserEmail, $emailAddresses);
+                if (\count($notificationEmailAddresses) > 0) {
+                    $templateParams = $this->getTemplateParams($task, $requestData, $notificationEmailAddresses, $attachment);
+                    $processedNotificationEmails = $this->get('email_service')->sendEmail($templateParams);
+                }else{
+                    $processedNotificationEmails = false;
                 }
 
+                $commentArray = $this->get('task_additional_service')->getTaskCommentResponse($comment->getId());
+                if ($processedNotificationEmails['error']) {
+                    $commentArray = array_merge($commentArray, ['notification ERROR' => $processedNotificationEmails['error']]);
+                } else {
+                    $commentArray = array_merge($commentArray, ['sent notification EMAILS' => $processedNotificationEmails['sentEmails']]);
+                }
+                $response = $response->setStatusCode($statusCode);
+                $response = $response->setContent(json_encode($commentArray));
                 return $response;
             } else {
                 $data = [
@@ -785,8 +782,11 @@ class CommentController extends ApiBaseController
      * @param Comment $comment
      * @param array $emailAddress
      * @param array $notValidEmailAddresses
+     * @throws \Symfony\Component\Validator\Exception\MissingOptionsException
+     * @throws \Symfony\Component\Validator\Exception\InvalidOptionsException
+     * @throws \Symfony\Component\Validator\Exception\ConstraintDefinitionException
      */
-    private function processEmailAddress(&$requestData, Comment &$comment, array &$emailAddress, array &$notValidEmailAddresses)
+    private function processEmailAddress(&$requestData, Comment &$comment, array &$emailAddress, array &$notValidEmailAddresses): void
     {
         $validator = $this->get('validator');
         $constraints = [
@@ -806,7 +806,7 @@ class CommentController extends ApiBaseController
         // Check the correct email address
         foreach ($emailTo as $item) {
             $emailError = $validator->validate($item, $constraints);
-            if (count($emailError)) {
+            if (\count($emailError)) {
                 $notValidEmailAddresses[] = $item;
             }
         }
@@ -824,7 +824,7 @@ class CommentController extends ApiBaseController
             // Check the correct email address
             foreach ($emailCc as $item) {
                 $emailError = $validator->validate($item, $constraints);
-                if (count($emailError)) {
+                if (\count($emailError)) {
                     $notValidEmailAddresses[] = $item;
                 }
             }
@@ -842,7 +842,7 @@ class CommentController extends ApiBaseController
             // Check the correct email address
             foreach ($emailBcc as $item) {
                 $emailError = $validator->validate($item, $constraints);
-                if (count($emailError)) {
+                if (\count($emailError)) {
                     $notValidEmailAddresses[] = $item;
                 }
             }
@@ -853,13 +853,14 @@ class CommentController extends ApiBaseController
     }
 
     /**
-     * @param int $taskId
+     * @param Task $task
      * @param array $requestData
      * @param array $emailAddresses
      * @param array|bool $attachmentParams
      * @return array
+     * @throws \LogicException
      */
-    private function getTemplateParams(int $taskId, array $requestData, array $emailAddresses, $attachmentParams): array
+    private function getTemplateParams(Task $task, array $requestData, array $emailAddresses, $attachmentParams): array
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -885,15 +886,15 @@ class CommentController extends ApiBaseController
             'date' => $todayDate,
             'username' => $username,
             'email' => $email,
-            'taskId' => $taskId,
-            'subject' => $title,
+            'taskId' => $task->getId(),
+            'taskTitle' => $task->getTitle(),
             'commentBody' => $requestData['body'],
             'signature' => $usersSignature,
-            'taskLink' => $baseFrontURL ? $baseFrontURL->getValue() : '' . '/tasks/' . $taskId
+            'taskLink' => $baseFrontURL->getValue() . '/tasks/' . $task->getId(),
         ];
 
         $params = [
-            'subject' => 'LanHelpdesk - ' . '[#' . $taskId . ']' . ' ' . $title,
+            'subject' => 'LanHelpdesk - ' . '[#' . $task->getId() . ']' . ' ' . $title,
             'from' => $email,
             'to' => $emailAddresses,
             'body' => $this->renderView('@APITask/Emails/comment.html.twig', $templateParams),
@@ -905,39 +906,78 @@ class CommentController extends ApiBaseController
 
     /**
      * @param Task $task
+     * @param Comment $comment
      * @param string $loggedUserEmail
      * @param array $emailAddresses
      * @return array
+     * @throws \LogicException
      */
-    private function getEmailForAddCommentNotification(Task $task, string $loggedUserEmail, array $emailAddresses): array
+    private function getEmailForAddCommentNotificationAndCreateNotifications(Task $task, Comment $comment, string $loggedUserEmail, array $emailAddresses): array
     {
         $notificationEmailAddresses = [];
+        $createdNotifications = 0;
 
-        $requesterEmail = $task->getRequestedBy()->getEmail();
-        if ($loggedUserEmail !== $requesterEmail && !in_array($requesterEmail, $emailAddresses) && !in_array($requesterEmail, $notificationEmailAddresses)) {
-            $notificationEmailAddresses[] = $requesterEmail;
+        if($comment->getEmail()){
+            $type = 'SENT EMAIL';
+        }else{
+            $type = 'COMMENT';
         }
 
-        $followers = $task->getFollowers();
-        if (count($followers) > 0) {
-            /** @var User $follower */
-            foreach ($followers as $follower) {
-                $followerEmail = $follower->getEmail();
-                if ($loggedUserEmail !== $followerEmail && !in_array($followerEmail, $emailAddresses) && !in_array($followerEmail, $notificationEmailAddresses)) {
-                    $notificationEmailAddresses[] = $followerEmail;
-                }
-            }
+        /** @var User $requesterUser */
+        $notificationUser = $task->getRequestedBy();
+        $requesterEmail =$notificationUser->getEmail();
+        if ($loggedUserEmail !== $requesterEmail && !\in_array($requesterEmail, $emailAddresses, true) && !\in_array($requesterEmail, $notificationEmailAddresses, true)) {
+            $notificationEmailAddresses[] = $requesterEmail;
+
+            $notification = new Notification();
+            $notification->setTask($task);
+            $notification->setCreatedBy($this->getUser());
+            $notification->setUser($notificationUser);
+            $notification->setChecked(false);
+            $notification->setBody('Comment was added to the Task!');
+            $notification->setTitle('Comment ADDED');
+            $notification->setType($type);
+            $notification->setInternal($comment->getInternal());
+            $this->getDoctrine()->getManager()->persist($notification);
+            $createdNotifications++;
         }
 
         $assignedUsers = $task->getTaskHasAssignedUsers();
-        if (count($assignedUsers) > 0) {
+        if (\count($assignedUsers) > 0) {
             /** @var TaskHasAssignedUser $item */
             foreach ($assignedUsers as $item) {
                 $assignedUserEmail = $item->getUser()->getEmail();
-                if ($loggedUserEmail !== $assignedUserEmail && !in_array($assignedUserEmail, $emailAddresses) && !in_array($assignedUserEmail, $notificationEmailAddresses)) {
+                if ($loggedUserEmail !== $assignedUserEmail && !\in_array($assignedUserEmail, $emailAddresses, true) && !\in_array($assignedUserEmail, $notificationEmailAddresses, true)) {
                     $notificationEmailAddresses[] = $assignedUserEmail;
+
+                    $notification = new Notification();
+                    $notification->setTask($task);
+                    $notification->setCreatedBy($this->getUser());
+                    $notification->setUser($item->getUser());
+                    $notification->setChecked(false);
+                    $notification->setBody('Comment was added to the Task!');
+                    $notification->setTitle('Comment ADDED');
+                    $notification->setType($type);
+                    $notification->setInternal($comment->getInternal());
+                    $this->getDoctrine()->getManager()->persist($notification);
+                    $createdNotifications++;
                 }
             }
+        }
+
+//        $followers = $task->getFollowers();
+//        if (count($followers) > 0) {
+//            /** @var User $follower */
+//            foreach ($followers as $follower) {
+//                $followerEmail = $follower->getEmail();
+//                if ($loggedUserEmail !== $followerEmail && !in_array($followerEmail, $emailAddresses) && !in_array($followerEmail, $notificationEmailAddresses)) {
+//                    $notificationEmailAddresses[] = $followerEmail;
+//                }
+//            }
+//        }
+
+        if ($createdNotifications > 0) {
+            $this->getDoctrine()->getManager()->flush();
         }
 
         return $notificationEmailAddresses;

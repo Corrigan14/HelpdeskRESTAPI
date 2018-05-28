@@ -1580,6 +1580,7 @@ class TaskController extends ApiBaseController
      * @param bool|int $companyId
      * @return Response
      * @throws \LogicException
+     * @throws \ReflectionException
      */
     public function updateAction(int $taskId, Request $request, $projectId = false, $statusId = false, $requesterId = false, $companyId = false): Response
     {
@@ -2448,10 +2449,11 @@ class TaskController extends ApiBaseController
             $notification->setChecked(false);
             $notification->setBody('New task was created and you was promoted to be its REQUESTER!');
             $notification->setTitle('Task CREATE');
+            $notification->setType('TASK');
             $this->getDoctrine()->getManager()->persist($notification);
             $createdNotifications++;
 
-            $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), [$changedParams['requester']['toEmail']], $loggedUser, '', 'taskCreateRequester.html.twig', 'vytvorena');
+            $templateParams = $this->getTemplateParams($task, [$changedParams['requester']['toEmail']], $loggedUser, '', 'taskCreateRequester.html.twig', 'vytvorena');
             $processedEmails = $this->get('email_service')->sendEmail($templateParams);
             $sentEmailsToRequester = $processedEmails['sentEmails'];
             $sentEmailsToRequesterError = $processedEmails['error'];
@@ -2476,6 +2478,7 @@ class TaskController extends ApiBaseController
                     $notification->setChecked(false);
                     $notification->setBody('New task was created and you was promoted to be its ASSIGNER!');
                     $notification->setTitle('Task CREATE');
+                    $notification->setType('TASK');
                     $this->getDoctrine()->getManager()->persist($notification);
                     $createdNotifications++;
                 }
@@ -2486,7 +2489,7 @@ class TaskController extends ApiBaseController
                 $otherAssigners = false;
             }
 
-            $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $processAssignersEmails, $loggedUser, $otherAssigners, 'taskCreateAssigner.html.twig', 'vytvorena');
+            $templateParams = $this->getTemplateParams($task, $processAssignersEmails, $loggedUser, $otherAssigners, 'taskCreateAssigner.html.twig', 'vytvorena');
             $processedEmails = $this->get('email_service')->sendEmail($templateParams);
             $sentEmailsToAssigner = $processedEmails['sentEmails'];
             $sentEmailsToAssignerError = $processedEmails['error'];
@@ -2511,6 +2514,7 @@ class TaskController extends ApiBaseController
      * @param Task $task
      * @param array $changedParams
      * @return array
+     * @throws \LogicException
      */
     private function processUpdateNotifications(User $loggedUser, Task $task, array $changedParams): array
     {
@@ -2532,7 +2536,7 @@ class TaskController extends ApiBaseController
             $generalUpdate = $notificationEmailAddresses['generalUpdateAddresses'];
             if (\count($generalUpdate) > 0) {
                 $stringifyChangedParams = $this->createStringFromDeepArray($changedParams);
-                $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $generalUpdate, $this->getUser(), $stringifyChangedParams, 'taskUpdate.html.twig', 'zmenena');
+                $templateParams = $this->getTemplateParams($task, $generalUpdate, $this->getUser(), $stringifyChangedParams, 'taskUpdate.html.twig', 'zmenena');
                 $processedEmails = $this->get('email_service')->sendEmail($templateParams);
                 $sentEmailsToGeneral = $processedEmails['sentEmails'];
                 $sentEmailsToGeneralError = $processedEmails['error'];
@@ -2540,7 +2544,7 @@ class TaskController extends ApiBaseController
 
             $oldRequester[] = $notificationEmailAddresses['oldRequesterAddress'];
             if ($oldRequester[0]) {
-                $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $oldRequester, $this->getUser(), $changedParams['requester']['from'], 'taskOldRequester.html.twig', 'zmenena');
+                $templateParams = $this->getTemplateParams($task, $oldRequester, $this->getUser(), $changedParams['requester']['from'], 'taskOldRequester.html.twig', 'zmenena');
                 $processedEmails = $this->get('email_service')->sendEmail($templateParams);
                 $sentEmailsToOldRequester = $processedEmails['sentEmails'];
                 $sentEmailsToOldRequesterError = $processedEmails['error'];
@@ -2548,7 +2552,7 @@ class TaskController extends ApiBaseController
 
             $newRequester[] = $notificationEmailAddresses['newRequesterAddress'];
             if ($newRequester[0]) {
-                $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $newRequester, $this->getUser(), $changedParams['requester']['to'], 'taskNewRequester.html.twig', 'zmenena');
+                $templateParams = $this->getTemplateParams($task, $newRequester, $this->getUser(), $changedParams['requester']['to'], 'taskNewRequester.html.twig', 'zmenena');
                 $processedEmails = $this->get('email_service')->sendEmail($templateParams);
                 $sentEmailsToNewRequester = $processedEmails['sentEmails'];
                 $sentEmailsToNewRequesterError = $processedEmails['error'];
@@ -2556,7 +2560,7 @@ class TaskController extends ApiBaseController
 
             $oldAssigner = $notificationEmailAddresses['oldAssignerAddresses'];
             if ($oldAssigner) {
-                $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $oldAssigner, $this->getUser(), $changedParams['assigner']['from'], 'taskOldAssigner.html.twig', 'zmenena');
+                $templateParams = $this->getTemplateParams($task, $oldAssigner, $this->getUser(), $changedParams['assigner']['from'], 'taskOldAssigner.html.twig', 'zmenena');
                 $processedEmails = $this->get('email_service')->sendEmail($templateParams);
                 $sentEmailsToOldAssigner = $processedEmails['sentEmails'];
                 $sentEmailsToOldAssignerError = $processedEmails['error'];
@@ -2564,7 +2568,7 @@ class TaskController extends ApiBaseController
 
             $newAssigner = $notificationEmailAddresses['newAssignerAddresses'];
             if ($newAssigner) {
-                $templateParams = $this->getTemplateParams($task->getId(), $task->getTitle(), $newAssigner, $this->getUser(), $changedParams['assigner']['from'], 'taskNewAssigner.html.twig', 'zmenena');
+                $templateParams = $this->getTemplateParams($task, $newAssigner, $this->getUser(), $changedParams['assigner']['from'], 'taskNewAssigner.html.twig', 'zmenena');
                 $processedEmails = $this->get('email_service')->sendEmail($templateParams);
                 $sentEmailsToNewAssigner = $processedEmails['sentEmails'];
                 $sentEmailsToNewAssignerError = $processedEmails['error'];
@@ -2620,6 +2624,7 @@ class TaskController extends ApiBaseController
                 $notification->setChecked(false);
                 $notification->setBody('Tasks requester was changed from you to ' . $changedParams['requester']['to'] . '.');
                 $notification->setTitle('Task UPDATE');
+                $notification->setType('TASK');
                 $this->getDoctrine()->getManager()->persist($notification);
                 $createdNotifications++;
             }
@@ -2638,6 +2643,7 @@ class TaskController extends ApiBaseController
                 $notification->setChecked(false);
                 $notification->setBody('Tasks requester was changed from ' . $changedParams['requester']['from'] . ' to you.');
                 $notification->setTitle('Task UPDATE');
+                $notification->setType('TASK');
                 $this->getDoctrine()->getManager()->persist($notification);
                 $createdNotifications++;
             }
@@ -2662,6 +2668,7 @@ class TaskController extends ApiBaseController
                     $notification->setChecked(false);
                     $notification->setBody('Tasks assigner was changed from you to ' . $changedParams['assigner']['to'] . '.');
                     $notification->setTitle('Task UPDATE');
+                    $notification->setType('TASK');
                     $this->getDoctrine()->getManager()->persist($notification);
                     $createdNotifications++;
                 }
@@ -2682,6 +2689,7 @@ class TaskController extends ApiBaseController
                     $notification->setChecked(false);
                     $notification->setBody('Tasks assigner was changed from ' . $changedParams['assigner']['from'] . ' to you.');
                     $notification->setTitle('Task UPDATE');
+                    $notification->setType('TASK');
                     $this->getDoctrine()->getManager()->persist($notification);
                     $createdNotifications++;
                 }
@@ -2701,6 +2709,7 @@ class TaskController extends ApiBaseController
                 $notification->setChecked(false);
                 $notification->setBody($jsonFromChangedParams);
                 $notification->setTitle('Task UPDATE');
+                $notification->setType('TASK');
                 $this->getDoctrine()->getManager()->persist($notification);
                 $createdNotifications++;
             }
@@ -2722,6 +2731,7 @@ class TaskController extends ApiBaseController
                         $notification->setChecked(false);
                         $notification->setBody($jsonFromChangedParams);
                         $notification->setTitle('Task UPDATE');
+                        $notification->setType('TASK');
                         $this->getDoctrine()->getManager()->persist($notification);
                         $createdNotifications++;
                     }
@@ -2754,39 +2764,51 @@ class TaskController extends ApiBaseController
     }
 
     /**
-     * @param int $taskId
-     * @param string $title
+     * @param Task $task
      * @param array $emailAddresses
      * @param User $user
      * @param string $changedParams
      * @param string $twigTemplate
+     * @param string $change
      * @return array
      * @throws \LogicException
      */
-    private function getTemplateParams(int $taskId, string $title, array $emailAddresses, User $user, string $changedParams, string $twigTemplate, string $change): array
+    private function getTemplateParams(Task $task, array $emailAddresses, User $user, string $changedParams, string $twigTemplate, string $change): array
     {
         $userDetailData = $user->getDetailData();
         if ($userDetailData instanceof UserData) {
             $username = $userDetailData->getName() . ' ' . $userDetailData->getSurname();
+            $signature = $userDetailData->getSignature();
         } else {
             $username = '';
+            $signature = '';
         }
         $todayDate = new \DateTime();
         $email = $user->getEmail();
         $baseFrontURL = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->findOneBy([
             'title' => 'Base Front URL'
         ]);
+        $requesterDetailData = $task->getRequestedBy()->getDetailData();
+        if ($requesterDetailData instanceof UserData) {
+            $usernameRequester = $requesterDetailData->getName() . ' ' . $requesterDetailData->getSurname();
+        } else {
+            $usernameRequester = '';
+        }
+
         $templateParams = [
             'date' => $todayDate,
             'username' => $username,
+            'signature' => $signature,
             'email' => $email,
-            'taskId' => $taskId,
-            'subject' => $title,
-            'taskLink' => $baseFrontURL->getValue() . '/tasks/' . $taskId,
+            'taskId' => $task->getId(),
+            'subject' => $task->getTitle(),
+            'taskDescription' => $task->getDescription(),
+            'requester' => $usernameRequester . ' '.$task->getRequestedBy()->getEmail(),
+            'taskLink' => $baseFrontURL->getValue() . '/tasks/' . $task->getId(),
             'changedParams' => $changedParams
         ];
         $params = [
-            'subject' => 'LanHelpdesk - ' . '[#' . $taskId . '] ' . 'Úloha bola ' . $change,
+            'subject' => 'LanHelpdesk - ' . '[#' .  $task->getId() . '] ' . 'Úloha bola ' . $change,
             'from' => $email,
             'to' => $emailAddresses,
             'body' => $this->renderView('@APITask/Emails/' . $twigTemplate, $templateParams)

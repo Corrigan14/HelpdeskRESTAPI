@@ -931,4 +931,28 @@ class Task
     {
         return $this->subtasks;
     }
+
+    /**
+     * Set workType.
+     *
+     * @param string $workType
+     *
+     * @return Task
+     */
+    public function setWorkType($workType): Task
+    {
+        $this->work_type = $workType;
+
+        return $this;
+    }
+
+    /**
+     * Get workType.
+     *
+     * @return string
+     */
+    public function getWorkType()
+    {
+        return $this->work_type;
+    }
 }

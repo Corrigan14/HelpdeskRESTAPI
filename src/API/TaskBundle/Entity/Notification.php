@@ -52,6 +52,21 @@ class Notification
     private $checked;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="type", type="string", length=255, nullable=true)
+     * @Assert\Type("string")
+     */
+    private $type;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="internal", type="boolean", options={"default":0},  nullable=true)
+     */
+    private $internal;
+
+    /**
      * @var User
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="createdNotifications")
@@ -300,5 +315,53 @@ class Notification
         } else {
             return $this->updatedAt;
         }
+    }
+
+    /**
+     * Set type.
+     *
+     * @param string|null $type
+     *
+     * @return Notification
+     */
+    public function setType($type = null)
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    /**
+     * Get type.
+     *
+     * @return string|null
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * Set internal.
+     *
+     * @param bool|null $internal
+     *
+     * @return Notification
+     */
+    public function setInternal($internal = null)
+    {
+        $this->internal = $internal;
+
+        return $this;
+    }
+
+    /**
+     * Get internal.
+     *
+     * @return bool|null
+     */
+    public function getInternal()
+    {
+        return $this->internal;
     }
 }

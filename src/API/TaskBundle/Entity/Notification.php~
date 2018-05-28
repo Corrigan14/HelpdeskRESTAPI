@@ -52,6 +52,21 @@ class Notification
     private $checked;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="type", type="string", length=255, nullable=true)
+     * @Assert\Type("string")
+     */
+    private $type;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="internal", type="boolean", options={"default":0},  nullable=true)
+     */
+    private $internal;
+
+    /**
      * @var User
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="createdNotifications")

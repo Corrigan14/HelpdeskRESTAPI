@@ -1,6 +1,6 @@
 <?php
 
-namespace API\TaskBundle\DataFixtures\ORM;
+namespace API\TaskBundle\DataFixtures\ORMDEVELOPMENT;
 
 use API\TaskBundle\Entity\Status;
 use API\TaskBundle\Security\StatusFunctionOptions;
@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Class StatusFixture
  *
- * @package API\TaskBundle\DataFixtures\ORM
+ * @package API\TaskBundle\DataFixtures\ORMDEVELOPMENT
  */
 class StatusFixture implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
 {
@@ -83,6 +83,6 @@ class StatusFixture implements FixtureInterface, ContainerAwareInterface, Ordere
      */
     public function getOrder()
     {
-        return 5;
+        return 3;
     }
 }

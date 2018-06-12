@@ -1,11 +1,9 @@
 <?php
 
-namespace API\TaskBundle\DataFixtures\ORM;
+namespace API\TaskBundle\DataFixtures\ORMDEVELOPMENT;
 
 
-use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Filter;
-use API\TaskBundle\Entity\Status;
 use API\TaskBundle\Security\StatusOptions;
 use API\TaskBundle\Security\FilterAttributeOptions;
 use Doctrine\Common\DataFixtures\FixtureInterface;
@@ -17,7 +15,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Class FilterFixture
  *
- * @package API\TaskBundle\DataFixtures\ORM
+ * @package API\TaskBundle\DataFixtures\ORMDEVELOPMENT
  */
 class FilterFixture implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
 {
@@ -29,23 +27,27 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
      */
     public function load(ObjectManager $manager)
     {
-        /** @var Status $status */
         $status = $manager->getRepository('APITaskBundle:Status')->findOneBy([
             'title' => StatusOptions::NEW
         ]);
         $newStatId = $status->getId();
 
-        /** @var Status $status */
         $status = $manager->getRepository('APITaskBundle:Status')->findOneBy([
             'title' => StatusOptions::IN_PROGRESS
         ]);
         $inProgressStatId = $status->getId();
 
-        /** @var User $admin */
         $admin = $manager->getRepository('APICoreBundle:User')->findOneBy([
             'username' => 'admin'
         ]);
 
+        $taskAttribute = $manager->getRepository('APITaskBundle:TaskAttribute')->findOneBy([
+            'title' => 'input task additional attribute'
+        ]);
+
+        $taskAttribute2 = $manager->getRepository('APITaskBundle:TaskAttribute')->findOneBy([
+            'title' => 'select task additional attribute'
+        ]);
 
         $doItFilter = [
             FilterAttributeOptions::STATUS => $newStatId . ',' . $inProgressStatId,
@@ -87,6 +89,10 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
             FilterAttributeOptions::DEADLINE,
             FilterAttributeOptions::STATUS,
         ];
+        $importantColumnsTaskAttr = [
+            $taskAttribute->getId(),
+            $taskAttribute2->getId()
+        ];
 
         $filter = new Filter();
         $filter->setTitle('IMPORTANT');
@@ -99,6 +105,7 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
         $filter->setIconClass('&#xE838;');
         $filter->setOrder(2);
         $filter->setColumns($importantColumns);
+        $filter->setColumnsTaskAttributes($importantColumnsTaskAttr);
 
         $manager->persist($filter);
 
@@ -165,7 +172,7 @@ class FilterFixture implements FixtureInterface, ContainerAwareInterface, Ordere
      */
     public function getOrder()
     {
-        return 7;
+        return 14;
     }
 
     public function setContainer(ContainerInterface $container = null)

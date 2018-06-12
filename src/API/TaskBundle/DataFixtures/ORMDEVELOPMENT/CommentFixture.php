@@ -1,6 +1,6 @@
 <?php
 
-namespace API\TaskBundle\DataFixtures\ORM;
+namespace API\TaskBundle\DataFixtures\ORMDEVELOPMENT;
 
 
 use API\CoreBundle\Entity\User;
@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Class CommentFixture
  *
- * @package API\TaskBundle\DataFixtures\ORM
+ * @package API\TaskBundle\DataFixtures\ORMDEVELOPMENT
  */
 class CommentFixture implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
 {

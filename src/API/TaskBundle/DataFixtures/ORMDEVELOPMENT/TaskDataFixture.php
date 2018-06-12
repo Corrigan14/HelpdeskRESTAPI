@@ -1,6 +1,6 @@
 <?php
 
-namespace API\TaskBundle\DataFixtures\ORM;
+namespace API\TaskBundle\DataFixtures\ORMDEVELOPMENT;
 
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskAttribute;
@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Class TaskDataFixture
  *
- * @package API\TaskBundle\DataFixtures\ORM
+ * @package API\TaskBundle\DataFixtures\ORMDEVELOPMENT
  */
 class TaskDataFixture implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
 {

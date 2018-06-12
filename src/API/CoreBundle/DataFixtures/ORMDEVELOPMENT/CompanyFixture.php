@@ -1,6 +1,6 @@
 <?php
 
-namespace API\CoreBundle\DataFixtures\ORM;
+namespace API\CoreBundle\DataFixtures\ORMDEVELOPMENT;
 
 use API\CoreBundle\Entity\Company;
 use Doctrine\Common\DataFixtures\FixtureInterface;
@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Class CompanyFixture
  *
- * @package API\CoreBundle\DataFixtures\ORM
+ * @package API\CoreBundle\DataFixtures\ORMDEVELOPMENT
  */
 class CompanyFixture implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
 {

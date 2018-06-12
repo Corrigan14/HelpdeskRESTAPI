@@ -1,6 +1,6 @@
 <?php
 
-namespace API\TaskBundle\DataFixtures\ORM;
+namespace API\TaskBundle\DataFixtures\ORMDEVELOPMENT;
 
 use API\TaskBundle\Entity\Notification;
 use Doctrine\Common\DataFixtures\FixtureInterface;
@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Class NotificationFixture
  *
- * @package API\TaskBundle\DataFixtures\ORM
+ * @package API\TaskBundle\DataFixtures\ORMDEVELOPMENT
  */
 class NotificationFixture implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
 {

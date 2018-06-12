@@ -1,6 +1,6 @@
 <?php
 
-namespace API\TaskBundle\DataFixtures\ORM;
+namespace API\TaskBundle\DataFixtures\ORMDEVELOPMENT;
 
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Status;
@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Class TaskHasAssignedUserFixture
  *
- * @package API\TaskBundle\DataFixtures\ORM
+ * @package API\TaskBundle\DataFixtures\ORMDEVELOPMENT
  */
 class TaskHasAssignedUserFixture implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
 {

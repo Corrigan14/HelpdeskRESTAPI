@@ -1,6 +1,6 @@
 <?php
 
-namespace API\TaskBundle\DataFixtures\ORM;
+namespace API\TaskBundle\DataFixtures\ORMDEVELOPMENT;
 
 use API\TaskBundle\Entity\Smtp;
 use Doctrine\Common\DataFixtures\FixtureInterface;
@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Class SmtpFixture
  *
- * @package API\TaskBundle\DataFixtures\ORM
+ * @package API\TaskBundle\DataFixtures\ORMDEVELOPMENT
  */
 class SmtpFixture implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
 {
@@ -44,7 +44,7 @@ class SmtpFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
      */
     public function getOrder()
     {
-        return 6;
+        return 16;
     }
 
     public function setContainer(ContainerInterface $container = null)

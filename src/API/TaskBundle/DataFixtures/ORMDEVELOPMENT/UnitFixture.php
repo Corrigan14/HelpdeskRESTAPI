@@ -1,6 +1,6 @@
 <?php
 
-namespace API\TaskBundle\DataFixtures\ORM;
+namespace API\TaskBundle\DataFixtures\ORMDEVELOPMENT;
 
 use API\TaskBundle\Entity\Unit;
 use Doctrine\Common\DataFixtures\FixtureInterface;
@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Class UnitFixture
  *
- * @package API\TaskBundle\DataFixtures\ORM
+ * @package API\TaskBundle\DataFixtures\ORMDEVELOPMENT
  */
 class UnitFixture implements FixtureInterface, ContainerAwareInterface, OrderedFixtureInterface
 {
@@ -60,7 +60,7 @@ class UnitFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
      */
     public function getOrder()
     {
-        return 4;
+        return 1;
     }
 
     public function setContainer(ContainerInterface $container = null)

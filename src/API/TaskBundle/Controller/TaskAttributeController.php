@@ -246,17 +246,6 @@ class TaskAttributeController extends ApiBaseController implements ControllerInt
         $locationURL = $this->generateUrl('task_attribute_list');
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
-        $aclOptions = [
-            'acl' => UserRoleAclOptions::TASK_ATTRIBUTE_SETTINGS,
-            'user' => $this->getUser()
-        ];
-
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
-            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
-            return $response;
-        }
-
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
         if (false !== $requestBody) {

@@ -1,6 +1,6 @@
 <?php
 
-namespace API\TaskBundle\DataFixtures\ORM;
+namespace API\TaskBundle\DataFixtures\ORMDEVELOPMENT;
 
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Tag;
@@ -13,7 +13,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Class TagFixture
  *
- * @package ScrumBundle\DataFixtures\ORM
+ * @package ScrumBundle\DataFixtures\ORMDEVELOPMENT
  */
 class TagFixture implements FixtureInterface , ContainerAwareInterface , OrderedFixtureInterface
 {

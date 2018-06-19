@@ -8,6 +8,7 @@ use API\CoreBundle\Entity\UserData;
 use API\TaskBundle\Entity\Comment;
 use API\TaskBundle\Entity\CommentHasAttachment;
 use API\TaskBundle\Entity\Notification;
+use API\TaskBundle\Entity\SystemSettings;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
 use API\TaskBundle\Security\VoteOptions;
@@ -877,6 +878,11 @@ class CommentController extends ApiBaseController
         $baseFrontURL = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->findOneBy([
             'title' => 'Base Front URL'
         ]);
+        if ($baseFrontURL instanceof SystemSettings) {
+            $taskLink = $baseFrontURL->getValue() .'/#/task/view/'. $task->getId();
+        } else {
+            $taskLink = 'http://lanhelpdesk4.lansystems.sk/#/task/view/' . $task->getId();
+        }
         if (isset($requestData['title'])) {
             $title = $requestData['title'];
         } else {
@@ -890,7 +896,7 @@ class CommentController extends ApiBaseController
             'taskTitle' => $task->getTitle(),
             'commentBody' => $requestData['body'],
             'signature' => $usersSignature,
-            'taskLink' => $baseFrontURL->getValue() . '/tasks/' . $task->getId(),
+            'taskLink' => $taskLink,
         ];
 
         $params = [

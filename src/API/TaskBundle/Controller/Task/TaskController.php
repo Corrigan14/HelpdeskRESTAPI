@@ -10,6 +10,7 @@ use API\TaskBundle\Entity\Filter;
 use API\TaskBundle\Entity\Notification;
 use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Status;
+use API\TaskBundle\Entity\SystemSettings;
 use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskAttribute;
@@ -1864,10 +1865,10 @@ class TaskController extends ApiBaseController
         if (isset($requestBody['workType']) && \strlen($requestBody['workType']) > 0) {
             $oldParam = $task->getWorkType();
             $newParam = $requestBody['workType'];
-            if(!\in_array($newParam, TaskWorkTypeOptions::getConstants(), true)){
+            if (!\in_array($newParam, TaskWorkTypeOptions::getConstants(), true)) {
                 $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                $workTypeOptions = implode(',',TaskWorkTypeOptions::getConstants());
-                $response = $response->setContent(json_encode(['message' => 'Allowed Tasks Work Type params are: '.$workTypeOptions]));
+                $workTypeOptions = implode(',', TaskWorkTypeOptions::getConstants());
+                $response = $response->setContent(json_encode(['message' => 'Allowed Tasks Work Type params are: ' . $workTypeOptions]));
                 return $response;
             }
             $task->setWorkType($newParam);
@@ -2788,6 +2789,11 @@ class TaskController extends ApiBaseController
         $baseFrontURL = $this->getDoctrine()->getRepository('APITaskBundle:SystemSettings')->findOneBy([
             'title' => 'Base Front URL'
         ]);
+        if ($baseFrontURL instanceof SystemSettings) {
+            $taskLink = $baseFrontURL->getValue() .'/#/task/view/'. $task->getId();
+        } else {
+            $taskLink = 'http://lanhelpdesk4.lansystems.sk/#/task/view/' . $task->getId();
+        }
         $requesterDetailData = $task->getRequestedBy()->getDetailData();
         if ($requesterDetailData instanceof UserData) {
             $usernameRequester = $requesterDetailData->getName() . ' ' . $requesterDetailData->getSurname();
@@ -2803,12 +2809,12 @@ class TaskController extends ApiBaseController
             'taskId' => $task->getId(),
             'subject' => $task->getTitle(),
             'taskDescription' => $task->getDescription(),
-            'requester' => $usernameRequester . ' '.$task->getRequestedBy()->getEmail(),
-            'taskLink' => $baseFrontURL->getValue() . '/tasks/' . $task->getId(),
+            'requester' => $usernameRequester . ' ' . $task->getRequestedBy()->getEmail(),
+            'taskLink' => $taskLink,
             'changedParams' => $changedParams
         ];
         $params = [
-            'subject' => 'LanHelpdesk - ' . '[#' .  $task->getId() . '] ' . 'Úloha bola ' . $change,
+            'subject' => 'LanHelpdesk - ' . '[#' . $task->getId() . '] ' . 'Úloha bola ' . $change,
             'from' => $email,
             'to' => $emailAddresses,
             'body' => $this->renderView('@APITask/Emails/' . $twigTemplate, $templateParams)

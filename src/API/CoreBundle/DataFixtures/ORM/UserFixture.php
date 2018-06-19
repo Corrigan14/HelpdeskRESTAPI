@@ -2,6 +2,7 @@
 
 namespace API\CoreBundle\DataFixtures\ORM;
 
+use API\CoreBundle\Entity\Company;
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Entity\UserData;
 use API\TaskBundle\Entity\UserRole;
@@ -45,6 +46,10 @@ class UserFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
      */
     public function load(ObjectManager $manager)
     {
+        /** @var Company $companyLS */
+        $companyLS = $manager->getRepository('APICoreBundle:Company')->findOneBy([
+            'title' => 'LanSystems'
+        ]);
 
         /** @var UserRole $adminUserRole */
         $adminUserRole = $manager->getRepository('APITaskBundle:UserRole')->findOneBy([
@@ -78,6 +83,7 @@ class UserFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
         $user->setPassword($encoded);
         $user->setLanguage($language);
         $user->setUserRole($adminUserRole);
+        $user->setCompany($companyLS);
         $manager->persist($user);
 
 
@@ -91,6 +97,7 @@ class UserFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
         $user->setPassword($encoded);
         $user->setLanguage($language);
         $user->setUserRole($managerUserRole);
+        $user->setCompany($companyLS);
         $manager->persist($user);
 
         $user = new User();
@@ -103,6 +110,7 @@ class UserFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
         $user->setPassword($encoded);
         $user->setLanguage($language);
         $user->setUserRole($agentUserRole);
+        $user->setCompany($companyLS);
         $manager->persist($user);
 
         $user = new User();
@@ -115,6 +123,7 @@ class UserFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
         $user->setPassword($encoded);
         $user->setLanguage($language);
         $user->setUserRole($customerUserRole);
+        $user->setCompany($companyLS);
         $manager->persist($user);
 
 

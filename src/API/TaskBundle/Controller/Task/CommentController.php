@@ -8,9 +8,12 @@ use API\CoreBundle\Entity\UserData;
 use API\TaskBundle\Entity\Comment;
 use API\TaskBundle\Entity\CommentHasAttachment;
 use API\TaskBundle\Entity\Notification;
+use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\SystemSettings;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
+use API\TaskBundle\Entity\UserHasProject;
+use API\TaskBundle\Security\ProjectAclOptions;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
@@ -137,9 +140,6 @@ class CommentController extends ApiBaseController
      * @param Request $request
      * @param int $taskId
      * @return Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      */
     public function tasksCommentsListAction(Request $request, int $taskId): Response
@@ -156,7 +156,7 @@ class CommentController extends ApiBaseController
             return $response;
         }
 
-        // Check if logged user has access to show tasks comments
+        // Check if logged user has access to see tasks comments
         if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_LIST_OF_TASKS_COMMENTS, $task)) {
             $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
             $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
@@ -167,6 +167,7 @@ class CommentController extends ApiBaseController
 
         if (false !== $requestBody) {
             $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody);
+            $canSeeInternalNotes = $this->loggedUserCanSeeInternalNotes($task->getProject());
 
             $page = $processedFilterParams['page'];
             $limit = $processedFilterParams['limit'];
@@ -178,6 +179,7 @@ class CommentController extends ApiBaseController
                 'internal' => $internal,
                 'limit' => $limit,
                 'order' => $order,
+                'canSeeInternalNotes' => $canSeeInternalNotes,
                 'filterForUrl' => '&limit=' . $limit . '&order=' . $order . '&internal=' . $internal
             ];
             $routeOptions = [
@@ -511,8 +513,6 @@ class CommentController extends ApiBaseController
      * @param int $commentId
      * @return Response
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \LogicException
      * @throws \InvalidArgumentException
      */
     public function createCommentsCommentAction(Request $request, int $commentId): Response
@@ -574,9 +574,8 @@ class CommentController extends ApiBaseController
      * @param int $commentId
      *
      * @return Response
-     * @throws \LogicException
      */
-    public function deleteAction(int $commentId):Response
+    public function deleteAction(int $commentId): Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('tasks_delete_tasks_comment', ['commentId' => $commentId]);
@@ -613,8 +612,6 @@ class CommentController extends ApiBaseController
      * @return Response
      * @throws \InvalidArgumentException
      * @throws \LogicException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
     private function updateCommentEntity(Comment $comment, $requestData, $locationUrl): Response
     {
@@ -749,7 +746,7 @@ class CommentController extends ApiBaseController
                 if (\count($notificationEmailAddresses) > 0) {
                     $templateParams = $this->getTemplateParams($task, $requestData, $notificationEmailAddresses, $attachment);
                     $processedNotificationEmails = $this->get('email_service')->sendEmail($templateParams);
-                }else{
+                } else {
                     $processedNotificationEmails = false;
                 }
 
@@ -762,14 +759,14 @@ class CommentController extends ApiBaseController
                 $response = $response->setStatusCode($statusCode);
                 $response = $response->setContent(json_encode($commentArray));
                 return $response;
-            } else {
-                $data = [
-                    'errors' => $errors,
-                    'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-                ];
-                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                $response = $response->setContent(json_encode($data));
             }
+
+            $data = [
+                'errors' => $errors,
+                'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+            ];
+            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $response = $response->setContent(json_encode($data));
         } else {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
             $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
@@ -879,7 +876,7 @@ class CommentController extends ApiBaseController
             'title' => 'Base Front URL'
         ]);
         if ($baseFrontURL instanceof SystemSettings) {
-            $taskLink = $baseFrontURL->getValue() .'/#/task/view/'. $task->getId();
+            $taskLink = $baseFrontURL->getValue() . '/#/task/view/' . $task->getId();
         } else {
             $taskLink = 'http://lanhelpdesk4.lansystems.sk/#/task/view/' . $task->getId();
         }
@@ -923,15 +920,15 @@ class CommentController extends ApiBaseController
         $notificationEmailAddresses = [];
         $createdNotifications = 0;
 
-        if($comment->getEmail()){
+        if ($comment->getEmail()) {
             $type = 'SENT EMAIL';
-        }else{
+        } else {
             $type = 'COMMENT';
         }
 
         /** @var User $requesterUser */
         $notificationUser = $task->getRequestedBy();
-        $requesterEmail =$notificationUser->getEmail();
+        $requesterEmail = $notificationUser->getEmail();
         if ($loggedUserEmail !== $requesterEmail && !\in_array($requesterEmail, $emailAddresses, true) && !\in_array($requesterEmail, $notificationEmailAddresses, true)) {
             $notificationEmailAddresses[] = $requesterEmail;
 
@@ -1003,6 +1000,37 @@ class CommentController extends ApiBaseController
         ]);
 
         return (!$commentHasAttachment instanceof CommentHasAttachment);
+    }
+
+    /**
+     * @param Project $project
+     * @return boolean
+     * @throws \LogicException
+     */
+    private function loggedUserCanSeeInternalNotes(Project $project): bool
+    {
+        $isAdmin = $this->get('task_voter')->isAdmin();
+
+        if ($isAdmin) {
+            return true;
+        }
+
+        $loggedUser = $this->getUser();
+        $loggedUserHasProjectAcl = $this->getDoctrine()->getRepository('APITaskBundle:UserHasProject')->findOneBy([
+            'project' => $project,
+            'user' => $loggedUser
+        ]);
+
+        if ($loggedUserHasProjectAcl instanceof UserHasProject) {
+            $projectAcl = $loggedUserHasProjectAcl->getAcl();
+
+            if (\in_array(ProjectAclOptions::VIEW_INTERNAL_NOTE, $projectAcl, true)) {
+                return true;
+            }
+        }
+
+        return false;
+
     }
 }
 

@@ -49,6 +49,7 @@ class CdnController extends ApiBaseController
      *  output={"class"="API\CoreBundle\Entity\File"},
      *  statusCodes={
      *      201 ="The entity was successfully uploaded",
+     *      400 = "Bad Request",
      *      401 ="Unauthorized request",
      *      409 ="Invalid parameters"
      *  }
@@ -89,7 +90,7 @@ class CdnController extends ApiBaseController
         // Check, if the file was uploaded via HTTP POST
         if (!is_uploaded_file($uploadingFile)) {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Uploading Error!']));
+            $response = $response->setContent(json_encode(['message' => 'Uploading Error! File was not uploaded via HTTP POST. File needs to have a filename.']));
             return $response;
         }
 
@@ -97,21 +98,22 @@ class CdnController extends ApiBaseController
         $fileType = $uploadingFile->getMimeType();
         $supportedFileTypes = UploadingFilesOptions::$supportedFileTypes;
 
-        if (in_array($fileType, $supportedFileTypes)) {
+        if (\in_array($fileType, $supportedFileTypes, true)) {
 
-            if (in_array($fileType, UploadingFilesOptions::$supportedImageTypes)) {
+            if (\in_array($fileType, UploadingFilesOptions::$supportedImageTypes, true)) {
                 //Check the allowed image size
                 $imageSize = getimagesize($uploadingFile);
-                if ($imageSize && ($imageSize[0] > 2500 || $imageSize[1] > 2500)) {
+                if ($imageSize && ($imageSize[0] > 10000 || $imageSize[1] > 10000)) {
                     $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                     $response = $response->setContent(json_encode(['message' => 'Uploading image is too large!']));
                     return $response;
                 }
+
             } else {
                 $fileSize = filesize($uploadingFile);
-                if ($fileSize > 500000) {
+                if ($fileSize > 10000000) {
                     $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                    $response = $response->setContent(json_encode(['message' => 'Uploading file is too large! Max Allowed: 500kb']));
+                    $response = $response->setContent(json_encode(['message' => 'Uploading file is too large! Max Allowed: 10MB']));
                     return $response;
                 }
             }
@@ -203,7 +205,7 @@ class CdnController extends ApiBaseController
         // Check, if the file was uploaded via HTTP POST
         if (!is_uploaded_file($uploadingFile)) {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Uploading Error!']));
+            $response = $response->setContent(json_encode(['message' => 'Uploading Error! File was not uploaded via HTTP POST. Image needs to have a filename.']));
             return $response;
         }
 
@@ -211,10 +213,10 @@ class CdnController extends ApiBaseController
         $fileType = $uploadingFile->getMimeType();
         $supportedImageTypes = UploadingFilesOptions::$supportedImageTypes;
 
-        if (in_array($fileType, $supportedImageTypes)) {
+        if (\in_array($fileType, $supportedImageTypes, true)) {
             //Check the allowed image size
             $imageSize = getimagesize($uploadingFile);
-            if ($imageSize && ($imageSize[0] > 2500 || $imageSize[1] > 2500)) {
+            if ($imageSize && ($imageSize[0] > 10000 || $imageSize[1] > 10000)) {
                 $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 $response = $response->setContent(json_encode(['message' => 'Uploading image is too large!']));
                 return $response;

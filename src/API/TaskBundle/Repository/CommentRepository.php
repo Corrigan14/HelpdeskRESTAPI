@@ -27,8 +27,9 @@ class CommentRepository extends EntityRepository
         $task = $options['task'];
         $internal = $options['internal'];
         $order = $options['order'];
+        $canSeeInternalNotes = $options['canSeeInternalNotes'];
 
-        if ('false' === $internal || false === $internal) {
+        if (('false' === $internal || false === $internal) || false === $canSeeInternalNotes) {
             $query = $this->createQueryBuilder('c')
                 ->select('c,createdBy,detailData,commentHasAttachments,parentComment')
                 ->leftJoin('c.createdBy', 'createdBy')

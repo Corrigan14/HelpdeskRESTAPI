@@ -289,12 +289,11 @@ class TaskAdditionalService
      * @param int $page
      * @param array $routeOptions
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      */
     public function getTaskCommentsResponse(array $options, int $page, array $routeOptions): array
     {
         $limit = $options['limit'];
+      
         $responseData = $this->em->getRepository('APITaskBundle:Comment')->getTaskComments($options, $page, $limit);
 
         $response = [
@@ -319,8 +318,6 @@ class TaskAdditionalService
      * @param int $id
      *
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      */
     public function getTaskCommentResponse(int $id): array
     {

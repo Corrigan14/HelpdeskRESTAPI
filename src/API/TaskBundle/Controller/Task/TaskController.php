@@ -2790,7 +2790,7 @@ class TaskController extends ApiBaseController
             'title' => 'Base Front URL'
         ]);
         if ($baseFrontURL instanceof SystemSettings) {
-            $taskLink = $baseFrontURL->getValue() .'/#/task/view/'. $task->getId();
+            $taskLink = $baseFrontURL->getValue() . '/#/task/view/' . $task->getId();
         } else {
             $taskLink = 'http://lanhelpdesk4.lansystems.sk/#/task/view/' . $task->getId();
         }
@@ -3246,8 +3246,9 @@ class TaskController extends ApiBaseController
                     $isNullFilter[] = 'taskHasAssignedUsers.user';
                 } elseif ('current-user' === strtolower($assigned)) {
                     $equalFilter['assignedUser.id'] = $this->getUser()->getId();
-                } elseif (\is_array(explode(',', $assigned))) {
+                } else {
                     $assignedArray = explode(',', $assigned);
+
                     if (\in_array('not', $assignedArray, true) && \in_array('current-user', $assignedArray, true)) {
                         $notAndCurrentFilter[] = [
                             'not' => 'taskHasAssignedUsers.user',
@@ -3256,9 +3257,9 @@ class TaskController extends ApiBaseController
                                 'value' => $this->getUser()->getId(),
                             ],
                         ];
+                    } else {
+                        $inFilter['assignedUser.id'] = explode(',', $assigned);
                     }
-                } else {
-                    $inFilter['assignedUser.id'] = explode(',', $assigned);
                 }
 
                 $filterForUrl['assigned'] = '&assigned=' . $assigned;
@@ -3428,6 +3429,8 @@ class TaskController extends ApiBaseController
      */
     private function separateFromToDateData(string $created, $separator = '='): array
     {
+        $created = strtoupper($created);
+
         $fromPosition = strpos($created, 'FROM' . $separator);
         $toPosition = strpos($created, 'TO' . $separator);
 
@@ -3440,7 +3443,7 @@ class TaskController extends ApiBaseController
             $fromDataTimestamp = (int)$fromData;
             $fromDataDate = new \DateTime("@$fromDataTimestamp");
 
-            if ('now' === $toData) {
+            if ('NOW' === $toData) {
                 $toDataDate = new \DateTime();
             } else {
                 $toDataTimestamp = (int)$toData;
@@ -3452,7 +3455,7 @@ class TaskController extends ApiBaseController
             $fromDataDate = new \DateTime("@$fromDataTimestamp");
         } elseif (false !== $toPosition && false === $fromPosition) {
             $toData = substr($created, $toPosition + 3);
-            if ('now' === $toData) {
+            if ('NOW' === $toData) {
                 $toDataDate = new \DateTime();
             } else {
                 $toDataTimestamp = (int)$toData;

@@ -8,10 +8,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation as Serializer;
-use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\ReadOnly;
 use JMS\Serializer\Annotation\Exclude;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Traits\CompanyTrait;
 
 /**
@@ -19,10 +17,6 @@ use Traits\CompanyTrait;
  *
  * @ORM\Table(name="company")
  * @ORM\Entity(repositoryClass="API\CoreBundle\Repository\CompanyRepository")
- * @UniqueEntity("ico")
- * @UniqueEntity("dic")
- * @UniqueEntity("ic_dph")
- * @ExclusionPolicy("none")
  */
 class Company implements \Serializable
 {
@@ -51,7 +45,7 @@ class Company implements \Serializable
     /**
      * @var string
      *
-     * @ORM\Column(name="ico", type="string", length=255, nullable=true, unique=true)
+     * @ORM\Column(name="ico", type="string", length=255, nullable=true)
      * @Assert\Type("string")
      */
     private $ico;
@@ -59,7 +53,7 @@ class Company implements \Serializable
     /**
      * @var string
      *
-     * @ORM\Column(name="dic", type="string", length=255, nullable=true, unique=true)
+     * @ORM\Column(name="dic", type="string", length=255, nullable=true)
      * @Assert\Type("string")
      */
     private $dic;
@@ -67,7 +61,7 @@ class Company implements \Serializable
     /**
      * @var string
      *
-     * @ORM\Column(name="ic_dph", type="string", length=255, nullable=true, unique=true)
+     * @ORM\Column(name="ic_dph", type="string", length=255, nullable=true)
      * @Assert\Type("string")
      */
     private $ic_dph;

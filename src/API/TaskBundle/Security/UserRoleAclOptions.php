@@ -57,6 +57,7 @@ class UserRoleAclOptions
 
     /**
      * @return array
+     * @throws \ReflectionException
      */
     public static function getConstants()
     {

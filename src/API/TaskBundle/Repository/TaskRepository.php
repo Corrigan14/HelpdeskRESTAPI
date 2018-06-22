@@ -355,7 +355,7 @@ class TaskRepository extends EntityRepository
      *
      * @return array|null
      */
-    public function getAllUsersTasks(int $page, int $userId, int $companyId, $dividedProjects, array $options): ?array
+    public function getAllUsersTasks(int $page, int $userId, int $companyId, $dividedProjects, array $options): array
     {
         $paramArray = [];
 

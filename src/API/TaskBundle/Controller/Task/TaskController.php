@@ -231,7 +231,9 @@ class TaskController extends ApiBaseController
      *       "name"="creator",
      *       "description"="A list of coma separated ID's of Creator f.i. 1,2,3
      *        Another option:
-     *          CURRENT-USER - just tasks created by actually logged user are returned."
+     *          current-user - just tasks created by actually logged user are returned.
+     *        Another option:
+     *          current-user OR coma separated list od others IDs f.i. current-userOR1,2,3"
      *     },
      *     {
      *       "name"="requester",
@@ -3199,12 +3201,17 @@ class TaskController extends ApiBaseController
         }
         if (isset($data[FilterAttributeOptions::CREATOR])) {
             $creator = $data[FilterAttributeOptions::CREATOR];
+
             if (!\is_array($creator)) {
-                if ('current-user' === strtolower($creator)) {
-                    $equalFilter['createdBy.id'] = $this->getUser()->getId();
-                } else {
-                    $inFilter['createdBy.id'] = explode(',', $creator);
+                $separatedData = $this->separateCurrentUserFilterData($creator);
+                if (isset($separatedData['inFilter'])) {
+                    $inFilter['createdBy.id'] = $separatedData['inFilter'];
                 }
+
+                if (isset($separatedData['equalFilter'])) {
+                    $equalFilter['createdBy.id'] = $separatedData['equalFilter'];
+                }
+
                 $filterForUrl['createdBy'] = '&creator=' . $creator;
             } else {
                 $inFilter['createdBy.id'] = $creator;
@@ -3419,6 +3426,40 @@ class TaskController extends ApiBaseController
             'dateFilterAddedParams' => $dateFilterAddedParams,
             'filterForUrl' => $filterForUrl,
         ];
+    }
+
+    /**
+     * @param string $data
+     * @return array
+     */
+    private function separateCurrentUserFilterData(string $data): array
+    {
+        $response = [];
+
+        $orPosition = strpos($data, 'OR', 0);
+        $currentUserPosition = strpos($data, 'current-user', 0);
+        $currentUserId = $this->getUser()->getId();
+
+        if ($orPosition !== false && $currentUserPosition !== false) {
+            $otherUsersId = \substr($data, $orPosition + 2, \strlen($data));
+            $otherUsersId = explode(',', $otherUsersId);
+            foreach ($otherUsersId as $item) {
+                $otherUsersIdInt[] = (int)$item;
+            }
+            $otherUsersIdInt[] = $currentUserId;
+            $response['inFilter'] = $otherUsersIdInt;
+        } elseif ('current-user' === strtolower($data)) {
+            $response['equalFilter'] = $currentUserId;
+        } elseif ($orPosition === false && $currentUserPosition === false) {
+            $usersId = explode(',', $data);
+            foreach ($usersId as $item) {
+                $usersIdInt[] = (int)$item;
+            }
+            $response['inFilter'] = $usersIdInt;
+        }
+
+        return $response;
+
     }
 
     /**

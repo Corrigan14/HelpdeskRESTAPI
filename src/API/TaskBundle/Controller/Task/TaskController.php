@@ -17,10 +17,7 @@ use API\TaskBundle\Entity\TaskAttribute;
 use API\TaskBundle\Entity\TaskData;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
 use API\TaskBundle\Entity\TaskHasAttachment;
-use API\TaskBundle\Entity\UserHasProject;
-use API\TaskBundle\Security\ProjectAclOptions;
 use API\TaskBundle\Security\StatusFunctionOptions;
-use API\TaskBundle\Security\StatusOptions;
 use API\TaskBundle\Security\TaskWorkTypeOptions;
 use API\TaskBundle\Security\UserRoleAclOptions;
 use API\TaskBundle\Security\VoteOptions;
@@ -232,27 +229,29 @@ class TaskController extends ApiBaseController
      *       "description"="A list of coma separated ID's of Creator f.i. 1,2,3
      *        Another option:
      *          current-user - just tasks created by actually logged user are returned.
-     *        Another option:
-     *          current-user OR coma separated list od others IDs f.i. current-userOR1,2,3"
+     *          current-user,coma separated list od others IDs f.i. current-user,1,2,3"
      *     },
      *     {
      *       "name"="requester",
-     *       "description"="A list of coma separated ID's of Requesters f.i. 1,2,3
+     *       "description"="A list of coma separated ID's of Creator f.i. 1,2,3
      *        Another option:
-     *          CURRENT-USER - just tasks requested by actually logged user are returned."
+     *          current-user - just tasks created by actually logged user are returned.
+     *          current-user,coma separated list od others IDs f.i. current-user,1,2,3"
      *     },
      *     {
      *       "name"="company",
      *       "description"="A list of coma separated ID's of Companies f.i. 1,2,3
      *        Another options:
-     *          CURRENT-USER - just tasks created by users with the same company like logged user are returned."
+     *          current-user - just tasks created by users with the same company like logged user are returned.
+     *          current-user,coma separated list od others IDs f.i. current-user,1,2,3"
      *     },
      *     {
      *       "name"="assigned",
      *       "description"="A list of coma separated ID's of Users f.i. 1,2,3
      *        Another option:
-     *          NOT - just tasks which aren't assigned to nobody are returned,
-     *          CURRENT-USER - just tasks assigned to actually logged user are returned."
+     *          not - just tasks which aren't assigned to nobody are returned,
+     *          current-user - just tasks assigned to actually logged user are returned
+     *          current-user,coma separated list od others IDs f.i. current-user,1,2,3"
      *     },
      *     {
      *       "name"="tag",
@@ -343,9 +342,9 @@ class TaskController extends ApiBaseController
                 $response = $response->setContent(json_encode(['message' => $processedArray['message']]));
                 $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 return $response;
-            } else {
-                $orderProcessed = $processedArray['message'];
             }
+
+            $orderProcessed = $processedArray['message'];
 
             $processedFilterData = $this->getFilterData($requestBody);
 
@@ -619,9 +618,9 @@ class TaskController extends ApiBaseController
                 $response = $response->setContent(json_encode(['message' => $processedArray['message']]));
                 $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 return $response;
-            } else {
-                $orderProcessed = $processedArray['message'];
             }
+
+            $orderProcessed = $processedArray['message'];
 
             $filterDataArray = $filter->getFilter();
             $filterData = $this->getFilterDataFromSavedFilterArray($filterDataArray);
@@ -1761,15 +1760,15 @@ class TaskController extends ApiBaseController
                 $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
                 $response = $response->setContent(json_encode(['message' => 'Company with requested Id does not exist!']));
                 return $response;
-            } else {
-                $oldParam = $task->getCompany()->getTitle();
-                $newParam = $company->getTitle();
-                $task->setCompany($company);
+            }
 
-                //Notification
-                if ($this->paramsAreDifferent($oldParam, $newParam)) {
-                    $changedParams['company'] = $this->setChangedParams($oldParam, $newParam);
-                }
+            $oldParam = $task->getCompany()->getTitle();
+            $newParam = $company->getTitle();
+            $task->setCompany($company);
+
+            //Notification
+            if ($this->paramsAreDifferent($oldParam, $newParam)) {
+                $changedParams['company'] = $this->setChangedParams($oldParam, $newParam);
             }
         }
 
@@ -3160,7 +3159,7 @@ class TaskController extends ApiBaseController
         $dateFilter = [];
         $equalFilter = [];
         $isNullFilter = [];
-        $notAndCurrentFilter = [];
+        $notAndOptionsFilter = [];
         $searchFilter = null;
 
         $inFilterAddedParams = [];
@@ -3201,88 +3200,68 @@ class TaskController extends ApiBaseController
         }
         if (isset($data[FilterAttributeOptions::CREATOR])) {
             $creator = $data[FilterAttributeOptions::CREATOR];
-
             if (!\is_array($creator)) {
                 $separatedData = $this->separateCurrentUserFilterData($creator);
-                if (isset($separatedData['inFilter'])) {
-                    $inFilter['createdBy.id'] = $separatedData['inFilter'];
-                }
-
-                if (isset($separatedData['equalFilter'])) {
-                    $equalFilter['createdBy.id'] = $separatedData['equalFilter'];
-                }
-
                 $filterForUrl['createdBy'] = '&creator=' . $creator;
             } else {
-                $inFilter['createdBy.id'] = $creator;
+                $separatedData = $this->separateCurrentUserArrayFilterData($creator);
                 $filterForUrl['createdBy'] = '&creator=' . implode(',', $creator);
+            }
+
+            if (isset($separatedData['inFilter'])) {
+                $inFilter['createdBy.id'] = $separatedData['inFilter'];
             }
         }
         if (isset($data[FilterAttributeOptions::REQUESTER])) {
             $requester = $data[FilterAttributeOptions::REQUESTER];
             if (!\is_array($requester)) {
-                if ('current-user' === strtolower($requester)) {
-                    $equalFilter['requestedBy.id'] = $this->getUser()->getId();
-                } else {
-                    $inFilter['requestedBy.id'] = explode(',', $requester);
-                }
+                $separatedData = $this->separateCurrentUserFilterData($requester);
                 $filterForUrl['requestedBy'] = '&requester=' . $requester;
             } else {
-                $inFilter['requestedBy.id'] = $requester;
+                $separatedData = $this->separateCurrentUserArrayFilterData($requester);
                 $filterForUrl['requestedBy'] = '&requester=' . implode(',', $requester);
+            }
+
+            if (isset($separatedData['inFilter'])) {
+                $inFilter['requestedBy.id'] = $separatedData['inFilter'];
             }
         }
         if (isset($data[FilterAttributeOptions::COMPANY])) {
             $company = $data[FilterAttributeOptions::COMPANY];
+
             if (!\is_array($company)) {
-                if ('current-user' === strtolower($company)) {
-                    $equalFilter['taskCompany.id'] = $this->getUser()->getCompany()->getId();
-                } else {
-                    $inFilter['taskCompany.id'] = explode(',', $company);
-                }
+                $separatedData = $this->separateCurrentUserFilterData($company, true);
                 $filterForUrl['taskCompany'] = '&taskCompany=' . $company;
             } else {
-                $inFilter['taskCompany.id'] = $company;
+                $separatedData = $this->separateCurrentUserArrayFilterData($company, true);
                 $filterForUrl['taskCompany'] = '&taskCompany=' . implode(',', $company);
+            }
+
+            if (isset($separatedData['inFilter'])) {
+                $inFilter['taskCompany.id'] = $separatedData['inFilter'];
             }
         }
         if (isset($data[FilterAttributeOptions::ASSIGNED])) {
             $assigned = $data[FilterAttributeOptions::ASSIGNED];
             if (!\is_array($assigned)) {
-                if ('not' === strtolower($assigned)) {
-                    $isNullFilter[] = 'taskHasAssignedUsers.user';
-                } elseif ('current-user' === strtolower($assigned)) {
-                    $equalFilter['assignedUser.id'] = $this->getUser()->getId();
-                } else {
-                    $assignedArray = explode(',', $assigned);
-
-                    if (\in_array('not', $assignedArray, true) && \in_array('current-user', $assignedArray, true)) {
-                        $notAndCurrentFilter[] = [
-                            'not' => 'taskHasAssignedUsers.user',
-                            'equal' => [
-                                'key' => 'assignedUser.id',
-                                'value' => $this->getUser()->getId(),
-                            ],
-                        ];
-                    } else {
-                        $inFilter['assignedUser.id'] = explode(',', $assigned);
-                    }
-                }
-
+                $separatedData = $this->separateCurrentUserFilterData($assigned, false);
                 $filterForUrl['assigned'] = '&assigned=' . $assigned;
             } else {
-                if (\in_array('not', $assigned, true) && \in_array('current-user', $assigned, true)) {
-                    $notAndCurrentFilter[] = [
-                        'not' => 'taskHasAssignedUsers.user',
-                        'equal' => [
-                            'key' => 'assignedUser.id',
-                            'value' => $this->getUser()->getId(),
-                        ],
-                    ];
-                } else {
-                    $inFilter['assignedUser.id'] = $assigned;
-                }
+                $separatedData = $this->separateCurrentUserArrayFilterData($assigned, false);
                 $filterForUrl['assigned'] = '&assigned=' . implode(',', $assigned);
+            }
+
+            if (isset($separatedData['isNullFilter'])) {
+                $isNullFilter[] = $separatedData['isNullFilter'];
+            }
+            if (isset($separatedData['equalFilter'])) {
+                $equalFilter['assignedUser.id'] = $separatedData['equalFilter'];
+            }
+            if (isset($separatedData['notAndOptionsFilter'])) {
+                $notAndOptionsFilter[] = $separatedData['notAndOptionsFilter'];
+            }
+            if (isset($separatedData['inFilter'])) {
+                $inFilter['assignedUser.id'] = $separatedData['inFilter'];
             }
         }
         if (isset($data[FilterAttributeOptions::TAG])) {
@@ -3420,7 +3399,7 @@ class TaskController extends ApiBaseController
             'dateFilter' => $dateFilter,
             'isNullFilter' => $isNullFilter,
             'searchFilter' => $searchFilter,
-            'notAndCurrentFilter' => $notAndCurrentFilter,
+            'notAndCurrentFilter' => $notAndOptionsFilter,
             'inFilterAddedParams' => $inFilterAddedParams,
             'equalFilterAddedParams' => $equalFilterAddedParams,
             'dateFilterAddedParams' => $dateFilterAddedParams,
@@ -3430,36 +3409,81 @@ class TaskController extends ApiBaseController
 
     /**
      * @param string $data
+     * @param bool $company
      * @return array
      */
-    private function separateCurrentUserFilterData(string $data): array
+    private function separateCurrentUserFilterData(string $data, bool $company = false): array
     {
         $response = [];
 
-        $orPosition = strpos($data, 'OR', 0);
-        $currentUserPosition = strpos($data, 'current-user', 0);
-        $currentUserId = $this->getUser()->getId();
+        $dataArray = explode(',', $data);
+        if ($company) {
+            $currentUserId = $this->getUser()->getCompany()->getId();
+        } else {
+            $currentUserId = $this->getUser()->getId();
+        }
 
-        if ($orPosition !== false && $currentUserPosition !== false) {
-            $otherUsersId = \substr($data, $orPosition + 2, \strlen($data));
-            $otherUsersId = explode(',', $otherUsersId);
-            foreach ($otherUsersId as $item) {
-                $otherUsersIdInt[] = (int)$item;
+        foreach ($dataArray as $datum) {
+            if ('current-user' === strtolower($datum)) {
+                $response['inFilter'][] = $currentUserId;
+            } elseif ('not' !== strtolower($datum)) {
+                $response['inFilter'][] = (int)$datum;
             }
-            $otherUsersIdInt[] = $currentUserId;
-            $response['inFilter'] = $otherUsersIdInt;
-        } elseif ('current-user' === strtolower($data)) {
-            $response['equalFilter'] = $currentUserId;
-        } elseif ($orPosition === false && $currentUserPosition === false) {
-            $usersId = explode(',', $data);
-            foreach ($usersId as $item) {
-                $usersIdInt[] = (int)$item;
-            }
-            $response['inFilter'] = $usersIdInt;
+        }
+
+        if (\in_array('not', $dataArray, true) && \count($dataArray) > 1) {
+            $response['notAndOptionsFilter'] = [
+                'not' => 'taskHasAssignedUsers.user',
+                'equal' => [
+                    'key' => 'assignedUser.id',
+                    'value' => $response['inFilter'],
+                ],
+            ];
+            unset($response['inFilter']);
+        } elseif (\in_array('not', $dataArray, true) && \count($dataArray) === 1) {
+            $response['isNullFilter'] = 'taskHasAssignedUsers.user';
         }
 
         return $response;
+    }
 
+    /**
+     * @param array $data
+     * @param bool $company
+     * @return array
+     */
+    private function separateCurrentUserArrayFilterData(array $data, bool $company = false): array
+    {
+        $response = [];
+
+        if ($company) {
+            $currentUserId = $this->getUser()->getCompany()->getId();
+        } else {
+            $currentUserId = $this->getUser()->getId();
+        }
+
+        foreach ($data as $datum) {
+            if ('current-user' === strtolower($datum)) {
+                $response['inFilter'][] = $currentUserId;
+            } elseif ('not' !== strtolower($datum)) {
+                $response['inFilter'][] = (int)$datum;
+            }
+        }
+
+        if (\in_array('not', $data, true) && \count($data) > 1) {
+            $response['notAndOptionsFilter'] = [
+                'not' => 'taskHasAssignedUsers.user',
+                'equal' => [
+                    'key' => 'assignedUser.id',
+                    'value' => $response['inFilter'],
+                ],
+            ];
+            unset($response['inFilter']);
+        } elseif (\in_array('not', $data, true) && \count($data) === 1) {
+            $response['isNullFilter'] = 'taskHasAssignedUsers.user';
+        }
+
+        return $response;
     }
 
     /**

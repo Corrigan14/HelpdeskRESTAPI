@@ -23,6 +23,7 @@ class VariableHelper
     public static $allowedKeysInFilter = [
         'taskGlobalStatus.id',
         'taskHasAssignedUsers.actual',
+        'taskHasAssignedUsers.user',
         'project.id',
         'createdBy.id',
         'requestedBy.id',

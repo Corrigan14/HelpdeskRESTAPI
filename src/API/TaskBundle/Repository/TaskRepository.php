@@ -186,8 +186,8 @@ class TaskRepository extends EntityRepository
 
         foreach ($notAndCurrentFilter as $filter) {
             if (\in_array($filter['not'], VariableHelper::$allowedKeysInFilter, true) && \in_array($filter['equal']['key'], VariableHelper::$allowedKeysInFilter, true)) {
-                $query->andWhere($filter['not'] . ' IS NULL' . ' OR ' . $filter['equal']['key'] . ' = :parameter' . $paramNum);
-                $paramArray['parameter' . $paramNum] = $filter['equal']['value'];
+                $query->andWhere($filter['not'] . ' IS NULL' . ' OR ' . $filter['equal']['key'] . ' IN (:parameters' . $paramNum.')');
+                $paramArray['parameters' . $paramNum] = $filter['equal']['value'];
             }
         }
 
@@ -548,8 +548,8 @@ class TaskRepository extends EntityRepository
 
         foreach ($notAndCurrentFilter as $filter) {
             if (\in_array($filter['not'], VariableHelper::$allowedKeysInFilter, true) && \in_array($filter['equal']['key'], VariableHelper::$allowedKeysInFilter, true)) {
-                $query->andWhere($filter['not'] . ' IS NULL' . ' OR ' . $filter['equal']['key'] . ' = :parameter' . $paramNum);
-                $paramArray['parameter' . $paramNum] = $filter['equal']['value'];
+                $query->andWhere($filter['not'] . ' IS NULL' . ' OR ' . $filter['equal']['key'] . ' IN (:parameters' . $paramNum.')');
+                $paramArray['parameters' . $paramNum] = $filter['equal']['value'];
             }
         }
 

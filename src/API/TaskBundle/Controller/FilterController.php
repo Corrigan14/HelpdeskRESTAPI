@@ -1242,6 +1242,7 @@ class FilterController extends ApiBaseController
      * @param $locationUrl
      * @param bool $project
      * @return Response
+     * @throws \LogicException
      */
     private function updateEntity(Filter $filter, array $data, $create = false, $locationUrl, $project = false)
     {
@@ -1386,9 +1387,9 @@ class FilterController extends ApiBaseController
             // Check if user set some Columns_task_attributes and if these columns are allowed (exists)
             if (isset($data['columns_task_attributes'])) {
                 $dataColumnsArray = $data['columns_task_attributes'];
-                if (!is_array($dataColumnsArray)) {
+                if (!\is_array($dataColumnsArray)) {
                     $dataColumnsArray = json_decode($data['columns_task_attributes'], true);
-                    if (!is_array($dataColumnsArray)) {
+                    if (!\is_array($dataColumnsArray)) {
                         $dataColumnsArray = explode(',', $data['columns_task_attributes']);
                     }
                 }

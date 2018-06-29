@@ -3449,6 +3449,7 @@ class TaskController extends ApiBaseController
         }
 
         if ($project) {
+            // List of projest created by logged user
             $userProjects = $user->getProjects();
             /** @var Project $userProject */
             foreach ($userProjects as $userProject) {

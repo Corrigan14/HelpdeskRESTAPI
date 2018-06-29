@@ -221,8 +221,9 @@ class TaskController extends ApiBaseController
      *       "name"="project",
      *       "description"="A list of coma separated ID's of Project f.i. 1,2,3.
      *        Another options:
-     *          NOT - just tasks without projects are returned,
-     *          CURRENT-USER - just tasks from actually logged user's projects are returned."
+     *          not - just tasks without projects are returned,
+     *          current-user - just tasks from actually logged user's projects are returned
+     *          current-user,coma separated list od others IDs f.i. current-user,1,2,3,not"
      *     },
      *     {
      *       "name"="creator",
@@ -251,7 +252,7 @@ class TaskController extends ApiBaseController
      *        Another option:
      *          not - just tasks which aren't assigned to nobody are returned,
      *          current-user - just tasks assigned to actually logged user are returned
-     *          current-user,coma separated list od others IDs f.i. current-user,1,2,3"
+     *          current-user,coma separated list od others IDs f.i. current-user,1,2,3,not"
      *     },
      *     {
      *       "name"="tag",
@@ -261,7 +262,8 @@ class TaskController extends ApiBaseController
      *       "name"="follower",
      *       "description"="A list of coma separated ID's of Task Followers f.i. 1,2,3
      *        Another option:
-     *          CURRENT-USER - just tasks followed by actually logged user are returned."
+     *          current-user - just tasks followed by actually logged user are returned
+     *          current-user,coma separated list od others IDs f.i. current-user,1,2,3"
      *     },
      *     {
      *       "name"="createdTime",
@@ -1228,15 +1230,15 @@ class TaskController extends ApiBaseController
             $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
             $response = $response->setContent(json_encode(['message' => 'Project with requested Id does not exist!']));
             return $response;
-        } else {
-            // Check if user can create task in a selected project
-            if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT, $project)) {
-                $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
-                $response = $response->setContent(json_encode(['message' => 'Permission denied! You can not create task in a selected project!']));
-                return $response;
-            }
-            $task->setProject($project);
         }
+
+        // Check if user can create task in a selected project
+        if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT, $project)) {
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Permission denied! You can not create task in a selected project!']));
+            return $response;
+        }
+        $task->setProject($project);
 
         $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($statusId);
         if (!$status instanceof Status) {
@@ -1581,6 +1583,7 @@ class TaskController extends ApiBaseController
      * @param bool|int $requesterId
      * @param bool|int $companyId
      * @return Response
+     * @throws \InvalidArgumentException
      * @throws \LogicException
      * @throws \ReflectionException
      */
@@ -1636,39 +1639,39 @@ class TaskController extends ApiBaseController
                 $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
                 $response = $response->setContent(json_encode(['message' => 'Project with requested Id does not exist!']));
                 return $response;
-            } else {
-                // Check if user can create task in a selected project
-                if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT, $project)) {
-                    $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
-                    $response = $response->setContent(json_encode(['message' => 'Permission denied! You can not create task in a selected project!']));
-                    return $response;
-                }
-                $oldProject = $task->getProject();
-                $oldParam = $oldProject->getTitle();
-                $newParam = $project->getTitle();
-                $task->setProject($project);
+            }
 
+            // Check if user can create task in a selected project
+            if (!$this->get('task_voter')->isGranted(VoteOptions::CREATE_TASK_IN_PROJECT, $project)) {
+                $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Permission denied! You can not create task in a selected project!']));
+                return $response;
+            }
+            $oldProject = $task->getProject();
+            $oldParam = $oldProject->getTitle();
+            $newParam = $project->getTitle();
+            $task->setProject($project);
+
+            //Notification
+            if ($this->paramsAreDifferent($oldParam, $newParam)) {
+                $changedParams['project'] = $this->setChangedParams($oldParam, $newParam);
+            }
+
+            // Delete all assigners from the old project
+            if ($oldProject->getId() !== $project->getId()) {
+                $assigners = $task->getTaskHasAssignedUsers();
+
+                $oldParams = $this->createArrayOfUsernames($assigners);
+                $newParams = [];
+                if (\count($assigners) > 0) {
+                    foreach ($assigners as $assigner) {
+                        $this->getDoctrine()->getManager()->remove($assigner);
+                    }
+                    $this->getDoctrine()->getManager()->flush();
+                }
                 //Notification
-                if ($this->paramsAreDifferent($oldParam, $newParam)) {
-                    $changedParams['project'] = $this->setChangedParams($oldParam, $newParam);
-                }
-
-                // Delete all assigners from the old project
-                if ($oldProject->getId() !== $project->getId()) {
-                    $assigners = $task->getTaskHasAssignedUsers();
-
-                    $oldParams = $this->createArrayOfUsernames($assigners);
-                    $newParams = [];
-                    if (\count($assigners) > 0) {
-                        foreach ($assigners as $assigner) {
-                            $this->getDoctrine()->getManager()->remove($assigner);
-                        }
-                        $this->getDoctrine()->getManager()->flush();
-                    }
-                    //Notification
-                    if ($this->arraysAreDifferent($oldParams, $newParams)) {
-                        $changedParams['assigner'] = $this->setChangedParams(implode(',', $oldParams), implode(',', $newParams));
-                    }
+                if ($this->arraysAreDifferent($oldParams, $newParams)) {
+                    $changedParams['assigner'] = $this->setChangedParams(implode(',', $oldParams), implode(',', $newParams));
                 }
             }
         }
@@ -1679,35 +1682,35 @@ class TaskController extends ApiBaseController
                 $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
                 $response = $response->setContent(json_encode(['message' => 'Status with requested Id does not exist!']));
                 return $response;
-            } else {
-                // Check Status function. If it is CLOSED, closedAt and startedAT params are required.
-                // Only Task with a COMPANY can be closed!
-                // If it IS IN PROGRESS or COMPLETED, startedAt param has to be set
-                if ($status->getFunction() === StatusFunctionOptions::CLOSED_TASK) {
-                    if (null === $task->getCompany()) {
-                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                        $response = $response->setContent(json_encode(['message' => 'Company is required for tasks with a CLOSED Status!']));
-                        return $response;
-                    }
+            }
 
-                    if (!isset($requestBody['closedAt'])) {
-                        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                        $response = $response->setContent(json_encode(['message' => 'ClosedAt param is required for a tasks with CLOSED Status!']));
-                        return $response;
-                    }
-                } elseif ($status->getFunction() === StatusFunctionOptions::IN_PROGRESS_TASK || $status->getFunction() === StatusFunctionOptions::COMPLETED_TASK) {
-                    if (!$task->getStartedAt() && !isset($requestBody['startedAt'])) {
-                        $task->setStartedAt(new \DateTime());
-                    }
+            // Check Status function. If it is CLOSED, closedAt and startedAT params are required.
+            // Only Task with a COMPANY can be closed!
+            // If it IS IN PROGRESS or COMPLETED, startedAt param has to be set
+            if ($status->getFunction() === StatusFunctionOptions::CLOSED_TASK) {
+                if (null === $task->getCompany()) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'Company is required for tasks with a CLOSED Status!']));
+                    return $response;
                 }
-                $oldParam = $task->getStatus()->getTitle();
-                $newParam = $status->getTitle();
-                $task->setStatus($status);
 
-                //Notification
-                if ($this->paramsAreDifferent($oldParam, $newParam)) {
-                    $changedParams['status'] = $this->setChangedParams($oldParam, $newParam);
+                if (!isset($requestBody['closedAt'])) {
+                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                    $response = $response->setContent(json_encode(['message' => 'ClosedAt param is required for a tasks with CLOSED Status!']));
+                    return $response;
                 }
+            } elseif ($status->getFunction() === StatusFunctionOptions::IN_PROGRESS_TASK || $status->getFunction() === StatusFunctionOptions::COMPLETED_TASK) {
+                if (!$task->getStartedAt() && !isset($requestBody['startedAt'])) {
+                    $task->setStartedAt(new \DateTime());
+                }
+            }
+            $oldParam = $task->getStatus()->getTitle();
+            $newParam = $status->getTitle();
+            $task->setStatus($status);
+
+            //Notification
+            if ($this->paramsAreDifferent($oldParam, $newParam)) {
+                $changedParams['status'] = $this->setChangedParams($oldParam, $newParam);
             }
         } else {
             $status = $task->getStatus();
@@ -1719,38 +1722,38 @@ class TaskController extends ApiBaseController
                 $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
                 $response = $response->setContent(json_encode(['message' => 'Requester with requested Id does not exist!']));
                 return $response;
+            }
+
+            $oldRequester = $task->getRequestedBy();
+            if ($oldRequester->getDetailData()) {
+                $name = $oldRequester->getDetailData()->getName();
+                $surname = $oldRequester->getDetailData()->getSurname();
+                $detailData = ' (' . $name . ' ' . $surname . ')';
             } else {
-                $oldRequester = $task->getRequestedBy();
-                if ($oldRequester->getDetailData()) {
-                    $name = $oldRequester->getDetailData()->getName();
-                    $surname = $oldRequester->getDetailData()->getSurname();
-                    $detailData = ' (' . $name . ' ' . $surname . ')';
-                } else {
-                    $name = null;
-                    $surname = null;
-                    $detailData = '';
-                }
+                $name = null;
+                $surname = null;
+                $detailData = '';
+            }
 
-                if ($requester->getDetailData()) {
-                    $nameNew = $requester->getDetailData()->getName();
-                    $surnameNew = $requester->getDetailData()->getSurname();
-                    $detailDataNew = ' (' . $nameNew . ' ' . $surnameNew . ')';
-                } else {
-                    $nameNew = null;
-                    $surnameNew = null;
-                    $detailDataNew = '';
-                }
+            if ($requester->getDetailData()) {
+                $nameNew = $requester->getDetailData()->getName();
+                $surnameNew = $requester->getDetailData()->getSurname();
+                $detailDataNew = ' (' . $nameNew . ' ' . $surnameNew . ')';
+            } else {
+                $nameNew = null;
+                $surnameNew = null;
+                $detailDataNew = '';
+            }
 
-                $oldParam = $oldRequester->getUsername() . $detailData;
-                $newParam = $requester->getUsername() . $detailDataNew;
-                $task->setRequestedBy($requester);
+            $oldParam = $oldRequester->getUsername() . $detailData;
+            $newParam = $requester->getUsername() . $detailDataNew;
+            $task->setRequestedBy($requester);
 
-                //Notification
-                if ($this->paramsAreDifferent($oldParam, $newParam)) {
-                    $changedParams['requester'] = $this->setChangedParams($oldParam, $newParam);
-                    $changedParams['requester']['fromEmail'] = $oldRequester->getEmail();
-                    $changedParams['requester']['toEmail'] = $requester->getEmail();
-                }
+            //Notification
+            if ($this->paramsAreDifferent($oldParam, $newParam)) {
+                $changedParams['requester'] = $this->setChangedParams($oldParam, $newParam);
+                $changedParams['requester']['fromEmail'] = $oldRequester->getEmail();
+                $changedParams['requester']['toEmail'] = $requester->getEmail();
             }
         }
 
@@ -1839,6 +1842,7 @@ class TaskController extends ApiBaseController
      * @param bool $create
      * @param bool|array $changedParams
      * @return Response
+     * @throws \InvalidArgumentException
      * @throws \LogicException
      * @throws \ReflectionException
      */
@@ -2256,15 +2260,15 @@ class TaskController extends ApiBaseController
 
                     if ($taskHasAttachment instanceof TaskHasAttachment) {
                         continue;
-                    } else {
-                        //Add attachment to the task
-                        $taskHasAttachmentNew = new TaskHasAttachment();
-                        $taskHasAttachmentNew->setTask($task);
-                        $taskHasAttachmentNew->setSlug($data);
-                        $task->addTaskHasAttachment($taskHasAttachmentNew);
-                        $this->getDoctrine()->getManager()->persist($taskHasAttachmentNew);
-                        $this->getDoctrine()->getManager()->persist($task);
                     }
+
+                    //Add attachment to the task
+                    $taskHasAttachmentNew = new TaskHasAttachment();
+                    $taskHasAttachmentNew->setTask($task);
+                    $taskHasAttachmentNew->setSlug($data);
+                    $task->addTaskHasAttachment($taskHasAttachmentNew);
+                    $this->getDoctrine()->getManager()->persist($taskHasAttachmentNew);
+                    $this->getDoctrine()->getManager()->persist($task);
                 }
             }
             //Notification
@@ -3185,26 +3189,35 @@ class TaskController extends ApiBaseController
         if (isset($data[FilterAttributeOptions::PROJECT])) {
             $project = $data[FilterAttributeOptions::PROJECT];
             if (!\is_array($project)) {
-                if ('not' === strtolower($project)) {
-                    $isNullFilter[] = 'task.project';
-                } elseif ('current-user' === strtolower($project)) {
-                    $equalFilter['projectCreator.id'] = $this->getUser()->getId();
-                } else {
-                    $inFilter['project.id'] = explode(',', $project);
-                }
+                $separatedData = $this->separateCurrentUserFilterData($project, false, false, true);
                 $filterForUrl['project'] = '&project=' . $project;
             } else {
-                $inFilter['project.id'] = $project;
+                $separatedData = $this->separateCurrentUserFilterData($project, true, false, true);
                 $filterForUrl['project'] = '&project=' . implode(',', $project);
+            }
+
+            if (isset($separatedData['isNullFilter'])) {
+                $isNullFilter[] = 'task.project';
+            }
+            if (isset($separatedData['equalFilter'])) {
+                $equalFilter['project.id'] = $separatedData['equalFilter'];
+            }
+            if (isset($separatedData['notAndOptionsFilter'])) {
+                $separatedData['notAndOptionsFilter']['not'] = 'task.project';
+                $separatedData['notAndOptionsFilter']['equal']['key'] = 'project.id';
+                $notAndOptionsFilter[] = $separatedData['notAndOptionsFilter'];
+            }
+            if (isset($separatedData['inFilter'])) {
+                $inFilter['project.id'] = $separatedData['inFilter'];
             }
         }
         if (isset($data[FilterAttributeOptions::CREATOR])) {
             $creator = $data[FilterAttributeOptions::CREATOR];
             if (!\is_array($creator)) {
-                $separatedData = $this->separateCurrentUserFilterData($creator);
+                $separatedData = $this->separateCurrentUserFilterData($creator, false, false, false);
                 $filterForUrl['createdBy'] = '&creator=' . $creator;
             } else {
-                $separatedData = $this->separateCurrentUserArrayFilterData($creator);
+                $separatedData = $this->separateCurrentUserFilterData($creator, true, false, false);
                 $filterForUrl['createdBy'] = '&creator=' . implode(',', $creator);
             }
 
@@ -3215,10 +3228,10 @@ class TaskController extends ApiBaseController
         if (isset($data[FilterAttributeOptions::REQUESTER])) {
             $requester = $data[FilterAttributeOptions::REQUESTER];
             if (!\is_array($requester)) {
-                $separatedData = $this->separateCurrentUserFilterData($requester);
+                $separatedData = $this->separateCurrentUserFilterData($requester, false, false, false);
                 $filterForUrl['requestedBy'] = '&requester=' . $requester;
             } else {
-                $separatedData = $this->separateCurrentUserArrayFilterData($requester);
+                $separatedData = $this->separateCurrentUserFilterData($requester, true, false, false);
                 $filterForUrl['requestedBy'] = '&requester=' . implode(',', $requester);
             }
 
@@ -3230,10 +3243,10 @@ class TaskController extends ApiBaseController
             $company = $data[FilterAttributeOptions::COMPANY];
 
             if (!\is_array($company)) {
-                $separatedData = $this->separateCurrentUserFilterData($company, true);
+                $separatedData = $this->separateCurrentUserFilterData($company, false, true, false);
                 $filterForUrl['taskCompany'] = '&taskCompany=' . $company;
             } else {
-                $separatedData = $this->separateCurrentUserArrayFilterData($company, true);
+                $separatedData = $this->separateCurrentUserFilterData($company, true, true, false);
                 $filterForUrl['taskCompany'] = '&taskCompany=' . implode(',', $company);
             }
 
@@ -3244,20 +3257,22 @@ class TaskController extends ApiBaseController
         if (isset($data[FilterAttributeOptions::ASSIGNED])) {
             $assigned = $data[FilterAttributeOptions::ASSIGNED];
             if (!\is_array($assigned)) {
-                $separatedData = $this->separateCurrentUserFilterData($assigned, false);
+                $separatedData = $this->separateCurrentUserFilterData($assigned, false, false, false);
                 $filterForUrl['assigned'] = '&assigned=' . $assigned;
             } else {
-                $separatedData = $this->separateCurrentUserArrayFilterData($assigned, false);
+                $separatedData = $this->separateCurrentUserFilterData($assigned, true, false, false);
                 $filterForUrl['assigned'] = '&assigned=' . implode(',', $assigned);
             }
 
             if (isset($separatedData['isNullFilter'])) {
-                $isNullFilter[] = $separatedData['isNullFilter'];
+                $isNullFilter[] = 'taskHasAssignedUsers.user';
             }
             if (isset($separatedData['equalFilter'])) {
                 $equalFilter['assignedUser.id'] = $separatedData['equalFilter'];
             }
             if (isset($separatedData['notAndOptionsFilter'])) {
+                $separatedData['notAndOptionsFilter']['not'] = 'taskHasAssignedUsers.user';
+                $separatedData['notAndOptionsFilter']['equal']['key'] = 'assignedUser.id';
                 $notAndOptionsFilter[] = $separatedData['notAndOptionsFilter'];
             }
             if (isset($separatedData['inFilter'])) {
@@ -3277,15 +3292,15 @@ class TaskController extends ApiBaseController
         if (isset($data[FilterAttributeOptions::FOLLOWER])) {
             $follower = $data[FilterAttributeOptions::FOLLOWER];
             if (!\is_array($follower)) {
-                if ('current-user' === $follower) {
-                    $equalFilter['followers.id'] = $this->getUser()->getId();
-                } else {
-                    $inFilter['followers.id'] = explode(',', $follower);
-                }
+                $separatedData = $this->separateCurrentUserFilterData($follower, false, false, false);
                 $filterForUrl['followers'] = '&follower=' . $follower;
             } else {
-                $inFilter['followers.id'] = $follower;
+                $separatedData = $this->separateCurrentUserFilterData($follower, true, false, false);
                 $filterForUrl['followers'] = '&follower=' . implode(',', $follower);
+            }
+
+            if (isset($separatedData['inFilter'])) {
+                $inFilter['followers.id'] = $separatedData['inFilter'];
             }
         }
         if (isset($data[FilterAttributeOptions::CREATED])) {
@@ -3408,19 +3423,38 @@ class TaskController extends ApiBaseController
     }
 
     /**
-     * @param string $data
+     * @param string|array $data
      * @param bool $company
+     * @param bool $project
+     * @param bool $isArray
      * @return array
+     * @throws \LogicException
      */
-    private function separateCurrentUserFilterData(string $data, bool $company = false): array
+    private function separateCurrentUserFilterData($data, bool $isArray, bool $company, bool $project): array
     {
         $response = [];
 
-        $dataArray = explode(',', $data);
-        if ($company) {
-            $currentUserId = $this->getUser()->getCompany()->getId();
+        /** @var User $user */
+        $user = $this->getUser();
+        $currentUserId = $user->getId();
+
+        if (!$isArray) {
+            $dataArray = explode(',', $data);
         } else {
-            $currentUserId = $this->getUser()->getId();
+            $dataArray = $data;
+        }
+
+        if ($company) {
+            $currentUserId = $user->getCompany()->getId();
+        }
+
+        if ($project) {
+            $userProjects = $user->getProjects();
+            /** @var Project $userProject */
+            foreach ($userProjects as $userProject) {
+                $currentUserIds[] = $userProject->getId();
+            }
+            $currentUserId = $currentUserIds;
         }
 
         foreach ($dataArray as $datum) {
@@ -3431,56 +3465,17 @@ class TaskController extends ApiBaseController
             }
         }
 
-        if (\in_array('not', $dataArray, true) && \count($dataArray) > 1) {
+        if ((\in_array('not', $dataArray, true) || \in_array('NOT', $dataArray, true)) && \count($dataArray) > 1) {
             $response['notAndOptionsFilter'] = [
-                'not' => 'taskHasAssignedUsers.user',
                 'equal' => [
-                    'key' => 'assignedUser.id',
                     'value' => $response['inFilter'],
                 ],
             ];
             unset($response['inFilter']);
-        } elseif (\in_array('not', $dataArray, true) && \count($dataArray) === 1) {
-            $response['isNullFilter'] = 'taskHasAssignedUsers.user';
         }
 
-        return $response;
-    }
-
-    /**
-     * @param array $data
-     * @param bool $company
-     * @return array
-     */
-    private function separateCurrentUserArrayFilterData(array $data, bool $company = false): array
-    {
-        $response = [];
-
-        if ($company) {
-            $currentUserId = $this->getUser()->getCompany()->getId();
-        } else {
-            $currentUserId = $this->getUser()->getId();
-        }
-
-        foreach ($data as $datum) {
-            if ('current-user' === strtolower($datum)) {
-                $response['inFilter'][] = $currentUserId;
-            } elseif ('not' !== strtolower($datum)) {
-                $response['inFilter'][] = (int)$datum;
-            }
-        }
-
-        if (\in_array('not', $data, true) && \count($data) > 1) {
-            $response['notAndOptionsFilter'] = [
-                'not' => 'taskHasAssignedUsers.user',
-                'equal' => [
-                    'key' => 'assignedUser.id',
-                    'value' => $response['inFilter'],
-                ],
-            ];
-            unset($response['inFilter']);
-        } elseif (\in_array('not', $data, true) && \count($data) === 1) {
-            $response['isNullFilter'] = 'taskHasAssignedUsers.user';
+        if ((\in_array('not', $dataArray, true) || \in_array('NOT', $dataArray, true)) && \count($dataArray) === 1) {
+            $response['isNullFilter'] = true;
         }
 
         return $response;

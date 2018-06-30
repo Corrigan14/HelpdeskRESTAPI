@@ -222,6 +222,33 @@ class Task
     private $notifications;
 
     /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\RepeatingTask", mappedBy="task", cascade={"persist", "remove"})
+     * @Serializer\Exclude()
+     */
+    private $repeatingTasks;
+
+    // Repeating Task Parent&Children
+    /**
+     * @var Task
+     *
+     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Task", inversedBy="repeatingTaskChildren")
+     * @ORM\JoinColumn(name="repeating_task_parent", referencedColumnName="id", nullable=true)
+     * @Serializer\ReadOnly()
+     */
+    private $repeatingTaskParent;
+
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Task", mappedBy="repeatingTaskParent", cascade={"persist", "remove"})
+     * @Serializer\Exclude()
+     */
+    private $repeatingTaskChildren;
+
+
+    /**
      * Task constructor.
      */
     public function __construct()
@@ -235,6 +262,8 @@ class Task
         $this->invoiceableItems = new ArrayCollection();
         $this->notifications = new ArrayCollection();
         $this->subtasks = new ArrayCollection();
+        $this->repeatingTasks = new ArrayCollection();
+        $this->repeatingTaskChildren = new ArrayCollection();
     }
 
     /**
@@ -323,9 +352,9 @@ class Task
     {
         if ($this->deadline) {
             return $this->deadline->getTimestamp();
-        } else {
-            return $this->deadline;
         }
+
+        return $this->deadline;
     }
 
     /**
@@ -656,9 +685,9 @@ class Task
     {
         if ($this->startedAt) {
             return $this->startedAt->getTimestamp();
-        } else {
-            return $this->startedAt;
         }
+
+        return $this->startedAt;
 
     }
 
@@ -686,9 +715,9 @@ class Task
     {
         if ($this->closedAt) {
             return $this->closedAt->getTimestamp();
-        } else {
-            return $this->closedAt;
         }
+
+        return $this->closedAt;
     }
 
     /**
@@ -840,39 +869,6 @@ class Task
     }
 
     /**
-     * EXTENSION TO TIMESTAMP TRAIT - RETURNS TIMESTAMP DATE FORMAT
-     */
-
-    /**
-     * Returns createdAt.
-     *
-     * @return \DateTime|int
-     */
-    public function getCreatedAt()
-    {
-        if ($this->createdAt) {
-            return $this->createdAt->getTimestamp();
-        } else {
-            return $this->createdAt;
-        }
-    }
-
-    /**
-     * Returns updatedAt.
-     *
-     * @return \DateTime|int
-     */
-    public function getUpdatedAt()
-    {
-        if ($this->updatedAt) {
-            return $this->updatedAt->getTimestamp();
-        } else {
-            return $this->updatedAt;
-        }
-    }
-
-
-    /**
      * Set status.
      *
      * @param Status|null $status
@@ -954,5 +950,133 @@ class Task
     public function getWorkType()
     {
         return $this->work_type;
+    }
+
+    /**
+     * Add repeatingTask.
+     *
+     * @param RepeatingTask $repeatingTask
+     *
+     * @return Task
+     */
+    public function addRepeatingTask(RepeatingTask $repeatingTask)
+    {
+        $this->repeatingTasks[] = $repeatingTask;
+
+        return $this;
+    }
+
+    /**
+     * Remove repeatingTask.
+     *
+     * @param RepeatingTask $repeatingTask
+     *
+     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
+     */
+    public function removeRepeatingTask(RepeatingTask $repeatingTask)
+    {
+        return $this->repeatingTasks->removeElement($repeatingTask);
+    }
+
+    /**
+     * Get repeatingTasks.
+     *
+     * @return Collection
+     */
+    public function getRepeatingTasks()
+    {
+        return $this->repeatingTasks;
+    }
+
+    /**
+     * Set repeatingTaskParent.
+     *
+     * @param Task|null $repeatingTaskParent
+     *
+     * @return Task
+     */
+    public function setRepeatingTaskParent(Task $repeatingTaskParent = null)
+    {
+        $this->repeatingTaskParent = $repeatingTaskParent;
+
+        return $this;
+    }
+
+    /**
+     * Get repeatingTaskParent.
+     *
+     * @return Task|null
+     */
+    public function getRepeatingTaskParent()
+    {
+        return $this->repeatingTaskParent;
+    }
+
+    /**
+     * Add repeatingTaskChild.
+     *
+     * @param Task $repeatingTaskChild
+     *
+     * @return Task
+     */
+    public function addRepeatingTaskChild(Task $repeatingTaskChild)
+    {
+        $this->repeatingTaskChildren[] = $repeatingTaskChild;
+
+        return $this;
+    }
+
+    /**
+     * Remove repeatingTaskChild.
+     *
+     * @param Task $repeatingTaskChild
+     *
+     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
+     */
+    public function removeRepeatingTaskChild(Task $repeatingTaskChild)
+    {
+        return $this->repeatingTaskChildren->removeElement($repeatingTaskChild);
+    }
+
+    /**
+     * Get repeatingTaskChildren.
+     *
+     * @return Collection
+     */
+    public function getRepeatingTaskChildren()
+    {
+        return $this->repeatingTaskChildren;
+    }
+
+    /**
+     * EXTENSION TO TIMESTAMP TRAIT - RETURNS TIMESTAMP DATE FORMAT
+     */
+
+    /**
+     * Returns createdAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getCreatedAt()
+    {
+        if ($this->createdAt) {
+            return $this->createdAt->getTimestamp();
+        }
+
+        return $this->createdAt;
+    }
+
+    /**
+     * Returns updatedAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getUpdatedAt()
+    {
+        if ($this->updatedAt) {
+            return $this->updatedAt->getTimestamp();
+        }
+
+        return $this->updatedAt;
     }
 }

@@ -586,6 +586,7 @@ class TaskController extends ApiBaseController
      * @return Response
      * @throws \LogicException
      * @throws \InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function listSavedFilterAction(Request $request, int $filterId): Response
     {

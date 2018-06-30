@@ -165,12 +165,21 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
         $locationURL = $this->generateUrl('user_role_list');
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
-        $aclOptions = [
+
+        // To list User Roles User has to have USER_ROLE_SETTINGS ACL or USER_SETTINGS
+        $aclForUserRoleSettingsOptions = [
             'acl' => UserRoleAclOptions::USER_ROLE_SETTINGS,
             'user' => $this->getUser()
         ];
+        $hasUserRoleSettingsACL = $this->get('acl_helper')->roleHasACL($aclForUserRoleSettingsOptions);
 
-        if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
+        $aclForUserSettingsOptions = [
+            'acl' => UserRoleAclOptions::USER_SETTINGS,
+            'user' => $this->getUser()
+        ];
+        $hasUserSettingsACL = $this->get('acl_helper')->roleHasACL($aclForUserSettingsOptions);
+        
+        if (false === $hasUserRoleSettingsACL && false === $hasUserSettingsACL) {
             $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
             $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
             return $response;
@@ -785,14 +794,14 @@ class UserRoleController extends ApiBaseController implements ControllerInterfac
                 $response = $response->setStatusCode($statusCode);
                 $response = $response->setContent(json_encode($userRoleArray));
                 return $response;
-            } else {
-                $data = [
-                    'errors' => $errors,
-                    'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-                ];
-                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                $response = $response->setContent(json_encode($data));
             }
+
+            $data = [
+                'errors' => $errors,
+                'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+            ];
+            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $response = $response->setContent(json_encode($data));
         } else {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
             $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));

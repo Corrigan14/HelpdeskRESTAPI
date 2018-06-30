@@ -31,8 +31,9 @@ class FilterAttributeOptions
 
     /**
      * @return array
+     * @throws \ReflectionException
      */
-    public static function getConstants()
+    public static function getConstants():array
     {
         $oClass = new \ReflectionClass(__CLASS__);
 

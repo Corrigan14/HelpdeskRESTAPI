@@ -60,11 +60,7 @@ class UserVoter extends ApiBaseVoter
         /** @var UserRole $loggedUserUserRole */
         $loggedUserUserRole = $this->user->getUserRole();
 
-        if ($loggedUserUserRole->getOrder() < $requestedUserRole->getOrder()) {
-            return true;
-        }
-
-        return false;
+        return $loggedUserUserRole->getOrder() < $requestedUserRole->getOrder();
     }
 
 }

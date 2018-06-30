@@ -119,8 +119,6 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @param Request $request
      * @return Response
      * @throws \UnexpectedValueException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -216,8 +214,6 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      * @return Response
      * @throws \UnexpectedValueException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -317,8 +313,6 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      * @return Response
      * @throws \UnexpectedValueException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -452,8 +446,6 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      *
      * @param int $id
      * @return Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      * @throws \InvalidArgumentException
      * @throws \UnexpectedValueException
      * @throws \LogicException
@@ -850,8 +842,6 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @param int $id
      *
      * @return Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      * @throws \InvalidArgumentException
      * @throws \UnexpectedValueException
      * @throws \LogicException
@@ -1120,8 +1110,6 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @param int $projectId
      * @param int $userId
      * @return Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
@@ -1430,13 +1418,10 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @param bool $create
      * @param $locationUrl
      *
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
      *
      * @return Response
      */
@@ -1506,18 +1491,13 @@ class ProjectController extends ApiBaseController implements ControllerInterface
 
     /**
      * @param array $requestData
-     * @param $locationUrl
      * @param UserHasProject $userHasProject
      * @param bool $create
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \UnexpectedValueException
-     * @throws \LogicException
-     *
+     * @param $locationUrl
      * @return Response
      * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \LogicException
+     * @throws \ReflectionException
      */
     private function updateUserHasProject(array $requestData, UserHasProject $userHasProject, $create = false, $locationUrl): Response
     {

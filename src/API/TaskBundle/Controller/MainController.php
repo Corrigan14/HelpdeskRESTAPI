@@ -288,6 +288,7 @@ class MainController extends ApiBaseController
         // Add to every project canEdit value based on logged user's project ACL. ADMIN can edit every project
         // Add to every project the number of Tasks
         $modifiedLoggedUserProjects = [];
+        /** @var Project $project */
         foreach ($loggedUsersAvailableProjects as $project) {
             /** @var Project $projectEntityFromDb */
             $projectEntityFromDb = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($project['id']);

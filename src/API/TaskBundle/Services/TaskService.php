@@ -47,8 +47,6 @@ class TaskService
      * @param array $options
      *
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      */
     public function getTasksResponse(int $page, array $options): array
     {
@@ -75,8 +73,6 @@ class TaskService
      * @param  User $loggedUser
      * @param  bool $isAdmin
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      */
     public function getFullTaskEntity(Task $task, bool $canEdit, User $loggedUser, bool $isAdmin): array
     {
@@ -142,10 +138,8 @@ class TaskService
     /**
      * @param array $ids
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      */
-    public function getTaskResponse(array $ids)
+    public function getTaskResponse(array $ids):array
     {
         $taskId = $ids['taskId'];
 
@@ -160,7 +154,7 @@ class TaskService
      * @param array $ids
      * @return array
      */
-    private function getTaskLinks(array $ids)
+    private function getTaskLinks(array $ids):array
     {
         $taskId = $ids['taskId'];
         $projectId = $ids['projectId'];
@@ -191,8 +185,6 @@ class TaskService
      * @param int $page
      * @param array $options
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      */
     private function getRequiredTasks(int $page, array $options): array
     {

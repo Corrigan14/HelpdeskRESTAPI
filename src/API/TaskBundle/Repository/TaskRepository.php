@@ -119,7 +119,7 @@ class TaskRepository extends EntityRepository
                     $query->addOrderBy('taskCompany.id', $value);
                     break;
                 case FilterAttributeOptions::ASSIGNED:
-                    $query->addOrderBy('assignedUser.id', $value);
+                    $query->addOrderBy('assignedUser.username', $value);
                     break;
                 case FilterAttributeOptions::TAG:
                     $query->addOrderBy('tags.id', $value);

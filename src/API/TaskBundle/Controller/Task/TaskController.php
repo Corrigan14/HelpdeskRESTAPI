@@ -324,6 +324,7 @@ class TaskController extends ApiBaseController
      * @return Response
      * @throws \InvalidArgumentException
      * @throws \LogicException
+     * @throws \ReflectionException
      */
     public function listAction(Request $request): Response
     {
@@ -1189,6 +1190,7 @@ class TaskController extends ApiBaseController
      * @param bool|int $requesterId
      * @param bool|int $companyId
      * @return Response
+     * @throws \InvalidArgumentException
      * @throws \LogicException
      * @throws \ReflectionException
      */
@@ -1245,29 +1247,30 @@ class TaskController extends ApiBaseController
             $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
             $response = $response->setContent(json_encode(['message' => 'Status with requested Id does not exist!']));
             return $response;
-        } else {
-            // Check Status function. If it is CLOSED, closedAt param is required.
-            // Only Task with a COMPANY can be closed!
-            // If it IS IN PROGRESS or COMPLETED, startedAt param has to be set
-            if ($status->getFunction() === StatusFunctionOptions::CLOSED_TASK) {
-                if (null === $task->getCompany()) {
-                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                    $response = $response->setContent(json_encode(['message' => 'Company is required for a tasks with CLOSED Status!']));
-                    return $response;
-                }
-
-                if (!isset($requestBody['closedAt'])) {
-                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                    $response = $response->setContent(json_encode(['message' => ' ClosedAt param is required for a tasks with CLOSED Status!']));
-                    return $response;
-                }
-            } elseif ($status->getFunction() === StatusFunctionOptions::IN_PROGRESS_TASK || $status->getFunction() === StatusFunctionOptions::COMPLETED_TASK) {
-                if (!isset($requestBody['startedAt'])) {
-                    $task->setStartedAt(new \DateTime());
-                }
-            }
-            $task->setStatus($status);
         }
+
+        // Check Status function. If it is CLOSED, closedAt param is required.
+        // Only Task with a COMPANY can be closed!
+        // If it IS IN PROGRESS or COMPLETED, startedAt param has to be set
+        $statusFunction = $status->getFunction();
+        if ($statusFunction === StatusFunctionOptions::CLOSED_TASK) {
+            if (null === $task->getCompany()) {
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Company is required for a tasks with CLOSED Status!']));
+                return $response;
+            }
+
+            if (!isset($requestBody['closedAt'])) {
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode(['message' => ' ClosedAt param is required for a tasks with CLOSED Status!']));
+                return $response;
+            }
+        } elseif ($statusFunction === StatusFunctionOptions::IN_PROGRESS_TASK || $statusFunction === StatusFunctionOptions::COMPLETED_TASK) {
+            if (!isset($requestBody['startedAt'])) {
+                $task->setStartedAt(new \DateTime());
+            }
+        }
+        $task->setStatus($status);
 
         /** @var User $loggedUser */
         $loggedUser = $this->getUser();
@@ -1651,6 +1654,7 @@ class TaskController extends ApiBaseController
             $oldParam = $oldProject->getTitle();
             $newParam = $project->getTitle();
             $task->setProject($project);
+            $project->setUpdatedAt(new \DateTime());
 
             //Notification
             if ($this->paramsAreDifferent($oldParam, $newParam)) {
@@ -1669,10 +1673,6 @@ class TaskController extends ApiBaseController
                     }
                     $this->getDoctrine()->getManager()->flush();
                 }
-                //Notification
-                if ($this->arraysAreDifferent($oldParams, $newParams)) {
-                    $changedParams['assigner'] = $this->setChangedParams(implode(',', $oldParams), implode(',', $newParams));
-                }
             }
         }
 
@@ -1687,7 +1687,8 @@ class TaskController extends ApiBaseController
             // Check Status function. If it is CLOSED, closedAt and startedAT params are required.
             // Only Task with a COMPANY can be closed!
             // If it IS IN PROGRESS or COMPLETED, startedAt param has to be set
-            if ($status->getFunction() === StatusFunctionOptions::CLOSED_TASK) {
+            $statusFunction = $status->getFunction();
+            if ($statusFunction === StatusFunctionOptions::CLOSED_TASK) {
                 if (null === $task->getCompany()) {
                     $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                     $response = $response->setContent(json_encode(['message' => 'Company is required for tasks with a CLOSED Status!']));
@@ -1699,8 +1700,8 @@ class TaskController extends ApiBaseController
                     $response = $response->setContent(json_encode(['message' => 'ClosedAt param is required for a tasks with CLOSED Status!']));
                     return $response;
                 }
-            } elseif ($status->getFunction() === StatusFunctionOptions::IN_PROGRESS_TASK || $status->getFunction() === StatusFunctionOptions::COMPLETED_TASK) {
-                if (!$task->getStartedAt() && !isset($requestBody['startedAt'])) {
+            } elseif ($statusFunction === StatusFunctionOptions::IN_PROGRESS_TASK || $statusFunction === StatusFunctionOptions::COMPLETED_TASK) {
+                if (!isset($requestBody['startedAt']) && !$task->getStartedAt()) {
                     $task->setStartedAt(new \DateTime());
                 }
             }
@@ -3531,8 +3532,9 @@ class TaskController extends ApiBaseController
     }
 
     /**
-     * @param string|null $orderString
+     * @param $orderString
      * @return array|Response
+     * @throws \ReflectionException
      */
     private function processOrderData($orderString)
     {
@@ -3549,8 +3551,8 @@ class TaskController extends ApiBaseController
                         'message' => $message
                     ];
                 }
-                $orderArrayKeyValueLowwer = strtolower($orderArrayKeyValue[1]);
-                if (!($orderArrayKeyValueLowwer === 'asc' || $orderArrayKeyValueLowwer === 'desc')) {
+                $orderArrayKeyValueLower = strtolower($orderArrayKeyValue[1]);
+                if (!($orderArrayKeyValueLower === 'asc' || $orderArrayKeyValueLower === 'desc')) {
                     $message = $orderArrayKeyValue[1] . ' Is not allowed! You can order data only ASC or DESC!';
                     return [
                         'correct' => false,
@@ -3563,26 +3565,11 @@ class TaskController extends ApiBaseController
         if (\count($order) === 0) {
             $order[FilterAttributeOptions::ID] = 'DESC';
         }
+
         return [
             'correct' => true,
             'message' => $order
         ];
-    }
-
-    /**
-     * @param array $requestData
-     * @param array $changedParams
-     * @return array
-     */
-    private function getChangedParams(array &$requestData, array &$changedParams): array
-    {
-        if (\count($requestData) > 0) {
-            foreach ($requestData as $key => $value) {
-                $changedParams[] = $key;
-            }
-        }
-
-        return $changedParams;
     }
 
     /**

@@ -230,7 +230,7 @@ class ApiBaseService
      *
      * @return array
      */
-    public function getEntitiesResponse(RepositoryInterface $entityRepository, int $page, string $routeName, array $options = [])
+    public function getEntitiesResponse(RepositoryInterface $entityRepository, int $page, string $routeName, array $options = []):array
     {
         $entities = $entityRepository->getAllEntities($page, $options);
 
@@ -256,7 +256,7 @@ class ApiBaseService
      *
      * @return array
      */
-    public function getEntityResponse($entity, string $entityName)
+    public function getEntityResponse($entity, string $entityName):array
     {
         return [
             'data' => $entity,
@@ -272,7 +272,7 @@ class ApiBaseService
      * @param string $entityName
      * @return array
      */
-    public function getFullEntityResponse(RepositoryInterface $entityRepository, $entityId, string $entityName)
+    public function getFullEntityResponse(RepositoryInterface $entityRepository, $entityId, string $entityName):array
     {
         $entity = $entityRepository->getEntity($entityId);
 
@@ -288,7 +288,7 @@ class ApiBaseService
      * @param string $entityName
      * @return array
      */
-    private function getEntityLinks(int $id, string $entityName)
+    private function getEntityLinks(int $id, string $entityName):array
     {
         return [
             'put' => $this->router->generate($entityName . '_update', ['id' => $id]),

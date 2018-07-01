@@ -1,0 +1,46 @@
+repeating_task_list:
+    path:     /repeating-tasks
+    defaults: { _controller: APITaskBundle:RepeatingTask/RepeatingTask:list }
+    methods: [GET]
+
+repeating_task:
+    path:     /repeating-tasks/{repeatingTaskId}
+    defaults: { _controller: APITaskBundle:RepeatingTask/RepeatingTask:get }
+    methods: [GET]
+    requirements:
+        repeatingTaskId: '\d+'
+
+repeating_task_create:
+    path:     /repeating-tasks/{repeatingTaskId}
+    defaults: { _controller: APITaskBundle:RepeatingTask/RepeatingTask:create }
+    methods: [POST]
+    requirements:
+        repeatingTaskId: '\d+'
+
+repeating_task_update:
+    path:     /repeating-tasks/{repeatingTaskId}
+    defaults: { _controller: APITaskBundle:RepeatingTask/RepeatingTask:update }
+    methods: [PUT]
+    requirements:
+        repeatingTaskId: '\d+'
+
+repeating_task_delete:
+    path:     /repeating-tasks/{repeatingTaskId}
+    defaults: { _controller: APITaskBundle:RepeatingTask/RepeatingTask:delete }
+    methods: [DELETE]
+    requirements:
+        repeatingTaskId: '\d+'
+
+repeating_task_inactivate:
+    path:     /repeating-tasks/{repeatingTaskId}/inactivate
+    defaults: { _controller: APITaskBundle:RepeatingTask/RepeatingTask:update }
+    methods: [PUT]
+    requirements:
+        repeatingTaskId: '\d+'
+
+repeating_task_restore:
+    path:     /repeating-tasks/{repeatingTaskId}/restore
+    defaults: { _controller: APITaskBundle:RepeatingTask/RepeatingTask:update }
+    methods: [PUT]
+    requirements:
+        repeatingTaskId: '\d+'

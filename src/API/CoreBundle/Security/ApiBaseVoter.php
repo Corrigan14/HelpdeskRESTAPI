@@ -41,22 +41,26 @@ class ApiBaseVoter
      * @param array|bool $voteConsts
      * @return bool
      */
-    public function hasAclRights($action, User $user, $voteConsts = false)
+    public function hasAclRights($action, User $user, $voteConsts = false):bool
     {
         if (!$voteConsts) {
             $voteConsts = VoteOptions::getConstants();
         }
 
-        if (!in_array($action, $voteConsts, true)) {
+        if (!\in_array($action, $voteConsts, true)) {
             throw new \InvalidArgumentException('Action ins not valid, please list your action in the options list');
         }
 
-//        $acl = $user->getAcl();
-
-//        if (in_array($action, $acl, true)) {
-//            return true;
-//        }
-
         return false;
+    }
+
+    /**
+     * Check if logged user has Admin ROLE
+     *
+     * @return bool
+     */
+    public function isAdmin():bool
+    {
+        return $this->decisionManager->decide($this->token, ['ROLE_ADMIN']);
     }
 }

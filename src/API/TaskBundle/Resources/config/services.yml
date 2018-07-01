@@ -64,3 +64,6 @@ services:
     notifications_service:
             class: API\TaskBundle\Services\NotificationService
             arguments: ["@doctrine.orm.entity_manager", "@router"]
+    repeating_task_service:
+            class: API\TaskBundle\Services\RepeatingTask\RepeatingTaskService
+            arguments: ["@doctrine.orm.entity_manager", "@router"]

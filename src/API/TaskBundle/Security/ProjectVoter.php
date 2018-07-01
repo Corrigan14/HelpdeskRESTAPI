@@ -27,6 +27,7 @@ class ProjectVoter extends ApiBaseVoter
      *
      * @return bool
      * @throws \InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function isGranted($action, $project = false)
     {
@@ -82,6 +83,7 @@ class ProjectVoter extends ApiBaseVoter
      * @param Project $project
      * @return bool
      * @throws \InvalidArgumentException
+     * @throws \ReflectionException
      */
     private function canRead($project):bool
     {
@@ -143,6 +145,7 @@ class ProjectVoter extends ApiBaseVoter
      * @param Project $project
      * @return bool
      * @throws \InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function hasAclProjectRightsConditionOR(array $actions, Project $project): bool
     {

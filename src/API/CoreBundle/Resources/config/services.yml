@@ -2,6 +2,9 @@ services:
     api_base.service:
           class: API\CoreBundle\Services\ApiBaseService
           arguments: ["@router"]
+    api_base.voter:
+          class: API\CoreBundle\Security\ApiBaseVoter
+          arguments: ["@security.access.decision_manager","@security.token_storage"]
     api_user.service:
           class: API\CoreBundle\Services\UserService
           arguments: ["@doctrine.orm.entity_manager","@router"]

@@ -72,6 +72,15 @@ class RepeatingTask
     private $repeatsNumber;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="is_active", type="boolean", options={"default":1})
+     * @Serializer\ReadOnly()
+     *
+     */
+    private $is_active = true;
+
+    /**
      * @var Task
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Task", inversedBy="repeatingTasks")
@@ -240,6 +249,34 @@ class RepeatingTask
     public function getTitle():string
     {
         return $this->title;
+    }
+
+    /**
+     * Set isActive
+     *
+     * @param boolean|string $isActive
+     *
+     * @return RepeatingTask
+     */
+    public function setIsActive($isActive): RepeatingTask
+    {
+        if (\is_string($isActive)) {
+            $isActive = ($isActive === 'true' || $isActive == 1);
+        }
+
+        $this->is_active = $isActive;
+
+        return $this;
+    }
+
+    /**
+     * Get isActive
+     *
+     * @return boolean
+     */
+    public function getIsActive(): bool
+    {
+        return $this->is_active;
     }
 
     /**

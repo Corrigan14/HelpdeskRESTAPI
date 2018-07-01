@@ -2,6 +2,7 @@
 
 namespace API\CoreBundle\Services;
 
+use API\CoreBundle\Entity\User;
 use API\CoreBundle\Repository\RepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\HttpFoundation\Request;
@@ -115,10 +116,14 @@ class ApiBaseService
      *
      * @param array $requestBody
      * @param bool $specialConditions
+     * @param bool|User $loggedUser
+     * @param bool $isAdmin
      * @return array
      */
-    public function processFilterParams(array $requestBody, $specialConditions = false): array
+    public function processFilterParams(array $requestBody, $specialConditions = false, $loggedUser = false, $isAdmin = false): array
     {
+        $filtersForUrl = [];
+
         // Filter params processing
         if (isset($requestBody['page'])) {
             $pageNum = $requestBody['page'];
@@ -137,6 +142,8 @@ class ApiBaseService
         if (999 === $limit) {
             $page = 1;
         }
+        $filtersForUrl ['page'] = '&page=' . $page;
+        $filtersForUrl ['limit'] = '&limit=' . $limit;
 
         $order = 'ASC';
         if ($specialConditions && isset($requestBody['order'])) {
@@ -151,45 +158,54 @@ class ApiBaseService
                 $order = $orderString;
             }
         }
+        $filtersForUrl ['order'] = '&order=' . $order;
 
         if (isset($requestBody['isActive'])) {
             $isActive = strtolower($requestBody['isActive']);
         } else {
             $isActive = 'all';
         }
+        $filtersForUrl ['isActive'] = '&isActive=' . $isActive;
 
         if (isset($requestBody['term'])) {
             $term = strtolower($requestBody['term']);
+            $filtersForUrl ['term'] = '&term=' . $term;
         } else {
             $term = false;
         }
 
         if (isset($requestBody['internal'])) {
             $internal = strtolower($requestBody['internal']);
+            $filtersForUrl ['internal'] = '&internal=' . $internal;
         } else {
             $internal = 'all';
         }
 
         if (isset($requestBody['public'])) {
             $public = strtolower($requestBody['public']);
+            $filtersForUrl ['public'] = '&public=' . $public;
         } else {
             $public = 'all';
         }
 
+
         if (isset($requestBody['report'])) {
             $report = strtolower($requestBody['report']);
+            $filtersForUrl ['report'] = '&report=' . $report;
         } else {
             $report = 'all';
         }
 
         if (isset($requestBody['project'])) {
             $project = strtolower($requestBody['project']);
+            $filtersForUrl ['project'] = '&project=' . $project;
         } else {
             $project = null;
         }
 
         if (isset($requestBody['default'])) {
             $default = strtolower($requestBody['default']);
+            $filtersForUrl ['default'] = '&default=' . $default;
         } else {
             $default = null;
         }
@@ -201,7 +217,7 @@ class ApiBaseService
             } elseif ('false' === $read || false === $read) {
                 $read = false;
             }
-        }else {
+        } else {
             $read = 'all';
         }
 
@@ -216,7 +232,10 @@ class ApiBaseService
             'report' => $report,
             'project' => $project,
             'default' => $default,
-            'read' => $read
+            'read' => $read,
+            'filtersForUrl' => $filtersForUrl,
+            'loggedUser' => $loggedUser,
+            'isAdmin' => $isAdmin
         ];
     }
 
@@ -230,7 +249,7 @@ class ApiBaseService
      *
      * @return array
      */
-    public function getEntitiesResponse(RepositoryInterface $entityRepository, int $page, string $routeName, array $options = []):array
+    public function getEntitiesResponse(RepositoryInterface $entityRepository, int $page, string $routeName, array $options = []): array
     {
         $entities = $entityRepository->getAllEntities($page, $options);
 
@@ -256,7 +275,7 @@ class ApiBaseService
      *
      * @return array
      */
-    public function getEntityResponse($entity, string $entityName):array
+    public function getEntityResponse($entity, string $entityName): array
     {
         return [
             'data' => $entity,
@@ -272,7 +291,7 @@ class ApiBaseService
      * @param string $entityName
      * @return array
      */
-    public function getFullEntityResponse(RepositoryInterface $entityRepository, $entityId, string $entityName):array
+    public function getFullEntityResponse(RepositoryInterface $entityRepository, $entityId, string $entityName): array
     {
         $entity = $entityRepository->getEntity($entityId);
 
@@ -288,7 +307,7 @@ class ApiBaseService
      * @param string $entityName
      * @return array
      */
-    private function getEntityLinks(int $id, string $entityName):array
+    private function getEntityLinks(int $id, string $entityName): array
     {
         return [
             'put' => $this->router->generate($entityName . '_update', ['id' => $id]),

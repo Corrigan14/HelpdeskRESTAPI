@@ -43,8 +43,6 @@ class ProjectService
      *
      * @param array $options
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      */
     public function getProjectsResponse(int $page, array $options): array
     {
@@ -76,9 +74,9 @@ class ProjectService
     {
         if ($isAdmin) {
             return $this->em->getRepository('APITaskBundle:Project')->getAllProjectEntitiesWithIdAndTitle();
-        } else {
-            return $this->em->getRepository('APITaskBundle:UserHasProject')->getAllProjectEntitiesWithIdAndTitle($user, $rule);
         }
+        return $this->em->getRepository('APITaskBundle:UserHasProject')->getAllProjectEntitiesWithIdAndTitle($user, $rule);
+
     }
 
     /**
@@ -90,9 +88,9 @@ class ProjectService
     {
         if ($isAdmin) {
             return $this->em->getRepository('APITaskBundle:Project')->getAllProjectEntitiesWithIdAndTitle();
-        } else {
-            return $this->em->getRepository('APITaskBundle:UserHasProject')->getAllProjectEntitiesWithIdAndTitleWhereUsersACLExists($user);
         }
+        return $this->em->getRepository('APITaskBundle:UserHasProject')->getAllProjectEntitiesWithIdAndTitleWhereUsersACLExists($user);
+
     }
 
     /**
@@ -126,8 +124,6 @@ class ProjectService
      * @param int $id
      * @param bool $canEdit
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      */
     public function getEntityResponse(int $id, bool $canEdit): array
     {

@@ -72,6 +72,15 @@ class RepeatingTask
     private $repeatsNumber;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="is_active", type="boolean", options={"default":1})
+     * @Serializer\ReadOnly()
+     *
+     */
+    private $is_active = true;
+
+    /**
      * @var Task
      *
      * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Task", inversedBy="repeatingTasks")
@@ -216,6 +225,30 @@ class RepeatingTask
     public function getTask(): Task
     {
         return $this->task;
+    }
+
+    /**
+     * Set title.
+     *
+     * @param string $title
+     *
+     * @return RepeatingTask
+     */
+    public function setTitle($title):RepeatingTask
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    /**
+     * Get title.
+     *
+     * @return string
+     */
+    public function getTitle():string
+    {
+        return $this->title;
     }
 
     /**

@@ -89,8 +89,6 @@ class ImapController extends ApiBaseController
      *
      * @param Request $request
      * @return Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException

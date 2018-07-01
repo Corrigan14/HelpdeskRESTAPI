@@ -43,3 +43,6 @@ api_task_system_settings:
 api_task_notifications:
     resource: "@APITaskBundle/Resources/config/routing/notification.yml"
     prefix: /
+api_task_repeating_tasks:
+    resource: "@APITaskBundle/Resources/config/routing/repeatingTask.yml"
+    prefix: /

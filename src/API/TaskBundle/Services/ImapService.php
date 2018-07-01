@@ -38,8 +38,6 @@ class ImapService
      *
      * @param array $options
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      */
     public function getAttributesResponse(array $options): array
     {

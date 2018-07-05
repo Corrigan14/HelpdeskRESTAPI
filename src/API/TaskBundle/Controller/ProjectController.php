@@ -217,7 +217,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function listOfProjectsWhereCanCreateTasksLoggedUserAction():Response
+    public function listOfProjectsWhereCanCreateTasksLoggedUserAction(): Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('projects_list_where_logged_user_can_create_tasks');
@@ -316,7 +316,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
-    public function listOfProjectsWhereLoggedUserCanViewTasksAction():Response
+    public function listOfProjectsWhereLoggedUserCanViewTasksAction(): Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('projects_list_where_logged_user_can_view_tasks');
@@ -450,7 +450,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @throws \UnexpectedValueException
      * @throws \LogicException
      */
-    public function getAction(int $id):Response
+    public function getAction(int $id): Response
     {
         // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('project', ['id' => $id]);
@@ -969,13 +969,10 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @param int $userId
      * @param Request $request
      * @return Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function addUserToProjectAction(int $projectId, int $userId, Request $request): Response
     {
@@ -1012,10 +1009,12 @@ class ProjectController extends ApiBaseController implements ControllerInterface
         ]);
         if ($existedUserHasProjectEntity instanceof UserHasProject) {
             $userHasProjectAdd = $existedUserHasProjectEntity;
+            $project->setUpdatedAt(new \DateTime());
         } else {
             $userHasProjectAdd = new UserHasProject();
             $userHasProjectAdd->setProject($project);
             $userHasProjectAdd->setUser($user);
+            $project->setUpdatedAt(new \DateTime());
         }
 
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
@@ -1149,6 +1148,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
         ]);
 
         if ($userHasProject instanceof UserHasProject) {
+            $project->setUpdatedAt(new \DateTime());
+            $this->getDoctrine()->getManager()->persist($project);
             $this->getDoctrine()->getManager()->remove($userHasProject);
             $this->getDoctrine()->getManager()->flush();
 
@@ -1250,11 +1251,9 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @param Request $request
      * @param int $projectId
      * @return Response
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function processProjectAclForMoreUsersAction(Request $request, int $projectId): Response
     {
@@ -1314,6 +1313,8 @@ class ProjectController extends ApiBaseController implements ControllerInterface
                                 return $response;
                             }
                             if ($userHasProjectNew instanceof UserHasProject) {
+                                $project->setUpdatedAt(new \DateTime());
+                                $this->getDoctrine()->getManager()->persist($project);
                                 $this->getDoctrine()->getManager()->remove($userHasProjectNew);
                                 continue;
                             }
@@ -1336,15 +1337,18 @@ class ProjectController extends ApiBaseController implements ControllerInterface
                                 }
                             }
 
+                            $project->setUpdatedAt(new \DateTime());
                             if ($userHasProjectNew instanceof UserHasProject) {
                                 $userHasProjectNew->setAcl($aclArray);
                                 $this->getDoctrine()->getManager()->persist($userHasProjectNew);
+                                $this->getDoctrine()->getManager()->persist($project);
                             } else {
                                 $userHasProjectNewAdd = new UserHasProject();
                                 $userHasProjectNewAdd->setProject($project);
                                 $userHasProjectNewAdd->setUser($user);
                                 $userHasProjectNewAdd->setAcl($aclArray);
                                 $this->getDoctrine()->getManager()->persist($userHasProjectNewAdd);
+                                $this->getDoctrine()->getManager()->persist($project);
                             }
                         }
 
@@ -1356,20 +1360,19 @@ class ProjectController extends ApiBaseController implements ControllerInterface
                     $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
                     $response = $response->setContent(json_encode($projectArray));
                     return $response;
-                } else {
-                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                    $response = $response->setContent(json_encode(['message' => 'usersAcl array for processing is required!']));
-                    return $response;
                 }
-            } else {
+
                 $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 $response = $response->setContent(json_encode(['message' => 'usersAcl array for processing is required!']));
                 return $response;
             }
-        } else {
-            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
+            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $response = $response->setContent(json_encode(['message' => 'usersAcl array for processing is required!']));
+            return $response;
         }
+
+        $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+        $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         return $response;
 
     }
@@ -1467,14 +1470,14 @@ class ProjectController extends ApiBaseController implements ControllerInterface
                     $response = $response->setStatusCode($statusCode);
                     $response = $response->setContent(json_encode($projectArray));
                     return $response;
-                } else {
-                    $canEdit = true;
-                    $projectArray = $this->get('project_service')->getEntityResponse($project->getId(), $canEdit);
-
-                    $response = $response->setStatusCode($statusCode);
-                    $response = $response->setContent(json_encode($projectArray));
-                    return $response;
                 }
+
+                $canEdit = true;
+                $projectArray = $this->get('project_service')->getEntityResponse($project->getId(), $canEdit);
+
+                $response = $response->setStatusCode($statusCode);
+                $response = $response->setContent(json_encode($projectArray));
+                return $response;
             }
             $data = [
                 'errors' => $errors,
@@ -1530,24 +1533,27 @@ class ProjectController extends ApiBaseController implements ControllerInterface
 
             if (false === $errors) {
                 $this->getDoctrine()->getManager()->persist($userHasProject);
+                $project = $userHasProject->getProject();
+                $this->getDoctrine()->getManager()->persist($project);
                 $this->getDoctrine()->getManager()->flush();
 
                 $projectArray = $this->get('project_service')->getEntityResponse($userHasProject->getProject()->getId(), true);
                 $response = $response->setStatusCode($statusCode);
                 $response = $response->setContent(json_encode($projectArray));
                 return $response;
-            } else {
-                $data = [
-                    'errors' => $errors,
-                    'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-                ];
-                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                $response = $response->setContent(json_encode($data));
             }
-        } else {
-            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
+
+            $data = [
+                'errors' => $errors,
+                'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+            ];
+            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $response = $response->setContent(json_encode($data));
+            return $response;
         }
+
+        $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+        $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         return $response;
     }
 
@@ -1567,13 +1573,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
             'project' => $project
         ]);
 
-        if ($userHasProject instanceof UserHasProject) {
-            if ($this->get('project_voter')->isGranted(VoteOptions::EDIT_PROJECT, $userHasProject)) {
-                return true;
-            }
-        }
-
-        return false;
+        return ($userHasProject instanceof UserHasProject) && $this->get('project_voter')->isGranted(VoteOptions::EDIT_PROJECT, $userHasProject);
     }
 
     /**

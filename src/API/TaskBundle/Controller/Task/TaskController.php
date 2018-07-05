@@ -1656,6 +1656,9 @@ class TaskController extends ApiBaseController
             $newParam = $project->getTitle();
             $task->setProject($project);
             $project->setUpdatedAt(new \DateTime());
+            $oldProject->setUpdatedAt(new \DateTime());
+            $this->getDoctrine()->getManager()->persist($oldProject);
+            $this->getDoctrine()->getManager()->persist($project);
 
             //Notification
             if ($this->paramsAreDifferent($oldParam, $newParam)) {
@@ -2869,11 +2872,7 @@ class TaskController extends ApiBaseController
      */
     private function checkTaskAttributeDateType(TaskAttribute $taskAttribute): bool
     {
-        if ($taskAttribute->getType() === 'date') {
-            return true;
-        }
-
-        return false;
+        return $taskAttribute->getType() === 'date';
     }
 
     /**
@@ -2955,11 +2954,7 @@ class TaskController extends ApiBaseController
         $differentAreOld = array_diff($oldParams, $newParams);
         $differentAreNew = array_diff($newParams, $oldParams);
 
-        if (\count($differentAreNew) === 0 && \count($differentAreOld) === 0) {
-            return false;
-        }
-
-        return true;
+        return !(\count($differentAreNew) === 0 && \count($differentAreOld) === 0);
     }
 
     /**
@@ -3453,11 +3448,14 @@ class TaskController extends ApiBaseController
         if ($project) {
             // List of projest created by logged user
             $userProjects = $user->getProjects();
+            $currentUserIds = [];
             /** @var Project $userProject */
             foreach ($userProjects as $userProject) {
                 $currentUserIds[] = $userProject->getId();
             }
-            $currentUserId = $currentUserIds;
+            if (\count($currentUserIds) > 0) {
+                $currentUserId = $currentUserIds;
+            }
         }
 
         foreach ($dataArray as $datum) {
@@ -3468,7 +3466,7 @@ class TaskController extends ApiBaseController
             }
         }
 
-        if ((\in_array('not', $dataArray, true) || \in_array('NOT', $dataArray, true)) && \count($dataArray) > 1) {
+        if (\count($dataArray) > 1 && (\in_array('not', $dataArray, true) || \in_array('NOT', $dataArray, true))) {
             $response['notAndOptionsFilter'] = [
                 'equal' => [
                     'value' => $response['inFilter'],
@@ -3477,7 +3475,7 @@ class TaskController extends ApiBaseController
             unset($response['inFilter']);
         }
 
-        if ((\in_array('not', $dataArray, true) || \in_array('NOT', $dataArray, true)) && \count($dataArray) === 1) {
+        if (\count($dataArray) === 1 && (\in_array('not', $dataArray, true) || \in_array('NOT', $dataArray, true))) {
             $response['isNullFilter'] = true;
         }
 

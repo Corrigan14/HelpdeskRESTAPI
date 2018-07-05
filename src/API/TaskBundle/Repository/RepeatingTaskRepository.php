@@ -19,9 +19,11 @@ class RepeatingTaskRepository extends EntityRepository
      */
     public function getAllEntities(array $options, $allowedTasks): array
     {
+        
         return [
             'array' => [],
             'count' => 10
         ];
+
     }
 }

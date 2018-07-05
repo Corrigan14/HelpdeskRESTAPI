@@ -186,7 +186,7 @@ class TaskRepository extends EntityRepository
 
         foreach ($notAndCurrentFilter as $filter) {
             if (\in_array($filter['not'], VariableHelper::$allowedKeysInFilter, true) && \in_array($filter['equal']['key'], VariableHelper::$allowedKeysInFilter, true)) {
-                $query->andWhere($filter['not'] . ' IS NULL' . ' OR ' . $filter['equal']['key'] . ' IN (:parameters' . $paramNum.')');
+                $query->andWhere($filter['not'] . ' IS NULL' . ' OR ' . $filter['equal']['key'] . ' IN (:parameters' . $paramNum . ')');
                 $paramArray['parameters' . $paramNum] = $filter['equal']['value'];
             }
         }
@@ -548,7 +548,7 @@ class TaskRepository extends EntityRepository
 
         foreach ($notAndCurrentFilter as $filter) {
             if (\in_array($filter['not'], VariableHelper::$allowedKeysInFilter, true) && \in_array($filter['equal']['key'], VariableHelper::$allowedKeysInFilter, true)) {
-                $query->andWhere($filter['not'] . ' IS NULL' . ' OR ' . $filter['equal']['key'] . ' IN (:parameters' . $paramNum.')');
+                $query->andWhere($filter['not'] . ' IS NULL' . ' OR ' . $filter['equal']['key'] . ' IN (:parameters' . $paramNum . ')');
                 $paramArray['parameters' . $paramNum] = $filter['equal']['value'];
             }
         }
@@ -700,12 +700,12 @@ class TaskRepository extends EntityRepository
                 'count' => $count,
                 'array' => $this->formatData($paginator)
             ];
-        } else {
-            // Return all entities
-            return [
-                'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
-            ];
         }
+
+        // Return all entities
+        return [
+            'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
+        ];
     }
 
     /**
@@ -744,6 +744,45 @@ class TaskRepository extends EntityRepository
             ->getQuery();
 
         return $this->processData($query->getSingleResult(), true);
+    }
+
+    /**
+     * Return user's allowed tasks ID based on his ACL
+     *
+     * @param array $dividedTasks
+     * @param int $userId
+     * @param int $companyId
+     * @return array
+     */
+    public function getUsersTasksId(array $dividedTasks, int $userId, int $companyId): array
+    {
+        $allTasksInProject = $dividedTasks['VIEW_ALL_TASKS_IN_PROJECT'];
+        $companyTasksInProject = $dividedTasks['VIEW_COMPANY_TASKS_IN_PROJECT'];
+        $ownTasksInProject = $dividedTasks['VIEW_OWN_TASKS'];
+
+        $query = $this->createQueryBuilder('task')
+            ->select('task.id')
+            ->leftJoin('task.project', 'project')
+            ->leftJoin('task.company', 'taskCompany')
+            ->leftJoin('task.requestedBy', 'requestedBy')
+            ->leftJoin('task.createdBy', 'createdBy');
+
+        $query->where($query->expr()->orX(
+            $query->expr()->in('project.id', $allTasksInProject),
+            $query->expr()->andX(
+                $query->expr()->in('project.id', $companyTasksInProject),
+                $query->expr()->eq('taskCompany.id', $companyId)
+            ),
+            $query->expr()->andX(
+                $query->expr()->in('project.id', $ownTasksInProject),
+                $query->expr()->orX(
+                    $query->expr()->eq('requestedBy.id', $userId),
+                    $query->expr()->eq('createdBy.id', $userId)
+                )
+            )
+        ));
+
+       return $query->getQuery()->getArrayResult();
     }
 
     /**

@@ -150,6 +150,44 @@ class TaskService
     }
 
     /**
+     * Return user's allowed tasks ID based on his ACL
+     *
+     * @param User $user
+     * @return array
+     */
+    public function getUsersTasksId(User $user): array
+    {
+        $dividedProjects['VIEW_ALL_TASKS_IN_PROJECT'] = [0];
+        $dividedProjects['VIEW_COMPANY_TASKS_IN_PROJECT'] = [0];
+        $dividedProjects['VIEW_OWN_TASKS'] = [0];
+
+        $userHasProjects = $user->getUserHasProjects();
+        /** @var UserHasProject $userHasProject */
+        foreach ($userHasProjects as $userHasProject) {
+            /** @var Project $project */
+            $acl = $userHasProject->getAcl();
+            if (null === $acl) {
+                continue;
+            }
+            if (\in_array(ProjectAclOptions::VIEW_ALL_TASKS, $acl, true)) {
+                $dividedProjects['VIEW_ALL_TASKS_IN_PROJECT'][] = $userHasProject->getProject()->getId();
+                continue;
+            }
+            if (\in_array(ProjectAclOptions::VIEW_TASKS_FROM_USERS_COMPANY, $acl, true)) {
+                $dividedProjects['VIEW_COMPANY_TASKS_IN_PROJECT'][] = $userHasProject->getProject()->getId();
+                continue;
+            }
+            if (\in_array(ProjectAclOptions::VIEW_OWN_TASKS, $acl, true)) {
+                $dividedProjects['VIEW_OWN_TASKS'][] = $userHasProject->getProject()->getId();
+                continue;
+            }
+        }
+
+        $response = $this->em->getRepository('APITaskBundle:Task')->getUsersTasksId($dividedProjects,$user->getId(),$user->getCompany()->getId());
+        return $response;
+    }
+
+    /**
      *
      * @param array $ids
      * @return array

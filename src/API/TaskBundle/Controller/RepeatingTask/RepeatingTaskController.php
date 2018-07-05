@@ -98,7 +98,8 @@ class RepeatingTaskController extends ApiBaseController implements ControllerInt
         $isAdmin = $this->get('api_base.voter')->isAdmin();
         $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody, false, $loggedUser, $isAdmin);
 
-        $repeatingTaskArray = $this->get('repeating_task_service')->getRepeatingTasks($processedFilterParams);
+        $allowedLoggedUsersTasks = $this->get('task_service')->getUsersTasksId($loggedUser);
+        $repeatingTaskArray = $this->get('repeating_task_service')->getRepeatingTasks($processedFilterParams, $allowedLoggedUsersTasks);
         $response = $response->setContent(json_encode($repeatingTaskArray));
         $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
         return $response;

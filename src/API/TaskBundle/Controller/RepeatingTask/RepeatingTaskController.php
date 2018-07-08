@@ -24,16 +24,45 @@ class RepeatingTaskController extends ApiBaseController implements ControllerInt
      *       "data":
      *       [
      *          {
-     *            "id": "1",
+     *              "id": 3,
+     *              "title": "Weekly repeating task",
+     *              "startAt": 1530385892,
+     *              "interval": "day",
+     *              "intervalLength": "2",
+     *              "repeatsNumber": 10,
+     *              "createdAt": 1530385892,
+     *              "updatedAt": 1530385892,
+     *              "is_active": true,
+     *              "task":
+     *              {
+     *                  "id": 8996,
+     *                  "title": "Task 1"
+     *              }
+     *          },
+     *          {
+     *              "id": 4,
+     *              "title": "Monthly repeating task",
+     *              "startAt": 1530385892,
+     *              "interval": "month",
+     *              "intervalLength": "2",
+     *              "repeatsNumber": 10,
+     *              "createdAt": 1530385892,
+     *              "updatedAt": 1530385892,
+     *              "is_active": false,
+     *              "task":
+     *              {
+     *                  "id": 8996,
+     *                  "title": "Task 1"
+     *              }
      *          }
      *       ],
      *       "_links":
      *       {
-     *          "self": "/api/v1/task-bundle/projects?page=2&limit=10&page=2&limit=10&order=DESC&isActive=true",
-     *          "first": "/api/v1/task-bundle/projects?page=1&limit=10&page=2&limit=10&order=DESC&isActive=true",
-     *          "prev": "/api/v1/task-bundle/projects?page=1&limit=10&page=2&limit=10&order=DESC&isActive=true",
+     *          "self": "/api/v1/task-bundle/repeating-tasks?page=2&limit=10&page=2&limit=10&order=DESC&isActive=true",
+     *          "first": "/api/v1/task-bundle/repeating-tasks?page=1&limit=10&page=2&limit=10&order=DESC&isActive=true",
+     *          "prev": "/api/v1/task-bundle/repeating-tasks?page=1&limit=10&page=2&limit=10&order=DESC&isActive=true",
      *          "next": false,
-     *          "last": "/api/v1/task-bundle/projects?page=1&limit=10&page=2&limit=10&order=DESC&isActive=true"
+     *          "last": "/api/v1/task-bundle/repeating-tasks?page=1&limit=10&page=2&limit=10&order=DESC&isActive=true"
      *       },
      *       "total": 22,
      *       "page": 1,
@@ -100,6 +129,7 @@ class RepeatingTaskController extends ApiBaseController implements ControllerInt
 
         $allowedLoggedUsersTasks = $this->get('task_service')->getUsersTasksId($loggedUser);
         $repeatingTaskArray = $this->get('repeating_task_service')->getRepeatingTasks($processedFilterParams, $allowedLoggedUsersTasks);
+
         $response = $response->setContent(json_encode($repeatingTaskArray));
         $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
         return $response;

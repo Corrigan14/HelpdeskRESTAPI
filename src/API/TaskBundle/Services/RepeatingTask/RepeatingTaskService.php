@@ -49,7 +49,7 @@ class RepeatingTaskService
             $count = $responseData['count'];
         }
 
-        $pagination = PaginationHelper::getPagination($this->router->generate('projects_list'), $limit, $options['page'], $count, $options['filtersForUrl']);
+        $pagination = PaginationHelper::getPagination($this->router->generate('repeating_task_list'), $limit, $options['page'], $count, $options['filtersForUrl']);
 
         return array_merge($response, $pagination);
     }

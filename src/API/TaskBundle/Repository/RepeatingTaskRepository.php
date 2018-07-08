@@ -2,7 +2,9 @@
 
 namespace API\TaskBundle\Repository;
 
+use API\TaskBundle\Entity\Task;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * RepeatingTaskRepository
@@ -19,11 +21,144 @@ class RepeatingTaskRepository extends EntityRepository
      */
     public function getAllEntities(array $options, $allowedTasks): array
     {
-        
+        $isAdmin = $options['isAdmin'];
+        $limit = $options['limit'];
+        $order = $options['order'];
+        $page = $options['page'];
+        $isActive = $options['isActive'];
+
+        $isActiveParam = null;
+        if ('true' === $isActive || true === $isActive) {
+            $isActiveParam = 1;
+        } elseif ('false' === $isActive || false === $isActive) {
+            $isActiveParam = 0;
+        }
+
+        $query = $this->createQueryBuilder('repeatingTask')
+            ->select('repeatingTask, task')
+            ->leftJoin('repeatingTask.task', 'task')
+            ->orderBy('repeatingTask.id', $order);
+
+        if ($isAdmin && null !== $isActiveParam) {
+            $query = $query->where('repeatingTask.is_active = :isActive')
+                ->setParameter('isActive', $isActiveParam);
+        }
+
+        if (!$isAdmin && null !== $isActiveParam) {
+            $query = $query->where('repeatingTask.is_active = :isActive')
+                ->andWhere('task.id IN (:allowedTasks)')
+                ->setParameters([
+                    'isActive' => $isActiveParam,
+                    'allowedTasks' => $allowedTasks
+                ]);
+        }
+
+        if (!$isAdmin && null === $isActiveParam) {
+            $query = $query->where('task.id IN (:allowedTasks)')
+                ->setParameter('allowedTasks', $allowedTasks);
+        }
+
+        $query = $query->distinct();
+
+
+        $firstResult = $this->getFirstResultNumber($page, $limit);
+        if (999 !== $limit) {
+            $query->setFirstResult($firstResult);
+            $query->setMaxResults($limit);
+
+            $paginator = new Paginator($query, $fetchJoinCollection = true);
+            $count = $paginator->count();
+
+            return [
+                'count' => $count,
+                'array' => $this->formatData($paginator)
+            ];
+        }
+
+        // Return all entities
         return [
-            'array' => [],
-            'count' => 10
+            'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
         ];
 
+    }
+
+    /**
+     * @param int $page
+     * @param int $limit
+     * @return int
+     */
+    private function getFirstResultNumber(int $page, int $limit): int
+    {
+        if (1 < $page) {
+            $response = $limit * $page - $limit;
+            return $response;
+        }
+
+        $response = 0;
+        return $response;
+    }
+
+    /**
+     * @param $data
+     * @param bool $array
+     * @return array
+     */
+    private function formatData($data, $array = false): array
+    {
+        $response = [];
+        foreach ($data as $datum) {
+            $response[] = $this->processData($datum, $array);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param $data
+     * @param $array
+     * @return array
+     */
+    private function processData($data, $array): array
+    {
+        if (!$array) {
+            /** @var Task $task */
+            $task = $data->getTask();
+            $taskArray = [
+                'id' => $task->getId(),
+                'title' => $task->getTitle()
+            ];
+            $response = [
+                'id' => $data->getId(),
+                'title' => $data->getTitle(),
+                'startAt' => $data->getStartAt(),
+                'interval' => $data->getInterval(),
+                'intervalLength' => $data->getIntervalLength(),
+                'repeatsNumber' => $data->getRepeatsNumber(),
+                'createdAt' => $data->getCreatedAt(),
+                'updatedAt' => $data->getUpdatedAt(),
+                'is_active' => $data->getIsActive(),
+                'task' => $taskArray
+            ];
+            return $response;
+        }
+
+        $task = $data['task'];
+        $taskArray = [
+            'id' => $task['id'],
+            'title' => $task['title']
+        ];
+        $response = [
+            'id' => $data['id'],
+            'title' => $data['title'],
+            'startAt' => date_timestamp_get($data['startAt']),
+            'interval' => $data['interval'],
+            'intervalLength' => $data['intervalLength'],
+            'repeatsNumber' => $data['repeatsNumber'],
+            'createdAt' => isset($data['createdAt']) ? date_timestamp_get($data['createdAt']) : null,
+            'updatedAt' => isset($data['updatedAt']) ? date_timestamp_get($data['updatedAt']) : null,
+            'is_active' => $data['is_active'],
+            'task' => $taskArray
+        ];
+        return $response;
     }
 }

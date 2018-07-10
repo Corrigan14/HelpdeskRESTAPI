@@ -55,6 +55,7 @@ class TaskController extends ApiBaseController
      *            "work_type": "servis IT",
      *            "createdAt": 1506434914,
      *            "updatedAt": 1506434914,
+     *            "statusChange": 1531254165,
      *            "createdBy":
      *            {
      *               "id": 2575,
@@ -402,6 +403,7 @@ class TaskController extends ApiBaseController
      *            "work_type": "servis IT",
      *            "createdAt": 1506434914,
      *            "updatedAt": 1506434914,
+     *            "statusChange": 1531254165,
      *            "createdBy":
      *            {
      *               "id": 2575,
@@ -586,6 +588,7 @@ class TaskController extends ApiBaseController
      * @return Response
      * @throws \LogicException
      * @throws \InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function listSavedFilterAction(Request $request, int $filterId): Response
     {
@@ -657,11 +660,10 @@ class TaskController extends ApiBaseController
 
             $response = $response->setContent(json_encode($tasksModified));
             $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
-        } else {
-            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
+            return $response;
         }
-
+        $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+        $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
         return $response;
     }
 
@@ -681,7 +683,8 @@ class TaskController extends ApiBaseController
      *            "work_time": null,,
      *            "work_type": "servis IT",
      *            "createdAt":1506434914,
-     *            "updatedAt":1506434914
+     *            "updatedAt":1506434914,
+     *            "statusChange": 1531254165,
      *            "createdBy":
      *            {
      *               "id": 2575,
@@ -956,7 +959,8 @@ class TaskController extends ApiBaseController
      *            "work_time": null,,
      *            "work_type": "servis IT",
      *            "createdAt":1506434914,
-     *            "updatedAt":1506434914
+     *            "updatedAt":1506434914,
+     *            "statusChange": 1531254165,
      *            "createdBy":
      *            {
      *               "id": 2575,
@@ -1223,6 +1227,7 @@ class TaskController extends ApiBaseController
 
         $task = new Task();
         $task->setCreatedBy($this->getUser());
+        $task->setStatusChange(new \DateTime());
 
         //Decode sent parameters
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
@@ -1241,6 +1246,8 @@ class TaskController extends ApiBaseController
             return $response;
         }
         $task->setProject($project);
+        $project->setUpdatedAt(new \DateTime());
+        $this->getDoctrine()->getManager()->persist($project);
 
         $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($statusId);
         if (!$status instanceof Status) {
@@ -1343,7 +1350,8 @@ class TaskController extends ApiBaseController
      *            "work_time": null,,
      *            "work_type": "servis IT",
      *            "createdAt":1506434914,
-     *            "updatedAt":1506434914
+     *            "updatedAt":1506434914,
+     *            "statusChange": 1531254165,
      *            "createdBy":
      *            {
      *               "id": 2575,
@@ -1711,6 +1719,7 @@ class TaskController extends ApiBaseController
             $oldParam = $task->getStatus()->getTitle();
             $newParam = $status->getTitle();
             $task->setStatus($status);
+            $task->setStatusChange(new \DateTime());
 
             //Notification
             if ($this->paramsAreDifferent($oldParam, $newParam)) {

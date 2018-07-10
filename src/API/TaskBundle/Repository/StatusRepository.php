@@ -4,6 +4,8 @@ namespace API\TaskBundle\Repository;
 
 use API\TaskBundle\Entity\Status;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
@@ -65,12 +67,12 @@ class StatusRepository extends EntityRepository
                 'count' => $count,
                 'array' => $this->formatData($paginator)
             ];
-        }else {
-            // Return all entities
-            return [
-                'array' => $this->formatData($query->getArrayResult(), true)
-            ];
         }
+
+        // Return all entities
+        return [
+            'array' => $this->formatData($query->getArrayResult(), true)
+        ];
     }
 
     /**
@@ -85,13 +87,17 @@ class StatusRepository extends EntityRepository
             ->setParameter('sId', $id)
             ->getQuery();
 
-        return $this->processData($query->getSingleResult());
+        try {
+            return $this->processData($query->getSingleResult());
+        } catch (NoResultException $e) {
+        } catch (NonUniqueResultException $e) {
+        }
     }
 
     /**
      * @return array
      */
-    public function getAllStatusEntitiesWithIdAndTitle()
+    public function getAllStatusEntitiesWithIdAndTitle(): array
     {
         $query = $this->createQueryBuilder('s')
             ->select('s.id,s.title, s.color')
@@ -110,7 +116,7 @@ class StatusRepository extends EntityRepository
     {
         if ($date) {
             $query = $this->createQueryBuilder('status')
-                ->select('status.id, status.title, status.color, status.order, status.function, status.is_active')
+                ->select('status')
                 ->orderBy('status.order', 'ASC')
                 ->where('status.updatedAt >= :date')
                 ->setParameters([
@@ -118,13 +124,13 @@ class StatusRepository extends EntityRepository
                 ]);
         } else {
             $query = $this->createQueryBuilder('status')
-                ->select('status.id, status.title, status.color, status.order, status.function, status.is_active')
+                ->select('status')
                 ->orderBy('status.order', 'ASC')
                 ->where('status.is_active = :isActive')
                 ->setParameter('isActive', true);
         }
 
-        return $query->getQuery()->getArrayResult();
+        return $this->formatData($query->getQuery()->getArrayResult(), true);
     }
 
     /**
@@ -132,7 +138,7 @@ class StatusRepository extends EntityRepository
      * @param bool $array
      * @return array
      */
-    private function formatData($paginatorData, $array = false):array
+    private function formatData($paginatorData, $array = false): array
     {
         $response = [];
         foreach ($paginatorData as $data) {
@@ -150,7 +156,7 @@ class StatusRepository extends EntityRepository
      * @param Status $data
      * @return array
      */
-    private function processData(Status $data):array
+    private function processData(Status $data): array
     {
         $response = [
             'id' => $data->getId(),

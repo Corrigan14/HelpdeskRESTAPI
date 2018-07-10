@@ -40,8 +40,6 @@ class StatusService
      * @param int $page
      * @param array $options
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      */
     public function getAttributesResponse(int $page, array $options): array
     {

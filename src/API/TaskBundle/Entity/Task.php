@@ -100,6 +100,14 @@ class Task
     private $work_type;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="status_change", type="datetime", nullable=true)
+     * @Assert\DateTime(message="status_change has to be a correct Date Time object")
+     */
+    private $statusChange;
+
+    /**
      * @var User
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="createdTasks")
@@ -638,7 +646,7 @@ class Task
      */
     public function setStartedAt($startedAt)
     {
-        if (is_int($startedAt) && null !== $startedAt) {
+        if (\is_int($startedAt) && null !== $startedAt) {
             $dateTimeUnix = new \DateTime("@$startedAt");
             $this->startedAt = $dateTimeUnix;
         } else {
@@ -656,9 +664,9 @@ class Task
     {
         if ($this->startedAt) {
             return $this->startedAt->getTimestamp();
-        } else {
-            return $this->startedAt;
         }
+
+        return $this->startedAt;
 
     }
 
@@ -668,7 +676,7 @@ class Task
      */
     public function setClosedAt($closedAt)
     {
-        if (is_int($closedAt) && null !== $closedAt) {
+        if (\is_int($closedAt) && null !== $closedAt) {
             $dateTimeUnix = new \DateTime("@$closedAt");
             $this->closedAt = $dateTimeUnix;
         } else {
@@ -686,9 +694,9 @@ class Task
     {
         if ($this->closedAt) {
             return $this->closedAt->getTimestamp();
-        } else {
-            return $this->closedAt;
         }
+
+        return $this->closedAt;
     }
 
     /**
@@ -840,39 +848,6 @@ class Task
     }
 
     /**
-     * EXTENSION TO TIMESTAMP TRAIT - RETURNS TIMESTAMP DATE FORMAT
-     */
-
-    /**
-     * Returns createdAt.
-     *
-     * @return \DateTime|int
-     */
-    public function getCreatedAt()
-    {
-        if ($this->createdAt) {
-            return $this->createdAt->getTimestamp();
-        } else {
-            return $this->createdAt;
-        }
-    }
-
-    /**
-     * Returns updatedAt.
-     *
-     * @return \DateTime|int
-     */
-    public function getUpdatedAt()
-    {
-        if ($this->updatedAt) {
-            return $this->updatedAt->getTimestamp();
-        } else {
-            return $this->updatedAt;
-        }
-    }
-
-
-    /**
      * Set status.
      *
      * @param Status|null $status
@@ -954,5 +929,70 @@ class Task
     public function getWorkType()
     {
         return $this->work_type;
+    }
+
+    /**
+     * Set statusChange.
+     *
+     * @param \DateTime|null|int $statusChange
+     *
+     * @return Task
+     */
+    public function setStatusChange($statusChange = null): Task
+    {
+        if (\is_int($statusChange) && null !== $statusChange) {
+            $dateTimeUnix = new \DateTime("@$statusChange");
+            $this->statusChange = $dateTimeUnix;
+        } else {
+            $this->statusChange = $statusChange;
+        }
+        return $this;
+    }
+
+    /**
+     * Get statusChange.
+     *
+     * @return int|null
+     */
+    public function getStatusChange(): ?int
+    {
+        if ($this->statusChange) {
+            return $this->statusChange->getTimestamp();
+        }
+
+        return $this->getStatusChange();
+    }
+
+
+    /**
+     * EXTENSION TO TIMESTAMP TRAIT - RETURNS TIMESTAMP DATE FORMAT
+     */
+
+    /**
+     * Returns createdAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getCreatedAt()
+    {
+        if ($this->createdAt) {
+            return $this->createdAt->getTimestamp();
+        }
+
+        return $this->createdAt;
+    }
+
+    /**
+     * Returns updatedAt.
+     *
+     * @return \DateTime|int
+     */
+    public function getUpdatedAt()
+    {
+        if ($this->updatedAt) {
+            return $this->updatedAt->getTimestamp();
+        }
+
+        return $this->updatedAt;
     }
 }

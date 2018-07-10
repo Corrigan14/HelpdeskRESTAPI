@@ -95,8 +95,6 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @param Request $request
      * @return Response|JsonResponse
      * @throws \UnexpectedValueException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -143,11 +141,11 @@ class StatusController extends ApiBaseController implements ControllerInterface
             $statusArray = $this->get('status_service')->getAttributesResponse($page, $options);
             $response = $response->setContent(json_encode($statusArray));
             $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
-        } else {
-            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
+            return $response;
         }
 
+        $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
+        $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
         return $response;
     }
 
@@ -205,7 +203,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
         // JSON API Response - Content type and Location settings
         if (false !== $date && 'false' !== $date) {
             $intDate = (int)$date;
-            if (is_int($intDate) && null !== $intDate) {
+            if (\is_int($intDate) && null !== $intDate) {
                 $locationURL = $this->generateUrl('status_list_of_all_active_from_date', ['date' => $date]);
                 $dateTimeObject = new \DateTime("@$date");
             } else {
@@ -366,7 +364,6 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @return Response
      * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -389,6 +386,7 @@ class StatusController extends ApiBaseController implements ControllerInterface
 
         $status = new Status();
         $status->setIsActive(true);
+        $status->setDefault(false);
 
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
         return $this->updateStatus($status, $requestBody, true, $locationURL);
@@ -448,7 +446,6 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
     public function updateAction(int $id, Request $request): Response
@@ -472,6 +469,12 @@ class StatusController extends ApiBaseController implements ControllerInterface
         if (!$status instanceof Status) {
             $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
             $response = $response->setContent(json_encode(['message' => 'Status with requested Id does not exist!']));
+            return $response;
+        }
+
+        if(true === $status->getDefault()){
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => 'It is not allowed to update default status!']));
             return $response;
         }
 
@@ -597,7 +600,6 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
     public function restoreAction(int $id): Response
@@ -645,7 +647,6 @@ class StatusController extends ApiBaseController implements ControllerInterface
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
     private function updateStatus(Status $status, $requestData, $create = false, $locationUrl): Response
@@ -661,51 +662,50 @@ class StatusController extends ApiBaseController implements ControllerInterface
         // JSON API Response - Content type and Location settings
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationUrl);
 
-        if (false !== $requestData) {
-            if (array_key_exists('_format', $requestData)) {
-                unset($requestData['_format']);
-            }
-
-            foreach ($requestData as $key => $value) {
-                if (!\in_array($key, $allowedUnitEntityParams, true)) {
-                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                    $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for Status Entity!']));
-                    return $response;
-                }
-            }
-
-            // Control, if function is allowed
-            $statusConstants = StatusFunctionOptions::getConstants();
-            if (isset($requestData['function']) && 'null' !== strtolower($requestData['function']) && !\in_array($requestData['function'], $statusConstants, true)) {
-                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                $response = $response->setContent(json_encode(['message' => $requestData['function'] . ' is not allowed parameter for Function of Status Entity! Allowed are: ' .implode(',',$statusConstants)]));
-                return $response;
-            }
-
-            $statusCode = $this->getCreateUpdateStatusCode($create);
-
-            $errors = $this->get('entity_processor')->processEntity($status, $requestData);
-
-            if (false === $errors) {
-                $this->getDoctrine()->getManager()->persist($status);
-                $this->getDoctrine()->getManager()->flush();
-
-                $statusArray = $this->get('status_service')->getAttributeResponse($status->getId());
-                $response = $response->setStatusCode($statusCode);
-                $response = $response->setContent(json_encode($statusArray));
-                return $response;
-            } else {
-                $data = [
-                    'errors' => $errors,
-                    'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-                ];
-                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                $response = $response->setContent(json_encode($data));
-            }
-        } else {
+        if (false === $requestData) {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
             $response = $response->setContent(json_encode(['message' => 'Problem with data coding. Supported Content Types: application/json, application/x-www-form-urlencoded']));
+            return $response;
         }
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
+        }
+
+        foreach ($requestData as $key => $value) {
+            if (!\in_array($key, $allowedUnitEntityParams, true)) {
+                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+                $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for Status Entity!']));
+                return $response;
+            }
+        }
+
+        // Control, if function is allowed
+        $statusConstants = StatusFunctionOptions::getConstants();
+        if (isset($requestData['function']) && 'null' !== strtolower($requestData['function']) && !\in_array($requestData['function'], $statusConstants, true)) {
+            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+            $response = $response->setContent(json_encode(['message' => $requestData['function'] . ' is not allowed parameter for Function of Status Entity! Allowed are: ' . implode(',', $statusConstants)]));
+            return $response;
+        }
+
+        $statusCode = $this->getCreateUpdateStatusCode($create);
+
+        $errors = $this->get('entity_processor')->processEntity($status, $requestData);
+        if (false === $errors) {
+            $this->getDoctrine()->getManager()->persist($status);
+            $this->getDoctrine()->getManager()->flush();
+
+            $statusArray = $this->get('status_service')->getAttributeResponse($status->getId());
+            $response = $response->setStatusCode($statusCode);
+            $response = $response->setContent(json_encode($statusArray));
+            return $response;
+        }
+
+        $data = [
+            'errors' => $errors,
+            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+        ];
+        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        $response = $response->setContent(json_encode($data));
         return $response;
     }
 }

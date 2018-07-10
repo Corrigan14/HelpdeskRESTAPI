@@ -948,7 +948,7 @@ class UserController extends ApiBaseController
      * @param int $id
      * @param Request $request
      *
-     * @param bool $userRoleId
+     * @param bool|int $userRoleId
      * @param int|bool $companyId
      * @return Response
      * @throws \Doctrine\ORM\NonUniqueResultException

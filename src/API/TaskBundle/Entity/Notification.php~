@@ -316,4 +316,52 @@ class Notification
             return $this->updatedAt;
         }
     }
+
+    /**
+     * Set type.
+     *
+     * @param string|null $type
+     *
+     * @return Notification
+     */
+    public function setType($type = null)
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    /**
+     * Get type.
+     *
+     * @return string|null
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * Set internal.
+     *
+     * @param bool|null $internal
+     *
+     * @return Notification
+     */
+    public function setInternal($internal = null)
+    {
+        $this->internal = $internal;
+
+        return $this;
+    }
+
+    /**
+     * Get internal.
+     *
+     * @return bool|null
+     */
+    public function getInternal()
+    {
+        return $this->internal;
+    }
 }

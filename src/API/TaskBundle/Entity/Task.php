@@ -954,7 +954,7 @@ class Task
      *
      * @return int|null
      */
-    public function getStatusChange(): ?int
+    public function getStatusChange()
     {
         if ($this->statusChange) {
             return $this->statusChange->getTimestamp();

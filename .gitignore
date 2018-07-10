@@ -19,3 +19,4 @@
 !app/uploads/.gitkeep
 /app/uploads/
 /composer.lock
+src/API/TaskBundle/Entity/Task.php

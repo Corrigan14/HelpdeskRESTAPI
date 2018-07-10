@@ -338,12 +338,12 @@ class TaskRepository extends EntityRepository
                 'count' => $count,
                 'array' => $this->formatData($paginator)
             ];
-        } else {
-            // Return all entities
-            return [
-                'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
-            ];
         }
+
+        // Return all entities
+        return [
+            'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
+        ];
     }
 
     /**
@@ -1043,6 +1043,7 @@ class TaskRepository extends EntityRepository
             'work_type' => $data->getWorkType(),
             'createdAt' => $data->getCreatedAt(),
             'updatedAt' => $data->getUpdatedAt(),
+            'statusChange' => $data->getStatusChange(),
             'createdBy' => [
                 'id' => $data->getCreatedBy()->getId(),
                 'username' => $data->getCreatedBy()->getUsername(),
@@ -1288,6 +1289,7 @@ class TaskRepository extends EntityRepository
             'work_type' => $data['work_type'],
             'createdAt' => isset($data['createdAt']) ? date_timestamp_get($data['createdAt']) : null,
             'updatedAt' => isset($data['updatedAt']) ? date_timestamp_get($data['updatedAt']) : null,
+            'statusChange' => isset($data['statusChange']) ? date_timestamp_get($data['statusChange']) : null,
             'createdBy' => [
                 'id' => $data['createdBy']['id'],
                 'username' => $data['createdBy']['username'],

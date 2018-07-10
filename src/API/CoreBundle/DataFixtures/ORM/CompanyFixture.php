@@ -35,13 +35,13 @@ class CompanyFixture implements FixtureInterface, ContainerAwareInterface, Order
     public function load(ObjectManager $manager)
     {
         $company = new Company();
-        $company->setTitle('LanSystems')
-            ->setIco('110258782')
-            ->setDic('12587458996244')
-            ->setStreet('Ina cesta 125')
-            ->setZip('021478')
-            ->setCity('Bratislava')
-            ->setCountry('Slovenska Republika');
+        $company->setTitle('Unassigned')
+            ->setIco('000000')
+            ->setDic('000000000000')
+            ->setStreet('000000')
+            ->setZip('000000')
+            ->setCity('000000')
+            ->setCountry('000000');
         $manager->persist($company);
 
         $manager->flush();

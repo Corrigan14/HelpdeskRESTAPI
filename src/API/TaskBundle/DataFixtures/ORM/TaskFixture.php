@@ -3,8 +3,6 @@
 namespace API\TaskBundle\DataFixtures\ORM;
 
 use API\CoreBundle\Entity\User;
-use API\TaskBundle\Entity\Project;
-use API\TaskBundle\Entity\Tag;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Security\StatusOptions;
 use API\TaskBundle\Security\TaskWorkTypeOptions;
@@ -52,8 +50,8 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
             'title' => 'Project of admin'
         ]);
 
-        $lanCompany = $manager->getRepository('APICoreBundle:Company')->findOneBy([
-            'title' => 'LanSystems'
+        $company = $manager->getRepository('APICoreBundle:Company')->findOneBy([
+            'title' => 'Unassigned'
         ]);
 
         $newStatus = $manager->getRepository('APITaskBundle:Status')->findOneBy([
@@ -72,7 +70,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                 $task->setImportant(true);
                 $task->setCreatedBy($adminUser);
                 $task->setRequestedBy($adminUser);
-                $task->setCompany($lanCompany);
+                $task->setCompany($company);
                 $task->setStatus($newStatus);
                 $task->setWorkType(TaskWorkTypeOptions::MATERIAL);
                 $task->setProject($adminsProject);
@@ -87,7 +85,7 @@ class TaskFixture implements FixtureInterface, ContainerAwareInterface, OrderedF
                 $task->setImportant(true);
                 $task->setCreatedBy($managerUser);
                 $task->setRequestedBy($managerUser);
-                $task->setCompany($lanCompany);
+                $task->setCompany($company);
                 $task->setStatus($inProgresStatus);
                 $task->setProject($adminsProject);
                 $task->setStartedAt(new \DateTime());

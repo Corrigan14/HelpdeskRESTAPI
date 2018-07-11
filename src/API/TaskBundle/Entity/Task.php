@@ -952,7 +952,7 @@ class Task
     /**
      * Get statusChange.
      *
-     * @return int|null
+     * @return \DateTime|int|null
      */
     public function getStatusChange()
     {
@@ -960,7 +960,7 @@ class Task
             return $this->statusChange->getTimestamp();
         }
 
-        return $this->getStatusChange();
+        return $this->statusChange;
     }
 
 

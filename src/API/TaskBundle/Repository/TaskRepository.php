@@ -700,12 +700,12 @@ class TaskRepository extends EntityRepository
                 'count' => $count,
                 'array' => $this->formatData($paginator)
             ];
-        } else {
-            // Return all entities
-            return [
-                'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
-            ];
         }
+
+        // Return all entities
+        return [
+            'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
+        ];
     }
 
     /**

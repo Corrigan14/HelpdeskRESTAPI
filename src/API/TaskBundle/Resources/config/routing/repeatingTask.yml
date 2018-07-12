@@ -11,11 +11,11 @@ repeating_task:
         repeatingTaskId: '\d+'
 
 repeating_task_create:
-    path:     /repeating-tasks/{repeatingTaskId}
+    path:     /repeating-tasks/{taskId}
     defaults: { _controller: APITaskBundle:RepeatingTask/RepeatingTask:create }
     methods: [POST]
     requirements:
-        repeatingTaskId: '\d+'
+        taskId: '\d+'
 
 repeating_task_update:
     path:     /repeating-tasks/{repeatingTaskId}

@@ -4,6 +4,8 @@ namespace API\TaskBundle\Repository;
 
 use API\TaskBundle\Entity\Task;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
@@ -60,7 +62,6 @@ class RepeatingTaskRepository extends EntityRepository
 
         $query = $query->distinct();
 
-
         $firstResult = $this->getFirstResultNumber($page, $limit);
         if (999 !== $limit) {
             $query->setFirstResult($firstResult);
@@ -79,7 +80,23 @@ class RepeatingTaskRepository extends EntityRepository
         return [
             'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
         ];
+    }
 
+    /**
+     * @param int $id
+     * @return array
+     */
+    public function getEntity(int $id): array
+    {
+        $query = $this->createQueryBuilder('repeatingTask')
+            ->select('repeatingTask, task')
+            ->leftJoin('repeatingTask.task', 'task')
+            ->where('repeatingTask.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery();
+        $arrayResult = $query->getArrayResult();
+
+        return $this->processData($arrayResult[0], true);
     }
 
     /**

@@ -61,6 +61,11 @@ class VoteOptions
     public const VIEW_PROJECT = 'read_project';
     public const EDIT_PROJECT = 'edit_project';
 
+    //REPEATING TASK
+    public const VIEW_REPEATING_TASK = 'view_repeating_task';
+    public const UPDATE_REPEATING_TASK = 'update_repeating_task';
+    public const CREATE_REPEATING_TASK = 'create_repeating_task';
+
     /**
      * @return array
      * @throws \ReflectionException

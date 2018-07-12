@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Controller\RepeatingTask;
 
 use API\CoreBundle\Entity\User;
+use API\TaskBundle\Entity\RepeatingTask;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Controller\ControllerInterface;
@@ -110,12 +111,10 @@ class RepeatingTaskController extends ApiBaseController implements ControllerInt
      */
     public function listAction(Request $request): Response
     {
-        // JSON API Response - Content type and Location settings
         $locationURL = $this->generateUrl('repeating_task_list');
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
-
         if (false === $requestBody) {
             $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
             $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
@@ -140,7 +139,20 @@ class RepeatingTaskController extends ApiBaseController implements ControllerInt
      *      {
      *        "data":
      *        {
-     *           "id": "2",
+     *           "id": 4,
+     *           "title": "Monthly repeating task",
+     *           "startAt": 1530385892,
+     *           "interval": "month",
+     *           "intervalLength": "2",
+     *           "repeatsNumber": 10,
+     *           "createdAt": 1530385892,
+     *           "updatedAt": 1530385892,
+     *           "is_active": false,
+     *           "task":
+     *           {
+     *               "id": 8996,
+     *               "title": "Task 1"
+     *           }
      *        },
      *        "_links":
      *        {
@@ -151,10 +163,10 @@ class RepeatingTaskController extends ApiBaseController implements ControllerInt
      *      }
      *
      * @ApiDoc(
-     *  description="Returns an Entity (GET)",
+     *  description="Returns Repeating Task Entity",
      *  requirements={
      *     {
-     *       "name"="id",
+     *       "name"="repeatingTaskId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
      *       "description"="The id of processed object"
@@ -167,7 +179,7 @@ class RepeatingTaskController extends ApiBaseController implements ControllerInt
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  output="API\CoreBundle\Entity\...entityName",
+     *  output="API\TaskBundle\Entity\RepeatingTask",
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
@@ -178,10 +190,31 @@ class RepeatingTaskController extends ApiBaseController implements ControllerInt
      *
      * @param int $repeatingTaskId
      * @return Response
+     * @throws \LogicException
      */
     public function getAction(int $repeatingTaskId): Response
     {
-        // TODO: Implement getAction() method.
+        $locationURL = $this->generateUrl('repeating_task', ['repeatingTaskId' => $repeatingTaskId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        $repeatingTask = $this->getDoctrine()->getRepository('APITaskBundle:RepeatingTask')->find($repeatingTaskId);
+        if (!$repeatingTask instanceof RepeatingTask) {
+            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+            $response = $response->setContent(json_encode(['message' => 'Repeating Task with requested Id does not exist!']));
+            return $response;
+        }
+
+        // User can see a repeating task if he is ADMIN or repeating task is related to the task where he has a permission to view it
+        if (!$this->checkViewPermission($repeatingTask)) {
+            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
+            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            return $response;
+        }
+
+        $repeatingTaskArray = $this->get('repeating_task_service')->getRepeatingTask($repeatingTaskId);
+        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response = $response->setContent(json_encode($repeatingTaskArray));
+        return $response;
     }
 
     /**
@@ -311,5 +344,24 @@ class RepeatingTaskController extends ApiBaseController implements ControllerInt
     public function deleteAction(int $repeatingTaskId): Response
     {
         // TODO: Implement deleteAction() method.
+    }
+
+    /**
+     * @param RepeatingTask $repeatingTask
+     * @return bool
+     * @throws \LogicException
+     */
+    private function checkViewPermission(RepeatingTask $repeatingTask): bool
+    {
+        /** @var User $loggedUser */
+        $loggedUser = $this->getUser();
+        $options = [
+            'allowedTasksId' => $this->get('task_service')->getUsersTasksId($loggedUser),
+            'repeatingTasksTaskId' => $repeatingTask->getTask()->getId()
+        ];
+        if (!$this->get('repeating_task_voter')->isGranted(VoteOptions::VIEW_REPEATING_TASK, $options)) {
+            return false;
+        }
+        return true;
     }
 }

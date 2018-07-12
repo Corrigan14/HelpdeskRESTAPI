@@ -54,4 +54,33 @@ class RepeatingTaskService
         return array_merge($response, $pagination);
     }
 
+    /**
+     * @param int $id
+     * @return array
+     */
+    public function getRepeatingTask(int $id): array
+    {
+        $entity = $this->em->getRepository('APITaskBundle:RepeatingTask')->getEntity($id);
+
+        return [
+            'data' => $entity,
+            '_links' => $this->getEntityLinks($id),
+        ];
+    }
+
+    /**
+     * @param int $id
+     *
+     * @return array
+     */
+    private function getEntityLinks(int $id):array
+    {
+        return [
+            'update' => $this->router->generate('repeating_task_update',['repeatingTaskId' => $id]),
+            'delete' => $this->router->generate('repeating_task_delete',['repeatingTaskId' => $id]),
+            'inactivate' => $this->router->generate('repeating_task_inactivate', ['repeatingTaskId' => $id]),
+            'restore' => $this->router->generate('repeating_task_restore', ['repeatingTaskId' => $id]),
+        ];
+    }
+
 }

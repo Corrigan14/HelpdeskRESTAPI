@@ -782,7 +782,7 @@ class TaskRepository extends EntityRepository
             )
         ));
 
-       return $query->getQuery()->getArrayResult();
+        return $this->formatIdData($query->getQuery()->getArrayResult());
     }
 
     /**
@@ -799,6 +799,20 @@ class TaskRepository extends EntityRepository
             ->getQuery();
 
         return $query->getSingleScalarResult();
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function formatIdData(array $data): array
+    {
+        $response = [];
+        foreach ($data as $datum) {
+            $response[] = $datum['id'];
+        }
+
+        return $response;
     }
 
     /**

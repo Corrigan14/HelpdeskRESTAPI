@@ -553,16 +553,13 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * )
      *
      * @param Request $request
-     *
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      *
      * @return Response
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function createAction(Request $request): Response
     {
@@ -586,7 +583,6 @@ class ProjectController extends ApiBaseController implements ControllerInterface
         $project->setIsActive(true);
 
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
-
         return $this->updateProject($project, $requestBody, true, $locationURL);
     }
 
@@ -1427,6 +1423,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      *
      * @return Response
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function updateProject(Project $project, $requestData, $create = false, $locationUrl): Response
     {
@@ -1501,6 +1498,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @throws \InvalidArgumentException
      * @throws \LogicException
      * @throws \ReflectionException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function updateUserHasProject(array $requestData, UserHasProject $userHasProject, $create = false, $locationUrl): Response
     {
@@ -1561,6 +1559,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @param Project $project
      * @return bool
      * @throws \LogicException
+     * @throws \ReflectionException
      */
     private function canEditProject(Project $project): bool
     {

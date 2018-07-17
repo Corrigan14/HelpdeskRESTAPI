@@ -4,8 +4,6 @@ namespace API\TaskBundle\Repository;
 
 use API\TaskBundle\Entity\Task;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
@@ -72,7 +70,7 @@ class RepeatingTaskRepository extends EntityRepository
 
             return [
                 'count' => $count,
-                'array' => $this->formatData($paginator)
+                'array' => $this->formatData($paginator->getQuery()->getArrayResult(), true)
             ];
         }
 
@@ -173,7 +171,7 @@ class RepeatingTaskRepository extends EntityRepository
             'repeatsNumber' => $data['repeatsNumber'],
             'createdAt' => isset($data['createdAt']) ? date_timestamp_get($data['createdAt']) : null,
             'updatedAt' => isset($data['updatedAt']) ? date_timestamp_get($data['updatedAt']) : null,
-            'is_active' => $data['is_active'],
+            'is_active' => $data['isActive'],
             'task' => $taskArray
         ];
         return $response;

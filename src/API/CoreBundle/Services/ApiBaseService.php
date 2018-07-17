@@ -4,6 +4,7 @@ namespace API\CoreBundle\Services;
 
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Repository\RepositoryInterface;
+use Igsem\APIBundle\Services\StatusCodesHelper;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -95,6 +96,41 @@ class ApiBaseService
                 return false;
         }
         return false;
+    }
+
+    /**
+     * @param $request
+     * @param array $allowedEntityParams
+     * @return array|bool
+     * @throws \LogicException
+     */
+    public function checkRequestData($request, array $allowedEntityParams)
+    {
+        $response = [];
+        $requestData = $this->encodeRequest($request);
+
+        if (false === $requestData) {
+            $response['error'] = ['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT];
+            return $response;
+        }
+
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
+        }
+
+        $errorsArray = false;
+        foreach ($requestData as $key => $value) {
+            if (!\in_array($key, $allowedEntityParams, true)) {
+                $errorsArray[] = $key . ' is not allowed parameter for a Repeating Task Entity!';
+            }
+        }
+        if ($errorsArray) {
+            $response['error'] = $errorsArray;
+            return $response;
+        }
+
+        $response['requestData'] = $requestData;
+        return $response;
     }
 
     /**

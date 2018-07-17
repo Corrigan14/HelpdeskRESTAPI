@@ -11,6 +11,8 @@ use API\TaskBundle\Entity\UserRole;
 use API\TaskBundle\Repository\TaskRepository;
 use API\TaskBundle\Security\ProjectAclOptions;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
 /**
@@ -139,14 +141,18 @@ class TaskService
      * @param array $ids
      * @return array
      */
-    public function getTaskResponse(array $ids):array
+    public function getTaskResponse(array $ids): array
     {
         $taskId = $ids['taskId'];
 
-        return [
-            'data' => $this->em->getRepository('APITaskBundle:Task')->getTask($taskId),
-            '_links' => $this->getTaskLinks($ids)
-        ];
+        try {
+            return [
+                'data' => $this->em->getRepository('APITaskBundle:Task')->getTask($taskId),
+                '_links' => $this->getTaskLinks($ids)
+            ];
+        } catch (NoResultException $e) {
+        } catch (NonUniqueResultException $e) {
+        }
     }
 
     /**
@@ -155,7 +161,7 @@ class TaskService
      * @param User $user
      * @return array
      */
-    public function getUsersTasksId(User $user): array
+    public function getUsersViewTasksId(User $user): array
     {
         $dividedProjects['VIEW_ALL_TASKS_IN_PROJECT'] = [0];
         $dividedProjects['VIEW_COMPANY_TASKS_IN_PROJECT'] = [0];
@@ -183,7 +189,7 @@ class TaskService
             }
         }
 
-        $response = $this->em->getRepository('APITaskBundle:Task')->getUsersTasksId($dividedProjects,$user->getId(),$user->getCompany()->getId());
+        $response = $this->em->getRepository('APITaskBundle:Task')->getUsersTasksId($dividedProjects, $user->getId(), $user->getCompany()->getId());
         return $response;
     }
 
@@ -192,7 +198,7 @@ class TaskService
      * @param array $ids
      * @return array
      */
-    private function getTaskLinks(array $ids):array
+    private function getTaskLinks(array $ids): array
     {
         $taskId = $ids['taskId'];
         $projectId = $ids['projectId'];

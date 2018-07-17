@@ -4,6 +4,7 @@ namespace API\TaskBundle\Security;
 
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Security\ApiBaseVoter;
+use API\TaskBundle\Entity\UserHasProject;
 
 /**
  * Class RepeatingTaskVoter
@@ -37,6 +38,8 @@ class RepeatingTaskVoter extends ApiBaseVoter
         switch ($action) {
             case VoteOptions::VIEW_REPEATING_TASK:
                 return $this->canView($options);
+            case VoteOptions::CREATE_REPEATING_TASK:
+                return $this->canCreate($options);
             default:
                 return false;
         }
@@ -57,6 +60,31 @@ class RepeatingTaskVoter extends ApiBaseVoter
         $allowedTasksId = $options['allowedTasksId'];
         $repeatingTasksTaskId = $options['repeatingTasksTaskId'];
         if (!\in_array($repeatingTasksTaskId, $allowedTasksId, true)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * User can create a repeating task if: he is an admin, or repeating task is related to the task where he has a permission to create
+     *
+     * @param array $options
+     * @return bool
+     */
+    private function canCreate(array $options): bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        $userHasProject = $options['userHasProject'];
+        if (!$userHasProject instanceof UserHasProject) {
+           return false;
+        }
+
+        $userHasProjectACL = $userHasProject->getAcl();
+        if (!\in_array(ProjectAclOptions::CREATE_TASK, $userHasProjectACL, true)) {
             return false;
         }
 

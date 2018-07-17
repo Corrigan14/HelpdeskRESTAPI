@@ -2,15 +2,19 @@
 
 namespace API\TaskBundle\Services\RepeatingTask;
 
+use API\TaskBundle\Entity\RepeatingTask;
+use API\TaskBundle\Security\RepeatingTaskIntervalOptions;
 use API\TaskBundle\Services\PaginationHelper;
 use Doctrine\ORM\EntityManager;
+use Igsem\APIBundle\Services\StatusCodesHelper;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class RepeatingTaskService
+ * Class GetMethods
  * @package API\TaskBundle\Services\RepeatingTask
  */
-class RepeatingTaskService
+class GetMethods
 {
     /**
      * @var EntityManager

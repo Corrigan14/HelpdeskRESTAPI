@@ -1,17 +1,19 @@
 <?php
 
-namespace API\TaskBundle\Security;
+namespace API\TaskBundle\Security\RepeatingTask;
 
 use API\CoreBundle\Entity\User;
 use API\CoreBundle\Security\ApiBaseVoter;
 use API\TaskBundle\Entity\UserHasProject;
+use API\TaskBundle\Security\ProjectAclOptions;
+use API\TaskBundle\Security\VoteOptions;
 
 /**
  * Class RepeatingTaskVoter
  *
- * @package API\TaskBundle\Security
+ * @package API\TaskBundle\Security\RepeatingTask
  */
-class RepeatingTaskVoter extends ApiBaseVoter
+class Voter extends ApiBaseVoter
 {
     /** @var  User */
     private $user;

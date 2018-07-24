@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Services\RepeatingTask;
 
 use API\TaskBundle\Entity\RepeatingTask;
+use API\TaskBundle\Security\RepeatingTask\IntervalOptions;
 use API\TaskBundle\Security\RepeatingTaskIntervalOptions;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\Response;
@@ -46,7 +47,7 @@ class UpdateMethods
         }
 
         // Interval param has to match to the defined choices
-        $allowedIntervals = RepeatingTaskIntervalOptions::getConstants();
+        $allowedIntervals = IntervalOptions::getConstants();
         if (!\in_array($requestData['interval'], $allowedIntervals, true)) {
             $response['error'] =  $requestData['interval'] . ' is not allowed parameter for a Repeating Tasks INTERVAL! Allowed are: ' . implode(',', $allowedIntervals);
             return $response;

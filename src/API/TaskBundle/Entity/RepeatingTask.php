@@ -139,7 +139,7 @@ class RepeatingTask
      */
     public function setIntervalLength($intervalLength): RepeatingTask
     {
-        $this->intervalLength = $intervalLength;
+        $this->intervalLength = (int)$intervalLength;
 
         return $this;
     }

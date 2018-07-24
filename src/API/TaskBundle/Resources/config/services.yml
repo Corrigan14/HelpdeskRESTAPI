@@ -17,7 +17,7 @@ services:
         class: API\TaskBundle\Security\FilterVoter
         arguments: ["@security.access.decision_manager","@security.token_storage", "@doctrine.orm.entity_manager"]
     repeating_task_voter:
-        class: API\TaskBundle\Security\RepeatingTaskVoter
+        class: API\TaskBundle\Security\RepeatingTask\Voter
         arguments: ["@security.access.decision_manager","@security.token_storage"]
     project_service:
           class: API\TaskBundle\Services\ProjectService

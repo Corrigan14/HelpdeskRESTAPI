@@ -5,6 +5,7 @@ namespace API\TaskBundle\Controller\RepeatingTask;
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\RepeatingTask;
 use API\TaskBundle\Entity\Task;
+use API\TaskBundle\Security\RepeatingTask\EntityParams;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
@@ -18,6 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class CreateController extends ApiBaseController
 {
+
     /**
      * ### Response ###
      *      {
@@ -90,55 +92,76 @@ class CreateController extends ApiBaseController
         $locationURL = $this->generateUrl('repeating_task_create', ['taskId' => $taskId]);
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
-        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
-        if (!$task instanceof Task) {
-            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+        $dataValidation = $this->validateData($request, $taskId);
+
+        if (false === $dataValidation['status']) {
+            $response->setStatusCode($dataValidation['errorCode'])
+                ->setContent(json_encode($dataValidation['errorMessage']));
             return $response;
         }
 
-        // User can see a repeating task if he is ADMIN or repeating task is related to the task where he has a permission to create a Task
-        if (!$this->checkCreatePermission($task)) {
-            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
-            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
-            return $response;
-        }
-
-        $requestDataCheck = $this->get('api_base.service')->checkRequestData($request, $this->getAllowedEntityParams());
-        if (isset($requestDataCheck['error'])) {
-            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-            $response = $response->setContent(json_encode(['message' => $requestDataCheck['error']]));
-            return $response;
-        }
+        $task = $dataValidation['task'];
+        $requestData = $dataValidation['requestData'];
 
         $repeatingTask = new RepeatingTask();
         $repeatingTask->setTask($task);
         $repeatingTask->setIsActive(true);
-        $errors = $this->get('entity_processor')->processEntity($repeatingTask, $requestDataCheck['requestData']);
-        $updateEntity = $this->get('repeating_task_update_service')->updateRepeatingTask($errors, $repeatingTask, $requestDataCheck['requestData']);
+        $errors = $this->get('entity_processor')->processEntity($repeatingTask, $requestData);
+        $updateEntity = $this->get('repeating_task_update_service')->updateRepeatingTask($errors, $repeatingTask, $requestData);
 
         if (isset($updateEntity['error'])) {
-            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-            $response = $response->setContent(json_encode(['message' => $updateEntity['error']]));
+            $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE)
+                ->setContent(json_encode(['message' => $updateEntity['error']]));
+
             return $response;
         }
         $repeatingTaskArray = $this->get('repeating_task_get_service')->getRepeatingTask($repeatingTask->getId());
-        $response = $response->setStatusCode(StatusCodesHelper::CREATED_CODE);
-        $response = $response->setContent(json_encode($repeatingTaskArray));
+        $response->setStatusCode(StatusCodesHelper::CREATED_CODE)
+            ->setContent(json_encode($repeatingTaskArray));
+
         return $response;
     }
 
     /**
-     * @return array
+     * @param int $taskId
+     * @param Request $request
+     * @return array|bool
+     * @throws \LogicException
      */
-    private function getAllowedEntityParams(): array
+    private function validateData(Request $request, int $taskId)
     {
+        $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+        if (!$task instanceof Task) {
+            return [
+                'status' => false,
+                'errorCode' => StatusCodesHelper::NOT_FOUND_CODE,
+                'errorMessage' => 'Task with requested Id does not exist!'
+            ];
+
+        }
+
+        // User can see a repeating task if he is ADMIN or repeating task is related to the task where he has a permission to create a Task
+        if (!$this->checkCreatePermission($task)) {
+            return [
+                'status' => false,
+                'errorCode' => StatusCodesHelper::ACCESS_DENIED_CODE,
+                'errorMessage' => StatusCodesHelper::ACCESS_DENIED_MESSAGE
+            ];
+        }
+
+        $requestDataCheck = $this->get('api_base.service')->checkRequestData($request, EntityParams::getAllowedEntityParams());
+        if (isset($requestDataCheck['error'])) {
+            return [
+                'status' => false,
+                'errorCode' => StatusCodesHelper::INVALID_PARAMETERS_CODE,
+                'errorMessage' => $requestDataCheck['error']
+            ];
+        }
+
         return [
-            'title',
-            'startAt',
-            'interval',
-            'intervalLength',
-            'repeatsNumber'
+            'status' => true,
+            'task' => $task,
+            'requestData' => $requestDataCheck['requestData']
         ];
     }
 
@@ -160,6 +183,7 @@ class CreateController extends ApiBaseController
         $options = [
             'userHasProject' => $userHasProject
         ];
+
         if (!$this->get('repeating_task_voter')->isGranted(VoteOptions::CREATE_REPEATING_TASK, $options)) {
             return false;
         }

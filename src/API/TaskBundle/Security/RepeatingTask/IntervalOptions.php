@@ -1,12 +1,12 @@
 <?php
 
-namespace API\TaskBundle\Security;
+namespace API\TaskBundle\Security\RepeatingTask;
 
 /**
  * Class RepeatingTaskIntervalOptions
- * @package API\TaskBundle\Security
+ * @package API\TaskBundle\Security\RepeatingTask
  */
-class RepeatingTaskIntervalOptions
+class IntervalOptions
 {
     public const DAY = 'day';
     public const WEEK = 'week';

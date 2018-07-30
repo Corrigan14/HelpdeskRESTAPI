@@ -42,9 +42,10 @@ class CreateController extends ApiBaseController
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/id",
-     *           "patch": "/api/v1/entityName/id",
-     *           "delete": "/api/v1/entityName/id"
+     *           "update": "/api/v1/task-bundle/repeating-tasks/22",
+     *           "delete": "/api/v1/task-bundle/repeating-tasks/22",
+     *           "inactivate": "/api/v1/task-bundle/repeating-tasks/22/inactivate",
+     *           "restore": "/api/v1/task-bundle/repeating-tasks/22/restore"
      *         }
      *      }
      *

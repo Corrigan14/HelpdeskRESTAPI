@@ -5,6 +5,7 @@ namespace API\TaskBundle\Controller\RepeatingTask;
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\RepeatingTask;
 use API\TaskBundle\Entity\Task;
+use API\TaskBundle\Security\RepeatingTask\EntityParams;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
@@ -40,23 +41,30 @@ class UpdateController extends ApiBaseController
      *        },
      *        "_links":
      *        {
-     *           "put": "/api/v1/entityName/id",
-     *           "patch": "/api/v1/entityName/id",
-     *           "delete": "/api/v1/entityName/id"
+     *           "update": "/api/v1/task-bundle/repeating-tasks/22",
+     *           "delete": "/api/v1/task-bundle/repeating-tasks/22",
+     *           "inactivate": "/api/v1/task-bundle/repeating-tasks/22/inactivate",
+     *           "restore": "/api/v1/task-bundle/repeating-tasks/22/restore"
      *         }
      *      }
      *
      * @ApiDoc(
-     *  description="Update the Entity (PUT)",
+     *  description="Update Repeating Task Entity",
      *  requirements={
      *     {
-     *       "name"="id",
+     *       "name"="taskId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
-     *       "description"="The id of processed object"
+     *       "description"="The id of a Repeating's task related Task"
+     *     },
+     *     {
+     *       "name"="repeatingTaskId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of a Repeating task"
      *     }
      *  },
-     *  input={"class"="API\CoreBundle\Entity\...entityName"},
+     *  input={"class"="API\TaskBundle\Entity\RepeatingTask"},
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -64,7 +72,7 @@ class UpdateController extends ApiBaseController
      *       "description"="Bearer {JWT Token}"
      *     }
      *  },
-     *  output={"class"="API\CoreBundle\Entity\...entityName"},
+     *  output={"class"="API\TaskBundle\Entity\RepeatingTask"},
      *  statusCodes={
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
@@ -75,12 +83,53 @@ class UpdateController extends ApiBaseController
      * )
      *
      * @param int $repeatingTaskId
+     * @param bool|int $taskId
      * @param Request $request
      * @return Response
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \LogicException
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \ReflectionException
      */
-    public function updateAction(int $repeatingTaskId, Request $request): Response
+    public function updateAction(int $repeatingTaskId, $taskId = false, Request $request): Response
     {
-        // TODO: Implement updateAction() method.
+        $locationURL = $this->generateUrl('repeating_task_create', ['taskId' => $taskId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        $dataValidation = $this->validateData($request, $taskId, $repeatingTaskId);
+
+        if (false === $dataValidation['status']) {
+            $response->setStatusCode($dataValidation['errorCode'])
+                ->setContent(json_encode($dataValidation['errorMessage']));
+            return $response;
+        }
+
+        /** @var Task $task */
+        $task = $dataValidation['task'];
+        /** @var RepeatingTask $repeatingTask */
+        $repeatingTask = $dataValidation['repeatingTask'];
+        $requestData = $dataValidation['requestData'];
+
+        $repeatingTask->setTask($task);
+        $errors = $this->get('entity_processor')->processEntity($repeatingTask, $requestData);
+        $updateEntity = $this->get('repeating_task_update_service')->updateRepeatingTask($errors, $repeatingTask, $requestData);
+        if (isset($updateEntity['error'])) {
+            $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE)
+                ->setContent(json_encode(['message' => $updateEntity['error']]));
+
+            return $response;
+        }
+
+        $repeatingTaskArray = $this->get('repeating_task_get_service')->getRepeatingTask($repeatingTask->getId());
+        $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE)
+            ->setContent(json_encode($repeatingTaskArray));
+
+        return $response;
+
+
     }
 
     /**
@@ -118,16 +167,59 @@ class UpdateController extends ApiBaseController
     }
 
     /**
-     * @return array
+     * @param Request $request
+     * @param int $taskId
+     * @param int $repeatingTaskId
+     * @return array|bool
+     * @throws \LogicException
      */
-    private function getAllowedEntityParams(): array
+    private function validateData(Request $request, $taskId, int $repeatingTaskId): array
     {
+        $repeatingTask = $this->getDoctrine()->getRepository('APITaskBundle:RepeatingTask')->find($repeatingTaskId);
+        if (!$repeatingTask instanceof RepeatingTask) {
+            return [
+                'status' => false,
+                'errorCode' => StatusCodesHelper::NOT_FOUND_CODE,
+                'errorMessage' => 'Repeating task with requested Id does not exist!'
+            ];
+
+        }
+
+        $task = $repeatingTask->getTask();
+        if ($taskId) {
+            $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
+        }
+        if (!$task instanceof Task) {
+            return [
+                'status' => false,
+                'errorCode' => StatusCodesHelper::NOT_FOUND_CODE,
+                'errorMessage' => 'Task with requested Id does not exist!'
+            ];
+        }
+
+        // User can see a repeating task if he is ADMIN or repeating task is related to the task where he has a permission to create a Task
+        if (!$this->checkUpdatePermission($task)) {
+            return [
+                'status' => false,
+                'errorCode' => StatusCodesHelper::ACCESS_DENIED_CODE,
+                'errorMessage' => StatusCodesHelper::ACCESS_DENIED_MESSAGE
+            ];
+        }
+
+        $requestDataCheck = $this->get('api_base.service')->checkRequestData($request, EntityParams::getAllowedEntityParams());
+        if (isset($requestDataCheck['error'])) {
+            return [
+                'status' => false,
+                'errorCode' => StatusCodesHelper::INVALID_PARAMETERS_CODE,
+                'errorMessage' => $requestDataCheck['error']
+            ];
+        }
+
         return [
-            'title',
-            'startAt',
-            'interval',
-            'intervalLength',
-            'repeatsNumber'
+            'status' => true,
+            'task' => $task,
+            'repeatingTask' => $repeatingTask,
+            'requestData' => $requestDataCheck['requestData']
         ];
     }
 
@@ -136,7 +228,7 @@ class UpdateController extends ApiBaseController
      * @return bool
      * @throws \LogicException
      */
-    private function checkCreatePermission(Task $task): bool
+    private function checkUpdatePermission(Task $task): bool
     {
         /** @var User $loggedUser */
         $loggedUser = $this->getUser();
@@ -149,7 +241,8 @@ class UpdateController extends ApiBaseController
         $options = [
             'userHasProject' => $userHasProject
         ];
-        if (!$this->get('repeating_task_voter')->isGranted(VoteOptions::CREATE_REPEATING_TASK, $options)) {
+
+        if (!$this->get('repeating_task_voter')->isGranted(VoteOptions::UPDATE_REPEATING_TASK, $options)) {
             return false;
         }
         return true;

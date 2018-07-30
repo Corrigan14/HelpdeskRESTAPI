@@ -121,7 +121,7 @@ class ApiBaseService
         $errorsArray = false;
         foreach ($requestData as $key => $value) {
             if (!\in_array($key, $allowedEntityParams, true)) {
-                $errorsArray[] = $key . ' is not allowed parameter for a Repeating Task Entity!';
+                $errorsArray[] = $key . ' is not allowed parameter!';
             }
         }
         if ($errorsArray) {

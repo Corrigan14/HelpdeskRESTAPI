@@ -24,6 +24,14 @@ repeating_task_update:
     requirements:
         repeatingTaskId: '\d+'
 
+repeating_task_update_task:
+    path:     /repeating-tasks/{repeatingTaskId}/task/{taskId}
+    defaults: { _controller: APITaskBundle:RepeatingTask/Update:update }
+    methods: [PUT]
+    requirements:
+        repeatingTaskId: '\d+'
+        taskId: '\d+'
+
 repeating_task_delete:
     path:     /repeating-tasks/{repeatingTaskId}
     defaults: { _controller: APITaskBundle:RepeatingTask/Update:delete }

@@ -48,7 +48,7 @@ class UpdateMethods
 
         // Interval param has to match to the defined choices
         $allowedIntervals = IntervalOptions::getConstants();
-        if (!\in_array($requestData['interval'], $allowedIntervals, true)) {
+        if (isset($requestData['interval']) && !\in_array($requestData['interval'], $allowedIntervals, true)) {
             $response['error'] =  $requestData['interval'] . ' is not allowed parameter for a Repeating Tasks INTERVAL! Allowed are: ' . implode(',', $allowedIntervals);
             return $response;
         }

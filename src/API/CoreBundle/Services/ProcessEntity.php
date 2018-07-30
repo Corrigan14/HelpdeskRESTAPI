@@ -35,7 +35,6 @@ class ProcessEntity
      * @param array $data
      *
      * @return Response|array|bool
-     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      */
     public function processEntity($entity, array $data = [])
@@ -123,19 +122,19 @@ class ProcessEntity
                 break;
             case 'multi_select':
                 $options = $attributeEntity->getOptions();
-                if (is_array($value)) {
+                if (\is_array($value)) {
                     foreach ($value as $val) {
                         if (!\in_array($val, $options, true)) {
                             return false;
                         }
                     }
                     return true;
-                } else {
-                    if (!\in_array($value, $options, true)) {
-                        return false;
-                    }
-                    return true;
                 }
+
+                if (!\in_array($value, $options, true)) {
+                    return false;
+                }
+                return true;
                 break;
             case 'date':
                 $intDateData = (int)$value;

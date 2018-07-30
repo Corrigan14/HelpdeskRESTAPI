@@ -10,31 +10,32 @@ namespace API\TaskBundle\Security;
 class FilterColumnsOptions
 {
     // Attributes available for filter
-    const ID = 'id';
-    const TITLE = 'title';
-    const DESCRIPTION = 'description';
-    const STATUS = 'status';
-    const PROJECT = 'project';
-    const CREATOR = 'creator';
-    const REQUESTER = 'requester';
-    const COMPANY = 'taskCompany';
-    const ASSIGNED = 'assigned';
-    const TAG = 'tag';
-    const FOLLOWER = 'follower';
-    const CREATED = 'createdTime';
-    const STARTED = 'startedTime';
-    const DEADLINE = 'deadlineTime';
-    const CLOSED = 'closedTime';
-    const ARCHIVED = 'archived';
-    const IMPORTANT = 'important';
-    const WORK = 'work';
-    const WORK_TIME = 'work_time';
-    const ATTACHMENT = 'attachment';
+    public const ID = 'id';
+    public const TITLE = 'title';
+    public const DESCRIPTION = 'description';
+    public const STATUS = 'status';
+    public const PROJECT = 'project';
+    public const CREATOR = 'creator';
+    public const REQUESTER = 'requester';
+    public const COMPANY = 'taskCompany';
+    public const ASSIGNED = 'assigned';
+    public const TAG = 'tag';
+    public const FOLLOWER = 'follower';
+    public const CREATED = 'createdTime';
+    public const STARTED = 'startedTime';
+    public const DEADLINE = 'deadlineTime';
+    public const CLOSED = 'closedTime';
+    public const ARCHIVED = 'archived';
+    public const IMPORTANT = 'important';
+    public const WORK = 'work';
+    public const WORK_TIME = 'work_time';
+    public const ATTACHMENT = 'attachment';
 
     /**
      * @return array
+     * @throws \ReflectionException
      */
-    public static function getConstants()
+    public static function getConstants():array
     {
         $oClass = new \ReflectionClass(__CLASS__);
 

@@ -9,14 +9,14 @@ namespace API\TaskBundle\Security;
  */
 class LanguageOptions
 {
-    public const ENGLISH = 'AJ';
-    public const SLOVAK = 'SJ';
+    const ENGLISH = 'AJ';
+    const SLOVAK = 'SJ';
 
     /**
      * @return array
      * @throws \ReflectionException
      */
-    public static function getConstants():array
+    public static function getConstants(): array
     {
         $oClass = new \ReflectionClass(__CLASS__);
 

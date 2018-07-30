@@ -9,16 +9,16 @@ namespace API\TaskBundle\Security;
  */
 class StatusOptions
 {
-    public const NEW = 'new';
-    public const IN_PROGRESS = 'In Progress';
-    public const COMPLETED = 'Completed';
-    public const CLOSED = 'Closed';
+    const NEW = 'new';
+    const IN_PROGRESS = 'In Progress';
+    const COMPLETED = 'Completed';
+    const CLOSED = 'Closed';
 
     /**
      * @return array
      * @throws \ReflectionException
      */
-    public static function getConstants():array
+    public static function getConstants(): array
     {
         $oClass = new \ReflectionClass(__CLASS__);
 

@@ -230,6 +230,14 @@ class Task
     private $notifications;
 
     /**
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\RepeatingTask", mappedBy="task", cascade={"persist", "remove"})
+     * @Serializer\Exclude()
+     *
+     * @var ArrayCollection
+     */
+    private $repeatingTasks;
+
+    /**
      * Task constructor.
      */
     public function __construct()
@@ -243,6 +251,7 @@ class Task
         $this->invoiceableItems = new ArrayCollection();
         $this->notifications = new ArrayCollection();
         $this->subtasks = new ArrayCollection();
+        $this->repeatingTasks = new ArrayCollection();
     }
 
     /**

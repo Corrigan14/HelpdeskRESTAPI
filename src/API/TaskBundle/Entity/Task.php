@@ -1004,4 +1004,40 @@ class Task
 
         return $this->updatedAt;
     }
+
+    /**
+     * Add repeatingTask.
+     *
+     * @param RepeatingTask $repeatingTask
+     *
+     * @return Task
+     */
+    public function addRepeatingTask(RepeatingTask $repeatingTask)
+    {
+        $this->repeatingTasks[] = $repeatingTask;
+
+        return $this;
+    }
+
+    /**
+     * Remove repeatingTask.
+     *
+     * @param RepeatingTask $repeatingTask
+     *
+     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
+     */
+    public function removeRepeatingTask(RepeatingTask $repeatingTask)
+    {
+        return $this->repeatingTasks->removeElement($repeatingTask);
+    }
+
+    /**
+     * Get repeatingTasks.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getRepeatingTasks()
+    {
+        return $this->repeatingTasks;
+    }
 }

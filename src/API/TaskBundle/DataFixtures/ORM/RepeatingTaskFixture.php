@@ -5,7 +5,7 @@ namespace API\TaskBundle\DataFixtures\ORM;
 
 use API\TaskBundle\Entity\RepeatingTask;
 use API\TaskBundle\Entity\Task;
-use API\TaskBundle\Security\RepeatingTaskIntervalOptions;
+use API\TaskBundle\Security\RepeatingTask\IntervalOptions;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -32,7 +32,7 @@ class RepeatingTaskFixture implements FixtureInterface, ContainerAwareInterface,
         if ($task instanceof Task) {
             $repeatingTask = new RepeatingTask();
             $repeatingTask->setTitle('Daily repeating task');
-            $repeatingTask->setInterval(RepeatingTaskIntervalOptions::DAY);
+            $repeatingTask->setInterval(IntervalOptions::DAY);
             $repeatingTask->setIntervalLength(2);
             $repeatingTask->setRepeatsNumber(10);
             $repeatingTask->setStartAt(new \DateTime());
@@ -41,7 +41,7 @@ class RepeatingTaskFixture implements FixtureInterface, ContainerAwareInterface,
 
             $repeatingTask = new RepeatingTask();
             $repeatingTask->setTitle('Weekly repeating task');
-            $repeatingTask->setInterval(RepeatingTaskIntervalOptions::WEEK);
+            $repeatingTask->setInterval(IntervalOptions::WEEK);
             $repeatingTask->setIntervalLength(1);
             $repeatingTask->setStartAt(new \DateTime());
             $repeatingTask->setTask($task);
@@ -49,7 +49,7 @@ class RepeatingTaskFixture implements FixtureInterface, ContainerAwareInterface,
 
             $repeatingTask = new RepeatingTask();
             $repeatingTask->setTitle('Monthly repeating task');
-            $repeatingTask->setInterval(RepeatingTaskIntervalOptions::MONTH);
+            $repeatingTask->setInterval(IntervalOptions::MONTH);
             $repeatingTask->setIntervalLength(3);
             $repeatingTask->setStartAt(new \DateTime());
             $repeatingTask->setTask($task);

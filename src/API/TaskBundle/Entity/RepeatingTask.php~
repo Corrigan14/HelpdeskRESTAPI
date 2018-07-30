@@ -31,17 +31,16 @@ class RepeatingTask
      * @var string
      *
      * @ORM\Column(name="title", type="string", length=255)
-     * @Assert\NotBlank(message="Title of arepeating task is required")
+     * @Assert\NotBlank(message="Title of a repeating task is required")
      * @Assert\Type("string")
      */
     private $title;
 
     /**
-     * @var \DateTime
+     * @var \DateTime|int
      *
      * @ORM\Column(name="start_at", type="datetime")
      * @Assert\NotBlank(message="Start at param is required")
-     * @Assert\DateTime(message="Start at has to be a correct Date Time object")
      */
     private $startAt;
 
@@ -59,7 +58,6 @@ class RepeatingTask
      *
      * @ORM\Column(name="interval_length", type="integer")
      * @Assert\NotBlank(message="Interval length is required")
-     * @Assert\Type("integer")
      */
     private $intervalLength;
 
@@ -67,7 +65,6 @@ class RepeatingTask
      * @var integer
      *
      * @ORM\Column(name="repeats_number", type="integer", nullable=true)
-     * @Assert\NotBlank(message="Number of repeats is required")
      */
     private $repeatsNumber;
 
@@ -78,7 +75,7 @@ class RepeatingTask
      * @Serializer\ReadOnly()
      *
      */
-    private $is_active = true;
+    private $isActive = true;
 
     /**
      * @var Task
@@ -94,7 +91,7 @@ class RepeatingTask
      *
      * @return int
      */
-    public function getId():int
+    public function getId(): int
     {
         return $this->id;
     }
@@ -108,12 +105,14 @@ class RepeatingTask
      */
     public function setStartAt($startAt): RepeatingTask
     {
-        if (\is_int($startAt) && null !== $startAt) {
-            $dateTimeUnix = new \DateTime("@$startAt");
-            $this->startAt = $dateTimeUnix;
-        } else {
+        if($startAt instanceof \DateTime){
             $this->startAt = $startAt;
+            return $this;
         }
+
+        $startAt = (int)$startAt;
+        $dateTimeUnix = new \DateTime("@$startAt");
+        $this->startAt = $dateTimeUnix;
         return $this;
     }
 
@@ -140,7 +139,7 @@ class RepeatingTask
      */
     public function setIntervalLength($intervalLength): RepeatingTask
     {
-        $this->intervalLength = $intervalLength;
+        $this->intervalLength = (int)$intervalLength;
 
         return $this;
     }
@@ -234,7 +233,7 @@ class RepeatingTask
      *
      * @return RepeatingTask
      */
-    public function setTitle($title):RepeatingTask
+    public function setTitle($title): RepeatingTask
     {
         $this->title = $title;
 
@@ -246,9 +245,37 @@ class RepeatingTask
      *
      * @return string
      */
-    public function getTitle():string
+    public function getTitle(): string
     {
         return $this->title;
+    }
+
+    /**
+     * Set isActive
+     *
+     * @param boolean|string $isActive
+     *
+     * @return RepeatingTask
+     */
+    public function setIsActive($isActive): RepeatingTask
+    {
+        if (\is_string($isActive)) {
+            $isActive = ($isActive === 'true' || $isActive == 1);
+        }
+
+        $this->isActive = $isActive;
+
+        return $this;
+    }
+
+    /**
+     * Get isActive
+     *
+     * @return boolean
+     */
+    public function getIsActive(): bool
+    {
+        return $this->isActive;
     }
 
     /**

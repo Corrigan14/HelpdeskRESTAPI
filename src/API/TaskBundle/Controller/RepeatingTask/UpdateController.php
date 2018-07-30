@@ -107,6 +107,7 @@ class UpdateController extends ApiBaseController
         if (false === $dataValidation['status']) {
             $response->setStatusCode($dataValidation['errorCode'])
                 ->setContent(json_encode($dataValidation['errorMessage']));
+
             return $response;
         }
 
@@ -133,40 +134,6 @@ class UpdateController extends ApiBaseController
         return $response;
 
 
-    }
-
-    /**
-     * @ApiDoc(
-     *  description="Delete Entity (DELETE)",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  statusCodes={
-     *      204 ="The Entity was successfully deleted",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *  })
-     *
-     * @param int $repeatingTaskId
-     *
-     * @return Response
-     */
-    public function deleteAction(int $repeatingTaskId): Response
-    {
-        // TODO: Implement deleteAction() method.
     }
 
     /**
@@ -248,6 +215,7 @@ class UpdateController extends ApiBaseController
         if (!$this->get('repeating_task_voter')->isGranted(VoteOptions::UPDATE_REPEATING_TASK, $options)) {
             return false;
         }
+
         return true;
     }
 }

@@ -84,21 +84,23 @@ class GetController extends ApiBaseController
 
         $repeatingTask = $this->getDoctrine()->getRepository('APITaskBundle:RepeatingTask')->find($repeatingTaskId);
         if (!$repeatingTask instanceof RepeatingTask) {
-            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Repeating Task with requested Id does not exist!']));
+            $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE)
+                ->setContent(json_encode(['message' => 'Repeating Task with requested Id does not exist!']));
+
             return $response;
         }
 
         // User can see a repeating task if he is ADMIN or repeating task is related to the task where he has a permission to view it
         if (!$this->checkViewPermission($repeatingTask)) {
-            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
-            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE)
+                ->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
             return $response;
         }
 
         $repeatingTaskArray = $this->get('repeating_task_get_service')->getRepeatingTask($repeatingTaskId);
-        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
-        $response = $response->setContent(json_encode($repeatingTaskArray));
+        $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE)
+            ->setContent(json_encode($repeatingTaskArray));
+
         return $response;
     }
 
@@ -115,9 +117,11 @@ class GetController extends ApiBaseController
             'allowedTasksId' => $this->get('task_service')->getUsersViewTasksId($loggedUser),
             'repeatingTasksTaskId' => $repeatingTask->getTask()->getId()
         ];
+
         if (!$this->get('repeating_task_voter')->isGranted(VoteOptions::VIEW_REPEATING_TASK, $options)) {
             return false;
         }
+
         return true;
     }
 }

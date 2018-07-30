@@ -115,8 +115,9 @@ class ListController extends ApiBaseController
 
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
         if (false === $requestBody) {
-            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
+            $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE)
+                ->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
+
             return $response;
         }
 
@@ -128,8 +129,9 @@ class ListController extends ApiBaseController
         $allowedLoggedUsersTasks = $this->get('task_service')->getUsersViewTasksId($loggedUser);
         $repeatingTaskArray = $this->get('repeating_task_get_service')->getRepeatingTasks($processedFilterParams, $allowedLoggedUsersTasks);
 
-        $response = $response->setContent(json_encode($repeatingTaskArray));
-        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+        $response->setContent(json_encode($repeatingTaskArray))
+            ->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
+
         return $response;
     }
 }

@@ -5,11 +5,9 @@ namespace API\TaskBundle\Controller\RepeatingTask;
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\RepeatingTask;
 use API\TaskBundle\Entity\Task;
-use API\TaskBundle\Security\RepeatingTask\EntityParams;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
-use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -59,6 +57,7 @@ class ActivationController extends ApiBaseController
         if (false === $dataValidation['status']) {
             $response->setStatusCode($dataValidation['errorCode'])
                 ->setContent(json_encode($dataValidation['errorMessage']));
+
             return $response;
         }
 
@@ -145,6 +144,7 @@ class ActivationController extends ApiBaseController
         if (false === $dataValidation['status']) {
             $response->setStatusCode($dataValidation['errorCode'])
                 ->setContent(json_encode($dataValidation['errorMessage']));
+
             return $response;
         }
 
@@ -175,7 +175,6 @@ class ActivationController extends ApiBaseController
                 'errorCode' => StatusCodesHelper::NOT_FOUND_CODE,
                 'errorMessage' => 'Repeating task with requested Id does not exist!'
             ];
-
         }
 
         // User can see a repeating task if he is ADMIN or repeating task is related to the task where he has a permission to create a Task
@@ -215,6 +214,7 @@ class ActivationController extends ApiBaseController
         if (!$this->get('repeating_task_voter')->isGranted(VoteOptions::UPDATE_REPEATING_TASK, $options)) {
             return false;
         }
+
         return true;
     }
 }

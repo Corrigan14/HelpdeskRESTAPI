@@ -44,6 +44,8 @@ class Voter extends ApiBaseVoter
                 return $this->canCreate($options);
             case VoteOptions::UPDATE_REPEATING_TASK:
                 return $this->canUpdate($options);
+            case VoteOptions::DELETE_REPEATING_TASK:
+                return $this->canDelete($options);
             default:
                 return false;
         }
@@ -96,12 +98,37 @@ class Voter extends ApiBaseVoter
     }
 
     /**
-     * User can create a repeating task if: he is an admin, or repeating task is related to the task where he has a permission to create tasks
+     * User can update a repeating task if: he is an admin, or repeating task is related to the task where he has a permission to create tasks
      *
      * @param array $options
      * @return bool
      */
     private function canUpdate(array $options): bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        $userHasProject = $options['userHasProject'];
+        if (!$userHasProject instanceof UserHasProject) {
+           return false;
+        }
+
+        $userHasProjectACL = $userHasProject->getAcl();
+        if (!\in_array(ProjectAclOptions::CREATE_TASK, $userHasProjectACL, true)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * User can delete a repeating task if: he is an admin, or repeating task is related to the task where he has a permission to create tasks
+     *
+     * @param array $options
+     * @return bool
+     */
+    private function canDelete(array $options): bool
     {
         if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
             return true;

@@ -98,6 +98,7 @@ class CreateController extends ApiBaseController
         if (false === $dataValidation['status']) {
             $response->setStatusCode($dataValidation['errorCode'])
                 ->setContent(json_encode($dataValidation['errorMessage']));
+
             return $response;
         }
 
@@ -138,7 +139,6 @@ class CreateController extends ApiBaseController
                 'errorCode' => StatusCodesHelper::NOT_FOUND_CODE,
                 'errorMessage' => 'Task with requested Id does not exist!'
             ];
-
         }
 
         // User can see a repeating task if he is ADMIN or repeating task is related to the task where he has a permission to create a Task
@@ -188,6 +188,7 @@ class CreateController extends ApiBaseController
         if (!$this->get('repeating_task_voter')->isGranted(VoteOptions::CREATE_REPEATING_TASK, $options)) {
             return false;
         }
+
         return true;
     }
 }

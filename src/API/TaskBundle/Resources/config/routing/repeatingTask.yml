@@ -34,7 +34,7 @@ repeating_task_update_task:
 
 repeating_task_delete:
     path:     /repeating-tasks/{repeatingTaskId}
-    defaults: { _controller: APITaskBundle:RepeatingTask/Update:delete }
+    defaults: { _controller: APITaskBundle:RepeatingTask/Delete:delete }
     methods: [DELETE]
     requirements:
         repeatingTaskId: '\d+'

@@ -65,6 +65,7 @@ class VoteOptions
     public const VIEW_REPEATING_TASK = 'view_repeating_task';
     public const UPDATE_REPEATING_TASK = 'update_repeating_task';
     public const CREATE_REPEATING_TASK = 'create_repeating_task';
+    public const DELETE_REPEATING_TASK = 'delete_repeating_task';
 
     /**
      * @return array

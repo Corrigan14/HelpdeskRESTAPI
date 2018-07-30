@@ -21,7 +21,7 @@ class FilterAttributeOptions
     public const TAG = 'tag';
     public const FOLLOWER = 'follower';
     public const CREATED = 'createdTime';
-    const STARTED = 'startedTime';
+    public const STARTED = 'startedTime';
     public const DEADLINE = 'deadlineTime';
     public const CLOSED = 'closedTime';
     public const ARCHIVED = 'archived';

@@ -140,6 +140,8 @@ class CommentController extends ApiBaseController
      * @param Request $request
      * @param int $taskId
      * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      */
     public function tasksCommentsListAction(Request $request, int $taskId): Response
@@ -277,6 +279,7 @@ class CommentController extends ApiBaseController
      *
      * @param int $commentId
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
      */
@@ -393,9 +396,9 @@ class CommentController extends ApiBaseController
      * @param Request $request
      * @param int $taskId
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
     public function createTasksCommentAction(Request $request, int $taskId): Response
@@ -512,6 +515,8 @@ class CommentController extends ApiBaseController
      * @param Request $request
      * @param int $commentId
      * @return Response
+     * @throws \LogicException
+     * @throws \UnexpectedValueException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \InvalidArgumentException
      */
@@ -574,6 +579,9 @@ class CommentController extends ApiBaseController
      * @param int $commentId
      *
      * @return Response
+     * @throws \LogicException
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      */
     public function deleteAction(int $commentId): Response
     {
@@ -610,6 +618,7 @@ class CommentController extends ApiBaseController
      * @param $requestData
      * @param $locationUrl
      * @return Response
+     * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      * @throws \LogicException
      */
@@ -784,7 +793,7 @@ class CommentController extends ApiBaseController
      * @throws \Symfony\Component\Validator\Exception\InvalidOptionsException
      * @throws \Symfony\Component\Validator\Exception\ConstraintDefinitionException
      */
-    private function processEmailAddress(&$requestData, Comment &$comment, array &$emailAddress, array &$notValidEmailAddresses): void
+    private function processEmailAddress(&$requestData, Comment &$comment, array &$emailAddress, array &$notValidEmailAddresses)
     {
         $validator = $this->get('validator');
         $constraints = [

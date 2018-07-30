@@ -14,11 +14,66 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class UpdateController
+ * Class ActivationController
  * @package API\TaskBundle\Controller\RepeatingTask
  */
-class UpdateController extends ApiBaseController
+class ActivationController extends ApiBaseController
 {
+    /**
+     * @ApiDoc(
+     *  description="Inactivate Repeating Task Entity",
+     *  requirements={
+     *     {
+     *       "name"="repeatingTaskId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of a processed object"
+     *     }
+     *  },
+     *  headers={
+     *     {
+     *       "name"="Authorization",
+     *       "required"=true,
+     *       "description"="Bearer {JWT Token}"
+     *     }
+     *  },
+     *  statusCodes={
+     *      200 ="is_active param of Entity was successfully changed to inactive: 0",
+     *      401 ="Unauthorized request",
+     *      403 ="Access denied",
+     *      404 ="Not found Entity",
+     *  })
+     *
+     * @param int $repeatingTaskId
+     * @return Response
+     * @throws \LogicException
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
+     */
+    public function inactivateAction(int $repeatingTaskId):Response
+    {
+        $locationURL = $this->generateUrl('repeating_task_inactivate', ['repeatingTaskId' => $repeatingTaskId]);
+        $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
+
+        $dataValidation = $this->validateData($repeatingTaskId);
+        if (false === $dataValidation['status']) {
+            $response->setStatusCode($dataValidation['errorCode'])
+                ->setContent(json_encode($dataValidation['errorMessage']));
+            return $response;
+        }
+
+        /** @var RepeatingTask $repeatingTask */
+        $repeatingTask = $dataValidation['repeatingTask'];
+        $repeatingTask->setIsActive(false);
+        $this->getDoctrine()->getManager()->persist($repeatingTask);
+        $this->getDoctrine()->getManager()->flush();
+
+        $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE)
+                 ->setContent(json_encode(['message' => StatusCodesHelper::UNACITVATE_MESSAGE]));
+
+        return $response;
+    }
+
     /**
      * ### Response ###
      *      {
@@ -52,19 +107,12 @@ class UpdateController extends ApiBaseController
      *  description="Update Repeating Task Entity",
      *  requirements={
      *     {
-     *       "name"="taskId",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of a Repeating's task related Task"
-     *     },
-     *     {
      *       "name"="repeatingTaskId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
      *       "description"="The id of a Repeating task"
      *     }
      *  },
-     *  input={"class"="API\TaskBundle\Entity\RepeatingTask"},
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -77,106 +125,48 @@ class UpdateController extends ApiBaseController
      *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *      409 ="Invalid parameters",
+     *      404 ="Not found Entity"
      *  }
      * )
      *
      * @param int $repeatingTaskId
-     * @param bool|int $taskId
-     * @param Request $request
      * @return Response
-     * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \LogicException
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \ReflectionException
      */
-    public function updateAction(int $repeatingTaskId, $taskId = false, Request $request): Response
+    public function restoreAction(int $repeatingTaskId): Response
     {
-        $locationURL = $this->generateUrl('repeating_task_update', ['repeatingTaskId' => $repeatingTaskId]);
-        if ($taskId) {
-            $locationURL = $this->generateUrl('repeating_task_update_task', ['taskId' => $taskId, 'repeatingTaskId' => $repeatingTaskId]);
-        }
+        $locationURL = $this->generateUrl('repeating_task_restore', ['repeatingTaskId' => $repeatingTaskId]);
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
-        $dataValidation = $this->validateData($request, $taskId, $repeatingTaskId);
-
+        $dataValidation = $this->validateData($repeatingTaskId);
         if (false === $dataValidation['status']) {
             $response->setStatusCode($dataValidation['errorCode'])
                 ->setContent(json_encode($dataValidation['errorMessage']));
             return $response;
         }
 
-        /** @var Task $task */
-        $task = $dataValidation['task'];
         /** @var RepeatingTask $repeatingTask */
         $repeatingTask = $dataValidation['repeatingTask'];
-        $requestData = $dataValidation['requestData'];
-
-        $repeatingTask->setTask($task);
-        $errors = $this->get('entity_processor')->processEntity($repeatingTask, $requestData);
-        $updateEntity = $this->get('repeating_task_update_service')->updateRepeatingTask($errors, $repeatingTask, $requestData);
-        if (isset($updateEntity['error'])) {
-            $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE)
-                ->setContent(json_encode(['message' => $updateEntity['error']]));
-
-            return $response;
-        }
+        $repeatingTask->setIsActive(true);
+        $this->getDoctrine()->getManager()->persist($repeatingTask);
+        $this->getDoctrine()->getManager()->flush();
 
         $repeatingTaskArray = $this->get('repeating_task_get_service')->getRepeatingTask($repeatingTask->getId());
         $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE)
             ->setContent(json_encode($repeatingTaskArray));
 
         return $response;
-
-
     }
 
     /**
-     * @ApiDoc(
-     *  description="Delete Entity (DELETE)",
-     *  requirements={
-     *     {
-     *       "name"="id",
-     *       "dataType"="integer",
-     *       "requirement"="\d+",
-     *       "description"="The id of processed object"
-     *     }
-     *  },
-     *  headers={
-     *     {
-     *       "name"="Authorization",
-     *       "required"=true,
-     *       "description"="Bearer {JWT Token}"
-     *     }
-     *  },
-     *  statusCodes={
-     *      204 ="The Entity was successfully deleted",
-     *      401 ="Unauthorized request",
-     *      403 ="Access denied",
-     *      404 ="Not found Entity",
-     *  })
-     *
-     * @param int $repeatingTaskId
-     *
-     * @return Response
-     */
-    public function deleteAction(int $repeatingTaskId): Response
-    {
-        // TODO: Implement deleteAction() method.
-    }
-
-    /**
-     * @param Request $request
-     * @param int $taskId
      * @param int $repeatingTaskId
      * @return array|bool
      * @throws \LogicException
      */
-    private function validateData(Request $request, $taskId, int $repeatingTaskId): array
+    private function validateData(int $repeatingTaskId): array
     {
         $repeatingTask = $this->getDoctrine()->getRepository('APITaskBundle:RepeatingTask')->find($repeatingTaskId);
         if (!$repeatingTask instanceof RepeatingTask) {
@@ -188,20 +178,8 @@ class UpdateController extends ApiBaseController
 
         }
 
-        $task = $repeatingTask->getTask();
-        if ($taskId) {
-            $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
-        }
-        if (!$task instanceof Task) {
-            return [
-                'status' => false,
-                'errorCode' => StatusCodesHelper::NOT_FOUND_CODE,
-                'errorMessage' => 'Task with requested Id does not exist!'
-            ];
-        }
-
         // User can see a repeating task if he is ADMIN or repeating task is related to the task where he has a permission to create a Task
-        if (!$this->checkUpdatePermission($task)) {
+        if (!$this->checkUpdatePermission($repeatingTask->getTask())) {
             return [
                 'status' => false,
                 'errorCode' => StatusCodesHelper::ACCESS_DENIED_CODE,
@@ -209,20 +187,9 @@ class UpdateController extends ApiBaseController
             ];
         }
 
-        $requestDataCheck = $this->get('api_base.service')->checkRequestData($request, EntityParams::getAllowedEntityParams());
-        if (isset($requestDataCheck['error'])) {
-            return [
-                'status' => false,
-                'errorCode' => StatusCodesHelper::INVALID_PARAMETERS_CODE,
-                'errorMessage' => $requestDataCheck['error']
-            ];
-        }
-
         return [
             'status' => true,
-            'task' => $task,
-            'repeatingTask' => $repeatingTask,
-            'requestData' => $requestDataCheck['requestData']
+            'repeatingTask' => $repeatingTask
         ];
     }
 

@@ -674,6 +674,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @throws \InvalidArgumentException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
+     * @throws \ReflectionException
      */
     public function updateAction(int $id, Request $request): Response
     {
@@ -730,6 +731,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @throws \InvalidArgumentException
      * @throws \UnexpectedValueException
      * @throws \LogicException
+     * @throws \ReflectionException
      */
     public function deleteAction(int $id): Response
     {
@@ -841,6 +843,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @throws \InvalidArgumentException
      * @throws \UnexpectedValueException
      * @throws \LogicException
+     * @throws \ReflectionException
      */
     public function restoreAction(int $id): Response
     {
@@ -969,6 +972,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @throws \LogicException
      * @throws \InvalidArgumentException
      * @throws \ReflectionException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function addUserToProjectAction(int $projectId, int $userId, Request $request): Response
     {
@@ -1108,6 +1112,7 @@ class ProjectController extends ApiBaseController implements ControllerInterface
      * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function removeUserFromProjectAction(int $projectId, int $userId): Response
     {

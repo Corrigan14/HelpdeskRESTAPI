@@ -41,14 +41,14 @@ repeating_task_delete:
 
 repeating_task_inactivate:
     path:     /repeating-tasks/{repeatingTaskId}/inactivate
-    defaults: { _controller: APITaskBundle:RepeatingTask/Update:update }
+    defaults: { _controller: APITaskBundle:RepeatingTask/Activation:inactivate }
     methods: [PUT]
     requirements:
         repeatingTaskId: '\d+'
 
 repeating_task_restore:
     path:     /repeating-tasks/{repeatingTaskId}/restore
-    defaults: { _controller: APITaskBundle:RepeatingTask/Update:update }
+    defaults: { _controller: APITaskBundle:RepeatingTask/Activation:restore }
     methods: [PUT]
     requirements:
         repeatingTaskId: '\d+'

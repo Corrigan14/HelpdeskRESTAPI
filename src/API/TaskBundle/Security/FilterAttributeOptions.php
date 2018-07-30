@@ -10,24 +10,24 @@ namespace API\TaskBundle\Security;
 class FilterAttributeOptions
 {
     // Attributes available for filter
-    public const ID = 'id';
-    public const TITLE = 'title';
-    public const STATUS = 'status';
-    public const PROJECT = 'project';
-    public const CREATOR = 'creator';
-    public const REQUESTER = 'requester';
-    public const COMPANY = 'taskCompany';
-    public const ASSIGNED = 'assigned';
-    public const TAG = 'tag';
-    public const FOLLOWER = 'follower';
-    public const CREATED = 'createdTime';
-    public const STARTED = 'startedTime';
-    public const DEADLINE = 'deadlineTime';
-    public const CLOSED = 'closedTime';
-    public const ARCHIVED = 'archived';
-    public const IMPORTANT = 'important';
-    public const ADDED_PARAMETERS = 'addedParameters';
-    public const SEARCH = 'search';
+    const ID = 'id';
+    const TITLE = 'title';
+    const STATUS = 'status';
+    const PROJECT = 'project';
+    const CREATOR = 'creator';
+    const REQUESTER = 'requester';
+    const COMPANY = 'taskCompany';
+    const ASSIGNED = 'assigned';
+    const TAG = 'tag';
+    const FOLLOWER = 'follower';
+    const CREATED = 'createdTime';
+    const STARTED = 'startedTime';
+    const DEADLINE = 'deadlineTime';
+    const CLOSED = 'closedTime';
+    const ARCHIVED = 'archived';
+    const IMPORTANT = 'important';
+    const ADDED_PARAMETERS = 'addedParameters';
+    const SEARCH = 'search';
 
     /**
      * @return array

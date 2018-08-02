@@ -98,6 +98,33 @@ class RepeatingTaskRepository extends EntityRepository
     }
 
     /**
+     * @param $actualDate
+     * @return array
+     */
+    public function getCronAvailableEntities($actualDate): array
+    {
+        $query = $this->createQueryBuilder('repeatingTask')
+            ->select('repeatingTask, task')
+            ->leftJoin('repeatingTask.task', 'task')
+            ->where('repeatingTask.isActive = :isActiveParam');
+
+        $query->andWhere(
+            $query->expr()->orX(
+                $query->expr()->isNull('repeatingTask.repeatsNumber'),
+                $query->expr()->isNull('repeatingTask.alreadyRepeated'),
+                $query->expr()->lt('repeatingTask.alreadyRepeated','repeatingTask.repeatsNumber')
+            )
+        );
+//        dump($query->getQuery());
+
+        $query->setParameters([
+            'isActiveParam' => true
+        ]);
+
+        return $query->getQuery()->getArrayResult();
+    }
+
+    /**
      * @param int $page
      * @param int $limit
      * @return int

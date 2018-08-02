@@ -68,6 +68,21 @@ class RepeatingTask
      */
     private $repeatsNumber;
 
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="already_repeated", type="integer", nullable=true)
+     */
+    private $alreadyRepeated = 0;
+
+    /**
+     * @var \DateTime|int
+     *
+     * @ORM\Column(name="last_repeat", type="datetime", nullable=true)
+     */
+    private $lastRepeat;
+
     /**
      * @var bool
      *
@@ -308,5 +323,63 @@ class RepeatingTask
         }
 
         return $this->updatedAt;
+    }
+
+    /**
+     * Set alreadyRepeated.
+     *
+     * @param int|null $alreadyRepeated
+     *
+     * @return RepeatingTask
+     */
+    public function setAlreadyRepeated($alreadyRepeated = null):RepeatingTask
+    {
+        $this->alreadyRepeated = $alreadyRepeated;
+
+        return $this;
+    }
+
+    /**
+     * Get alreadyRepeated.
+     *
+     * @return int|null
+     */
+    public function getAlreadyRepeated()
+    {
+        return $this->alreadyRepeated;
+    }
+
+    /**
+     * Set lastRepeat.
+     *
+     * @param \DateTime|null $lastRepeat
+     *
+     * @return RepeatingTask
+     */
+    public function setLastRepeat($lastRepeat = null):RepeatingTask
+    {
+        if($lastRepeat instanceof \DateTime){
+            $this->lastRepeat = $lastRepeat;
+            return $this;
+        }
+
+        $lastRepeat = (int)$lastRepeat;
+        $dateTimeUnix = new \DateTime("@$lastRepeat");
+        $this->lastRepeat = $dateTimeUnix;
+        return $this;
+    }
+
+    /**
+     * Get lastRepeat.
+     *
+     * @return int|null
+     */
+    public function getLastRepeat()
+    {
+        if ($this->lastRepeat) {
+            return $this->lastRepeat->getTimestamp();
+        }
+
+        return $this->lastRepeat;
     }
 }

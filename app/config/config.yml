@@ -99,6 +99,11 @@ nelmio_cors:
             allow_headers: ['*']
             allow_methods: ['GET','OPTIONS']
             max_age: 3600
+        '^/cron':
+            allow_origin: ['*']
+            allow_headers: ['*']
+            allow_methods: ['OPTIONS','POST']
+            max_age: 3600
 
 stof_doctrine_extensions:
     default_locale: en

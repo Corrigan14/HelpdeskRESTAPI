@@ -68,6 +68,21 @@ class RepeatingTask
      */
     private $repeatsNumber;
 
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="already_repeated", type="integer", nullable=true)
+     */
+    private $alreadyRepeated = 0;
+
+    /**
+     * @var \DateTime|int
+     *
+     * @ORM\Column(name="last_repeat", type="datetime", nullable=true)
+     */
+    private $lastRepeat;
+
     /**
      * @var bool
      *

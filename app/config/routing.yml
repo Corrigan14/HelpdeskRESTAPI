@@ -20,3 +20,8 @@ file_download:
     defaults: { _controller: APICoreBundle:Cdn:downloadFile }
     methods: [GET]
 
+repeating_task_cron:
+    path:     /cron/repeating-tasks
+    defaults: { _controller: APITaskBundle:RepeatingTask/Cron:cron }
+    methods: [POST]
+

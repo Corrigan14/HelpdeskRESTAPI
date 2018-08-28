@@ -17,6 +17,13 @@ task:
     requirements:
         id: '\d+'
 
+tasks_list_of_tasks_repeating_tasks:
+    path:     /tasks/{taskId}/repeating-task
+    defaults: { _controller: APITaskBundle:Task/RepeatingTask:list}
+    methods: [GET]
+    requirements:
+            taskId: '\d+'
+
 tasks_create_project_status:
     path:     /tasks/project/{projectId}/status/{statusId}
     defaults: { _controller: APITaskBundle:Task/Task:create }

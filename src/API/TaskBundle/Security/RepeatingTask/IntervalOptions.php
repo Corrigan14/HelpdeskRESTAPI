@@ -8,10 +8,10 @@ namespace API\TaskBundle\Security\RepeatingTask;
  */
 class IntervalOptions
 {
-    public const DAY = 'day';
-    public const WEEK = 'week';
-    public const MONTH = 'month';
-    public const YEAR = 'year';
+    const DAY = 'day';
+    const WEEK = 'week';
+    const MONTH = 'month';
+    const YEAR = 'year';
 
     /**
      * @return array

@@ -1232,6 +1232,9 @@ class TaskController extends ApiBaseController
         //Decode sent parameters
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
 
+        /** @var User $loggedUser */
+        $loggedUser = $this->getUser();
+
         $project = $this->getDoctrine()->getRepository('APITaskBundle:Project')->find($projectId);
         if (!$project instanceof Project) {
             $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
@@ -1256,17 +1259,29 @@ class TaskController extends ApiBaseController
             return $response;
         }
 
+        if ($companyId) {
+            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
+            if (!$company instanceof Company) {
+                $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Company with requested Id does not exist!']));
+                return $response;
+            }
+            $task->setCompany($company);
+        } else {
+            $usersCompany = $loggedUser->getCompany();
+            if (!$usersCompany instanceof Company) {
+                $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
+                $response = $response->setContent(json_encode(['message' => 'Company has to be set for a task! Logged user does not have a company what could be set up!']));
+                return $response;
+            }
+            $task->setCompany($usersCompany);
+        }
+
         // Check Status function. If it is CLOSED, closedAt param is required.
         // Only Task with a COMPANY can be closed!
         // If it IS IN PROGRESS or COMPLETED, startedAt param has to be set
         $statusFunction = $status->getFunction();
         if ($statusFunction === StatusFunctionOptions::CLOSED_TASK) {
-            if (null === $task->getCompany()) {
-                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                $response = $response->setContent(json_encode(['message' => 'Company is required for a tasks with CLOSED Status!']));
-                return $response;
-            }
-
             if (!isset($requestBody['closedAt'])) {
                 $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
                 $response = $response->setContent(json_encode(['message' => ' ClosedAt param is required for a tasks with CLOSED Status!']));
@@ -1279,8 +1294,7 @@ class TaskController extends ApiBaseController
         }
         $task->setStatus($status);
 
-        /** @var User $loggedUser */
-        $loggedUser = $this->getUser();
+
         if ($requesterId) {
             $requester = $this->getDoctrine()->getRepository('APICoreBundle:User')->find($requesterId);
             if (!$requester instanceof User) {
@@ -1311,24 +1325,6 @@ class TaskController extends ApiBaseController
             }
         } else {
             $task->setRequestedBy($loggedUser);
-        }
-
-        if ($companyId) {
-            $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
-            if (!$company instanceof Company) {
-                $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-                $response = $response->setContent(json_encode(['message' => 'Company with requested Id does not exist!']));
-                return $response;
-            }
-            $task->setCompany($company);
-        } else {
-            $usersCompany = $loggedUser->getCompany();
-            if (!$usersCompany instanceof Company) {
-                $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-                $response = $response->setContent(json_encode(['message' => 'Company has to be set for a task! Logged user does not have a company what could be set up!']));
-                return $response;
-            }
-            $task->setCompany($usersCompany);
         }
 
         return $this->updateTask($task, $requestBody, $locationURL, $status, true, $changedParams);

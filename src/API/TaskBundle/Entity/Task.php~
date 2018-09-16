@@ -237,6 +237,24 @@ class Task
      */
     private $repeatingTasks;
 
+    //Parent and Child Tasks
+    /**
+     * @var Task
+     *
+     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Task", inversedBy="tasks",  cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="repeating_task_parent_id", referencedColumnName="id", nullable=true)
+     * @Serializer\ReadOnly()
+     */
+    private $parentTask;
+
+    /**
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Task", mappedBy="parentTask", cascade={"persist", "remove"})
+     * @Serializer\Exclude()
+     *
+     * @var ArrayCollection
+     */
+    private $childTasks;
+
     /**
      * Task constructor.
      */
@@ -252,6 +270,7 @@ class Task
         $this->notifications = new ArrayCollection();
         $this->subtasks = new ArrayCollection();
         $this->repeatingTasks = new ArrayCollection();
+        $this->childTasks = new ArrayCollection();
     }
 
     /**

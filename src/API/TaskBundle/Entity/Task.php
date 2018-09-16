@@ -237,6 +237,24 @@ class Task
      */
     private $repeatingTasks;
 
+    //Parent and Child Tasks
+    /**
+     * @var Task
+     *
+     * @ORM\ManyToOne(targetEntity="API\TaskBundle\Entity\Task", inversedBy="tasks",  cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="repeating_task_parent_id", referencedColumnName="id", nullable=true)
+     * @Serializer\ReadOnly()
+     */
+    private $parentTask;
+
+    /**
+     * @ORM\OneToMany(targetEntity="API\TaskBundle\Entity\Task", mappedBy="parentTask", cascade={"persist", "remove"})
+     * @Serializer\Exclude()
+     *
+     * @var ArrayCollection
+     */
+    private $childTasks;
+
     /**
      * Task constructor.
      */
@@ -252,6 +270,7 @@ class Task
         $this->notifications = new ArrayCollection();
         $this->subtasks = new ArrayCollection();
         $this->repeatingTasks = new ArrayCollection();
+        $this->childTasks = new ArrayCollection();
     }
 
     /**
@@ -1039,5 +1058,65 @@ class Task
     public function getRepeatingTasks()
     {
         return $this->repeatingTasks;
+    }
+
+    /**
+     * Set parentTask.
+     *
+     * @param Task|null $parentTask
+     *
+     * @return Task
+     */
+    public function setParentTask(Task $parentTask = null)
+    {
+        $this->parentTask = $parentTask;
+
+        return $this;
+    }
+
+    /**
+     * Get parentTask.
+     *
+     * @return Task|null
+     */
+    public function getParentTask()
+    {
+        return $this->parentTask;
+    }
+
+    /**
+     * Add childTask.
+     *
+     * @param Task $childTask
+     *
+     * @return Task
+     */
+    public function addChildTask(Task $childTask)
+    {
+        $this->childTasks[] = $childTask;
+
+        return $this;
+    }
+
+    /**
+     * Remove childTask.
+     *
+     * @param Task $childTask
+     *
+     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
+     */
+    public function removeChildTask(Task $childTask)
+    {
+        return $this->childTasks->removeElement($childTask);
+    }
+
+    /**
+     * Get childTasks.
+     *
+     * @return Collection
+     */
+    public function getChildTasks()
+    {
+        return $this->childTasks;
     }
 }

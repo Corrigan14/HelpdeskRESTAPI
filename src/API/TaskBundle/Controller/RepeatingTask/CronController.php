@@ -162,15 +162,15 @@ class CronController extends ApiBaseController
         $childTask->setProject($parentTask->getProject());
         $childTask->setCompany($parentTask->getCompany());
         $childTask->setStatus($newStatus);
+        $childTask->setParentTask($parentTask);
 
-        //Doplnit upgrade Tasku- pridavat k nemu jeho deti - nutny upgrade DB
-        
+        $parentTask->addChildTask($childTask);
+
         $oldRepeatsNumber = $repeatingTask->getAlreadyRepeated();
         $newRepeatsNumber = $oldRepeatsNumber + 1;
         $repeatingTask->setLastRepeat($actualTime);
         $repeatingTask->setAlreadyRepeated($newRepeatsNumber);
-
-
+        
         $this->getDoctrine()->getManager()->persist($childTask);
         $this->getDoctrine()->getManager()->persist($parentTask);
         $this->getDoctrine()->getManager()->persist($repeatingTask);

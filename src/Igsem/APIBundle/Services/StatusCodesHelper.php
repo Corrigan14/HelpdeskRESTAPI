@@ -48,9 +48,8 @@ class StatusCodesHelper
     const INVALID_PARAMETERS_CODE = 409;
     const PROBLEM_WITH_EMAIL_SENDING = 422;
 
-
     const INVALID_JWT_TOKEN_MESSAGE = 'Invalid JWT Token';
     const INVALID_JWT_TOKEN_CODE = 401;
 
-
+    const NO_CRON_TASKS_CREATED = 'No tasks created!';
 }

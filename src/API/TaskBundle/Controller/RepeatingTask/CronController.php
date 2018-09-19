@@ -5,6 +5,9 @@ namespace API\TaskBundle\Controller\RepeatingTask;
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\RepeatingTask;
 use API\TaskBundle\Entity\Task;
+use API\TaskBundle\Entity\TaskHasAssignedUser;
+use API\TaskBundle\Entity\TaskHasAttachment;
+use API\TaskBundle\Entity\TaskSubtask;
 use API\TaskBundle\Security\RepeatingTask\EntityParams;
 use API\TaskBundle\Security\RepeatingTask\IntervalOptions;
 use API\TaskBundle\Security\StatusFunctionOptions;
@@ -32,8 +35,6 @@ class CronController extends ApiBaseController
      *              "id": 5999,
      *              "title": "Task 2999",
      *              "description": "Description of Users Task 2999",
-     *              "important": true,
-     *              "work_type": "programovanie www",
      *              "createdAt": 1537125154,
      *              "updatedAt": 1537125154,
      *              "createdBy":
@@ -111,7 +112,7 @@ class CronController extends ApiBaseController
                 $dailyTasks[] = $this->processDailyRepeatedTask($repeatingTask, $actualTime);
             }
         }
-        $createdTasks = array_merge($dailyTasks,$weeklyTasks,$monthlyTasks,$yearlyTasks);
+        $createdTasks = array_merge($dailyTasks, $weeklyTasks, $monthlyTasks, $yearlyTasks);
 
         if (0 === \count($createdTasks)) {
             return false;
@@ -156,6 +157,7 @@ class CronController extends ApiBaseController
         $childTask->setTitle($parentTask->getTitle());
         $childTask->setDescription($parentTask->getDescription());
         $childTask->setWorkType($parentTask->getWorkType());
+        $childTask->setWork($parentTask->getWork());
         $childTask->setImportant($parentTask->getImportant());
         $childTask->setCreatedBy($parentTask->getCreatedBy());
         $childTask->setRequestedBy($parentTask->getRequestedBy());
@@ -164,13 +166,62 @@ class CronController extends ApiBaseController
         $childTask->setStatus($newStatus);
         $childTask->setParentTask($parentTask);
 
+        //Tags
+        $parentTaskTags = $parentTask->getTags();
+        foreach ($parentTaskTags as $tag) {
+            $childTask->addTag($tag);
+            $this->getDoctrine()->getManager()->persist($childTask);
+        }
+
+        //Followers
+        $parentTaskFollowers = $parentTask->getFollowers();
+        foreach ($parentTaskFollowers as $follower) {
+            $childTask->addFollower($follower);
+            $this->getDoctrine()->getManager()->persist($childTask);
+        }
+
+        //Sub-tasks
+        $parentTaskSubtasks = $parentTask->getSubtasks();
+        /** @var TaskSubtask $parentSubtask */
+        foreach ($parentTaskSubtasks as $parentSubtask) {
+            $childSubtask = new TaskSubtask();
+            $childSubtask->setTask($childTask);
+            $childSubtask->setTitle($parentSubtask->getTitle());
+            $childSubtask->setDone(false);
+            $childSubtask->setCreatedBy($parentSubtask->getCreatedBy());
+            $this->getDoctrine()->getManager()->persist($childSubtask);
+        }
+
+        //Task Has Attachments
+        $parentTaskAttachments = $parentTask->getTaskHasAttachments();
+        foreach ($parentTaskAttachments as $taskHasAttachmentParent) {
+            $taskHasAttachmentChild = new TaskHasAttachment();
+            $taskHasAttachmentChild->setTask($childTask);
+            $taskHasAttachmentChild->setSlug($taskHasAttachmentParent->getSlug());
+            $this->getDoctrine()->getManager()->persist($taskHasAttachmentChild);
+        }
+
+        //Task Has Assigners
+        $parentTaskAssigners = $parentTask->getTaskHasAssignedUsers();
+        /** @var TaskHasAssignedUser $taskHasAssignerParent */
+        foreach ($parentTaskAssigners as $taskHasAssignerParent)
+        {
+            $taskHasAssignerChild = new TaskHasAssignedUser();
+            $taskHasAssignerChild->setTask($childTask);
+            $taskHasAssignerChild->setStatus($newStatus);
+            $taskHasAssignerChild->setUser($taskHasAssignerParent->getUser());
+            $taskHasAssignerChild->setActual($taskHasAssignerParent->getActual());
+            $taskHasAssignerChild->setGps($taskHasAssignerParent->getGps());
+            $this->getDoctrine()->getManager()->persist($taskHasAssignerChild);
+        }
+
         $parentTask->addChildTask($childTask);
 
         $oldRepeatsNumber = $repeatingTask->getAlreadyRepeated();
         $newRepeatsNumber = $oldRepeatsNumber + 1;
         $repeatingTask->setLastRepeat($actualTime);
         $repeatingTask->setAlreadyRepeated($newRepeatsNumber);
-        
+
         $this->getDoctrine()->getManager()->persist($childTask);
         $this->getDoctrine()->getManager()->persist($parentTask);
         $this->getDoctrine()->getManager()->persist($repeatingTask);
@@ -180,9 +231,6 @@ class CronController extends ApiBaseController
             'parentId' => $parentTask->getId(),
             'id' => $childTask->getId(),
             'title' => $childTask->getTitle(),
-            'description' => $childTask->getDescription(),
-            'important' => $childTask->getImportant(),
-            'work_type' => $childTask->getWorkType(),
             'createdAt' => $childTask->getCreatedAt(),
             'updatedAt' => $childTask->getUpdatedAt(),
             'createdBy' => [

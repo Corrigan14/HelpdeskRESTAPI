@@ -18,6 +18,7 @@ use Igsem\APIBundle\Services\StatusCodesHelper;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
  * Class CronController
@@ -128,11 +129,14 @@ class CronController extends ApiBaseController
      */
     private function processDailyRepeatedTask(RepeatingTask $repeatingTask, \DateTime $actualTime): array
     {
-        $lastRepeat = $repeatingTask->getLastRepeat();
-        $intervalLength = $repeatingTask->getIntervalLength();
-
-        // doplnit podmienku pre interval: opakovat, ak datum kedy by som mala zopakovat ulohu ($lastRepeat + $intervalLength*24hodin) je mensi ako aktualny datum
+        $lastRepeat = $repeatingTask->getLastRepeatDateTime();
         if (null === $lastRepeat) {
+            return $this->createChildTask($repeatingTask->getTask(), $repeatingTask, $actualTime);
+        }
+
+        $intervalLength = $repeatingTask->getIntervalLength();
+        $repeatingTime = $lastRepeat->modify('+' . $intervalLength . 'day');
+        if ($repeatingTime < $actualTime) {
             return $this->createChildTask($repeatingTask->getTask(), $repeatingTask, $actualTime);
         }
 
@@ -142,11 +146,11 @@ class CronController extends ApiBaseController
     /**
      * @param Task $parentTask
      * @param RepeatingTask $repeatingTask
-     * @param \DateTime $actualTime
+     * @param \DateTime $repeatingTime
      * @return array
      * @throws \LogicException
      */
-    private function createChildTask(Task $parentTask, RepeatingTask $repeatingTask, \DateTime $actualTime): array
+    private function createChildTask(Task $parentTask, RepeatingTask $repeatingTask, \DateTime $repeatingTime): array
     {
         $newStatus = $this->getDoctrine()->getRepository('APITaskBundle:Status')->findOneBy([
             'function' => StatusFunctionOptions::NEW_TASK,
@@ -204,8 +208,7 @@ class CronController extends ApiBaseController
         //Task Has Assigners
         $parentTaskAssigners = $parentTask->getTaskHasAssignedUsers();
         /** @var TaskHasAssignedUser $taskHasAssignerParent */
-        foreach ($parentTaskAssigners as $taskHasAssignerParent)
-        {
+        foreach ($parentTaskAssigners as $taskHasAssignerParent) {
             $taskHasAssignerChild = new TaskHasAssignedUser();
             $taskHasAssignerChild->setTask($childTask);
             $taskHasAssignerChild->setStatus($newStatus);
@@ -219,7 +222,7 @@ class CronController extends ApiBaseController
 
         $oldRepeatsNumber = $repeatingTask->getAlreadyRepeated();
         $newRepeatsNumber = $oldRepeatsNumber + 1;
-        $repeatingTask->setLastRepeat($actualTime);
+        $repeatingTask->setLastRepeat($repeatingTime);
         $repeatingTask->setAlreadyRepeated($newRepeatsNumber);
 
         $this->getDoctrine()->getManager()->persist($childTask);

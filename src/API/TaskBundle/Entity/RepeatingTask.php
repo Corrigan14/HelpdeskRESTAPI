@@ -120,7 +120,7 @@ class RepeatingTask
      */
     public function setStartAt($startAt): RepeatingTask
     {
-        if($startAt instanceof \DateTime){
+        if ($startAt instanceof \DateTime) {
             $this->startAt = $startAt;
             return $this;
         }
@@ -332,7 +332,7 @@ class RepeatingTask
      *
      * @return RepeatingTask
      */
-    public function setAlreadyRepeated($alreadyRepeated = null):RepeatingTask
+    public function setAlreadyRepeated($alreadyRepeated = null): RepeatingTask
     {
         $this->alreadyRepeated = $alreadyRepeated;
 
@@ -356,9 +356,9 @@ class RepeatingTask
      *
      * @return RepeatingTask
      */
-    public function setLastRepeat($lastRepeat = null):RepeatingTask
+    public function setLastRepeat($lastRepeat = null): RepeatingTask
     {
-        if($lastRepeat instanceof \DateTime){
+        if ($lastRepeat instanceof \DateTime) {
             $this->lastRepeat = $lastRepeat;
             return $this;
         }
@@ -379,6 +379,17 @@ class RepeatingTask
         if ($this->lastRepeat) {
             return $this->lastRepeat->getTimestamp();
         }
+
+        return $this->lastRepeat;
+    }
+
+    /**
+     * Get getLastRepeatDateTime.
+     *
+     * @return \DateTime|null
+     */
+    public function getLastRepeatDateTime()
+    {
 
         return $this->lastRepeat;
     }

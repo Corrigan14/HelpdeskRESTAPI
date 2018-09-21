@@ -73,3 +73,6 @@ services:
     repeating_task_update_service:
             class: API\TaskBundle\Services\RepeatingTask\UpdateMethods
             arguments: ["@doctrine.orm.entity_manager"]
+    repeating_task_cron_service:
+            class: API\TaskBundle\Services\RepeatingTask\CronMethods
+            arguments: ["@doctrine.orm.entity_manager"]

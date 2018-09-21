@@ -108,6 +108,7 @@ class CreateController extends ApiBaseController
         $repeatingTask = new RepeatingTask();
         $repeatingTask->setTask($task);
         $repeatingTask->setIsActive(true);
+        $repeatingTask->setLastRepeat(new \DateTime());
         $errors = $this->get('entity_processor')->processEntity($repeatingTask, $requestData);
         $updateEntity = $this->get('repeating_task_update_service')->updateRepeatingTask($errors, $repeatingTask, $requestData);
 

@@ -105,18 +105,20 @@ class RepeatingTaskRepository extends EntityRepository
         $query = $this->createQueryBuilder('repeatingTask')
             ->select('repeatingTask, task')
             ->leftJoin('repeatingTask.task', 'task')
-            ->where('repeatingTask.isActive = :isActiveParam');
+            ->where('repeatingTask.isActive = :isActiveParam')
+            ->andWhere('repeatingTask.startAt <= :today');
 
         $query->andWhere(
             $query->expr()->orX(
                 $query->expr()->isNull('repeatingTask.repeatsNumber'),
                 $query->expr()->isNull('repeatingTask.alreadyRepeated'),
-                $query->expr()->lt('repeatingTask.alreadyRepeated','repeatingTask.repeatsNumber')
+                $query->expr()->lt('repeatingTask.alreadyRepeated', 'repeatingTask.repeatsNumber')
             )
         );
 
         $query->setParameters([
-            'isActiveParam' => true
+            'isActiveParam' => true,
+            'today' => new \DateTime()
         ]);
 
         return $query->getQuery()->getResult();

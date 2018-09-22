@@ -28,6 +28,9 @@ class SubtaskController extends ApiBaseController
      *             "id": 37,
      *             "title": "The first Subtask",
      *             "done": true,
+     *             "from": 1234567,
+     *             "to": 1234567,
+     *             "hours": 2.5,
      *             "createdAt": 123456778,
      *             "updatedAt": 123456778,
      *             "createdBy":
@@ -93,6 +96,9 @@ class SubtaskController extends ApiBaseController
      *
      * @param int $taskId
      * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
      */
     public function listOfTasksSubtasksAction(int $taskId): Response
     {
@@ -103,22 +109,24 @@ class SubtaskController extends ApiBaseController
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
-            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+            $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE)
+                ->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+
             return $response;
         }
 
         // Check if user can see a task
         if (!$this->get('task_voter')->isGranted(VoteOptions::SHOW_TASK, $task)) {
-            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
-            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE)
+                ->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+
             return $response;
         }
 
         $subtasksArray = $this->get('task_additional_service')->getTaskSubtasksResponse($task);
+        $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE)
+            ->setContent(json_encode($subtasksArray));
 
-        $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
-        $response = $response->setContent(json_encode($subtasksArray));
         return $response;
     }
 
@@ -130,6 +138,9 @@ class SubtaskController extends ApiBaseController
      *          "id": 37,
      *          "title": "The first Subtask",
      *          "done": true,
+     *          "from": 1234567,
+     *          "to": 1234567,
+     *          "hours": 2.5,
      *          "createdAt": 123456778,
      *          "updatedAt": 123456778,
      *          "createdBy":
@@ -182,7 +193,12 @@ class SubtaskController extends ApiBaseController
      * )
      *
      * @param int $taskId
+     * @param Request $request
      * @return Response
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
      */
     public function createSubtaskAction(int $taskId, Request $request): Response
     {
@@ -193,15 +209,17 @@ class SubtaskController extends ApiBaseController
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
-            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+            $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE)
+                ->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+
             return $response;
         }
 
         // Check if user can edit a task
         if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
-            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
-            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE)
+                ->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+
             return $response;
         }
 
@@ -211,6 +229,7 @@ class SubtaskController extends ApiBaseController
         $subtask->setDone(false);
 
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
+
         return $this->updateEntity($subtask, $requestBody, false, $locationURL);
     }
 
@@ -222,6 +241,9 @@ class SubtaskController extends ApiBaseController
      *          "id": 37,
      *          "title": "The first Subtask",
      *          "done": true,
+     *          "from": 1234567,
+     *          "to": 1234567,
+     *          "hours": 2.5,
      *          "createdAt": 123456778,
      *          "updatedAt": 123456778,
      *          "createdBy":
@@ -281,7 +303,12 @@ class SubtaskController extends ApiBaseController
      *
      * @param int $taskId
      * @param int $subtaskId
+     * @param Request $request
      * @return Response
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
      */
     public function updateSubtaskAction(int $taskId, int $subtaskId, Request $request): Response
     {
@@ -292,15 +319,17 @@ class SubtaskController extends ApiBaseController
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
-            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+            $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE)
+                ->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+
             return $response;
         }
 
         // Check if user can edit a task
         if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
-            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
-            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE)
+                ->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+
             return $response;
         }
 
@@ -310,8 +339,9 @@ class SubtaskController extends ApiBaseController
         ]);
 
         if (!$subtask instanceof TaskSubtask) {
-            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Subtask with requested Id for a requested task does not exist!']));
+            $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE)
+                ->setContent(json_encode(['message' => 'Subtask with requested Id for a requested task does not exist!']));
+
             return $response;
         }
 
@@ -354,6 +384,9 @@ class SubtaskController extends ApiBaseController
      * @param int $taskId
      * @param int $subtaskId
      * @return Response
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
+     * @throws \LogicException
      */
     public function deleteSubtaskAction(int $taskId, int $subtaskId): Response
     {
@@ -364,15 +397,17 @@ class SubtaskController extends ApiBaseController
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
         if (!$task instanceof Task) {
-            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+            $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE)
+                ->setContent(json_encode(['message' => 'Task with requested Id does not exist!']));
+
             return $response;
         }
 
         // Check if user can edit a task
         if (!$this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $task)) {
-            $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
-            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+            $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE)
+                ->setContent(json_encode(['message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE]));
+
             return $response;
         }
 
@@ -382,16 +417,18 @@ class SubtaskController extends ApiBaseController
         ]);
 
         if (!$subtask instanceof TaskSubtask) {
-            $response = $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Subtask with requested Id for a requested task does not exist!']));
+            $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE)
+                ->setContent(json_encode(['message' => 'Subtask with requested Id for a requested task does not exist!']));
+
             return $response;
         }
 
         $this->getDoctrine()->getManager()->remove($subtask);
         $this->getDoctrine()->getManager()->flush();
 
-        $response = $response->setStatusCode(StatusCodesHelper::DELETED_CODE);
-        $response = $response->setContent(json_encode(['message' => StatusCodesHelper::DELETED_MESSAGE]));
+        $response->setStatusCode(StatusCodesHelper::DELETED_CODE)
+            ->setContent(json_encode(['message' => StatusCodesHelper::DELETED_MESSAGE]));
+
         return $response;
 
     }
@@ -402,55 +439,75 @@ class SubtaskController extends ApiBaseController
      * @param bool $create
      * @param string $locationUrl
      * @return Response
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
+     * @throws \LogicException
+     * @throws \UnexpectedValueException
+     * @throws \InvalidArgumentException
      */
     private function updateEntity(TaskSubtask $subtask, $requestData, $create = false, string $locationUrl): Response
     {
         $allowedUnitEntityParams = [
             'title',
-            'done'
+            'done',
+            'from',
+            'to',
+            'hours'
         ];
 
         // JSON API Response - Content type and Location settings
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationUrl);
 
-        if (false !== $requestData) {
-            if (array_key_exists('_format', $requestData)) {
-                unset($requestData['_format']);
-            }
+        if (false === $requestData) {
+            $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE)
+                ->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
 
-            foreach ($requestData as $key => $value) {
-                if (!\in_array($key, $allowedUnitEntityParams, true)) {
-                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                    $response = $response->setContent(json_encode(['message' => $key . ' is not allowed parameter for User-Role Entity!']));
-                    return $response;
-                }
-            }
-
-            $statusCode = $this->getCreateUpdateStatusCode($create);
-
-            $errors = $this->get('entity_processor')->processEntity($subtask, $requestData);
-
-            if (false === $errors) {
-                $this->getDoctrine()->getManager()->persist($subtask);
-                $this->getDoctrine()->getManager()->flush();
-
-                $subtaskArray = $this->get('task_additional_service')->getTaskSubtaskResponse($subtask->getTask()->getId(), $subtask->getId());
-                $response = $response->setStatusCode($statusCode);
-                $response = $response->setContent(json_encode($subtaskArray));
-                return $response;
-            } else {
-                $data = [
-                    'errors' => $errors,
-                    'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-                ];
-                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                $response = $response->setContent(json_encode($data));
-            }
-        } else {
-            $response = $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE);
-            $response = $response->setContent(json_encode(['message' => StatusCodesHelper::INVALID_DATA_FORMAT_MESSAGE_JSON_FORM_SUPPORT]));
+            return $response;
         }
+
+        if (array_key_exists('_format', $requestData)) {
+            unset($requestData['_format']);
+        }
+
+        foreach ($requestData as $key => $value) {
+            if (!\in_array($key, $allowedUnitEntityParams, true)) {
+                $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE)
+                    ->setContent(json_encode(['message' => $key . ' is not allowed parameter for Subtask Entity!']));
+
+                return $response;
+            }
+        }
+
+        if (array_key_exists('from', $requestData)) {
+            $requestData['from'] = (int)$requestData['from'];
+        }
+
+        if (array_key_exists('to', $requestData)) {
+            $requestData['to'] = (int)$requestData['to'];
+        }
+
+        $statusCode = $this->getCreateUpdateStatusCode($create);
+        $errors = $this->get('entity_processor')->processEntity($subtask, $requestData);
+        if (false === $errors) {
+            $this->getDoctrine()->getManager()->persist($subtask);
+            $this->getDoctrine()->getManager()->flush();
+
+            $subtaskArray = $this->get('task_additional_service')->getTaskSubtaskResponse($subtask->getTask()->getId(), $subtask->getId());
+            $response->setStatusCode($statusCode)
+                ->setContent(json_encode($subtaskArray));
+
+            return $response;
+        }
+
+        $data = [
+            'errors' => $errors,
+            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
+        ];
+        $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE)
+            ->setContent(json_encode($data));
+
         return $response;
+
+
     }
 
 

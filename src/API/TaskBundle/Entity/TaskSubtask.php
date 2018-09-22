@@ -45,6 +45,30 @@ class TaskSubtask
     private $done;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="from_time", type="datetime", nullable=true)
+     * @Assert\DateTime(message="FROM param has to be a correct Date Time object")
+     */
+    private $from;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="to_time", type="datetime", nullable=true)
+     * @Assert\DateTime(message="TO param has to be a correct Date Time object")
+     */
+    private $to;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="hours", type="float", nullable=true)
+     * @Assert\Type("float", message="The value {{ value }} is not a valid {{ type }}")
+     */
+    private $hours;
+
+    /**
      * @var User
      *
      * @ORM\ManyToOne(targetEntity="API\CoreBundle\Entity\User", inversedBy="createdSubtasks")
@@ -121,7 +145,7 @@ class TaskSubtask
      *
      * @return bool
      */
-    public function getDone()
+    public function getDone(): bool
     {
         return $this->done;
     }
@@ -187,9 +211,9 @@ class TaskSubtask
     {
         if ($this->createdAt) {
             return $this->createdAt->getTimestamp();
-        } else {
-            return $this->createdAt;
         }
+
+        return $this->createdAt;
     }
 
     /**
@@ -201,9 +225,100 @@ class TaskSubtask
     {
         if ($this->updatedAt) {
             return $this->updatedAt->getTimestamp();
-        } else {
-            return $this->updatedAt;
         }
+
+        return $this->updatedAt;
     }
 
+
+    /**
+     * Set from.
+     *
+     * @param \DateTime|null|integer $from
+     *
+     * @return TaskSubtask
+     */
+    public function setFrom($from = null)
+    {
+        if (\is_int($from) && null !== $from) {
+            $dateTimeUnix = new \DateTime("@$from");
+            $this->from = $dateTimeUnix;
+        } else {
+            $this->from = $from;
+        }
+        return $this;
+    }
+
+    /**
+     * Get from.
+     *
+     * @return integer|null|\DateTime
+     */
+    public function getFrom()
+    {
+        if ($this->from) {
+            return $this->from->getTimestamp();
+        }
+
+        return $this->from;
+    }
+
+    /**
+     * Set to.
+     *
+     * @param \DateTime|null|integer $to
+     *
+     * @return TaskSubtask
+     */
+    public function setTo($to = null)
+    {
+        if (\is_int($to) && null !== $to) {
+            $dateTimeUnix = new \DateTime("@$to");
+            $this->to = $dateTimeUnix;
+        } else {
+            $this->to = $to;
+        }
+        return $this;
+    }
+
+    /**
+     * Get to.
+     *
+     * @return integer|null|\DateTime
+     */
+    public function getTo()
+    {
+        if ($this->to) {
+            return $this->to->getTimestamp();
+        }
+
+        return $this->to;
+    }
+
+    /**
+     * Set hours.
+     *
+     * @param float|null $hours
+     *
+     * @return TaskSubtask
+     */
+    public function setHours($hours = null)
+    {
+        if ($hours) {
+            $hours = (float)$hours;
+            $this->hours = $hours;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get hours.
+     *
+     * @return float
+     */
+    public function getHours()
+    {
+        return $this->hours;
+    }
 }

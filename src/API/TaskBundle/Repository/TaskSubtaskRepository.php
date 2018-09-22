@@ -79,6 +79,9 @@ class TaskSubtaskRepository extends \Doctrine\ORM\EntityRepository
             'id' => $data->getId(),
             'title' => $data->getTitle(),
             'done' => $data->getDone(),
+            'from' => $data->getFrom(),
+            'to' => $data->getTo(),
+            'hours' => $data->getHours(),
             'createdAt' => $data->getCreatedAt(),
             'updatedAt' => $data->getUpdatedAt(),
             'createdBy' => [
@@ -105,6 +108,9 @@ class TaskSubtaskRepository extends \Doctrine\ORM\EntityRepository
             'id' => $data['id'],
             'title' => $data['title'],
             'done' => $data['done'],
+            'from' => isset($data['from']) ? date_timestamp_get($data['from']) : null,
+            'to' => isset($data['to']) ? date_timestamp_get($data['to']) : null,
+            'hours' => $data['hours'],
             'createdAt' => isset($data['createdAt']) ? date_timestamp_get($data['createdAt']) : null,
             'updatedAt' => isset($data['updatedAt']) ? date_timestamp_get($data['updatedAt']) : null,
             'createdBy' => [

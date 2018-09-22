@@ -1059,4 +1059,64 @@ class Task
     {
         return $this->repeatingTasks;
     }
+
+    /**
+     * Set parentTask.
+     *
+     * @param Task|null $parentTask
+     *
+     * @return Task
+     */
+    public function setParentTask(Task $parentTask = null)
+    {
+        $this->parentTask = $parentTask;
+
+        return $this;
+    }
+
+    /**
+     * Get parentTask.
+     *
+     * @return Task|null
+     */
+    public function getParentTask()
+    {
+        return $this->parentTask;
+    }
+
+    /**
+     * Add childTask.
+     *
+     * @param Task $childTask
+     *
+     * @return Task
+     */
+    public function addChildTask(Task $childTask)
+    {
+        $this->childTasks[] = $childTask;
+
+        return $this;
+    }
+
+    /**
+     * Remove childTask.
+     *
+     * @param Task $childTask
+     *
+     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
+     */
+    public function removeChildTask(Task $childTask)
+    {
+        return $this->childTasks->removeElement($childTask);
+    }
+
+    /**
+     * Get childTasks.
+     *
+     * @return Collection
+     */
+    public function getChildTasks()
+    {
+        return $this->childTasks;
+    }
 }

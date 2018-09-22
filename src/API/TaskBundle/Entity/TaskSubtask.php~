@@ -3,6 +3,7 @@
 namespace API\TaskBundle\Entity;
 
 use API\CoreBundle\Entity\User;
+use Doctrine\DBAL\Types\DecimalType;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use JMS\Serializer\Annotation as Serializer;
@@ -43,6 +44,29 @@ class TaskSubtask
      * @ORM\Column(name="done", type="boolean", options={"default: 0"})
      */
     private $done;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="from", type="datetime", nullable=true)
+     * @Assert\DateTime(message="FROM param has to be a correct Date Time object")
+     */
+    private $from;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="to", type="datetime", nullable=true)
+     * @Assert\DateTime(message="TO param has to be a correct Date Time object")
+     */
+    private $to;
+
+    /**
+     * @var DecimalType
+     *
+     * @ORM\Column(name="hours", type="decimal", nullable=true)
+     */
+    private $hours;
 
     /**
      * @var User

@@ -16,26 +16,27 @@ class FilterRepository extends EntityRepository
     /**
      * Return's all entities with specific conditions based on actual Entity
      *
-     * @param int $page
+     * @param int $loggedUserId
      * @param array $options
      * @return mixed
      */
-    public function getAllEntities(int $page, array $options = [])
+    public function getAllEntities(int $loggedUserId, array $options = [])
     {
         $isActive = $options['isActive'];
         $public = $options['public'];
         $report = $options['report'];
         $project = $options['project'];
-        $loggedUserId = $options['loggedUserId'];
         $order = $options['order'];
         $limit = $options['limit'];
         $default = $options['default'];
+        $page = $options['page'];
 
         $query = $this->createQueryBuilder('f')
             ->select('f, createdBy, project, projectCreator')
             ->leftJoin('f.createdBy', 'createdBy')
             ->leftJoin('f.project', 'project')
             ->leftJoin('project.createdBy', 'projectCreator')
+            ->leftJoin('f.rememberUser', 'rememberUser')
             ->orderBy('f.order', $order)
             ->distinct()
             ->where('f.id is not NULL');
@@ -93,9 +94,9 @@ class FilterRepository extends EntityRepository
         }
 
         // Return also logged users Remembered filter
-        $query->orWhere($query->expr()->andX(
-            $query->expr()->eq('createdBy.id', $loggedUserId)
-        ));
+        $query->orWhere(
+            $query->expr()->eq('rememberUser.id', $loggedUserId)
+        );
 
 
         if (!empty($paramArray)) {
@@ -114,16 +115,17 @@ class FilterRepository extends EntityRepository
 
             $paginator = new Paginator($query, $fetchJoinCollection = true);
             $count = $paginator->count();
+
             return [
                 'count' => $count,
                 'array' => $this->formatData($paginator)
             ];
-        } else {
-            // Return all entities
-            return [
-                'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
-            ];
         }
+
+        // Return all entities
+        return [
+            'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
+        ];
     }
 
     /**
@@ -204,10 +206,10 @@ class FilterRepository extends EntityRepository
             }
         }
 
-        if($date){
+        if ($date) {
             $query->andWhere('f.updatedAt >= :date');
             $paramArray['date'] = $date;
-        }else{
+        } else {
             // Return also logged users Remembered filter
             $query->orWhere($query->expr()->andX(
                 $query->expr()->eq('createdBy.id', $loggedUserId)

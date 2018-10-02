@@ -1,6 +1,6 @@
 filter_list:
     path:     /filters
-    defaults: { _controller: APITaskBundle:Filter:list }
+    defaults: { _controller: APITaskBundle:Filter/List:list }
     methods: [GET]
 
 filter:

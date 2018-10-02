@@ -15,7 +15,7 @@ class UserRoleAclOptions
     const SHARE_FILTERS = 'share_filters';
     // User can CRUD PUBLIC Filters in Projects
     const PROJECT_SHARED_FILTERS = 'project_shared_filters';
-    // User can CRUD Filters checked like REPORT
+    // User can CRUD Filters checked like REPORT and also filter between all tasks
     const REPORT_FILTERS = 'report_filters';
 
     // User can CRUD PUBLIC Tags

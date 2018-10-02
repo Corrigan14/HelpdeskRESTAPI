@@ -39,15 +39,13 @@ class FilterService
     /**
      * Return Filters Response which includes Data and Links and Pagination
      *
-     * @param int $page
+     * @param int $loggedUserId
      * @param array $options
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
      */
-    public function getFiltersResponse(int $page, array $options): array
+    public function getFiltersResponse(int $loggedUserId, array $options): array
     {
-        $responseData = $this->em->getRepository('APITaskBundle:Filter')->getAllEntities($page, $options);
+        $responseData = $this->em->getRepository('APITaskBundle:Filter')->getAllEntities($loggedUserId, $options);
 
         $response = [
             'data' => $responseData['array'],
@@ -55,7 +53,7 @@ class FilterService
 
         $url = $this->router->generate('filter_list');
         $limit = $options['limit'];
-        $filters = $options['filtersForUrl'];
+        $filters = $this->getParamsForUrl($options);
 
         if (999 !== $limit) {
             $count = $responseData['count'];
@@ -63,7 +61,7 @@ class FilterService
             $count = \count($responseData['array']);
         }
 
-        $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);
+        $pagination = PaginationHelper::getPagination($url, $limit, $options['page'], $count, $filters);
 
         return array_merge($response, $pagination);
     }
@@ -89,7 +87,7 @@ class FilterService
      *
      * @return array
      */
-    private function getFilterLinks(int $id)
+    private function getFilterLinks(int $id):array
     {
         return [
             'update filter' => $this->router->generate('filter_update', ['id' => $id]),
@@ -99,5 +97,30 @@ class FilterService
             'get logged users remembered filter' => $this->router->generate('filter_get_user_remembered'),
             'remove logged users remembered filter' => $this->router->generate('filter_reset_user_remembered'),
         ];
+    }
+
+    /**
+     * @param array $processedFilterParams
+     * @return array
+     */
+    private function getParamsForUrl(array $processedFilterParams): array
+    {
+        $order = $processedFilterParams['order'];
+        $isActive = $processedFilterParams['isActive'];
+        $public = $processedFilterParams['public'];
+        $report = $processedFilterParams['report'];
+        $project = $processedFilterParams['project'];
+        $default = $processedFilterParams['default'];
+
+        $filtersForUrl = [
+            'isActive' => '&isActive=' . $isActive,
+            'order' => '&order=' . $order,
+            'public' => '&public=' . $public,
+            'report' => '&report=' . $report,
+            'project' => '&project=' . $project,
+            'default' => '&default=' . $default
+        ];
+
+        return $filtersForUrl;
     }
 }

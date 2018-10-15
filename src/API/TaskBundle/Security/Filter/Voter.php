@@ -1,21 +1,24 @@
 <?php
 
-namespace API\TaskBundle\Security;
+namespace API\TaskBundle\Security\Filter;
 
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\Filter;
 use API\TaskBundle\Entity\UserHasProject;
+use API\TaskBundle\Entity\UserRole;
+use API\TaskBundle\Security\UserRoleAclOptions;
+use API\TaskBundle\Security\VoteOptions;
 use Doctrine\ORM\EntityManager;
 use Prophecy\Argument\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 
 /**
- * Class FilterVoter
+ * Class Voter
  *
- * @package API\TaskBundle\Security
+ * @package API\TaskBundle\Security\Filetr
  */
-class FilterVoter
+class Voter
 {
     /** @var  User */
     private $user;
@@ -97,6 +100,13 @@ class FilterVoter
 
         //User can view filter if he created it
         if ($filter->getCreatedBy()->getId() === $this->user->getId()) {
+            return true;
+        }
+
+        // User can view a filter if it is report and he/she has a his rol has a right REPORT_FILTERS
+        /** @var UserRole $loggedUsersRole */
+        $loggedUsersRole = $this->user->getUserRole();
+        if ($filter->getReport() && \in_array(UserRoleAclOptions::REPORT_FILTERS, $loggedUsersRole->getAcl(), true)) {
             return true;
         }
 

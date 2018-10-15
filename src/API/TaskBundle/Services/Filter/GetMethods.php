@@ -1,19 +1,18 @@
 <?php
 
-namespace API\TaskBundle\Services;
+namespace API\TaskBundle\Services\Filter;
 
 
-use API\TaskBundle\Entity\Filter;
-use API\TaskBundle\Repository\FilterRepository;
+use API\TaskBundle\Services\PaginationHelper;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
 /**
- * Class FilterService
+ * Class GetMethods
  *
  * @package API\TaskBundle\Services
  */
-class FilterService
+class GetMethods
 {
     /**
      * @var EntityManager

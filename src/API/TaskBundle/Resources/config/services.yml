@@ -14,7 +14,7 @@ services:
         class: API\TaskBundle\Security\ProjectVoter
         arguments: ["@security.access.decision_manager","@security.token_storage"]
     filter_voter:
-        class: API\TaskBundle\Security\FilterVoter
+        class: API\TaskBundle\Security\Filter\Voter
         arguments: ["@security.access.decision_manager","@security.token_storage", "@doctrine.orm.entity_manager"]
     repeating_task_voter:
         class: API\TaskBundle\Security\RepeatingTask\Voter
@@ -34,8 +34,8 @@ services:
     task_additional_service:
           class: API\TaskBundle\Services\TaskAdditionalService
           arguments: ["@doctrine.orm.entity_manager", "@router"]
-    filter_service:
-          class: API\TaskBundle\Services\FilterService
+    filter_get_service:
+          class: API\TaskBundle\Services\Filter\GetMethods
           arguments: ["@doctrine.orm.entity_manager", "@router"]
     user_role_service:
           class: API\TaskBundle\Services\UserRoleService

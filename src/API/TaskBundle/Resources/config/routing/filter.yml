@@ -5,7 +5,7 @@ filter_list:
 
 filter:
     path:     /filters/{id}
-    defaults: { _controller: APITaskBundle:Filter:get }
+    defaults: { _controller: APITaskBundle:Filter/Get:get }
     methods: [GET]
     requirements:
         id: '\d+'

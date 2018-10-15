@@ -186,7 +186,7 @@ class ListController extends ApiBaseController
 
         $processedFilterParams = $this->get('api_base.service')->processFilterParams($requestBody);
 
-        $filtersArray = $this->get('filter_service')->getFiltersResponse($this->getUser()->getId(), $processedFilterParams);
+        $filtersArray = $this->get('filter_get_service')->getFiltersResponse($this->getUser()->getId(), $processedFilterParams);
         $response->setContent(json_encode($filtersArray))
             ->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
 

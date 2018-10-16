@@ -1,11 +1,11 @@
 <?php
 
-namespace API\TaskBundle\Security;
+namespace API\TaskBundle\Security\Filter;
 
 /**
  * Class FilterColumnsOptions
  *
- * @package API\TaskBundle\Security
+ * @package API\TaskBundle\Security\Filter
  */
 class FilterColumnsOptions
 {

@@ -341,7 +341,7 @@ class Filter
      */
     public function setDefault($default)
     {
-        if (is_string($default)) {
+        if (\is_string($default)) {
             $default = ($default === 'true' || $default == 1) ? true : false;
         }
 

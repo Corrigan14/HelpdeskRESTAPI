@@ -39,7 +39,7 @@ services:
           arguments: ["@doctrine.orm.entity_manager", "@router"]
     filter_update_service:
           class: API\TaskBundle\Services\Filter\UpdateMethods
-          arguments: ["@doctrine.orm.entity_manager", "@router"]
+          arguments: ["@doctrine.orm.entity_manager"]
     user_role_service:
           class: API\TaskBundle\Services\UserRoleService
           arguments: ["@doctrine.orm.entity_manager", "@router"]

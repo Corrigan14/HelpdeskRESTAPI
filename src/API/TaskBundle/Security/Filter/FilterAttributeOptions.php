@@ -1,6 +1,6 @@
 <?php
 
-namespace API\TaskBundle\Security;
+namespace API\TaskBundle\Security\Filter;
 
 /**
  * Class FilterAttributeOptions

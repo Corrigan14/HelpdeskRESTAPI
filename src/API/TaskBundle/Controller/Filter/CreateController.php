@@ -92,9 +92,13 @@ class CreateController extends ApiBaseController
      *
      * @param Request $request
      * @return Response
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \InvalidArgumentException
      * @throws \UnexpectedValueException
      * @throws \LogicException
+     * @throws \ReflectionException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function createAction(Request $request): Response
     {
@@ -113,8 +117,28 @@ class CreateController extends ApiBaseController
         $filter = new Filter();
         $filter->setIsActive(true);
         $filter->setCreatedBy($this->getUser());
+        $filter->setFilter($dataValidation['filterArray']);
+        $filter->setReport($dataValidation['report']);
+        $filter->setPublic($dataValidation['public']);
+        $filter->setColumns($dataValidation['columns']);
+        $filter->setColumnsTaskAttributes($dataValidation['columns_task_attributes']);
+        $filter->setDefault($dataValidation['default']);
 
-        dump($dataValidation);
+        $errors = $this->get('entity_processor')->processEntity($filter, $dataValidation['requestData']);
+        if ($errors) {
+            $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_MESSAGE)
+                ->setContent(json_encode($errors));
+
+            return $response;
+        }
+
+        $this->getDoctrine()->getManager()->persist($filter);
+        $this->getDoctrine()->getManager()->flush();
+
+        $filterArray = $this->get('filter_get_service')->getFilterResponse($filter->getId());
+        $response->setStatusCode(StatusCodesHelper::CREATED_CODE)
+            ->setContent(json_encode($filterArray));
+
         return $response;
     }
 
@@ -122,6 +146,7 @@ class CreateController extends ApiBaseController
      * @param $request
      * @return array
      * @throws \LogicException
+     * @throws \ReflectionException
      */
     private function validateData($request): array
     {
@@ -134,181 +159,38 @@ class CreateController extends ApiBaseController
             ];
         }
 
-        $checkPublicFilterPermission = $this->checkPublicFilterPermission($requestDataCheck['requestData']);
-        if (isset($checkPublicFilterPermission['error'])) {
-            return [
-                'status' => false,
-                'errorCode' => StatusCodesHelper::ACCESS_DENIED_CODE,
-                'errorMessage' => $checkPublicFilterPermission['error']
-            ];
-        }
-
-        return [
-            'status' => true,
-            'requestData' => $requestDataCheck['requestData'],
-            'public' => $checkPublicFilterPermission['public']
-        ];
-    }
-
-    /**
-     * Check if user can create PUBLIC filter (it's role has SHARE_FILTER ACL)
-     *
-     * @param array $data
-     * @return array
-     * @throws \LogicException
-     */
-    private function checkPublicFilterPermission(array $data): array
-    {
         $aclOptions = [
             'acl' => UserRoleAclOptions::SHARE_FILTERS,
             'user' => $this->getUser()
         ];
         $checkRolesAclForPublicFilterCreation = $this->get('acl_helper')->roleHasACL($aclOptions);
 
-        $response = $this->get('filter_update_service')->checkPublicFilterPermission($data, $checkRolesAclForPublicFilterCreation);
+        $aclOptions = [
+            'acl' => UserRoleAclOptions::REPORT_FILTERS,
+            'user' => $this->getUser()
+        ];
+        $checkRoleAclForReportFilterCreation = $this->get('acl_helper')->roleHasACL($aclOptions);
 
-        return $response;
-    }
-
-    /**
-     * @param Filter $filter
-     * @param array $data
-     * @param bool $create
-     * @param $locationUrl
-     * @param bool $project
-     * @return Response
-     * @throws \LogicException
-     */
-    private function updateEntity(Filter $filter, array $data, $create = false, $locationUrl, $project = false)
-    {
-
-
-        // Check if user can create REPORT Filter (it's role has to have ACL REPORT_FILTERS)
-        if (isset($data['report']) && (true === $data['report'] || 'true' === $data['report'] || 1 === (int)$data['report'])) {
-            $aclOptions = [
-                'acl' => UserRoleAclOptions::REPORT_FILTERS,
-                'user' => $this->getUser()
+        $permissionAndFormatDataCheck = $this->get('filter_update_service')->permissionAndFormatDataCheck($requestDataCheck['requestData'], $checkRolesAclForPublicFilterCreation, $checkRoleAclForReportFilterCreation);
+        if (false === $permissionAndFormatDataCheck['status']) {
+            return [
+                'status' => false,
+                'errorCode' => $permissionAndFormatDataCheck['errorCode'],
+                'errorMessage' => $permissionAndFormatDataCheck['errorMessage']
             ];
-
-            if (!$this->get('acl_helper')->roleHasACL($aclOptions)) {
-                $response = $response->setStatusCode(StatusCodesHelper::ACCESS_DENIED_CODE);
-                $response = $response->setContent(json_encode(['message' => 'You have not permission to create a REPORT filter!']));
-                return $response;
-            } else {
-                $filter->setReport(true);
-            }
-            unset($data['report']);
-        } elseif ($create) {
-            $filter->setReport(false);
         }
 
+        unset($requestDataCheck['requestData']['public'], $requestDataCheck['requestData']['report'], $requestDataCheck['requestData']['filter'], $requestDataCheck['requestData']['columns'], $requestDataCheck['requestData']['columns_task_attributes']);
 
-        // Check if user want to set this filter like default
-        if (isset($data['default']) && (true === $data['default'] || 'true' === $data['default'] || 1 === (int)$data['default'])) {
-            $filter->setDefault(true);
-        } elseif ($create) {
-            $filter->setDefault(false);
-        }
-
-        // Check if every key sent in a filter array is allowed in FilterOptions and decode data correctly
-        // Possilbe ways how to send Filter data:
-        // 2. json: e.g {"assigned":"210,211","taskCompany":"202"}
-        // 3. string in a specific format: assigned=>210,taskCompany=>202
-        if (isset($data['filter'])) {
-            //Try Json decode
-            $filtersArray = json_decode($data['filter'], true);
-
-
-            if (!\is_array($filtersArray)) {
-                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                $response = $response->setContent(json_encode(['message' => 'Invalid filter parameter format!']));
-                return $response;
-            }
-
-            foreach ($filtersArray as $key => $value) {
-                if (!\in_array($key, FilterAttributeOptions::getConstants(), true)) {
-                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                    $response = $response->setContent(json_encode(['message' => 'Requested filter parameter ' . $key . ' is not allowed!']));
-                    return $response;
-                }
-            }
-            $filter->setFilter($filtersArray);
-            unset($data['filter']);
-        }
-
-        // Check if user set some Columns and if these columns are allowed (exists)
-        // The data format should be
-        // 1. JSON ARRAY: ["title","status"]
-        // 2. Arrray separated by ,: title, status
-        if (isset($data['columns'])) {
-            $dataColumnsArray = $data['columns'];
-            if (!\is_array($dataColumnsArray)) {
-                $dataColumnsArray = json_decode($data['columns'], true);
-                if (!\is_array($dataColumnsArray)) {
-                    $dataColumnsArray = explode(',', $data['columns']);
-                }
-            }
-
-            foreach ($dataColumnsArray as $col) {
-                if (!\in_array($col, FilterColumnsOptions::getConstants(), true)) {
-                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                    $response = $response->setContent(json_encode(['message' => 'Requested column parameter ' . $col . ' is not allowed!']));
-                    return $response;
-                }
-            }
-
-            $filter->setColumns($dataColumnsArray);
-            unset($data['columns']);
-        }
-
-        // Check if user set some Columns and if these columns are allowed (exists)
-        // The data format shoul be
-        // 1. JSON ARRAY: ["title","status"]
-        // 2. Arrray separated by ,: title, status
-        // Check if user set some Columns_task_attributes and if these columns are allowed (exists)
-        if (isset($data['columns_task_attributes'])) {
-            $dataColumnsArray = $data['columns_task_attributes'];
-            if (!\is_array($dataColumnsArray)) {
-                $dataColumnsArray = json_decode($data['columns_task_attributes'], true);
-                if (!\is_array($dataColumnsArray)) {
-                    $dataColumnsArray = explode(',', $data['columns_task_attributes']);
-                }
-            }
-
-            foreach ($dataColumnsArray as $col) {
-                $taskAttribute = $this->getDoctrine()->getRepository('APITaskBundle:TaskAttribute')->find($col);
-
-                if (!$taskAttribute instanceof TaskAttribute) {
-                    $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                    $response = $response->setContent(json_encode(['message' => 'Requested task attribute with id ' . $col . ' does not exist!']));
-                    return $response;
-                }
-            }
-
-            $filter->setColumnsTaskAttributes($dataColumnsArray);
-            unset($data['columns_task_attributes']);
-        }
-
-        $statusCode = $this->getCreateUpdateStatusCode($create);
-        $errors = $this->get('entity_processor')->processEntity($filter, $data);
-
-        if (false === $errors) {
-            $this->getDoctrine()->getManager()->persist($filter);
-            $this->getDoctrine()->getManager()->flush();
-
-            $filterArray = $this->get('filter_service')->getFilterResponse($filter->getId());
-            $response = $response->setStatusCode($statusCode);
-            $response = $response->setContent(json_encode($filterArray));
-            return $response;
-        } else {
-            $data = [
-                'errors' => $errors,
-                'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE
-            ];
-            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-            $response = $response->setContent(json_encode($data));
-        }
-
-
+        return [
+            'status' => true,
+            'requestData' => $requestDataCheck['requestData'],
+            'public' => $permissionAndFormatDataCheck['public'],
+            'report' => $permissionAndFormatDataCheck['report'],
+            'filterArray' => $permissionAndFormatDataCheck['filterArray'],
+            'columns' => $permissionAndFormatDataCheck['columns'],
+            'columns_task_attributes' => $permissionAndFormatDataCheck['columns_task_attributes'],
+            'default' => $permissionAndFormatDataCheck['default']
+        ];
     }
 }

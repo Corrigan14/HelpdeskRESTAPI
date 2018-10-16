@@ -94,7 +94,6 @@ class CreateController extends ApiBaseController
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
         $dataValidation = $this->validateData($request, $taskId);
-
         if (false === $dataValidation['status']) {
             $response->setStatusCode($dataValidation['errorCode'])
                 ->setContent(json_encode($dataValidation['errorMessage']));

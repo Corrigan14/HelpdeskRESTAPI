@@ -12,7 +12,7 @@ filter:
 
 filter_create:
     path:     /filters
-    defaults: { _controller: APITaskBundle:Filter:create }
+    defaults: { _controller: APITaskBundle:Filter/Create:create }
     methods: [POST]
 
 filter_update:

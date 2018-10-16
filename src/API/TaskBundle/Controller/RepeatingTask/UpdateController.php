@@ -132,8 +132,6 @@ class UpdateController extends ApiBaseController
             ->setContent(json_encode($repeatingTaskArray));
 
         return $response;
-
-
     }
 
     /**

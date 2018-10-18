@@ -62,7 +62,7 @@ filter_delete:
 
 filter_project_create:
     path:     /filters/project/{projectId}
-    defaults: { _controller: APITaskBundle:Filter:createProjectsFilter }
+    defaults: { _controller: APITaskBundle:Filter/CreateInProject:create }
     methods: [POST]
     requirements:
         projectId: '\d+'

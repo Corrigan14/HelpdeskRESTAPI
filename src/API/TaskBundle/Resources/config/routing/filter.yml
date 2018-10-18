@@ -69,7 +69,7 @@ filter_project_create:
 
 filter_project_update:
     path:     /filters/{filterId}/project/{projectId}
-    defaults: { _controller: APITaskBundle:Filter:updateProjectFilter }
+    defaults: { _controller: APITaskBundle:Filter/UpdateInProject:update }
     methods: [PUT]
     requirements:
         filterId: '\d+'

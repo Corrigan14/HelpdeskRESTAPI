@@ -123,7 +123,7 @@ class Voter
             return true;
         }
 
-        // User can update filter if he created it
+        // User can update filter if he/she created it
         if ($this->user->getId() === $filter->getCreatedBy()->getId()) {
             return true;
         }

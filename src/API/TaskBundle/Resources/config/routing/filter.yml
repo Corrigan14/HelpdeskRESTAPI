@@ -17,7 +17,7 @@ filter_create:
 
 filter_update:
     path:     /filters/{id}
-    defaults: { _controller: APITaskBundle:Filter:update }
+    defaults: { _controller: APITaskBundle:Filter/Update:update }
     methods: [PUT]
     requirements:
             id: '\d+'

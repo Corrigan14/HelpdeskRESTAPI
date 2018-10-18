@@ -5,6 +5,7 @@ namespace API\TaskBundle\Controller\Filter;
 use API\TaskBundle\Entity\Filter;
 use API\TaskBundle\Security\Filter\EntityParams;
 use API\TaskBundle\Security\UserRoleAclOptions;
+use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,12 +13,13 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class CreateController
+ * Class UpdateController
  *
  * @package API\TaskBundle\Controller\Filter
  */
-class CreateController extends ApiBaseController
+class UpdateController extends ApiBaseController
 {
+
     /**
      * ### Response ###
      *      {
@@ -58,7 +60,7 @@ class CreateController extends ApiBaseController
      *                206
      *             ]
      *         },
-     *        "_links":
+     *       "_links":
      *        {
      *          "update filter": "/api/v1/task-bundle/filters/15",
      *          "inactivate": "/api/v1/task-bundle/filters/15/inactivate",
@@ -71,7 +73,7 @@ class CreateController extends ApiBaseController
      *
      * @ApiDoc(
      *  resource = true,
-     *  description="Create a new Filter Entity.
+     *  description="Update Filter Entity.
      *  Filter field is expected to be an array with key = filter option, value = requested data id/val/... (look at task list filters)",
      *  input={"class"="API\TaskBundle\Entity\Filter"},
      *  headers={
@@ -83,29 +85,32 @@ class CreateController extends ApiBaseController
      *  },
      *  output={"class"="API\TaskBundle\Entity\Filter"},
      *  statusCodes={
-     *      201 ="The entity was successfully created",
+     *      200 ="The request has succeeded",
      *      401 ="Unauthorized request",
      *      403 ="Access denied",
+     *      404 ="Not found Entity",
      *      409 ="Invalid parameters",
      *  }
      * )
      *
      * @param Request $request
+     * @param int $id
      * @return Response
+     * @throws \UnexpectedValueException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
-     * @throws \InvalidArgumentException
-     * @throws \UnexpectedValueException
      * @throws \LogicException
+     * @throws \InvalidArgumentException
      * @throws \ReflectionException
-     * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function createAction(Request $request): Response
+    public function updateAction(Request $request, int $id): Response
     {
-        $locationURL = $this->generateUrl('filter_create');
+        $locationURL = $this->generateUrl('filter_update', ['id' => $id]);
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
-        $dataValidation = $this->validateData($request);
+        $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($id);
+        $dataValidation = $this->validateData($request, $filter);
         if (false === $dataValidation['status']) {
             $response->setStatusCode($dataValidation['errorCode'])
                 ->setContent(json_encode($dataValidation['errorMessage']));
@@ -113,9 +118,6 @@ class CreateController extends ApiBaseController
             return $response;
         }
 
-        $filter = new Filter();
-        $filter->setIsActive(true);
-        $filter->setCreatedBy($this->getUser());
         $filter->setFilter($dataValidation['filterArray']);
         $filter->setReport($dataValidation['report']);
         $filter->setPublic($dataValidation['public']);
@@ -135,7 +137,7 @@ class CreateController extends ApiBaseController
         $this->getDoctrine()->getManager()->flush();
 
         $filterArray = $this->get('filter_get_service')->getFilterResponse($filter->getId());
-        $response->setStatusCode(StatusCodesHelper::CREATED_CODE)
+        $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE)
             ->setContent(json_encode($filterArray));
 
         return $response;
@@ -143,12 +145,21 @@ class CreateController extends ApiBaseController
 
     /**
      * @param $request
+     * @param $filter
      * @return array
      * @throws \LogicException
      * @throws \ReflectionException
      */
-    private function validateData($request): array
+    private function validateData($request, $filter): array
     {
+        if (!$filter instanceof Filter) {
+            return [
+                'status' => false,
+                'errorCode' => StatusCodesHelper::INVALID_PARAMETERS_CODE,
+                'errorMessage' => 'Filter with requested Id does not exist!'
+            ];
+        }
+
         $requestDataCheck = $this->get('api_base.service')->checkRequestData($request, EntityParams::getAllowedEntityParams());
         if (isset($requestDataCheck['error'])) {
             return [
@@ -157,6 +168,8 @@ class CreateController extends ApiBaseController
                 'errorMessage' => $requestDataCheck['error']
             ];
         }
+
+        $permissionToUpdateFilter = $this->get('filter_voter')->isGranted(VoteOptions::UPDATE_FILTER, $filter);
 
         $aclOptions = [
             'acl' => UserRoleAclOptions::SHARE_FILTERS,
@@ -170,7 +183,7 @@ class CreateController extends ApiBaseController
         ];
         $checkRoleAclForReportFilterCreation = $this->get('acl_helper')->roleHasACL($aclOptions);
 
-        $permissionAndFormatDataCheck = $this->get('filter_create_service')->permissionAndFormatDataCheck($requestDataCheck['requestData'], $checkRolesAclForPublicFilterCreation, $checkRoleAclForReportFilterCreation);
+        $permissionAndFormatDataCheck = $this->get('filter_update_service')->permissionAndFormatDataCheck($requestDataCheck['requestData'], $checkRolesAclForPublicFilterCreation, $checkRoleAclForReportFilterCreation, $permissionToUpdateFilter, $filter);
         if (false === $permissionAndFormatDataCheck['status']) {
             return [
                 'status' => false,
@@ -179,7 +192,7 @@ class CreateController extends ApiBaseController
             ];
         }
 
-        unset($requestDataCheck['requestData']['public'], $requestDataCheck['requestData']['report'], $requestDataCheck['requestData']['filter'], $requestDataCheck['requestData']['columns'], $requestDataCheck['requestData']['columns_task_attributes']);
+        unset($requestDataCheck['requestData']['public'], $requestDataCheck['requestData']['report'], $requestDataCheck['requestData']['filter'], $requestDataCheck['requestData']['columns'], $requestDataCheck['requestData']['columns_task_attributes'],  $requestDataCheck['requestData']['default']);
 
         return [
             'status' => true,

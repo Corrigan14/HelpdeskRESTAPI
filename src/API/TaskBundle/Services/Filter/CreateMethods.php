@@ -3,19 +3,19 @@
 namespace API\TaskBundle\Services\Filter;
 
 
-use API\TaskBundle\Entity\Filter;
 use API\TaskBundle\Entity\TaskAttribute;
 use API\TaskBundle\Security\Filter\FilterAttributeOptions;
 use API\TaskBundle\Security\Filter\FilterColumnsOptions;
 use Doctrine\ORM\EntityManager;
 use Igsem\APIBundle\Services\StatusCodesHelper;
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 
 /**
- * Class UpdateMethods
+ * Class CreateMethods
  *
  * @package API\TaskBundle\Services
  */
-class UpdateMethods
+class CreateMethods
 {
     /**
      * @var EntityManager
@@ -37,22 +37,12 @@ class UpdateMethods
      * @param array $data
      * @param bool $userRoleAclPublicPermission
      * @param bool $userRoleAclReportPermission
-     * @param bool $userCanUpdateFilter
-     * @param Filter $filter
      * @return array
      * @throws \ReflectionException
      */
-    public function permissionAndFormatDataCheck(array $data, bool $userRoleAclPublicPermission, bool $userRoleAclReportPermission, bool $userCanUpdateFilter, Filter $filter): array
+    public function permissionAndFormatDataCheck(array $data, bool $userRoleAclPublicPermission, bool $userRoleAclReportPermission): array
     {
-        if (!$userCanUpdateFilter) {
-            return [
-                'status' => false,
-                'errorCode' => StatusCodesHelper::ACCESS_DENIED_CODE,
-                'errorMessage' => 'You have not a permission to update this filter!'
-            ];
-        }
-
-        $checkPublicFilterPermission = $this->checkPublicFilterPermission($data, $userRoleAclPublicPermission, $filter);
+        $checkPublicFilterPermission = $this->checkPublicFilterPermission($data, $userRoleAclPublicPermission);
         if (isset($checkPublicFilterPermission['error'])) {
             return [
                 'status' => false,
@@ -61,7 +51,7 @@ class UpdateMethods
             ];
         }
 
-        $checkReportFilterPermission = $this->checkReportFilterPermission($data, $userRoleAclReportPermission, $filter);
+        $checkReportFilterPermission = $this->checkReportFilterPermission($data, $userRoleAclReportPermission);
         if (isset($checkReportFilterPermission['error'])) {
             return [
                 'status' => false,
@@ -70,7 +60,7 @@ class UpdateMethods
             ];
         }
 
-        $checkFilterData = $this->checkFilterDataFormat($data, $filter);
+        $checkFilterData = $this->checkFilterDataFormat($data);
         if (isset($checkFilterData['error'])) {
             return [
                 'status' => false,
@@ -79,7 +69,7 @@ class UpdateMethods
             ];
         }
 
-        $checkColumnsParamData = $this->checkColumnsParamDataFormat($data, $filter);
+        $checkColumnsParamData = $this->checkColumnsParamDataFormat($data);
         if (isset($checkColumnsParamData['error'])) {
             return [
                 'status' => false,
@@ -88,7 +78,7 @@ class UpdateMethods
             ];
         }
 
-        $checkColumnsTaskAttributeParamData = $this->checkColumnsTaskAttributesParamDataFormat($data, $filter);
+        $checkColumnsTaskAttributeParamData = $this->checkColumnsTaskAttributesParamDataFormat($data);
         if (isset($checkColumnsTaskAttributeParamData['error'])) {
             return [
                 'status' => false,
@@ -97,10 +87,11 @@ class UpdateMethods
             ];
         }
 
-        $default = $filter->getDefault();
+        $default = false;
         if (isset($data['default'])) {
             $default = $data['default'];
         }
+
 
         return [
             'status' => true,
@@ -113,19 +104,19 @@ class UpdateMethods
         ];
     }
 
+
     /**
      * Check if user can create PUBLIC filter (it's role has SHARE_FILTER ACL)
      *
      * @param array $data
      * @param bool $userRoleAclPermission
-     * @param Filter $filter
      * @return array
      */
-    private function checkPublicFilterPermission(array $data, bool $userRoleAclPermission, Filter $filter): array
+    private function checkPublicFilterPermission(array $data, bool $userRoleAclPermission): array
     {
         if (!isset($data['public'])) {
             return [
-                'public' => $filter->getPublic()
+                'public' => false
             ];
         }
 
@@ -142,14 +133,8 @@ class UpdateMethods
             ];
         }
 
-        if (false === $data['public'] || 'false' === $data['public'] || 0 === (int)$data['public']) {
-            return [
-                'public' => false
-            ];
-        }
-
         return [
-            'public' => $filter->getPublic()
+            'public' => false
         ];
     }
 
@@ -160,11 +145,11 @@ class UpdateMethods
      * @param bool $userRoleAclPermission
      * @return array
      */
-    private function checkReportFilterPermission(array $data, bool $userRoleAclPermission, Filter $filter): array
+    private function checkReportFilterPermission(array $data, bool $userRoleAclPermission): array
     {
         if (!isset($data['report'])) {
             return [
-                'report' => $filter->getReport()
+                'report' => false
             ];
         }
 
@@ -181,14 +166,8 @@ class UpdateMethods
             ];
         }
 
-        if (false === $data['report'] || 'false' === $data['report'] || 0 === (int)$data['report']) {
-            return [
-                'report' => false
-            ];
-        }
-
         return [
-            'report' => $filter->getReport()
+            'report' => false
         ];
     }
 
@@ -198,22 +177,22 @@ class UpdateMethods
      *  json: e.g {"assigned":"210,211","taskCompany":"202"}
      *
      * @param array $data
-     * @param Filter $filter
      * @return array
      * @throws \ReflectionException
      */
-    private function checkFilterDataFormat(array $data, Filter $filter): array
+    private function checkFilterDataFormat(array $data): array
     {
         if (!isset($data['filter'])) {
             return [
-                'data' => $filter->getFilter()
+                'error' => 'Filter param is required!',
+                'data' => []
             ];
         }
 
         $filtersArray = json_decode($data['filter'], true);
         if (!\is_array($filtersArray)) {
             return [
-                'data' => $filter->getFilter(),
+                'data' => [],
                 'error' => 'Invalid filter parameter format!'
             ];
         }
@@ -221,7 +200,7 @@ class UpdateMethods
         foreach ($filtersArray as $key => $value) {
             if (!\in_array($key, FilterAttributeOptions::getConstants(), true)) {
                 return [
-                    'data' => $filter->getFilter(),
+                    'data' => [],
                     'error' => 'Requested filter parameter ' . $key . ' is not allowed!'
                 ];
             }
@@ -239,21 +218,14 @@ class UpdateMethods
      *   Array separated by ,: title, status
      *
      * @param array $data
-     * @param Filter $filter
      * @return array
      * @throws \ReflectionException
      */
-    private function checkColumnsParamDataFormat(array $data, Filter $filter): array
+    private function checkColumnsParamDataFormat(array $data): array
     {
         if (!isset($data['columns'])) {
             return [
-                'data' => $filter->getColumns()
-            ];
-        }
-
-        if (\is_string($data['columns']) && 'null' === strtolower($data['columns'])) {
-            return [
-                'data' => null
+                'data' => []
             ];
         }
 
@@ -267,7 +239,7 @@ class UpdateMethods
 
         if (!\is_array($dataColumnsArray)) {
             return [
-                'data' => $filter->getColumns(),
+                'data' => [],
                 'error' => 'Invalid columns parameter format!'
             ];
         }
@@ -275,7 +247,7 @@ class UpdateMethods
         foreach ($dataColumnsArray as $col) {
             if (!\in_array($col, FilterColumnsOptions::getConstants(), true)) {
                 return [
-                    'data' => $filter->getColumns(),
+                    'data' => [],
                     'error' => 'Requested column parameter ' . $col . ' is not allowed!'
                 ];
             }
@@ -295,17 +267,11 @@ class UpdateMethods
      * @param array $data
      * @return array
      */
-    private function checkColumnsTaskAttributesParamDataFormat(array $data, Filter $filter): array
+    private function checkColumnsTaskAttributesParamDataFormat(array $data): array
     {
         if (!isset($data['columns_task_attributes'])) {
             return [
-                'data' => $filter->getColumnsTaskAttributes()
-            ];
-        }
-
-        if (\is_string($data['columns_task_attributes']) && 'null' === strtolower($data['columns_task_attributes'])) {
-            return [
-                'data' => null
+                'data' => []
             ];
         }
 
@@ -319,7 +285,7 @@ class UpdateMethods
 
         if (!\is_array($dataColumnsArray)) {
             return [
-                'data' => $filter->getColumnsTaskAttributes(),
+                'data' => [],
                 'error' => 'Invalid columns_task_attributes parameter format!'
             ];
         }
@@ -329,7 +295,7 @@ class UpdateMethods
 
             if (!$taskAttribute instanceof TaskAttribute) {
                 return [
-                    'data' => $filter->getColumnsTaskAttributes(),
+                    'data' => [],
                     'error' => 'Requested task attribute with id ' . $col . ' does not exist!'
                 ];
             }

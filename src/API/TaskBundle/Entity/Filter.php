@@ -285,7 +285,7 @@ class Filter
      */
     public function setReport($report)
     {
-        if (is_string($report)) {
+        if (\is_string($report)) {
             $report = ($report === 'true' || $report == 1) ? true : false;
         }
 
@@ -307,13 +307,13 @@ class Filter
     /**
      * Set isActive
      *
-     * @param boolean $isActive
+     * @param $isActive
      *
      * @return Filter
      */
     public function setIsActive($isActive)
     {
-        if (is_string($isActive)) {
+        if (\is_string($isActive)) {
             $isActive = ($isActive === 'true' || $isActive == 1) ? true : false;
         }
 
@@ -335,7 +335,7 @@ class Filter
     /**
      * Set default
      *
-     * @param boolean $default
+     * @param $default
      *
      * @return Filter
      */
@@ -411,12 +411,17 @@ class Filter
     /**
      * Set columns
      *
-     * @param array $columns
+     * @param array|string $columns
      *
      * @return Filter
      */
-    public function setColumns(array $columns)
+    public function setColumns($columns)
     {
+        if (null === $columns) {
+            $this->columns = null;
+
+            return $this;
+        }
         $this->columns = json_encode($columns);
 
         return $this;
@@ -435,12 +440,18 @@ class Filter
     /**
      * Set columnsAddedParams
      *
-     * @param array $columnsAddedParams
+     * @param $columnsAddedParams
      *
      * @return Filter
      */
-    public function setColumnsTaskAttributes(array $columnsAddedParams)
+    public function setColumnsTaskAttributes($columnsAddedParams)
     {
+        if (null === $columnsAddedParams) {
+            $this->columns_task_attributes = null;
+
+            return $this;
+        }
+
         $this->columns_task_attributes = json_encode($columnsAddedParams);
 
         return $this;

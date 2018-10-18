@@ -30,6 +30,7 @@ class FilterColumnsOptions
     const WORK = 'work';
     const WORK_TIME = 'work_time';
     const ATTACHMENT = 'attachment';
+    const NULL = 'null';
 
     /**
      * @return array

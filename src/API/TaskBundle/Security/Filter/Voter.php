@@ -106,11 +106,8 @@ class Voter
         // User can view a filter if it is report and he/she has a his rol has a right REPORT_FILTERS
         /** @var UserRole $loggedUsersRole */
         $loggedUsersRole = $this->user->getUserRole();
-        if ($filter->getReport() && \in_array(UserRoleAclOptions::REPORT_FILTERS, $loggedUsersRole->getAcl(), true)) {
-            return true;
-        }
 
-        return false;
+        return $filter->getReport() && \in_array(UserRoleAclOptions::REPORT_FILTERS, $loggedUsersRole->getAcl(), true);
     }
 
     /**
@@ -152,11 +149,8 @@ class Voter
                 'user' => $this->user,
                 'project' => $project
             ]);
-            if ($userHasProject instanceof UserHasProject) {
-                return true;
-            }
 
-            return false;
+            return $userHasProject instanceof UserHasProject;
         }
 
         return false;
@@ -180,11 +174,8 @@ class Voter
             'user' => $this->user,
             'project' => $project
         ]);
-        if ($userHasProject instanceof UserHasProject) {
-            return true;
-        }
 
-        return false;
+        return $userHasProject instanceof UserHasProject;
     }
 
 

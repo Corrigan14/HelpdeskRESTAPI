@@ -41,21 +41,21 @@ filter_reset_user_remembered:
 
 filter_inactivate:
     path:     /filters/{id}/inactivate
-    defaults: { _controller: APITaskBundle:Filter:inactivate }
+    defaults: { _controller: APITaskBundle:Filter/Inactivate:inactivate }
     methods: [PUT]
     requirements:
             id: '\d+'
 
 filter_restore:
     path:     /filters/{id}/restore
-    defaults: { _controller: APITaskBundle:Filter:activate }
+    defaults: { _controller: APITaskBundle:Filter/Activate:activate }
     methods: [PUT]
     requirements:
             id: '\d+'
 
 filter_delete:
     path:     /filters/{id}/delete
-    defaults: { _controller: APITaskBundle:Filter:delete }
+    defaults: { _controller: APITaskBundle:Filter/Delete:delete }
     methods: [DELETE]
     requirements:
             id: '\d+'

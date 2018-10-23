@@ -24,19 +24,19 @@ filter_update:
 
 filter_set_user_remembered:
     path:     /filters/{id}/user-remembered
-    defaults: { _controller: APITaskBundle:Filter:setUsersRememberedFilter }
+    defaults: { _controller: APITaskBundle:Filter/SetRemembered:setUsersRememberedFilter }
     methods: [PUT]
     requirements:
             id: '\d+'
 
 filter_get_user_remembered:
     path:     /filters/user-remembered
-    defaults: { _controller: APITaskBundle:Filter:getUsersRememberedFilter }
+    defaults: { _controller: APITaskBundle:Filter/GetRemembered:getUsersRememberedFilter }
     methods: [GET]
 
 filter_reset_user_remembered:
     path:     /filters/user-remembered/delete
-    defaults: { _controller: APITaskBundle:Filter:resetUsersRememberedFilter }
+    defaults: { _controller: APITaskBundle:Filter/ResetRemembered:resetUsersRememberedFilter }
     methods: [PUT]
 
 filter_inactivate:

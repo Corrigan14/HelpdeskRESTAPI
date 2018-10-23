@@ -1,6 +1,6 @@
 <?php
 
-namespace API\TaskBundle\Controller\Task;
+namespace API\TaskBundle\Controller\TaskParts;
 
 use API\CoreBundle\Entity\Company;
 use API\CoreBundle\Entity\File;

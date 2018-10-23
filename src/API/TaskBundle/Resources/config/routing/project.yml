@@ -71,7 +71,7 @@ project_process_users_acl:
 
 project_list_of_available_assign_users:
     path:     /project/{projectId}/assign-user
-    defaults: { _controller: APITaskBundle:Task/Assign:listOfAllAvailableAssigners}
+    defaults: { _controller: APITaskBundle:TaskParts/Assign:listOfAllAvailableAssigners}
     methods: [GET]
     requirements:
             projectId: '\d+'

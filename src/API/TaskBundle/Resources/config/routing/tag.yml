@@ -5,7 +5,7 @@ tag_list:
 
 tag_list_of_available_logged_users_tags:
     path:     /tags/all
-    defaults: { _controller: APITaskBundle:Task/Tag:listOfAllAvailableTags}
+    defaults: { _controller: APITaskBundle:TaskParts/Tag:listOfAllAvailableTags}
     methods: [GET]
 
 tag:

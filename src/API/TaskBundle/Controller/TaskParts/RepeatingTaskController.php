@@ -1,6 +1,6 @@
 <?php
 
-namespace API\TaskBundle\Controller\Task;
+namespace API\TaskBundle\Controller\TaskParts;
 
 use API\CoreBundle\Entity\User;
 use API\TaskBundle\Entity\RepeatingTask;

@@ -1,32 +1,32 @@
 tasks_list:
     path:     /tasks
-    defaults: { _controller: APITaskBundle:Task/Task:list }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:list }
     methods: [GET]
 
 tasks_list_saved_filter:
     path:     /tasks/filter/{filterId}
-    defaults: { _controller: APITaskBundle:Task/Task:listSavedFilter }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:listSavedFilter }
     methods: [GET]
     requirements:
         filterId: '\d+'
 
 task:
     path:     /tasks/{id}
-    defaults: { _controller: APITaskBundle:Task/Task:get }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:get }
     methods: [GET]
     requirements:
         id: '\d+'
 
 tasks_list_of_tasks_repeating_tasks:
     path:     /tasks/{taskId}/repeating-task
-    defaults: { _controller: APITaskBundle:Task/RepeatingTask:list}
+    defaults: { _controller: APITaskBundle:TaskParts/RepeatingTask:list}
     methods: [GET]
     requirements:
             taskId: '\d+'
 
 tasks_create_project_status:
     path:     /tasks/project/{projectId}/status/{statusId}
-    defaults: { _controller: APITaskBundle:Task/Task:create }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:create }
     methods: [POST]
     requirements:
             projectId: '\d+'
@@ -34,7 +34,7 @@ tasks_create_project_status:
 
 tasks_create_project_status_requester:
     path:     /tasks/project/{projectId}/status/{statusId}/requester/{requesterId}
-    defaults: { _controller: APITaskBundle:Task/Task:create }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:create }
     methods: [POST]
     requirements:
             projectId: '\d+'
@@ -43,7 +43,7 @@ tasks_create_project_status_requester:
 
 tasks_create_project_status_company:
     path:     /tasks/project/{projectId}/status/{statusId}/company/{companyId}
-    defaults: { _controller: APITaskBundle:Task/Task:create }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:create }
     methods: [POST]
     requirements:
             projectId: '\d+'
@@ -52,7 +52,7 @@ tasks_create_project_status_company:
 
 tasks_create_project_status_requester_company:
     path:     /tasks/project/{projectId}/status/{statusId}/requester/{requesterId}/company/{companyId}
-    defaults: { _controller: APITaskBundle:Task/Task:create }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:create }
     methods: [POST]
     requirements:
             projectId: '\d+'
@@ -62,14 +62,14 @@ tasks_create_project_status_requester_company:
 
 tasks_update:
     path:     /tasks/{taskId}
-    defaults: { _controller: APITaskBundle:Task/Task:update }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:update }
     methods: [PUT]
     requirements:
             taskId: '\d+'
 
 tasks_update_project:
     path:     /tasks/{taskId}/project/{projectId}
-    defaults: { _controller: APITaskBundle:Task/Task:update }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:update }
     methods: [PUT]
     requirements:
             taskId: '\d+'
@@ -77,7 +77,7 @@ tasks_update_project:
 
 tasks_update_project_status:
     path:     /tasks/{taskId}/project/{projectId}/status/{statusId}
-    defaults: { _controller: APITaskBundle:Task/Task:update }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:update }
     methods: [PUT]
     requirements:
             taskId: '\d+'
@@ -86,7 +86,7 @@ tasks_update_project_status:
 
 tasks_update_project_status_requester:
     path:     /tasks/{taskId}/project/{projectId}/status/{statusId}/requester/{requesterId}
-    defaults: { _controller: APITaskBundle:Task/Task:update }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:update }
     methods: [PUT]
     requirements:
             taskId: '\d+'
@@ -96,7 +96,7 @@ tasks_update_project_status_requester:
 
 tasks_update_project_status_requester_company:
     path:     /tasks/{taskId}/project/{projectId}/status/{statusId}/requester/{requesterId}/company/{companyId}
-    defaults: { _controller: APITaskBundle:Task/Task:update }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:update }
     methods: [PUT]
     requirements:
             taskId: '\d+'
@@ -107,7 +107,7 @@ tasks_update_project_status_requester_company:
 
 tasks_update_status:
     path:     /tasks/{taskId}/status/{statusId}
-    defaults: { _controller: APITaskBundle:Task/Task:update }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:update }
     methods: [PUT]
     requirements:
             taskId: '\d+'
@@ -115,7 +115,7 @@ tasks_update_status:
 
 tasks_update_status_requester:
     path:     /tasks/{taskId}/status/{statusId}/requester/{requesterId}
-    defaults: { _controller: APITaskBundle:Task/Task:update }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:update }
     methods: [PUT]
     requirements:
             taskId: '\d+'
@@ -124,7 +124,7 @@ tasks_update_status_requester:
 
 tasks_update_status_requester_company:
     path:     /tasks/{taskId}/status/{statusId}/requester/{requesterId}/company/{companyId}
-    defaults: { _controller: APITaskBundle:Task/Task:update }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:update }
     methods: [PUT]
     requirements:
             taskId: '\d+'
@@ -134,7 +134,7 @@ tasks_update_status_requester_company:
 
 tasks_update_requester:
     path:     /tasks/{taskId}/requester/{requesterId}
-    defaults: { _controller: APITaskBundle:Task/Task:update }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:update }
     methods: [PUT]
     requirements:
             taskId: '\d+'
@@ -142,7 +142,7 @@ tasks_update_requester:
 
 tasks_update_requester_company:
     path:     /tasks/{taskId}/requester/{requesterId}/company/{companyId}
-    defaults: { _controller: APITaskBundle:Task/Task:update }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:update }
     methods: [PUT]
     requirements:
             taskId: '\d+'
@@ -151,7 +151,7 @@ tasks_update_requester_company:
 
 tasks_update_company:
     path:     /tasks/{taskId}/company/{companyId}
-    defaults: { _controller: APITaskBundle:Task/Task:update }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:update }
     methods: [PUT]
     requirements:
             taskId: '\d+'
@@ -159,21 +159,21 @@ tasks_update_company:
 
 tasks_delete:
     path:     /tasks/{taskId}
-    defaults: { _controller: APITaskBundle:Task/Task:delete }
+    defaults: { _controller: APITaskBundle:TaskParts/Task:delete }
     methods: [DELETE]
     requirements:
             taskId: '\d+'
 
 tasks_list_of_tasks_followers:
     path:     /tasks/{taskId}/follower
-    defaults: { _controller: APITaskBundle:Task/Follower:listOfTasksFollowers}
+    defaults: { _controller: APITaskBundle:TaskParts/Follower:listOfTasksFollowers}
     methods: [GET]
     requirements:
             taskId: '\d+'
 
 tasks_add_follower_to_task:
     path:     /tasks/{taskId}/add-follower/{userId}
-    defaults: { _controller: APITaskBundle:Task/Follower:addFollowerToTask}
+    defaults: { _controller: APITaskBundle:TaskParts/Follower:addFollowerToTask}
     methods: [PUT]
     requirements:
             taskId: '\d+'
@@ -181,7 +181,7 @@ tasks_add_follower_to_task:
 
 tasks_remove_follower_from_task:
     path:     /tasks/{taskId}/remove-follower/{userId}
-    defaults: { _controller: APITaskBundle:Task/Follower:removeFollowerFromTask}
+    defaults: { _controller: APITaskBundle:TaskParts/Follower:removeFollowerFromTask}
     methods: [PUT]
     requirements:
             taskId: '\d+'
@@ -189,14 +189,14 @@ tasks_remove_follower_from_task:
 
 tasks_list_of_tasks_tags:
     path:     /tasks/{taskId}/tag
-    defaults: { _controller: APITaskBundle:Task/Tag:listOfTasksTags}
+    defaults: { _controller: APITaskBundle:TaskParts/Tag:listOfTasksTags}
     methods: [GET]
     requirements:
             taskId: '\d+'
 
 tasks_add_tag_to_task:
     path:     /tasks/{taskId}/add-tag/{tagId}
-    defaults: { _controller: APITaskBundle:Task/Tag:addTagToTask}
+    defaults: { _controller: APITaskBundle:TaskParts/Tag:addTagToTask}
     methods: [PUT]
     requirements:
             taskId: '\d+'
@@ -204,7 +204,7 @@ tasks_add_tag_to_task:
 
 tasks_remove_tag_from_task:
     path:     /tasks/{taskId}/remove-tag/{tagId}
-    defaults: { _controller: APITaskBundle:Task/Tag:removeTagFromTask}
+    defaults: { _controller: APITaskBundle:TaskParts/Tag:removeTagFromTask}
     methods: [PUT]
     requirements:
             taskId: '\d+'
@@ -212,7 +212,7 @@ tasks_remove_tag_from_task:
 
 tasks_assign_user_to_task:
     path:     /tasks/{taskId}/assign-user/{userId}
-    defaults: { _controller: APITaskBundle:Task/Assign:createAssignUserToTask}
+    defaults: { _controller: APITaskBundle:TaskParts/Assign:createAssignUserToTask}
     methods: [POST]
     requirements:
             taskId: '\d+'
@@ -220,7 +220,7 @@ tasks_assign_user_to_task:
 
 tasks_assign_user_to_task_with_specific_status:
     path:     /tasks/{taskId}/assign-user/{userId}/status/{statusId}
-    defaults: { _controller: APITaskBundle:Task/Assign:createAssignUserToTask}
+    defaults: { _controller: APITaskBundle:TaskParts/Assign:createAssignUserToTask}
     methods: [POST]
     requirements:
             taskId: '\d+'
@@ -229,8 +229,7 @@ tasks_assign_user_to_task_with_specific_status:
 
 tasks_update_assign_user_to_task:
     path:     /tasks/{taskId}/assign-user/{userId}/status/{statusId}
-    defaults: { _controller: APITaskBundle:Task/Assign:updateAssignUserToTask}
-    defaults: { _controller: APITaskBundle:Task/Assign:updateAssignUserToTask}
+    defaults: { _controller: APITaskBundle:TaskParts/Assign:updateAssignUserToTask}
     methods: [PATCH]
     requirements:
             taskId: '\d+'
@@ -239,7 +238,7 @@ tasks_update_assign_user_to_task:
 
 tasks_remove_assign_user_from_task:
     path:     /tasks/{taskId}/assign-user/{userId}
-    defaults: { _controller: APITaskBundle:Task/Assign:removeAssignUserFromTask}
+    defaults: { _controller: APITaskBundle:TaskParts/Assign:removeAssignUserFromTask}
     methods: [DELETE]
     requirements:
             taskId: '\d+'
@@ -247,91 +246,91 @@ tasks_remove_assign_user_from_task:
 
 tasks_list_of_tasks_attachments:
     path:     /tasks/{taskId}/attachment
-    defaults: { _controller: APITaskBundle:Task/Attachment:listOfTasksAttachments}
+    defaults: { _controller: APITaskBundle:TaskParts/Attachment:listOfTasksAttachments}
     methods: [GET]
     requirements:
             taskId: '\d+'
 
 tasks_add_attachment_to_task:
     path:     /tasks/{taskId}/add-attachment/{slug}
-    defaults: { _controller: APITaskBundle:Task/Attachment:addAttachmentToTask}
+    defaults: { _controller: APITaskBundle:TaskParts/Attachment:addAttachmentToTask}
     methods: [PUT]
     requirements:
             taskId: '\d+'
 
 tasks_remove_attachment_from_task:
     path:     /tasks/{taskId}/remove-attachment/{slug}
-    defaults: { _controller: APITaskBundle:Task/Attachment:removeAttachmentFromTask}
+    defaults: { _controller: APITaskBundle:TaskParts/Attachment:removeAttachmentFromTask}
     methods: [PUT]
     requirements:
             taskId: '\d+'
 
 tasks_list_of_tasks_comments:
     path:     /tasks/{taskId}/comments
-    defaults: { _controller: APITaskBundle:Task/Comment:tasksCommentsList }
+    defaults: { _controller: APITaskBundle:TaskParts/Comment:tasksCommentsList }
     methods: [GET]
     requirements:
             taskId: '\d+'
 
 tasks_comment:
     path:     /tasks/comments/{commentId}
-    defaults: { _controller: APITaskBundle:Task/Comment:getTasksComment }
+    defaults: { _controller: APITaskBundle:TaskParts/Comment:getTasksComment }
     methods: [GET]
     requirements:
             commentId: '\d+'
 
 tasks_add_comment_to_task:
     path:     /tasks/{taskId}/add-comment
-    defaults: { _controller: APITaskBundle:Task/Comment:createTasksComment }
+    defaults: { _controller: APITaskBundle:TaskParts/Comment:createTasksComment }
     methods: [POST]
     requirements:
             taskId: '\d+'
 
 tasks_add_comment_to_comment:
     path:     /tasks/comments/{commentId}/add-comment
-    defaults: { _controller: APITaskBundle:Task/Comment:createCommentsComment }
+    defaults: { _controller: APITaskBundle:TaskParts/Comment:createCommentsComment }
     methods: [POST]
     requirements:
             commentId: '\d+'
 
 tasks_delete_tasks_comment:
     path:     /tasks/comments/{commentId}
-    defaults: { _controller: APITaskBundle:Task/Comment:delete }
+    defaults: { _controller: APITaskBundle:TaskParts/Comment:delete }
     methods: [DELETE]
     requirements:
             commentId: '\d+'
 
 tasks_add_attachment_to_comment:
     path:     /tasks/comments/{commentId}/add-attachment/{slug}
-    defaults: { _controller: APITaskBundle:Task/CommentAttachment:addAttachmentToComment}
+    defaults: { _controller: APITaskBundle:TaskParts/CommentAttachment:addAttachmentToComment}
     methods: [PUT]
     requirements:
             commentId: '\d+'
 
 tasks_remove_attachment_from_comment:
     path:     /tasks/comments/{commentId}/remove-attachment/{slug}
-    defaults: { _controller: APITaskBundle:Task/CommentAttachment:removeAttachmentFromComment}
+    defaults: { _controller: APITaskBundle:TaskParts/CommentAttachment:removeAttachmentFromComment}
     methods: [PUT]
     requirements:
             commentId: '\d+'
 
 tasks_list_of_tasks_subtasks:
     path:     /tasks/{taskId}/subtasks
-    defaults: { _controller: APITaskBundle:Task/Subtask:listOfTasksSubtasks}
+    defaults: { _controller: APITaskBundle:TaskParts/Subtask:listOfTasksSubtasks}
     methods: [GET]
     requirements:
             taskId: '\d+'
 
 tasks_create_subtask:
     path:     /tasks/{taskId}/subtask
-    defaults: { _controller: APITaskBundle:Task/Subtask:createSubtask}
+    defaults: { _controller: APITaskBundle:TaskParts/Subtask:createSubtask}
     methods: [POST]
     requirements:
             taskId: '\d+'
 
 tasks_update_subtask:
     path:     /tasks/{taskId}/subtask/{subtaskId}
-    defaults: { _controller: APITaskBundle:Task/Subtask:updateSubtask}
+    defaults: { _controller: APITaskBundle:TaskParts/Subtask:updateSubtask}
     methods: [PUT]
     requirements:
             taskId: '\d+'
@@ -339,7 +338,7 @@ tasks_update_subtask:
 
 tasks_delete_subtask:
     path:     /tasks/{taskId}/subtask/{subtaskId}
-    defaults: { _controller: APITaskBundle:Task/Subtask:deleteSubtask}
+    defaults: { _controller: APITaskBundle:TaskParts/Subtask:deleteSubtask}
     methods: [DELETE]
     requirements:
             taskId: '\d+'

@@ -58,6 +58,8 @@ class CdnController extends ApiBaseController
      * @param Request $request
      *
      * @return Response
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \UnexpectedValueException
      * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
@@ -127,16 +129,16 @@ class CdnController extends ApiBaseController
                 $response = $response->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
                 $response = $response->setContent(json_encode($responseArray));
                 return $response;
-            } else {
-                $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-                $response = $response->setContent(json_encode(['message' => 'Problem with uploaded file type!']));
-                return $response;
             }
-        } else {
+
             $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Not supported file type! Supported are: ' . implode(', ', UploadingFilesOptions::$supportedFileTypesArray)]));
+            $response = $response->setContent(json_encode(['message' => 'Problem with uploaded file type!']));
             return $response;
         }
+
+        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        $response = $response->setContent(json_encode(['message' => 'Not supported file type! Supported are: ' . implode(', ', UploadingFilesOptions::$supportedFileTypesArray)]));
+        return $response;
     }
 
     /**
@@ -173,6 +175,8 @@ class CdnController extends ApiBaseController
      * @param Request $request
      *
      * @return Response
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\ORMInvalidArgumentException
      * @throws \UnexpectedValueException
      * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
@@ -236,11 +240,11 @@ class CdnController extends ApiBaseController
             $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
             $response = $response->setContent(json_encode(['message' => 'Problem with uploaded file type!']));
             return $response;
-        } else {
-            $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
-            $response = $response->setContent(json_encode(['message' => 'Not supported image type!']));
-            return $response;
         }
+
+        $response = $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
+        $response = $response->setContent(json_encode(['message' => 'Not supported image type!']));
+        return $response;
     }
 
     /**

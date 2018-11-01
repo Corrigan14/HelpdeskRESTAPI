@@ -5,11 +5,10 @@ tasks_list:
 
 tasks_list_saved_filter:
     path:     /tasks/filter/{filterId}
-    defaults: { _controller: APITaskBundle:TaskParts/Task:listSavedFilter }
+    defaults: { _controller: APITaskBundle:Task/ListFromFilter:list }
     methods: [GET]
     requirements:
         filterId: '\d+'
-
 task:
     path:     /tasks/{id}
     defaults: { _controller: APITaskBundle:TaskParts/Task:get }

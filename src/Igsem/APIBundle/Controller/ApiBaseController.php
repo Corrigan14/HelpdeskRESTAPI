@@ -1,17 +1,11 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: websolutions
- * Date: 11/1/16
- * Time: 10:22 AM
- */
 
 namespace Igsem\APIBundle\Controller;
 
 
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Response;
+use API\TaskBundle\Security\VoteOptions;
 
 /**
  * Class ApiBaseController
@@ -20,65 +14,6 @@ use Symfony\Component\HttpFoundation\Response;
  */
 abstract class ApiBaseController extends Controller
 {
-    /**
-     * @return Response 401
-     * @throws \InvalidArgumentException
-     */
-    protected function unauthorizedResponse()
-    {
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::UNAUTHORIZED_MESSAGE ,
-        ] , StatusCodesHelper::UNAUTHORIZED_CODE);
-    }
-
-    /**
-     * @return Response 404
-     * @throws \InvalidArgumentException
-     */
-    protected function notFoundResponse()
-    {
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::NOT_FOUND_MESSAGE ,
-        ] , StatusCodesHelper::NOT_FOUND_CODE);
-    }
-
-    /**
-     * @return Response 409
-     * @throws \InvalidArgumentException
-     */
-    protected function invalidParametersResponse()
-    {
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::INVALID_PARAMETERS_MESSAGE ,
-        ] , StatusCodesHelper::INVALID_PARAMETERS_CODE);
-    }
-
-    /**
-     * @return Response 403
-     * @throws \InvalidArgumentException
-     */
-    protected function accessDeniedResponse()
-    {
-        return $this->createApiResponse([
-            'message' => StatusCodesHelper::ACCESS_DENIED_MESSAGE ,
-        ] , StatusCodesHelper::ACCESS_DENIED_CODE);
-    }
-
-    /**
-     * @param     $data
-     * @param int $statusCode
-     *
-     * @return Response
-     * @throws \InvalidArgumentException
-     */
-    protected function createApiResponse($data , $statusCode = 200)
-    {
-        $json = $this->serialize($data);
-
-        return new Response($json , $statusCode , [
-            'Content-Type' => 'application/json' ,
-        ]);
-    }
 
     /**
      * @param        $data
@@ -86,10 +21,10 @@ abstract class ApiBaseController extends Controller
      *
      * @return mixed
      */
-    protected function serialize($data , $format = 'json')
+    protected function serialize($data, $format = 'json')
     {
         return $this->get('jms_serializer')
-                    ->serialize($data , $format);
+            ->serialize($data, $format);
     }
 
     /**
@@ -99,12 +34,44 @@ abstract class ApiBaseController extends Controller
      *
      * @return int
      */
-    protected function getCreateUpdateStatusCode($create)
+    protected function getCreateUpdateStatusCode($create): int
     {
         if ($create) {
             return StatusCodesHelper::CREATED_CODE;
-        } else {
-            return StatusCodesHelper::SUCCESSFUL_CODE;
         }
+        return StatusCodesHelper::SUCCESSFUL_CODE;
+
     }
+
+    /**
+     * @param array $tasksArray
+     * @return array
+     * @throws \LogicException
+     * @throws \InvalidArgumentException
+     */
+    protected function addCanEditParamToEveryTask(array $tasksArray): array
+    {
+        $tasksModified = $tasksArray;
+
+        foreach ($tasksArray['data'] as $task) {
+            $taskEntityFromDb = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($task['id']);
+
+            // Check if user can update selected task
+            if ($this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $taskEntityFromDb)) {
+                $canEditArray = ['canEdit' => true];
+            } else {
+                $canEditArray = ['canEdit' => false];
+            }
+            $task = array_merge($task, $canEditArray);
+            $tasksModified['data'][] = $task;
+        }
+
+        $tasksModified['_links'] = $tasksArray['_links'];
+        $tasksModified['total'] = $tasksArray['total'];
+        $tasksModified['page'] = $tasksArray['page'];
+        $tasksModified['numberOfPages'] = $tasksArray['numberOfPages'];
+
+        return $tasksModified;
+    }
+
 }

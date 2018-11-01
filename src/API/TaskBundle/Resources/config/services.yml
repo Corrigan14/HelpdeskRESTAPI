@@ -31,6 +31,9 @@ services:
     task_service:
           class: API\TaskBundle\Services\TaskService
           arguments: ["@doctrine.orm.entity_manager", "@router"]
+    task_list_service:
+            class: API\TaskBundle\Services\Task\ListMethods
+            arguments: ["@doctrine.orm.entity_manager", "@router"]
     task_helper_service:
           class: API\TaskBundle\Services\Task\HelperService
     task_process_order_param_service:

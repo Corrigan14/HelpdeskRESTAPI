@@ -103,7 +103,7 @@ class Voter
             return true;
         }
 
-        // User can view a filter if it is report and he/she has a his rol has a right REPORT_FILTERS
+        // User can view a filter if it is report and he/she has a his role has a right REPORT_FILTERS
         /** @var UserRole $loggedUsersRole */
         $loggedUsersRole = $this->user->getUserRole();
 

@@ -36,12 +36,19 @@ class ProcessFilterParams
     /**
      * @param array $requestBody
      * @param User $loggedUser
+     * @param bool $savedFilter
      * @return array
      * @throws \LogicException
      */
-    public function processFilterData(array $requestBody, User $loggedUser): array
+    public function processFilterData(array $requestBody, User $loggedUser, bool $savedFilter = false): array
     {
-        $dataArray = $this->createArrayOfParams($requestBody);
+        if ($savedFilter) {
+            $dataArray = $this->formatArrayParams($requestBody);
+
+            return $this->processData($dataArray, $loggedUser);
+        }
+
+        $dataArray = $this->formatParams($requestBody);
 
         return $this->processData($dataArray, $loggedUser);
     }
@@ -50,7 +57,7 @@ class ProcessFilterParams
      * @param $requestBody
      * @return array
      */
-    private function createArrayOfParams($requestBody): array
+    private function formatParams($requestBody): array
     {
         $data = [];
 
@@ -106,8 +113,70 @@ class ProcessFilterParams
         }
 
         return $data;
-
     }
+
+    /**
+     * @param array $filterDataArray
+     *
+     * @return array
+     * @throws \LogicException
+     */
+    private function formatArrayParams($filterDataArray): array
+    {
+        $data = [];
+
+        if (isset($filterDataArray[FilterAttributeOptions::SEARCH])) {
+            $data[FilterAttributeOptions::SEARCH] = $filterDataArray[FilterAttributeOptions::SEARCH];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::STATUS])) {
+            $data[FilterAttributeOptions::STATUS] = $filterDataArray[FilterAttributeOptions::STATUS];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::PROJECT])) {
+            $data[FilterAttributeOptions::PROJECT] = $filterDataArray[FilterAttributeOptions::PROJECT];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::CREATOR])) {
+            $data[FilterAttributeOptions::CREATOR] = $filterDataArray[FilterAttributeOptions::CREATOR];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::REQUESTER])) {
+            $data[FilterAttributeOptions::REQUESTER] = $filterDataArray[FilterAttributeOptions::REQUESTER];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::COMPANY])) {
+            $data[FilterAttributeOptions::COMPANY] = $filterDataArray[FilterAttributeOptions::COMPANY];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::ASSIGNED])) {
+            $data[FilterAttributeOptions::ASSIGNED] = $filterDataArray[FilterAttributeOptions::ASSIGNED];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::TAG])) {
+            $data[FilterAttributeOptions::TAG] = $filterDataArray[FilterAttributeOptions::TAG];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::FOLLOWER])) {
+            $data[FilterAttributeOptions::FOLLOWER] = $filterDataArray[FilterAttributeOptions::FOLLOWER];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::CREATED])) {
+            $data[FilterAttributeOptions::CREATED] = $filterDataArray[FilterAttributeOptions::CREATED];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::STARTED])) {
+            $data[FilterAttributeOptions::STARTED] = $filterDataArray[FilterAttributeOptions::STARTED];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::DEADLINE])) {
+            $data[FilterAttributeOptions::DEADLINE] = $filterDataArray[FilterAttributeOptions::DEADLINE];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::CLOSED])) {
+            $data[FilterAttributeOptions::CLOSED] = $filterDataArray[FilterAttributeOptions::CLOSED];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::ARCHIVED])) {
+            $data[FilterAttributeOptions::ARCHIVED] = $filterDataArray[FilterAttributeOptions::ARCHIVED];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::IMPORTANT])) {
+            $data[FilterAttributeOptions::IMPORTANT] = $filterDataArray[FilterAttributeOptions::IMPORTANT];
+        }
+        if (isset($filterDataArray[FilterAttributeOptions::ADDED_PARAMETERS])) {
+            $data[FilterAttributeOptions::ADDED_PARAMETERS] = $filterDataArray[FilterAttributeOptions::ADDED_PARAMETERS];
+        }
+
+        return $data;
+    }
+
 
     /**
      * @param array $data

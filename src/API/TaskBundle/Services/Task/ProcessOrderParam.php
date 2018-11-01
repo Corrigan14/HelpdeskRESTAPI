@@ -13,16 +13,16 @@ use API\TaskBundle\Security\Filter\FilterAttributeOptions;
 class ProcessOrderParam
 {
     /**
-     * @param $orderString
+     * @param $requestBody
      * @return array
      * @throws \ReflectionException
      */
-    public function processOrderParam($orderString): array
+    public function processOrderParam($requestBody): array
     {
         $order = [];
         $allowedOrderParams = FilterAttributeOptions::getConstants();
 
-        if (!$orderString) {
+        if (!isset($requestBody['order'])) {
             $order[FilterAttributeOptions::ID] = 'DESC';
 
             return [
@@ -31,6 +31,7 @@ class ProcessOrderParam
             ];
         }
 
+        $orderString = $requestBody['order'];
         $orderArray = explode(',', $orderString);
         foreach ($orderArray as $item) {
             $orderArrayKeyValue = explode('=>', $item);

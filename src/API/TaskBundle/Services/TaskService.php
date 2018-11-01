@@ -8,7 +8,6 @@ use API\TaskBundle\Entity\Project;
 use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\UserHasProject;
 use API\TaskBundle\Entity\UserRole;
-use API\TaskBundle\Repository\TaskRepository;
 use API\TaskBundle\Security\ProjectAclOptions;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\NonUniqueResultException;

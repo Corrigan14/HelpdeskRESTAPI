@@ -14,7 +14,7 @@ use API\TaskBundle\Entity\Task;
 use API\TaskBundle\Entity\TaskData;
 use API\TaskBundle\Entity\TaskHasAssignedUser;
 use API\TaskBundle\Entity\TaskHasAttachment;
-use API\TaskBundle\Security\FilterAttributeOptions;
+use API\TaskBundle\Security\Filter\FilterAttributeOptions;
 use API\TaskBundle\Services\VariableHelper;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;

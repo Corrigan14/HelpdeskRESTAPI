@@ -1,6 +1,6 @@
 tasks_list:
     path:     /tasks
-    defaults: { _controller: APITaskBundle:TaskParts/Task:list }
+    defaults: { _controller: APITaskBundle:Task/List:list }
     methods: [GET]
 
 tasks_list_saved_filter:

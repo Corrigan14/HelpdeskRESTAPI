@@ -29,11 +29,10 @@ class TaskRepository extends EntityRepository
     /**
      * Return's all entities with specific conditions based on actual Entity
      *
-     * @param int $page
      * @param array $options
      * @return array
      */
-    public function getAllAdminTasks(int $page, array $options)
+    public function getAllAdminTasks( array $options):array
     {
         $inFilter = $options['inFilter'];
         $equalFilter = $options['equalFilter'];
@@ -47,6 +46,7 @@ class TaskRepository extends EntityRepository
         $order = $options['order'];
         $limit = $options['limit'];
         $project = $options['project'];
+        $page = $options['page'];
 
         $query = $this->createQueryBuilder('task')
             ->select('task')

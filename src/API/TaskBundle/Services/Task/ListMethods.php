@@ -44,75 +44,91 @@ class ListMethods
      * @param Filter $filter
      * @return array
      */
-    public function getList(array $options, Filter $filter):array
+    public function getList(array $options, Filter $filter): array
     {
         if ($filter->getReport()) {
             return $this->getTasksResponseForReport($options);
         }
 
-        return $this->getTasksResponse($options['page'], $options);
+        return $this->getTasksResponse($options);
     }
 
     /**
      * Return Tasks Response which includes Data, Links and is based on Pagination, Project, Creator and/or Requested user
      *
-     * @param int $page
      * @param array $options
      *
      * @return array
      */
-    public function getTasksResponse(int $page, array $options): array
+    public function getTasksResponse(array $options): array
     {
-        $data = $this->getRequiredTasks($page, $options);
+        $data = $this->getRequiredTasks($options);
         $tasks = $data['tasks'];
-        $count = $data['count'];
 
-        $response = [
-            'data' => $tasks,
-        ];
+        $count = $data['count'];
+        $url = $this->router->generate('tasks_list');
+        $limit = $options['limit'];
+        $filters = $options['filtersForUrl'];
+
+        $response['data'] = $tasks;
+        $pagination = PaginationHelper::getPagination($url, $limit, $options['page'], $count, $filters);
+
+        return array_merge($response, $pagination);
+    }
+
+    /**
+     * @param array $options
+     * @return array
+     */
+    public function getTasksResponseForReport(array $options): array
+    {
+        $tasks = $this->em->getRepository('APITaskBundle:Task')->getAllAdminTasks($options);
 
         $url = $this->router->generate('tasks_list');
         $limit = $options['limit'];
         $filters = $options['filtersForUrl'];
 
-        $pagination = PaginationHelper::getPagination($url, $limit, $page, $count, $filters);
+        if (999 !== $limit) {
+            $pagination = PaginationHelper::getPagination($url, $limit, $options['page'], $tasks['count'], $filters);
+            $response['data'] = $tasks['array'];
+
+            return array_merge($response, $pagination);
+        }
+
+        $pagination = PaginationHelper::getPagination($url, $limit, $options['page'], \count($tasks['array']), $filters);
+        $response['data'] = $tasks['array'];
 
         return array_merge($response, $pagination);
-    }
-
-
-    public function getTasksResponseForReport(array $options): array
-    {
-        return [];
     }
 
     /**
      * Return Tasks based on User's ACL
      *
-     * @param int $page
      * @param array $options
      * @return array
      */
-    private function getRequiredTasks(int $page, array $options): array
+    private function getRequiredTasks(array $options): array
     {
         /** @var User $loggedUser */
         $loggedUser = $options['loggedUser'];
         $isAdmin = $options['isAdmin'];
         $limit = $options['limit'];
+        $page = $options['page'];
 
         // Return's all Tasks - logged user is ADMIN
         if ($isAdmin) {
-            $response = $this->em->getRepository('APITaskBundle:Task')->getAllAdminTasks($page, $options);
+            $response = $this->em->getRepository('APITaskBundle:Task')->getAllAdminTasks($options);
 
             if (999 !== $limit) {
-                $count = $response['count'];
-            } else {
-                $count = \count($response['array']);
+                return [
+                    'tasks' => $response['array'],
+                    'count' => $response['count']
+                ];
             }
 
             return [
                 'tasks' => $response['array'],
-                'count' => $count
+                'count' => \count($response['array'])
             ];
         }
 
@@ -165,14 +181,15 @@ class ListMethods
         $response = $this->em->getRepository('APITaskBundle:Task')->getAllUsersTasks($page, $loggedUser->getId(), $companyId, $dividedProjects, $options);
 
         if (999 !== $limit) {
-            $count = $response['count'];
-        } else {
-            $count = \count($response['array']);
+            return [
+                'tasks' => $response['array'],
+                'count' => $response['count']
+            ];
         }
 
         return [
             'tasks' => $response['array'],
-            'count' => $count
+            'count' => \count($response['array'])
         ];
     }
 }

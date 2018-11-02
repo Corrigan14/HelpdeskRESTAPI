@@ -263,8 +263,8 @@ class ListFromFilterController extends ApiBaseController
         }
 
         $processedBasicFilterParams = $this->get('api_base.service')->processFilterParams($requestBody, true);
-        $processedAdditionalFilterParams = $this->get('task_process_filter_param_service')->processFilterData($requestBody, $this->getUser(), true);
-
+        $processedAdditionalFilterParams = $this->get('task_process_filter_param_service')->processFilterData($requestBody, $this->getUser(), $filter->getFilter());
+        
         $options = $this->get('task_helper_service')->createOptionsForTasksArray($this->getUser(), $this->get('task_voter')->isAdmin(), $processedBasicFilterParams, $processedOrderParam, $processedAdditionalFilterParams, $filter);
         $tasksArray = $this->get('task_list_service')->getList($options, $filter);
         $tasksModified = $this->addCanEditParamToEveryTask($tasksArray);

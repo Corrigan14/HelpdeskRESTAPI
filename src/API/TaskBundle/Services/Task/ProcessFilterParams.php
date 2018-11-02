@@ -36,14 +36,14 @@ class ProcessFilterParams
     /**
      * @param array $requestBody
      * @param User $loggedUser
-     * @param bool $savedFilter
+     * @param bool|array $savedFilterArray
      * @return array
      * @throws \LogicException
      */
-    public function processFilterData(array $requestBody, User $loggedUser, bool $savedFilter = false): array
+    public function processFilterData(array $requestBody, User $loggedUser, $savedFilterArray = false): array
     {
-        if ($savedFilter) {
-            $dataArray = $this->formatArrayParams($requestBody);
+        if ($savedFilterArray) {
+            $dataArray = $this->formatArrayParams($savedFilterArray);
 
             return $this->processData($dataArray, $loggedUser);
         }

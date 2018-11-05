@@ -332,7 +332,7 @@ class ListController extends ApiBaseController
         $processedAdditionalFilterParams = $this->get('task_process_filter_param_service')->processFilterData($requestBody, $this->getUser());
 
         $options = $this->get('task_helper_service')->createOptionsForTasksArray($this->getUser(), $this->get('task_voter')->isAdmin(), $processedBasicFilterParams, $processedOrderParam, $processedAdditionalFilterParams);
-        $tasksArray = $this->get('task_list_service')->getTasksResponse($processedBasicFilterParams['page'], $options);
+        $tasksArray = $this->get('task_list_service')->getTasksResponse($options);
         $tasksModified = $this->addCanEditParamToEveryTask($tasksArray);
 
         $response->setContent(json_encode($tasksModified))

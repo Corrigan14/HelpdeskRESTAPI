@@ -68,7 +68,8 @@ class DeleteController extends ApiBaseController
             return $response;
         }
 
-        $this->getDoctrine()->getManager()->remove($filter);
+        $filter->setIsActive(false);
+        $this->getDoctrine()->getManager()->persist($filter);
         $this->getDoctrine()->getManager()->flush();
 
         $response->setStatusCode(StatusCodesHelper::DELETED_CODE)

@@ -6,6 +6,7 @@ namespace Igsem\APIBundle\Controller;
 use Igsem\APIBundle\Services\StatusCodesHelper;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use API\TaskBundle\Security\VoteOptions;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class ApiBaseController
@@ -14,6 +15,22 @@ use API\TaskBundle\Security\VoteOptions;
  */
 abstract class ApiBaseController extends Controller
 {
+
+    /**
+     * @param     $data
+     * @param int $statusCode
+     *
+     * @return Response
+     * @throws \InvalidArgumentException
+     */
+    protected function createApiResponse($data, $statusCode = 200): Response
+    {
+        $json = $this->serialize($data);
+
+        return new Response($json, $statusCode, [
+            'Content-Type' => 'application/json',
+        ]);
+    }
 
     /**
      * @param        $data
@@ -51,18 +68,16 @@ abstract class ApiBaseController extends Controller
      */
     protected function addCanEditParamToEveryTask(array $tasksArray): array
     {
-        $tasksModified = $tasksArray;
+        $tasksModified = [];
 
         foreach ($tasksArray['data'] as $task) {
             $taskEntityFromDb = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($task['id']);
 
-            // Check if user can update selected task
             if ($this->get('task_voter')->isGranted(VoteOptions::UPDATE_TASK, $taskEntityFromDb)) {
-                $canEditArray = ['canEdit' => true];
+                $task['canEdit'] = true;
             } else {
-                $canEditArray = ['canEdit' => false];
+                $task['canEdit'] = false;
             }
-            $task = array_merge($task, $canEditArray);
             $tasksModified['data'][] = $task;
         }
 

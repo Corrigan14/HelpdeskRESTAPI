@@ -65,6 +65,7 @@ class AssignController extends ApiBaseController
      *
      * @param int $projectId
      * @return Response
+     * @throws \LogicException
      * @throws \UnexpectedValueException
      * @throws \InvalidArgumentException
      */
@@ -366,7 +367,7 @@ class AssignController extends ApiBaseController
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \LogicException
      */
-    public function createAssignUserToTaskAction(Request $request, int $taskId, int $userId, $statusId = false)
+    public function createAssignUserToTaskAction(Request $request, int $taskId, int $userId, $statusId = false):Response
     {
         $task = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($taskId);
 
@@ -394,8 +395,8 @@ class AssignController extends ApiBaseController
         }
 
         if ($statusId) {
+            $statusId = (int)$statusId;
             $status = $this->getDoctrine()->getRepository('APITaskBundle:Status')->find($statusId);
-
             if (!$status instanceof Status) {
                 return $this->createApiResponse([
                     'message' => 'Status with requested Id does not exist!',
@@ -405,12 +406,11 @@ class AssignController extends ApiBaseController
             $newStatus = $this->getDoctrine()->getRepository('APITaskBundle:Status')->findOneBy([
                 'title' => StatusOptions::NEW,
             ]);
+            $status = $newStatus;
             if (!$newStatus instanceof Status) {
                 return $this->createApiResponse([
                     'message' => 'New Status Entity does not exist!',
                 ], StatusCodesHelper::NOT_FOUND_CODE);
-            } else {
-                $status = $newStatus;
             }
         }
 

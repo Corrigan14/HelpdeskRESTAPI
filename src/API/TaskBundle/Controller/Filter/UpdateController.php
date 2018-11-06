@@ -127,7 +127,7 @@ class UpdateController extends ApiBaseController
 
         $errors = $this->get('entity_processor')->processEntity($filter, $dataValidation['requestData']);
         if ($errors) {
-            $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_MESSAGE)
+            $response->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE)
                 ->setContent(json_encode($errors));
 
             return $response;

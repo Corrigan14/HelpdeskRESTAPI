@@ -68,7 +68,7 @@ abstract class ApiBaseController extends Controller
      */
     protected function addCanEditParamToEveryTask(array $tasksArray): array
     {
-        $tasksModified = [];
+        $tasksModified['data'] = [];
 
         foreach ($tasksArray['data'] as $task) {
             $taskEntityFromDb = $this->getDoctrine()->getRepository('APITaskBundle:Task')->find($task['id']);

@@ -3,6 +3,13 @@ filter_list:
     defaults: { _controller: APITaskBundle:Filter/List:list }
     methods: [GET]
 
+filter_company_list:
+    path:     /filters/{filterId}/company
+    defaults: { _controller: APITaskBundle:Filter/ListCompanyFilter:list }
+    methods: [GET]
+    requirements:
+       filterId: '\d+'
+
 filter:
     path:     /filters/{id}
     defaults: { _controller: APITaskBundle:Filter/Get:get }

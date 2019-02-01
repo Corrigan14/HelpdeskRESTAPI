@@ -64,4 +64,22 @@ class ProcessOrderParam
         ];
     }
 
+    /**
+     * @param $requestBody
+     * @return string
+     */
+    public function processOrderParamForCompanyList($requestBody): string
+    {
+        if (!isset($requestBody['order'])) {
+            return 'DESC';
+        }
+
+        if ('ASC' === strtoupper($requestBody['order'])) {
+            return 'ASC';
+        }
+
+        return 'DESC';
+
+    }
+
 }

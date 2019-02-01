@@ -54,6 +54,12 @@ class ListCompanyFilterController extends ApiBaseController
      *       "description"="The id of filter"
      *     }
      *  },
+     *  filters={
+     *     {
+     *       "name"="order",
+     *       "description"="ASC or DESC order chart. The list is ordered by TITLE of a comapny."
+     *     }
+     *  },
      *  headers={
      *     {
      *       "name"="Authorization",
@@ -108,22 +114,14 @@ class ListCompanyFilterController extends ApiBaseController
             return $response;
         }
 
-        $processedOrderParam = $this->get('task_process_order_param_service')->processOrderParam($requestBody);
-        if (false === $processedOrderParam['correct']) {
-            $response->setContent(json_encode(['message' => $processedOrderParam['message']]))
-                ->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
 
-            return $response;
-        }
-
-        $processedBasicFilterParams = $this->get('api_base.service')->processFilterParams($requestBody, true);
+        $processedOrderParam = $this->get('task_process_order_param_service')->processOrderParamForCompanyList($requestBody);
         $processedAdditionalFilterParams = $this->get('task_process_filter_param_service')->processFilterData($requestBody, $this->getUser(), $filter->getFilter());
-        
-        $options = $this->get('task_helper_service')->createOptionsForTasksArray($this->getUser(), $this->get('task_voter')->isAdmin(), $processedBasicFilterParams, $processedOrderParam, $processedAdditionalFilterParams, $filter);
-        $tasksArray = $this->get('task_list_service')->getList($options, $filter);
-        $tasksModified = $this->addCanEditParamToEveryTask($tasksArray);
+        $options = $this->get('task_helper_service')->createOptionsForCompanyArray($processedAdditionalFilterParams, $processedOrderParam, $filter);
 
-        $response->setContent(json_encode($tasksModified))
+        $companyArray = $this->get('task_list_service')->getListOfCompaniesForCompanyReport($options);
+
+        $response->setContent(json_encode($companyArray))
             ->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
 
         return $response;

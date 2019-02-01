@@ -54,6 +54,15 @@ class ListMethods
     }
 
     /**
+     * @param array $options
+     * @return array
+     */
+    public function getListOfCompaniesForCompanyReport(array $options): array
+    {
+        return $this->em->getRepository('APITaskBundle:Task')->getCompaniesWithTasksFulfillingOptions($options);
+    }
+
+    /**
      * Return Tasks Response which includes Data, Links and is based on Pagination, Project, Creator and/or Requested user
      *
      * @param array $options
@@ -192,4 +201,5 @@ class ListMethods
             'count' => \count($response['array'])
         ];
     }
+
 }

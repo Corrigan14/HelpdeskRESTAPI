@@ -49,4 +49,33 @@ class HelperService
         ];
     }
 
+    /**
+     * @param $processedAdditionalFilterParams
+     * @param string $processedOrderParam
+     * @param $filter
+     * @return array
+     */
+    public function createOptionsForCompanyArray($processedAdditionalFilterParams, string $processedOrderParam, $filter): array
+    {
+        $project = null;
+        if ($filter) {
+            $project = $filter->getProject();
+        }
+
+        return [
+            'inFilter' => $processedAdditionalFilterParams['inFilter'],
+            'equalFilter' => $processedAdditionalFilterParams['equalFilter'],
+            'isNullFilter' => $processedAdditionalFilterParams['isNullFilter'],
+            'dateFilter' => $processedAdditionalFilterParams['dateFilter'],
+            'searchFilter' => $processedAdditionalFilterParams['searchFilter'],
+            'notAndCurrentFilter' => $processedAdditionalFilterParams['notAndCurrentFilter'],
+            'inFilterAddedParams' => $processedAdditionalFilterParams['inFilterAddedParams'],
+            'equalFilterAddedParams' => $processedAdditionalFilterParams['equalFilterAddedParams'],
+            'dateFilterAddedParams' => $processedAdditionalFilterParams['dateFilterAddedParams'],
+            'filtersForUrl' => $processedAdditionalFilterParams['filterForUrl'],
+            'order' => $processedOrderParam,
+            'project' => $project
+        ];
+    }
+
 }

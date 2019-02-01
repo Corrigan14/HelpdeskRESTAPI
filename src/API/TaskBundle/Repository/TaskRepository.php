@@ -17,6 +17,7 @@ use API\TaskBundle\Entity\TaskHasAttachment;
 use API\TaskBundle\Security\Filter\FilterAttributeOptions;
 use API\TaskBundle\Services\VariableHelper;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
@@ -32,20 +33,9 @@ class TaskRepository extends EntityRepository
      * @param array $options
      * @return array
      */
-    public function getAllAdminTasks( array $options):array
+    public function getAllAdminTasks(array $options): array
     {
-        $inFilter = $options['inFilter'];
-        $equalFilter = $options['equalFilter'];
-        $dateFilter = $options['dateFilter'];
-        $isNullFilter = $options['isNullFilter'];
-        $searchFilter = $options['searchFilter'];
-        $notAndCurrentFilter = $options['notAndCurrentFilter'];
-        $inFilterAddedParams = $options['inFilterAddedParams'];
-        $equalFilterAddedParams = $options['equalFilterAddedParams'];
-        $dateFilterAddedParams = $options['dateFilterAddedParams'];
-        $order = $options['order'];
         $limit = $options['limit'];
-        $project = $options['project'];
         $page = $options['page'];
 
         $query = $this->createQueryBuilder('task')
@@ -95,6 +85,399 @@ class TaskRepository extends EntityRepository
             ->leftJoin('invoiceableItems.unit', 'unit')
             ->distinct();
 
+        // Apply Order
+        $query = $this->createQueryForOrder($query, $options['order']);
+
+        //Check and apply filters
+        $query->where('task.id is not NULL');
+        $query = $this->createQueryForFilter($query, $options);
+
+        // Pagination
+        if (999 !== $limit) {
+            if (1 < $page) {
+                $query->setFirstResult($limit * $page - $limit);
+            } else {
+                $query->setFirstResult(0);
+            }
+
+            $query->setMaxResults($limit);
+
+            $paginator = new Paginator($query, $fetchJoinCollection = true);
+            $count = $paginator->count();
+
+            return [
+                'count' => $count,
+                'array' => $this->formatData($paginator)
+            ];
+        }
+
+        return [
+            'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
+        ];
+    }
+
+    /**
+     * @param int $page
+     * @param int $userId
+     * @param int $companyId
+     * @param       $dividedProjects
+     * @param array $options
+     *
+     * @return array|null
+     */
+    public function getAllUsersTasks(int $page, int $userId, int $companyId, $dividedProjects, array $options): array
+    {
+        $limit = $options['limit'];
+
+        $query = $this->createQueryBuilder('task')
+            ->select('task')
+            ->addSelect('taskData')
+            ->addSelect('taskAttribute')
+            ->addSelect('project')
+            ->addSelect('projectCreator')
+            ->addSelect('createdBy')
+            ->addSelect('creatorDetailData')
+            ->addSelect('company')
+            ->addSelect('requestedBy')
+            ->addSelect('requesterDetailData')
+            ->addSelect('taskHasAttachments')
+            ->addSelect('taskGlobalStatus')
+            ->addSelect('assignedUser')
+            ->addSelect('assigneeDetailData')
+            ->addSelect('tags')
+            ->addSelect('taskCompany')
+            ->addSelect('followers')
+            ->addSelect('followersDetailData')
+            ->addSelect('invoiceableItems')
+            ->addSelect('unit')
+            ->addSelect('taskHasAssignedUsers')
+            ->addSelect('assignedUserStatus')
+            ->addSelect('assignedUser')
+            ->leftJoin('task.taskData', 'taskData')
+            ->leftJoin('taskData.taskAttribute', 'taskAttribute')
+            ->leftJoin('task.project', 'project')
+            ->leftJoin('project.createdBy', 'projectCreator')
+            ->leftJoin('task.createdBy', 'createdBy')
+            ->leftJoin('createdBy.detailData', 'creatorDetailData')
+            ->leftJoin('createdBy.company', 'company')
+            ->leftJoin('task.requestedBy', 'requestedBy')
+            ->leftJoin('requestedBy.detailData', 'requesterDetailData')
+            ->leftJoin('task.taskHasAssignedUsers', 'taskHasAssignedUsers')
+            ->leftJoin('task.taskHasAttachments', 'taskHasAttachments')
+            ->leftJoin('taskHasAssignedUsers.status', 'assignedUserStatus')
+            ->leftJoin('taskHasAssignedUsers.user', 'assignedUser')
+            ->leftJoin('assignedUser.detailData', 'assigneeDetailData')
+            ->leftJoin('task.tags', 'tags')
+            ->leftJoin('task.company', 'taskCompany')
+            ->leftJoin('task.status', 'taskGlobalStatus')
+            ->leftJoin('task.followers', 'followers')
+            ->leftJoin('followers.detailData', 'followersDetailData')
+            ->leftJoin('task.invoiceableItems', 'invoiceableItems')
+            ->leftJoin('invoiceableItems.unit', 'unit')
+            ->distinct();
+
+        // Apply Order
+        $query = $this->createQueryForOrder($query, $options['order']);
+
+        // Check and apply User's project ACL
+        if (array_key_exists('VIEW_ALL_TASKS_IN_PROJECT', $dividedProjects)) {
+            /** @var array $allTasksInProject */
+            $allTasksInProject = $dividedProjects['VIEW_ALL_TASKS_IN_PROJECT'];
+        } else {
+            $allTasksInProject = [1];
+        }
+
+        if (array_key_exists('VIEW_COMPANY_TASKS_IN_PROJECT', $dividedProjects)) {
+            /** @var array $companyTasksInProject */
+            $companyTasksInProject = $dividedProjects['VIEW_COMPANY_TASKS_IN_PROJECT'];
+        } else {
+            $companyTasksInProject = [1];
+        }
+
+        if (array_key_exists('VIEW_OWN_TASKS', $dividedProjects)) {
+            /** @var array $companyTasksInProject */
+            $ownTasksInProject = $dividedProjects['VIEW_OWN_TASKS'];
+        } else {
+            $ownTasksInProject = [1];
+        }
+
+        // Select only in Allowed users projects
+        $query->andWhere($query->expr()->orX(
+            $query->expr()->in('project.id', $allTasksInProject),
+            $query->expr()->andX(
+                $query->expr()->in('project.id', $companyTasksInProject),
+                $query->expr()->eq('taskCompany.id', $companyId)
+            ),
+            $query->expr()->andX(
+                $query->expr()->in('project.id', $ownTasksInProject),
+                $query->expr()->orX(
+                    $query->expr()->eq('requestedBy.id', $userId),
+                    $query->expr()->eq('createdBy.id', $userId)
+                )
+            )
+        ));
+
+        //Check and apply filters
+        $query = $this->createQueryForFilter($query, $options);
+
+        // Pagination
+        if (999 !== $limit) {
+            if (1 < $page) {
+                $query->setFirstResult($limit * $page - $limit);
+            } else {
+                $query->setFirstResult(0);
+            }
+
+            $query->setMaxResults($limit);
+
+            $paginator = new Paginator($query, $fetchJoinCollection = true);
+            $count = $paginator->count();
+
+            return [
+                'count' => $count,
+                'array' => $this->formatData($paginator)
+            ];
+        }
+
+        return [
+            'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
+        ];
+    }
+
+    /**
+     * @param array $options
+     * @return array
+     */
+    public function getCompaniesWithTasksFulfillingOptions(array $options): array
+    {
+        $order = $options['order'];
+
+        $query = $this->createQueryBuilder('task')
+            ->select('task', 'taskCompany')
+            ->leftJoin('task.taskData', 'taskData')
+            ->leftJoin('taskData.taskAttribute', 'taskAttribute')
+            ->leftJoin('task.project', 'project')
+            ->leftJoin('project.createdBy', 'projectCreator')
+            ->leftJoin('task.createdBy', 'createdBy')
+            ->leftJoin('createdBy.detailData', 'creatorDetailData')
+            ->leftJoin('createdBy.company', 'company')
+            ->leftJoin('task.requestedBy', 'requestedBy')
+            ->leftJoin('requestedBy.detailData', 'requesterDetailData')
+            ->leftJoin('task.taskHasAssignedUsers', 'taskHasAssignedUsers')
+            ->leftJoin('task.taskHasAttachments', 'taskHasAttachments')
+            ->leftJoin('taskHasAssignedUsers.status', 'assignedUserStatus')
+            ->leftJoin('taskHasAssignedUsers.user', 'assignedUser')
+            ->leftJoin('assignedUser.detailData', 'assigneeDetailData')
+            ->leftJoin('task.tags', 'tags')
+            ->leftJoin('task.company', 'taskCompany')
+            ->leftJoin('task.status', 'taskGlobalStatus')
+            ->leftJoin('task.followers', 'followers')
+            ->leftJoin('followers.detailData', 'followersDetailData')
+            ->leftJoin('task.invoiceableItems', 'invoiceableItems')
+            ->leftJoin('invoiceableItems.unit', 'unit')
+            ->distinct()
+            ->orderBy('taskCompany.title', $order);
+
+        // Check and apply filters
+        $query = $this->createQueryForFilter($query, $options);
+
+        //Format data
+
+        return [];
+    }
+
+    private function createQueryForFilter($query, $options): QueryBuilder
+    {
+        $inFilter = $options['inFilter'];
+        $equalFilter = $options['equalFilter'];
+        $dateFilter = $options['dateFilter'];
+        $isNullFilter = $options['isNullFilter'];
+        $searchFilter = $options['searchFilter'];
+        $notAndCurrentFilter = $options['notAndCurrentFilter'];
+        $inFilterAddedParams = $options['inFilterAddedParams'];
+        $equalFilterAddedParams = $options['equalFilterAddedParams'];
+        $dateFilterAddedParams = $options['dateFilterAddedParams'];
+        $project = $options['project'];
+
+        $paramArray = [];
+        $paramNum = 0;
+        if (null !== $searchFilter) {
+            $query->andWhere('task.id LIKE :taskIdParam OR task.title LIKE :taskTitleParam');
+            $paramArray['taskIdParam'] = '%' . $searchFilter . '%';
+            $paramArray['taskTitleParam'] = '%' . $searchFilter . '%';
+        }
+        foreach ($isNullFilter as $value) {
+            // check if query is allowed
+            if (\in_array($value, VariableHelper::$allowedKeysInFilter, true)) {
+                $query->andWhere($value . ' IS NULL');
+            }
+        }
+
+        foreach ($inFilter as $key => $value) {
+            // check if query is allowed
+            if (\in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
+                $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
+                $paramArray['parameters' . $paramNum] = $value;
+                $paramNum++;
+            }
+        }
+
+        foreach ($equalFilter as $key => $value) {
+            if (\in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
+                $query->andWhere($key . ' = :parameter' . $paramNum);
+                $paramArray['parameter' . $paramNum] = $value;
+
+                $paramNum++;
+            }
+        }
+
+        foreach ($notAndCurrentFilter as $filter) {
+            if (\in_array($filter['not'], VariableHelper::$allowedKeysInFilter, true) && \in_array($filter['equal']['key'], VariableHelper::$allowedKeysInFilter, true)) {
+                $query->andWhere($filter['not'] . ' IS NULL' . ' OR ' . $filter['equal']['key'] . ' IN (:parameters' . $paramNum . ')');
+                $paramArray['parameters' . $paramNum] = $filter['equal']['value'];
+            }
+        }
+
+        foreach ($dateFilter as $key => $value) {
+            if (\in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
+                if (isset($value['from']) && isset($value['to'])) {
+                    $query->andWhere($query->expr()->between($key, ':FROM' . $paramNum, ':TO' . $paramNum));
+                    $paramArray['FROM' . $paramNum] = $value['from'];
+                    $paramArray['TO' . $paramNum] = $value['to'];
+
+                    $paramNum++;
+                } elseif (isset($value['from']) && !isset($value['to'])) {
+                    $query->andWhere($key . '>= :FROM' . $paramNum);
+                    $paramArray['FROM' . $paramNum] = $value['from'];
+
+                    $paramNum++;
+                } elseif (isset($value['to']) && !isset($value['from'])) {
+                    $query->andWhere($key . '<= :TO' . $paramNum);
+                    $paramArray['TO' . $paramNum] = $value['to'];
+
+                    $paramNum++;
+                }
+            }
+        }
+
+        $addedParamNum = 0;
+        if (\count($inFilterAddedParams) > 1) {
+            foreach ($inFilterAddedParams as $key => $value) {
+                $andString = 'taskAttribute.id = :attributeId' . $addedParamNum;
+                $paramArray['attributeId' . $addedParamNum] = $key;
+                $addedParamNum++;
+
+                $helperCount = 1;
+                $queryString = '';
+                if (\count($value) > 1) {
+                    foreach ($value as $val) {
+                        // Create Query
+                        if ($helperCount === 1) {
+                            $queryString = 'taskData.value LIKE :parameters' . $paramNum;
+                            $helperCount++;
+                        } else {
+                            $queryString = $queryString . ' OR ' . 'taskData.value LIKE :parameters' . $paramNum;
+                        }
+                        $paramArray['parameters' . $paramNum] = '%' . $val . '%';
+                        $paramNum++;
+
+                    }
+                } else {
+                    $queryString = 'taskData.value LIKE :parameters' . $paramNum;
+                    $paramArray['parameters' . $paramNum] = '%' . $value[0] . '%';
+                    $paramNum++;
+                }
+                $query->andWhere($andString . ' AND ' . '(' . $queryString . ')');
+
+            }
+        } else {
+            foreach ($inFilterAddedParams as $key => $value) {
+                $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
+                $paramArray['attributeId' . $addedParamNum] = $key;
+                $addedParamNum++;
+
+                $helperCount = 1;
+                $queryString = '';
+                if (count($value) > 1) {
+                    foreach ($value as $val) {
+                        // Create Query
+                        if ($helperCount === 1) {
+                            $queryString = 'taskData.value LIKE :parameters' . $paramNum;
+                            $helperCount++;
+                        } else {
+                            $queryString = $queryString . ' OR ' . 'taskData.value LIKE :parameters' . $paramNum;
+                        }
+                        $paramArray['parameters' . $paramNum] = '%' . $val . '%';
+                        $paramNum++;
+
+                    }
+                } else {
+                    $queryString = 'taskData.value LIKE :parameters' . $paramNum;
+                    $paramArray['parameters' . $paramNum] = '%' . $value[0] . '%';
+                    $paramNum++;
+                }
+                $query->andWhere($queryString);
+
+            }
+        }
+
+        foreach ($equalFilterAddedParams as $key => $value) {
+            $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
+            $query->andWhere('taskData.boolValue = :parameters' . $paramNum);
+            $paramArray['parameters' . $paramNum] = $value;
+            $paramArray['attributeId' . $addedParamNum] = $key;
+
+            $paramNum++;
+            $addedParamNum++;
+        }
+
+        foreach ($dateFilterAddedParams as $key => $value) {
+            if (isset($value['from']) && isset($value['to'])) {
+                $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
+                $query->andWhere($query->expr()->between('taskData.value', ':FROM' . $paramNum, ':TO' . $paramNum));
+                $paramArray['FROM' . $paramNum] = $value['from'];
+                $paramArray['TO' . $paramNum] = $value['to'];
+                $paramArray['attributeId' . $addedParamNum] = $key;
+
+                $paramNum++;
+                $addedParamNum++;
+            } elseif (isset($value['from']) && !isset($value['to'])) {
+                $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
+                $query->andWhere('taskData.value' . '>= :FROM' . $paramNum);
+                $paramArray['FROM' . $paramNum] = $value['from'];
+                $paramArray['attributeId' . $addedParamNum] = $key;
+
+                $paramNum++;
+                $addedParamNum++;
+            } elseif (isset($value['to']) && !isset($value['from'])) {
+                $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
+                $query->andWhere('taskData.value' . '<= :TO' . $paramNum);
+                $paramArray['TO' . $paramNum] = $value['to'];
+
+                $paramNum++;
+                $addedParamNum++;
+            }
+        }
+
+        if (null !== $project) {
+            $query->andWhere('project.id = :mainProjectId' . $addedParamNum);
+            $paramArray['mainProjectId' . $addedParamNum] = $project;
+        }
+
+        if (!empty($paramArray)) {
+            $query->setParameters($paramArray);
+        }
+
+        return $query;
+    }
+
+    /**
+     * @param $query
+     * @param array $order
+     * @return QueryBuilder
+     */
+    private function createQueryForOrder($query, array $order): QueryBuilder
+    {
         foreach ($order as $key => $value) {
             switch ($key) {
                 case FilterAttributeOptions::ID:
@@ -150,562 +533,7 @@ class TaskRepository extends EntityRepository
             }
         }
 
-        $query->where('task.id is not NULL');
-
-        $paramArray = [];
-        $paramNum = 0;
-        if (null !== $searchFilter) {
-            $query->andWhere('task.id LIKE :taskIdParam OR task.title LIKE :taskTitleParam');
-            $paramArray['taskIdParam'] = '%' . $searchFilter . '%';
-            $paramArray['taskTitleParam'] = '%' . $searchFilter . '%';
-        }
-        foreach ($isNullFilter as $value) {
-            // check if query is allowed
-            if (\in_array($value, VariableHelper::$allowedKeysInFilter, true)) {
-                $query->andWhere($value . ' IS NULL');
-            }
-        }
-
-        foreach ($inFilter as $key => $value) {
-            // check if query is allowed
-            if (\in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
-                $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
-                $paramArray['parameters' . $paramNum] = $value;
-                $paramNum++;
-            }
-        }
-
-        foreach ($equalFilter as $key => $value) {
-            if (\in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
-                $query->andWhere($key . ' = :parameter' . $paramNum);
-                $paramArray['parameter' . $paramNum] = $value;
-
-                $paramNum++;
-            }
-        }
-
-        foreach ($notAndCurrentFilter as $filter) {
-            if (\in_array($filter['not'], VariableHelper::$allowedKeysInFilter, true) && \in_array($filter['equal']['key'], VariableHelper::$allowedKeysInFilter, true)) {
-                $query->andWhere($filter['not'] . ' IS NULL' . ' OR ' . $filter['equal']['key'] . ' IN (:parameters' . $paramNum . ')');
-                $paramArray['parameters' . $paramNum] = $filter['equal']['value'];
-            }
-        }
-
-        foreach ($dateFilter as $key => $value) {
-            if (\in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
-                if (isset($value['from']) && isset($value['to'])) {
-                    $query->andWhere($query->expr()->between($key, ':FROM' . $paramNum, ':TO' . $paramNum));
-                    $paramArray['FROM' . $paramNum] = $value['from'];
-                    $paramArray['TO' . $paramNum] = $value['to'];
-
-                    $paramNum++;
-                } elseif (isset($value['from']) && !isset($value['to'])) {
-                    $query->andWhere($key . '>= :FROM' . $paramNum);
-                    $paramArray['FROM' . $paramNum] = $value['from'];
-
-                    $paramNum++;
-                } elseif (isset($value['to']) && !isset($value['from'])) {
-                    $query->andWhere($key . '<= :TO' . $paramNum);
-                    $paramArray['TO' . $paramNum] = $value['to'];
-
-                    $paramNum++;
-                }
-            }
-        }
-
-        $addedParamNum = 0;
-        if (\count($inFilterAddedParams) > 1) {
-            foreach ($inFilterAddedParams as $key => $value) {
-                $andString = 'taskAttribute.id = :attributeId' . $addedParamNum;
-                $paramArray['attributeId' . $addedParamNum] = $key;
-                $addedParamNum++;
-
-                $helperCount = 1;
-                $queryString = '';
-                if (\count($value) > 1) {
-                    foreach ($value as $val) {
-                        // Create Query
-                        if ($helperCount === 1) {
-                            $queryString = 'taskData.value LIKE :parameters' . $paramNum;
-                            $helperCount++;
-                        } else {
-                            $queryString = $queryString . ' OR ' . 'taskData.value LIKE :parameters' . $paramNum;
-                        }
-                        $paramArray['parameters' . $paramNum] = '%' . $val . '%';
-                        $paramNum++;
-
-                    }
-                } else {
-                    $queryString = 'taskData.value LIKE :parameters' . $paramNum;
-                    $paramArray['parameters' . $paramNum] = '%' . $value[0] . '%';
-                    $paramNum++;
-                }
-                $query->andWhere($andString . ' AND ' . '(' . $queryString . ')');
-
-            }
-        } else {
-            foreach ($inFilterAddedParams as $key => $value) {
-                $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
-                $paramArray['attributeId' . $addedParamNum] = $key;
-                $addedParamNum++;
-
-                $helperCount = 1;
-                $queryString = '';
-                if (count($value) > 1) {
-                    foreach ($value as $val) {
-                        // Create Query
-                        if ($helperCount === 1) {
-                            $queryString = 'taskData.value LIKE :parameters' . $paramNum;
-                            $helperCount++;
-                        } else {
-                            $queryString = $queryString . ' OR ' . 'taskData.value LIKE :parameters' . $paramNum;
-                        }
-                        $paramArray['parameters' . $paramNum] = '%' . $val . '%';
-                        $paramNum++;
-
-                    }
-                } else {
-                    $queryString = 'taskData.value LIKE :parameters' . $paramNum;
-                    $paramArray['parameters' . $paramNum] = '%' . $value[0] . '%';
-                    $paramNum++;
-                }
-                $query->andWhere($queryString);
-
-            }
-        }
-
-        foreach ($equalFilterAddedParams as $key => $value) {
-            $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
-            $query->andWhere('taskData.boolValue = :parameters' . $paramNum);
-            $paramArray['parameters' . $paramNum] = $value;
-            $paramArray['attributeId' . $addedParamNum] = $key;
-
-            $paramNum++;
-            $addedParamNum++;
-        }
-
-        foreach ($dateFilterAddedParams as $key => $value) {
-            if (isset($value['from']) && isset($value['to'])) {
-                $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
-                $query->andWhere($query->expr()->between('taskData.value', ':FROM' . $paramNum, ':TO' . $paramNum));
-                $paramArray['FROM' . $paramNum] = $value['from'];
-                $paramArray['TO' . $paramNum] = $value['to'];
-                $paramArray['attributeId' . $addedParamNum] = $key;
-
-                $paramNum++;
-                $addedParamNum++;
-            } elseif (isset($value['from']) && !isset($value['to'])) {
-                $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
-                $query->andWhere('taskData.value' . '>= :FROM' . $paramNum);
-                $paramArray['FROM' . $paramNum] = $value['from'];
-                $paramArray['attributeId' . $addedParamNum] = $key;
-
-                $paramNum++;
-                $addedParamNum++;
-            } elseif (isset($value['to']) && !isset($value['from'])) {
-                $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
-                $query->andWhere('taskData.value' . '<= :TO' . $paramNum);
-                $paramArray['TO' . $paramNum] = $value['to'];
-
-                $paramNum++;
-                $addedParamNum++;
-            }
-        }
-
-        if (null !== $project) {
-            $query->andWhere('project.id = :mainProjectId' . $addedParamNum);
-            $paramArray['mainProjectId' . $addedParamNum] = $project;
-        }
-
-        if (!empty($paramArray)) {
-            $query->setParameters($paramArray);
-        }
-
-        if (999 !== $limit) {
-            // Pagination
-            if (1 < $page) {
-                $query->setFirstResult($limit * $page - $limit);
-            } else {
-                $query->setFirstResult(0);
-            }
-
-            $query->setMaxResults($limit);
-
-            $paginator = new Paginator($query, $fetchJoinCollection = true);
-            $count = $paginator->count();
-
-            return [
-                'count' => $count,
-                'array' => $this->formatData($paginator)
-            ];
-        }
-
-        // Return all entities
-        return [
-            'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
-        ];
-    }
-
-    /**
-     * @param int $page
-     * @param int $userId
-     * @param int $companyId
-     * @param       $dividedProjects
-     * @param array $options
-     *
-     * @return array|null
-     */
-    public function getAllUsersTasks(int $page, int $userId, int $companyId, $dividedProjects, array $options): array
-    {
-        $paramArray = [];
-
-        $inFilter = $options['inFilter'];
-        $equalFilter = $options['equalFilter'];
-        $dateFilter = $options['dateFilter'];
-        $isNullFilter = $options['isNullFilter'];
-        $searchFilter = $options['searchFilter'];
-        $notAndCurrentFilter = $options['notAndCurrentFilter'];
-        $inFilterAddedParams = $options['inFilterAddedParams'];
-        $equalFilterAddedParams = $options['equalFilterAddedParams'];
-        $dateFilterAddedParams = $options['dateFilterAddedParams'];
-        $order = $options['order'];
-        $limit = $options['limit'];
-        $project = $options['project'];
-
-        $query = $this->createQueryBuilder('task')
-            ->select('task')
-            ->addSelect('taskData')
-            ->addSelect('taskAttribute')
-            ->addSelect('project')
-            ->addSelect('projectCreator')
-            ->addSelect('createdBy')
-            ->addSelect('creatorDetailData')
-            ->addSelect('company')
-            ->addSelect('requestedBy')
-            ->addSelect('requesterDetailData')
-            ->addSelect('taskHasAttachments')
-            ->addSelect('taskGlobalStatus')
-            ->addSelect('assignedUser')
-            ->addSelect('assigneeDetailData')
-            ->addSelect('tags')
-            ->addSelect('taskCompany')
-            ->addSelect('followers')
-            ->addSelect('followersDetailData')
-            ->addSelect('invoiceableItems')
-            ->addSelect('unit')
-            ->addSelect('taskHasAssignedUsers')
-            ->addSelect('assignedUserStatus')
-            ->addSelect('assignedUser')
-            ->leftJoin('task.taskData', 'taskData')
-            ->leftJoin('taskData.taskAttribute', 'taskAttribute')
-            ->leftJoin('task.project', 'project')
-            ->leftJoin('project.createdBy', 'projectCreator')
-            ->leftJoin('task.createdBy', 'createdBy')
-            ->leftJoin('createdBy.detailData', 'creatorDetailData')
-            ->leftJoin('createdBy.company', 'company')
-            ->leftJoin('task.requestedBy', 'requestedBy')
-            ->leftJoin('requestedBy.detailData', 'requesterDetailData')
-            ->leftJoin('task.taskHasAssignedUsers', 'taskHasAssignedUsers')
-            ->leftJoin('task.taskHasAttachments', 'taskHasAttachments')
-            ->leftJoin('taskHasAssignedUsers.status', 'assignedUserStatus')
-            ->leftJoin('taskHasAssignedUsers.user', 'assignedUser')
-            ->leftJoin('assignedUser.detailData', 'assigneeDetailData')
-            ->leftJoin('task.tags', 'tags')
-            ->leftJoin('task.company', 'taskCompany')
-            ->leftJoin('task.status', 'taskGlobalStatus')
-            ->leftJoin('task.followers', 'followers')
-            ->leftJoin('followers.detailData', 'followersDetailData')
-            ->leftJoin('task.invoiceableItems', 'invoiceableItems')
-            ->leftJoin('invoiceableItems.unit', 'unit')
-            ->distinct();
-
-        foreach ($order as $key => $value) {
-            switch ($key) {
-                case FilterAttributeOptions::ID:
-                    $query->addOrderBy('task.id', $value);
-                    break;
-                case FilterAttributeOptions::TITLE:
-                    $query->addOrderBy('task.title', $value);
-                    break;
-                case FilterAttributeOptions::STATUS:
-                    $query->addOrderBy('taskGlobalStatus.id', $value);
-                    break;
-                case FilterAttributeOptions::PROJECT:
-                    $query->addOrderBy('project.id', $value);
-                    break;
-                case FilterAttributeOptions::CREATOR:
-                    $query->addOrderBy('createdBy.id', $value);
-                    break;
-                case FilterAttributeOptions::REQUESTER:
-                    $query->addOrderBy('requestedBy.id', $value);
-                    break;
-                case FilterAttributeOptions::COMPANY:
-                    $query->addOrderBy('taskCompany.id', $value);
-                    break;
-                case FilterAttributeOptions::ASSIGNED:
-                    $query->addOrderBy('assignedUser.id', $value);
-                    break;
-                case FilterAttributeOptions::TAG:
-                    $query->addOrderBy('tags.id', $value);
-                    break;
-                case FilterAttributeOptions::FOLLOWER:
-                    $query->addOrderBy('followers.id', $value);
-                    break;
-                case FilterAttributeOptions::CREATED:
-                    $query->addOrderBy('task.createdAt', $value);
-                    break;
-                case FilterAttributeOptions::STARTED:
-                    $query->addOrderBy('task.startedAt', $value);
-                    break;
-                case FilterAttributeOptions::DEADLINE:
-                    $query->addOrderBy('task.deadline', $value);
-                    break;
-                case FilterAttributeOptions::CLOSED:
-                    $query->addOrderBy('task.closedAt', $value);
-                    break;
-                case FilterAttributeOptions::IMPORTANT:
-                    $query->addOrderBy('task.important', $value);
-                    break;
-                case FilterAttributeOptions::ARCHIVED:
-                    $query->addOrderBy('project.is_active', $value);
-                    break;
-                default:
-                    $query->addOrderBy('task.id', 'DESC');
-            }
-        }
-
-        // Check and apply User's project ACL
-        if (array_key_exists('VIEW_ALL_TASKS_IN_PROJECT', $dividedProjects)) {
-            /** @var array $allTasksInProject */
-            $allTasksInProject = $dividedProjects['VIEW_ALL_TASKS_IN_PROJECT'];
-        } else {
-            $allTasksInProject = [1];
-        }
-
-        if (array_key_exists('VIEW_COMPANY_TASKS_IN_PROJECT', $dividedProjects)) {
-            /** @var array $companyTasksInProject */
-            $companyTasksInProject = $dividedProjects['VIEW_COMPANY_TASKS_IN_PROJECT'];
-        } else {
-            $companyTasksInProject = [1];
-        }
-
-        if (array_key_exists('VIEW_OWN_TASKS', $dividedProjects)) {
-            /** @var array $companyTasksInProject */
-            $ownTasksInProject = $dividedProjects['VIEW_OWN_TASKS'];
-        } else {
-            $ownTasksInProject = [1];
-        }
-
-        // Select only in Allowed users projects
-        $query->andWhere($query->expr()->orX(
-            $query->expr()->in('project.id', $allTasksInProject),
-            $query->expr()->andX(
-                $query->expr()->in('project.id', $companyTasksInProject),
-                $query->expr()->eq('taskCompany.id', $companyId)
-            ),
-            $query->expr()->andX(
-                $query->expr()->in('project.id', $ownTasksInProject),
-                $query->expr()->orX(
-                    $query->expr()->eq('requestedBy.id', $userId),
-                    $query->expr()->eq('createdBy.id', $userId)
-                )
-            )
-        ));
-
-        //Check and apply filters
-        $paramNum = 0;
-        if (null !== $searchFilter) {
-            $query->andWhere('task.id LIKE :taskIdParam OR task.title LIKE :taskTitleParam');
-            $paramArray['taskIdParam'] = '%' . $searchFilter . '%';
-            $paramArray['taskTitleParam'] = '%' . $searchFilter . '%';
-        }
-
-        foreach ($isNullFilter as $value) {
-            // check if query is allowed
-            if (\in_array($value, VariableHelper::$allowedKeysInFilter, true)) {
-                $query->andWhere($value . ' IS NULL');
-            }
-        }
-
-        foreach ($inFilter as $key => $value) {
-            // check if query is allowed
-            if (\in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
-                $query->andWhere($key . ' IN (:parameters' . $paramNum . ')');
-                $paramArray['parameters' . $paramNum] = $value;
-
-                $paramNum++;
-            }
-        }
-
-        foreach ($equalFilter as $key => $value) {
-            if (\in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
-                $query->andWhere($key . ' = :parameter' . $paramNum);
-                $paramArray['parameter' . $paramNum] = $value;
-
-                $paramNum++;
-            }
-        }
-
-        foreach ($notAndCurrentFilter as $filter) {
-            if (\in_array($filter['not'], VariableHelper::$allowedKeysInFilter, true) && \in_array($filter['equal']['key'], VariableHelper::$allowedKeysInFilter, true)) {
-                $query->andWhere($filter['not'] . ' IS NULL' . ' OR ' . $filter['equal']['key'] . ' IN (:parameters' . $paramNum . ')');
-                $paramArray['parameters' . $paramNum] = $filter['equal']['value'];
-            }
-        }
-
-        foreach ($dateFilter as $key => $value) {
-            if (\in_array($key, VariableHelper::$allowedKeysInFilter, true)) {
-                if (isset($value['from']) && isset($value['to'])) {
-                    $query->andWhere($query->expr()->between($key, ':FROM' . $paramNum, ':TO' . $paramNum));
-                    $paramArray['FROM' . $paramNum] = $value['from'];
-                    $paramArray['TO' . $paramNum] = $value['to'];
-
-                    $paramNum++;
-                } elseif (isset($value['from']) && !isset($value['to'])) {
-                    $query->andWhere($key . '>= :FROM' . $paramNum);
-                    $paramArray['FROM' . $paramNum] = $value['from'];
-
-                    $paramNum++;
-                } elseif (isset($value['to']) && !isset($value['from'])) {
-                    $query->andWhere($key . '<= :TO' . $paramNum);
-                    $paramArray['TO' . $paramNum] = $value['to'];
-
-                    $paramNum++;
-                }
-            }
-        }
-
-        $addedParamNum = 0;
-        if (\count($inFilterAddedParams) > 1) {
-            foreach ($inFilterAddedParams as $key => $value) {
-                $andString = 'taskAttribute.id = :attributeId' . $addedParamNum;
-                $paramArray['attributeId' . $addedParamNum] = $key;
-                $addedParamNum++;
-
-                $helperCount = 1;
-                $queryString = '';
-                if (count($value) > 1) {
-                    foreach ($value as $val) {
-                        // Create Query
-                        if ($helperCount === 1) {
-                            $queryString = 'taskData.value LIKE :parameters' . $paramNum;
-                            $helperCount++;
-                        } else {
-                            $queryString = $queryString . ' OR ' . 'taskData.value LIKE :parameters' . $paramNum;
-                        }
-                        $paramArray['parameters' . $paramNum] = '%' . $val . '%';
-                        $paramNum++;
-
-                    }
-                } else {
-                    $queryString = 'taskData.value LIKE :parameters' . $paramNum;
-                    $paramArray['parameters' . $paramNum] = '%' . $value[0] . '%';
-                    $paramNum++;
-                }
-                $query->andWhere($andString . ' AND ' . '(' . $queryString . ')');
-
-            }
-        } else {
-            foreach ($inFilterAddedParams as $key => $value) {
-                $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
-                $paramArray['attributeId' . $addedParamNum] = $key;
-                $addedParamNum++;
-
-                $helperCount = 1;
-                $queryString = '';
-                if (\count($value) > 1) {
-                    foreach ($value as $val) {
-                        // Create Query
-                        if ($helperCount === 1) {
-                            $queryString = 'taskData.value LIKE :parameters' . $paramNum;
-                            $helperCount++;
-                        } else {
-                            $queryString = $queryString . ' OR ' . 'taskData.value LIKE :parameters' . $paramNum;
-                        }
-                        $paramArray['parameters' . $paramNum] = '%' . $val . '%';
-                        $paramNum++;
-
-                    }
-                } else {
-                    $queryString = 'taskData.value LIKE :parameters' . $paramNum;
-                    $paramArray['parameters' . $paramNum] = '%' . $value[0] . '%';
-                    $paramNum++;
-                }
-                $query->andWhere($queryString);
-
-            }
-        }
-
-        foreach ($equalFilterAddedParams as $key => $value) {
-            $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
-            $query->andWhere('taskData.boolValue = :parameters' . $paramNum);
-            $paramArray['parameters' . $paramNum] = $value;
-            $paramArray['attributeId' . $addedParamNum] = $key;
-
-            $paramNum++;
-            $addedParamNum++;
-        }
-
-        foreach ($dateFilterAddedParams as $key => $value) {
-            if (isset($value['from']) && isset($value['to'])) {
-                $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
-                $query->andWhere($query->expr()->between('taskData.value', ':FROM' . $paramNum, ':TO' . $paramNum));
-                $paramArray['FROM' . $paramNum] = $value['from'];
-                $paramArray['TO' . $paramNum] = $value['to'];
-                $paramArray['attributeId' . $addedParamNum] = $key;
-
-                $paramNum++;
-                $addedParamNum++;
-            } elseif (isset($value['from']) && !isset($value['to'])) {
-                $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
-                $query->andWhere('taskData.value' . '>= :FROM' . $paramNum);
-                $paramArray['FROM' . $paramNum] = $value['from'];
-                $paramArray['attributeId' . $addedParamNum] = $key;
-
-                $paramNum++;
-                $addedParamNum++;
-            } elseif (isset($value['to']) && !isset($value['from'])) {
-                $query->andWhere('taskAttribute.id = :attributeId' . $addedParamNum);
-                $query->andWhere('taskData.value' . '<= :TO' . $paramNum);
-                $paramArray['TO' . $paramNum] = $value['to'];
-
-                $paramNum++;
-                $addedParamNum++;
-            }
-        }
-
-        if (null !== $project) {
-            $query->andWhere('project.id = :mainProjectId' . $addedParamNum);
-            $paramArray['mainProjectId' . $addedParamNum] = $project;
-        }
-
-        if (!empty($paramArray)) {
-            $query->setParameters($paramArray);
-        }
-
-        if (999 !== $limit) {
-            // Pagination
-            if (1 < $page) {
-                $query->setFirstResult($limit * $page - $limit);
-            } else {
-                $query->setFirstResult(0);
-            }
-
-            $query->setMaxResults($limit);
-
-            $paginator = new Paginator($query, $fetchJoinCollection = true);
-            $count = $paginator->count();
-
-            return [
-                'count' => $count,
-                'array' => $this->formatData($paginator)
-            ];
-        }
-
-        // Return all entities
-        return [
-            'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
-        ];
+        return $query;
     }
 
     /**

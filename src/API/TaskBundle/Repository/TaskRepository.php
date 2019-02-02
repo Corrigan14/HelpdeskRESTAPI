@@ -253,7 +253,48 @@ class TaskRepository extends EntityRepository
         $order = $options['order'];
 
         $query = $this->createQueryBuilder('task')
-            ->select('task', 'taskCompany')
+            ->select('taskCompany.id', 'taskCompany.title', 'task')
+            ->leftJoin('task.taskData', 'taskData')
+            ->leftJoin('taskData.taskAttribute', 'taskAttribute')
+            ->leftJoin('task.project', 'project')
+            ->leftJoin('project.createdBy', 'projectCreator')
+            ->leftJoin('task.createdBy', 'createdBy')
+            ->leftJoin('createdBy.detailData', 'creatorDetailData')
+            ->leftJoin('createdBy.company', 'company')
+            ->leftJoin('task.requestedBy', 'requestedBy')
+            ->leftJoin('requestedBy.detailData', 'requesterDetailData')
+            ->leftJoin('task.taskHasAssignedUsers', 'taskHasAssignedUsers')
+            ->leftJoin('task.taskHasAttachments', 'taskHasAttachments')
+            ->leftJoin('taskHasAssignedUsers.status', 'assignedUserStatus')
+            ->leftJoin('taskHasAssignedUsers.user', 'assignedUser')
+            ->leftJoin('assignedUser.detailData', 'assigneeDetailData')
+            ->leftJoin('task.tags', 'tags')
+            ->leftJoin('task.company', 'taskCompany')
+            ->leftJoin('task.status', 'taskGlobalStatus')
+            ->leftJoin('task.followers', 'followers')
+            ->leftJoin('followers.detailData', 'followersDetailData')
+            ->leftJoin('task.invoiceableItems', 'invoiceableItems')
+            ->leftJoin('invoiceableItems.unit', 'unit');
+
+        // Check and apply filters
+        $query = $this->createQueryForFilter($query, $options);
+
+        //Format data
+        $companyArrayRaw = $this->formatDataForCompanyFilter($query->getQuery()->getArrayResult());
+
+        return $this->formatCompanyArray($companyArrayRaw,$order);
+    }
+
+    /**
+     * @param int $taskId
+     * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\NoResultException
+     */
+    public function getTask(int $taskId): array
+    {
+        $query = $this->createQueryBuilder('task')
+            ->select('task')
             ->leftJoin('task.taskData', 'taskData')
             ->leftJoin('taskData.taskAttribute', 'taskAttribute')
             ->leftJoin('task.project', 'project')
@@ -275,17 +316,73 @@ class TaskRepository extends EntityRepository
             ->leftJoin('followers.detailData', 'followersDetailData')
             ->leftJoin('task.invoiceableItems', 'invoiceableItems')
             ->leftJoin('invoiceableItems.unit', 'unit')
-            ->distinct()
-            ->orderBy('taskCompany.title', $order);
+            ->where('task.id = :taskId')
+            ->setParameter('taskId', $taskId)
+            ->getQuery();
 
-        // Check and apply filters
-        $query = $this->createQueryForFilter($query, $options);
-
-        //Format data
-
-        return [];
+        return $this->processData($query->getSingleResult(), true);
     }
 
+    /**
+     * Return user's allowed tasks ID based on his ACL
+     *
+     * @param array $dividedTasks
+     * @param int $userId
+     * @param int $companyId
+     * @return array
+     */
+    public function getUsersTasksId(array $dividedTasks, int $userId, int $companyId): array
+    {
+        $allTasksInProject = $dividedTasks['VIEW_ALL_TASKS_IN_PROJECT'];
+        $companyTasksInProject = $dividedTasks['VIEW_COMPANY_TASKS_IN_PROJECT'];
+        $ownTasksInProject = $dividedTasks['VIEW_OWN_TASKS'];
+
+        $query = $this->createQueryBuilder('task')
+            ->select('task.id')
+            ->leftJoin('task.project', 'project')
+            ->leftJoin('task.company', 'taskCompany')
+            ->leftJoin('task.requestedBy', 'requestedBy')
+            ->leftJoin('task.createdBy', 'createdBy');
+
+        $query->where($query->expr()->orX(
+            $query->expr()->in('project.id', $allTasksInProject),
+            $query->expr()->andX(
+                $query->expr()->in('project.id', $companyTasksInProject),
+                $query->expr()->eq('taskCompany.id', $companyId)
+            ),
+            $query->expr()->andX(
+                $query->expr()->in('project.id', $ownTasksInProject),
+                $query->expr()->orX(
+                    $query->expr()->eq('requestedBy.id', $userId),
+                    $query->expr()->eq('createdBy.id', $userId)
+                )
+            )
+        ));
+
+        return $this->formatIdData($query->getQuery()->getArrayResult());
+    }
+
+    /**
+     * @param Project $project
+     * @return int
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getNumberOfTasksFromProject(Project $project): int
+    {
+        $query = $this->createQueryBuilder('task')
+            ->select('COUNT(task)')
+            ->where('task.project = :project')
+            ->setParameter('project', $project)
+            ->getQuery();
+
+        return $query->getSingleScalarResult();
+    }
+
+    /**
+     * @param $query
+     * @param $options
+     * @return QueryBuilder
+     */
     private function createQueryForFilter($query, $options): QueryBuilder
     {
         $inFilter = $options['inFilter'];
@@ -536,98 +633,6 @@ class TaskRepository extends EntityRepository
         return $query;
     }
 
-    /**
-     * @param int $taskId
-     * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\NoResultException
-     */
-    public function getTask(int $taskId): array
-    {
-        $query = $this->createQueryBuilder('task')
-            ->select('task')
-            ->leftJoin('task.taskData', 'taskData')
-            ->leftJoin('taskData.taskAttribute', 'taskAttribute')
-            ->leftJoin('task.project', 'project')
-            ->leftJoin('project.createdBy', 'projectCreator')
-            ->leftJoin('task.createdBy', 'createdBy')
-            ->leftJoin('createdBy.detailData', 'creatorDetailData')
-            ->leftJoin('createdBy.company', 'company')
-            ->leftJoin('task.requestedBy', 'requestedBy')
-            ->leftJoin('requestedBy.detailData', 'requesterDetailData')
-            ->leftJoin('task.taskHasAssignedUsers', 'taskHasAssignedUsers')
-            ->leftJoin('task.taskHasAttachments', 'taskHasAttachments')
-            ->leftJoin('taskHasAssignedUsers.status', 'assignedUserStatus')
-            ->leftJoin('taskHasAssignedUsers.user', 'assignedUser')
-            ->leftJoin('assignedUser.detailData', 'assigneeDetailData')
-            ->leftJoin('task.tags', 'tags')
-            ->leftJoin('task.company', 'taskCompany')
-            ->leftJoin('task.status', 'taskGlobalStatus')
-            ->leftJoin('task.followers', 'followers')
-            ->leftJoin('followers.detailData', 'followersDetailData')
-            ->leftJoin('task.invoiceableItems', 'invoiceableItems')
-            ->leftJoin('invoiceableItems.unit', 'unit')
-            ->where('task.id = :taskId')
-            ->setParameter('taskId', $taskId)
-            ->getQuery();
-
-        return $this->processData($query->getSingleResult(), true);
-    }
-
-    /**
-     * Return user's allowed tasks ID based on his ACL
-     *
-     * @param array $dividedTasks
-     * @param int $userId
-     * @param int $companyId
-     * @return array
-     */
-    public function getUsersTasksId(array $dividedTasks, int $userId, int $companyId): array
-    {
-        $allTasksInProject = $dividedTasks['VIEW_ALL_TASKS_IN_PROJECT'];
-        $companyTasksInProject = $dividedTasks['VIEW_COMPANY_TASKS_IN_PROJECT'];
-        $ownTasksInProject = $dividedTasks['VIEW_OWN_TASKS'];
-
-        $query = $this->createQueryBuilder('task')
-            ->select('task.id')
-            ->leftJoin('task.project', 'project')
-            ->leftJoin('task.company', 'taskCompany')
-            ->leftJoin('task.requestedBy', 'requestedBy')
-            ->leftJoin('task.createdBy', 'createdBy');
-
-        $query->where($query->expr()->orX(
-            $query->expr()->in('project.id', $allTasksInProject),
-            $query->expr()->andX(
-                $query->expr()->in('project.id', $companyTasksInProject),
-                $query->expr()->eq('taskCompany.id', $companyId)
-            ),
-            $query->expr()->andX(
-                $query->expr()->in('project.id', $ownTasksInProject),
-                $query->expr()->orX(
-                    $query->expr()->eq('requestedBy.id', $userId),
-                    $query->expr()->eq('createdBy.id', $userId)
-                )
-            )
-        ));
-
-        return $this->formatIdData($query->getQuery()->getArrayResult());
-    }
-
-    /**
-     * @param Project $project
-     * @return int
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
-    public function getNumberOfTasksFromProject(Project $project): int
-    {
-        $query = $this->createQueryBuilder('task')
-            ->select('COUNT(task)')
-            ->where('task.project = :project')
-            ->setParameter('project', $project)
-            ->getQuery();
-
-        return $query->getSingleScalarResult();
-    }
 
     /**
      * @param array $data
@@ -1158,5 +1163,45 @@ class TaskRepository extends EntityRepository
         ];
 
         return $response;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function formatDataForCompanyFilter(array $data): array
+    {
+
+        $companyArray = [];
+
+        foreach ($data as $datum) {
+            $hours = (int)$datum[0]['work_time'];
+            $companyId = $datum['id'];
+            $companyArray[$companyId]['company_id'] = $companyId;
+            $companyArray[$companyId]['company_title'] = $datum['title'];
+            $companyArray[$companyId]['work_hours'][] = $hours;
+            $companyArray[$companyId]['task_id'][] = $datum[0]['id'];
+        }
+
+        return $companyArray;
+    }
+
+    /**
+     * @param array $companyArray
+     * @param string $order
+     * @return array
+     */
+    private function formatCompanyArray(array $companyArray, string $order): array
+    {
+        $companyArrayFinal = [];
+
+        foreach ($companyArray as $entity) {
+            $companyId = $entity['company_id'];
+            $companyArrayFinal[$companyId]['company_title'] = $entity['company_title'];
+            $companyArrayFinal[$companyId]['work_hours'] = array_sum($entity['work_hours']);
+            $companyArrayFinal[$companyId]['number_of_tasks'] = \count($entity['task_id'], true);
+        }
+
+        return $companyArrayFinal;
     }
 }

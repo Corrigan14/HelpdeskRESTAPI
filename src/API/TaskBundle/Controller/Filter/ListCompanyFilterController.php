@@ -21,31 +21,28 @@ class ListCompanyFilterController extends ApiBaseController
     /**
      *  ### Response ###
      *     {
-     *       "data":
-     *       [
+     *     "2":
      *         {
-     *            "company":
-     *            {
-     *               "id": 1802,
-     *               "title": "Web-Solutions"
-     *            },
-     *            "work_hours": 20
-     *          },
-     *          {
-     *            "company":
-     *            {
-     *               "id": 1803,
-     *               "title": "LAN-Systems"
-     *            },
-     *            "work_hours": 35
-     *          }
-     *       ],
-     *       "total": 22
-     *     }
-     *
+     *          "company_title": "Unassigned",
+     *          "work_hours": 34,
+     *          "number_of_tasks": 3048
+     *         },
+     *     "3":
+     *         {
+     *          "company_title": "LAN-SYSTEMS",
+     *          "work_hours": 9,
+     *          "number_of_tasks": 5
+     *         },
+     *     "4":
+     *         {
+     *          "company_title": "WEB-SOLUTIONS",
+     *          "work_hours": 14,
+     *          "number_of_tasks": 10
+     *         }
+     *      }
      *
      * @ApiDoc(
-     *  description="Returns a list of COMPANIES with WORK HOURS. These companies include Tasks which fulfill conditions from the requested FILTER",
+     *  description="Returns a list of COMPANIES with WORK HOURS and NUMBER OF TASKS related to the company. These companies include Tasks which fulfill conditions from the requested FILTER",
      *  requirements={
      *     {
      *       "name"="filterId",
@@ -82,7 +79,6 @@ class ListCompanyFilterController extends ApiBaseController
      * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
-     * @throws \ReflectionException
      */
     public function listAction(Request $request, int $filterId): Response
     {

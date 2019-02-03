@@ -22,7 +22,158 @@ class ListCompanyFilterController extends ApiBaseController
     /**
      *  ### Response ###
      *     {
-     *
+     *       "data":
+     *       [
+     *         {
+     *            "id": 62020,
+     *            "title": "Task 3 - admin is creator, admin is requested",
+     *            "description": "Description of Task 3",
+     *            "deadline": null,
+     *            "startedAt": null,
+     *            "closedAt": null,
+     *            "important": false,
+     *            "work": null,
+     *            "work_time": null,,
+     *            "work_type": "servis IT",
+     *            "createdAt": 1506434914,
+     *            "updatedAt": 1506434914,
+     *            "statusChange": 1531254165,
+     *            "createdBy":
+     *            {
+     *               "id": 2575,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
+     *            },
+     *            "requestedBy":
+     *            {
+     *               "id": 2575,
+     *               "username": "admin",
+     *               "email": "admin@admin.sk",
+     *               "name": null,
+     *               "surname": null
+     *            },
+     *            "project":
+     *            {
+     *               "id": 284,
+     *               "title": "Project of user 1"
+     *             },
+     *            "company":
+     *            {
+     *               "id": 1802,
+     *               "title": "Web-Solutions"
+     *            },
+     *            "status":
+     *            {
+     *               "id": 1802,
+     *               "title": "New",
+     *               "color": "#FF4500"
+     *            },
+     *            "taskData":
+     *            [
+     *              {
+     *                 "id": 113,
+     *                 "value": "some input",
+     *                 "boolValue": null,
+     *                 "dateValue": null,
+     *                 "taskAttribute":
+     *                 {
+     *                    "id": 169,
+     *                    "title": "input task additional attribute"
+     *                  }
+     *               }
+     *            ],
+     *            "followers":
+     *            [
+     *               {
+     *                  "id": 209,
+     *                  "username": "admin",
+     *                  "email": "admin@admin.sk",
+     *                  "name": "Admin",
+     *                  "surname": "Adminovic"
+     *                }
+     *            ],
+     *            "tags":
+     *            [
+     *               {
+     *                  "id": 71,
+     *                  "title": "Free Time",
+     *                  "color": "BF4848"
+     *               },
+     *               {
+     *                  "id": 73,
+     *                  "title": "Home",
+     *                  "color": "DFD112"
+     *                }
+     *            ],
+     *            "taskHasAssignedUsers":
+     *            {
+     *               "313":
+     *               {
+     *                  "id": 7,
+     *                  "status_date": null,
+     *                  "time_spent": null,
+     *                  "createdAt": 1519237291,
+     *                  "updatedAt": 1519237291,
+     *                  "status":
+     *                  {
+     *                      "id": 15,
+     *                      "title": "Completed",
+     *                      "color": "#FF4500"
+     *                  },
+     *                  "user":
+     *                  {
+     *                      "id": 313,
+     *                      "username": "admin",
+     *                      "email": "admin@admin.sk",
+     *                      "name": "Admin",
+     *                      "surname": "Adminovic"
+     *                  }
+     *              }
+     *            },
+     *            "taskHasAttachments":
+     *            [
+     *              {
+     *                  "id": 17,
+     *                  "slug": "coming-soon1-png-2018-04-06-06-50",
+     *                  "name": "coming-soon1.png"
+     *              },
+     *              {
+     *                  "id": 19,
+     *                  "slug": "left-png-2018-04-14-10-33",
+     *                  "name": "left.png"
+     *              }
+     *            ],
+     *            "invoiceableItems":
+     *            [
+     *              {
+     *                  "id": 4,
+     *                  "title": "Keyboard",
+     *                  "amount": 2.00,
+     *                  "unit_price": 50.00,
+     *                  "unit":
+     *                  {
+     *                      "id": 10,
+     *                      "title": "Kus",
+     *                      "shortcut": "Ks"
+     *                  }
+     *               },
+     *            ],
+     *            "canEdit": true
+     *           }
+     *       ],
+     *       "_links":
+     *       {
+     *           "self": "/api/v1/task-bundle/task?page=1&project=145&creator=21",
+     *           "first": "/api/v1/task-bundle/task?page=1&project=145&creator=21",
+     *           "prev": false,
+     *           "next": "/api/v1/task-bundle/task?page=2&project=145&creator=21",
+     *           "last": "/api/v1/task-bundle/task?page=3&project=145&creator=21"
+     *       },
+     *       "total": 22,
+     *       "page": 1,
+     *       "numberOfPages": 3
      *      }
      *
      * @ApiDoc(

@@ -38,52 +38,8 @@ class TaskRepository extends EntityRepository
         $limit = $options['limit'];
         $page = $options['page'];
 
-        $query = $this->createQueryBuilder('task')
-            ->select('task')
-            ->addSelect('taskData')
-            ->addSelect('taskAttribute')
-            ->addSelect('project')
-            ->addSelect('projectCreator')
-            ->addSelect('createdBy')
-            ->addSelect('creatorDetailData')
-            ->addSelect('company')
-            ->addSelect('requestedBy')
-            ->addSelect('requesterDetailData')
-            ->addSelect('taskHasAttachments')
-            ->addSelect('taskGlobalStatus')
-            ->addSelect('assignedUser')
-            ->addSelect('assigneeDetailData')
-            ->addSelect('tags')
-            ->addSelect('taskCompany')
-            ->addSelect('followers')
-            ->addSelect('followersDetailData')
-            ->addSelect('invoiceableItems')
-            ->addSelect('unit')
-            ->addSelect('taskHasAssignedUsers')
-            ->addSelect('assignedUserStatus')
-            ->addSelect('assignedUser')
-            ->leftJoin('task.taskData', 'taskData')
-            ->leftJoin('taskData.taskAttribute', 'taskAttribute')
-            ->leftJoin('task.project', 'project')
-            ->leftJoin('project.createdBy', 'projectCreator')
-            ->leftJoin('task.createdBy', 'createdBy')
-            ->leftJoin('createdBy.detailData', 'creatorDetailData')
-            ->leftJoin('createdBy.company', 'company')
-            ->leftJoin('task.requestedBy', 'requestedBy')
-            ->leftJoin('requestedBy.detailData', 'requesterDetailData')
-            ->leftJoin('task.taskHasAssignedUsers', 'taskHasAssignedUsers')
-            ->leftJoin('task.taskHasAttachments', 'taskHasAttachments')
-            ->leftJoin('taskHasAssignedUsers.status', 'assignedUserStatus')
-            ->leftJoin('taskHasAssignedUsers.user', 'assignedUser')
-            ->leftJoin('assignedUser.detailData', 'assigneeDetailData')
-            ->leftJoin('task.tags', 'tags')
-            ->leftJoin('task.company', 'taskCompany')
-            ->leftJoin('task.status', 'taskGlobalStatus')
-            ->leftJoin('task.followers', 'followers')
-            ->leftJoin('followers.detailData', 'followersDetailData')
-            ->leftJoin('task.invoiceableItems', 'invoiceableItems')
-            ->leftJoin('invoiceableItems.unit', 'unit')
-            ->distinct();
+        // Create Query
+        $query = $this->createQBJoin();
 
         // Apply Order
         $query = $this->createQueryForOrder($query, $options['order']);
@@ -129,52 +85,8 @@ class TaskRepository extends EntityRepository
     {
         $limit = $options['limit'];
 
-        $query = $this->createQueryBuilder('task')
-            ->select('task')
-            ->addSelect('taskData')
-            ->addSelect('taskAttribute')
-            ->addSelect('project')
-            ->addSelect('projectCreator')
-            ->addSelect('createdBy')
-            ->addSelect('creatorDetailData')
-            ->addSelect('company')
-            ->addSelect('requestedBy')
-            ->addSelect('requesterDetailData')
-            ->addSelect('taskHasAttachments')
-            ->addSelect('taskGlobalStatus')
-            ->addSelect('assignedUser')
-            ->addSelect('assigneeDetailData')
-            ->addSelect('tags')
-            ->addSelect('taskCompany')
-            ->addSelect('followers')
-            ->addSelect('followersDetailData')
-            ->addSelect('invoiceableItems')
-            ->addSelect('unit')
-            ->addSelect('taskHasAssignedUsers')
-            ->addSelect('assignedUserStatus')
-            ->addSelect('assignedUser')
-            ->leftJoin('task.taskData', 'taskData')
-            ->leftJoin('taskData.taskAttribute', 'taskAttribute')
-            ->leftJoin('task.project', 'project')
-            ->leftJoin('project.createdBy', 'projectCreator')
-            ->leftJoin('task.createdBy', 'createdBy')
-            ->leftJoin('createdBy.detailData', 'creatorDetailData')
-            ->leftJoin('createdBy.company', 'company')
-            ->leftJoin('task.requestedBy', 'requestedBy')
-            ->leftJoin('requestedBy.detailData', 'requesterDetailData')
-            ->leftJoin('task.taskHasAssignedUsers', 'taskHasAssignedUsers')
-            ->leftJoin('task.taskHasAttachments', 'taskHasAttachments')
-            ->leftJoin('taskHasAssignedUsers.status', 'assignedUserStatus')
-            ->leftJoin('taskHasAssignedUsers.user', 'assignedUser')
-            ->leftJoin('assignedUser.detailData', 'assigneeDetailData')
-            ->leftJoin('task.tags', 'tags')
-            ->leftJoin('task.company', 'taskCompany')
-            ->leftJoin('task.status', 'taskGlobalStatus')
-            ->leftJoin('task.followers', 'followers')
-            ->leftJoin('followers.detailData', 'followersDetailData')
-            ->leftJoin('task.invoiceableItems', 'invoiceableItems')
-            ->leftJoin('invoiceableItems.unit', 'unit')
-            ->distinct();
+        // Create Query
+        $query = $this->createQBJoin();
 
         // Apply Order
         $query = $this->createQueryForOrder($query, $options['order']);
@@ -292,7 +204,41 @@ class TaskRepository extends EntityRepository
      */
     public function getTasksResponseForCompanyReport(array $options, int $companyId): array
     {
+        $limit = $options['limit'];
+        $page = $options['page'];
 
+        // Create Query
+        $query = $this->createQBJoin();
+
+        // Apply Order
+        $query = $this->createQueryForOrder($query, $options['order']);
+
+        //Check and apply filters
+        $query->where('task.id is not NULL');
+        $query = $this->createQueryForFilter($query, $options, $companyId);
+
+        // Pagination - list of tasks
+        if (999 !== $limit) {
+            if (1 < $page) {
+                $query->setFirstResult($limit * $page - $limit);
+            } else {
+                $query->setFirstResult(0);
+            }
+
+            $query->setMaxResults($limit);
+
+            $paginator = new Paginator($query, $fetchJoinCollection = true);
+            $count = $paginator->count();
+
+            return [
+                'count' => $count,
+                'array' => $this->formatData($paginator)
+            ];
+        }
+
+        return [
+            'array' => $this->formatData($query->getQuery()->getArrayResult(), true)
+        ];
     }
 
     /**
@@ -388,9 +334,12 @@ class TaskRepository extends EntityRepository
         return $query->getSingleScalarResult();
     }
 
-    private function createQueryBuilder()
+    /**
+     * @return QueryBuilder
+     */
+    private function createQBJoin(): QueryBuilder
     {
-        $query = $this->createQueryBuilder('task')
+        return $this->createQueryBuilder('task')
             ->select('task')
             ->addSelect('taskData')
             ->addSelect('taskAttribute')
@@ -436,16 +385,15 @@ class TaskRepository extends EntityRepository
             ->leftJoin('task.invoiceableItems', 'invoiceableItems')
             ->leftJoin('invoiceableItems.unit', 'unit')
             ->distinct();
-
-        return $query;
     }
 
     /**
      * @param $query
      * @param $options
+     * @param bool $companyId
      * @return QueryBuilder
      */
-    private function createQueryForFilter($query, $options): QueryBuilder
+    private function createQueryForFilter($query, $options, $companyId = false): QueryBuilder
     {
         $inFilter = $options['inFilter'];
         $equalFilter = $options['equalFilter'];
@@ -460,6 +408,12 @@ class TaskRepository extends EntityRepository
 
         $paramArray = [];
         $paramNum = 0;
+        if ($companyId) {
+            $query->andWhere('taskCompany.id = :parameter' . $paramNum);
+            $paramArray['parameter' . $paramNum] = $companyId;
+
+            $paramNum++;
+        }
         if (null !== $searchFilter) {
             $query->andWhere('task.id LIKE :taskIdParam OR task.title LIKE :taskTitleParam');
             $paramArray['taskIdParam'] = '%' . $searchFilter . '%';

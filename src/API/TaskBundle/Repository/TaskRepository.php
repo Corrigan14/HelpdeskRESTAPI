@@ -282,7 +282,17 @@ class TaskRepository extends EntityRepository
         //Format data
         $companyArrayRaw = $this->formatDataForCompanyFilter($query->getQuery()->getArrayResult());
 
-        return $this->formatCompanyArray($companyArrayRaw,$order);
+        return $this->formatCompanyArray($companyArrayRaw, $order);
+    }
+
+    /**
+     * @param array $options
+     * @param int $companyId
+     * @return array
+     */
+    public function getTasksResponseForCompanyReport(array $options, int $companyId): array
+    {
+
     }
 
     /**
@@ -376,6 +386,58 @@ class TaskRepository extends EntityRepository
             ->getQuery();
 
         return $query->getSingleScalarResult();
+    }
+
+    private function createQueryBuilder()
+    {
+        $query = $this->createQueryBuilder('task')
+            ->select('task')
+            ->addSelect('taskData')
+            ->addSelect('taskAttribute')
+            ->addSelect('project')
+            ->addSelect('projectCreator')
+            ->addSelect('createdBy')
+            ->addSelect('creatorDetailData')
+            ->addSelect('company')
+            ->addSelect('requestedBy')
+            ->addSelect('requesterDetailData')
+            ->addSelect('taskHasAttachments')
+            ->addSelect('taskGlobalStatus')
+            ->addSelect('assignedUser')
+            ->addSelect('assigneeDetailData')
+            ->addSelect('tags')
+            ->addSelect('taskCompany')
+            ->addSelect('followers')
+            ->addSelect('followersDetailData')
+            ->addSelect('invoiceableItems')
+            ->addSelect('unit')
+            ->addSelect('taskHasAssignedUsers')
+            ->addSelect('assignedUserStatus')
+            ->addSelect('assignedUser')
+            ->leftJoin('task.taskData', 'taskData')
+            ->leftJoin('taskData.taskAttribute', 'taskAttribute')
+            ->leftJoin('task.project', 'project')
+            ->leftJoin('project.createdBy', 'projectCreator')
+            ->leftJoin('task.createdBy', 'createdBy')
+            ->leftJoin('createdBy.detailData', 'creatorDetailData')
+            ->leftJoin('createdBy.company', 'company')
+            ->leftJoin('task.requestedBy', 'requestedBy')
+            ->leftJoin('requestedBy.detailData', 'requesterDetailData')
+            ->leftJoin('task.taskHasAssignedUsers', 'taskHasAssignedUsers')
+            ->leftJoin('task.taskHasAttachments', 'taskHasAttachments')
+            ->leftJoin('taskHasAssignedUsers.status', 'assignedUserStatus')
+            ->leftJoin('taskHasAssignedUsers.user', 'assignedUser')
+            ->leftJoin('assignedUser.detailData', 'assigneeDetailData')
+            ->leftJoin('task.tags', 'tags')
+            ->leftJoin('task.company', 'taskCompany')
+            ->leftJoin('task.status', 'taskGlobalStatus')
+            ->leftJoin('task.followers', 'followers')
+            ->leftJoin('followers.detailData', 'followersDetailData')
+            ->leftJoin('task.invoiceableItems', 'invoiceableItems')
+            ->leftJoin('invoiceableItems.unit', 'unit')
+            ->distinct();
+
+        return $query;
     }
 
     /**

@@ -1,7 +1,8 @@
 <?php
 
-namespace API\TaskBundle\Controller\Filter;
+namespace API\TaskBundle\Controller\Task;
 
+use API\CoreBundle\Entity\Company;
 use API\TaskBundle\Entity\Filter;
 use API\TaskBundle\Security\VoteOptions;
 use Igsem\APIBundle\Controller\ApiBaseController;
@@ -13,7 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Class ListCompanyFilterController
  *
- * @package API\TaskBundle\Controller\Filter
+ * @package API\TaskBundle\Controller\Task
  */
 class ListCompanyFilterController extends ApiBaseController
 {
@@ -21,40 +22,37 @@ class ListCompanyFilterController extends ApiBaseController
     /**
      *  ### Response ###
      *     {
-     *     "2":
-     *         {
-     *          "company_title": "Unassigned",
-     *          "work_hours": 34,
-     *          "number_of_tasks": 3048
-     *         },
-     *     "3":
-     *         {
-     *          "company_title": "LAN-SYSTEMS",
-     *          "work_hours": 9,
-     *          "number_of_tasks": 5
-     *         },
-     *     "4":
-     *         {
-     *          "company_title": "WEB-SOLUTIONS",
-     *          "work_hours": 14,
-     *          "number_of_tasks": 10
-     *         }
+     *
      *      }
      *
      * @ApiDoc(
-     *  description="Returns a list of COMPANIES with WORK HOURS and NUMBER OF TASKS related to the company. These companies include Tasks which fulfill conditions from the requested FILTER",
+     *  description="Returns a list of TASKS for a requested company, which fulfill conditions from the requested FILTER",
      *  requirements={
      *     {
      *       "name"="filterId",
      *       "dataType"="integer",
      *       "requirement"="\d+",
      *       "description"="The id of filter"
+     *     },
+     *     {
+     *       "name"="companyId",
+     *       "dataType"="integer",
+     *       "requirement"="\d+",
+     *       "description"="The id of company"
      *     }
      *  },
      *  filters={
      *     {
+     *       "name"="page",
+     *       "description"="Pagination, limit is set to 10 records"
+     *     },
+     *     {
      *       "name"="order",
-     *       "description"="ASC or DESC order chart. The list is ordered by TITLE of a comapny."
+     *       "description"="Array of key=>value values, where KEY is column to sort by, VALUE is ASC or DESC order chart"
+     *     },
+     *     {
+     *       "name"="limit",
+     *       "description"="Limit for Pagination: 999 - returns all entities, null - returns 10 entities"
      *     }
      *  },
      *  headers={
@@ -74,13 +72,15 @@ class ListCompanyFilterController extends ApiBaseController
      *
      * @param Request $request
      * @param int $filterId
+     * @param int $companyId
      *
      * @return Response
      * @throws \UnexpectedValueException
      * @throws \LogicException
      * @throws \InvalidArgumentException
+     * @throws \ReflectionException
      */
-    public function listAction(Request $request, int $filterId): Response
+    public function listAction(Request $request, int $filterId, int $companyId): Response
     {
         $locationURL = $this->generateUrl('tasks_list_saved_filter', ['filterId' => $filterId]);
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
@@ -102,6 +102,14 @@ class ListCompanyFilterController extends ApiBaseController
             return $response;
         }
 
+        $company = $this->getDoctrine()->getRepository('APICoreBundle:Company')->find($companyId);
+        if (!$company instanceof Company) {
+            $response->setStatusCode(StatusCodesHelper::NOT_FOUND_CODE)
+                ->setContent(json_encode(['message' => 'Company with requested Id does not exist!']));
+
+            return $response;
+        }
+
         $requestBody = $this->get('api_base.service')->encodeRequest($request);
         if (false === $requestBody) {
             $response->setStatusCode(StatusCodesHelper::BAD_REQUEST_CODE)
@@ -110,12 +118,21 @@ class ListCompanyFilterController extends ApiBaseController
             return $response;
         }
 
-        $processedOrderParam = $this->get('task_process_order_param_service')->processOrderParamForCompanyList($requestBody);
-        $processedAdditionalFilterParams = $this->get('task_process_filter_param_service')->processFilterData($requestBody, $this->getUser(), $filter->getFilter());
-        $options = $this->get('task_helper_service')->createOptionsForCompanyArray($processedAdditionalFilterParams, $processedOrderParam, $filter);
+        $processedOrderParam = $this->get('task_process_order_param_service')->processOrderParam($requestBody);
+        if (false === $processedOrderParam['correct']) {
+            $response->setContent(json_encode(['message' => $processedOrderParam['message']]))
+                ->setStatusCode(StatusCodesHelper::INVALID_PARAMETERS_CODE);
 
-        $companyArray = $this->get('task_list_service')->getListOfCompaniesForCompanyReport($options);
-        $response->setContent(json_encode($companyArray))
+            return $response;
+        }
+
+        $processedBasicFilterParams = $this->get('api_base.service')->processFilterParams($requestBody, true);
+        $processedAdditionalFilterParams = $this->get('task_process_filter_param_service')->processFilterData($requestBody, $this->getUser(), $filter->getFilter());
+
+        $options = $this->get('task_helper_service')->createOptionsForTasksArray($this->getUser(), $this->get('task_voter')->isAdmin(), $processedBasicFilterParams, $processedOrderParam, $processedAdditionalFilterParams, $filter);
+        $taskArray = $this->get('task_list_service')->getTasksResponseForCompanyReport($options, $companyId);
+
+        $response->setContent(json_encode($taskArray))
             ->setStatusCode(StatusCodesHelper::SUCCESSFUL_CODE);
 
         return $response;

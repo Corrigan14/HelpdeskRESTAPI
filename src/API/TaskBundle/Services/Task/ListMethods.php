@@ -111,6 +111,31 @@ class ListMethods
     }
 
     /**
+     * @param array $options
+     * @return array
+     */
+    public function getTasksResponseForCompanyReport(array $options, int $companyId): array
+    {
+        $tasks = $this->em->getRepository('APITaskBundle:Task')->getTasksResponseForCompanyReport($options, $companyId);
+
+        $url = $this->router->generate('tasks_list');
+        $limit = $options['limit'];
+        $filters = $options['filtersForUrl'];
+
+        if (999 !== $limit) {
+            $pagination = PaginationHelper::getPagination($url, $limit, $options['page'], $tasks['count'], $filters);
+            $response['data'] = $tasks['array'];
+
+            return array_merge($response, $pagination);
+        }
+
+        $pagination = PaginationHelper::getPagination($url, $limit, $options['page'], \count($tasks['array']), $filters);
+        $response['data'] = $tasks['array'];
+
+        return array_merge($response, $pagination);
+    }
+
+    /**
      * Return Tasks based on User's ACL
      *
      * @param array $options

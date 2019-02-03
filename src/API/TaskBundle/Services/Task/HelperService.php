@@ -77,5 +77,4 @@ class HelperService
             'project' => $project
         ];
     }
-
 }

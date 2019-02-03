@@ -9,6 +9,14 @@ tasks_list_saved_filter:
     methods: [GET]
     requirements:
         filterId: '\d+'
+
+tasks_list_company_filter:
+    path:     /tasks/filter/{filterId}/company/{companyId}
+    defaults: { _controller: APITaskBundle:Task/ListCompanyFilter:list }
+    methods: [GET]
+    requirements:
+        filterId: '\d+'
+        companyId: '\d+'
 task:
     path:     /tasks/{id}
     defaults: { _controller: APITaskBundle:TaskParts/Task:get }

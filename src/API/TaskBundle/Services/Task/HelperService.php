@@ -55,7 +55,7 @@ class HelperService
      * @param $filter
      * @return array
      */
-    public function createOptionsForCompanyArray($processedAdditionalFilterParams, string $processedOrderParam, $filter): array
+    public function createOptionsForCompanyArray($processedAdditionalFilterParams, string $processedOrderParam, $filter = false): array
     {
         $project = null;
         if ($filter) {

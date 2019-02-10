@@ -28,6 +28,7 @@ class FilterAttributeOptions
     const IMPORTANT = 'important';
     const ADDED_PARAMETERS = 'addedParameters';
     const SEARCH = 'search';
+    const REPORT = 'report';
 
     /**
      * @return array

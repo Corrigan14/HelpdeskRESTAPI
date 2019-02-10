@@ -20,6 +20,8 @@ class VoteOptions
 
     // FILTER VOTE OPTIONS
     const SHOW_FILTER = 'show_filter';
+    const SHOW_COMPANY_REPORT_FILTER = 'show_company_report_filter';
+    const SHOW_USER_REPORT_FILTER = 'show_user_report_filter';
     const UPDATE_FILTER = 'update_filter';
     const UPDATE_PROJECT_FILTER = 'update_project_filter';
     const CREATE_PROJECT_FILTER = 'create_project_filter';

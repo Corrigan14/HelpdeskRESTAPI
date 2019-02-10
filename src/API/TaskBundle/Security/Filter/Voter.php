@@ -78,6 +78,8 @@ class Voter
                 return $this->canDeleteFilter($options);
             case VoteOptions::SET_REMEMBERED_FILTER:
                 return $this->canSetRememberedFilter($options);
+            case VoteOptions::SHOW_COMPANY_REPORT_FILTER:
+                return $this->canSeeCompanyReportFilter($options);
             default:
                 return false;
         }
@@ -217,5 +219,26 @@ class Voter
         }
 
         return false;
+    }
+
+    /**
+     * @param bool $isReport
+     * @return bool
+     */
+    private function canSeeCompanyReportFilter(bool $isReport): bool
+    {
+        if ($this->decisionManager->decide($this->token, ['ROLE_ADMIN'])) {
+            return true;
+        }
+
+        // User can view a filter if it is report and he/she has a his role has a right REPORT_FILTERS
+        if ($isReport) {
+            /** @var UserRole $loggedUsersRole */
+            $loggedUsersRole = $this->user->getUserRole();
+
+            return \in_array(UserRoleAclOptions::REPORT_FILTERS, $loggedUsersRole->getAcl(), true);
+        }
+
+        return true;
     }
 }

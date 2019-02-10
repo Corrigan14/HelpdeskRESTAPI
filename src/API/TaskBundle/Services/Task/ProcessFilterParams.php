@@ -111,6 +111,9 @@ class ProcessFilterParams
         if (isset($requestBody['addedParameters'])) {
             $data[FilterAttributeOptions::ADDED_PARAMETERS] = $requestBody['addedParameters'];
         }
+        if (isset($requestBody['report']) && 'true' === strtolower($requestBody['report'])) {
+            $data[FilterAttributeOptions::REPORT] = true;
+        }
 
         return $data;
     }
@@ -193,6 +196,7 @@ class ProcessFilterParams
         $isNullFilter = [];
         $notAndOptionsFilter = [];
         $searchFilter = null;
+        $isReport = false;
 
         $inFilterAddedParams = [];
         $dateFilterAddedParams = [];
@@ -387,6 +391,11 @@ class ProcessFilterParams
             $equalFilterAddedParams = $processedAddedParams['equalFilterAddedParams'];
             $dateFilterAddedParams = $processedAddedParams['dateFilterAddedParams'];
         }
+        if (isset($data[FilterAttributeOptions::REPORT])) {
+            if ('true' === strtolower($data[FilterAttributeOptions::REPORT]) || true === $data[FilterAttributeOptions::REPORT]) {
+                $isReport = true;
+            }
+        }
 
         return [
             'inFilter' => $inFilter,
@@ -399,6 +408,7 @@ class ProcessFilterParams
             'equalFilterAddedParams' => $equalFilterAddedParams,
             'dateFilterAddedParams' => $dateFilterAddedParams,
             'filterForUrl' => $filterForUrl,
+            'isReport' => $isReport
         ];
     }
 

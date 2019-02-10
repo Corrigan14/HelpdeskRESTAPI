@@ -233,7 +233,7 @@ class ListCompanyFilterController extends ApiBaseController
      */
     public function listAction(Request $request, int $filterId, int $companyId): Response
     {
-        $locationURL = $this->generateUrl('tasks_list_saved_filter', ['filterId' => $filterId]);
+        $locationURL = $this->generateUrl('tasks_list_company_filter', ['filterId' => $filterId, 'companyId' => $companyId]);
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
         $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($filterId);

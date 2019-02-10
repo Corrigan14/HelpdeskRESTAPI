@@ -10,6 +10,11 @@ filter_company_list:
     requirements:
        filterId: '\d+'
 
+filter_company_list_without_saved_filter:
+    path:     /filters/company
+    defaults: { _controller: APITaskBundle:Filter/ListCompany:list }
+    methods: [GET]
+
 filter:
     path:     /filters/{id}
     defaults: { _controller: APITaskBundle:Filter/Get:get }

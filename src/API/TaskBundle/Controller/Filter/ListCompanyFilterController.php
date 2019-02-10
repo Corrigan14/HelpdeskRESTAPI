@@ -54,7 +54,7 @@ class ListCompanyFilterController extends ApiBaseController
      *  filters={
      *     {
      *       "name"="order",
-     *       "description"="ASC or DESC order chart. The list is ordered by TITLE of a comapny."
+     *       "description"="ASC or DESC order chart. The list is ordered by TITLE of a company."
      *     }
      *  },
      *  headers={
@@ -82,7 +82,7 @@ class ListCompanyFilterController extends ApiBaseController
      */
     public function listAction(Request $request, int $filterId): Response
     {
-        $locationURL = $this->generateUrl('tasks_list_saved_filter', ['filterId' => $filterId]);
+        $locationURL = $this->generateUrl('filter_company_list', ['filterId' => $filterId]);
         $response = $this->get('api_base.service')->createResponseEntityWithSettings($locationURL);
 
         $filter = $this->getDoctrine()->getRepository('APITaskBundle:Filter')->find($filterId);
